@@ -1,0 +1,23 @@
+syntax: glob
+
+Standard Library.suo
+_ReSharper*
+
+Library/bin/
+Library/Generated Code/
+Library/obj/
+
+Red Stapler Library Tester/bin/
+Red Stapler Library Tester/obj/
+
+Solution Files/bin/
+Solution Files/obj/
+
+Standard Library/bin/
+Standard Library/Generated Code/
+Standard Library/obj/
+
+Test Web Site/bin/
+Test Web Site/Generated Code/
+Test Web Site/obj/
+Test Web Site/Web.config

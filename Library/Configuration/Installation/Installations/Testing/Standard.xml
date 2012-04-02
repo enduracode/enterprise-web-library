@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<installationStandardConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://redstapler.biz file:///C:/Red%20Stapler%20Vault/Supporting%20Files/Standard%20Library/Standard%20Library/Configuration/Installation%20Standard.xsd">
+	<rsisInstallationId>1288</rsisInstallationId>
+	<administrators>
+		<administrator>
+			<Name>William Gross</Name>
+			<EmailAddress>william.gross@redstapler.biz</EmailAddress>
+		</administrator>
+		<administrator>
+			<Name>Greg Smalter</Name>
+			<EmailAddress>greg.smalter@redstapler.biz</EmailAddress>
+		</administrator>
+	</administrators>
+	<installedInstallation>
+		<name>Testing</name>
+		<shortName>Testing</shortName>
+		<IsLiveInstallation>false</IsLiveInstallation>
+	</installedInstallation>
+</installationStandardConfiguration>

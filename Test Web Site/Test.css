@@ -1,0 +1,31 @@
+﻿/*
+body {
+	color: Blue;
+}
+*/
+
+.navigationBox {
+	background-color: Green;
+}
+
+.daysOfWeek {
+	background-color: Fuchsia;
+}
+
+.spacers {
+	background-color: Orange;
+}
+
+.today {
+	background-color: Aqua;
+}
+
+.days {
+	background-color: Maroon;
+}
+.red {
+	background-color: red;
+}
+.green {
+	background-color: green;
+}

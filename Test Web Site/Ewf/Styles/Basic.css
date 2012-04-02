@@ -1,0 +1,148 @@
+﻿/* Always show vertical scroll bar to avoid the screen shifting when flipping between long and short pages. */
+html {
+	overflow-y: scroll;
+}
+
+/* tables */
+table {
+	border-width: 0;
+	padding: 0;
+	border-spacing: 0;
+}
+th {
+	padding: 0;
+	text-align: left;
+}
+td {
+	padding: 0;
+}
+th.ewfTcTop, td.ewfTcTop {
+	vertical-align: top;
+}
+th.ewfTcMiddle, td.ewfTcMiddle {
+	vertical-align: middle;
+}
+th.ewfTcBottom, td.ewfTcBottom {
+	vertical-align: bottom;
+}
+th.ewfTcBaseLine, td.ewfTcBaseLine {
+	vertical-align: baseline;
+}
+.ewfOverflowedCell {
+	overflow: hidden;
+}
+
+/* Images. Remove default borders around images when they are inside anchor tags. */
+img {
+	border-width: 0;
+}
+
+/* date pickers, time pickers, and date and time pickers */
+ewfDatePicker, ewfTimePicker {
+	max-width: 10em;
+}
+ewfDateAndTimePicker {
+	max-width: 15em;
+}
+
+/* action controls */
+button {
+	font: inherit;
+}
+
+/* Text alignment. NOTE: The classes ewfCurrencyCell, ewfRightAlignCell, and ewfCenterCell are deprecated. Eliminate them from all systems and then remove them from these rules. */
+.ewfTaL {
+	text-align: left;
+}
+.ewfTaR, .ewfCurrencyCell, .ewfCurrencyCell input[type="text"], .ewfRightAlignCell, .ewfRightAlignCell input[type="text"] {
+	text-align: right;
+}
+.ewfTaC, .ewfCenterCell {
+	text-align: center;
+}
+.ewfTaJ {
+	text-align: justify;
+}
+
+/* bold */
+.ewfBold {
+	font-weight: bold;
+}
+
+/* error messages */
+ewfErrorMessageControlListBlock {
+	font-weight: bold;
+	color: red;
+}
+
+/* EwfPage and master page */
+div.ewfNonLiveWarning {
+	margin-bottom: 4px;
+	border: solid #464646 1px;
+	background-color: Red;
+	padding: 4px;
+	text-align: center;
+	color: White;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+ewfClickBlockingBlock {
+	z-index: 10000;
+}
+ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
+	z-index: 10001;
+}
+ewfClickBlockingBlock, ewfProcessingDialogBlock {
+	display: none;
+}
+ewfClickBlockingBlock {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: Gray;
+	opacity: 0.3;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+	filter: alpha(opacity=30);
+}
+ewfProcessingDialogBlock {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin-top: -5em;
+	margin-left: -13em;
+	border: 1px solid black;
+	background-color: #cccccc;
+	padding: 1em;
+	height: 8em;
+	width: 26em;
+	color: black;
+}
+ewfProcessingDialogParagraph {
+	text-align: center;
+}
+ewfStatusMessageDialogBlock {
+	position: fixed;
+	top: 30%;
+	left: 50%;
+	font-size: 1.5em;
+	margin-left: -15.1em;
+	border: .1em solid black;
+	background-color: white;
+	padding: 1em;
+	width: 28em;
+}
+ewfStatusMessageDialogControlListInfoItem {
+	color: black;
+}
+ewfStatusMessageDialogControlListWarningItem {
+	font-weight: bold;
+	color: orange;
+}
+.profiler-results {
+	opacity: .4;
+}
+.profiler-results:hover {
+	opacity: 1;
+}

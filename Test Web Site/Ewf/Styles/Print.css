@@ -1,0 +1,22 @@
+div.ewfNonLiveWarning {
+	display: none;
+}
+
+ewfUiBody {
+	width: auto;
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+ewfUiUserInfoControlList, ewfUiGlobalNavBlock, ewfUiTopErrorMessageControlListBlock, ewfUiEntityNavAndActionBlock, ewfUiSideTabCell, ewfUiContentFootCell {
+	display: none;
+}
+ewfUiBody h1 {
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+ewfUiBody ewfUiContentCell {
+	border-width: 0;
+	background-color: inherit;
+	padding: 0;
+}

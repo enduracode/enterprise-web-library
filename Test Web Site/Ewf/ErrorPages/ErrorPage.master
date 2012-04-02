@@ -1,0 +1,6 @@
+<%@ Master MasterPageFile="~/Ewf/BasicPage.master" Language="C#" AutoEventWireup="true" CodeBehind="ErrorPage.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ErrorPages.ErrorPage" %>
+<asp:Content runat="server" ContentPlaceHolderID="head">
+</asp:Content>
+<asp:Content runat="server" ContentPlaceHolderID="main">
+	<asp:ContentPlaceHolder runat="server" ID="contentPlace" />
+</asp:Content>

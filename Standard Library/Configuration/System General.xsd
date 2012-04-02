@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="systemGeneralConfiguration" type="rs:SystemGeneralConfiguration" />
+	<complexType name="SystemGeneralConfiguration">
+		<sequence>
+			<element name="systemName" type="string" />
+			<element name="systemShortName" type="string" />
+			<element name="emailDefaultFromNameAndAddress" type="rs:NameAndEmailAddress" minOccurs="0" />
+			<element name="WebApplications" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Application" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="Name" type="string" />
+									<element name="SupportsSecureConnections" type="boolean" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="WindowsServices" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Service" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="Name" type="string" />
+									<element name="NamespaceAndAssemblyName" type="string" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="developers">
+				<complexType>
+					<sequence>
+						<element name="developer" type="rs:NameAndEmailAddress" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="PrimaryDatabaseLiveToIntermediateConversionCommands" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Command" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="NameAndEmailAddress">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="EmailAddress" type="string" />
+		</sequence>
+	</complexType>
+</schema>

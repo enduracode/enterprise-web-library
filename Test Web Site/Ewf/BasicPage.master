@@ -1,0 +1,14 @@
+﻿<%@ Master Language="C#" CodeBehind="BasicPage.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.BasicPage" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+	<asp:ContentPlaceHolder ID="head" runat="server" />
+</head>
+<body runat="server" id="basicBody">
+	<form runat="server" id="form">
+		<asp:ScriptManager runat="server" /><asp:PlaceHolder runat="server" ID="ph" />
+		<div runat="server" class="containingDiv"><asp:ContentPlaceHolder ID="main" runat="server" /></div>
+		<asp:PlaceHolder runat="server" ID="ph2" /><ewf:EwfImage runat="server" ImageUrl="Images/ajax-loader.gif" Style="display: none" CssClass="ajaxloaderImage" />
+	</form>
+</body>
+</html>

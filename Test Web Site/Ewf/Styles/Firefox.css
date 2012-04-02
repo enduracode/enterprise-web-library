@@ -1,0 +1,10 @@
+﻿/* NOTE: For every rule that appears in this or any other browser specific file, we should explain the bug it counteracts, or explain how to reproduce it
+(all dynamic tables with captions overlap bla bla bla) so we can easily remove these rules over time.*/
+/* Easy fix for this file: See if everything looks OK in Firefox 4. If it does, we can probably scrap this file.*/
+body.ewf table.ewfStandard > caption {
+	margin: 20px 0 -20px 0;
+}
+body.ewf table.ewfStandard:first-child > caption {
+	margin-top: 0;
+	margin-bottom: 0;
+}

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="installationStandardConfiguration" type="rs:InstallationStandardConfiguration" />
+	<complexType name="InstallationStandardConfiguration">
+		<sequence>
+			<element name="rsisInstallationId" type="int" />
+			<element name="smtpServer" type="string" minOccurs="0" />
+			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
+			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
+			<element name="administrators">
+				<complexType>
+					<sequence>
+						<element name="administrator" type="rs:InstallationStandardNameAndEmailAddress" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="database" type="rs:Database" minOccurs="0" />
+			<element name="SecondaryDatabases" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="SecondaryDatabase" type="rs:SecondaryDatabase" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="installedInstallation" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="name" type="string" />
+						<element name="shortName" type="string" />
+						<element name="IsLiveInstallation" type="boolean" />
+
+						<!-- Delete when all systems have a release after 15 Jan 2009. -->
+						<element name="typeId" type="int" minOccurs="0" />
+
+						<element name="webSiteNames" minOccurs="0">
+							<complexType>
+								<sequence>
+									<element name="webSiteName" type="string" maxOccurs="unbounded" />
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="InstallationStandardNameAndEmailAddress">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="EmailAddress" type="string" />
+		</sequence>
+	</complexType>
+	<complexType name="SecondaryDatabase">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="Database" type="rs:Database" />
+		</sequence>
+	</complexType>
+	<complexType name="Database" abstract="true" />
+	<complexType name="SqlServerDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<sequence>
+					<element name="server" type="string" minOccurs="0" />
+					<element name="SqlServerAuthenticationLogin" type="rs:SqlServerAuthenticationLogin" minOccurs="0" />
+					<element name="database" type="string" minOccurs="0" />
+					<element name="FullTextCatalog" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="SqlServerAuthenticationLogin">
+		<sequence>
+			<element name="LoginName" type="string" />
+			<element name="Password" type="string" />
+		</sequence>
+	</complexType>
+	<complexType name="OracleDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<sequence>
+					<element name="tnsName" type="string" />
+					<element name="userAndSchema" type="string" />
+					<element name="password" type="string" />
+					<element name="SupportsConnectionPooling" type="boolean" minOccurs="0" />
+					<element name="SupportsLinguisticIndexes" type="boolean" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+</schema>

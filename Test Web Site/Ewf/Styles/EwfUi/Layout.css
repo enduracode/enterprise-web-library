@@ -1,0 +1,277 @@
+﻿/* To override any of these styles in a system, prefix your rules with ewfUiBody (if they don't include an element starting with ewfUi) to ensure that they only apply to the EWF UI. */
+
+body {
+	font-size: .75em;
+	margin: 1em auto;
+	border: 0;
+	padding: 0;
+	width: 999px;
+}
+
+/* headings */
+ewfPagePath {
+	font-size: 1.4em;
+	margin: .3em 0;
+}
+ewfPagePath > ewfActionControlAllStylesAllStates {
+	font-size: .95em;
+}
+ewfPagePath > h1 {
+	display: inline;
+	font-size: 1em;
+	margin: 0;
+	font-weight: inherit;
+}
+ewfH2 {
+	font-size: 1.2em;
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+ewfH3 {
+	font-size: 1.1em;
+	margin-top: 1em;
+	margin-bottom: 0;
+}
+ewfH4 {
+	font-size: 1em;
+	margin-top: 1em;
+	margin-bottom: 0;
+}
+ewfH2:first-child, ewfH3:first-child, ewfH4:first-child {
+	margin-top: 0;
+}
+
+/* lists */
+ul {
+	margin-left: 1em;
+	padding: 0;
+	list-style-type: circle;
+}
+li {
+	margin-top: 4px;
+}
+li:first-child {
+	margin-top: 0;
+}
+.ewfControlList tr td {
+	padding-top: 4px;
+}
+.ewfControlList tr:first-child td {
+	padding-top: 0;
+}
+
+/* boxes */
+ewfBox {
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 5px;
+	padding: 4px;
+}
+ewfBox > ewfBoxHeadingAllLevels {
+	font-size: 1em;
+	margin-top: -4px;
+	margin-right: -4px;
+	margin-left: -4px;
+	padding: 4px;
+}
+
+/* tables */
+ewfTableStandardAndStandardExceptLayoutStyles > caption {
+	padding-bottom: 4px;
+	text-align: left;
+	font-weight: bold;
+}
+ewfTableStandardAndStandardExceptLayoutStyles {
+	border-style: solid;
+	border-width: 1px;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th:not(.ewfTcTop):not(.ewfTcMiddle):not(.ewfTcBottom):not(.ewfTcBaseLine), ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td:not(.ewfTcTop):not(.ewfTcMiddle):not(.ewfTcBottom):not(.ewfTcBaseLine) {
+	vertical-align: top;
+}
+/* hack for IE8 */
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td {
+	vertical-align: top;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcTop, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcTop {
+	vertical-align: top;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcMiddle, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcMiddle {
+	vertical-align: middle;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcBottom, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcBottom {
+	vertical-align: bottom;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcBaseLine, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcBaseLine {
+	vertical-align: baseline;
+}
+/* end hack */
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
+	padding: 4px 4px 4px 4px;
+}
+table.ewfStandardDynamicTableCaption {
+	margin-bottom: 4px;
+	width: 100%;
+	table-layout: fixed;
+}
+table.ewfStandardDynamicTableCaption span.ewfCaption {
+	font-weight: bold;
+}
+table.ewfStandardDynamicTableCaption ewfControlLine {
+	margin-top: 2px;
+}
+table.ewfStandardDynamicTableCaption td.ewfAddItemLink {
+	vertical-align: bottom;
+	text-align: right;
+}
+div.ewfStandardDynamicTable > ewfTableStandardAndStandardExceptLayoutStyles {
+	margin-top: 0;
+}
+
+/* images */
+img {
+	display: block;
+}
+
+/* text style action controls */
+ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
+	text-decoration: none;
+}
+
+/* block element vertical spacing */
+p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, div.ewfStandardCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, ewfControlLine, div.ewfControlList, ewfHtmlBlockEditor, ewfBox, ewfFormItemBlock {
+	margin-top: 1.5em;
+}
+p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, div.ewfStandardCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, ewfControlLine:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfBox:first-child, ewfFormItemBlock:first-child {
+	margin-top: 0;
+}
+p, ul {
+	margin-bottom: 0;
+}
+
+/* Eliminate this when we no longer use stock ASP.NET drop down lists. */
+ewfTableStandardStyle > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > select {
+	width: 100%;
+}
+
+/* This rule is a workaround for drop downs in IE showing up too narrow to show their own content. */
+ewfControlLine > ewfControlLineItem div.ewfListControlWrapper.unspecifiedWidth > select {
+	width: auto;
+}
+
+/* master page */
+ewfUiAppLogoBlock {
+	margin-bottom: .2em;
+}
+ewfUiUserInfoControlList > ewfControlStackItem {
+	text-align: right;
+}
+ewfUiGlobalNavControlList {
+	margin-top: 0;
+	padding: .1em 0;
+}
+ewfUiGlobalNavControlList > ewfControlLineItem, ewfUiEntityNavControlList > ewfControlLineItem, ewfUiEntityActionControlList ewfControlLineItem {
+	padding-left: .2em;
+}
+ewfUiGlobalNavControlList > ewfControlLineItem:first-child, ewfUiEntityNavControlList > ewfControlLineItem:first-child {
+	padding-left: 0;
+}
+ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
+	padding: 0 .4em;
+	border-radius: .3em;
+	text-decoration: none;
+}
+ewfUiEntityNavAndActionBlock {
+	width: 100%;
+}
+ewfUiEntityActionControlList {
+	display: inline-block;
+}
+ewfUiTopErrorMessageControlListBlock {
+	margin: .4em 0;
+	border: solid #ff5500;
+	border-width: 0 0 0 1.5em;
+	padding-left: .2em;
+}
+ewfUiEntityNavControlList {
+	margin: 0;
+}
+ewfUiEntitySummaryBlock {
+	padding: .3em 0;
+}
+ewfUiTopTabControlList {
+	margin-top: 1.2em; /*NOTE: I want to eliminate this entirely when entity summary and friends share a background color that isn't white.*/
+}
+ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab {
+	display: block;
+	margin-bottom: -1px; /*NOTE: This really needs to be the same as whatever the border width of the content area is. Another use for constants.*/
+	border-width: .1em .1em 0 .1em;
+	border-style: solid;
+	border-top-left-radius: .5em;
+	border-top-right-radius: .5em;
+	padding: .3em;
+	position: relative;
+	text-decoration: none;
+}
+ewfUiSideTabAndContentBlock {
+	width: 100%;
+	table-layout: fixed;
+}
+ewfUiSideTabCell {
+	vertical-align: top;
+	width: 150px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+ewfUiSideTabCell > ewfUiSideTabGroupHead {
+	padding: 5px 4px 0 0;
+	font-weight: bold;
+}
+ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiDisabledTab {
+	display: block;
+	margin: .25em 0;
+	padding: .3em;
+	text-decoration: none;
+	border-top-left-radius: .5em;
+	border-bottom-left-radius: 1em;
+	border-style: solid;
+	border-width: .1em 0 .1em .1em;
+	position: relative; /*It is weird that we need this without using the top/left/etc. properties. But we do, for the negative margin to work.*/
+	margin-right: -1px; /*The negative margin makes the current tab flow right into the content area. It also makes newness tabs look better.*/
+}
+ewfUiContentCell {
+	border-style: solid;
+	border-width: 1px;
+	border-bottom-width: 0px;
+	padding: 10px 10px 10px 10px;
+	vertical-align: top;
+}
+ewfUiContentFootCell {
+	border-style: solid;
+	border-width: 1px;
+	border-top-width: 0px;
+	border-bottom-width: 0px;
+	vertical-align: bottom;
+}
+ewfUiContentFootActionControlList {
+	line-height: 0;
+}
+ewfUiContentFootActionControlList > table {
+	display: inline-block;
+	line-height: normal;
+}
+ewfUiContentFootBlock {
+	padding: 4px 10px;
+}
+div.ewfButtonsBottomBorder {
+	height: 1px;
+}
+
+/* IE6 warning */
+div.ewfIeWarningBanner {
+	padding: 6px;
+	margin-bottom: 6px;
+}
+div.ewfIeWarningBanner ewfActionControlAllStylesAllStates {
+	font-size: 1.5em;
+	font-weight: bold;
+}

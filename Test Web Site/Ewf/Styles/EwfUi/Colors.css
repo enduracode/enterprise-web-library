@@ -1,0 +1,98 @@
+﻿/* To override any of these styles in a system, prefix your rules with ewfUiBody (if they don't include an element starting with ewfUi) to ensure that they only apply to the EWF UI. */
+
+body {
+	background-color: white;
+	color: black;
+}
+
+/* content block background */
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiContentCell, ewfUiContentFootCell {
+	background-color: #e7edf3;
+}
+
+/* borders */
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBox {
+	border-color: #78a0c3;
+}
+ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab, div.ewfButtonsBottomBorder {
+	background-color: #78a0c3;
+}
+
+/* contrast */
+ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfBox > ewfBoxHeadingAllLevels {
+	background-color: #d4e0ec; /* hack for IE8 */
+	background-color: rgba( 0, 0, 0, 0 ); /* cancels out IE8 hack for all other browsers */
+	background-image: url('../Backgrounds/Darker.svg');
+}
+
+/* text style action controls */
+ewfActionControlTextStyleNormalState, ewfActionControlTextStyleVisitedState, ewfHtmlBlock a {
+	color: #7C13B8;
+}
+ewfActionControlTextStyleStatesWithHoverAndWithoutActive {
+	color: #A75DD1;
+}
+ewfActionControlTextStyleActiveState {
+	color: #7C13B8;
+}
+
+/* global nav block, top tabs, and side tabs */
+ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab {
+	color: white;
+}
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfUiDisabledTab {
+	opacity: .2; /* Standard */
+	filter: alpha(opacity=20); /* IE */
+}
+ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab {
+	border-color: transparent;
+}
+ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithHover, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithHover, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithFocus, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithFocus {
+	background-image: url('../Backgrounds/Lighter.svg');
+}
+
+/* table rows with action */
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover {
+	background-color: #CFA8E5 !important /* Remove "important" when we drop IE7/8 support and enable the :not pseudo class in table row selectors. */;
+	background-image: none;
+}
+
+/* check box list checked boxes */
+.checkedChecklistCheckboxDiv {
+	background-color: #b3ffb2;
+}
+
+/* newness */
+ewfActionControlAllStylesAllStates.ewfNewness {
+	background-color: #ff5500;
+}
+ewfActionControlAllStylesStatesWithHover.ewfNewness {
+	background-image: url('../Backgrounds/Lighter.svg');
+}
+.ewfNewness {
+	color: #ff5500;
+}
+
+/* IE6 warning */
+div.ewfIeWarningBanner {
+	background-color: #995555;
+}
+div.ewfIeWarningBanner ewfActionControlAllStylesAllStates {
+	color: Black;
+}
+div.ewfIeWarningBanner ewfActionControlAllStylesStatesWithHover {
+	color: Maroon;
+}
+
+/* entity nav and action block */
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
+	color: #336699;
+}
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates.ewfNewness {
+	color: white;
+}
+
+/* shadows */
+ewfUiGlobalNavBlock ewfActionControlAllStylesStatesWithHover, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesStatesWithHover {
+	box-shadow: 0 0 1em #336699;
+}

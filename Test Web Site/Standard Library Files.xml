@@ -1,0 +1,8 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Content Include="Ewf\**\*.aspx" />
+		<Content Include="Ewf\**\*.ascx" />
+		<Content Include="Ewf\**\*.master" />
+		<Compile Include="Ewf\**\*.cs" />
+	</ItemGroup>
+</Project>

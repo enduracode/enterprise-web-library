@@ -1,0 +1,20 @@
+﻿<%@ Master MasterPageFile="~/Ewf/BasicPage.master" Language="C#" AutoEventWireup="true" CodeBehind="EwfUi.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.EwfUi" %>
+<asp:Content runat="server" ContentPlaceHolderID="head">
+</asp:Content>
+<asp:Content runat="server" ContentPlaceHolderID="main">
+	<asp:PlaceHolder runat="server" ID="globalPlace" />
+	<div class="ewfUiEntityAndTabsAndContent"><asp:PlaceHolder runat="server" ID="entityAndTopTabPlace" />
+		<ewf:StaticTable runat="server" IsForm="false" CssClass="ewfUiTabsAndContent">
+			<tr runat="server">
+				<td runat="server" id="tabCell" class="ewfTabs" rowspan="2" visible="false" />
+				<td runat="server" id="contentCell" class="ewfContentBox"><asp:ContentPlaceHolder runat="server" ID="contentPlace" /></td>
+			</tr>
+			<tr runat="server">
+				<td runat="server" id="contentFootCell">
+					<div class="ewfButtonsBottomBorder"></div>
+				</td>
+			</tr>
+		</ewf:StaticTable>
+	</div>
+	<asp:PlaceHolder runat="server" ID="globalFootPlace" />
+</asp:Content>

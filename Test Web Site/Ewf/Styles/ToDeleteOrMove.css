@@ -1,0 +1,96 @@
+﻿
+/*NOTE: The calendar styles should be prefixed with ewf and moved to the EwfControls style sheet.*/
+/*Calendar*/
+
+.calendarViewHeader {
+	padding: 6px;
+}
+
+.ewfNavigationBoxHeader {
+	background-color: #718ba5;
+	border: solid 1px #999999;
+}
+
+.calendarViewHeader table {
+	width: 100%;
+}
+
+.calendarViewNavButtons {
+	text-align: right;
+}
+.calendarViewNavButtons button {
+	margin-right: 10px;
+}
+
+/*MonthViewCalendar*/
+
+table.ewfMonthView {
+	width: 100%;
+	table-layout: fixed;
+}
+table.ewfMonthViewCalendar {
+	border: solid 1px #999999;
+}
+table.ewfMonthView > tbody > tr > td {
+	padding: 4px;
+	font-size: 11px;
+	color: #000000;
+	height: 105px;
+	vertical-align: top;
+}
+table.ewfMonthView > tbody > tr > td.commonHeader {
+	text-transform: uppercase;
+	font-size: 9px;
+	font-weight: bold;
+	height: auto;
+	color: white;
+}
+
+table.ewfMonthView > tbody > tr > td.ewfDaysOfWeekHeader {
+	background-color: #91b5d8;
+}
+
+table.ewfMonthView > tbody > tr > td.ewfDaySpacer {
+	background-color: #daddde;
+	border: solid 1px #999999;
+}
+table.ewfMonthView > tbody > tr > td.ewfDay {
+	background-color: #edf1f2;
+	border: solid 1px #999999;
+}
+table.ewfMonthView > tbody > tr > td.ewfToday {
+	background-color: #d5ebf0;
+	border: solid 1px #999999;
+}
+table.ewfMonthView > tbody > tr > td > p.dayLabel {
+	padding: 0px;
+	margin: 0px 0px 3px 0px;
+}
+
+/*NOTE: These should probably be moved to the Basic style sheet.*/
+/* UpdatePanel Loading message */
+.ajaxLoadingMessage {
+	padding: 4px;
+	margin: 3px;
+	opacity: 0.8;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+	filter: alpha(opacity=80);
+}
+
+/* This prevents Chrome and Safari from allowing the user to resize textareas */
+textarea {
+	resize: none;
+}
+
+/*NOTE: Move to Ewf UI style sheet.*/
+body.ewf ewfModalConfirmationBlock {
+	width: 590px;
+	height: 120px;
+	overflow: hidden;
+	border-style: none;
+	table-layout: fixed;
+}
+
+body.ewf ewfModalConfirmationBlock > tbody > tr td {
+	padding: 5px;
+}

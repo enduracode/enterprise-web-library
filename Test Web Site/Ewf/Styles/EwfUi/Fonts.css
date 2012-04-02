@@ -1,0 +1,16 @@
+﻿/* To override any of these styles in a system, prefix your rules with ewfUiBody (if they don't include an element starting with ewfUi) to ensure that they only apply to the EWF UI. */
+
+body {
+	font-family: Verdana,Geneva,sans-serif;
+}
+
+ewfPagePath,
+ewfH2,
+ewfH3,
+ewfH4,
+/*control list with a class to limit to major nav elements,*/
+ewfTableStandardAndStandardExceptLayoutStyles > caption,
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh,
+ewfActionControlLargeButtonStyleAllStates {
+	font-family: Georgia,serif;
+}

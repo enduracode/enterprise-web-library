@@ -1,0 +1,259 @@
+﻿/* -----------------------------------------------------
+The rules below are required by the EWF controls. The classes in them should not be used directly. Override if necessary.
+----------------------------------------------------- */
+
+ewfTableStandardAndStandardLayoutOnlyStyles {
+	width: 100%;
+	table-layout: fixed;
+}
+.ewfClickable {
+	cursor: pointer;
+}
+.ewfNotClickable {
+	cursor: default;
+}
+
+label.ewfCheckBox > input, label.ewfCheckBox > span {
+	vertical-align: middle;
+}
+
+table.ewfBlockCheckBox {
+	width: 100%;
+}
+.ewfStandardCheckBoxList table.ewfBlockCheckBox {
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+table.ewfBlockCheckBox > tbody > tr > td:first-child {
+	font-size: 0;
+	line-height: 0;
+}
+table.ewfBlockCheckBox > tbody > tr > td:first-child input {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+img.ewfAutoSizer {
+	display: block;
+	width: 100%;
+}
+
+/* If we change the border or padding below, we also need to change the Width property on EwfTextBox. */
+div.textBoxWrapper {
+	border-color: #8E8E8E #B8B8B8 #B8B8B8 #8E8E8E;
+	border-style: solid;
+	border-width: 1px;
+	padding: 2px;
+	background-color: White;
+}
+div.textBoxWrapper:hover {
+	border-color: #515151;
+}
+
+div.textBoxWrapperFocused {
+	border-color: #515151;
+}
+
+div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"], div.textBoxWrapper > textarea {
+	display: block;
+	margin: 0px;
+	border-width: 0px;
+	padding: 0px;
+	width: 100%;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+ewfTextBoxCompletionList {
+	visibility: hidden;
+	margin: 0px !important;
+	background-color: window;
+	color: windowtext;
+	border: buttonshadow;
+	border-width: 1px !important;
+	border-style: solid;
+	cursor: 'default';
+	overflow: auto;
+	height: 200px;
+	text-align: left;
+	list-style-type: none;
+}
+ewfTextBoxCompletionList > ewfTextBoxCompletionListItemAllStates {
+	background-color: window;
+	color: windowtext;
+	padding: 1px !important;
+	margin: 0px !important;
+}
+ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
+	background-color: #ffff99;
+	color: black;
+}
+
+table.ewfBlockCheckBox > tbody > tr > td {
+	padding-top: 4px;
+}
+table.ewfBlockCheckBox > tbody > tr:first-child > td {
+	padding-top: 0;
+}
+
+ewfControlLine > ewfControlLineItem {
+	padding-left: 8px;
+}
+ewfControlLine > ewfControlLineItem:first-child {
+	padding-left: 0;
+}
+
+ewfStandardControlStack > ewfControlStackItem {
+	margin-top: 4px;
+}
+ewfStandardControlStack > ewfControlStackItem:first-child {
+	margin-top: 0;
+}
+
+div.ewfControlList > div > table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+/* action controls */
+a.ewfBlockContainer, span.ewfBlockContainer {
+	display: inline-block;
+}
+ewfActionControlAllStylesAllStates {
+	margin: 0;
+	border-style: none;
+	background-color: Transparent;
+	padding: 0;
+}
+ewfActionControlAllStylesAllStates::-moz-focus-inner {
+	border-style: none;
+	padding: 0;
+}
+ewfActionControlBoxStyleAllStates {
+	width: 175px; /* Removing this will result in a variable width button that does not work in IE7. */
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox {
+	display: block;
+	background-repeat: repeat-x;
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.left {
+	float: left;
+	margin-right: 4px;
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.right {
+	float: right;
+	margin-left: 4px;
+}
+
+ewfActionControlAllButtonStylesAllStates {
+	display: inline-block;
+	text-decoration: none; /*-moz-box-shadow: 2px 2px 2px Black;*/
+	background: transparent -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.6)), color-stop(0.5, rgba(255,255,255,0.15)), color-stop(0.5, rgba(255,255,255,0.01)), to(transparent));
+	background: transparent -moz-linear-gradient(top, rgba(255,255,255,0.6), rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.01) 50%, transparent);
+	background-color: #7C13B8;
+	color: white;
+}
+ewfActionControlShrinkWrapButtonStyleAllStates {
+	padding: .01em .2em .01em .2em;
+	border-radius: .2em;
+}
+ewfActionControlNormalButtonStyleAllStates {
+	padding: .4em;
+	border-radius: .3em;
+}
+ewfActionControlLargeButtonStyleAllStates {
+	padding: 1em;
+	font-size: 1.4em;
+	border-radius: .3em;
+}
+ewfActionControlAllButtonStylesStatesWithHoverAndWithoutActive {
+	background-color: black;
+}
+ewfActionControlAllButtonStylesStatesWithFocusAndWithoutHover {
+	background-color: gray;
+}
+
+ewfControlStackItem > ewfListControlDropDownStyle, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfListControlDropDownStyle {
+	width: 100%;
+}
+
+.upload-box > div.dropWrapper {
+	width: 90%;
+	margin: 5px auto;
+}
+
+.upload-box > div.dropWrapper.hovering {
+	-moz-animation: pulseShadow 4s infinite ease;
+	-webkit-animation: pulseShadow 4s infinite ease;
+	animation: pulseShadow 4s infinite ease;
+}
+
+.upload-box > div, .upload-box > div > div.dropZone {
+	border-radius: 10px;
+}
+.upload-box > div > div.dropZone {
+	border: #78A0C3 dotted 5px;
+	padding: .1em;
+}
+.dropFilesHereMessage {
+	opacity: .5;
+	font-size: 40pt;
+	text-align: center;
+	color: white;
+	text-shadow: black 0 0 0.1em;
+}
+
+.closingX {
+	background-color: #78A0C3; /* Fallback */
+	background: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.01) 50%, transparent) repeat scroll 0 0 #78A0C3; /* Firefox 3.6+ */
+	background: -webkit-gradient(linear, center top, center bottom, from(rgba(255, 255, 255, 0.6)), to(rgba(255, 255, 255, 0.01))) repeat scroll 0 0 #78A0C3; /* Safari 4-5, Chrome 1-9 */
+	background: -webkit-linear-gradient(center top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.01) 50%, transparent) repeat scroll 0 0 #78A0C3; /* Safari 5.1, Chrome 10+ */
+	background: -ms-linear-gradient(center top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.01) 50%, transparent) repeat scroll 0 0 #78A0C3; /* IE 10 */
+	background: -o-linear-gradient(center top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.01) 50%, transparent) repeat scroll 0 0 #78A0C3; /* Opera 11.10+ */
+	padding: .2em;
+	font-weight: bold;
+	border-radius: 0.5em 0.5em 0.5em 0.5em;
+	color: white;
+	cursor: default;
+}
+.closingX:hover {
+	background-color: #27557F;
+	box-shadow: 0 0 3px black;
+}
+
+.queuedFiles > table {
+	width: 100%;
+}
+
+tr.queuedFile > td {
+	padding: .3em;
+}
+
+.queuedFiles > .upload-count {
+	font-size: 1em;
+	margin: 0;
+	padding: 4px;
+	background-color: transparent; /* This file cannot be moved without updating this url */
+	background-image: url("Backgrounds/Darker.svg");
+}
+
+.fileError {
+	color: red;
+	font-weight: bold;
+}
+
+@-moz-keyframes pulseShadow {
+	0%	{ box-shadow: 0 0 0px #FFC87B; }
+	50% { box-shadow: 0 0 30px #FFC87B; }	
+	100% { box-shadow: 0 0 0px #FFC87B; }
+}
+@-webkit-keyframes pulseShadow {
+	0%	{ box-shadow: 0 0 0px #FFC87B; }
+	50% { box-shadow: 0 0 30px #FFC87B; }	
+	100% { box-shadow: 0 0 0px #FFC87B; }
+}
+@keyframes pulseShadow {
+	0%	{ box-shadow: 0 0 0px #FFC87B; }
+	50% { box-shadow: 0 0 30px #FFC87B; }	
+	100% { box-shadow: 0 0 0px #FFC87B; }
+}

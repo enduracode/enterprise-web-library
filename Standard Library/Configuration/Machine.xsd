@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="MachineConfiguration" type="rs:MachineConfiguration" />
+	<complexType name="MachineConfiguration">
+		<sequence>
+			<element name="IsStandbyServer" type="boolean" minOccurs="0" />
+		</sequence>
+	</complexType>
+</schema>

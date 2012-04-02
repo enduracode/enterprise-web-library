@@ -1,0 +1,1 @@
+<%@ Page Language="C#" CodeBehind="GetImage.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.GetImage" MasterPageFile="~/Ewf/BasicPage.master" %>

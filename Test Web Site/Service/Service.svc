@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="RedStapler.TestWebSite.Service.Service" CodeBehind="Service.svc.cs" %>
