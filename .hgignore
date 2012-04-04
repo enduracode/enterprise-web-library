@@ -3,6 +3,7 @@ syntax: glob
 Standard Library.suo
 packages/
 _ReSharper*
+*.csproj.user
 
 Library/bin/
 Library/obj/
