@@ -5,10 +5,14 @@
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}</ProjectGuid>
-    <SccProjectName>Red Stapler Library Tester</SccProjectName>
-    <SccLocalPath>1~d1552337-a5cb-483f-b8db-ff08fed05e69</SccLocalPath>
-    <SccAuxPath>http://vault.redstapler.biz/VaultService</SccAuxPath>
-    <SccProvider>SourceGear Vault Visual Studio 2005 Client:{1EA47954-8515-402d-82D9-B5C332120A8D}</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ApplicationIcon>

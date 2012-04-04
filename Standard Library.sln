@@ -18,18 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6BD28F
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(VaultVsipSolution-v2) = preSolution
-		VaultHost = https://vault.redstapler.biz/VaultService
-		VaultRepositoryID = 1
-		VaultRepositoryGUID = d1552337-a5cb-483f-b8db-ff08fed05e69
-		ProjectCount = 6
-		ProjectRelativeDiskPath1 = Standard Library\Standard Library.csproj
-		ProjectRelativeDiskPath2 = Test Web Site\Test Web Site.csproj
-		ProjectRelativeDiskPath3 = Red Stapler Library Tester\Red Stapler Library Tester.csproj
-		ProjectRelativeDiskPath4 = Solution Files\Solution Files.csproj
-		ProjectRelativeDiskPath5 = Library\Library.csproj
-		ProjectRelativeDiskPath6 = Standard Library.sln
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

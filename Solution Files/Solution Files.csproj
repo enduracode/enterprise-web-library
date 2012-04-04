@@ -10,10 +10,14 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Solution_Files</RootNamespace>
     <AssemblyName>Solution Files</AssemblyName>
-    <SccProjectName>Solution Files</SccProjectName>
-    <SccLocalPath>1~d1552337-a5cb-483f-b8db-ff08fed05e69</SccLocalPath>
-    <SccAuxPath>http://vault.redstapler.biz/VaultService</SccAuxPath>
-    <SccProvider>SourceGear Vault Visual Studio 2005 Client:{1EA47954-8515-402d-82D9-B5C332120A8D}</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
