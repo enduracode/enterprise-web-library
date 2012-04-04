@@ -264,7 +264,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			while( etherealControls.Any() ) {
 				var etherealControl = etherealControls.Dequeue();
 
-				// NOTE: This is kind of a hack, but it's an easy way to make sure ethereal controls are initially hidden.
+				// This is kind of a hack, but it's an easy way to make sure ethereal controls are initially hidden.
 				etherealControl.Control.Style.Add( HtmlTextWriterStyle.Display, "none" );
 
 				Form.Controls.Add( etherealControl.Control );
