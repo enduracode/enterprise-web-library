@@ -3,6 +3,7 @@ syntax: glob
 Standard Library.suo
 packages/
 _ReSharper*
+Standard Library.sln.DotSettings.user
 *.csproj.user
 
 Library/bin/
