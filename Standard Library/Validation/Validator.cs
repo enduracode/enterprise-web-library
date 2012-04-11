@@ -849,7 +849,9 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                                                   DateTime.MaxValue ).TimeOfDay );
 		}
 
-		// NOTE: Should we still be using this method or should we always be using the ones below that handle empty and return the default for validation problems?
+		/// <summary>
+		/// Do not use. Use executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid instead.
+		/// </summary>
 		private T executeValidationMethodAndTreatInvalidResultAsUnusable<T>( ValidationErrorHandler handler, ValidationMethod<T> method ) {
 			var result = method();
 			handler.HandleResult( this, true );
