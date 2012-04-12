@@ -14,6 +14,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		public ImageToBeSent( string fileName, string contentType, byte[] contents, int? forcedWidth ): base( fileName, contentType, contents ) {
 			if( forcedWidth.HasValue ) {
 				// Transform image to correct size
+				// NOTE: Investigate using this: http://www.hanselman.com/blog/NuGetPackageOfWeek11ImageResizerEnablesCleanClearImageResizingInASPNET.aspx.
 				using( var fromStream = new MemoryStream( contents ) ) {
 					using( var imageSource = Image.FromStream( fromStream ) ) {
 						var width = forcedWidth.Value;
@@ -26,7 +27,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 								gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
 								gr.DrawImage( imageSource, 0, 0, width, height );
 							}
-							
+
 							using( var toStream = new MemoryStream() ) {
 								resizedImage.Save( toStream, ImageFormat.Jpeg );
 								binaryContents = toStream.ToArray();
