@@ -72,7 +72,11 @@ namespace RedStapler.TestWebSite.TestPages {
 			var gibberish =
 				@"Kolo has refactored the abstraction of blog-based systems.  What do we embrace? Anything and everything, regardless of obscurity! We have proven we know that if you brand proactively then you may also synthesize strategically. What does the commonly-accepted term 'obfuscation' really mean? We realize that it is better to envisioneer virally than to iterate virtually. Without adequate angel investors, e-tailers are forced to become wireless. Our 60/60/24/7/365 feature set is second to none, but our revolutionary convergence and newbie-proof configuration is invariably considered an amazing achievement. We will scale up our ability to recontextualize without decreasing our ability to visualize. Your budget for meshing should be at least one-tenth of your budget for unleashing. We will augment our ability to visualize without reducing our capability to upgrade. Quick: do you have a magnetic, value-added plan of action for managing new communities? We often orchestrate C2B2B revolutionary C2C. That is an amazing achievement considering this fiscal year's conditions!";
 			four = new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( ( gibberish + gibberish + gibberish ).GetLiteralControl() );
-
+			var ln = new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
+			var ln1 = new LaunchWindowLink( two ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
+			var ln2 = new LaunchWindowLink( three ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
+			var ln3 = new LaunchWindowLink( four ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
+			ph.AddControlsReturnThis( ln, ln1, ln2, ln3 );
 			var t = new EwfTextBox();
 			//parameterFormControls.SomeTextControl = t;
 			ph.AddControlsReturnThis( t );
