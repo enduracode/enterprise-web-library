@@ -1,1 +1,1 @@
-RedStapler.ProgramRunner -2 4 UpdateAllDependentLogic
+"..\Library\Configuration\Update All Dependent Logic"
