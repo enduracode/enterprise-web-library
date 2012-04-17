@@ -74,6 +74,9 @@
       <Name>Standard Library</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Configuration\Update All Dependent Logic.bat" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
