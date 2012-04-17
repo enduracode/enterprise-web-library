@@ -284,11 +284,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var argException = exception as ArgumentException;
 				var errorIsBogusPathException = argException != null && argException.Message == "Illegal characters in path.";
 
-				// We can remove this when we stop using the Telerik date picker.
-				var invalidCastException = exception.InnerException as InvalidCastException;
-				var errorIsTelerikDatePickerInvalidCast = invalidCastException != null &&
-				                                          invalidCastException.Message == "Text property cannot be set. String was not recognized as a valid DateTime.";
-
 				// In the first part of this condition we check to make sure the base exception is also an HttpException, because we had a problem with WCF wrapping an
 				// important non-HttpException inside an HttpException that somehow had a code of 404. In the second part of the condition (after the OR) we use
 				// InnerException instead of GetBaseException because the ResourceNotAvailableException always has an inner exception that describes the specific
@@ -296,7 +291,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// wrapped with another exception.
 				if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
 				    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler ||
-				    viewStateFormFieldMangled || errorIsWcf404 || errorIsBogusPathException || errorIsTelerikDatePickerInvalidCast ) {
+				    viewStateFormFieldMangled || errorIsWcf404 || errorIsBogusPathException ) {
 					setStatusCode( 404 );
 					return;
 				}
