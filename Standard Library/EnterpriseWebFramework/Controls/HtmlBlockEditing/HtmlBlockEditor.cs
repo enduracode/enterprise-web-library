@@ -62,19 +62,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			wysiwygEditor = new WysiwygHtmlEditor( html );
+			var wysiwygEditorBlock = new Block( wysiwygEditor );
 			textBox = new EwfTextBox( html ) { Rows = 20 };
 
 			editModes = new EwfListControl();
 			editModes.Type = EwfListControl.ListControlType.HorizontalRadioButton;
 			editModes.AddItem( "The built-in editor", internalId );
 			editModes.AddItem( "A simple text box", simpleId );
-			editModes.AddDisplayLink( internalId, true, wysiwygEditor );
+			editModes.AddDisplayLink( internalId, true, wysiwygEditorBlock );
 			editModes.AddDisplayLink( simpleId, true, textBox );
 
 			var modeSelection = new Panel().AddControlsReturnThis( new LiteralControl( "View and edit HTML with:&nbsp;&nbsp;" ), editModes );
 			modeSelection.Style.Add( "margin-bottom", "4px" );
 
-			this.AddControlsReturnThis( modeSelection, wysiwygEditor, textBox );
+			this.AddControlsReturnThis( modeSelection, wysiwygEditorBlock, textBox );
 		}
 
 		/// <summary>
