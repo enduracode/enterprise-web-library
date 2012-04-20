@@ -47,38 +47,49 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Initializes the class. This includes loading application settings from the configuration file. The application name should be scoped within the system.
 		/// For non web applications, this method must be called directly from the main executable assembly and not from a supporting library.
-		/// To debug this method, create a folder called c:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far it got in init.
+		/// 
+		/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
+		/// it got in init.
 		/// </summary>
 		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
 					throw new ApplicationException( "This class can only be initialized once." );
+
 				AppName = appName;
 				AppTools.isClientSideProgram = isClientSideProgram;
+
 				initializationLog += Environment.NewLine + "About to load machine config";
+
 				// Load machine configuration.
 				if( File.Exists( MachineConfigXmlFilePath ) ) {
 					machineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( MachineConfigXmlFilePath, false
 						/*Do not perform schema validation since the schema file won't be available on non-development machines.*/ );
 				}
+
 				initializationLog += Environment.NewLine + "About to determine installation path";
+
 				// Determine the installation path and load configuration information.
 				string installationPath;
 				bool isDevelopmentInstallation;
 				if( isWebApp() ) {
 					initializationLog += Environment.NewLine + "Is a web app";
+
 					// Assume the first assembly up the call stack that is not this assembly is the web application assembly.
 					var stackFrames = new StackTrace().GetFrames();
 					if( stackFrames == null )
 						throw new ApplicationException( "No stack trace available." );
 					appAssembly = stackFrames.Select( frame => frame.GetMethod().DeclaringType.Assembly ).First( assembly => assembly != Assembly.GetExecutingAssembly() );
+
 					initializationLog += Environment.NewLine + "Stack trace loaded, about to create installation path";
+
 					installationPath = StandardLibraryMethods.CombinePaths( HttpRuntime.AppDomainAppPath, ".." );
 					isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 				}
 				else {
 					initializationLog += Environment.NewLine + "Is not a web app";
+
 					// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation.
 					// We use the assembly folder path here so we're not relying on the working directory of the application.
 					// Installed executables are one level below the installation folder.
@@ -89,20 +100,25 @@ namespace RedStapler.StandardLibrary {
 					if( isDevelopmentInstallation )
 						installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, "..", "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 				}
-
 				initializationLog += Environment.NewLine + "Successfully determined installation path";
 				InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 				initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
+
 				if( systemLogic == null )
 					throw new ApplicationException( "The system must have a global logic class and you must pass an instance of it to AppTools.Init." );
+
 				// Initialize the provider before the exception handling block below because it's reasonable for the exception handling to depend on this provider.
 				provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogic.GetType(), "General" ) as SystemGeneralProvider;
 				if( provider == null )
 					throw new ApplicationException( "General provider not found in system" );
+
 				initializationLog += Environment.NewLine + "Loaded system General provider.";
+
 				// NOTE: Get rid of this when there are providers for all functionality that is now implemented with additional GlobalLogic interfaces.
 				AppTools.systemLogic = systemLogic;
+
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";
+
 				try {
 					// Setting the initialized flag to true must be done first so the exception handling works.
 					initialized = true;
@@ -121,6 +137,7 @@ namespace RedStapler.StandardLibrary {
 					UserManagementStatics.Init( systemLogic.GetType() );
 
 					systemLogic.InitSystem();
+
 					initializationLog += Environment.NewLine + "Succeeded in secondary init.";
 				}
 				catch( Exception e ) {
@@ -133,17 +150,8 @@ namespace RedStapler.StandardLibrary {
 			}
 			catch( Exception e ) {
 				initializationLog += Environment.NewLine + e;
-				EmergencyLog( "Initialization log", initializationLog );
+				StandardLibraryMethods.EmergencyLog( "Initialization log", initializationLog );
 			}
-		}
-
-		internal static void EmergencyLog( string subject, string body ) {
-			try {
-				const string destinationPath = @"c:\AnyoneFullControl\";
-				if( Directory.Exists( destinationPath ) )
-					File.WriteAllText( StandardLibraryMethods.CombinePaths( destinationPath, subject + ".txt" ), DateTime.Now.ToHourAndMinuteString() + ":" + body );
-			}
-			catch {}
 		}
 
 		/// <summary>
