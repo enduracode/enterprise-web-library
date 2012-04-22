@@ -288,5 +288,14 @@ namespace RedStapler.StandardLibrary {
 
 			return identifier;
 		}
+
+		internal static void EmergencyLog( string subject, string body ) {
+			try {
+				const string destinationPath = @"c:\AnyoneFullControl\";
+				if( Directory.Exists( destinationPath ) )
+					File.WriteAllText( CombinePaths( destinationPath, subject + ".txt" ), DateTime.Now.ToHourAndMinuteString() + ":" + body );
+			}
+			catch {}
+		}
 	}
 }

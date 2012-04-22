@@ -64,17 +64,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			wysiwygEditor = new WysiwygHtmlEditor( html );
 			textBox = new EwfTextBox( html ) { Rows = 20 };
 
+			// This block control is necessary because the CKEditor hides the textarea and creates a sibling control immediately after it. We want display linking to
+			// affect both the textarea and the sibling.
+			// NOTE: It might be better for the block control to be part of the WYSIWYG editor since right now, when the editor is used on its own, display linking
+			// may not work.
+			var wysiwygEditorBlock = new Block( wysiwygEditor );
+
 			editModes = new EwfListControl();
 			editModes.Type = EwfListControl.ListControlType.HorizontalRadioButton;
 			editModes.AddItem( "The built-in editor", internalId );
 			editModes.AddItem( "A simple text box", simpleId );
-			editModes.AddDisplayLink( internalId, true, wysiwygEditor );
+			editModes.AddDisplayLink( internalId, true, wysiwygEditorBlock );
 			editModes.AddDisplayLink( simpleId, true, textBox );
 
 			var modeSelection = new Panel().AddControlsReturnThis( new LiteralControl( "View and edit HTML with:&nbsp;&nbsp;" ), editModes );
 			modeSelection.Style.Add( "margin-bottom", "4px" );
 
-			this.AddControlsReturnThis( modeSelection, wysiwygEditor, textBox );
+			this.AddControlsReturnThis( modeSelection, wysiwygEditorBlock, textBox );
 		}
 
 		/// <summary>

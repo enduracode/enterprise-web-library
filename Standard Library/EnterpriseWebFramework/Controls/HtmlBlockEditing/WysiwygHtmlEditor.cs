@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -39,7 +40,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return "$( '#" + ClientID + "' ).ckeditor( function() { /* callback code */ }, { toolbar: 'Basic' } );";
+			return "$( '#" + ClientID + "' ).ckeditor( function() { /* callback code */ }, { toolbar: 'Basic', contentsCss: '" +
+			       this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( CkEditorInstallationDate ) + ".css" ) + "' } );";
 		}
 
 		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
@@ -48,6 +50,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
+			// This hack prevents the NewLine that CKEditor seems to always add to the end of the textarea from causing ValueChangedOnPostBack to always return true.
+			if( postValue.EndsWith( Environment.NewLine ) && postValue.Remove( postValue.Length - Environment.NewLine.Length ) == durableValue )
+				postValue = durableValue;
+
 			postBackValues.Add( this, postValue );
 		}
 

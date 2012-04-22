@@ -115,10 +115,14 @@ function RemoveClickScriptBinding() {
 			//For each td
 			$( this ).children( ":not(.ewfNotClickable)" ).click( clickScript );
 		}
-    );
+	);
 }
 
 function postBackRequestStarted() {
+	// see http://stackoverflow.com/a/9924844/35349
+	for( var i in CKEDITOR.instances )
+		CKEDITOR.instances[i].updateElement();
+
 	$( ".ewfTimeOut" ).hide();
 	$( ".ewfClickBlocker, .ewfProcessingDialog" ).fadeIn( 0 );
 	setTimeout( '$(".ewfTimeOut").fadeIn(0);', 10000 );
