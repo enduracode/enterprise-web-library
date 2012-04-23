@@ -68,8 +68,6 @@
     <Content Include="stdLibDoxySettings.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tab.psd" />
-    <None Include="TabSelected.psd" />
     <None Include="Update All Dependent Logic.bat" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
