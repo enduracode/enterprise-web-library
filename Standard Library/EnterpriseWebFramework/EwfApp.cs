@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-using MvcMiniProfiler;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using StackExchange.Profiling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>

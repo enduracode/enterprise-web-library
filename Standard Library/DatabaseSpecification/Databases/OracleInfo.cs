@@ -1,8 +1,8 @@
 using System;
 using System.Data.Common;
 using System.Reflection;
-using MvcMiniProfiler;
-using MvcMiniProfiler.Data;
+using StackExchange.Profiling;
+using StackExchange.Profiling.Data;
 
 namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 	/// <summary>
