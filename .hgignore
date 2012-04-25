@@ -6,6 +6,9 @@ _ReSharper*
 Standard Library.sln.DotSettings.user
 *.csproj.user
 
+Development Utility/bin/
+Development Utility/obj/
+
 Library/bin/
 Library/obj/
 Library/Generated Code/
