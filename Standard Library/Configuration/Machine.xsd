@@ -3,6 +3,10 @@
 	<element name="MachineConfiguration" type="rs:MachineConfiguration" />
 	<complexType name="MachineConfiguration">
 		<sequence>
+			<element name="RsisAuthenticationKey" type="string" minOccurs="0" />
+			<element name="InstallationsFolderPath" type="string" minOccurs="0" />
+			<element name="VaultWorkingFolderPath" type="string" minOccurs="0" />
+			<element name="OracleSysPassword" type="string" minOccurs="0" />
 			<element name="IsStandbyServer" type="boolean" minOccurs="0" />
 		</sequence>
 	</complexType>

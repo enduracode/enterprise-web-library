@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="Build">
+		<complexType>
+			<sequence>
+				<element name="SystemId" type="int" />
+				<element name="SystemName" type="string" />
+				<element name="SystemShortName" type="string" />
+				<element name="ServerSideLogicPackage" type="base64Binary" />
+				<element name="ClientSideApp" minOccurs="0">
+					<complexType>
+						<sequence>
+							<element name="Name" type="string" />
+							<element name="AssemblyName" type="string" />
+							<element name="Package" type="base64Binary" />
+						</sequence>
+					</complexType>
+				</element>
+				<element name="Installations">
+					<complexType>
+						<sequence>
+							<element name="Installation" minOccurs="0" maxOccurs="unbounded">
+								<complexType>
+									<sequence>
+										<element name="Id" type="int" />
+										<element name="Name" type="string" />
+										<element name="ShortName" type="string" />
+										<element name="IsLiveInstallation" type="boolean" />
+										<element name="ConfigurationPackage" type="base64Binary" />
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+</schema>

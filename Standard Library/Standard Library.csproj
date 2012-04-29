@@ -109,6 +109,7 @@
     <Compile Include="Collections\OneToOneMap.cs" />
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
+    <Compile Include="Configuration\MachineConfiguration.cs" />
     <Compile Include="Configuration\WindowsService.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />
@@ -313,9 +314,22 @@
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />
     <Compile Include="EnterpriseWebFramework\WebMethodDefinition.cs" />
+    <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
     <Compile Include="Generated Code\Machine Configuration.cs" />
     <Compile Include="Generated Code\System General Configuration.cs" />
+    <Compile Include="Generated Code\System List Message.cs" />
+    <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\BuildUploadMessage.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\DataPackageUploadMessage.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\RsisInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\SystemList.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\Isu.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\ProgramRunner.cs" />
+    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\ProgramRunnerUnstreamed.cs" />
+    <Compile Include="InstallationSupportUtility\StatusStatics.cs" />
+    <Compile Include="InstallationSupportUtility\SystemIsuProvider.cs" />
+    <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />
     <Compile Include="MailMerging\MailMergeTesting\MergeStatics.cs" />
@@ -447,6 +461,12 @@
       </SubType>
     </None>
     <None Include="EnterpriseWebFramework\Controls\Readme.txt" />
+    <None Include="InstallationSupportUtility\RsisInterface\Messages\BuildMessage\Build.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\System List.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

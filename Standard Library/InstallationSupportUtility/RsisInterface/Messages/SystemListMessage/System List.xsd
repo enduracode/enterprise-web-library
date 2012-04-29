@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="SystemList" type="rs:SystemList" />
+	<complexType name="SystemList">
+		<sequence>
+			<element name="Systems">
+				<complexType>
+					<sequence>
+						<element name="SoftwareSystem" minOccurs="0" maxOccurs="unbounded">
+							<complexType>
+								<sequence>
+									<element name="Id" type="int" />
+									<element name="Name" type="string" />
+									<element name="ShortName" type="string" />
+									<element name="VaultPath" type="string" />
+									<element name="EwlSystemId" type="int" nillable="true" />
+									<element name="ClientSideApp" minOccurs="0">
+										<complexType>
+											<sequence>
+												<element name="Name" type="string" />
+												<element name="AssemblyName" type="string" />
+											</sequence>
+										</complexType>
+									</element>
+									<element name="PrimaryDatabaseOracleTableSpaces">
+										<complexType>
+											<sequence>
+												<element name="TableSpace" type="string" minOccurs="0" maxOccurs="unbounded" />
+											</sequence>
+										</complexType>
+									</element>
+									<element name="SecondaryDatabases">
+										<complexType>
+											<sequence>
+												<element name="SecondaryDatabase" type="rs:SecondaryDatabase" minOccurs="0" maxOccurs="unbounded" />
+											</sequence>
+										</complexType>
+									</element>
+									<element name="DevelopmentInstallationId" type="int" />
+									<element name="InstalledInstallations">
+										<complexType>
+											<sequence>
+												<element name="Installation" type="rs:RsisInstallation" minOccurs="0" maxOccurs="unbounded" />
+											</sequence>
+										</complexType>
+									</element>
+								</sequence>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="SecondaryDatabase">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="DataPackageRank" type="int" nillable="true" />
+			<element name="OracleTableSpaces">
+				<complexType>
+					<sequence>
+						<element name="TableSpace" type="string" minOccurs="0" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="RsisInstallation">
+		<sequence>
+			<element name="Id" type="int" />
+			<element name="Name" type="string" />
+			<element name="ShortName" type="string" />
+			<element name="DataPackageSize" type="long" nillable="true" />
+			<element name="LatestBuildIdForInstallation" type="int" nillable="true" />
+			<element name="InstallationTypeElements" type="rs:InstallationTypeElements" />
+
+			<!-- These elements are necessary to keep old versions of Program Runner working. Delete them when these versions are no longer supported. -->
+			<element name="DataPackageUrl" type="string" minOccurs="0" />
+			<element name="UpdateDataInstallationId" type="int" minOccurs="0" />
+			<element name="IsUpdateDataSourceForDev" type="boolean" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="InstallationTypeElements" />
+	<complexType name="LiveInstallationElements">
+		<complexContent>
+			<extension base="rs:InstallationTypeElements">
+				<sequence>
+					<element name="DataExportToRsisWebSiteNotPermitted" type="boolean" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="IntermediateInstallationElements">
+		<complexContent>
+			<extension base="rs:InstallationTypeElements">
+				<sequence>
+					<element name="UpdateDataInstallationId" type="int" />
+					<element name="AutomaticLogicUpdatesEnabled" type="boolean" />
+					<element name="AutomaticDataUpdatesEnabled" type="boolean" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+</schema>

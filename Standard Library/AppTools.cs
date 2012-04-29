@@ -64,8 +64,8 @@ namespace RedStapler.StandardLibrary {
 
 				// Load machine configuration.
 				if( File.Exists( MachineConfigXmlFilePath ) ) {
-					machineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( MachineConfigXmlFilePath, false
-						/*Do not perform schema validation since the schema file won't be available on non-development machines.*/ );
+					// Do not perform schema validation since the schema file won't be available on non-development machines.
+					machineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( MachineConfigXmlFilePath, false );
 				}
 
 				initializationLog += Environment.NewLine + "About to determine installation path";
@@ -134,6 +134,7 @@ namespace RedStapler.StandardLibrary {
 					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
 					BlobFileOps.Init( systemLogic.GetType() );
 					EncryptionOps.Init( systemLogic.GetType() );
+					InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
 					UserManagementStatics.Init( systemLogic.GetType() );
 
 					systemLogic.InitSystem();
@@ -171,6 +172,16 @@ namespace RedStapler.StandardLibrary {
 			get {
 				assertClassInitialized();
 				return secondaryInitFailed;
+			}
+		}
+
+		/// <summary>
+		/// Standard Library and ISU use only.
+		/// </summary>
+		public static MachineConfiguration MachineConfiguration {
+			get {
+				assertClassInitialized();
+				return machineConfiguration;
 			}
 		}
 
@@ -235,16 +246,6 @@ namespace RedStapler.StandardLibrary {
 			get {
 				assertClassInitialized();
 				return InstallationConfiguration.PrimaryDatabaseInfo != null;
-			}
-		}
-
-		/// <summary>
-		/// Standard library and ISU use only. Returns true if the machine this code is running on is a standby server.
-		/// </summary>
-		public static bool IsStandbyServer {
-			get {
-				assertClassInitialized();
-				return machineConfiguration != null && machineConfiguration.IsStandbyServerSpecified && machineConfiguration.IsStandbyServer;
 			}
 		}
 
