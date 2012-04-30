@@ -111,8 +111,8 @@
     <Compile Include="Collections\OneToOneMap.cs" />
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
-    <Compile Include="Configuration\MachineConfiguration.cs" />
-    <Compile Include="Configuration\WindowsService.cs" />
+    <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
+    <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\InequalityCondition.cs" />
@@ -319,9 +319,31 @@
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
     <Compile Include="Generated Code\Machine Configuration.cs" />
+    <Compile Include="Generated Code\System Development Configuration.cs" />
     <Compile Include="Generated Code\System General Configuration.cs" />
     <Compile Include="Generated Code\System List Message.cs" />
     <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\DatabaseOps.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\NoDatabase.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\Oracle.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\SqlServer.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ProcedureParameter.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\DevelopmentInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\ExistingInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Installation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\KnownInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\KnownInstalledInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\DevelopmentInstallationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\ExistingInstallationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\GeneralInstallationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\KnownInstallationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\KnownSystemLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\RecognizedInstallationLogic.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\NonexistentInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstalledInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\UnrecognizedInstallation.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\BuildUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\DataPackageUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\RsisInstallation.cs" />
@@ -369,6 +391,7 @@
     <Compile Include="MultiMessageApplicationException.cs" />
     <Compile Include="Tools\ControlTools.cs" />
     <Compile Include="Tools\DateTimeTools.cs" />
+    <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
@@ -456,6 +479,9 @@
       </SubType>
     </None>
     <None Include="Configuration\Machine.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Configuration\System Development.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Configuration\System General.xsd">

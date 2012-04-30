@@ -846,7 +846,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// the modified data from being used accidentally, or intentionally, in LoadData.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.MachineConfiguration.GetIsStandbyServer() ) {
+				if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 					updateLastPageRequestTimeForUser();
 					EwfApp.Instance.ExecuteInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
 				}

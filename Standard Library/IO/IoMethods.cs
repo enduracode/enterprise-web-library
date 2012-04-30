@@ -178,5 +178,16 @@ namespace RedStapler.StandardLibrary.IO {
 			Directory.CreateDirectory( Path.GetDirectoryName( filePath ) );
 			return File.Create( filePath );
 		}
+
+		internal static void ExecuteWithTempFolder( Action<string> method ) {
+			var folderPath = StandardLibraryMethods.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
+			Directory.CreateDirectory( folderPath );
+			try {
+				method( folderPath );
+			}
+			finally {
+				DeleteFolder( folderPath );
+			}
+		}
 	}
 }

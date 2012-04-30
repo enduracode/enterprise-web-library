@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Configuration {
+﻿namespace RedStapler.StandardLibrary.Configuration.Machine {
 	partial class MachineConfiguration {
 		// NOTE: The name of this method isn't very good. How can anyone know when to use it and when to use the underlying IsStandbyServer property?
 		public static bool GetIsStandbyServer() {

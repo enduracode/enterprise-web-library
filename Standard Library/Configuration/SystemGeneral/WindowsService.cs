@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Configuration {
+﻿namespace RedStapler.StandardLibrary.Configuration.SystemGeneral {
 	/// <summary>
 	/// A Windows service.
 	/// </summary>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
+	<element name="systemDevelopmentConfiguration" type="rs:SystemDevelopmentConfiguration" />
+	<complexType name="SystemDevelopmentConfiguration">
+		<sequence>
+			<element name="libraryNamespace" type="string" />
+			<element name="webProjects" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="project" type="rs:WebProject" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="serverSideConsoleProjects" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="project" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="clientSideAppProject" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="name" type="string" />
+						<element name="assemblyName" type="string" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="xmlSchemas" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="schema" type="rs:XmlSchema" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="database" type="rs:Database" minOccurs="0" />
+			<element name="secondaryDatabases" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="database" type="rs:SecondaryDatabase" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="WebProject">
+		<sequence>
+			<element name="name" type="string" />
+			<element name="namespace" type="string" />
+			<element name="useCertificateAuthentication" type="boolean" minOccurs="0" />
+			<element name="RequiresEnhancedSecurity" type="boolean" minOccurs="0" />
+			<element name="IsUpdateableWhenInstalled" type="boolean" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="XmlSchema">
+		<sequence>
+			<element name="project" type="string" />
+			<element name="pathInProject" type="string" />
+			<element name="namespace" type="string" />
+			<element name="codeFileName" type="string" />
+			<element name="useSvcUtil" type="boolean" />
+		</sequence>
+	</complexType>
+	<complexType name="SecondaryDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<attribute name="name" type="string" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Database">
+		<sequence>
+			<element name="EveryTableHasKey" type="boolean" minOccurs="0" />
+			<element name="rowConstantTables" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="table" type="rs:RowConstantTable" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="revisionHistoryTables" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="table" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="queries" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="query" type="rs:Query" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="customModifications" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="modification" type="rs:CustomModification" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="RowConstantTable">
+		<sequence>
+		</sequence>
+		<attribute name="tableName" type="string" use="required" />
+		<attribute name="valueColumn" type="string" use="required" />
+		<attribute name="nameColumn" type="string" use="required" />
+		<attribute name="orderByColumn" type="string" use="optional" />
+	</complexType>
+	<complexType name="Query">
+		<sequence>
+			<element name="selectFromClause" type="string" />
+			<element name="postSelectFromClauses">
+				<complexType>
+					<sequence>
+						<element name="postSelectFromClause" minOccurs="1" maxOccurs="unbounded">
+							<complexType>
+								<simpleContent>
+									<extension base="string">
+										<attribute name="name" type="string" use="required" />
+									</extension>
+								</simpleContent>
+							</complexType>
+						</element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+	<complexType name="CustomModification">
+		<sequence>
+			<element name="name" type="string" />
+			<element name="commands">
+				<complexType>
+					<sequence>
+						<element name="command" type="string" maxOccurs="unbounded"></element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+</schema>
