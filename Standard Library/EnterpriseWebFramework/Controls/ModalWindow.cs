@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		WebControl EtherealControl.Control { get { return control; } }
 
 		string EtherealControl.GetJsInitStatements() {
-			return "$( '#" + control.ClientID + "' ).dialog( { autoOpen: false, " +
+			return "$( '#" + control.ClientID + "' ).dialog( { autoOpen: false, width: 600, hide: 'fade', show: 'fade', " +
 			       ( postBackButton != null
 			         	? "buttons: { 'Cancel': function() { $( this ).dialog( 'close' ) }, 'Continue': function() { " +
 			         	  PostBackButton.GetPostBackScript( postBackButton, true ) + "; } }, "

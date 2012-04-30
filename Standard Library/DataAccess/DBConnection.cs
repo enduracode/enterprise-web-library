@@ -5,12 +5,12 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using MvcMiniProfiler;
-using MvcMiniProfiler.Data;
 using RedStapler.StandardLibrary.DataAccess.RevisionHistory;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using StackExchange.Profiling;
+using StackExchange.Profiling.Data;
 
 namespace RedStapler.StandardLibrary.DataAccess {
 	/// <summary>

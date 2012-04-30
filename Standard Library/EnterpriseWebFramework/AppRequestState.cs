@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
-using MvcMiniProfiler;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using StackExchange.Profiling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>

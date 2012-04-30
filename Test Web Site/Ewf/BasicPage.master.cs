@@ -89,6 +89,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 			if( EwfPage.Instance.StatusMessages.Any() )
 				ph2.AddControlsReturnThis( getStatusMessageDialog() );
 
+			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
+			ajaxLoadingImage.Style.Add( "display", "none" );
+			ph2.AddControlsReturnThis( ajaxLoadingImage );
+
 			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted();" );
 		}
 

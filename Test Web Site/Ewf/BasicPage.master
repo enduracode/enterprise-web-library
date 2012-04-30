@@ -8,7 +8,7 @@
 	<form runat="server" id="form">
 		<asp:ScriptManager runat="server" /><asp:PlaceHolder runat="server" ID="ph" />
 		<div runat="server" class="containingDiv"><asp:ContentPlaceHolder ID="main" runat="server" /></div>
-		<asp:PlaceHolder runat="server" ID="ph2" /><ewf:EwfImage runat="server" ImageUrl="Images/ajax-loader.gif" Style="display: none" CssClass="ajaxloaderImage" />
+		<asp:PlaceHolder runat="server" ID="ph2" />
 	</form>
 </body>
 </html>

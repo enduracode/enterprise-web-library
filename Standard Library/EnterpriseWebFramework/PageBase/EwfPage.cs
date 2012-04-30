@@ -8,7 +8,6 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using MvcMiniProfiler;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -19,6 +18,7 @@ using RedStapler.StandardLibrary.JavaScriptWriting;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
+using StackExchange.Profiling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
