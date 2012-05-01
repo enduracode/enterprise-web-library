@@ -9,25 +9,25 @@ using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
-	internal class ExistingInstallationLogic {
-		internal const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
+	public class ExistingInstallationLogic {
+		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
 
-		internal ExistingInstallationLogic( GeneralInstallationLogic generalInstallationLogic, InstallationConfiguration runtimeConfiguration ) {
+		public ExistingInstallationLogic( GeneralInstallationLogic generalInstallationLogic, InstallationConfiguration runtimeConfiguration ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.runtimeConfiguration = runtimeConfiguration;
 		}
 
-		internal InstallationConfiguration RuntimeConfiguration { get { return runtimeConfiguration; } }
+		public InstallationConfiguration RuntimeConfiguration { get { return runtimeConfiguration; } }
 
-		internal string DatabaseUpdateFilePath { get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); } }
+		public string DatabaseUpdateFilePath { get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); } }
 
 		/// <summary>
 		/// Creates a text file named "Error Log.txt" in the root of the installation folder and gives NETWORK SERVICE full control over it.
 		/// </summary>
-		internal void CreateFreshLogFile() {
+		public void CreateFreshLogFile() {
 			File.WriteAllText( runtimeConfiguration.ErrorLogFilePath, "" );
 
 			// We need to modify permissions after creating the file so we can inherit instead of wiping out parent settings.
@@ -117,7 +117,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 				true );
 		}
 
-		internal string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
+		public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
 			var path = StandardLibraryMethods.CombinePaths( generalInstallationLogic.Path, service.Name );
 			if( runtimeConfiguration.InstallationType == InstallationType.Development )
 				path = StandardLibraryMethods.CombinePaths( path, StandardLibraryMethods.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation ) );

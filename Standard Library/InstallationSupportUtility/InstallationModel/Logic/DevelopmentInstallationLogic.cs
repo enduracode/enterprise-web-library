@@ -4,8 +4,8 @@ using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
-	internal class DevelopmentInstallationLogic {
-		internal const string SystemDevelopmentConfigurationFileName = "Development.xml";
+	public class DevelopmentInstallationLogic {
+		public const string SystemDevelopmentConfigurationFileName = "Development.xml";
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
@@ -13,8 +13,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		private readonly SystemDevelopmentConfiguration developmentConfiguration;
 		private readonly List<DatabaseAbstraction.Database> databasesForCodeGeneration;
 
-		internal DevelopmentInstallationLogic( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
-		                                       RecognizedInstallationLogic recognizedInstallationLogic ) {
+		public DevelopmentInstallationLogic( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
+		                                     RecognizedInstallationLogic recognizedInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.recognizedInstallationLogic = recognizedInstallationLogic;
@@ -40,10 +40,10 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			}
 		}
 
-		internal SystemDevelopmentConfiguration DevelopmentConfiguration { get { return developmentConfiguration; } }
+		public SystemDevelopmentConfiguration DevelopmentConfiguration { get { return developmentConfiguration; } }
 
-		internal string LibraryPath { get { return StandardLibraryMethods.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
+		public string LibraryPath { get { return StandardLibraryMethods.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
 
-		internal List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
+		public List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
 	}
 }

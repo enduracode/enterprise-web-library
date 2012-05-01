@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
-	internal interface Database {
+	public interface Database {
 		/// <summary>
 		/// Returns the empty string if this is the primary database.
 		/// </summary>

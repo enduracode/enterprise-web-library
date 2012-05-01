@@ -4,7 +4,7 @@ using System.Data;
 using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
-	internal class ProcedureParameter {
+	public class ProcedureParameter {
 		private readonly string name;
 		private readonly Type dataType;
 		private readonly string dbTypeString;
@@ -29,14 +29,14 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			allowsNull = (bool)row[ "IsNullable" ];
 		}
 
-		internal string Name { get { return name; } }
+		public string Name { get { return name; } }
 
-		internal string DataTypeName { get { return dataType.IsValueType && allowsNull ? dataType + "?" : dataType.ToString(); } }
+		public string DataTypeName { get { return dataType.IsValueType && allowsNull ? dataType + "?" : dataType.ToString(); } }
 
-		internal string DataTypeDefaultValueExpression { get { return dataType.IsValueType ? "new " + DataTypeName + "()" : "null"; } }
+		public string DataTypeDefaultValueExpression { get { return dataType.IsValueType ? "new " + DataTypeName + "()" : "null"; } }
 
-		internal string DbTypeString { get { return dbTypeString; } }
+		public string DbTypeString { get { return dbTypeString; } }
 
-		internal ParameterDirection Direction { get { return direction; } }
+		public ParameterDirection Direction { get { return direction; } }
 	}
 }

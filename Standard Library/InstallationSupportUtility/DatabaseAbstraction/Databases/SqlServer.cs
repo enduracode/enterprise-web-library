@@ -13,14 +13,14 @@ using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
-	internal class SqlServer: Database {
+	public class SqlServer: Database {
 		private static readonly string sqlServerFilesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "SQL Server Databases" );
 
 		private readonly SqlServerInfo info;
 		private readonly string dataLogicalFileName;
 		private readonly string logLogicalFileName;
 
-		internal SqlServer( SqlServerInfo info, string dataLogicalFileName, string logLogicalFileName ) {
+		public SqlServer( SqlServerInfo info, string dataLogicalFileName, string logLogicalFileName ) {
 			this.info = info;
 			this.dataLogicalFileName = dataLogicalFileName;
 			this.logLogicalFileName = logLogicalFileName;

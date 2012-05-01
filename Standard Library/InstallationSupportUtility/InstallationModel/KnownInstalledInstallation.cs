@@ -1,7 +1,7 @@
 ﻿using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
-	internal interface KnownInstalledInstallation: KnownInstallation {
+	public interface KnownInstalledInstallation: KnownInstallation {
 		KnownInstallationLogic KnownInstallationLogic { get; }
 	}
 }

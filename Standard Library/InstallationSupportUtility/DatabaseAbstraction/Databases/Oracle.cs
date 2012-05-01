@@ -12,7 +12,7 @@ using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
-	internal class Oracle: Database {
+	public class Oracle: Database {
 		private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
 		private const string databaseFileDumpFileName = "Dump File.dmp";
 		private const string databaseFileSchemaNameFileName = "Schema.txt";

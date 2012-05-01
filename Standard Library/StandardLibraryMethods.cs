@@ -298,7 +298,7 @@ namespace RedStapler.StandardLibrary {
 			catch {}
 		}
 
-		internal static string GetProjectOutputFolderPath( bool debug ) {
+		public static string GetProjectOutputFolderPath( bool debug ) {
 			return CombinePaths( "bin", debug ? "Debug" : "Release" );
 		}
 	}

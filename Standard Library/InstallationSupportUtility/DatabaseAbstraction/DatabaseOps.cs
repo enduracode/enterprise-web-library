@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
-	internal static class DatabaseOps {
+	public static class DatabaseOps {
 		internal static Database CreateDatabase( DatabaseInfo databaseInfo, List<string> oracleTableSpaces ) {
 			if( databaseInfo == null )
 				return new NoDatabase();
@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			throw new ApplicationException( "Invalid database information object type." );
 		}
 
-		internal static void UpdateDatabaseLogicIfUpdateFileExists( Database database, string databaseUpdateFilePath, bool allFailuresUserCorrectable ) {
+		public static void UpdateDatabaseLogicIfUpdateFileExists( Database database, string databaseUpdateFilePath, bool allFailuresUserCorrectable ) {
 			var linesInScriptOnHd = GetNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
 
 			// We don't want to ask the database for the line number if there is no script.
@@ -64,12 +64,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			database.UpdateLineMarker( lineMarker );
 		}
 
-		internal static void ExportDatabaseToFile( Database database, string dataPackageFolderPath ) {
+		public static void ExportDatabaseToFile( Database database, string dataPackageFolderPath ) {
 			if( !( database is NoDatabase ) )
 				database.ExportToFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
 		}
 
-		internal static void DeleteAndReCreateDatabaseFromFile( Database database, string dataPackageFolderPath, bool keepDbInStandbyMode ) {
+		public static void DeleteAndReCreateDatabaseFromFile( Database database, string dataPackageFolderPath, bool keepDbInStandbyMode ) {
 			if( !( database is NoDatabase ) )
 				database.DeleteAndReCreateFromFile( getDatabaseFilePath( dataPackageFolderPath, database ), keepDbInStandbyMode );
 		}

@@ -1,15 +1,15 @@
 ﻿using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
-	internal class RecognizedInstalledInstallation: KnownInstalledInstallation, RecognizedInstallation {
+	public class RecognizedInstalledInstallation: KnownInstalledInstallation, RecognizedInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 		private readonly KnownSystemLogic knownSystemLogic;
 		private readonly KnownInstallationLogic knownInstallationLogic;
 		private readonly RecognizedInstallationLogic recognizedInstallationLogic;
 
-		internal RecognizedInstalledInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
-		                                          KnownSystemLogic knownSystemLogic, RecognizedInstallationLogic recognizedInstallationLogic ) {
+		public RecognizedInstalledInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
+		                                        KnownSystemLogic knownSystemLogic, RecognizedInstallationLogic recognizedInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;

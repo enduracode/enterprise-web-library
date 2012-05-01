@@ -2,13 +2,13 @@
 using System.Linq;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
-	internal class RecognizedInstallationLogic {
+	public class RecognizedInstallationLogic {
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 		private readonly KnownSystemLogic knownSystemLogic;
 		private readonly DatabaseAbstraction.Database database;
 		private readonly List<DatabaseAbstraction.Database> secondaryDatabasesIncludedInDataPackages;
 
-		internal RecognizedInstallationLogic( ExistingInstallationLogic existingInstallationLogic, KnownSystemLogic knownSystemLogic ) {
+		public RecognizedInstallationLogic( ExistingInstallationLogic existingInstallationLogic, KnownSystemLogic knownSystemLogic ) {
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
 
@@ -24,8 +24,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			}
 		}
 
-		internal DatabaseAbstraction.Database Database { get { return database; } }
+		public DatabaseAbstraction.Database Database { get { return database; } }
 
-		internal List<DatabaseAbstraction.Database> SecondaryDatabasesIncludedInDataPackages { get { return secondaryDatabasesIncludedInDataPackages; } }
+		public List<DatabaseAbstraction.Database> SecondaryDatabasesIncludedInDataPackages { get { return secondaryDatabasesIncludedInDataPackages; } }
 	}
 }

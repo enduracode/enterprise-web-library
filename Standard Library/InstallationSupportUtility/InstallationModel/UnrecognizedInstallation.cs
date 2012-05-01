@@ -1,11 +1,11 @@
 ﻿using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
-	internal class UnrecognizedInstallation: ExistingInstallation {
+	public class UnrecognizedInstallation: ExistingInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 
-		internal UnrecognizedInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic ) {
+		public UnrecognizedInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 		}
