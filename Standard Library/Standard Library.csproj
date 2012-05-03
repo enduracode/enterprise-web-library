@@ -344,6 +344,8 @@
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstalledInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\UnrecognizedInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\Operation.cs" />
+    <Compile Include="InstallationSupportUtility\OperationResult.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\BuildUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\DataPackageUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\RsisInstallation.cs" />
