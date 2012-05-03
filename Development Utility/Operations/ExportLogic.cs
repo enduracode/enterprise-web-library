@@ -178,7 +178,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			IoMethods.CopyFolder(
 				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-				StandardLibraryMethods.CombinePaths( folderPath, "lib" ),
+				StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" ),
 				false );
 
 			var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Test Web Site" );
@@ -205,10 +205,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                                     InstallationConfiguration.InstallationConfigurationFolderName ),
 				false );
 
-			using( var writer = IoMethods.GetTextWriterForWrite( StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" ) ) )
-				writeManifest( installation, writer );
+			var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
+			using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+				writeManifest( installation, prerelease, writer );
 
-			// NOTE: Make package using the copy NuGet.exe in the solution.
+			StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
+			                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + logicPackagesFolderPath + "\"",
+			                                                            "",
+			                                                            true ) );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -231,14 +235,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
-		private static void writeManifest( DevelopmentInstallation installation, TextWriter writer ) {
+		private static void writeManifest( DevelopmentInstallation installation, bool prerelease, TextWriter writer ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
 			writer.WriteLine( "<id>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName + "</id>" );
 
 			// NOTE: Implement this.
-			writer.WriteLine( "<version>1.0.0-1</version>" );
+			writer.WriteLine( "<version>1.0.0" + ( prerelease ? "-prerelease" + 1.ToString( "d5" ) : "" ) + "</version>" );
 
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
