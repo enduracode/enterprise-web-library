@@ -217,9 +217,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
 			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, StandardLibraryMethods.ProvidersFolderAndNamespaceName ) );
 			if( !includeDatabaseUpdates )
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
 
 			// other files
 			var filesFolderInInstallationPath =

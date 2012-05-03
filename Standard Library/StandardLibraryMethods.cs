@@ -15,6 +15,11 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Standard Library and RSIS use only.
 		/// </summary>
+		public const string ProvidersFolderAndNamespaceName = "Providers";
+
+		/// <summary>
+		/// Standard Library and RSIS use only.
+		/// </summary>
 		public const string TestRunnerProjectName = "Test Runner";
 
 		/// <summary>
@@ -261,14 +266,14 @@ namespace RedStapler.StandardLibrary {
 
 		internal static object GetSystemLibraryProvider( Type systemLogicType, string providerName ) {
 			var systemLibraryAssembly = systemLogicType.Assembly;
-			var typeName = systemLogicType.Namespace + ".Configuration.Providers." + providerName;
+			var typeName = systemLogicType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
 			return systemLibraryAssembly.GetType( typeName ) != null ? systemLibraryAssembly.CreateInstance( typeName ) : null;
 		}
 
 		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
 			return
-				new ApplicationException( providerName + " provider not found in system. To implement, create a class named " + providerName +
-				                          @" in Library\Configuration\Providers and implement the System" + providerName + "Provider interface." );
+				new ApplicationException( providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
+				                          ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
 		}
 
 		/// <summary>
