@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
 			knownInstallationLogic =
-				new KnownInstallationLogic( ConfigurationLogic.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId ) );
+				new KnownInstallationLogic( SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId ) );
 			this.recognizedInstallationLogic = recognizedInstallationLogic;
 		}
 

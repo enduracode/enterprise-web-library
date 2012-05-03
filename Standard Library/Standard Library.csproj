@@ -355,6 +355,7 @@
     <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\ProgramRunnerUnstreamed.cs" />
     <Compile Include="InstallationSupportUtility\StatusStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemIsuProvider.cs" />
+    <Compile Include="InstallationSupportUtility\SystemListStatics.cs" />
     <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />
