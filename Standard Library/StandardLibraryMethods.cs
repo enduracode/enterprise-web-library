@@ -13,6 +13,11 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static class StandardLibraryMethods {
 		/// <summary>
+		/// Standard Library and RSIS use only.
+		/// </summary>
+		public const string TestRunnerProjectName = "Test Runner";
+
+		/// <summary>
 		/// Runs the specified program with the specified arguments and passes in the specified input. Optionally waits for the program to exit, and throws an
 		/// exception if this is specified and a nonzero exit code is returned. If the program is in a folder that is included in the Path environment variable,
 		/// specify its name only. Otherwise, specify a path to the program. In either case, you do NOT need ".exe" at the end. Specify the empty string for input
