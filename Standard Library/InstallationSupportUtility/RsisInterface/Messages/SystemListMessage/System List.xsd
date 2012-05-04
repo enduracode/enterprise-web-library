@@ -14,6 +14,8 @@
 									<element name="ShortName" type="string" />
 									<element name="VaultPath" type="string" />
 									<element name="EwlSystemId" type="int" nillable="true" />
+									<element name="CurrentMajorVersion" type="int" minOccurs="0" />
+									<element name="NextBuildNumber" type="int" minOccurs="0" />
 									<element name="ClientSideApp" minOccurs="0">
 										<complexType>
 											<sequence>
