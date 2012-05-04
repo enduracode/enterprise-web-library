@@ -3,16 +3,16 @@
 	<element name="Build">
 		<complexType>
 			<sequence>
-				<element name="SystemId" type="int" />
-				<element name="SystemName" type="string" />
-				<element name="SystemShortName" type="string" />
-				<element name="ServerSideLogicPackage" type="base64Binary" />
+				<element name="SystemId" type="int"/>
+				<element name="SystemName" type="string"/>
+				<element name="SystemShortName" type="string"/>
+				<element name="ServerSideLogicPackage" type="base64Binary"/>
 				<element name="ClientSideApp" minOccurs="0">
 					<complexType>
 						<sequence>
-							<element name="Name" type="string" />
-							<element name="AssemblyName" type="string" />
-							<element name="Package" type="base64Binary" />
+							<element name="Name" type="string"/>
+							<element name="AssemblyName" type="string"/>
+							<element name="Package" type="base64Binary"/>
 						</sequence>
 					</complexType>
 				</element>
@@ -22,14 +22,22 @@
 							<element name="Installation" minOccurs="0" maxOccurs="unbounded">
 								<complexType>
 									<sequence>
-										<element name="Id" type="int" />
-										<element name="Name" type="string" />
-										<element name="ShortName" type="string" />
-										<element name="IsLiveInstallation" type="boolean" />
-										<element name="ConfigurationPackage" type="base64Binary" />
+										<element name="Id" type="int"/>
+										<element name="Name" type="string"/>
+										<element name="ShortName" type="string"/>
+										<element name="IsLiveInstallation" type="boolean"/>
+										<element name="ConfigurationPackage" type="base64Binary"/>
 									</sequence>
 								</complexType>
 							</element>
+						</sequence>
+					</complexType>
+				</element>
+				<element name="NuGetPackages" minOccurs="0">
+					<complexType>
+						<sequence>
+							<element name="Prerelease" type="base64Binary"/>
+							<element name="Stable" type="base64Binary"/>
 						</sequence>
 					</complexType>
 				</element>
