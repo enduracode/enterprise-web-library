@@ -6,6 +6,8 @@
 				<element name="SystemId" type="int"/>
 				<element name="SystemName" type="string"/>
 				<element name="SystemShortName" type="string"/>
+				<element name="MajorVersion" type="int"/>
+				<element name="BuildNumber" type="int"/>
 				<element name="ServerSideLogicPackage" type="base64Binary"/>
 				<element name="ClientSideApp" minOccurs="0">
 					<complexType>

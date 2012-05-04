@@ -31,6 +31,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.SystemId = installation.KnownSystemLogic.RsisSystem.Id;
 			build.SystemName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
+			build.MajorVersion = installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion;
+			build.BuildNumber = installation.KnownSystemLogic.RsisSystem.NextBuildNumber;
 			var serverSideLogicFolderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
