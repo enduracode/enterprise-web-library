@@ -76,7 +76,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 
 			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName.StartsWith( "Ewl" ) )
-				packageEwl( installation, logicPackagesFolderPath );
+				build.NuGetPackages = packageEwl( installation, logicPackagesFolderPath );
 
 			operationResult.TimeSpentWaitingForNetwork = AppTools.ExecuteTimedRegion( delegate {
 				using( var memoryStream = new MemoryStream() ) {
@@ -168,12 +168,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				false );
 		}
 
-		private static void packageEwl( DevelopmentInstallation installation, string logicPackagesFolderPath ) {
-			createNuGetPackage( installation, logicPackagesFolderPath, true );
-			createNuGetPackage( installation, logicPackagesFolderPath, false );
+		private static RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
+			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
+			var buildMessageNuGetPackages = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
+			buildMessageNuGetPackages.Prerelease = createNuGetPackage( installation, logicPackagesFolderPath, true );
+			buildMessageNuGetPackages.Stable = createNuGetPackage( installation, logicPackagesFolderPath, false );
+			return buildMessageNuGetPackages;
 		}
 
-		private static void createNuGetPackage( DevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
+		private static byte[] createNuGetPackage( DevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
 			IoMethods.ExecuteWithTempFolder( folderPath => {
 				IoMethods.CopyFolder(
 					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
@@ -206,13 +209,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
 				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-					writeManifest( installation, prerelease, writer );
+					writeNuGetPackageManifest( installation, prerelease, writer );
 
 				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
 				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + logicPackagesFolderPath + "\"",
 				                                                            "",
 				                                                            true ) );
 			} );
+
+			// NOTE: Get the major version and build number (if prerelease) from the installation object.
+			const int majorVersion = 1;
+			const int buildNumber = 1;
+
+			return
+				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( logicPackagesFolderPath,
+				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
+				                                                        	majorVersion,
+				                                                        	prerelease ? buildNumber as int? : null ) ) );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -235,15 +249,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
-		private static void writeManifest( DevelopmentInstallation installation, bool prerelease, TextWriter writer ) {
+		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool prerelease, TextWriter writer ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
-			writer.WriteLine( "<id>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName + "</id>" );
+			writer.WriteLine( "<id>" +
+			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) +
+			                  "</id>" );
 
-			// NOTE: Implement this.
-			writer.WriteLine( "<version>1.0.0" + ( prerelease ? "-prerelease" + 1.ToString( "d5" ) : "" ) + "</version>" );
+			// NOTE: Get the major version and build number (if prerelease) from the installation object.
+			const int majorVersion = 1;
+			const int buildNumber = 1;
 
+			writer.WriteLine( "<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( majorVersion, prerelease ? buildNumber as int? : null ) +
+			                  "</version>" );
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
