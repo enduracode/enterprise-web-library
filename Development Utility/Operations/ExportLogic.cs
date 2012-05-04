@@ -217,16 +217,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                                                            true ) );
 			} );
 
-			// NOTE: Get the major version and build number (if prerelease) from the installation object.
-			const int majorVersion = 1;
-			const int buildNumber = 1;
-
 			return
 				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( logicPackagesFolderPath,
 				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
-				                                                        	majorVersion,
-				                                                        	prerelease ? buildNumber as int? : null ) ) );
+				                                                        	installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
+				                                                        	prerelease ? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int? : null ) ) );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -256,13 +252,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<id>" +
 			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) +
 			                  "</id>" );
-
-			// NOTE: Get the major version and build number (if prerelease) from the installation object.
-			const int majorVersion = 1;
-			const int buildNumber = 1;
-
-			writer.WriteLine( "<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( majorVersion, prerelease ? buildNumber as int? : null ) +
-			                  "</version>" );
+			writer.WriteLine( "<version>" +
+			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
+			                                                                                    prerelease
+			                                                                                    	? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int?
+			                                                                                    	: null ) + "</version>" );
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
