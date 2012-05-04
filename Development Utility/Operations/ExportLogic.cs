@@ -169,50 +169,50 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private static void packageEwl( DevelopmentInstallation installation, string logicPackagesFolderPath ) {
-			createNuGetFolder( installation, logicPackagesFolderPath, true );
-			createNuGetFolder( installation, logicPackagesFolderPath, false );
+			createNuGetPackage( installation, logicPackagesFolderPath, true );
+			createNuGetPackage( installation, logicPackagesFolderPath, false );
 		}
 
-		private static void createNuGetFolder( DevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
-			var folderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "NuGet " + ( prerelease ? "Prerelease" : "Stable" ) );
+		private static void createNuGetPackage( DevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
+			IoMethods.ExecuteWithTempFolder( folderPath => {
+				IoMethods.CopyFolder(
+					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
+					StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" ),
+					false );
 
-			IoMethods.CopyFolder(
-				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-				StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" ),
-				false );
+				var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Test Web Site" );
+				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, "Web Project Files" );
+				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.EwfFolderName ),
+				                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
+				                      false );
+				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.StandardLibraryFilesFileName ),
+				                    StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
 
-			var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Test Web Site" );
-			var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, "Web Project Files" );
-			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.EwfFolderName ),
-			                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
-			                      false );
-			IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.StandardLibraryFilesFileName ),
-			                    StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
+				const string duProjectAndFolderName = "Development Utility";
+				IoMethods.CopyFolder(
+					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
+					StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
+					false );
+				packageGeneralFiles( installation, folderPath, false );
+				IoMethods.CopyFolder(
+					StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+					                                     InstallationConfiguration.InstallationConfigurationFolderName,
+					                                     InstallationConfiguration.InstallationsFolderName,
+					                                     ( prerelease ? "Testing" : "Live" ) ),
+					StandardLibraryMethods.CombinePaths( folderPath,
+					                                     InstallationConfiguration.ConfigurationFolderName,
+					                                     InstallationConfiguration.InstallationConfigurationFolderName ),
+					false );
 
-			const string duProjectAndFolderName = "Development Utility";
-			IoMethods.CopyFolder(
-				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-				StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
-				false );
-			packageGeneralFiles( installation, folderPath, false );
-			IoMethods.CopyFolder(
-				StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-				                                     InstallationConfiguration.InstallationConfigurationFolderName,
-				                                     InstallationConfiguration.InstallationsFolderName,
-				                                     ( prerelease ? "Testing" : "Live" ) ),
-				StandardLibraryMethods.CombinePaths( folderPath,
-				                                     InstallationConfiguration.ConfigurationFolderName,
-				                                     InstallationConfiguration.InstallationConfigurationFolderName ),
-				false );
+				var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
+				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+					writeManifest( installation, prerelease, writer );
 
-			var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
-			using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-				writeManifest( installation, prerelease, writer );
-
-			StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
-			                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + logicPackagesFolderPath + "\"",
-			                                                            "",
-			                                                            true ) );
+				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
+				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + logicPackagesFolderPath + "\"",
+				                                                            "",
+				                                                            true ) );
+			} );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
