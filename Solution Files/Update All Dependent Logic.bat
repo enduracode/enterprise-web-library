@@ -1,1 +1,2 @@
-"..\Library\Configuration\Update All Dependent Logic"
+cd ..
+"Library\Configuration\Update All Dependent Logic"
