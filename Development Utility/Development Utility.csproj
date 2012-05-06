@@ -40,12 +40,45 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppStatics.cs" />
     <Compile Include="Operations\ExportLogic.cs" />
+    <Compile Include="Operations\InstallAndStartServices.cs" />
+    <Compile Include="Operations\StopAndUninstallServices.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\CodeGenerationStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\CSharpParameter.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Column.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\DataAccessStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\CommandConditionStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\CustomModificationStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\ProcedureStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\QueryRetrievalStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\RowConstantStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\SequenceStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\StandardModification\StandardModificationStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\TableConstantStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\Subsystems\TableRetrievalStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\DataAccess\TableColumns.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\FormItemStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\ModificationField.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\TypedCssClassStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebConfig\WebConfigStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\InfoStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\OptionalParameterPackageStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\ParametersModificationStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\VariableSpecification.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItemGeneralData.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\CssFile.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\EntitySetup.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\Page.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\UserControl.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebMetaLogicStatics.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\UpdateAllDependentLogic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

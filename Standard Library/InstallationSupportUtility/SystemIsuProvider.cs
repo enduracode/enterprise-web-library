@@ -1,6 +1,8 @@
-﻿namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+﻿using System.IO;
+
+namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 	/// <summary>
-	/// System-specific encryption logic.
+	/// System-specific installation support utility logic.
 	/// </summary>
 	public interface SystemIsuProvider {
 		/// <summary>
@@ -22,5 +24,10 @@
 		/// Gets the RSIS TCP password.
 		/// </summary>
 		string RsisTcpPassword { get; }
+
+		/// <summary>
+		/// Writes members in the general provider class.
+		/// </summary>
+		void WriteGeneralProviderMembers( TextWriter writer );
 	}
 }

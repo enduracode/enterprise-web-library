@@ -186,7 +186,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					false );
 
 				var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Test Web Site" );
-				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, "Web Project Files" );
+				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
 				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.EwfFolderName ),
 				                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
 				                      false );

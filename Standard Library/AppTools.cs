@@ -711,6 +711,26 @@ namespace RedStapler.StandardLibrary {
 			}
 		}
 
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string InstallationPath {
+			get {
+				assertClassInitialized();
+				return InstallationConfiguration.InstallationPath;
+			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ConfigurationFolderPath {
+			get {
+				assertClassInitialized();
+				return InstallationConfiguration.ConfigurationFolderPath;
+			}
+		}
+
 		private static void assertClassInitialized() {
 			if( !initialized )
 				throw new ApplicationException( "Initialize the class before calling this method." );

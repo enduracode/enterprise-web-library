@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Microsoft.Web.Administration;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -310,6 +311,29 @@ namespace RedStapler.StandardLibrary {
 
 		public static string GetProjectOutputFolderPath( bool debug ) {
 			return CombinePaths( "bin", debug ? "Debug" : "Release" );
+		}
+
+		/// <summary>
+		/// Standard Library and RSIS use only.
+		/// </summary>
+		public static void ConfigureIis() {
+			// Overlapping commitment of changes to server manager do not end well.
+			AppTools.ExecuteAsCriticalRegion( "{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
+			                                  false,
+			                                  delegate {
+			                                  	using( var serverManager = new ServerManager() ) {
+			                                  		var config = serverManager.GetApplicationHostConfiguration();
+
+			                                  		var modulesSection = config.GetSection( "system.webServer/modules", "" );
+			                                  		foreach( var element in modulesSection.GetCollection() )
+			                                  			element.SetMetadata( "lockItem", null );
+
+			                                  		var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+			                                  		serverRuntimeSection.OverrideMode = OverrideMode.Allow;
+
+			                                  		serverManager.CommitChanges();
+			                                  	}
+			                                  } );
 		}
 	}
 }

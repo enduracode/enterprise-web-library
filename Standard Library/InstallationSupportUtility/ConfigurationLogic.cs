@@ -11,7 +11,10 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemIsuProvider;
 		}
 
-		internal static SystemIsuProvider SystemProvider {
+		/// <summary>
+		/// Standard Library and Development Utility use only.
+		/// </summary>
+		public static SystemIsuProvider SystemProvider {
 			get {
 				if( provider == null )
 					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
