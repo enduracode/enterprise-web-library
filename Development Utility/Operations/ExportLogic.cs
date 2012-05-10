@@ -185,6 +185,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" ),
 					false );
 
+				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+				                    StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
+
 				var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Test Web Site" );
 				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
 				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.EwfFolderName ),
