@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.MailMerging;
 using RedStapler.StandardLibrary.Validation;
@@ -10,7 +11,10 @@ namespace RedStapler.StandardLibrary {
 		public static readonly string OutputFolderPath = StandardLibraryMethods.CombinePaths(
 			Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "StdLib Test Outputs" );
 
-		internal const string InputTestFilesFolderPath = @"C:\Red Stapler Vault\Supporting Files\Standard Library\Red Stapler Library Tester\TestFiles";
+		internal static readonly string InputTestFilesFolderPath = StandardLibraryMethods.CombinePaths( Path.GetDirectoryName(  Assembly.GetExecutingAssembly().Location),
+		                                                                                                "..",
+		                                                                                                "..",
+		                                                                                                "TestFiles" );
 
 		public static void RunTests() {
 			ZipOps.Test();
