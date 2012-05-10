@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
@@ -180,10 +181,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private static byte[] createNuGetPackage( DevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
 			IoMethods.ExecuteWithTempFolder( folderPath => {
-				IoMethods.CopyFolder(
-					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-					StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" ),
-					false );
+				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+				                                                               "Standard Library",
+				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( false ) );
+				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
+				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "RedStapler.StandardLibrary." + i ) )
+					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
 
 				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
 				                    StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
@@ -241,6 +244,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
 			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
+			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
 
 			// other files
 			var filesFolderInInstallationPath =
@@ -269,9 +273,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
 			writer.WriteLine( "<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
-			writer.WriteLine( "<references>" );
-			writer.WriteLine( "<reference file=\"RedStapler.StandardLibrary.dll\"/>" );
-			writer.WriteLine( "</references>" );
+			writer.WriteLine( "<dependencies>" );
+
+			var lines = from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\packages.config" ) )
+			            let trimmedLine = line.Trim()
+			            where trimmedLine.StartsWith( "<package " )
+			            select trimmedLine;
+			foreach( var line in lines )
+				writer.WriteLine( line.Replace( "package", "dependency" ) );
+
+			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "</metadata>" );
 			writer.WriteLine( "</package>" );
 		}

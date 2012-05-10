@@ -129,7 +129,6 @@ namespace RedStapler.StandardLibrary {
 						new Aspose.Pdf.License().SetLicense( asposeLicense );
 						new Aspose.Words.License().SetLicense( asposeLicense );
 						new Aspose.Cells.License().SetLicense( asposeLicense );
-						new Aspose.Network.License().SetLicense( asposeLicense );
 					}
 
 					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
