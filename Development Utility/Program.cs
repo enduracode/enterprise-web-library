@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 			} );
 		}
 
-		private static DevelopmentInstallation getInstallation( string path ) {
+		private static RecognizedDevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );
 			var existingInstallationLogic = new ExistingInstallationLogic( generalInstallationLogic, new InstallationConfiguration( path, true ) );
 
@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				SystemListStatics.RsisSystemList.Systems.Single( i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId );
 			var knownSystemLogic = new KnownSystemLogic( rsisSystem );
 			var recognizedInstallationLogic = new RecognizedInstallationLogic( existingInstallationLogic, knownSystemLogic );
-			return new DevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
+			return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
 		}
 	}
 }
