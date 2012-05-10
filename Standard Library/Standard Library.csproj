@@ -355,6 +355,7 @@
     <Compile Include="InstallationSupportUtility\InstallationModel\NonexistentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedInstalledInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\UnrecognizedDevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\UnrecognizedInstalledInstallation.cs" />
     <Compile Include="InstallationSupportUtility\Operation.cs" />
     <Compile Include="InstallationSupportUtility\OperationResult.cs" />

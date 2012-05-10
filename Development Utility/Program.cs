@@ -13,9 +13,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 		private static int Main( string[] args ) {
 			AppTools.Init( "Development Utility", true, new GlobalLogic() );
 			return AppTools.ExecuteAppWithStandardExceptionHandling( () => {
-				// NOTE: Make the machine configuration file optional.
-				ConfigurationLogic.Init();
-
 				// Get installation.
 				var installationPath = args[ 0 ];
 				var installation = getInstallation( installationPath );
@@ -33,17 +30,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 			} );
 		}
 
-		private static RecognizedDevelopmentInstallation getInstallation( string path ) {
+		private static DevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );
 			var existingInstallationLogic = new ExistingInstallationLogic( generalInstallationLogic, new InstallationConfiguration( path, true ) );
 
-			// NOTE: Only do this if there is an RSIS installation ID in the runtime configuration.
-			SystemListStatics.RefreshSystemList();
-			var rsisSystem =
-				SystemListStatics.RsisSystemList.Systems.Single( i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId );
-			var knownSystemLogic = new KnownSystemLogic( rsisSystem );
-			var recognizedInstallationLogic = new RecognizedInstallationLogic( existingInstallationLogic, knownSystemLogic );
-			return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
+			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
+				ConfigurationLogic.Init();
+				SystemListStatics.RefreshSystemList();
+				var knownSystemLogic =
+					new KnownSystemLogic(
+						SystemListStatics.RsisSystemList.Systems.Single(
+							i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
+				var recognizedInstallationLogic = new RecognizedInstallationLogic( existingInstallationLogic, knownSystemLogic );
+				return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
+			}
+
+			return new UnrecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic );
 		}
 	}
 }

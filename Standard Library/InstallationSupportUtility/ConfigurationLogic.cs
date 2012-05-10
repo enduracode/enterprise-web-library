@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.ServiceModel;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility {
@@ -26,13 +25,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
-		/// <summary>
-		/// Loads the machine configuration file.
-		/// </summary>
 		public static void Init() {
-			if( !File.Exists( AppTools.MachineConfigXmlFilePath ) )
-				throw new UserCorrectableException( "Missing machine configuration file. File should be located at " + AppTools.MachineConfigXmlFilePath + "." );
-
 			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
 			programRunnerUnstreamedServiceFactory = getHttpChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed>( "ProgramRunnerUnstreamed.svc" );
@@ -164,7 +157,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 
 		public static string AuthenticationKey {
 			get {
-				if( AppTools.MachineConfiguration.RsisAuthenticationKey == null )
+				if( AppTools.MachineConfiguration == null || AppTools.MachineConfiguration.RsisAuthenticationKey == null )
 					throw new UserCorrectableException( "Missing RSIS authentication key in machine configuration file." );
 				return AppTools.MachineConfiguration.RsisAuthenticationKey;
 			}
@@ -175,7 +168,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static string InstallationsFolderPath {
 			get {
-				if( AppTools.MachineConfiguration.InstallationsFolderPath != null )
+				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.InstallationsFolderPath != null )
 					return AppTools.MachineConfiguration.InstallationsFolderPath;
 				return @"C:\Inetpub";
 			}
@@ -183,7 +176,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 
 		public static string RevisionControlFolderPath {
 			get {
-				if( AppTools.MachineConfiguration.VaultWorkingFolderPath != null )
+				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.VaultWorkingFolderPath != null )
 					return AppTools.MachineConfiguration.VaultWorkingFolderPath;
 				return @"C:\Red Stapler\Revision Control";
 			}
@@ -215,7 +208,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 
 		public static string OracleSysPassword {
 			get {
-				if( AppTools.MachineConfiguration.OracleSysPassword == null )
+				if( AppTools.MachineConfiguration == null || AppTools.MachineConfiguration.OracleSysPassword == null )
 					throw new UserCorrectableException( "Missing Oracle sys password in machine configuration file." );
 				return AppTools.MachineConfiguration.OracleSysPassword;
 			}

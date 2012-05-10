@@ -3,7 +3,7 @@
 	<element name="installationStandardConfiguration" type="rs:InstallationStandardConfiguration" />
 	<complexType name="InstallationStandardConfiguration">
 		<sequence>
-			<element name="rsisInstallationId" type="int" />
+			<element name="rsisInstallationId" type="int" minOccurs="0" />
 			<element name="smtpServer" type="string" minOccurs="0" />
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />

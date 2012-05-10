@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
 			knownInstallationLogic =
-				new KnownInstallationLogic( SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId ) );
+				new KnownInstallationLogic( SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
 			this.recognizedInstallationLogic = recognizedInstallationLogic;
 		}
 
@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			return LatestFullName;
 		}
 
-		public int Id { get { return knownInstallationLogic.RsisInstallation.Id; } }
+		public int? Id { get { return knownInstallationLogic.RsisInstallation.Id; } }
 
 		public string LatestFullName { get { return knownInstallationLogic.RsisInstallation.FullName; } }
 
