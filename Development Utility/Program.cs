@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				var operation = operations[ operationName ];
 
 				if( !operation.IsValid( installation ) )
-					throw new UserCorrectableException( "The " + operation.GetType().Name + " operation cannot be performed on installation " + installation.Id + "." );
+					throw new UserCorrectableException( "The " + operation.GetType().Name + " operation cannot be performed on this installation." );
 				operation.Execute( installation, new OperationResult() );
 			} );
 		}

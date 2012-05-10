@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			return LatestFullName;
 		}
 
-		public int? Id { get { return knownSystemLogic.RsisSystem.DevelopmentInstallationId; } }
+		public int Id { get { return knownSystemLogic.RsisSystem.DevelopmentInstallationId; } }
 
 		public string LatestFullName { get { return existingInstallationLogic.RuntimeConfiguration.FullName; } }
 

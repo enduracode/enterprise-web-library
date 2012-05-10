@@ -14,8 +14,6 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			return LatestFullName;
 		}
 
-		public int? Id { get { return null; } }
-
 		public string LatestFullName { get { return existingInstallationLogic.RuntimeConfiguration.FullName; } }
 
 		public string LatestFullShortName { get { return existingInstallationLogic.RuntimeConfiguration.FullShortName; } }
