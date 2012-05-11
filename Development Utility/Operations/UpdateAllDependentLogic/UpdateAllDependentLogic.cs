@@ -24,19 +24,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private UpdateAllDependentLogic() {}
 
 		bool Operation.IsValid( Installation installation ) {
-			return installation is RecognizedDevelopmentInstallation;
+			return installation is DevelopmentInstallation;
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
 			StandardLibraryMethods.ConfigureIis();
 
-			var installation = genericInstallation as RecognizedDevelopmentInstallation;
+			var installation = genericInstallation as DevelopmentInstallation;
 
-			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists( installation.RecognizedInstallationLogic.Database,
+			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists( installation.DevelopmentInstallationLogic.Database,
 			                                                   installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
 			                                                   true );
 
-			if( installation.KnownSystemLogic.RsisSystem.EwlSystemId.HasValue ) {
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				try {
 					copyInStandardLibraryFiles( installation );
 				}
@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
 		}
 
-		private static void copyInStandardLibraryFiles( RecognizedDevelopmentInstallation installation ) {
+		private static void copyInStandardLibraryFiles( DevelopmentInstallation installation ) {
 			var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, "Aspose.Total.lic" );
 			if( File.Exists( asposeLicenseFilePath ) ) {
 				IoMethods.CopyFile( asposeLicenseFilePath,
@@ -103,7 +103,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return text.Replace( "RedStapler.TestWebSite", webProject.@namespace );
 		}
 
-		private static void generateLibraryCode( RecognizedDevelopmentInstallation installation ) {
+		private static void generateLibraryCode( DevelopmentInstallation installation ) {
 			var libraryGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Generated Code" );
 			Directory.CreateDirectory( libraryGeneratedCodeFolderPath );
 			var isuFilePath = StandardLibraryMethods.CombinePaths( libraryGeneratedCodeFolderPath, "ISU.cs" );
@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
 
 				writer.WriteLine();
-				if( installation.KnownSystemLogic.RsisSystem.EwlSystemId.HasValue )
+				if( !installation.DevelopmentInstallationLogic.SystemIsEwl )
 					generateGeneralProvider( writer, installation );
 				generateDataAccessCode( writer, installation );
 				writer.WriteLine();
@@ -137,7 +137,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void generateGeneralProvider( TextWriter writer, RecognizedDevelopmentInstallation installation ) {
+		private static void generateGeneralProvider( TextWriter writer, DevelopmentInstallation installation ) {
 			writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.libraryNamespace + ".Configuration.Providers {" );
 			writer.WriteLine( "internal partial class General: SystemGeneralProvider {" );
 			ConfigurationLogic.SystemProvider.WriteGeneralProviderMembers( writer );
@@ -145,7 +145,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "}" );
 		}
 
-		private static void generateDataAccessCode( TextWriter writer, RecognizedDevelopmentInstallation installation ) {
+		private static void generateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
 			var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.libraryNamespace + ".DataAccess";
 			foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration ) {
 				try {
@@ -245,7 +245,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			} );
 		}
 
-		private static void generateWebConfigAndCodeForWebProject( RecognizedDevelopmentInstallation installation, WebProject webProject ) {
+		private static void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
 			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
@@ -272,7 +272,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void generateWindowsServiceCode( RecognizedDevelopmentInstallation installation, WindowsService service ) {
+		private static void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
 			var serviceProjectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, service.Name, "Generated Code" );
 			Directory.CreateDirectory( serviceProjectGeneratedCodeFolderPath );
 			var isuFilePath = StandardLibraryMethods.CombinePaths( serviceProjectGeneratedCodeFolderPath, "ISU.cs" );
@@ -330,7 +330,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( RecognizedDevelopmentInstallation installation ) {
+		private static void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( DevelopmentInstallation installation ) {
 			var libraryProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Library" );
 			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
 			if( File.Exists( StandardLibraryMethods.CombinePaths( libraryProjectPath, customInstallationConfigSchemaPathInProject ) ) ) {
@@ -342,7 +342,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void generateXmlSchemaLogicForOtherXsdFiles( RecognizedDevelopmentInstallation installation ) {
+		private static void generateXmlSchemaLogicForOtherXsdFiles( DevelopmentInstallation installation ) {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null ) {
 				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
 					generateXmlSchemaLogic( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),

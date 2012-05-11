@@ -78,7 +78,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 			}
 
-			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName.StartsWith( "Ewl" ) )
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				build.NuGetPackages = packageEwl( installation, logicPackagesFolderPath );
 
 			operationResult.TimeSpentWaitingForNetwork = AppTools.ExecuteTimedRegion( delegate {

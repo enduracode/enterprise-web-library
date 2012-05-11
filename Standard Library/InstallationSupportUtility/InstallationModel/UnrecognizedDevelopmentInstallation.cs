@@ -4,10 +4,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 	public class UnrecognizedDevelopmentInstallation: DevelopmentInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
+		private readonly DevelopmentInstallationLogic developmentInstallationLogic;
 
 		public UnrecognizedDevelopmentInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
+			developmentInstallationLogic = new DevelopmentInstallationLogic( generalInstallationLogic, existingInstallationLogic, null );
 		}
 
 		public override string ToString() {
@@ -21,5 +23,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		public GeneralInstallationLogic GeneralLogic { get { return generalInstallationLogic; } }
 
 		public ExistingInstallationLogic ExistingInstallationLogic { get { return existingInstallationLogic; } }
+
+		public DevelopmentInstallationLogic DevelopmentInstallationLogic { get { return developmentInstallationLogic; } }
 	}
 }
