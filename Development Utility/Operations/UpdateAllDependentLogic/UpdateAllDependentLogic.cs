@@ -32,11 +32,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			var installation = genericInstallation as DevelopmentInstallation;
 
-			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists( installation.RecognizedInstallationLogic.Database,
+			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists( installation.DevelopmentInstallationLogic.Database,
 			                                                   installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
 			                                                   true );
 
-			if( installation.KnownSystemLogic.RsisSystem.EwlSystemId.HasValue ) {
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				try {
 					copyInStandardLibraryFiles( installation );
 				}
@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
 
 				writer.WriteLine();
-				if( installation.KnownSystemLogic.RsisSystem.EwlSystemId.HasValue )
+				if( !installation.DevelopmentInstallationLogic.SystemIsEwl )
 					generateGeneralProvider( writer, installation );
 				generateDataAccessCode( writer, installation );
 				writer.WriteLine();

@@ -2,7 +2,6 @@ using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Lo
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public interface Installation {
-		int Id { get; }
 		string LatestFullName { get; }
 		string LatestFullShortName { get; }
 		GeneralInstallationLogic GeneralLogic { get; }

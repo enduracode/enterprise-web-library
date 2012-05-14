@@ -184,7 +184,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
 		/// </summary>
-		public int RsisInstallationId { get { return installationStandardConfiguration.rsisInstallationId; } }
+		public int? RsisInstallationId { get { return installationStandardConfiguration.rsisInstallationIdSpecified ? installationStandardConfiguration.rsisInstallationId as int? : null; } }
 
 		/// <summary>
 		/// Gets the name of the installation.

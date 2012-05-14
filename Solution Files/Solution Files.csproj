@@ -46,20 +46,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Content Include="Referenced Files\AjaxControlToolkit.dll" />
-    <Content Include="Referenced Files\AjaxControlToolkit.pdb" />
-    <Content Include="Referenced Files\Aspose.Cells.dll" />
-    <Content Include="Referenced Files\Aspose.Cells.xml" />
-    <Content Include="Referenced Files\Aspose.Network.dll" />
-    <Content Include="Referenced Files\Aspose.Network.XML" />
-    <Content Include="Referenced Files\Aspose.Pdf.dll" />
-    <Content Include="Referenced Files\Aspose.Pdf.xml" />
-    <Content Include="Referenced Files\Aspose.Words.dll" />
-    <Content Include="Referenced Files\Aspose.Words.xml" />
-    <Content Include="Referenced Files\ICSharpCode.SharpZipLib.dll" />
-    <Content Include="Referenced Files\nmock.dll" />
-    <Content Include="Referenced Files\nunit.core.dll" />
-    <Content Include="Referenced Files\nunit.framework.dll" />
     <Content Include="Referenced Files\ThoughtWorks.Selenium.Core.dll" />
     <Content Include="Referenced Files\ThoughtWorks.Selenium.IntegrationTests.dll" />
     <Content Include="Referenced Files\ThoughtWorks.Selenium.UnitTests.dll" />

@@ -8,11 +8,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private StopAndUninstallServices() {}
 
 		bool Operation.IsValid( Installation installation ) {
-			return installation is DevelopmentInstallation;
+			return installation is RecognizedDevelopmentInstallation;
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
-			var installation = genericInstallation as DevelopmentInstallation;
+			var installation = genericInstallation as RecognizedDevelopmentInstallation;
 			installation.ExistingInstallationLogic.UninstallServices();
 		}
 	}
