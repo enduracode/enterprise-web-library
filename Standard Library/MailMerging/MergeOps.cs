@@ -102,7 +102,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// <summary>
 		/// Merges a row tree with a Microsoft Word document.
 		/// </summary>
-		internal static void CreateMsWordDoc( DBConnection cn, IEnumerable<MergeRow> rowTree, bool ensureAllFieldsHaveValues, Stream inputStream,
+		public static void CreateMsWordDoc( DBConnection cn, IEnumerable<MergeRow> rowTree, bool ensureAllFieldsHaveValues, Stream inputStream,
 		                                      Stream destinationStream ) {
 			createMsWordDocOrPdfFromMsWordDoc( cn, rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream, true );
 		}
