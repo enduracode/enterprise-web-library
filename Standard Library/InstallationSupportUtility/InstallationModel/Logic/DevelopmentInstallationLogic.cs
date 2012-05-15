@@ -54,6 +54,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		public List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
 
-		public bool SystemIsEwl { get { return existingInstallationLogic.RuntimeConfiguration.SystemShortName.StartsWith( "Ewl" ); } }
+		public bool SystemIsEwl {
+			get {
+				var shortName = existingInstallationLogic.RuntimeConfiguration.SystemShortName;
+				return shortName.StartsWith( "Ewl" ) && shortName != "EwlWebSite";
+			}
+		}
 	}
 }
