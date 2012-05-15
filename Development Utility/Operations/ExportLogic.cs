@@ -174,12 +174,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private static RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
 			RecognizedDevelopmentInstallation installation, string logicPackagesFolderPath ) {
 			var buildMessageNuGetPackages = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
-			buildMessageNuGetPackages.Prerelease = createNuGetPackage( installation, logicPackagesFolderPath, true );
-			buildMessageNuGetPackages.Stable = createNuGetPackage( installation, logicPackagesFolderPath, false );
+			buildMessageNuGetPackages.Prerelease = CreateNuGetPackage( installation, logicPackagesFolderPath, true );
+			buildMessageNuGetPackages.Stable = CreateNuGetPackage( installation, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;
 		}
 
-		private static byte[] createNuGetPackage( RecognizedDevelopmentInstallation installation, string logicPackagesFolderPath, bool prerelease ) {
+		internal static byte[] CreateNuGetPackage( RecognizedDevelopmentInstallation installation, string outputFolderPath, bool prerelease ) {
 			IoMethods.ExecuteWithTempFolder( folderPath => {
 				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                                               "Standard Library",
@@ -220,13 +220,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writeNuGetPackageManifest( installation, prerelease, writer );
 
 				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
-				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + logicPackagesFolderPath + "\"",
+				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 				                                                            "",
 				                                                            true ) );
 			} );
 
 			return
-				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( logicPackagesFolderPath,
+				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( outputFolderPath,
 				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
 				                                                        	installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,

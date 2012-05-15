@@ -54,6 +54,7 @@
     <Content Include="stdLibDoxySettings.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Export EWL to Local Feed.bat" />
     <None Include="Update All Dependent Logic.bat" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
