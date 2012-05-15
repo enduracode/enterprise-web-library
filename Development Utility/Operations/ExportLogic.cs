@@ -179,7 +179,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return buildMessageNuGetPackages;
 		}
 
-		internal static byte[] CreateNuGetPackage( RecognizedDevelopmentInstallation installation, string outputFolderPath, bool prerelease ) {
+		internal static byte[] CreateNuGetPackage( RecognizedDevelopmentInstallation installation, string outputFolderPath, bool? prerelease ) {
+			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
+
 			IoMethods.ExecuteWithTempFolder( folderPath => {
 				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                                               "Standard Library",
@@ -209,7 +211,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 					                                     InstallationConfiguration.InstallationConfigurationFolderName,
 					                                     InstallationConfiguration.InstallationsFolderName,
-					                                     ( prerelease ? "Testing" : "Live" ) ),
+					                                     ( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
 					StandardLibraryMethods.CombinePaths( folderPath,
 					                                     InstallationConfiguration.ConfigurationFolderName,
 					                                     InstallationConfiguration.InstallationConfigurationFolderName ),
@@ -217,7 +219,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
 				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-					writeNuGetPackageManifest( installation, prerelease, writer );
+					writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
 
 				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
 				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
@@ -230,7 +232,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
 				                                                        	installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
-				                                                        	prerelease ? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int? : null ) ) );
+				                                                        	!prerelease.HasValue || prerelease.Value
+				                                                        		? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int?
+				                                                        		: null,
+				                                                        	localExportDateAndTime: localExportDateAndTime ) ) );
 		}
 
 		private static void packageGeneralFiles( RecognizedDevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -254,7 +259,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
-		private static void writeNuGetPackageManifest( RecognizedDevelopmentInstallation installation, bool prerelease, TextWriter writer ) {
+		private static void writeNuGetPackageManifest( RecognizedDevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime,
+		                                               TextWriter writer ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
@@ -263,9 +269,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			                  "</id>" );
 			writer.WriteLine( "<version>" +
 			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
-			                                                                                    prerelease
+			                                                                                    !prerelease.HasValue || prerelease.Value
 			                                                                                    	? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int?
-			                                                                                    	: null ) + "</version>" );
+			                                                                                    	: null,
+			                                                                                    localExportDateAndTime: localExportDateAndTime ) + "</version>" );
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
