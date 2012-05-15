@@ -11,9 +11,9 @@ namespace RedStapler.StandardLibrary.Email {
 		private readonly string filePath;
 
 		/// <summary>
-		/// Creates an email attachment. The stream must contain the contents of the attachment and be readable, but it does not need to be open.
+		/// Creates an email attachment. The stream must contain the contents of the attachment, be readable and must not be closed.
 		/// The attachmentDisplayName should be a file name with the proper extension.
-		/// // NOTE: It would be kind of nice if this could use FileInfoToBeSent. THen we could have ExcelFileWriter just know how to return one of those and it would cover
+		/// NOTE: It would be kind of nice if this could use FileInfoToBeSent. THen we could have ExcelFileWriter just know how to return one of those and it would cover
 		/// sending the file to the browser and emailing it.
 		/// </summary>
 		public EmailAttachment( Stream stream, string contentType, string attachmentDisplayName ) {
