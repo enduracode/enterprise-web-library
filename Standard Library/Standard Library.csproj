@@ -110,7 +110,7 @@
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="ThoughtWorks.Selenium.Core">
-      <HintPath>..\Solution Files\Referenced Files\ThoughtWorks.Selenium.Core.dll</HintPath>
+      <HintPath>..\packages\Selenium.RC.2.21.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

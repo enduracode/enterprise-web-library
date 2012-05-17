@@ -46,9 +46,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Content Include="Referenced Files\ThoughtWorks.Selenium.Core.dll" />
-    <Content Include="Referenced Files\ThoughtWorks.Selenium.IntegrationTests.dll" />
-    <Content Include="Referenced Files\ThoughtWorks.Selenium.UnitTests.dll" />
     <Content Include="Selenium Support\selenium-server.jar" />
     <Content Include="Selenium Support\srvany.exe" />
     <Content Include="stdLibDoxySettings.txt" />
