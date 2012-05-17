@@ -104,7 +104,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework">
-      <HintPath>..\Solution Files\Referenced Files\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="TestFiles\MergeOps\pdf.pdf" />
     <None Include="TestFiles\MergeOps\word.docx" />
     <None Include="TestFiles\PdfOps\onepage.pdf" />
