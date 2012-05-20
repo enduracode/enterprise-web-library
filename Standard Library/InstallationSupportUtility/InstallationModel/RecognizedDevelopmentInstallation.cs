@@ -36,5 +36,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		public RecognizedInstallationLogic RecognizedInstallationLogic { get { return recognizedInstallationLogic; } }
 
 		public DevelopmentInstallationLogic DevelopmentInstallationLogic { get { return developmentInstallationLogic; } }
+
+		int DevelopmentInstallation.CurrentMajorVersion { get { return knownSystemLogic.RsisSystem.CurrentMajorVersion; } }
+		int DevelopmentInstallation.NextBuildNumber { get { return knownSystemLogic.RsisSystem.NextBuildNumber; } }
 	}
 }

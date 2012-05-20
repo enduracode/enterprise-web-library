@@ -364,14 +364,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			                        "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "\"" );
 			writeAssemblyAttribute( writer, "AssemblyProduct", "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "\"" );
 			writeAssemblyAttribute( writer, "ComVisible", "false" );
-
-			var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
-			if( recognizedInstallation != null ) {
-				writeAssemblyAttribute( writer,
-				                        "AssemblyVersion",
-				                        "\"" + recognizedInstallation.KnownSystemLogic.RsisSystem.CurrentMajorVersion + ".0." +
-				                        recognizedInstallation.KnownSystemLogic.RsisSystem.NextBuildNumber + ".0\"" );
-			}
+			writeAssemblyAttribute( writer, "AssemblyVersion", "\"" + installation.CurrentMajorVersion + ".0." + installation.NextBuildNumber + ".0\"" );
 		}
 
 		private static void writeAssemblyAttribute( TextWriter writer, string name, string value ) {
