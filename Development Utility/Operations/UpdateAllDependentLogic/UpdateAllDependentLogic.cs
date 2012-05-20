@@ -49,6 +49,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 
 			// Generate code.
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+				var ewlGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\Generated Code" );
+				Directory.CreateDirectory( ewlGeneratedCodeFolderPath );
+				var isuFilePath = StandardLibraryMethods.CombinePaths( ewlGeneratedCodeFolderPath, "ISU.cs" );
+				IoMethods.DeleteFile( isuFilePath );
+				using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
+					writer.WriteLine( "using System.Reflection;" );
+					writer.WriteLine( "using System.Runtime.InteropServices;" );
+					writeAssemblyInfo( writer, installation, "" );
+				}
+			}
 			generateLibraryCode( installation );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
 				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
@@ -113,6 +124,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
 				writer.WriteLine( "using System.Data.Common;" );
+				writer.WriteLine( "using System.Reflection;" );
+				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Web.UI;" );
 				writer.WriteLine( "using System.Web.UI.WebControls;" ); // Necessary for the fill list control functionality in row constants
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
@@ -128,6 +141,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
 
+				writer.WriteLine();
+				writeAssemblyInfo( writer, installation, "Library" );
 				writer.WriteLine();
 				if( !installation.DevelopmentInstallationLogic.SystemIsEwl )
 					generateGeneralProvider( writer, installation );
@@ -260,6 +275,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Collections.ObjectModel;" );
 				writer.WriteLine( "using System.Linq;" );
+				writer.WriteLine( "using System.Reflection;" );
+				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Web;" );
 				writer.WriteLine( "using System.Web.UI;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
@@ -267,6 +284,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
+				writer.WriteLine();
+				writeAssemblyInfo( writer, installation, webProject.name );
 				writer.WriteLine();
 				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, webProjectPath, webProject );
 			}
@@ -280,9 +299,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				writer.WriteLine( "using System;" );
 				writer.WriteLine( "using System.ComponentModel;" );
+				writer.WriteLine( "using System.Reflection;" );
+				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.ServiceProcess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.WindowsServiceFramework;" );
+				writer.WriteLine();
+				writeAssemblyInfo( writer, installation, service.Name );
 				writer.WriteLine();
 				writer.WriteLine( "namespace " + service.NamespaceAndAssemblyName + " {" );
 
@@ -330,11 +353,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
+		private static void writeAssemblyInfo( TextWriter writer, DevelopmentInstallation installation, string projectName ) {
+			writeAssemblyAttribute( writer,
+			                        "AssemblyTitle",
+			                        "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "\"" );
+			writeAssemblyAttribute( writer, "AssemblyProduct", "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "\"" );
+			writeAssemblyAttribute( writer, "ComVisible", "false" );
+
+			var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
+			if( recognizedInstallation != null ) {
+				writeAssemblyAttribute( writer,
+				                        "AssemblyVersion",
+				                        "\"" + recognizedInstallation.KnownSystemLogic.RsisSystem.CurrentMajorVersion + ".0." +
+				                        recognizedInstallation.KnownSystemLogic.RsisSystem.NextBuildNumber + ".0\"" );
+			}
+		}
+
+		private static void writeAssemblyAttribute( TextWriter writer, string name, string value ) {
+			writer.WriteLine( "[ assembly: " + name + "( " + value + " ) ]" );
+		}
+
 		private static void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( DevelopmentInstallation installation ) {
-			var libraryProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Library" );
 			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
-			if( File.Exists( StandardLibraryMethods.CombinePaths( libraryProjectPath, customInstallationConfigSchemaPathInProject ) ) ) {
-				generateXmlSchemaLogic( libraryProjectPath,
+			if( File.Exists( StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) ) {
+				generateXmlSchemaLogic( installation.DevelopmentInstallationLogic.LibraryPath,
 				                        customInstallationConfigSchemaPathInProject,
 				                        installation.DevelopmentInstallationLogic.DevelopmentConfiguration.libraryNamespace + ".Configuration.Installation",
 				                        "Installation Custom Configuration.cs",
