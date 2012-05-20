@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppStatics.cs" />
+    <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="Operations\ExportEwlToLocalFeed.cs" />
     <Compile Include="Operations\ExportLogic.cs" />
     <Compile Include="Operations\InstallAndStartServices.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebMetaLogicStatics.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\UpdateAllDependentLogic.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
@@ -95,6 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Package Manager Console Commands.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
