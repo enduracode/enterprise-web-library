@@ -50,15 +50,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				var ewlGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\Generated Code" );
-				Directory.CreateDirectory( ewlGeneratedCodeFolderPath );
-				var isuFilePath = StandardLibraryMethods.CombinePaths( ewlGeneratedCodeFolderPath, "ISU.cs" );
-				IoMethods.DeleteFile( isuFilePath );
-				using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
-					writer.WriteLine( "using System.Reflection;" );
-					writer.WriteLine( "using System.Runtime.InteropServices;" );
-					writeAssemblyInfo( writer, installation, "" );
-				}
+				generateAssemblyInfoCodeFile( installation, "Standard Library", "" );
+				generateAssemblyInfoCodeFile( installation, "Development Utility", "Development Utility" );
 			}
 			generateLibraryCode( installation );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
@@ -112,6 +105,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private static string customizeNamespace( string text, WebProject webProject ) {
 			return text.Replace( "RedStapler.TestWebSite", webProject.@namespace );
+		}
+
+		private static void generateAssemblyInfoCodeFile( DevelopmentInstallation installation, string projectName, string projectNameForAssemblyInfo ) {
+			var generatedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
+			Directory.CreateDirectory( generatedCodeFolderPath );
+			var isuFilePath = StandardLibraryMethods.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
+			IoMethods.DeleteFile( isuFilePath );
+			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
+				writer.WriteLine( "using System.Reflection;" );
+				writer.WriteLine( "using System.Runtime.InteropServices;" );
+				writeAssemblyInfo( writer, installation, projectNameForAssemblyInfo );
+			}
 		}
 
 		private static void generateLibraryCode( DevelopmentInstallation installation ) {
