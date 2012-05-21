@@ -8,6 +8,14 @@ using RedStapler.StandardLibrary.InstallationSupportUtility;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig {
 	internal class WebConfigStatics {
 		internal static void GenerateWebConfig( WebProject webProject, string webProjectPath, string systemName ) {
+			if( !File.Exists( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) ) )
+				throw new UserCorrectableException( "The Web.config file is missing." );
+			var webConfigContents = File.ReadAllText( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) );
+
+			webConfigContents = removeElement( webConfigContents, "appSettings" );
+			webConfigContents = removeElement( webConfigContents, "system.web" );
+			webConfigContents = removeElement( webConfigContents, "system.webServer" );
+
 			var templateContents = File.ReadAllText( StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
 
 			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
@@ -26,17 +34,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			                                             	? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, RedStapler.StandardLibrary\"/>"
 			                                             	: "" );
 
+			webConfigContents = webConfigContents.Replace( "<configuration>", templateContents );
+
 			try {
-				File.WriteAllText( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ), templateContents );
-				File.WriteAllText( StandardLibraryMethods.CombinePaths( webProjectPath, "Installed.config" ),
-				                   templateContents.Replace( "debug=\"true\"", "debug=\"false\"" ) );
+				File.WriteAllText( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ), webConfigContents );
 			}
 			catch( Exception e ) {
-				const string message = "Failed to write web configuration files.";
+				const string message = "Failed to write web configuration file.";
 				if( e is UnauthorizedAccessException )
 					throw new UserCorrectableException( message, e );
 				throw new ApplicationException( message, e );
 			}
+		}
+
+		private static string removeElement( string webConfigContents, string element ) {
+			var index = webConfigContents.IndexOf( "<" + element + ">" );
+			if( index == -1 )
+				return webConfigContents;
+			var endTag = "</" + element + ">";
+			var endTagIndex = webConfigContents.IndexOf( endTag );
+			if( endTagIndex == -1 )
+				throw new UserCorrectableException( "End tag not found." );
+			return webConfigContents.Remove( index, endTagIndex + endTag.Length - index );
 		}
 	}
 }

@@ -135,7 +135,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
 					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
 
-					IoMethods.MoveFile( StandardLibraryMethods.CombinePaths( webAppPath, "Installed.config" ), StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" ) );
+					var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
+					File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 				}
 			}
 		}
