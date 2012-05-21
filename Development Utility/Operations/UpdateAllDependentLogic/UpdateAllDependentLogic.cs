@@ -18,6 +18,9 @@ using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
+	// NOTE: Rename this, and the containing folder, to UpdateDependentLogic. Also rename the batch file in Solution Files and the batch file in each person's EWL
+	// Configuration repository. Remember to fix the CruiseControl.NET config generator and the place in ExportLogic where we reference the batch file name when
+	// packaging general files.
 	internal class UpdateAllDependentLogic: Operation {
 		private static readonly Operation instance = new UpdateAllDependentLogic();
 		public static Operation Instance { get { return instance; } }
