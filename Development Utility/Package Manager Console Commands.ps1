@@ -8,8 +8,6 @@ function UpdateDependentLogic {
 	Param()
 	Process {
 		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateAllDependentLogic
-		Write-Host "Adding binding redirects:"
-		Add-BindingRedirect
 	}
 }
 
