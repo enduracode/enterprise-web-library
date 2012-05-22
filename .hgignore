@@ -10,6 +10,7 @@ Error Log.txt
 
 Development Utility/bin/
 Development Utility/obj/
+Development Utility/Generated Code/
 
 Library/bin/
 Library/obj/
@@ -29,5 +30,3 @@ Standard Library/RedStapler.StandardLibrary.xml
 Test Web Site/bin/
 Test Web Site/obj/
 Test Web Site/Generated Code/
-Test Web Site/Web.config
-Test Web Site/Installed.config

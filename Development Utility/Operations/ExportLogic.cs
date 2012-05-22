@@ -18,22 +18,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private ExportLogic() {}
 
 		bool Operation.IsValid( Installation installation ) {
-			return installation is RecognizedDevelopmentInstallation;
+			return installation is DevelopmentInstallation;
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
-			var installation = genericInstallation as RecognizedDevelopmentInstallation;
+			var installation = genericInstallation as DevelopmentInstallation;
 
 			var logicPackagesFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );
 			IoMethods.DeleteFolder( logicPackagesFolderPath );
 
 			// Set up the main (build) object in the build message.
 			var build = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build();
-			build.SystemId = installation.KnownSystemLogic.RsisSystem.Id;
 			build.SystemName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
-			build.MajorVersion = installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion;
-			build.BuildNumber = installation.KnownSystemLogic.RsisSystem.NextBuildNumber;
+			build.MajorVersion = installation.CurrentMajorVersion;
+			build.BuildNumber = installation.NextBuildNumber;
 			var serverSideLogicFolderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
@@ -81,6 +80,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				build.NuGetPackages = packageEwl( installation, logicPackagesFolderPath );
 
+			var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
+			if( recognizedInstallation == null )
+				return;
+
+			build.SystemId = recognizedInstallation.KnownSystemLogic.RsisSystem.Id;
+
 			operationResult.TimeSpentWaitingForNetwork = AppTools.ExecuteTimedRegion( delegate {
 				using( var memoryStream = new MemoryStream() ) {
 					// Understand that by doing this, we are not really taking advantage of streaming, but at least it will be easier to do it the right way some day (probably by implementing our own BuildMessageStream)
@@ -94,7 +99,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			} );
 		}
 
-		private static void packageWebApps( RecognizedDevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private static void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			// NOTE: When packaging web apps, try to find a way to exclude data files. Apparently web deployment projects include these in their output even though
 			// they aren't part of the source web projects. NOTE ON NOTE: We don't use WDPs anymore, so maybe we can eliminate this note.
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
@@ -130,12 +135,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
 					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
 
-					IoMethods.MoveFile( StandardLibraryMethods.CombinePaths( webAppPath, "Installed.config" ), StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" ) );
+					var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
+					File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 				}
 			}
 		}
 
-		private static void packageWindowsServices( RecognizedDevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private static void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
 				IoMethods.CopyFolder( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
 				                      StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, service.Name ),
@@ -143,7 +149,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void packageServerSideConsoleApps( RecognizedDevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private static void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects != null ) {
 				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects )
 					copyServerSideProject( installation, serverSideLogicFolderPath, project );
@@ -155,14 +161,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				copyServerSideProject( installation, serverSideLogicFolderPath, StandardLibraryMethods.TestRunnerProjectName );
 		}
 
-		private static void copyServerSideProject( RecognizedDevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
+		private static void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
 			IoMethods.CopyFolder(
 				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, project, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
 				StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, project ),
 				false );
 		}
 
-		private static void packageClientSideApp( RecognizedDevelopmentInstallation installation, string clientSideAppFolder ) {
+		private static void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
 			IoMethods.CopyFolder(
 				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                     installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
@@ -172,14 +178,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private static RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
-			RecognizedDevelopmentInstallation installation, string logicPackagesFolderPath ) {
+			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
 			var buildMessageNuGetPackages = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
 			buildMessageNuGetPackages.Prerelease = CreateNuGetPackage( installation, logicPackagesFolderPath, true );
 			buildMessageNuGetPackages.Stable = CreateNuGetPackage( installation, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;
 		}
 
-		internal static byte[] CreateNuGetPackage( RecognizedDevelopmentInstallation installation, string outputFolderPath, bool? prerelease ) {
+		internal static byte[] CreateNuGetPackage( DevelopmentInstallation installation, string outputFolderPath, bool? prerelease ) {
 			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
 
 			IoMethods.ExecuteWithTempFolder( folderPath => {
@@ -231,14 +237,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( outputFolderPath,
 				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
-				                                                        	installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
-				                                                        	!prerelease.HasValue || prerelease.Value
-				                                                        		? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int?
-				                                                        		: null,
+				                                                        	installation.CurrentMajorVersion,
+				                                                        	!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
 				                                                        	localExportDateAndTime: localExportDateAndTime ) ) );
 		}
 
-		private static void packageGeneralFiles( RecognizedDevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
+		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
 			// configuration files
 			var configurationFolderPath = StandardLibraryMethods.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
 			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
@@ -259,8 +263,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
-		private static void writeNuGetPackageManifest( RecognizedDevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime,
-		                                               TextWriter writer ) {
+		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime, TextWriter writer ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
@@ -268,9 +271,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) +
 			                  "</id>" );
 			writer.WriteLine( "<version>" +
-			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.KnownSystemLogic.RsisSystem.CurrentMajorVersion,
+			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.CurrentMajorVersion,
 			                                                                                    !prerelease.HasValue || prerelease.Value
-			                                                                                    	? installation.KnownSystemLogic.RsisSystem.NextBuildNumber as int?
+			                                                                                    	? installation.NextBuildNumber as int?
 			                                                                                    	: null,
 			                                                                                    localExportDateAndTime: localExportDateAndTime ) + "</version>" );
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );

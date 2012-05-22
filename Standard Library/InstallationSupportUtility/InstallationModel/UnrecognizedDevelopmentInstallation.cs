@@ -25,5 +25,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		public ExistingInstallationLogic ExistingInstallationLogic { get { return existingInstallationLogic; } }
 
 		public DevelopmentInstallationLogic DevelopmentInstallationLogic { get { return developmentInstallationLogic; } }
+
+		int DevelopmentInstallation.CurrentMajorVersion { get { return 1; } }
+		int DevelopmentInstallation.NextBuildNumber { get { return 1; } }
 	}
 }
