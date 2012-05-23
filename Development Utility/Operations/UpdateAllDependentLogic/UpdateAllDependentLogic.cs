@@ -152,7 +152,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
 				writer.WriteLine();
-				if( !installation.DevelopmentInstallationLogic.SystemIsEwl )
+				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl )
 					generateGeneralProvider( writer, installation );
 				generateDataAccessCode( writer, installation );
 				writer.WriteLine();
