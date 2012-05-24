@@ -180,18 +180,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private static RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
 			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
 			var buildMessageNuGetPackages = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
-			buildMessageNuGetPackages.Prerelease = CreateNuGetPackage( installation, logicPackagesFolderPath, true );
-			buildMessageNuGetPackages.Stable = CreateNuGetPackage( installation, logicPackagesFolderPath, false );
+			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, true );
+			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;
 		}
 
-		internal static byte[] CreateNuGetPackage( DevelopmentInstallation installation, string outputFolderPath, bool? prerelease ) {
+		internal static byte[] CreateEwlNuGetPackage( DevelopmentInstallation installation, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
 			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
 
 			IoMethods.ExecuteWithTempFolder( folderPath => {
 				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                                               "Standard Library",
-				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( false ) );
+				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
 				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
 				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "RedStapler.StandardLibrary." + i ) )
 					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
