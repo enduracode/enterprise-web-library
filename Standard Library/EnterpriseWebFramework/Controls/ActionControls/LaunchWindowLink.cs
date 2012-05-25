@@ -7,6 +7,7 @@ using RedStapler.StandardLibrary.JavaScriptWriting;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Displays a clickable link to the user that will display a ModalWindow.
+	/// NOTE: Think about renaming this. At the least, the term Link should be replaced with Button to be consistent with other action controls.
 	/// </summary>
 	public class LaunchWindowLink: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
 		private readonly ModalWindow windowToLaunch;
@@ -47,7 +48,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			ActionControlStyle.SetUpControl( this, "", Unit.Empty, Unit.Empty, width => { } );
 
-			// NOTE: Man, there are some invalid states here. Can you imagine putting a non-hover-triggered tool tip on a launch window link? Ugh.
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}

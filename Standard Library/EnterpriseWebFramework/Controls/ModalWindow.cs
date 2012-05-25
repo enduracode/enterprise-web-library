@@ -5,12 +5,21 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// Displays a closeable modal window that cannot be ignored by the user.
-	/// This can only be displayed to the user via a LaunchWindowLink.
-	/// Never add a ModalWindow to the control tree yourself.
+	/// An element that hovers over the page in the center of the browser window and prevents interaction with the page. There can only be one modal window
+	/// visible at a time.
 	/// </summary>
-	// Sealed because of the virtual method call in the constructor
-	public sealed class ModalWindow: EtherealControl {
+	// NOTE: Prohibit form controls from existing in a modal window.
+	// NOTE: Prevent a modal window from opening another modal window, probably be prohibiting LaunchWindowLink controls from existing in a modal window.
+	// NOTE: Answer these questions and make the necessary implementation changes:
+	//       1. Should modal windows have a gigantic close button?
+	//       2. Should clicking outside of a modal window close it? What if it's a modal confirmation?
+	//       3. Should modal windows be locked in the center of the browser window?
+	//       4. Should modal windows gray out the rest of the page?
+	//       5. Should modal windows be able to contain post back buttons that require [modal] confirmation?
+	//       6. Should modal windows be able to contain action controls that don't open another modal, such as EwfLink?
+	//       7. Can we reimplement info/warning status message boxes to use modal windows? For info messages, we'd need a way to make a modal window close
+	//          automatically on a timer.
+	public class ModalWindow: EtherealControl {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfModalConfirmation";
 
