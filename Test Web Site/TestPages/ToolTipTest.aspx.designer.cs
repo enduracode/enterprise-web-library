@@ -40,33 +40,6 @@ namespace RedStapler.TestWebSite.TestPages {
         protected global::System.Web.UI.WebControls.Panel extra;
         
         /// <summary>
-        /// markupLink control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.ToolTipLink markupLink;
-        
-        /// <summary>
-        /// boxActionControlStyle control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.ToolTipLink boxActionControlStyle;
-        
-        /// <summary>
-        /// imageActionControlStyle control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.ToolTipLink imageActionControlStyle;
-        
-        /// <summary>
         /// calendarTest control.
         /// </summary>
         /// <remarks>
@@ -173,14 +146,5 @@ namespace RedStapler.TestWebSite.TestPages {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.TimePicker timepicker;
-        
-        /// <summary>
-        /// nestedToolTipLinks control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.ToolTipLink nestedToolTipLinks;
     }
 }

@@ -47,31 +47,25 @@ namespace RedStapler.TestWebSite.TestPages {
 			public override string EntitySetupName { get { return "Customer #1"; } }
 		}
 
-		private StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow one;
-		private StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow two;
-		private StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow three;
-		private StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow four;
+		private ModalWindow one;
+		private ModalWindow two;
+		private ModalWindow three;
+		private ModalWindow four;
 
 		public void LoadData( DBConnection cn ) {
-			one = new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( new EwfImage( "http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" ) );
-			two = new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) );
+			one = new ModalWindow( new EwfImage( "http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" ) );
+			two = new ModalWindow( new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) );
 			three =
-				new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( ControlStack.CreateWithControls( true,
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                                                                  new EwfImage(
-				                                                                                                  	"http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) ) );
+				new ModalWindow( ControlStack.CreateWithControls( true,
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
+				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) ) );
 			var gibberish =
 				@"Kolo has refactored the abstraction of blog-based systems.  What do we embrace? Anything and everything, regardless of obscurity! We have proven we know that if you brand proactively then you may also synthesize strategically. What does the commonly-accepted term 'obfuscation' really mean? We realize that it is better to envisioneer virally than to iterate virtually. Without adequate angel investors, e-tailers are forced to become wireless. Our 60/60/24/7/365 feature set is second to none, but our revolutionary convergence and newbie-proof configuration is invariably considered an amazing achievement. We will scale up our ability to recontextualize without decreasing our ability to visualize. Your budget for meshing should be at least one-tenth of your budget for unleashing. We will augment our ability to visualize without reducing our capability to upgrade. Quick: do you have a magnetic, value-added plan of action for managing new communities? We often orchestrate C2B2B revolutionary C2C. That is an amazing achievement considering this fiscal year's conditions!";
-			four = new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( ( gibberish + gibberish + gibberish ).GetLiteralControl() );
+			four = new ModalWindow( ( gibberish + gibberish + gibberish ).GetLiteralControl() );
 			var ln = new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
 			var ln1 = new LaunchWindowLink( two ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
 			var ln2 = new LaunchWindowLink( three ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
@@ -88,7 +82,7 @@ namespace RedStapler.TestWebSite.TestPages {
 			navButtonSetups.Add( new ActionButtonSetup( "Go to Microsoft", new EwfLink( new ExternalPageInfo( "http://www.microsoft.com" ) ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Custom script", new CustomButton( "alert('test')" ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Menu",
-			                                            new ToolTipLink(
+			                                            new ToolTipButton(
 			                                            	EwfTable.CreateWithItems( items:
 			                                            	                          	new Func<EwfTableItem>[]
 			                                            	                          		{
@@ -118,14 +112,13 @@ namespace RedStapler.TestWebSite.TestPages {
 			                                            	                          				"Custom script".ToCell() ),
 			                                            	                          			() =>
 			                                            	                          			new EwfTableItem(
-			                                            	                          				new LaunchWindowLink(
-			                                            	                          					new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow( new EwfTextBox() ) )
+			                                            	                          				new LaunchWindowLink( new ModalWindow( new EwfTextBox() ) )
 			                                            	                          					{ ActionControlStyle = new TextActionControlStyle( "Modal" ) }.ToCell() )
 			                                            	                          		} ) ) ) );
 
 			navButtonSetups.Add( new ActionButtonSetup( "Modal Window",
 			                                            new LaunchWindowLink(
-			                                            	new StandardLibrary.EnterpriseWebFramework.Controls.ModalWindow(
+			                                            	new ModalWindow(
 			                                            		new EwfImage( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) ) ) );
 			return navButtonSetups;
 		}

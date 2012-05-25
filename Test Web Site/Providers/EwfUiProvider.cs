@@ -30,7 +30,7 @@ namespace RedStapler.TestWebSite.Providers {
 						clickScript:
 							ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ); } ) ),
 					"Test method".ToCell() ) );
-			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipLink( menu ) ) );
+			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipButton( menu ) ) );
 
 			navButtonSetups.Add( new ActionButtonSetup( "Calendar",
 			                                            new EwfLink( CalendarDemo.GetInfo( new EntitySetup.OptionalParameterPackage(),

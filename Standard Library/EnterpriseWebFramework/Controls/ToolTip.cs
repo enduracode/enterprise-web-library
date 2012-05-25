@@ -4,7 +4,8 @@ using System.Web.UI.WebControls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// Appears near the associated control when the mouse hovers over it.
+	/// An element that hovers over the page near the target control. There can only be one target control for a tool tip since having more than one target would
+	/// require the tool tip to support being visible in multiple places at the same time. The WebControl content of the tool tip doesn't support this.
 	/// </summary>
 	internal class ToolTip: EtherealControl {
 		private readonly WebControl control;
