@@ -205,7 +205,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\Styles\ButtonActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\Styles\TextActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\ToggleButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\ActionControls\ToolTipLink.cs" />
+    <Compile Include="EnterpriseWebFramework\Controls\ActionControls\ToolTipButton.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\AJaxLabel.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFile.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFileCollectionManager.cs" />
