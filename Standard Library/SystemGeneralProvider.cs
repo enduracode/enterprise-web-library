@@ -24,6 +24,16 @@
 		string FormsLogInPassword { get; }
 
 		/// <summary>
+		/// Gets the email default from name.
+		/// </summary>
+		string EmailDefaultFromName { get; }
+
+		/// <summary>
+		/// Gets the email default from address.
+		/// </summary>
+		string EmailDefaultFromAddress { get; }
+
+		/// <summary>
 		/// Not yet documented.
 		/// </summary>
 		System.Net.Mail.SmtpClient CreateClientSideAppSmtpClient();

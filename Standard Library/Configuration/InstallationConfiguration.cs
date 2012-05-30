@@ -136,9 +136,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			get {
 				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
 				       	? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.Name
-				       	: systemGeneralConfiguration.emailDefaultFromNameAndAddress != null
-				       	  	? systemGeneralConfiguration.emailDefaultFromNameAndAddress.Name
-				       	  	: "Red Stapler Software, LLC";
+				       	: AppTools.SystemProvider.EmailDefaultFromName;
 			}
 		}
 
@@ -149,9 +147,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			get {
 				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
 				       	? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.EmailAddress
-				       	: systemGeneralConfiguration.emailDefaultFromNameAndAddress != null
-				       	  	? systemGeneralConfiguration.emailDefaultFromNameAndAddress.EmailAddress
-				       	  	: "do-not-reply@redstapler.biz";
+				       	: AppTools.SystemProvider.EmailDefaultFromAddress;
 			}
 		}
 

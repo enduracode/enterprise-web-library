@@ -5,7 +5,6 @@
 		<sequence>
 			<element name="systemName" type="string" />
 			<element name="systemShortName" type="string" />
-			<element name="emailDefaultFromNameAndAddress" type="rs:NameAndEmailAddress" minOccurs="0" />
 			<element name="WebApplications" minOccurs="0">
 				<complexType>
 					<sequence>
