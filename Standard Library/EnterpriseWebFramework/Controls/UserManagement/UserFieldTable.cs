@@ -135,7 +135,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
 		/// </summary>
-		public string SaltedPassword { get; private set; }
+		public byte[] SaltedPassword { get; private set; }
 
 		/// <summary>
 		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
