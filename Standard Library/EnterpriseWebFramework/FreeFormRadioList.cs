@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -63,17 +62,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns the key-value pairs in the form of &lt;string value, CommonCheckBox&gt;
 		/// </summary>
 		internal IEnumerable<KeyValuePair<string, CommonCheckBox>> ValuesAndRadioButtons { get { return dictionary.ToList(); } }
-
-		/// <summary>
-		/// Adds an event handler that will fire when the selected index of this free-form radio list changes.
-		/// This does not set up AutoPostback on each radio button in the list.
-		/// This must be called after all checkboxes have been added to the free-form radio list.
-		/// </summary>
-		public void AddSelectedIndexChangedHandler( Action selectedIndexChangedHandler ) {
-			// This wires up the event handler to every check box in the radio list.  Since it will only fire when the box is checked, and only one box should be checked
-			// at a time, this event will fire a maximum of once per request.
-			foreach( var checkBox in dictionary.Values )
-				checkBox.AddCheckedHandler( selectedIndexChangedHandler );
-		}
 	}
 }

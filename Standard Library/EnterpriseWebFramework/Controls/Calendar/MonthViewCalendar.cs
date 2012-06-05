@@ -144,8 +144,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			for( var i = -3; i <= 3; i += 1 )
 				jumpList.AddItem( formatDateTimeForJumpList( adjustDateByNumberOfIntervals( date, i ) ), i.ToString() );
 			jumpList.Value = "0";
-			jumpList.AddSelectedIndexChangedEventHandler(
-				() => EwfPage.Instance.EhModifyData( delegate { dateModificationMethod( adjustDateByNumberOfIntervals( date, int.Parse( jumpList.Value ) ) ); } ) );
+			EwfPage.Instance.PostBackDataModification.AddModificationMethod(
+				cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, int.Parse( jumpList.Value ) ) ) );
 
 
 			var previousLink = new PostBackButton( new DataModification(),

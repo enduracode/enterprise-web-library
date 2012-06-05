@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -26,7 +25,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string text;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private CheckBox checkBox;
-		private readonly List<Action> checkedHandlers = new List<Action>();
 		private PostBackButton defaultSubmitButton;
 
 		/// <summary>
@@ -73,11 +71,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public bool AutoPostBack { get; set; }
 
 		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public Action CheckedChangedHandler { private get; set; }
-
-		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
 		/// </summary>
 		public override string ToolTip { get; set; }
@@ -97,10 +90,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				checkBox.AddJavaScriptEventScript( JsWritingMethods.onclick, jsMethodInvocation );
 			else
 				onClickJsMethods.Add( jsMethodInvocation );
-		}
-
-		void CommonCheckBox.AddCheckedHandler( Action method ) {
-			checkedHandlers.Add( method );
 		}
 
 		/// <summary>
@@ -126,17 +115,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( text.Length > 0 ) {
 				label = new HtmlGenericControl( "span" ) { InnerText = text };
 				Controls.Add( label );
-			}
-
-			if( CheckedChangedHandler != null )
-				checkBox.CheckedChanged += delegate { CheckedChangedHandler(); };
-
-			foreach( var handler in checkedHandlers ) {
-				var handlerCopy = handler;
-				checkBox.CheckedChanged += ( sender, e ) => {
-					if( ( (CheckBox)sender ).Checked )
-						handlerCopy();
-				};
 			}
 
 			if( ToolTip != null || ToolTipControl != null )

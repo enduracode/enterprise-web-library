@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -18,7 +17,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string text;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private CheckBox checkBox;
-		private readonly List<Action> checkedHandlers = new List<Action>();
 
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
@@ -65,11 +63,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public bool AutoPostBack { get; set; }
 
 		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public Action CheckedChangedHandler { private get; set; }
-
-		/// <summary>
 		/// Sets a control that appears beneath the check box's label only when the box is checked.
 		/// Controls added to this collection do not need to be added to the page separately.
 		/// NOTE: We should make this an Add method instead or exposing the collection.
@@ -103,10 +96,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				onClickJsMethods.Add( jsMethodInvocation );
 		}
 
-		void CommonCheckBox.AddCheckedHandler( Action method ) {
-			checkedHandlers.Add( method );
-		}
-
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			var table = TableOps.CreateUnderlyingTable();
 			table.CssClass = "ewfBlockCheckBox";
@@ -137,17 +126,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				if( !NestedControlsAlwaysVisible )
 					CheckBoxToControlArrayDisplayLink.AddToPage( this, true, nestedControlRow );
-			}
-
-			if( CheckedChangedHandler != null )
-				checkBox.CheckedChanged += delegate { CheckedChangedHandler(); };
-
-			foreach( var handler in checkedHandlers ) {
-				var handlerCopy = handler;
-				checkBox.CheckedChanged += ( sender, e ) => {
-					if( ( (CheckBox)sender ).Checked )
-						handlerCopy();
-				};
 			}
 
 			Controls.Add( table );

@@ -53,7 +53,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<ListItem> listItems = new List<ListItem>();
 		private string durableValue = "";
 		private bool durableValueSet;
-		private readonly List<Action> selectedIndexChangedEventHandlers = new List<Action>();
 		private readonly List<DisplayLinkData> displayLinkDataPackages = new List<DisplayLinkData>();
 		private List<EwfCheckBox> checkBoxes;
 		private PostBackButton defaultSubmitButton;
@@ -204,15 +203,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Do not use.
-		/// NOTE: Do not use this method right now. If the first item in the list is created by FillWithBlank, no initial value is explicitly specified, and a value not in the list is posted back, the handler incorrectly fires.
-		/// Another way of explaining this is that our leniance in accepting selected values that aren't in the list (the client comes back with a "4", but there is no "4", so we keep it as "") is biting us here.
-		/// </summary>
-		public void AddSelectedIndexChangedEventHandler( Action method ) {
-			selectedIndexChangedEventHandlers.Add( method );
-		}
-
-		/// <summary>
 		/// Creates a display link that toggles the visibility of the given controls when the given list item is selected and unselected.
 		/// </summary>
 		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params WebControl[] controls ) {
@@ -244,10 +234,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					dropDownList.Items.Add( listItem );
 				}
 				dropDownList.AutoPostBack = AutoPostBack;
-				foreach( var selectedIndexChangedHandler in selectedIndexChangedEventHandlers ) {
-					var handler = selectedIndexChangedHandler;
-					dropDownList.SelectedIndexChanged += delegate { handler(); };
-				}
 				Controls.Add( dropDownList );
 
 				addToolTipIfNeccesary( dropDownList );
@@ -272,9 +258,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					freeFormRadioList.AddCheckBox( listItem.Value, checkBox );
 					checkBoxes.Add( checkBox );
 				}
-
-				foreach( var selectedIndexChangedHandler in selectedIndexChangedEventHandlers )
-					freeFormRadioList.AddSelectedIndexChangedHandler( selectedIndexChangedHandler );
 
 				var container = Type == ListControlType.HorizontalRadioButton
 				                	? (Control)new ControlLine( checkBoxes.ToArray() )
