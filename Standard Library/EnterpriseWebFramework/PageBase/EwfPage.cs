@@ -881,16 +881,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 			}
 
-			// This is necessary to include controls like the Telerik RadToolTip, which is a post back data handler that does not allow access to its data and
-			// therefore is not a form control. These controls should be included in the concurrency checks because ASP.NET will blow up if it can't find them on a
-			// post back.
-			if( forConcurrencyCheck ) {
-				foreach( var postBackDataHandler in getImplementersWithinControl<IPostBackDataHandler>( this ) ) {
-					formControlString.Append( postBackDataHandler.GetType().ToString() );
-					formControlString.Append( postBackDataHandler.UniqueID );
-				}
-			}
-
 			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formControlString.ToString() ) );
 			var hashString = "";
 			foreach( var b in hash )
