@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ICSharpCode.SharpZipLib.Zip;
-using RedStapler.StandardLibrary;
 
 namespace RedStapler.StandardLibrary.IO {
 	/// <summary>
@@ -11,7 +10,9 @@ namespace RedStapler.StandardLibrary.IO {
 	/// </summary>
 	public static class ZipOps {
 		internal static void Test() {
+			// NOTE: This path is probably wrong, and should not be hard-coded.
 			const string sourceFolderPath = @"C:\Red Stapler Vault\Supporting Files\Standard Library\Standard Library\MailMerging";
+
 			var outputFolderPath = TestStatics.OutputFolderPath;
 			IoMethods.DeleteFolder( outputFolderPath );
 

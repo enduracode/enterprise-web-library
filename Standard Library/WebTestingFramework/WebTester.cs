@@ -58,7 +58,10 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 		private void setupBrowser() {
 			// NOTE: These base URLs only work for systems who happen to have the same integration and localhost suffix (For example, localhost/RlePersonnel and integration.redstapler.biz/RlePersonnel).
 			// Systems like MITCalendar will not work until we come up with a better solution.
+
+			// NOTE: This should not be hard-coded.
 			var baseUrl = "https://integration.redstapler.biz/";
+
 			if( AppTools.IsDevelopmentInstallation ) {
 				if( AppTools.InstallationConfiguration.WebApplications.Any( wa => wa.SupportsSecureConnections ) )
 					baseUrl = "https://localhost/";
@@ -66,9 +69,9 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 					baseUrl = "http://localhost/";
 			}
 
+
 			selenium = new DefaultSelenium( "localhost" /*location of Selenium server*/, 4444, @"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe", baseUrl );
 			selenium.Start();
-
 
 			if( AppTools.IsIntermediateInstallation ) {
 				executeSeleniumBlock( "Intermediate log on",
