@@ -49,7 +49,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private string formControlHash;
 		private string formControlHashWithValues;
 		private PageInfo redirectInfo;
-		private string redirectUrl = "";
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
 		/// <summary>
@@ -717,7 +716,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Performs a secondary validation/modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, RedirectingDbMethod modificationMethod ) {
-			EhExecute( delegate { executeModification( validationMethod, delegate( DBConnection cn ) { redirectUrl = modificationMethod( cn ) ?? ""; } ); } );
+			EhExecute( () => executeModification( validationMethod,
+			                                      cn => {
+			                                      	var url = modificationMethod( cn ) ?? "";
+			                                      	redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+			                                      } ) );
 		}
 
 		private static void executeModification( Action<Validator> validationMethod, DbMethod modificationMethod ) {
@@ -733,20 +736,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Passing null for pageInfo will result in no redirection.
 		/// </summary>
 		public void EhRedirect( PageInfo pageInfo ) {
-			EhExecute( delegate {
-				redirectInfo = pageInfo;
-				redirectUrl = "";
-			} );
-		}
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public void EhRedirect( string navigateUrl ) {
-			EhExecute( delegate {
-				redirectInfo = null;
-				redirectUrl = navigateUrl;
-			} );
+			EhExecute( () => redirectInfo = pageInfo );
 		}
 
 		/// <summary>
@@ -800,9 +790,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				else
 					requestState.EwfPageRequestState.StaticFormControlHash = generateFormControlHash( true, false );
-
-				if( !requestState.EwfPageRequestState.ModificationErrorsExist && redirectUrl.Length > 0 )
-					NetTools.Redirect( redirectUrl );
 
 				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
 				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current

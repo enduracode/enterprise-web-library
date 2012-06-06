@@ -22,15 +22,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Do not call. This method will be deleted.
-		/// </summary>
-		public static ClickScript CreateRedirectScript( string url ) {
-			if( EwfPage.Instance is AutoDataModifier )
-				return CreatePostBackScript( () => EwfPage.Instance.EhRedirect( url ) );
-			return new ClickScript { url = url };
-		}
-
-		/// <summary>
 		/// Creates a script that posts the page back and executes the specified method.
 		/// Do not pass null for method.
 		/// </summary>
