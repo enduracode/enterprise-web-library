@@ -821,7 +821,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// If the redirect destination is the current page, but with different query parameters, save page state and scroll position in session state until the
 				// next request. Since connections will be closed and reopened after the redirect, data could change between requests, possibly invalidating page state
 				// and scroll position.
-				if( redirectInfo.GetType().Equals( InfoAsBaseType.GetType() ) ) {
+				if( redirectInfo.GetType() == InfoAsBaseType.GetType() ) {
 					// NOTE: Implement this.
 				}
 
