@@ -649,10 +649,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Notifies the server control that caused the postback that it should handle an incoming postback event.
 		/// </summary>
 		protected override void RaisePostBackEvent( IPostBackEventHandler sourceControl, string eventArgument ) {
-			// NOTE: Remove this when we've eradicated these controls from all systems.
-			var legacyControl = sourceControl is Button || sourceControl is LinkButton;
-
-			if( isEventPostBack || legacyControl )
+			if( isEventPostBack )
 				base.RaisePostBackEvent( sourceControl, eventArgument );
 		}
 
