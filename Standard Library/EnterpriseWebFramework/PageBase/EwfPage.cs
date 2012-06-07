@@ -652,8 +652,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected override void RaisePostBackEvent( IPostBackEventHandler sourceControl, string eventArgument ) {
 			// NOTE: Remove this when we've eradicated these controls from all systems.
-			var legacyControl = sourceControl is Button || sourceControl is LinkButton || sourceControl is ImageButton /* MIT Calendar only */||
-			                    sourceControl is HtmlInputButton /* Todd only */;
+			var legacyControl = sourceControl is Button || sourceControl is LinkButton;
 
 			if( isEventPostBack || legacyControl )
 				base.RaisePostBackEvent( sourceControl, eventArgument );
