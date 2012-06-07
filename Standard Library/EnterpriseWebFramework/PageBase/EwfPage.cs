@@ -154,8 +154,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected override sealed void OnInitComplete( EventArgs e ) {
 			base.OnInitComplete( e );
 			if( !IsPostBack ) {
-				if( AppRequestState.Instance.EwfPageRequestState == null )
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+				if( AppRequestState.Instance.EwfPageRequestState == null ) {
+					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState ??
+					                                               new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
+				}
 				else
 					PageState.ClearCustomStateControlKeys();
 
@@ -539,7 +542,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
 			string clientSideRedirectUrl;
 			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetAndClearClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
+			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
 			var locationReplaceStatement = "";
 			if( clientSideRedirectUrl.Length > 0 ) {
 				locationReplaceStatement = "location.replace( '" + this.GetClientUrl( clientSideRedirectUrl ) + "' );";
@@ -819,11 +822,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 
 				// If the redirect destination is the current page, but with different query parameters, save page state and scroll position in session state until the
-				// next request. Since connections will be closed and reopened after the redirect, data could change between requests, possibly invalidating page state
-				// and scroll position.
-				if( redirectInfo.GetType() == InfoAsBaseType.GetType() ) {
-					// NOTE: Implement this.
-				}
+				// next request.
+				if( redirectInfo.GetType() == InfoAsBaseType.GetType() )
+					StandardLibrarySessionState.Instance.EwfPageRequestState = requestState.EwfPageRequestState;
 
 				NetTools.Redirect( redirectInfo.GetUrl() );
 			}
@@ -832,6 +833,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// happen at the end of the life cycle, in PreRender. This prevents modifications from being executed twice when transfers happen. It also prevents any of
 			// the modified data from being used accidentally, or intentionally, in LoadData.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
+			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
 				if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 					updateLastPageRequestTimeForUser();

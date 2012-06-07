@@ -13,6 +13,7 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		private string clientSideRedirectUrl = "";
 		private int? clientSideRedirectDelay;
 		private FileToBeSent fileToDownload;
+		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		private StandardLibrarySessionState() {}
 
@@ -53,10 +54,13 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 			clientSideRedirectDelay = numberOfSeconds;
 		}
 
-		internal void GetAndClearClientSideRedirectUrlAndDelay( out string url, out int? numberOfSeconds ) {
+		internal void GetClientSideRedirectUrlAndDelay( out string url, out int? numberOfSeconds ) {
 			url = clientSideRedirectUrl;
-			clientSideRedirectUrl = "";
 			numberOfSeconds = clientSideRedirectDelay;
+		}
+
+		internal void ClearClientSideRedirectUrlAndDelay() {
+			clientSideRedirectUrl = "";
 			clientSideRedirectDelay = null;
 		}
 
