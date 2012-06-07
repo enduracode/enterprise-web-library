@@ -303,8 +303,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// This must be after LoadData is called on all controls. AddJavaScript shouldn't be called during AddDisplayLink since
 			// FreeFormRadioListToControlArrayDisplayLink's script must be built after all items are added to the list.
-			foreach( var displayLink in displayLinks )
+			foreach( var displayLink in displayLinks ) {
 				displayLink.AddJavaScript();
+				displayLink.SetInitialDisplay();
+			}
 		}
 
 		private void addMetadataAndFaviconLinks() {
@@ -623,10 +625,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				foreach( var formControl in getChildFormControls( this ) )
 					formControl.AddPostBackValueToDictionary( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			}
-
-			// NOTE: This should probably move earlier in the life cycle and become a part of onLoadData.
-			foreach( var displayLink in displayLinks )
-				displayLink.SetInitialDisplay();
 
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
