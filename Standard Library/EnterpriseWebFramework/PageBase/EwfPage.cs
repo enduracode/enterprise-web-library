@@ -166,8 +166,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				if( AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash != null &&
 				    generateFormControlHash( true, false ) != AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash ) {
-					throw new ApplicationException(
-						"Developer mistake. Form controls, modification error display keys, and post back event handlers may not change on a post back with modification errors." );
+					var sentences = new[]
+					                	{
+					                		"Possible developer mistake.",
+					                		"Form controls, modification error display keys, and post back event handlers may not change on a post back with modification errors.",
+					                		"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+					                	};
+					throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 				}
 
 				formControlHash = generateFormControlHash( false, true );
