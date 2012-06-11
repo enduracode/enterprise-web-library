@@ -185,17 +185,30 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// changes.
 		/// </summary>
 		protected override sealed object LoadPageStateFromPersistenceMedium() {
-			// Based on our implementation of SavePageStateFromPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
-			// with no First object.
-			var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
+			object standardSavedState = null;
+			try {
+				// Based on our implementation of SavePageStateToPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
+				// with no First object.
+				var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
 
-			var savedState = PageState.CreateFromViewState( (object[])pair.Second );
-			AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
-			                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
-			                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
-			formControlHash = (string)savedState.Item2[ 0 ];
-			formControlHashWithValues = (string)savedState.Item2[ 1 ];
-			var standardSavedState = savedState.Item2[ 2 ];
+				var savedState = PageState.CreateFromViewState( (object[])pair.Second );
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
+				                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
+				                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
+				formControlHash = (string)savedState.Item2[ 0 ];
+				formControlHashWithValues = (string)savedState.Item2[ 1 ];
+				standardSavedState = savedState.Item2[ 2 ];
+			}
+			catch {
+				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
+				if( AppRequestState.Instance.EwfPageRequestState == null )
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+				Response.StatusCode = 400;
+				Response.TrySkipIisCustomErrors = true;
+				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors =
+					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToSingleElementArray();
+				resetPage();
+			}
 
 			onLoadData();
 

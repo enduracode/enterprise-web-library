@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
@@ -277,7 +276,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				RequestState.RollbackDatabaseTransactions();
 
-				var viewStateFormFieldMangled = exception.InnerException is ViewStateException;
 				var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 
 				// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
@@ -290,8 +288,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
 				// wrapped with another exception.
 				if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
-				    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler ||
-				    viewStateFormFieldMangled || errorIsWcf404 || errorIsBogusPathException ) {
+				    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler || errorIsWcf404 ||
+				    errorIsBogusPathException ) {
 					setStatusCode( 404 );
 					return;
 				}

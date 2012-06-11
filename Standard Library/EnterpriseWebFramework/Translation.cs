@@ -16,6 +16,15 @@
 		/// </summary>
 		internal static string UnacceptableFileExtension { get { return getCorrectTranslation( "Unacceptable file extension. Acceptable file extensions are:", "Extensión de archivo no válida. La extensión válida es:" ); } }
 
+		internal static string ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction {
+			get {
+				return
+					getCorrectTranslation(
+						"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
+						"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." );
+			}
+		}
+
 		internal static string AnotherUserHasModifiedPageBad {
 			get {
 				return getCorrectTranslation( "Another user has modified this page since the last time you saw it. The latest version has been loaded.",
