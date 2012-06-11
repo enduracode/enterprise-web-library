@@ -165,10 +165,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			EwfPage.Instance.SetContentContainer( contentPlace );
 
-			if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )
-				globalPlace.AddControlsReturnThis( getOldBrowserWarningBanner() );
-			StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
-
 			globalPlace.AddControlsReturnThis( getGlobalBlock() );
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
@@ -180,19 +176,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 			globalFootPlace.AddControlsReturnThis( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.BodyCssClass;
-		}
 
-		private static Control getOldBrowserWarningBanner() {
-			return
-				new Block(
-					new Paragraph(
-						"We've detected that you are not using the latest version of your browser. While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet." ),
-					ControlStack.CreateWithControls( true,
-					                                 EwfLink.CreateForNavigationInNewWindow( new ExternalPageInfo( "http://www.beautyoftheweb.com/" ),
-					                                                                         new TextActionControlStyle( "Click here to get Internet Explorer 9 (it's free)" ) ),
-					                                 EwfLink.CreateForNavigationInNewWindow( new ExternalPageInfo( "http://www.getfirefox.com" ),
-					                                                                         new TextActionControlStyle( "Click here to get Firefox (it's free)" ) ) ) )
-					{ CssClass = "ewfIeWarningBanner" };
+			if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {
+				EwfPage.AddStatusMessage( StatusMessageType.Warning,
+				                          StringTools.ConcatenateWithDelimiter( " ",
+				                                                                new[]
+				                                                                	{
+				                                                                		"We've detected that you are not using the latest version of your browser.",
+				                                                                		"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
+				                                                                	} ) + "<br/>" +
+				                          NetTools.BuildBasicLink( "Click here to get Internet Explorer 9 (it's free)",
+				                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
+				                                                   true ) + "<br/>" +
+				                          NetTools.BuildBasicLink( "Click here to get Firefox (it's free)",
+				                                                   new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(),
+				                                                   true ) );
+			}
+			StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 		}
 
 		private Control getGlobalBlock() {

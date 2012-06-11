@@ -86,8 +86,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
-			if( EwfPage.Instance.StatusMessages.Any() )
-				ph2.AddControlsReturnThis( getStatusMessageDialog() );
+			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog().ToArray() ) );
 
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );
@@ -106,7 +105,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 			       	{ CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
 		}
 
-		private static Control getStatusMessageDialog() {
+		private static IEnumerable<Control> getStatusMessageDialog() {
+			if( !EwfPage.Instance.StatusMessages.Any() )
+				yield break;
+
 			var list = ControlStack.Create( true );
 			list.AddControls(
 				EwfPage.Instance.StatusMessages.Select(
@@ -118,12 +120,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 									? CssElementCreator.StatusMessageDialogControlListInfoItemCssClass
 									: CssElementCreator.StatusMessageDialogControlListWarningItemCssClass,
 							Text = i.Item2
-						} ).ToArray() );
+						} as Control ).ToArray() );
 
 			if( EwfPage.Instance.StatusMessages.Any( i => i.Item1 == StatusMessageType.Warning ) )
 				list.AddControls( new CustomButton( "fadeOutStatusMessageDialog( 0 )" ) { ActionControlStyle = new ButtonActionControlStyle( "OK" ) } );
 
-			return new Block( list ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass };
+			yield return new Block( list ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass };
 		}
 	}
 }

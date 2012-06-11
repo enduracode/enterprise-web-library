@@ -73,17 +73,6 @@ ewfActionControlAllStylesStatesWithHover.ewfNewness {
 	color: #ff5500;
 }
 
-/* IE6 warning */
-div.ewfIeWarningBanner {
-	background-color: #995555;
-}
-div.ewfIeWarningBanner ewfActionControlAllStylesAllStates {
-	color: Black;
-}
-div.ewfIeWarningBanner ewfActionControlAllStylesStatesWithHover {
-	color: Maroon;
-}
-
 /* entity nav and action block */
 ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
 	color: #336699;

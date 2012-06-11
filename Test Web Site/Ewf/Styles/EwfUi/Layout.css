@@ -265,13 +265,3 @@ ewfUiContentFootBlock {
 div.ewfButtonsBottomBorder {
 	height: 1px;
 }
-
-/* IE6 warning */
-div.ewfIeWarningBanner {
-	padding: 6px;
-	margin-bottom: 6px;
-}
-div.ewfIeWarningBanner ewfActionControlAllStylesAllStates {
-	font-size: 1.5em;
-	font-weight: bold;
-}
