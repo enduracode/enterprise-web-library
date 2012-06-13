@@ -194,7 +194,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			ActionControlStyle.SetUpControl( this, text.Any() ? text : url, width, height, setWidth );
 
-			if( navigatePageInfo.AlternativeMode is DisabledPageMode ) {
+			if( navigatePageInfo != null && navigatePageInfo.AlternativeMode is DisabledPageMode ) {
 				var message = ( navigatePageInfo.AlternativeMode as DisabledPageMode ).Message;
 				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
 			}
