@@ -7,9 +7,12 @@ namespace RedStapler.StandardLibrary {
 	/// Provides helpful DateTime methods.
 	/// </summary>
 	public static class DateTimeTools {
+		internal static readonly string[] DayMonthYearFormats = new[] { dayMonthYearFormatLz, dayMonthYearFormat };
 		internal static readonly string[] MonthDayYearFormats = new[] { monthDayYearFormat, "MM/dd/yy" };
 		internal const string HourAndMinuteFormat = "h:mmt";
 
+		private const string dayMonthYearFormatLz = "dd MMM yyyy";
+		private const string dayMonthYearFormat = "d MMM yyyy";
 		private const string monthDayYearFormat = "MM/dd/yyyy";
 
 		/// <summary>
@@ -24,7 +27,7 @@ namespace RedStapler.StandardLibrary {
 		/// Formats the date portion of the specified date/time in "day month year" style, e.g. 5 Apr 2008.
 		/// </summary>
 		public static string ToDayMonthYearString( this DateTime dateTime, bool useLeadingZero ) {
-			return dateTime.ToString( ( useLeadingZero ? "dd" : "d" ) + " MMM yyyy" );
+			return dateTime.ToString( useLeadingZero ? dayMonthYearFormatLz : dayMonthYearFormat );
 		}
 
 		/// <summary>

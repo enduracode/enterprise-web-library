@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Aspose.Cells;
 using RedStapler.StandardLibrary.Validation;
 
@@ -86,7 +87,12 @@ namespace RedStapler.StandardLibrary.IO {
 				setOrAddCellStyle( cell, false, bold: bold, textWrapped: true );
 
 				var v = new Validator();
-				var detectedDate = v.GetNullableSqlSmallDateTime( new ValidationErrorHandler( "" ), cellValue, false );
+				var detectedDate = v.GetNullableDateTime( new ValidationErrorHandler( "" ),
+				                                          cellValue,
+				                                          DateTimeTools.DayMonthYearFormats.Concat( DateTimeTools.MonthDayYearFormats ).ToArray(),
+				                                          false,
+				                                          DateTime.MinValue,
+				                                          DateTime.MaxValue );
 				if( !v.ErrorsOccurred ) {
 					setOrAddCellStyle( cell, false, date: true );
 					cell.PutValue( detectedDate );
