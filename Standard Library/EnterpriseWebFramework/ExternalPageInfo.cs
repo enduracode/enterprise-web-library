@@ -9,7 +9,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly string name;
 
 		/// <summary>
-		/// Creates an ExternalPageInfo. Do not pass null for url or uriFragmentIdentifier or name.
+		/// Creates an ExternalPageInfo. Do not pass null or the empty string for url. Do not pass null for uriFragmentIdentifier or name.
 		/// </summary>
 		public ExternalPageInfo( string url, string uriFragmentIdentifier = "", string name = "" ) {
 			this.url = url;

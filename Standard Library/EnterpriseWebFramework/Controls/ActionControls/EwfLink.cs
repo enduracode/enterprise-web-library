@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -172,28 +174,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// with no autopostback that has a change event that calls ValidateFormsValuesAndModifyData. We cannot think of a reasonable case where this would happen.
 		/// </summary>
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
-			var finalNavigateUrl = "";
-			if( navigatePageInfo != null )
-				finalNavigateUrl = navigatePageInfo.GetUrl();
-			if( finalNavigateUrl.Length > 0 )
-				Attributes.Add( "href", this.GetClientUrl( finalNavigateUrl ) );
+			var url = "";
+			if( navigatePageInfo != null && !( navigatePageInfo.AlternativeMode is DisabledPageMode ) ) {
+				url = navigatePageInfo.GetUrl();
+				Attributes.Add( "href", this.GetClientUrl( url ) );
+			}
 
-			if( isPostBackButton && finalNavigateUrl.Length > 0 )
+			if( isPostBackButton && url.Any() )
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( this, true ) );
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );
-			if( popUpWindowSettings != null && finalNavigateUrl.Length > 0 )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick,
-				                               JsWritingMethods.GetPopUpWindowScript( finalNavigateUrl, this, popUpWindowSettings ) + " return false" );
-			if( navigatesInOpeningWindow ) {
-				var openingWindowNavigationScript = finalNavigateUrl.Length > 0 ? "opener.document.location = '" + this.GetClientUrl( finalNavigateUrl ) + "'; " : "";
+			if( popUpWindowSettings != null && url.Any() )
+				this.AddJavaScriptEventScript( JsWritingMethods.onclick, JsWritingMethods.GetPopUpWindowScript( url, this, popUpWindowSettings ) + " return false" );
+			if( navigatesInOpeningWindow && ( navigatePageInfo == null || url.Any() ) ) {
+				var openingWindowNavigationScript = navigatePageInfo != null ? "opener.document.location = '" + this.GetClientUrl( url ) + "'; " : "";
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, openingWindowNavigationScript + "window.close(); return false" );
 			}
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, text.Length > 0 ? text : finalNavigateUrl, width, height, setWidth );
+			ActionControlStyle.SetUpControl( this, text.Any() ? text : url, width, height, setWidth );
 
-			if( ToolTip != null || ToolTipControl != null )
+			if( navigatePageInfo.AlternativeMode is DisabledPageMode ) {
+				var message = ( navigatePageInfo.AlternativeMode as DisabledPageMode ).Message;
+				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
+			}
+			else if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}
 
