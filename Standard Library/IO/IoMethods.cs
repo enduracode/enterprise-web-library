@@ -180,7 +180,9 @@ namespace RedStapler.StandardLibrary.IO {
 		}
 
 		public static void ExecuteWithTempFolder( Action<string> method ) {
+			// NOTE: What if GetRandomFileName returns a string that's already in use? We could be overwriting and deleting another application's data!
 			var folderPath = StandardLibraryMethods.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
+
 			Directory.CreateDirectory( folderPath );
 			try {
 				method( folderPath );
