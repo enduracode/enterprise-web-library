@@ -116,6 +116,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeNumberAsSelectListFormItemGetters( writer, field, "int?", "validator.GetInt( new ValidationErrorHandler( subject ), control.Value )" );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
+				writeFormItemGetters( writer,
+				                      field,
+				                      "DurationPicker",
+				                      "Duration",
+				                      "int",
+				                      "0",
+				                      new CSharpParameter[ 0 ],
+				                      new CSharpParameter[ 0 ],
+				                      new CSharpParameter[ 0 ],
+				                      new CSharpParameter[ 0 ],
+				                      "new DurationPicker( System.TimeSpan.FromSeconds( (int)v ) )",
+				                      "(int)control.ValidateAndGetPostBackDuration( postBackValues, validator, new ValidationErrorHandler( subject ) ).TotalSeconds",
+				                      "true" );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
 				writeNumberAsTextFormItemGetters( writer,
