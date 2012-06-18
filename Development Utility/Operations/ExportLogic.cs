@@ -209,7 +209,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				const string duProjectAndFolderName = "Development Utility";
 				IoMethods.CopyFolder(
-					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
+					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+					                                     duProjectAndFolderName,
+					                                     StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) ),
 					StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
 					false );
 				packageGeneralFiles( installation, folderPath, false );
