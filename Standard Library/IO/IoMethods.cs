@@ -180,10 +180,15 @@ namespace RedStapler.StandardLibrary.IO {
 		}
 
 		public static void ExecuteWithTempFolder( Action<string> method ) {
-			// NOTE: What if GetRandomFileName returns a string that's already in use? We could be overwriting and deleting another application's data!
-			var folderPath = StandardLibraryMethods.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
-
+			// There is a race condition here: another process could create a directory after we check if our folder path exists, but before we create the folder. See
+			// http://stackoverflow.com/a/217198/35349. We believe this is unlikely and is an acceptable risk.
+			string folderPath;
+			do {
+				folderPath = StandardLibraryMethods.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
+			}
+			while( File.Exists( folderPath ) || Directory.Exists( folderPath ) );
 			Directory.CreateDirectory( folderPath );
+
 			try {
 				method( folderPath );
 			}
