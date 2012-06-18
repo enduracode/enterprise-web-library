@@ -68,9 +68,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				var oracleInfo = databaseInfo as OracleInfo;
 				connectionString = "Data Source=" + oracleInfo.DataSource + "; User Id=" + oracleInfo.UserAndSchema + "; Password=" + oracleInfo.Password +
 				                   ( oracleInfo.UserAndSchema == "sys" ? "; DBA Privilege=SYSDBA" : "" );
-				//if( !oracleInfo.SupportsConnectionPooling )
-				// IMPORTANT: Re-enable above condition when MIT servers have Oracle updated.
-				connectionString = StringTools.ConcatenateWithDelimiter( "; ", connectionString, "Pooling=false" );
+				if( !oracleInfo.SupportsConnectionPooling )
+					connectionString = StringTools.ConcatenateWithDelimiter( "; ", connectionString, "Pooling=false" );
 			}
 			else
 				throw new ApplicationException( "Invalid database information object type." );
