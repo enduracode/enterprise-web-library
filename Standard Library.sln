@@ -50,4 +50,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NDepend) = preSolution
+		Project = ".\Standard Library.ndproj"
+	EndGlobalSection
 EndGlobal

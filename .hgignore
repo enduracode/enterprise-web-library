@@ -4,6 +4,7 @@ Standard Library.suo
 packages/
 _ReSharper*
 Standard Library.sln.DotSettings.user
+NDependOut/
 Logic Packages/
 Error Log.txt
 *.csproj.user
