@@ -274,7 +274,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public int CurrentItemLimit { get { return EwfPage.Instance.PageState.GetValue( this, itemLimitPageStateKey, (int)defaultItemLimit ); } }
 
 		/// <summary>
-		/// Adds all of the given data to the table, translating each piece of data into an EwfTableItem using the given itemSelector.
+		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If
+		/// enumerating the data is expensive, this call will be slow. The data must be enumerated so the table can show the total number of items.
 		/// </summary>
 		public void AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem> itemSelector ) {
 			data.ToList().ForEach( d => AddItem( () => itemSelector( d ) ) );
