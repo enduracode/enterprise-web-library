@@ -33,7 +33,6 @@
     <Dir>C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\Standard Library\bin\Debug</Dir>
     <Dir>C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\Development Utility\bin\Debug</Dir>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319</Dir>
-    <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319\WPF</Dir>
     <Dir>C:\Windows\System32\inetsrv</Dir>
   </Dirs>
   <Report Kind="0" SectionsEnabled="12287" XslPath="" Flags="64512">
