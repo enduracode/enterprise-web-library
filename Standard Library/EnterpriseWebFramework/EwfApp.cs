@@ -56,6 +56,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			executeWithBasicExceptionHandling( delegate {
 				webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
 
+				// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
+				MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
+
 				GlobalType = GetType().BaseType;
 				MetaLogicFactory =
 					GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".Ewf.MetaLogicFactory" ) as
