@@ -3,7 +3,7 @@ using System.Linq;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
+namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class DevelopmentInstallationLogic {
 		public const string SystemDevelopmentConfigurationFileName = "Development.xml";
 

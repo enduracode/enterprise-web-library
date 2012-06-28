@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
+﻿namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class GeneralInstallationLogic {
 		private readonly string path;
 

@@ -8,7 +8,7 @@ using System.ServiceProcess;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
+namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel.Logic {
+namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class RecognizedInstallationLogic {
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 		private readonly KnownSystemLogic knownSystemLogic;
