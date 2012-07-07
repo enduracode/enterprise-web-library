@@ -10,7 +10,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private const string cookieValue = "213aslkja23w09fua90zo9735";
 
 		internal static bool CookieExists() {
-			var cookie = NetTools.GetCookie( cookieName );
+			var cookie = HttpContext.Current.Request.Cookies[ cookieName ];
 			return cookie != null && cookie.Value == cookieValue;
 		}
 

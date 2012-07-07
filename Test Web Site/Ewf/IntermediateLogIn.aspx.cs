@@ -31,7 +31,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSi
 			var passwordMatch = password.Value == AppTools.SystemProvider.IntermediateLogInPassword;
 			if( !passwordMatch )
 				throw new EwfException( "Incorrect password." );
+
 			IntermediateAuthenticationMethods.SetCookie();
+			AppRequestState.Instance.IntermediateUserExists = true;
+
 			return info.ReturnUrl;
 		}
 	}
