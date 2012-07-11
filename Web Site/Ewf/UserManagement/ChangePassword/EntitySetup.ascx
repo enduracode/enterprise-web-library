@@ -1,1 +1,1 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="EntitySetup.ascx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.UserManagement.ChangePassword.EntitySetup" %>
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="EntitySetup.ascx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword.EntitySetup" %>

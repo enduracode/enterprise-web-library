@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.WebFileSending;
 
 // Parameter: string text
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class GetImage: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

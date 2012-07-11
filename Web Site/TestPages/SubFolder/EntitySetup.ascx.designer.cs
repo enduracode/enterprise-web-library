@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RedStapler.TestWebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
     
     
     public partial class EntitySetup {

@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.WebFileSending;
 
 // Parameter: string fileName
 
-namespace RedStapler.TestWebSite {
+namespace EnterpriseWebLibrary.WebSite {
 	public partial class GetSchema: EwfPage {
 		partial class Info {
 			internal string FilePath { get; private set; }

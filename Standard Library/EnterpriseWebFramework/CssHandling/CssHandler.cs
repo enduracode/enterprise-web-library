@@ -24,7 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 		/// </summary>
 		public static string CombineNamespacesAndProcessEwfIfNecessary( string appNamespace, string appRelativeNamespace ) {
 			if( appRelativeNamespace.StartsWith( "Ewf." ) )
-				return "RedStapler.StandardLibrary.EnterpriseWebFramework" + "." + appNamespace + ".Ewf." + appRelativeNamespace.Substring( 4 );
+				return "RedStapler.StandardLibrary.EnterpriseWebFramework" + "." + appNamespace + "." + appRelativeNamespace.Substring( 4 );
 
 			// App-relative namespace can be empty when this method is called from the ISU.
 			return appNamespace + appRelativeNamespace.PrependDelimiter( "." );

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	internal class MetaLogicFactory: AppMetaLogicFactory {
 		PageInfo AppMetaLogicFactory.GetIntermediateLogInPageInfo( string returnUrl ) {
 			return new IntermediateLogIn.Info( returnUrl );

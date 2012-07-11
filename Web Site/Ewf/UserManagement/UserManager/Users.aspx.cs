@@ -3,7 +3,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.UserManagement.UserManager {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.UserManager {
 	public partial class Users: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

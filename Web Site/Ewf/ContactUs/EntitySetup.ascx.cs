@@ -4,7 +4,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ContactUs {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

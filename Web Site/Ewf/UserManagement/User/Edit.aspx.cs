@@ -3,7 +3,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.Validation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.UserManagement.UserNs {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.UserNs {
 	public partial class Edit: EwfPage, DataModifierWithRightButton {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

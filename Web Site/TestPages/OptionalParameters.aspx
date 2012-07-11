@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="OptionalParameters.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.OptionalParameters"
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="OptionalParameters.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.OptionalParameters"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">

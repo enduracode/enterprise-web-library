@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="ExcelManipulation.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.ExcelManipulation" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" CodeBehind="ExcelManipulation.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ExcelManipulation" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="contentPlace">
 	<ewf:StaticTable runat="server" IsForm="true">

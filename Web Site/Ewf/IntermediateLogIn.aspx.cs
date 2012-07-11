@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.Validation;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class IntermediateLogIn: EwfPage, DataModifierWithRightButton {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {

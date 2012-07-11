@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ChecklistDemo.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.ChecklistDemo" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ChecklistDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ChecklistDemo" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">
 	<ewf:BlockCheckBox runat="server" Text="IE Display-linking checklist problem"><ewf:BlockCheckBox runat="server" Text="Checkthis">

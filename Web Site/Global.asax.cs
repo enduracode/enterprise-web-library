@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.TestWebSite.TestPages;
+using EnterpriseWebLibrary.WebSite.TestPages;
 
-namespace RedStapler.TestWebSite {
+namespace EnterpriseWebLibrary.WebSite {
 	public class Global: EwfApp {
 		// These methods exist because there is no way to hook into these events from within EWF.
 		protected void Application_Start( object sender, EventArgs e ) {

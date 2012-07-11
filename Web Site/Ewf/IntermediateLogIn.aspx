@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="IntermediateLogIn.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.IntermediateLogIn"
+<%@ Page Language="C#" CodeBehind="IntermediateLogIn.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.IntermediateLogIn"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="contentPlace">

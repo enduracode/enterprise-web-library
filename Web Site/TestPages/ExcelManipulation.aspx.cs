@@ -4,7 +4,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class ExcelManipulation: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class FormFieldDemo: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

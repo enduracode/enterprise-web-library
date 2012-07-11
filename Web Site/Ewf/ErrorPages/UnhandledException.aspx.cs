@@ -2,7 +2,7 @@ using RedStapler.StandardLibrary.DataAccess;
 
 // Parameter: string dummy
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ErrorPages {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	public partial class UnhandledException: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

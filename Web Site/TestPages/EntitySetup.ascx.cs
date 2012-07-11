@@ -11,7 +11,7 @@ using RedStapler.StandardLibrary.WebSessionState;
 
 // OptionalParameter: string someText
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

@@ -61,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				GlobalType = GetType().BaseType;
 				MetaLogicFactory =
-					GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".Ewf.MetaLogicFactory" ) as
+					GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
 					AppMetaLogicFactory;
 				if( MetaLogicFactory == null )
 					throw new ApplicationException( "Meta logic factory not found." );

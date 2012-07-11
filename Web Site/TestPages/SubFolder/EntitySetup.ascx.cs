@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 
-namespace RedStapler.TestWebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		public partial class Info: TabModeOverrider {
 			protected override void init( DBConnection cn ) {}

@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="PageNotAvailable.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ErrorPages.PageNotAvailable"
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="PageNotAvailable.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.PageNotAvailable"
 	MasterPageFile="ErrorPage.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">

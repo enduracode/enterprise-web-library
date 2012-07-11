@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="TwoWeekCalendarTest.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.TwoWeekCalendarTest" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" CodeBehind="TwoWeekCalendarTest.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.TwoWeekCalendarTest" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="contentPlace">
 	<h1>This weeks MonthViewCalendar</h1>

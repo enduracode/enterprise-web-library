@@ -1,1 +1,1 @@
-<%@ Application Codebehind="Global.asax.cs" Inherits="RedStapler.TestWebSite.Global" Language="C#" %>
+<%@ Application Codebehind="Global.asax.cs" Inherits="EnterpriseWebLibrary.WebSite.Global" Language="C#" %>

@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 // Parameter: DateTime date
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class TwoWeekCalendarTest: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

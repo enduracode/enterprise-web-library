@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="Ajax.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.Ajax" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" CodeBehind="Ajax.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.Ajax" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <%@ Register Assembly="System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Namespace="System.Web.UI" TagPrefix="asp" %>
 

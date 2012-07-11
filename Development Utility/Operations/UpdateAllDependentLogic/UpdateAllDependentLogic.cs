@@ -116,7 +116,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private static string customizeNamespace( string text, WebProject webProject ) {
-			return text.Replace( "RedStapler.TestWebSite", webProject.@namespace );
+			return text.Replace( "EnterpriseWebLibrary.WebSite", webProject.@namespace );
 		}
 
 		private static void generateAssemblyInfoCodeFile( DevelopmentInstallation installation, string projectName, string projectNameForAssemblyInfo ) {

@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 // Parameter: int? userId
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.UserManagement.UserNs {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.UserNs {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
 			public User User { get; private set; }

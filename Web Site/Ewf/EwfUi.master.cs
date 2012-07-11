@@ -15,7 +15,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string BodyCssClass = "ewf";

@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
 using RedStapler.StandardLibrary.Validation;
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class Email: EwfPage, DataModifierWithRightButton {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

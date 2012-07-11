@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="DynamicTableDemo.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.DynamicTableDemo"
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="DynamicTableDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.DynamicTableDemo"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">

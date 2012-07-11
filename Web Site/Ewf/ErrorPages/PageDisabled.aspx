@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="PageDisabled.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ErrorPages.PageDisabled"
+<%@ Page Language="C#" CodeBehind="PageDisabled.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.PageDisabled"
 	MasterPageFile="ErrorPage.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">

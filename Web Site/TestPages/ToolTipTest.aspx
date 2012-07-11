@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ToolTipTest.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.ToolTipTest" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ToolTipTest.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ToolTipTest" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">
 	<asp:PlaceHolder runat="server" ID="ph" /><ewf:EwfLabel runat="server" ID="label" Text="Label with ToolTip" />

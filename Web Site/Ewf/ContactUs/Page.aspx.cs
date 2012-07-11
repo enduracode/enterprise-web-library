@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.WebSessionState;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ContactUs {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	public partial class Page: EwfPage, DataModifierWithRightButton {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

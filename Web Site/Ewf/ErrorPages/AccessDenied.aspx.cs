@@ -3,7 +3,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 // Parameter: bool showHomeLink
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ErrorPages {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	public partial class AccessDenied: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

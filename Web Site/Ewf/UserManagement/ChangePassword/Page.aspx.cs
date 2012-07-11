@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.UserManagement.ChangePassword {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
 	public partial class Page: EwfPage, DataModifierWithRightButton {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

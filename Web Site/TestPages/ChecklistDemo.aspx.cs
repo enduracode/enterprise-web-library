@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.Validation;
 
 // OptionalParameter: string checkList
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class ChecklistDemo: EwfPage, AutoDataModifier {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}

@@ -3,7 +3,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class GetFile: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {

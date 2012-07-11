@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RedStapler.TestWebSite {
+namespace EnterpriseWebLibrary.WebSite {
     
     
     public partial class GetSchema {

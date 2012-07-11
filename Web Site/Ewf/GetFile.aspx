@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="GetFile.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.GetFile"
+<%@ Page Language="C#" CodeBehind="GetFile.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.GetFile"
 	MasterPageFile="BasicPage.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="head" />

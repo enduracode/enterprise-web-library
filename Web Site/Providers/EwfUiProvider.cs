@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using EnterpriseWebLibrary.WebSite.TestPages;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.WebSessionState;
-using RedStapler.TestWebSite.TestPages;
 
-namespace RedStapler.TestWebSite.Providers {
+namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
 		public override List<ActionButtonSetup> GetGlobalNavActionControls() {
 			var navButtonSetups = new List<ActionButtonSetup>();
@@ -15,7 +15,7 @@ namespace RedStapler.TestWebSite.Providers {
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
 			navButtonSetups.Add( new ActionButtonSetup( "Contact us",
 			                                            new EwfLink(
-			                                            	StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf.ContactUs.Page.GetInfo(
+			                                            	RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo(
 			                                            		EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
 
 			var menu = EwfTable.Create();

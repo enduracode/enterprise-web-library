@@ -2,7 +2,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 
-namespace RedStapler.TestWebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	public partial class New: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

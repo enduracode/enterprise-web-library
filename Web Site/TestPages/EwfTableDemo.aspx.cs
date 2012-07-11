@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class EwfTableDemo: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

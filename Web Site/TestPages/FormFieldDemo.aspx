@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormFieldDemo.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.FormFieldDemo" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormFieldDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.FormFieldDemo" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">
 	<ewf:StaticTable runat="server" IsForm="true">

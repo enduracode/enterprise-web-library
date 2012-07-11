@@ -8,7 +8,7 @@ using System;
 // OptionalParameter: string returnUrl
 // OptionalParameter: DateTime date
 
-namespace RedStapler.TestWebSite.TestPages {
+namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class CalendarDemo: EwfPage, PageWithRightButton {
 		partial class Info {
 			partial void initDefaultOptionalParameterPackage( OptionalParameterPackage package ) {

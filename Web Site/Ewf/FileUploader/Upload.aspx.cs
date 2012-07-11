@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.WebFileSending;
 
-namespace RedStapler.TestWebSite.Ewf.FileUploader {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader {
 	public partial class Upload: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {}

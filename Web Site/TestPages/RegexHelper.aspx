@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="RegexHelper.aspx.cs" Inherits="RedStapler.TestWebSite.TestPages.RegexHelper" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" CodeBehind="RegexHelper.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.RegexHelper" MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="contentPlace">
 	<ewf:ControlStack runat="server" IsStandard="true">

@@ -9,7 +9,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.RedStapler.TestWebSite.Ewf {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader {
 		internal class CssElementCreator: ControlCssElementCreator {
 			// Some of these are used by the Standard Library JavaScript file.
