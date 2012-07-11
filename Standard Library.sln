@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standard Library", "Standard Library\Standard Library.csproj", "{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test Web Site", "Test Web Site\Test Web Site.csproj", "{1FEF500E-B420-42D6-8702-D998CDF65C23}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web Site", "Web Site\Web Site.csproj", "{1FEF500E-B420-42D6-8702-D998CDF65C23}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Red Stapler Library Tester", "Red Stapler Library Tester\Red Stapler Library Tester.csproj", "{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}"
 EndProject
