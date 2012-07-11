@@ -30,7 +30,5 @@ namespace RedStapler.TestWebSite {
 		protected override List<CssInfo> GetStyleSheets() {
 			return new List<CssInfo> { new Test.Info() };
 		}
-
-		public override string AppDisplayName { get { return "Test Web Site"; } }
 	}
 }
