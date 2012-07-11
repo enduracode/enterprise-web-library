@@ -198,12 +198,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
 				                    StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
 
-				var testWebSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
+				var webSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
 				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
-				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.EwfFolderName ),
+				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.EwfFolderName ),
 				                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
 				                      false );
-				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( testWebSitePath, AppStatics.StandardLibraryFilesFileName ),
+				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
 				                    StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
 
 				const string duProjectAndFolderName = "Development Utility";
