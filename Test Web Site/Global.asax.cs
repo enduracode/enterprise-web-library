@@ -19,6 +19,12 @@ namespace RedStapler.TestWebSite {
 
 		protected override IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers() {
 			yield return new ShortcutUrlResolver( "", ConnectionSecurity.SecureIfPossible, () => ActionControls.GetInfo() );
+
+			foreach( var i in GlobalLogic.ConfigurationXsdFileNames ) {
+				var fileName = i;
+				yield return new ShortcutUrlResolver( "ConfigurationSchemas/" + fileName.ToPascalCase(), ConnectionSecurity.NonSecure, () => GetSchema.GetInfo( fileName ) )
+					;
+			}
 		}
 
 		protected override List<CssInfo> GetStyleSheets() {

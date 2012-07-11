@@ -87,6 +87,13 @@
       <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\MetaLogicFactory.cs" />
+    <Compile Include="GetSchema.aspx.cs">
+      <DependentUpon>GetSchema.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GetSchema.aspx.designer.cs">
+      <DependentUpon>GetSchema.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Providers\EwfUiProvider.cs" />
     <Compile Include="Service\IService.cs" />
     <Compile Include="Service\Service.svc.cs">
@@ -648,6 +655,7 @@
     <Content Include="Ewf\Styles\ToDeleteOrMove.css" />
     <Content Include="Ewf\TimePicker\JavaScript.js" />
     <Content Include="Ewf\TimePicker\Styles.css" />
+    <Content Include="GetSchema.aspx" />
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>

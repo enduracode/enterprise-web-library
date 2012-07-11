@@ -6,7 +6,6 @@ namespace RedStapler.StandardLibrary {
 	/// Includes the period prefix.
 	/// </summary>
 	public class FileExtensions {
-
 		/// <summary>
 		/// An APK file.
 		/// </summary>
@@ -81,6 +80,11 @@ namespace RedStapler.StandardLibrary {
 		/// An XML file.
 		/// </summary>
 		public const string Xml = ".xml";
+
+		/// <summary>
+		/// An XML Schema file.
+		/// </summary>
+		public const string Xsd = ".xsd";
 
 		/// <summary>
 		/// A ZIP file.

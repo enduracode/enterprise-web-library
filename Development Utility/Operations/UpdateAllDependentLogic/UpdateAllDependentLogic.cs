@@ -39,16 +39,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			                                                   installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
 			                                                   true );
 
-			if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				try {
-					copyInStandardLibraryFiles( installation );
-				}
-				catch( Exception e ) {
-					const string message = "Failed to copy Standard Library files into the installation. Please try the operation again.";
-					if( e is UnauthorizedAccessException || e is IOException )
-						throw new UserCorrectableException( message, e );
-					throw new ApplicationException( message, e );
-				}
+			try {
+				copyInEwlFiles( installation );
+			}
+			catch( Exception e ) {
+				const string message = "Failed to copy Standard Library files into the installation. Please try the operation again.";
+				if( e is UnauthorizedAccessException || e is IOException )
+					throw new UserCorrectableException( message, e );
+				throw new ApplicationException( message, e );
 			}
 
 			// Generate code.
@@ -68,19 +66,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
 		}
 
-		private static void copyInStandardLibraryFiles( DevelopmentInstallation installation ) {
-			var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, "Aspose.Total.lic" );
-			if( File.Exists( asposeLicenseFilePath ) ) {
-				IoMethods.CopyFile( asposeLicenseFilePath,
-				                    StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-				                                                         InstallationFileStatics.FilesFolderName,
-				                                                         "Aspose.Total.lic" ) );
+		private static void copyInEwlFiles( DevelopmentInstallation installation ) {
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+				foreach( var fileName in GlobalLogic.ConfigurationXsdFileNames ) {
+					IoMethods.CopyFile(
+						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", "Configuration", fileName + FileExtensions.Xsd ),
+						StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+						                                     InstallationFileStatics.FilesFolderName,
+						                                     fileName + FileExtensions.Xsd ) );
+				}
 			}
+			else {
+				var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, "Aspose.Total.lic" );
+				if( File.Exists( asposeLicenseFilePath ) ) {
+					IoMethods.CopyFile( asposeLicenseFilePath,
+					                    StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+					                                                         InstallationFileStatics.FilesFolderName,
+					                                                         "Aspose.Total.lic" ) );
+				}
 
-			// If web projects exist for this installation, copy appropriate files into them from the Test Web Site.
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
-				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
-					copyInWebProjectFiles( installation, webProject );
+				// If web projects exist for this installation, copy appropriate files into them from the Test Web Site.
+				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
+					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
+						copyInWebProjectFiles( installation, webProject );
+				}
 			}
 		}
 

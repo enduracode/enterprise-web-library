@@ -16,6 +16,7 @@ Development Utility/Generated Code/
 
 Library/bin/
 Library/obj/
+Library/Files/*.xsd
 Library/Generated Code/
 
 Red Stapler Library Tester/bin/
