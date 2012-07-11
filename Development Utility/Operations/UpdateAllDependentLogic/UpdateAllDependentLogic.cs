@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					                                                         "Aspose.Total.lic" ) );
 				}
 
-				// If web projects exist for this installation, copy appropriate files into them from the Test Web Site.
+				// If web projects exist for this installation, copy appropriate files into them.
 				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
 					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
 						copyInWebProjectFiles( installation, webProject );
