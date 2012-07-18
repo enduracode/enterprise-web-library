@@ -31,8 +31,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				}
 				catch( Exception e ) {
 					Output.WriteTimeStampedError( e.ToString() );
-					if( !( e is UserCorrectableException ) )
-						throw;
+					if( e is UserCorrectableException )
+						throw new DoNotEmailOrLogException();
+					throw;
 				}
 			} );
 		}

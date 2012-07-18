@@ -523,9 +523,9 @@ namespace RedStapler.StandardLibrary {
 
 		/// <summary>
 		/// Executes the specified method. Returns 0 if it is successful. If an exception occurs, this method returns 1 and details about the exception are emailed
-		/// to the developers and logged.
-		/// This should only be used at the root level of a console application because it checks to ensure the system logic has initialized properly and its
-		/// return code is designed to be useful from the command line of such an application.
+		/// to the developers and logged. This should only be used at the root level of a console application because it checks to ensure the system logic has
+		/// initialized properly and its return code is designed to be useful from the command line of such an application. Throw a DoNotEmailOrLogException to
+		/// cause this method to return 1 without emailing or logging the exception.
 		/// </summary>
 		public static int ExecuteAppWithStandardExceptionHandling( Action method ) {
 			assertClassInitialized();
@@ -536,7 +536,8 @@ namespace RedStapler.StandardLibrary {
 				method();
 			}
 			catch( Exception e ) {
-				EmailAndLogError( e );
+				if( !( e is DoNotEmailOrLogException ) )
+					EmailAndLogError( e );
 				return 1;
 			}
 			return 0;
