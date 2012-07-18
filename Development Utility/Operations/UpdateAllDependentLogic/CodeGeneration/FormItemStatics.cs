@@ -113,7 +113,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  "int?",
 				                                  new[] { new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
 				                                  "validator.GetInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "int?", "validator.GetInt( new ValidationErrorHandler( subject ), control.Value )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "int?",
+				                                        new CSharpParameter[ 0 ],
+				                                        "validator.GetInt( new ValidationErrorHandler( subject ), control.Value )" );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
 				writeFormItemGetters( writer,
@@ -136,7 +140,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  "int?",
 				                                  getAllowEmptyParameter( true ).ToSingleElementArray(),
 				                                  "validator.GetNullableInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "int?", "validator.GetNullableInt( new ValidationErrorHandler( subject ), control.Value, true )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "int?",
+				                                        getAllowEmptyParameter( true ).ToSingleElementArray(),
+				                                        "validator.GetNullableInt( new ValidationErrorHandler( subject ), control.Value, allowEmpty )" );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 			}
 
@@ -146,7 +154,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  "short?",
 				                                  new[] { new CSharpParameter( "short", "min", "short.MinValue" ), new CSharpParameter( "short", "max", "short.MaxValue" ) },
 				                                  "validator.GetShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "short?", "validator.GetShort( new ValidationErrorHandler( subject ), control.Value )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "short?",
+				                                        new CSharpParameter[ 0 ],
+				                                        "validator.GetShort( new ValidationErrorHandler( subject ), control.Value )" );
 			}
 			if( field.TypeIs( typeof( short? ) ) ) {
 				writeNumberAsTextFormItemGetters( writer,
@@ -158,7 +170,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  		new CSharpParameter( "short", "max", "short.MaxValue" )
 				                                  	},
 				                                  "validator.GetNullableShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "short?", "validator.GetNullableShort( new ValidationErrorHandler( subject ), control.Value, true )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "short?",
+				                                        getAllowEmptyParameter( true ).ToSingleElementArray(),
+				                                        "validator.GetNullableShort( new ValidationErrorHandler( subject ), control.Value, allowEmpty )" );
 			}
 
 			if( field.TypeIs( typeof( byte ) ) ) {
@@ -167,7 +183,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  "byte?",
 				                                  new[] { new CSharpParameter( "byte", "min", "byte.MinValue" ), new CSharpParameter( "byte", "max", "byte.MaxValue" ) },
 				                                  "validator.GetByte( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "byte?", "validator.GetByte( new ValidationErrorHandler( subject ), control.Value )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "byte?",
+				                                        new CSharpParameter[ 0 ],
+				                                        "validator.GetByte( new ValidationErrorHandler( subject ), control.Value )" );
 			}
 			if( field.TypeIs( typeof( byte? ) ) ) {
 				writeNumberAsTextFormItemGetters( writer,
@@ -175,7 +195,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  "byte?",
 				                                  getAllowEmptyParameter( true ).ToSingleElementArray(),
 				                                  "validator.GetNullableByte( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "byte?", "validator.GetNullableByte( new ValidationErrorHandler( subject ), control.Value, true )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "byte?",
+				                                        getAllowEmptyParameter( true ).ToSingleElementArray(),
+				                                        "validator.GetNullableByte( new ValidationErrorHandler( subject ), control.Value, allowEmpty )" );
 			}
 
 			if( field.TypeIs( typeof( decimal ) ) ) {
@@ -188,7 +212,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  		new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
 				                                  	},
 				                                  "validator.GetDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
-				writeNumberAsSelectListFormItemGetters( writer, field, "decimal?", "validator.GetDecimal( new ValidationErrorHandler( subject ), control.Value )" );
+				writeNumberAsSelectListFormItemGetters( writer,
+				                                        field,
+				                                        "decimal?",
+				                                        new CSharpParameter[ 0 ],
+				                                        "validator.GetDecimal( new ValidationErrorHandler( subject ), control.Value )" );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
 			}
@@ -205,7 +233,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeNumberAsSelectListFormItemGetters( writer,
 				                                        field,
 				                                        "decimal?",
-				                                        "validator.GetNullableDecimal( new ValidationErrorHandler( subject ), control.Value, true )" );
+				                                        getAllowEmptyParameter( true ).ToSingleElementArray(),
+				                                        "validator.GetNullableDecimal( new ValidationErrorHandler( subject ), control.Value, allowEmpty )" );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
 		}
@@ -228,7 +257,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeNumberAsSelectListFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName,
-		                                                            string validationMethodExpressionOrBlock ) {
+		                                                            IEnumerable<CSharpParameter> optionalValidationParams, string validationMethodExpressionOrBlock ) {
 			writeFormItemGetters( writer,
 			                      field,
 			                      "EwfListControl",
@@ -242,7 +271,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      		new CSharpParameter( "EwfListControl.ListControlType", "listControlType", "EwfListControl.ListControlType.DropDownList" ),
 			                      		new CSharpParameter( "bool", "autoPostBack", "false" )
 			                      	},
-			                      new CSharpParameter[ 0 ],
+			                      optionalValidationParams,
 			                      "{ var control = new EwfListControl { Type = listControlType, AutoPostBack = autoPostBack }; itemAdder( control ); control.Value = v.ObjectToString( true ); return control; }",
 			                      validationMethodExpressionOrBlock,
 			                      "true" );
