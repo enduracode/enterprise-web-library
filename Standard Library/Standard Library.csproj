@@ -161,7 +161,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
-    <Compile Include="DoNotCommitException.cs" />
+    <Compile Include="DataAccess\DoNotCommitException.cs" />
     <Compile Include="Email\EmailAddress.cs" />
     <Compile Include="Email\EmailAttachment.cs" />
     <Compile Include="Email\EmailSendingException.cs" />
