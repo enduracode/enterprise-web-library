@@ -1,9 +1,8 @@
 using System;
 
-namespace RedStapler.StandardLibrary {
+namespace RedStapler.StandardLibrary.DataAccess {
 	/// <summary>
-	/// Use in AppTools.ExecuteInTransaction to roll back the transaction instead of committing it.
-	/// NOTE: Move to DataAccess subsystem.
+	/// Use in DataAccessMethods.ExecuteInTransaction to roll back the transaction instead of committing it.
 	/// </summary>
 	public class DoNotCommitException: ApplicationException {}
 }
