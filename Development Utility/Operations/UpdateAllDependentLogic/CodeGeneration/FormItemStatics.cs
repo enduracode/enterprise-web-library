@@ -377,9 +377,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                      "null",
 				                      new CSharpParameter[ 0 ],
 				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" ).ToSingleElementArray(),
+				                      new[]
+				                      	{
+				                      		new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
+				                      		new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
+				                      	},
 				                      getAllowEmptyParameter( true ).ToSingleElementArray(),
-				                      "new DatePicker( v ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange }",
+				                      "{ " +
+				                      StringTools.ConcatenateWithDelimiter( " ",
+				                                                            "var c = new DatePicker( v ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange };",
+				                                                            "if( minDate.HasValue ) c.MinDate = minDate.Value;",
+				                                                            "if( maxDate.HasValue ) c.MaxDate = maxDate.Value;",
+				                                                            "return c;" ) + " }",
 				                      "control.ValidateAndGetNullablePostBackDate( postBackValues, validator, new ValidationErrorHandler( subject ), allowEmpty )",
 				                      "true" );
 			}
@@ -392,9 +401,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                      "null",
 				                      new CSharpParameter[ 0 ],
 				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" ).ToSingleElementArray(),
+				                      new[]
+				                      	{
+				                      		new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
+				                      		new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
+				                      	},
 				                      new CSharpParameter[ 0 ],
-				                      "new DatePicker( v ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange }",
+				                      "{ " +
+				                      StringTools.ConcatenateWithDelimiter( " ",
+				                                                            "var c = new DatePicker( v ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange };",
+				                                                            "if( minDate.HasValue ) c.MinDate = minDate.Value;",
+				                                                            "if( maxDate.HasValue ) c.MaxDate = maxDate.Value;",
+				                                                            "return c;" ) + " }",
 				                      "control.ValidateAndGetPostBackDate( postBackValues, validator, new ValidationErrorHandler( subject ) )",
 				                      "true" );
 			}
