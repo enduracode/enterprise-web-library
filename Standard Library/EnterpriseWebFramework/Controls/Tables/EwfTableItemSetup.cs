@@ -43,15 +43,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			FieldOrItemSetup = new EwfTableFieldOrItemSetup( classes, size, textAlignment, verticalAlignment, clickScript, toolTip, toolTipControl );
 
 			if( tableLevelItemActions != null ) {
-				if( !tableLevelItemActions.Any() )
+				var tableLevelItemActionList = tableLevelItemActions.ToList();
+				if( !tableLevelItemActionList.Any() )
 					throw new ApplicationException();
-				TableLevelItemActions = tableLevelItemActions.ToList().AsReadOnly();
+				TableLevelItemActions = tableLevelItemActionList.AsReadOnly();
 			}
 
 			if( groupLevelItemActions != null ) {
-				if( !groupLevelItemActions.Any() )
+				var groupLevelItemActionList = groupLevelItemActions.ToList();
+				if( !groupLevelItemActionList.Any() )
 					throw new ApplicationException();
-				GroupLevelItemActions = groupLevelItemActions.ToList().AsReadOnly();
+				GroupLevelItemActions = groupLevelItemActionList.AsReadOnly();
 			}
 
 			RankId = rankId;

@@ -38,9 +38,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public EwfTableItem( EwfTableItemSetup setup, IEnumerable<EwfTableCell> cells ) {
 			Setup = setup ?? new EwfTableItemSetup();
 
-			if( !cells.Any() )
+			var cellList = cells.ToList();
+			if( !cellList.Any() )
 				throw new ApplicationException( "Cell array must have at least one item." );
-			Cells = cells.ToList().AsReadOnly();
+			Cells = cellList.AsReadOnly();
 		}
 	}
 }
