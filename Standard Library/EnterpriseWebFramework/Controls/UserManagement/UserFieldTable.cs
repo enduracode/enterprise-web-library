@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private BlockCheckBox providePassword;
 		private EwfTextBox newPasswordTb;
 		private EwfTextBox confirmPasswordTb;
-		private DropDownList roleList;
+		private EwfListControl roleList;
 
 		private string passwordToEmail;
 
@@ -69,11 +69,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				table.AddRow( new EwfTableCell( "Password" ), new EwfTableCell( ControlStack.CreateWithControls( true, keepPassword, generatePassword, providePassword ) ) );
 			}
 
-			roleList = new DropDownList();
+			roleList = new EwfListControl();
 			foreach( var role in availableRoles )
-				roleList.Items.Add( new ListItem( role.Name, role.RoleId.ToString() ) );
+				roleList.AddItem( role.Name, role.RoleId.ToString() );
 			if( user != null )
-				roleList.SelectedValue = user.Role.RoleId.ToString();
+				roleList.Value = user.Role.RoleId.ToString();
 			table.AddRow( new EwfTableCell( "Role" ), new EwfTableCell( roleList ) );
 
 			Controls.Add( table );
@@ -106,7 +106,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				}
 			}
 
-			RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), roleList.SelectedValue );
+			RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), roleList.Value );
 		}
 
 		private static bool includePasswordControls() {
