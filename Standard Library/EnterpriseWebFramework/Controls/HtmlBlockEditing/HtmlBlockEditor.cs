@@ -98,9 +98,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				html = textBox.GetPostBackValue( postBackValues );
 
 			html = validator.GetString( new ValidationErrorHandler( "html" ), html, true );
-			html = HtmlBlockStatics.EncodeIntraSiteUris( html );
 			if( extraValidation != null )
 				html = extraValidation( validator, html );
+
+			// Do this after extraValidation so that extraValidation doesn't get confused by our app-relative URL prefix "merge fields". We have seen a system run
+			// into problems while using extraValidation to verify that all words preceded by @@ were valid system-specific merge fields; it was mistakenly picking up
+			// our app-relative prefixes, thinking that they were merge fields, and complaining that they were not valid.
+			html = HtmlBlockStatics.EncodeIntraSiteUris( html );
+
 			return html;
 		}
 
