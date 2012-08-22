@@ -96,6 +96,9 @@ table.ewfBlockCheckBox > tbody > tr:first-child > td {
 	padding-top: 0;
 }
 
+ewfControlLine {
+	display: inline-block;
+}
 ewfControlLine > ewfControlLineItem {
 	padding-left: 8px;
 }
