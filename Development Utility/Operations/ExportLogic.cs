@@ -291,7 +291,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			            where trimmedLine.StartsWith( "<package " )
 			            select trimmedLine;
 			foreach( var line in lines )
-				writer.WriteLine( line.Replace( "package", "dependency" ) );
+				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net40\"", "" ) );
 
 			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server Oracle</tags>" );
