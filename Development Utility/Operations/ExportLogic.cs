@@ -107,16 +107,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 					// Pre-compile the web project.
 					try {
-						// NOTE: Eliminate this constant and its use when we switch ISU over to .NET 4.
-						const string dotNet4RuntimeFolderPath = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319";
-
-						StandardLibraryMethods.RunProgram(
-							StandardLibraryMethods.CombinePaths( Directory.Exists( dotNet4RuntimeFolderPath ) ? dotNet4RuntimeFolderPath : RuntimeEnvironment.GetRuntimeDirectory(),
-							                                     "aspnet_compiler" ),
-							"-v \"/" + webProject.name + ".csproj\" -p \"" + StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
-							( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" + webAppPath + "\"",
-							"",
-							true );
+						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
+						                                   "-v \"/" + webProject.name + ".csproj\" -p \"" +
+						                                   StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
+						                                   ( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" +
+						                                   webAppPath + "\"",
+						                                   "",
+						                                   true );
 					}
 					catch( Exception e ) {
 						throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
