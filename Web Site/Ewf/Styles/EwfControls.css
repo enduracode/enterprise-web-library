@@ -98,6 +98,7 @@ table.ewfBlockCheckBox > tbody > tr:first-child > td {
 
 ewfControlLine {
 	display: inline-block;
+	vertical-align: top; /* We need any value except baseline to prevent extra vertical spacing. */
 }
 ewfControlLine > ewfControlLineItem {
 	padding-left: 8px;

@@ -276,15 +276,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private static Control getEntityNavAndActionBlock() {
-			var controls = new[] { getEntityNavList(), getEntityActionList() }.Where( i => i != null );
-			if( !controls.Any() )
+			var cells = new[] { getEntityNavCell(), getEntityActionCell() }.Where( i => i != null );
+			if( !cells.Any() )
 				return null;
 			var table = EwfTable.Create( style: EwfTableStyle.Raw, classes: CssElementCreator.EntityNavAndActionBlockCssClass.ToSingleElementArray() );
-			table.AddItem( () => new EwfTableItem( controls.Select( i => new EwfTableCell( i ) { TextAlignment = TextAlignment.Right } ) ) );
+			table.AddItem( new EwfTableItem( cells ) );
 			return table;
 		}
 
-		private static Control getEntityNavList() {
+		private static EwfTableCell getEntityNavCell() {
 			if( entityDisplaySetup == null )
 				return null;
 			var controls =
@@ -292,24 +292,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) ).ToArray();
 			return !controls.Any()
 			       	? null
-			       	: new ControlLine( controls )
-			       	  	{
-			       	  		CssClass = CssElementCreator.EntityNavListCssClass,
-			       	  		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-			       	  	};
+			       	: new EwfTableCell( new ControlLine( controls )
+			       	                    	{
+			       	                    		CssClass = CssElementCreator.EntityNavListCssClass,
+			       	                    		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+			       	                    	} );
 		}
 
-		private static Control getEntityActionList() {
+		private static EwfTableCell getEntityActionCell() {
 			if( entityDisplaySetup == null || EwfPage.Instance.InfoAsBaseType.ParentPage != null )
 				return null;
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			return !actionControls.Any()
 			       	? null
-			       	: new ControlLine( actionControls )
-			       	  	{
-			       	  		CssClass = CssElementCreator.EntityActionListCssClass,
-			       	  		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-			       	  	};
+			       	: new EwfTableCell( new ControlLine( actionControls )
+			       	                    	{
+			       	                    		CssClass = CssElementCreator.EntityActionListCssClass,
+			       	                    		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+			       	                    	} )
+			       	  	{ TextAlignment = TextAlignment.Right };
 		}
 
 		private static IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
