@@ -1,4 +1,5 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormFieldDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.FormFieldDemo" MasterPageFile="~/Ewf/EwfUi.master" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormFieldDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.FormFieldDemo"
+	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">
 	<ewf:StaticTable runat="server" IsForm="true">
@@ -21,10 +22,6 @@
 		<tr runat="server">
 			<td>Time</td>
 			<td><ewf:TimePicker runat="server" ID="timePicker" /></td>
-		</tr>
-		<tr>
-			<td>Numeric amount (right align):</td>
-			<td><ewf:HtmlBlockEditor runat="server" /></td>
 		</tr>
 		<tr runat="server">
 			<td>Choice</td>
