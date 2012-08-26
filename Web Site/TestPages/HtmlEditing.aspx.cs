@@ -3,6 +3,7 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using RedStapler.StandardLibrary.Validation;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class HtmlEditing: EwfPage {
@@ -11,15 +12,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void LoadData( DBConnection cn ) {
-			addHtmlEditor( cn );
+			addHtmlEditor();
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post back", new PostBackButton( new DataModification(), delegate { } ) ) );
 		}
 
-		private void addHtmlEditor( DBConnection cn ) {
-			var editor = new HtmlBlockEditor();
-			editor.LoadData( cn, null );
-			ph.AddControlsReturnThis( editor );
-			PostBackDataModification.AddValidationMethod( v => editor.ValidateFormValues( v ) );
+		private void addHtmlEditor() {
+			HtmlBlockEditorModification mod;
+			ph.AddControlsReturnThis(
+				FormItem.Create( "",
+				                 new HtmlBlockEditor( null, id => { }, out mod ),
+				                 validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), PostBackDataModification ) )
+					.ToControl() );
 		}
 	}
 }

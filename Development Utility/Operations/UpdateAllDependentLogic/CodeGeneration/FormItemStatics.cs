@@ -304,8 +304,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
-			                      "{ var control = new HtmlBlockEditor( (int?)v, id => " + field.PropertyName +
-			                      " = id, out m ); control.LoadData( AppRequestState.PrimaryDatabaseConnection ); return control; }",
+			                      "new HtmlBlockEditor( (int?)v, id => " + field.PropertyName + " = id, out m )",
 			                      "control.Validate( postBackValues, validator, new ValidationErrorHandler( subject ) )",
 			                      "true",
 			                      preFormItemGetterStatements: "HtmlBlockEditorModification m = null;",
