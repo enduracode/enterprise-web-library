@@ -385,6 +385,7 @@
     <Compile Include="Tools\AssemblyTools.cs" />
     <Compile Include="Tools\DecimalTools.cs" />
     <Compile Include="Tools\DoubleTools.cs" />
+    <Compile Include="Tools\EnumTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
     <Compile Include="Tools\IntTools.cs" />

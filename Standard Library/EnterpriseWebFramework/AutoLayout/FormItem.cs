@@ -56,6 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Creates a labeled control for this form item.
+		/// This can be used to insert controls to a page without a <see cref="FormItemBlock"/> and display inline error messages.
 		/// </summary>
 		public LabeledControl ToControl( bool omitLabel = false ) {
 			return new LabeledControl( omitLabel ? "" : label, control, validation );
