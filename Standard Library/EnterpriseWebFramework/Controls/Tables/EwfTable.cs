@@ -324,15 +324,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var allVisibleItems = new List<EwfTableItem>();
 
-			Controls.Add(
-				new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis(
-					buildRows( getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
-					           Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-					           null,
-					           false,
-					           null,
-					           null,
-					           allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ) ) );
+			var headRows =
+				buildRows( getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
+				           Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+				           null,
+				           false,
+				           null,
+				           null,
+				           allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
+			if( headRows.Any() )
+				Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
 
 			for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 				var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
