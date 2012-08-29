@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Aspose.Words.Reporting;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.IO;
@@ -103,7 +104,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// Merges a row tree with a Microsoft Word document.
 		/// </summary>
 		public static void CreateMsWordDoc( DBConnection cn, IEnumerable<MergeRow> rowTree, bool ensureAllFieldsHaveValues, Stream inputStream,
-		                                      Stream destinationStream ) {
+		                                    Stream destinationStream ) {
 			createMsWordDocOrPdfFromMsWordDoc( cn, rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream, true );
 		}
 
@@ -263,6 +264,56 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		private static bool mergeValueTypeIsSupportedByExcel( MergeValue mv ) {
+			return mv is MergeValue<string>;
+		}
+
+		/// <summary>
+		/// Creates an XML document from the top level of a row tree and writes it to a stream.
+		/// </summary>
+		// NOTE: Should this method write to a Stream or a TextWriter? I think this comes down to whether we want the XmlWriter to determine the encoding or we want
+		// ASP.NET to do it. If we decide that we want ASP.NET to do it, do we need to stop XmlWriter from writing 'encoding="utf-8"' at the beginning of the
+		// document?
+		public static void CreateXmlDocument( DBConnection cn, IEnumerable<MergeRow> rowTree, IEnumerable<string> fieldNames, string rootElementName,
+		                                      Stream destinationStream ) {
+			using( var writer = XmlWriter.Create( destinationStream ) ) {
+				writer.WriteStartDocument();
+				writer.WriteStartElement( rootElementName );
+				if( rowTree.Any() ) {
+					foreach( var fieldName in fieldNames ) {
+						if( !rowTree.First().Values.Any( i => i.Name == fieldName ) ) {
+							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+							throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
+						}
+					}
+
+					foreach( var row in rowTree ) {
+						writer.WriteStartElement( "Row" );
+						foreach( var mergeValue in fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ) {
+							writer.WriteStartElement( mergeValue.Name );
+							if( mergeValue is MergeValue<string> )
+								writer.WriteValue( ( mergeValue as MergeValue<string> ).Evaluate( cn, false ) );
+							else {
+								// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+								throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+							}
+							writer.WriteEndElement();
+						}
+						writer.WriteEndElement();
+					}
+				}
+				writer.WriteEndElement();
+				writer.WriteEndDocument();
+			}
+		}
+
+		/// <summary>
+		/// Gets an IEnumerable of the merge field names from the top level of the specified row tree that are supported by the CreateXmlDocument method.
+		/// </summary>
+		public static IEnumerable<string> GetXmlSupportedMergeFields( IEnumerable<MergeRow> rowTree ) {
+			return rowTree.First().Values.Where( mergeValueTypeIsSupportedInXml ).Select( v => v.Name );
+		}
+
+		private static bool mergeValueTypeIsSupportedInXml( MergeValue mv ) {
 			return mv is MergeValue<string>;
 		}
 
