@@ -58,6 +58,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// </summary>
 		public InstallationConfiguration( string installationPath, bool isDevelopmentInstallation ) {
 			this.installationPath = installationPath;
+
+			// The EWL configuration folder is not inside any particular app's folder the way that Web.config and app.config are. This is for two reasons. First, EWL
+			// configuration is system-wide (technically installation-wide) and not app-specific like Web.config and app.config. Second, it could be disastrous to
+			// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
+			// could potentially be served up to users.
 			configurationFolderPath =
 				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
 				                                     ConfigurationFolderName );
