@@ -268,11 +268,12 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Creates an XML document from the top level of a row tree and writes it to a stream.
+		/// Creates an XML document from the top level of a row tree and writes it to a stream using UTF-8 encoding.
 		/// </summary>
-		// NOTE: Should this method write to a Stream or a TextWriter? I think this comes down to whether we want the XmlWriter to determine the encoding or we want
-		// ASP.NET to do it. If we decide that we want ASP.NET to do it, do we need to stop XmlWriter from writing 'encoding="utf-8"' at the beginning of the
-		// document?
+		// If we need to start generating XML on the fly for HTTP responses, it may make sense to create an overload of this method that takes an HttpResponse
+		// object instead of a stream. This new overload would use the HttpResponse.Output property to obtain a TextWriter and then create the XmlWriter on top of
+		// that instead of a stream. The advantage of this approach is that the encoding of the XML would then be determined by ASP.NET, which takes into account
+		// any request headers the client may have sent that pertain to the desired encoding of the response.
 		public static void CreateXmlDocument( DBConnection cn, IEnumerable<MergeRow> rowTree, IEnumerable<string> fieldNames, string rootElementName,
 		                                      Stream destinationStream ) {
 			using( var writer = XmlWriter.Create( destinationStream ) ) {
