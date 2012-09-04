@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Linq;
 using System.ServiceProcess;
-using System.Timers;
+using System.Threading;
 using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
-	/// A .NET Framework service that uses a Red Stapler service for its implementation.
+	/// A .NET Framework service that uses an EWL service for its implementation.
 	/// </summary>
 	public sealed class ServiceBaseAdapter: ServiceBase {
-		private readonly Timer timer = new Timer();
+		private const int tickFrequency = 10000;
+
 		private DateTime lastHealthCheckDateAndTime;
 		private readonly WindowsServiceBase service;
+		private readonly Timer timer;
 
 		/// <summary>
 		/// Creates a ServiceBase adapter. Generated code use only.
@@ -20,10 +22,8 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 			ServiceName = WindowsServiceMethods.GetServiceInstalledName( service );
 			AutoLog = false;
 
-			timer.Interval = 10000;
-			timer.Elapsed += tick;
-
 			this.service = service;
+			timer = new Timer( tick, null, Timeout.Infinite, Timeout.Infinite );
 		}
 
 		/// <summary>
@@ -33,7 +33,8 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 			Action method = delegate {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
-				timer.Start();
+
+				timer.Change( tickFrequency, Timeout.Infinite );
 			};
 			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) )
 				Stop();
@@ -44,12 +45,15 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// </summary>
 		protected override void OnStop() {
 			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				timer.Stop();
+				var waitHandle = new ManualResetEvent( false );
+				timer.Dispose( waitHandle );
+				waitHandle.WaitOne();
+
 				service.CleanUp();
 			} );
 		}
 
-		private void tick( object sender, ElapsedEventArgs e ) {
+		private void tick( object state ) {
 			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
 				var now = DateTime.Now;
 				if( AppTools.IsLiveInstallation && new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) ) {
@@ -61,6 +65,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 				lastHealthCheckDateAndTime = now;
 
 				service.Tick();
+				timer.Change( tickFrequency, Timeout.Infinite );
 			} );
 		}
 	}
