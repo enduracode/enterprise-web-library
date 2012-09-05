@@ -201,7 +201,7 @@ ewfUiEntitySummaryBlock {
 ewfUiTopTabControlList {
 	margin-top: 1.2em; /*NOTE: I want to eliminate this entirely when entity summary and friends share a background color that isn't white.*/
 }
-ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab {
+ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates {
 	display: block;
 	margin-bottom: -1px; /*NOTE: This really needs to be the same as whatever the border width of the content area is. Another use for constants.*/
 	border-width: .1em .1em 0 .1em;
@@ -226,7 +226,7 @@ ewfUiSideTabCell > ewfUiSideTabGroupHead {
 	padding: 5px 4px 0 0;
 	font-weight: bold;
 }
-ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiDisabledTab {
+ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
 	display: block;
 	margin: .25em 0;
 	padding: .3em;

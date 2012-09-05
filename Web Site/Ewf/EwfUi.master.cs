@@ -145,7 +145,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			private static IEnumerable<CssElement> getTabElements() {
-				return new[] { new CssElement( "UiCurrentTab", "div." + CurrentTabCssClass ), new CssElement( "UiDisabledTab", "div." + DisabledTabCssClass ) };
+				return new[]
+				       	{
+				       		new CssElement( "UiCurrentTabActionControl",
+				       		                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
+				       		new CssElement( "UiDisabledTabActionControl",
+				       		                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
+				       	};
 			}
 		}
 
@@ -346,11 +352,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			foreach( var pageGroup in pageGroups ) {
 				var tabs = getTabControlsForPages( pageGroup );
-				if( tabs.Any() && pageGroup.Name.Length > 0 ) {
-					var groupHead = new Panel { CssClass = CssElementCreator.SideTabGroupHeadCssClass };
-					groupHead.Controls.Add( pageGroup.Name.GetLiteralControl() );
-					tabCell.Controls.Add( groupHead );
-				}
+				if( tabs.Any() && pageGroup.Name.Length > 0 )
+					tabCell.Controls.Add( new Block( pageGroup.Name.GetLiteralControl() ) { CssClass = CssElementCreator.SideTabGroupHeadCssClass } );
 				foreach( var control in tabs )
 					tabCell.Controls.Add( control );
 			}
@@ -364,23 +367,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private static IEnumerable<Control> getTabControlsForPages( PageGroup pageGroup ) {
 			var tabs = new List<Control>();
 			foreach( var page in pageGroup.Pages.Where( p => p.UserCanAccessPageAndAllControls ) ) {
-				if( page.IsIdenticalToCurrent() ) {
-					var tab = new Panel { CssClass = CssElementCreator.CurrentTabCssClass };
-					tab.Controls.Add( page.PageName.GetLiteralControl() );
-					tabs.Add( tab );
-				}
-				else if( page.AlternativeMode is DisabledPageMode ) {
-					var tab = new Panel { CssClass = CssElementCreator.DisabledTabCssClass };
-					tab.Controls.Add( page.PageName.GetLiteralControl() );
-					tabs.Add( tab );
-				}
-				else {
-					// NOTE: Should we use CustomActionControlStyle for the link so it doesn't have any built-in styling?
-					var tab = EwfLink.Create( page, new TextActionControlStyle( page.PageName ) );
-					if( page.AlternativeMode is NewContentPageMode )
-						tab.CssClass += " ewfNewness";
-					tabs.Add( tab );
-				}
+				// NOTE: Should we use CustomActionControlStyle for the link so it doesn't have any built-in styling?
+				var tab = EwfLink.Create( page.IsIdenticalToCurrent() ? null : page, new TextActionControlStyle( page.PageName ) );
+
+				tab.CssClass = page.IsIdenticalToCurrent()
+				               	? CssElementCreator.CurrentTabCssClass
+				               	: page.AlternativeMode is DisabledPageMode
+				               	  	? CssElementCreator.DisabledTabCssClass
+				               	  	: page.AlternativeMode is NewContentPageMode ? "ewfNewness" : "";
+				tabs.Add( tab );
 			}
 			return tabs;
 		}

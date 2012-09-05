@@ -4,7 +4,10 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
-	internal class CssElementCreator: ControlCssElementCreator {
+	/// <summary>
+	/// Standard Library use only.
+	/// </summary>
+	public class CssElementCreator: ControlCssElementCreator {
 		// This class allows us to cut the number of selectors in the ActionControlAllStyles... elements by an order of magnitude.
 		internal const string AllStylesClass = "ewfAction";
 
@@ -16,6 +19,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		internal const string LargeButtonStyleClass = "ewfActionLargeButton";
 		internal const string ImageStyleClass = "ewfActionImage";
 		internal const string TextStyleClass = "ewfActionText";
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public static readonly string[] Selectors = getElementsForAllStates( "", "." + AllStylesClass ).Single( i => i.Name == "AllStates" ).Selectors.ToArray();
 
 		CssElement[] ControlCssElementCreator.CreateCssElements() {
 			return
@@ -33,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					SelectMany( i => i ).ToArray();
 		}
 
-		private IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
+		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
 			// NOTE: Uncomment the things below when we no longer support IE7/IE8.
 			var actionless = styleSelectors.Select( i => "a" + i /*+ ":not([href]):not([" + JsWritingMethods.onclick + "])"*/ );
 			var normal =
@@ -69,7 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			yield return new CssElement( baseName + "ActiveState", active.ToArray() );
 		}
 
-		private IEnumerable<string> getActionStateSelectors( string styleSelector, string stateSelector, string anchorOnlyStateSelector = "" ) {
+		private static IEnumerable<string> getActionStateSelectors( string styleSelector, string stateSelector, string anchorOnlyStateSelector = "" ) {
 			yield return "a" + styleSelector + "[href]" + anchorOnlyStateSelector + stateSelector;
 			yield return "a" + styleSelector + "[" + JsWritingMethods.onclick + "]" + anchorOnlyStateSelector + stateSelector;
 			yield return "button" + styleSelector + stateSelector;

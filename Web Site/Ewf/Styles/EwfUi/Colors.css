@@ -5,16 +5,17 @@ body {
 	color: black;
 }
 
-/* content block background */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiContentCell, ewfUiContentFootCell {
+/* content block */
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell {
 	background-color: #e7edf3;
+	color: black;
 }
 
 /* borders */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiCurrentTab, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBox {
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBox {
 	border-color: #78a0c3;
 }
-ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab, div.ewfButtonsBottomBorder {
+ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, div.ewfButtonsBottomBorder {
 	background-color: #78a0c3;
 }
 
@@ -37,14 +38,14 @@ ewfActionControlTextStyleActiveState {
 }
 
 /* global nav block, top tabs, and side tabs */
-ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab {
+ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
 	color: white;
 }
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfUiDisabledTab {
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTabActionControl, ewfUiSideTabCell > ewfUiDisabledTabActionControl {
 	opacity: .2; /* Standard */
 	filter: alpha(opacity=20); /* IE */
 }
-ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfUiDisabledTab {
+ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
 	border-color: transparent;
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithHover, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithHover, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithFocus, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithFocus {
