@@ -13,17 +13,18 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 		/// Creates a merge row tree from the specified fields, data rows, and children, which together represent a merge data tree.
 		/// </summary>
 		public static IEnumerable<MergeRow> CreateRowTree<RowType>( ReadOnlyCollection<MergeField<RowType>> fields, IEnumerable<RowType> dataRows,
-		                                                            ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null ) {
-			return CreateMergeRows( fields, dataRows, children );
+		                                                            ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null,
+		                                                            MergeDataTreeRemapping remapping = null ) {
+			return CreateMergeRows( fields, dataRows, children, remapping ?? new MergeDataTreeRemapping() );
 		}
 
 		internal static IEnumerable<MergeRow> CreateMergeRows<RowType>( ReadOnlyCollection<MergeField<RowType>> fields, IEnumerable<RowType> dataRows,
-		                                                                ReadOnlyCollection<MergeDataTreeChild<RowType>> children ) {
+		                                                                ReadOnlyCollection<MergeDataTreeChild<RowType>> children, MergeDataTreeRemapping remapping ) {
 			return
 				dataRows.Select(
 					row =>
-					new MergeRow( fields.Select( i => i.CreateValue( i.Name, i.MsWordName, i.GetDescription, cn => row ) ),
-					              children != null ? children.Select( i => i.CreateMergeRowChildForParentRow( row ) ) : new MergeRowChild[ 0 ] ) );
+					new MergeRow( fields.Select( i => i.CreateValue( remapping.GetFieldName( i.Name ), i.MsWordName, i.GetDescription, cn => row ) ),
+					              children != null ? children.Select( i => i.CreateMergeRowChildForParentRow( row, remapping ) ) : new MergeRowChild[ 0 ] ) );
 		}
 	}
 }

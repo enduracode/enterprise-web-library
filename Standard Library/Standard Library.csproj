@@ -374,6 +374,7 @@
     <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />
+    <Compile Include="MailMerging\DataTree\MergeDataTreeRemapping.cs" />
     <Compile Include="MailMerging\MailMergeTesting\MergeStatics.cs" />
     <Compile Include="MailMerging\MailMergeTesting\PseudoChildRow.cs" />
     <Compile Include="MailMerging\MailMergeTesting\PseudoTableFields\FullName.cs" />
