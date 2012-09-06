@@ -16,10 +16,19 @@ namespace RedStapler.StandardLibrary.MailMerging.Fields {
 			this.implementation = implementation;
 		}
 
-		MergeValue MergeField<RowType>.CreateValue( string namePrefix, string msWordNamePrefix, string descriptionSuffix, Func<DBConnection, RowType> rowGetter ) {
-			return adaptedField.CreateValue( namePrefix + implementation.NamePrefix,
-			                                 msWordNamePrefix + implementation.MsWordNamePrefix,
-			                                 implementation.DescriptionSuffix + descriptionSuffix,
+		string MergeField<RowType>.Name { get { return implementation.NamePrefix + adaptedField.Name; } }
+
+		string MergeField<RowType>.MsWordName { get { return implementation.MsWordNamePrefix + adaptedField.MsWordName; } }
+
+		string MergeField<RowType>.GetDescription( DBConnection cn ) {
+			return adaptedField.GetDescription( cn ) + implementation.DescriptionSuffix;
+		}
+
+		MergeValue MergeField<RowType>.CreateValue( string name, string msWordName, Func<DBConnection, string> descriptionGetter,
+		                                            Func<DBConnection, RowType> rowGetter ) {
+			return adaptedField.CreateValue( name,
+			                                 msWordName,
+			                                 descriptionGetter,
 			                                 delegate( DBConnection cn ) {
 			                                 	var row = rowGetter( cn );
 			                                 	return row != null ? implementation.GetAdaptedFieldRow( cn, row ) : null;

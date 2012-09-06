@@ -22,11 +22,10 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 		private readonly Func<ParentRowType, MergeRowChild> mergeRowChildCreator;
 
 		/// <summary>
-		/// Create a merge data tree child node. The data row selector is a function that returns the rows that are children of the specified parent row. Null may
-		/// be specified for children if there are no child nodes.
+		/// Create a merge data tree child node. The data row selector is a function that returns the rows that are children of the specified parent row.
 		/// </summary>
 		public MergeDataTreeChild( string name, ReadOnlyCollection<MergeField<RowType>> fields, Func<ParentRowType, IEnumerable<RowType>> dataRowSelector,
-		                           ReadOnlyCollection<MergeDataTreeChild<RowType>> children ) {
+		                           ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null ) {
 			mergeRowChildCreator = parentRow => new MergeRowChild( name, MergeDataTreeOps.CreateMergeRows( fields, dataRowSelector( parentRow ), children ) );
 		}
 

@@ -26,49 +26,38 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 	/// <summary>
 	/// A combination of a merge field and a data row.
 	/// </summary>
-	public interface MergeValue<ValueType>: MergeValue {
+	public interface MergeValue<out ValType>: MergeValue {
 		/// <summary>
 		/// Evaluates the merge field for the row. Throws an exception if true is specified for ensureValueExists and the merge field has no value for the current
 		/// row.
 		/// </summary>
-		ValueType Evaluate( DBConnection cn, bool ensureValueExists );
+		ValType Evaluate( DBConnection cn, bool ensureValueExists );
 	}
 
-	internal class MergeValue<RowType, ValueType>: MergeValue<ValueType> where RowType: class {
-		private readonly BasicMergeFieldImplementation<RowType, ValueType> field;
-		private readonly string namePrefix;
-		private readonly string msWordNamePrefix;
-		private readonly string descriptionSuffix;
+	internal class MergeValue<RowType, ValType>: MergeValue<ValType> where RowType: class {
+		private readonly BasicMergeFieldImplementation<RowType, ValType> field;
+		private readonly string name;
+		private readonly string msWordName;
+		private readonly Func<DBConnection, string> descriptionGetter;
 		private readonly Func<DBConnection, RowType> rowGetter;
 
-		internal MergeValue( BasicMergeFieldImplementation<RowType, ValueType> field, string namePrefix, string msWordNamePrefix, string descriptionSuffix,
+		internal MergeValue( BasicMergeFieldImplementation<RowType, ValType> field, string name, string msWordName, Func<DBConnection, string> descriptionGetter,
 		                     Func<DBConnection, RowType> rowGetter ) {
 			this.field = field;
-			this.namePrefix = namePrefix;
-			this.msWordNamePrefix = msWordNamePrefix;
-			this.descriptionSuffix = descriptionSuffix;
+			this.name = name;
+			this.msWordName = msWordName;
+			this.descriptionGetter = descriptionGetter;
 			this.rowGetter = rowGetter;
 		}
 
-		public string Name {
-			get {
-				var fieldWithCustomName = field as BasicMergeFieldImplementationWithCustomName<RowType, ValueType>;
-				return namePrefix + ( fieldWithCustomName != null ? fieldWithCustomName.Name : field.GetType().Name );
-			}
-		}
-
-		public string MsWordName {
-			get {
-				var fieldWithMsWordName = field as BasicMergeFieldImplementationWithMsWordName<RowType, ValueType>;
-				return msWordNamePrefix + ( fieldWithMsWordName != null ? fieldWithMsWordName.MsWordName : field.GetType().Name );
-			}
-		}
+		public string Name { get { return name; } }
+		public string MsWordName { get { return msWordName; } }
 
 		public string GetDescription( DBConnection cn ) {
-			return field.GetDescription( cn ) + descriptionSuffix;
+			return descriptionGetter( cn );
 		}
 
-		ValueType MergeValue<ValueType>.Evaluate( DBConnection cn, bool ensureValueExists ) {
+		ValType MergeValue<ValType>.Evaluate( DBConnection cn, bool ensureValueExists ) {
 			var row = rowGetter( cn );
 
 			if( field is BasicMergeFieldImplementation<RowType, string> ) {
@@ -77,11 +66,11 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 					throw new ApplicationException( "String merge fields must never evaluate to null. (" + Name + ")" );
 				if( ensureValueExists && stringValue.Length == 0 )
 					throw new MailMergingException( "Merge field " + Name + " has no value for the current row." );
-				return (ValueType)(object)stringValue;
+				return (ValType)(object)stringValue;
 			}
 
-			var value = row != null ? field.Evaluate( cn, row ) : default( ValueType );
-			if( ensureValueExists && Equals( value, default( ValueType ) ) )
+			var value = row != null ? field.Evaluate( cn, row ) : default( ValType );
+			if( ensureValueExists && Equals( value, default( ValType ) ) )
 				throw new MailMergingException( "Merge field " + Name + " has no value for the current row." );
 			return value;
 		}

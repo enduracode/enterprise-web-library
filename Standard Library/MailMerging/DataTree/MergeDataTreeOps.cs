@@ -10,11 +10,10 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 	/// </summary>
 	public static class MergeDataTreeOps {
 		/// <summary>
-		/// Creates a merge row tree from the specified fields, data rows, and children, which together represent a merge data tree. Null may be specified for
-		/// children if there are no child nodes.
+		/// Creates a merge row tree from the specified fields, data rows, and children, which together represent a merge data tree.
 		/// </summary>
 		public static IEnumerable<MergeRow> CreateRowTree<RowType>( ReadOnlyCollection<MergeField<RowType>> fields, IEnumerable<RowType> dataRows,
-		                                                            ReadOnlyCollection<MergeDataTreeChild<RowType>> children ) {
+		                                                            ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null ) {
 			return CreateMergeRows( fields, dataRows, children );
 		}
 
@@ -23,8 +22,8 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 			return
 				dataRows.Select(
 					row =>
-					new MergeRow( fields.Select( field => field.CreateValue( "", "", "", delegate { return row; } ) ),
-					              children != null ? children.Select( child => child.CreateMergeRowChildForParentRow( row ) ) : new List<MergeRowChild>() ) );
+					new MergeRow( fields.Select( i => i.CreateValue( i.Name, i.MsWordName, i.GetDescription, cn => row ) ),
+					              children != null ? children.Select( i => i.CreateMergeRowChildForParentRow( row ) ) : new MergeRowChild[ 0 ] ) );
 		}
 	}
 }
