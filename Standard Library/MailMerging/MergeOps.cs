@@ -300,16 +300,17 @@ namespace RedStapler.StandardLibrary.MailMerging {
 						throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
 					}
 					writer.WriteEndElement();
-
-					foreach( var childNameAndFieldNameTree in fieldNameTree.ChildNamesAndChildren ) {
-						var childRowTree = row.Children.SingleOrDefault( i => i.NodeName == childNameAndFieldNameTree.Item1 );
-						if( childRowTree == null ) {
-							// Use ApplicationException instead of MailMergingException because the child names can easily be validated before this method is called.
-							throw new ApplicationException( "Child " + childNameAndFieldNameTree.Item1 + " is invalid." );
-						}
-						writeRowTreeXmlElement( cn, childRowTree, childNameAndFieldNameTree.Item2, writer );
-					}
 				}
+
+				foreach( var childNameAndFieldNameTree in fieldNameTree.ChildNamesAndChildren ) {
+					var childRowTree = row.Children.SingleOrDefault( i => i.NodeName == childNameAndFieldNameTree.Item1 );
+					if( childRowTree == null ) {
+						// Use ApplicationException instead of MailMergingException because the child names can easily be validated before this method is called.
+						throw new ApplicationException( "Child " + childNameAndFieldNameTree.Item1 + " is invalid." );
+					}
+					writeRowTreeXmlElement( cn, childRowTree, childNameAndFieldNameTree.Item2, writer );
+				}
+
 				writer.WriteEndElement();
 			}
 			writer.WriteEndElement();
