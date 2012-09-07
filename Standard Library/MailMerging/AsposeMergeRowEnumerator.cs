@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			var mergeValue = enumerator.Current.Values.SingleOrDefault( v => v.MsWordName == fieldName );
 			if( mergeValue == null ) {
 				// This is necessary because Aspose seems to call GetValue for TableStart and/or TableEnd fields.
-				if( enumerator.Current.Children.Any( child => child.Name == fieldName ) ) {
+				if( enumerator.Current.Children.Any( child => child.NodeName == fieldName ) ) {
 					fieldValue = null;
 					return false;
 				}
@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		IMailMergeDataSource IMailMergeDataSource.GetChildDataSource( string tableName ) {
-			var child = enumerator.Current.Children.SingleOrDefault( c => c.Name == tableName );
+			var child = enumerator.Current.Children.SingleOrDefault( c => c.NodeName == tableName );
 			return child != null ? new AsposeMergeRowEnumerator( cn, tableName, child.Rows, ensureAllFieldsHaveValues ) : null;
 		}
 	}

@@ -13,9 +13,9 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 		/// <summary>
 		/// Gets the children of this row, each of which is the child rows for a specific data type.
 		/// </summary>
-		public IEnumerable<MergeRowChild> Children { get; private set; }
+		public IEnumerable<MergeRowTree> Children { get; private set; }
 
-		internal MergeRow( IEnumerable<MergeValue> values, IEnumerable<MergeRowChild> children ) {
+		internal MergeRow( IEnumerable<MergeValue> values, IEnumerable<MergeRowTree> children ) {
 			Values = values;
 			Children = children;
 		}

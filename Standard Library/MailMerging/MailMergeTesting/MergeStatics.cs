@@ -45,12 +45,12 @@ namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting {
 			return new BasicMergeFieldImplementation<PseudoChildRow, string>[] { new TheValue() }.Select( MergeFieldOps.CreateBasicField ).ToArray();
 		}
 
-		public static IEnumerable<MergeRow> CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
+		public static MergeRowTree CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
 			var rand = new Random();
 			var children = new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>( "Things",
 			                                                                       childFields.AsReadOnly(),
-			                                                                       data =>
-			                                                                       /*Randomness.FlipCoin()*/false
+			                                                                       data => /*Randomness.FlipCoin()*/
+			                                                                       false
 			                                                                       	? new[]
 			                                                                       	  	{ new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) }
 			                                                                       	: new PseudoChildRow[ 0 ],
@@ -58,7 +58,7 @@ namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting {
 			return MergeDataTreeOps.CreateRowTree( tableFields.AsReadOnly(), rows, new List<MergeDataTreeChild<PseudoTableRow>> { children }.AsReadOnly() );
 		}
 
-		public static IEnumerable<MergeRow> CreateEmptyPseudoTableRowTree() {
+		public static MergeRowTree CreateEmptyPseudoTableRowTree() {
 			return CreatePseudoTableRowTree( new PseudoTableRow[] { } );
 		}
 	}

@@ -382,6 +382,7 @@
     <Compile Include="MailMerging\MailMergeTesting\PseudoTableRow.cs" />
     <Compile Include="MailMerging\MailMergeTesting\PsuedoChildFields\TheValue.cs" />
     <Compile Include="MailMerging\MergeFieldNameTree.cs" />
+    <Compile Include="MailMerging\RowTree\MergeRowTree.cs" />
     <Compile Include="Randomness.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
     <Compile Include="TestStatics.cs" />
@@ -409,7 +410,6 @@
     <Compile Include="MailMerging\MailMergingException.cs" />
     <Compile Include="MailMerging\RowTree\MergeValue.cs" />
     <Compile Include="MailMerging\RowTree\MergeRow.cs" />
-    <Compile Include="MailMerging\RowTree\MergeRowChild.cs" />
     <Compile Include="MultiMessageApplicationException.cs" />
     <Compile Include="Tools\ControlTools.cs" />
     <Compile Include="Tools\DateTimeTools.cs" />

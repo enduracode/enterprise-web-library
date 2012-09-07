@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using RedStapler.StandardLibrary.MailMerging.Fields;
 using RedStapler.StandardLibrary.MailMerging.RowTree;
 
@@ -11,9 +10,9 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 	/// </summary>
 	public interface MergeDataTreeChild<in ParentRowType> {
 		/// <summary>
-		/// Creates a merge row child for the specified parent row. Data Tree subsystem use only.
+		/// Creates a merge row tree for the specified parent row. Data Tree subsystem use only.
 		/// </summary>
-		MergeRowChild CreateMergeRowChildForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping );
+		MergeRowTree CreateRowTreeForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping );
 	}
 
 	/// <summary>
@@ -36,12 +35,11 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 			this.children = children;
 		}
 
-		MergeRowChild MergeDataTreeChild<ParentRowType>.CreateMergeRowChildForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping ) {
+		MergeRowTree MergeDataTreeChild<ParentRowType>.CreateRowTreeForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping ) {
 			remapping = remapping != null && remapping.ChildRemappingsByChildName.ContainsKey( name )
 			            	? remapping.ChildRemappingsByChildName[ name ]
 			            	: new MergeDataTreeRemapping();
-			return new MergeRowChild( remapping.NodeNameOverride.Any() ? remapping.NodeNameOverride : name,
-			                          MergeDataTreeOps.CreateMergeRows( fields, dataRowSelector( parentRow ), children, remapping ) );
+			return MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping );
 		}
 	}
 }
