@@ -55,17 +55,23 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 
 		private void tick( object state ) {
 			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				var now = DateTime.Now;
-				if( AppTools.IsLiveInstallation && new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) ) {
-					var message = new EmailMessage();
-					message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
-					message.Subject = "Health check from " + WindowsServiceMethods.GetServiceInstalledName( service );
-					AppTools.SendEmailWithDefaultFromAddress( message );
-				}
-				lastHealthCheckDateAndTime = now;
+				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
+				// exception stack traces.
+				try {
+					var now = DateTime.Now;
+					if( AppTools.IsLiveInstallation && new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) ) {
+						var message = new EmailMessage();
+						message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
+						message.Subject = "Health check from " + WindowsServiceMethods.GetServiceInstalledName( service );
+						AppTools.SendEmailWithDefaultFromAddress( message );
+					}
+					lastHealthCheckDateAndTime = now;
 
-				service.Tick();
-				timer.Change( tickFrequency, Timeout.Infinite );
+					service.Tick();
+				}
+				finally {
+					timer.Change( tickFrequency, Timeout.Infinite );
+				}
 			} );
 		}
 	}
