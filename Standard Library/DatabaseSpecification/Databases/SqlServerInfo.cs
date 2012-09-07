@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -85,7 +84,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
-			( parameter as SqlParameter ).SqlDbType = (SqlDbType)Enum.Parse( typeof( SqlDbType ), dbTypeString );
+			( parameter as SqlParameter ).SqlDbType = dbTypeString.ToEnum<SqlDbType>();
 		}
 	}
 }
