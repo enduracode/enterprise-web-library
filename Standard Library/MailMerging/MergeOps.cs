@@ -268,50 +268,63 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Creates an XML document from the top level of a row tree and writes it to a stream using UTF-8 encoding.
+		/// Creates an XML document from a row tree and writes it to a stream using UTF-8 encoding.
 		/// </summary>
 		// If we need to start generating XML on the fly for HTTP responses, it may make sense to create an overload of this method that takes an HttpResponse
 		// object instead of a stream. This new overload would use the HttpResponse.Output property to obtain a TextWriter and then create the XmlWriter on top of
 		// that instead of a stream. The advantage of this approach is that the encoding of the XML would then be determined by ASP.NET, which takes into account
 		// any request headers the client may have sent that pertain to the desired encoding of the response.
-		public static void CreateXmlDocument( DBConnection cn, IEnumerable<MergeRow> rowTree, IEnumerable<string> fieldNames, string rootElementName,
-		                                      Stream destinationStream ) {
+		public static void CreateXmlDocument( DBConnection cn, IEnumerable<MergeRow> rowTree, MergeFieldNameTree fieldNameTree, Stream destinationStream ) {
 			using( var writer = XmlWriter.Create( destinationStream ) ) {
 				writer.WriteStartDocument();
-				writer.WriteStartElement( rootElementName );
-				if( rowTree.Any() ) {
-					foreach( var fieldName in fieldNames ) {
-						if( !rowTree.First().Values.Any( i => i.Name == fieldName ) ) {
-							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-							throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-						}
-					}
-
-					foreach( var row in rowTree ) {
-						writer.WriteStartElement( "Row" );
-						foreach( var mergeValue in fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ) {
-							writer.WriteStartElement( mergeValue.Name );
-							if( mergeValue is MergeValue<string> )
-								writer.WriteValue( ( mergeValue as MergeValue<string> ).Evaluate( cn, false ) );
-							else {
-								// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-								throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-							}
-							writer.WriteEndElement();
-						}
-						writer.WriteEndElement();
-					}
-				}
-				writer.WriteEndElement();
+				writeRowTreeXmlElement( cn, rowTree, fieldNameTree, writer );
 				writer.WriteEndDocument();
 			}
 		}
 
+		private static void writeRowTreeXmlElement( DBConnection cn, IEnumerable<MergeRow> rowTree, MergeFieldNameTree fieldNameTree, XmlWriter writer ) {
+			writer.WriteStartElement( "Rows" );
+			if( rowTree.Any() ) {
+				foreach( var row in rowTree ) {
+					writer.WriteStartElement( "Row" );
+					foreach( var fieldName in fieldNameTree.FieldNames ) {
+						var mergeValue = row.Values.SingleOrDefault( i => i.Name == fieldName );
+						if( mergeValue == null ) {
+							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+							throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
+						}
+
+						writer.WriteStartElement( mergeValue.Name );
+						if( mergeValue is MergeValue<string> )
+							writer.WriteValue( ( mergeValue as MergeValue<string> ).Evaluate( cn, false ) );
+						else {
+							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+							throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+						}
+						writer.WriteEndElement();
+
+						foreach( var childNameAndFieldNameTree in fieldNameTree.ChildNamesAndChildren ) {
+							var rowChild = row.Children.SingleOrDefault( i => i.Name == childNameAndFieldNameTree.Item1 );
+							if( rowChild == null ) {
+								// Use ApplicationException instead of MailMergingException because the child names can easily be validated before this method is called.
+								throw new ApplicationException( "Child " + childNameAndFieldNameTree.Item1 + " is invalid." );
+							}
+							writeRowTreeXmlElement( cn, rowChild.Rows, childNameAndFieldNameTree.Item2, writer );
+						}
+					}
+					writer.WriteEndElement();
+				}
+			}
+			writer.WriteEndElement();
+		}
+
 		/// <summary>
-		/// Gets an IEnumerable of the merge field names from the top level of the specified row tree that are supported by the CreateXmlDocument method.
+		/// Gets a merge field name tree of the fields that are supported by the CreateXmlDocument method.
 		/// </summary>
-		public static IEnumerable<string> GetXmlSupportedMergeFields( IEnumerable<MergeRow> rowTree ) {
-			return rowTree.First().Values.Where( mergeValueTypeIsSupportedInXml ).Select( v => v.Name );
+		public static MergeFieldNameTree GetXmlSupportedMergeFields( IEnumerable<MergeRow> rowTree ) {
+			var firstRow = rowTree.First();
+			return new MergeFieldNameTree( firstRow.Values.Where( mergeValueTypeIsSupportedInXml ).Select( i => i.Name ),
+			                               childNamesAndChildren: firstRow.Children.Select( i => Tuple.Create( i.Name, GetXmlSupportedMergeFields( i.Rows ) ) ) );
 		}
 
 		private static bool mergeValueTypeIsSupportedInXml( MergeValue mv ) {

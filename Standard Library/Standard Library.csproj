@@ -381,6 +381,7 @@
     <Compile Include="MailMerging\MailMergeTesting\PseudoTableFields\Test.cs" />
     <Compile Include="MailMerging\MailMergeTesting\PseudoTableRow.cs" />
     <Compile Include="MailMerging\MailMergeTesting\PsuedoChildFields\TheValue.cs" />
+    <Compile Include="MailMerging\MergeFieldNameTree.cs" />
     <Compile Include="Randomness.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
     <Compile Include="TestStatics.cs" />
