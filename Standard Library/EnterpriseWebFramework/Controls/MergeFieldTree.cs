@@ -12,7 +12,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class MergeFieldTree: WebControl, ControlTreeDataLoader {
 		private string name;
-		private IEnumerable<MergeRow> emptyRowTree;
+		private MergeRowTree emptyRowTree;
 
 		/// <summary>
 		/// Creates a merge field tree.
@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a merge field tree and sets the name and empty row tree.
 		/// </summary>
-		public MergeFieldTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
+		public MergeFieldTree( string name, MergeRowTree emptyRowTree ) {
 			SetNameAndEmptyRowTree( name, emptyRowTree );
 		}
 
@@ -30,14 +30,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Sets the name and the merge row tree that will be used to draw the field tree. The name should be the plural name of the data type at the top level in
 		/// the row tree, e.g. Clients.
 		/// </summary>
-		public void SetNameAndEmptyRowTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
+		public void SetNameAndEmptyRowTree( string name, MergeRowTree emptyRowTree ) {
 			this.name = name;
 			this.emptyRowTree = emptyRowTree;
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfMergeFieldTree" );
-			Controls.Add( buildTree( cn, name, emptyRowTree ) );
+			Controls.Add( buildTree( cn, name, emptyRowTree.Rows ) );
 		}
 
 		private static DynamicTable buildTree( DBConnection cn, string name, IEnumerable<MergeRow> emptyRowTree ) {
