@@ -9,7 +9,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// A .NET Framework service that uses an EWL service for its implementation.
 	/// </summary>
 	public sealed class ServiceBaseAdapter: ServiceBase {
-		private const int tickFrequency = 10000;
+		private const int tickInterval = 10000;
 
 		private DateTime lastHealthCheckDateAndTime;
 		private readonly WindowsServiceBase service;
@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
 
-				timer.Change( tickFrequency, Timeout.Infinite );
+				timer.Change( tickInterval, Timeout.Infinite );
 			};
 			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) )
 				Stop();
@@ -71,7 +71,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 				}
 				finally {
 					try {
-						timer.Change( tickFrequency, Timeout.Infinite );
+						timer.Change( tickInterval, Timeout.Infinite );
 					}
 					catch( ObjectDisposedException ) {
 						// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
