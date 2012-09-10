@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 		                               Dictionary<string, MergeDataTreeRemapping> childRemappingsByChildName = null, string xmlRowElementName = "" ) {
 			this.nodeNameOverride = nodeNameOverride;
 			this.oldToNewFieldNames = oldToNewFieldNames ?? new Dictionary<string, string>();
-			this.childRemappingsByChildName = childRemappingsByChildName;
+			this.childRemappingsByChildName = childRemappingsByChildName ?? new Dictionary<string, MergeDataTreeRemapping>();
 			this.xmlRowElementName = xmlRowElementName;
 		}
 
