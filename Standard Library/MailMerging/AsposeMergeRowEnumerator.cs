@@ -49,8 +49,10 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		IMailMergeDataSource IMailMergeDataSource.GetChildDataSource( string tableName ) {
-			var child = enumerator.Current.Children.SingleOrDefault( c => c.NodeName == tableName );
-			return child != null ? new AsposeMergeRowEnumerator( cn, tableName, child.Rows, ensureAllFieldsHaveValues ) : null;
+			var child = enumerator.Current.Children.SingleOrDefault( i => i.NodeName == tableName );
+			if( child == null )
+				throw new MailMergingException( "Child " + tableName + ( this.tableName.Length > 0 ? " in table " + this.tableName : "" ) + " is invalid." );
+			return new AsposeMergeRowEnumerator( cn, tableName, child.Rows, ensureAllFieldsHaveValues );
 		}
 	}
 }
