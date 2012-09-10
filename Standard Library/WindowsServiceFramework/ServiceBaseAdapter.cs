@@ -70,7 +70,12 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 					service.Tick();
 				}
 				finally {
-					timer.Change( tickFrequency, Timeout.Infinite );
+					try {
+						timer.Change( tickFrequency, Timeout.Infinite );
+					}
+					catch( ObjectDisposedException ) {
+						// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
+					}
 				}
 			} );
 		}
