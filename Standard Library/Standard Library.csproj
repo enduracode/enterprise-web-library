@@ -188,11 +188,11 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\EwfListItem.cs" />
-    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditingSetup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
