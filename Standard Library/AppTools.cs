@@ -134,6 +134,7 @@ namespace RedStapler.StandardLibrary {
 					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
 					BlobFileOps.Init( systemLogic.GetType() );
 					EncryptionOps.Init( systemLogic.GetType() );
+					HtmlBlockStatics.Init( systemLogic.GetType() );
 					InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
 					UserManagementStatics.Init( systemLogic.GetType() );
 

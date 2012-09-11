@@ -30,11 +30,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// up our app-relative prefixes, thinking that they were merge fields, and complaining that they were not valid.
 			var encodedHtml = HtmlBlockStatics.EncodeIntraSiteUris( Html );
 
-			var setup = EwfApp.Instance as HtmlBlockEditingSetup;
 			if( htmlBlockId == null )
-				htmlBlockId = setup.InsertHtmlBlock( cn, encodedHtml );
+				htmlBlockId = HtmlBlockStatics.SystemProvider.InsertHtmlBlock( cn, encodedHtml );
 			else
-				setup.UpdateHtml( cn, htmlBlockId.Value, encodedHtml );
+				HtmlBlockStatics.SystemProvider.UpdateHtml( cn, htmlBlockId.Value, encodedHtml );
 
 			idSetter( htmlBlockId.Value );
 		}

@@ -13,7 +13,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// We probably want to represent "no HTML" with a foreign key to an empty row rather than a null foreign key. This allows the HTML content
 	/// to be cleared without clearing out any meta data (see above for examples of meta data that may eventually exist).
 	/// </summary>
-	public interface HtmlBlockEditingSetup {
+	public interface SystemHtmlBlockEditingProvider {
 		/// <summary>
 		/// Retrieves the HTML from the specified HTML block.
 		/// </summary>

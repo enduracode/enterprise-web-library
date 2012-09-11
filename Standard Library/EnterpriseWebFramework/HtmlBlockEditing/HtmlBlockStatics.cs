@@ -7,14 +7,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// Provides useful constants and methods pertaining to HTML blocks.
 	/// </summary>
 	public static class HtmlBlockStatics {
+		private const string providerName = "HtmlBlockEditing";
 		private const string applicationRelativeNonSecureUrlPrefix = "@@nonSecure~";
 		private const string applicationRelativeSecureUrlPrefix = "@@secure~";
+
+		private static SystemHtmlBlockEditingProvider provider;
+
+		internal static void Init( Type systemLogicType ) {
+			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemHtmlBlockEditingProvider;
+		}
+
+		internal static SystemHtmlBlockEditingProvider SystemProvider {
+			get {
+				if( provider == null )
+					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+				return provider;
+			}
+		}
 
 		/// <summary>
 		/// Gets the HTML from the specified HTML block, after decoding intra site URIs.
 		/// </summary>
 		public static string GetHtml( DBConnection cn, int htmlBlockId ) {
-			var html = ( EwfApp.Instance as HtmlBlockEditingSetup ).GetHtml( cn, htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
+			var html = SystemProvider.GetHtml( cn, htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
 			return GetDecodedHtml( html );
 		}
 
