@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
@@ -16,28 +17,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// Does nothing. Overriding this method forces Visual Studio to respect white space around the control when it is used in markup.
-		/// </summary>
-		protected override void AddParsedSubObject( object obj ) {}
+		private readonly string html;
 
 		/// <summary>
-		/// Call this during LoadData. Returns true if there is content.
+		/// Creates an HTML block placeholder.
 		/// </summary>
-		public bool LoadData( DBConnection cn, int htmlBlockId ) {
-			return LoadData( HtmlBlockStatics.GetHtml( cn, htmlBlockId ) );
+		public HtmlBlockPlaceholder( int htmlBlockId ): this( HtmlBlockStatics.GetHtml( AppRequestState.PrimaryDatabaseConnection, htmlBlockId ) ) {}
+
+		/// <summary>
+		/// Creates an HTML block placeholder. Do not pass null for HTML. This overload is useful when you've already loaded the HTML.
+		/// </summary>
+		public HtmlBlockPlaceholder( string html ) {
+			this.html = html;
 		}
 
 		/// <summary>
-		/// Call this during LoadData. Returns true if there is content. This overload is useful when you've already loaded the HTML.
+		/// Gets whether the HTML block has HTML (i.e. is not empty).
 		/// </summary>
-		public bool LoadData( string html ) {
-			Controls.Add( new Literal { Text = html } );
-			return !html.IsNullOrWhiteSpace();
-		}
+		public bool HasHtml { get { return html.Any(); } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+			Controls.Add( new Literal { Text = html } );
 		}
 
 		/// <summary>
