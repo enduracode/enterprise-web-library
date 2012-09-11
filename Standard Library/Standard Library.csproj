@@ -58,13 +58,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Aspose.Cells.7.3.1\lib\net40-client\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Pdf, Version=7.2.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Pdf, Version=7.3.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Pdf.7.2.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
+      <HintPath>..\packages\Aspose.Pdf.7.3.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Words, Version=11.6.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Words, Version=11.7.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Words.11.6.0\lib\net3.5\Aspose.Words.dll</HintPath>
+      <HintPath>..\packages\Aspose.Words.11.7.0\lib\net3.5\Aspose.Words.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\packages\AjaxControlToolkit.4.1.60623\lib\40\SanitizerProviders\HtmlAgilityPack.dll</HintPath>
