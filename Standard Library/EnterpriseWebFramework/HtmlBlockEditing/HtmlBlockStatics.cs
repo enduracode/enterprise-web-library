@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using RedStapler.StandardLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Provides useful constants and methods pertaining to HTML blocks.
 	/// </summary>

@@ -3,10 +3,11 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.Validation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for editing an HTML block either by using a browser-based WYSIWYG HTML editor or downloading it as a file, modifying it, and uploading it back
 	/// into the system.

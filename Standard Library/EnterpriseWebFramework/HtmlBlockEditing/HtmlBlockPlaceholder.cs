@@ -4,7 +4,7 @@ using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for displaying an HTML block on a page.
 	/// </summary>

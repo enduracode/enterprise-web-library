@@ -1,7 +1,7 @@
 ﻿using System;
 using RedStapler.StandardLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The modification class used by the HTML block editor control.
 	/// </summary>
