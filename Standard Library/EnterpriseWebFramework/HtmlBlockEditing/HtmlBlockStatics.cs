@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using RedStapler.StandardLibrary.DataAccess;
 
@@ -27,18 +28,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Gets the HTML from the specified HTML block, after decoding intra site URIs.
+		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
-		public static string GetHtml( DBConnection cn, int htmlBlockId ) {
+		public static string GetHtml( DBConnection cn, int htmlBlockId, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
 			var html = SystemProvider.GetHtml( cn, htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
-			return GetDecodedHtml( html );
+			return GetDecodedHtml( html, nonSecureBaseUrl: nonSecureBaseUrl, secureBaseUrl: secureBaseUrl );
 		}
 
 		/// <summary>
 		/// Decodes intra site URIs in the specified HTML and returns the result. Use this if you have retrieved HTML from the HTML blocks table without using
 		/// GetHtml.
+		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
-		public static string GetDecodedHtml( string encodedHtml ) {
-			return decodeIntraSiteUris( encodedHtml );
+		public static string GetDecodedHtml( string encodedHtml, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
+			return decodeIntraSiteUris( encodedHtml, nonSecureBaseUrl, secureBaseUrl );
 		}
 
 		internal static string EncodeIntraSiteUris( string html ) {
@@ -84,12 +87,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return html;
 		}
 
-		private static string decodeIntraSiteUris( string html ) {
+		// NOTE: The nonSecureBaseUrl and secureBaseUrl parameters are a hack. See https://info.redstapler.biz/Pages/Goal/EditGoal.aspx?GoalId=567.
+		private static string decodeIntraSiteUris( string html, string nonSecureBaseUrl, string secureBaseUrl ) {
 			foreach( var secure in new[] { true, false } ) {
 				// Any kind of relative URL could be a problem in an email message since there is no context. This is one reason we decode to absolute URLs.
 				html = Regex.Replace( html,
 				                      secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
-				                      AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( secure ) );
+				                      secure
+				                      	? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
+				                      	: nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
 			}
 			return html;
 		}
