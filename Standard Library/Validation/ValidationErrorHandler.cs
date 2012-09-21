@@ -45,7 +45,7 @@ namespace RedStapler.StandardLibrary.Validation {
 					customMessages.Add( e, message );
 			}
 			else {
-				foreach( ErrorCondition e in Enum.GetValues( typeof( ErrorCondition ) ) )
+				foreach( var e in EnumTools.GetValues<ErrorCondition>() )
 					customMessages.Add( e, message );
 			}
 		}

@@ -353,7 +353,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var itemCount = itemGroups.Sum( i => i.Items.Count );
 			if( CurrentItemLimit < itemCount ) {
-				var nextLimit = Enum.GetValues( typeof( DataRowLimit ) ).Cast<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
+				var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
 				var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
 				var button = new PostBackButton( new DataModification(),
 				                                 () =>
