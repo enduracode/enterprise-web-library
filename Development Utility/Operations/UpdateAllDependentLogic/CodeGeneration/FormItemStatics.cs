@@ -217,6 +217,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                        "decimal?",
 				                                        new CSharpParameter[ 0 ],
 				                                        "validator.GetDecimal( new ValidationErrorHandler( subject ), control.Value )" );
+				writeCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
 			}
@@ -329,19 +330,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		private static void writeBoolFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( field.TypeIs( typeof( bool ) ) ) {
-				writeFormItemGetters( writer,
-				                      field,
-				                      "EwfCheckBox",
-				                      "CheckBox",
-				                      "bool",
-				                      "false",
-				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter[ 0 ],
-				                      new[] { new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ) },
-				                      new CSharpParameter[ 0 ],
-				                      "putLabelOnCheckBox ? new EwfCheckBox( v.Value, ls ) { AutoPostBack = autoPostBack } : new EwfCheckBox( v.Value ) { AutoPostBack = autoPostBack }",
-				                      "control.IsCheckedInPostBack( postBackValues )",
-				                      "!putLabelOnCheckBox" );
+				writeCheckBoxFormItemGetters( writer, field, "bool" );
 				writeFormItemGetters( writer,
 				                      field,
 				                      "EwfListControl",
@@ -360,6 +349,49 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                      "bool.Parse( control.GetPostBackValue( postBackValues ) )",
 				                      "true" );
 			}
+		}
+
+		private static void writeCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
+			var fieldIsDecimal = valueParamTypeName == "decimal";
+			var valueParamDefaultValue = fieldIsDecimal ? false.BooleanToDecimal().ToString() : "false";
+			var toBoolSuffix = fieldIsDecimal ? ".DecimalToBoolean()" : "";
+			var fromBoolSuffix = fieldIsDecimal ? ".BooleanToDecimal()" : "";
+
+			writeFormItemGetters( writer,
+			                      field,
+			                      "EwfCheckBox",
+			                      "CheckBox",
+			                      valueParamTypeName,
+			                      valueParamDefaultValue,
+			                      new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      new[] { new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ) },
+			                      new CSharpParameter[ 0 ],
+			                      "new EwfCheckBox( v.Value" + toBoolSuffix + ", label: putLabelOnCheckBox ? ls : \"\" ) { AutoPostBack = autoPostBack }",
+			                      "control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
+			                      "!putLabelOnCheckBox" );
+			writeFormItemGetters( writer,
+			                      field,
+			                      "BlockCheckBox",
+			                      "BlockCheckBox",
+			                      valueParamTypeName,
+			                      valueParamDefaultValue,
+			                      new CSharpParameter( "IEnumerable<Control>", "nestedControls" ).ToSingleElementArray(),
+			                      new CSharpParameter[ 0 ],
+			                      new[]
+			                      	{
+			                      		new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
+			                      		new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
+			                      	},
+			                      new CSharpParameter[ 0 ],
+			                      "{ " +
+			                      StringTools.ConcatenateWithDelimiter( " ",
+			                                                            "var c = new BlockCheckBox( v.Value" + toBoolSuffix +
+			                                                            ", label: putLabelOnCheckBox ? ls : \"\" ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible };",
+			                                                            "c.NestedControls.AddRange( nestedControls );",
+			                                                            "return c;" ) + " }",
+			                      "control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
+			                      "!putLabelOnCheckBox" );
 		}
 
 		private static void writeDateFormItemGetters( TextWriter writer, ModificationField field ) {
