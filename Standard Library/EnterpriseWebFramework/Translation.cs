@@ -89,8 +89,9 @@
 		/// </summary>
 		public static string ThisSeemsToBeTakingAWhile {
 			get {
-				return getCorrectTranslation( "This seems to be taking a while. You may continue waiting or click here to cancel the request.",
-				                              "Esta operación parece estar durando bastante tiempo. Usted puede seguir esperando o haga clic aquí para cancelar la solicitud." );
+				return getCorrectTranslation(
+					"Network traffic may be causing this delay. You can click here to stop waiting, but you may need to repeat your last action.",
+					"El tráfico de red puede ser la causa de este retraso. Puede hacer clic aquí para dejar de esperar, pero es posible que tenga que repetir la última acción." );
 			}
 		}
 
