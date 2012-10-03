@@ -25,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private EwfTextBox textBox;
 
 		/// <summary>
-		/// Creates a time picker. The minute interval affects the slider but does not prevent other values from passing validation.
+		/// Creates a time picker. The minute interval allows the user to only submit values in the given increments.
 		/// </summary>
 		public TimePicker( TimeSpan? value, int minuteInterval = 15 ) {
 			this.value = value;
