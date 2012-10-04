@@ -25,11 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				var itemSelectors = from i in EwfTable.CssElementCreator.CellSelectors select "table > tbody > tr > " + i + "." + ItemCssClass;
-				return new[]
-				       	{
-				       		new CssElement( "ControlLine", Selectors ),
-				       		new CssElement( "ControlLineItem", itemSelectors.ToArray() )
-				       	};
+				return new[] { new CssElement( "ControlLine", Selectors ), new CssElement( "ControlLineItem", itemSelectors.ToArray() ) };
 			}
 		}
 
@@ -65,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Do not call this, and do not place control lines in markup.
 		/// </summary>
 		// NOTE: Remove this when we have eliminated control lines from markup.
-		public ControlLine(): this( new Control[0] ) {}
+		public ControlLine(): this( new Control[ 0 ] ) {}
 
 		/// <summary>
 		/// Do not use this property; it will be deleted.
@@ -107,7 +103,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Returns the div tag, which represents this control in HTML.
+		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}
