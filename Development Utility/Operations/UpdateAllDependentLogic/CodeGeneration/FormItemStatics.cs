@@ -300,20 +300,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "Html",
 			                      valueParamTypeName,
 			                      "null",
-			                      new CSharpParameter( "out DbMethod", "modificationMethod" ).ToSingleElementArray(),
+			                      new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
-			                      new[]
-				                      {
-					                      new CSharpParameter( "System.Func<bool>", "destroyHtmlPredicate", "null" ),
-					                      new CSharpParameter( "System.Func<Validator, string, string>", "extraValidation", "null" )
-				                      },
-			                      "{ var control = new HtmlBlockEditor( (int?)v ); control.LoadData( AppRequestState.PrimaryDatabaseConnection ); mm = cn => " +
-			                      field.PropertyName + " = control.ModifyData( cn ); return control; }",
-			                      "control.ValidateFormValues( postBackValues, validator, destroyHtml: destroyHtmlPredicate != null ? destroyHtmlPredicate() : false, extraValidation: extraValidation )",
+			                      new CSharpParameter[ 0 ],
+			                      "new HtmlBlockEditor( (int?)v, id => " + field.PropertyName + " = id, out m )",
+			                      "control.Validate( postBackValues, validator, new ValidationErrorHandler( subject ) )",
 			                      "true",
-			                      preFormItemGetterStatements: "DbMethod mm = null;",
-			                      postFormItemGetterStatements: "modificationMethod = mm;" );
+			                      preFormItemGetterStatements: "HtmlBlockEditorModification m = null;",
+			                      postFormItemGetterStatements: "mod = m;" );
 			writeFormItemGetters( writer,
 			                      field,
 			                      "BlobFileManager",
@@ -480,8 +475,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                                           IEnumerable<CSharpParameter> optionalValidationParams ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
 			var body = "return Get" + field.PascalCasedName + controlTypeForName + "FormItem( false, " +
-			           requiredControlParams.Concat( requiredValidationParams ).Select( i => ( i.Name == "modificationMethod" ? "out " : "" ) + i.Name ).
-				           GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
+			           requiredControlParams.Concat( requiredValidationParams ).Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
+				           .GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
 			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) +
 			           "cellSpan: cellSpan, textAlignment: textAlignment" + ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
