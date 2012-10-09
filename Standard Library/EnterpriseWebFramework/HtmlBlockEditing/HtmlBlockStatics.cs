@@ -56,19 +56,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Group 4 is the capture for the everything between single quotes
 			var urlReferenceRegex = new Regex( @"(href|src)=(""(.+?)""|'(.+?)')" );
 
-			// Use case-insensitive search.
-			// http://en.wikipedia.org/wiki/URI_scheme
-			// The scheme name consist of a sequence of characters beginning with a letter and followed by any 
-			// combination of letters, digits, plus ("+"), period ("."), or hyphen ("-"). Although schemes are 
-			// case-insensitive, the canonical form is lowercase and documents that specify schemes must do so with lowercase letters.
-			var schemeRegex = new Regex( @"^[a-z][a-z0-9+.-]*://", RegexOptions.IgnoreCase );
+			// Use case-insensitive search. From http://en.wikipedia.org/wiki/URI_scheme:
+			//
+			// The scheme name consist of a sequence of characters beginning with a letter and followed by any combination of letters, digits, plus ("+"), period
+			// ("."), or hyphen ("-"). Although schemes are case-insensitive, the canonical form is lowercase and documents that specify schemes must do so with
+			// lowercase letters.
+			var schemeRegex = new Regex( @"^([a-z][a-z0-9+.-]*://|mailto:)", RegexOptions.IgnoreCase );
 
 			// Get everything that looks like an HTML tag
 			foreach( Match match in htmlTagRegex.Matches( html ) ) {
 				// For each url reference inside that tag e.g. href="", src=''
 				foreach( Match urlReference in urlReferenceRegex.Matches( match.Value ) ) {
 					// Url inside that reference
-					var url = ( urlReference.Groups[ 3 ].Value.Length != 0 ? urlReference.Groups[ 3 ] : urlReference.Groups[ 4 ] ).Value;
+					var url = ( urlReference.Groups[ 3 ].Value.Any() ? urlReference.Groups[ 3 ] : urlReference.Groups[ 4 ] ).Value;
 					// The URL is definitely relative if it doesn't include a scheme. Skip scheme-less URLs that appear to be merge fields.
 					if( !schemeRegex.IsMatch( url ) && !url.StartsWith( "@@" ) ) {
 						// Passed all tests. Change this relative URL to an absolute URL.
