@@ -11,7 +11,7 @@ namespace RedStapler.StandardLibraryTester {
 	internal class RsLibraryTester {
 		[ MTAThread ]
 		public static void Main() {
-			AppTools.Init( "Tester", false, null );
+			AppTools.Init( "Tester", false, new GlobalLogic() );
 
 			StandardLibraryMethods.RunStandardLibraryTests();
 

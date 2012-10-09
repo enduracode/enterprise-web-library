@@ -124,6 +124,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{3398B3A5-8445-410E-A69B-33EE3E914A03}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Standard Library\Standard Library.csproj">
       <Project>{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}</Project>
       <Name>Standard Library</Name>
