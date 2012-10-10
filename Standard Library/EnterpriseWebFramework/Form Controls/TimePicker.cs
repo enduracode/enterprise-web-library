@@ -25,7 +25,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private EwfTextBox textBox;
 
 		/// <summary>
-		/// Creates a time picker. The minute interval allows the user to only submit values in the given increments.
+		/// Creates a time picker. The minute interval allows the user to select values only in the given increments. 
+		/// Be aware that other values can still be sent from the browser via a crafted request.
 		/// </summary>
 		public TimePicker( TimeSpan? value, int minuteInterval = 15 ) {
 			this.value = value;
