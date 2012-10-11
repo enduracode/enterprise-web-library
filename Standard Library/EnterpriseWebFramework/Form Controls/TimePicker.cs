@@ -61,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "" ) { AutoPostBack = autoPostBack };
+			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "" ) { AutoPostBack = autoPostBack, PreventAutoComplete = true };
 			Controls.Add( textBox );
 
 			if( ToolTip != null || ToolTipControl != null )
