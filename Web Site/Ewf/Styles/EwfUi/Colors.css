@@ -52,7 +52,7 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWit
 	background-image: url('../Backgrounds/Lighter.svg');
 }
 
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTab, ewfUiSideTabCell > ewfUiDisabledTab, ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTab, ewfUiSideTabCell > ewfUiCurrentTab {
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTabActionControl, ewfUiSideTabCell > ewfUiDisabledTabActionControl, ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl {
 	cursor: default;
 }
 
