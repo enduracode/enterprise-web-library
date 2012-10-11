@@ -1,9 +1,7 @@
 using System.IO;
 using System.Reflection;
-using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.WebFileSending;
 
@@ -29,9 +27,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 							// NOTE: Put in code to not trust any of the input.
 
-							// NOTE: Handle the header not being there.
 							// NOTE: Make it so that the script can get a handle on these
 							var encryptedPageToSubmit = Request.Headers[ "x-page-handler" ];
+							if( encryptedPageToSubmit == null )
+								return;
 							var thepage = EncryptionOps.GetDecryptedString( encryptedPageToSubmit );
 
 
@@ -50,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								                     type,
 								                     new object[]
 								                     	{
-								                     		Request.Headers[ "x-upload-identifier" ],Request.Headers[ "x-page-parameters" ],
+								                     		Request.Headers[ "x-upload-identifier" ], Request.Headers[ "x-page-parameters" ],
 								                     		new RsFile( memory.ToArray(), Request.Headers[ "x-file-name" ], Request.Headers[ "x-file-type" ] )
 								                     	} ) );
 
