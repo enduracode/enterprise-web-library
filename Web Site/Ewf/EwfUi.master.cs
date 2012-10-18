@@ -401,11 +401,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					                select i.BuildButton( text => new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = text }, false );
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
-				else if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier )
+				else if( EwfPage.Instance.IsAutoDataModifier )
 					controls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ) ) );
 			}
 			else {
-				if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier )
+				if( EwfPage.Instance.IsAutoDataModifier )
 					throw new ApplicationException( "AutoDataModifier is not currently compatible with custom content foot controls." );
 				controls.AddRange( contentFootControls.ToList() );
 			}

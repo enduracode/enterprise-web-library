@@ -647,18 +647,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
 
-			if( IsPostBack && ( this is PostBackDataModifier || postBackDataModification.ContainsAnyValidationsOrModifications() ) &&
+			if( IsPostBack && postBackDataModification.ContainsAnyValidationsOrModifications() &&
 			    getChildFormControls( this ).Any( fc => fc.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ) {
-				var validationMethod = new Action<Validator>( validator => {
-					if( this is PostBackDataModifier )
-						( this as PostBackDataModifier ).ValidateFormValues( validator );
-					ExecuteDataModificationValidations( postBackDataModification, validator );
-				} );
-				var modificationMethod = new DbMethod( cn => {
-					if( this is PostBackDataModifier )
-						( this as PostBackDataModifier ).ModifyData( cn );
-					postBackDataModification.ModifyData( cn );
-				} );
+				var validationMethod = new Action<Validator>( validator => ExecuteDataModificationValidations( postBackDataModification, validator ) );
+				var modificationMethod = new DbMethod( cn => postBackDataModification.ModifyData( cn ) );
 				EhValidateAndModifyData( validationMethod, modificationMethod );
 			}
 		}

@@ -196,7 +196,6 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\AutoDataModifier.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />
     <Compile Include="ContentTypes.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControl.cs" />
@@ -322,7 +321,6 @@
     <Compile Include="EnterpriseWebFramework\PageDisabledException.cs" />
     <Compile Include="EnterpriseWebFramework\PageGroup.cs" />
     <Compile Include="EnterpriseWebFramework\ParametersModificationBase.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PostBackDataModifier.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />

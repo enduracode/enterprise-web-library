@@ -1,12 +1,11 @@
 using System.Linq;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.Validation;
 
 // OptionalParameter: string checkList
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class ChecklistDemo: EwfPage, AutoDataModifier {
+	public partial class ChecklistDemo: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}
 		}
@@ -32,16 +31,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			checklist2.AddItem( "1", "Test item 1" );
 			checklist2.Associator = associateItem;
 			checklist2.Dissociator = dissociateItem;
+
+			PostBackDataModification.AddModificationMethod( checklist.ModifyData );
 		}
 
 		private static void associateItem( DBConnection cn, string itemId ) {}
-
 		private static void dissociateItem( DBConnection cn, string itemId ) {}
-
-		public void ValidateFormValues( Validator validator ) {}
-
-		public void ModifyData( DBConnection cn ) {
-			checklist.ModifyData( cn );
-		}
+		public override bool IsAutoDataModifier { get { return true; } }
 	}
 }

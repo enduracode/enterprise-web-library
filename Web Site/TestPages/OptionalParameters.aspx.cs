@@ -9,7 +9,7 @@ using RedStapler.StandardLibrary.Validation;
 // OptionalParameter: int? field3
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class OptionalParameters: EwfPage, AutoDataModifier {
+	public partial class OptionalParameters: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}
 
@@ -56,6 +56,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						} )
 					testUrl( table, additionalUrl );
 			}
+
+			PostBackDataModification.AddValidationMethod( validateFormValues );
 		}
 
 		private static void testUrl( EwfTable table, string url ) {
@@ -66,11 +68,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                                 	{ CssClass = validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green } ) );
 		}
 
-		void PostBackDataModifier.ValidateFormValues( Validator validator ) {
+		private void validateFormValues( Validator validator ) {
 			parametersModification.Field1 = validator.GetString( new ValidationErrorHandler( "field 1" ), field1.Value, true );
 			parametersModification.Field2 = validator.GetString( new ValidationErrorHandler( "field 2" ), field2.Value, true );
 		}
 
-		void PostBackDataModifier.ModifyData( DBConnection cn ) {}
+		public override bool IsAutoDataModifier { get { return true; } }
 	}
 }
