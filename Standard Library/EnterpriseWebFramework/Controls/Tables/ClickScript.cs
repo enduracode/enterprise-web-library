@@ -8,22 +8,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// of an EWF table or an item of a column primary table. Column hover behavior is not possible with CSS.
 	/// </summary>
 	public class ClickScript {
-		private string url;
+		private PageInfo page;
 		private Action method;
-		private string script;
+		private string script = "";
 
 		/// <summary>
 		/// Creates a script that redirects to the specified page. Passing null for pageInfo will result in no script being added.
 		/// </summary>
-		public static ClickScript CreateRedirectScript( PageInfo pageInfo ) {
-			if( EwfPage.Instance is AutoDataModifier )
-				return CreatePostBackScript( () => EwfPage.Instance.EhRedirect( pageInfo ) );
-			return new ClickScript { url = pageInfo == null ? "" : pageInfo.GetUrl() };
+		public static ClickScript CreateRedirectScript( PageInfo page ) {
+			return new ClickScript { page = page };
 		}
 
 		/// <summary>
-		/// Creates a script that posts the page back and executes the specified method.
-		/// Do not pass null for method.
+		/// Creates a script that posts the page back and executes the specified method. Do not pass null for method.
 		/// </summary>
 		public static ClickScript CreatePostBackScript( Action method ) {
 			return new ClickScript { method = method };
@@ -39,14 +36,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private ClickScript() {}
 
 		internal void SetUpClickableControl( WebControl clickableControl ) {
-			if( url == "" || script == "" )
+			if( page == null && method == null && script == "" )
 				return;
 
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
+			if( page != null && EwfPage.Instance is AutoDataModifier ) {
+				method = () => EwfPage.Instance.EhRedirect( page );
+				page = null;
+			}
+
 			Func<string> scriptGetter;
-			if( url != null )
-				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( url ) + "'; return false";
+			if( page != null )
+				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( page.GetUrl() ) + "'; return false";
 			else if( method != null ) {
 				var externalHandler = new ExternalPostBackEventHandler();
 				externalHandler.PostBackEvent += method;
