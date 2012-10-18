@@ -392,37 +392,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				EwfUiStatics.SetContentFootActions( new ActionButtonSetup( rbs.Text, new EwfLink( new ExternalPageInfo( rbs.Url ) ) ) );
 			}
 
-			var rightControls = new List<Control>();
-			var centerControls = new List<Control>();
+			var controls = new List<Control>();
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() ) {
 					var first = from i in contentFootActions.Take( 1 )
 					            select i.BuildButton( text => new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = text }, true );
 					var remaining = from i in contentFootActions.Skip( 1 )
 					                select i.BuildButton( text => new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = text }, false );
-					rightControls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
+					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
+				else if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier )
+					controls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ) ) );
 			}
-			else
-				centerControls.AddRange( contentFootControls.ToList() );
-
-			if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier ) {
-				if( contentFootControls != null )
+			else {
+				if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier )
 					throw new ApplicationException( "AutoDataModifier is not currently compatible with custom content foot controls." );
-				centerControls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ), !contentFootActions.Any() ) );
+				controls.AddRange( contentFootControls.ToList() );
 			}
 
-			if( !rightControls.Any() && !centerControls.Any() )
+			if( !controls.Any() )
 				return null;
 
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly,
-			                             classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray(),
-			                             fields: ( rightControls.Any() ? new[] { 3, 1, 3 } : new[] { 1 } ).Select( i => new EwfTableField( size: Unit.Percentage( i ) ) ) );
-			table.AddItem( rightControls.Any()
-			               	? new EwfTableItem( "".ToCell(),
-			               	                    new EwfTableCell( new PlaceHolder().AddControlsReturnThis( centerControls ) ) { TextAlignment = TextAlignment.Center },
-			               	                    new EwfTableCell( new PlaceHolder().AddControlsReturnThis( rightControls ) ) { TextAlignment = TextAlignment.Right } )
-			               	: new EwfTableItem( new EwfTableCell( new PlaceHolder().AddControlsReturnThis( centerControls ) ) { TextAlignment = TextAlignment.Center } ) );
+			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray() );
+			table.AddItem(
+				new EwfTableItem( new EwfTableCell( new PlaceHolder().AddControlsReturnThis( controls ) )
+				                  	{ TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center } ) );
 			return table;
 		}
 
