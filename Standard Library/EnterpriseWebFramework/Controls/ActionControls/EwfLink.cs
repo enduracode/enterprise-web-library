@@ -213,6 +213,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
 
-		private bool isPostBackButton { get { return EwfPage.Instance is AutoDataModifier && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; } }
+		private bool isPostBackButton {
+			get {
+				return ( EwfPage.Instance.IsAutoDataModifier || EwfPage.Instance is AutoDataModifier ) && !navigatesInNewWindow && popUpWindowSettings == null &&
+				       !navigatesInOpeningWindow;
+			}
+		}
 	}
 }

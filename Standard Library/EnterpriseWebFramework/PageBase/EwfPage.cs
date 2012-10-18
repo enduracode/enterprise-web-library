@@ -463,6 +463,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public DataModification PostBackDataModification { get { return postBackDataModification; } }
 
+		/// <summary>
+		/// Standard Library use only. Gets whether the page forces post backs when links are clicked.
+		/// </summary>
+		public virtual bool IsAutoDataModifier { get { return false; } }
+
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
 			etherealControls.Enqueue( etherealControl );
 		}

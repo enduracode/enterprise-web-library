@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
-			if( page != null && EwfPage.Instance is AutoDataModifier ) {
+			if( page != null && ( EwfPage.Instance.IsAutoDataModifier || EwfPage.Instance is AutoDataModifier ) ) {
 				method = () => EwfPage.Instance.EhRedirect( page );
 				page = null;
 			}

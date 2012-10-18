@@ -406,7 +406,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			else
 				centerControls.AddRange( contentFootControls.ToList() );
 
-			if( Page is AutoDataModifier ) {
+			if( EwfPage.Instance.IsAutoDataModifier || Page is AutoDataModifier ) {
 				if( contentFootControls != null )
 					throw new ApplicationException( "AutoDataModifier is not currently compatible with custom content foot controls." );
 				centerControls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ), !contentFootActions.Any() ) );
