@@ -42,8 +42,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
 			if( page != null && ( EwfPage.Instance.IsAutoDataModifier || EwfPage.Instance is AutoDataModifier ) ) {
-				method = () => EwfPage.Instance.EhRedirect( page );
+				var pageCopy = page;
 				page = null;
+				method = () => EwfPage.Instance.EhRedirect( pageCopy );
 			}
 
 			Func<string> scriptGetter;
