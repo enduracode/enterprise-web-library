@@ -167,12 +167,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return navigatePageInfo == null || navigatePageInfo.UserCanAccessPageAndAllControls;
 		}
 
-		/// <summary>
-		/// If the page is an AutoDataModifier we make a LinkButton, which forces a postback and allows data to be modified and also gives us the opportunity to
-		/// not navigate if the data modification failed. The reason we only use linkbuttons on AutoDataModifiers is that normal DataModifiers will only be
-		/// modifying data if another button (therefore, not this one) is pressed. The only case where this could possibly end up mattering is if there is a control
-		/// with no autopostback that has a change event that calls ValidateFormsValuesAndModifyData. We cannot think of a reasonable case where this would happen.
-		/// </summary>
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			var url = "";
 			if( navigatePageInfo != null && !( navigatePageInfo.AlternativeMode is DisabledPageMode ) ) {
