@@ -136,6 +136,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
 			// NOTE: In theory, we should always return the button tag, but buttons are difficult to style in IE7.
+			// NOTE: Another problem with button is that according to the HTML Standard, it can only contain phrasing content.
 			return actionControlStyle is TextActionControlStyle || actionControlStyle is CustomActionControlStyle ? HtmlTextWriterTag.A : HtmlTextWriterTag.Button;
 		}
 
