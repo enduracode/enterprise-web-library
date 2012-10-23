@@ -410,9 +410,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptIncludes() {
-			// NOTE: Consider using Google's copy; see http://code.google.com/apis/libraries/devguide.html. Use the latest version of major version numbers instead of
-			// specific versions. Keep in mind that we can't use Google or any other CDN for some of the other files since they are customized versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", this.GetClientUrl( "~/Ewf/jQuery.js" ) );
+			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
+			// versions.
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" );
 
 			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery UI", this.GetClientUrl( "~/Ewf/JQueryUi/js/jquery-ui-1.8.18.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/TimePicker/JavaScript.js" ) );

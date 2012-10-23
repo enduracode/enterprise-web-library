@@ -682,7 +682,6 @@
     <Content Include="Ewf\Images\Calendar\button_next.gif" />
     <Content Include="Ewf\Images\Calendar\button_previous.gif" />
     <Content Include="Ewf\Images\Progress.gif" />
-    <Content Include="Ewf\jQuery.js" />
     <Content Include="Ewf\ErrorPages\ErrorPage.master" />
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
