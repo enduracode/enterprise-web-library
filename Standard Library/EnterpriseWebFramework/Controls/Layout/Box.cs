@@ -50,7 +50,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				this.AddControlsReturnThis( new Heading( heading.GetLiteralControl() )
 				                            	{ Level = headingLevel, CssClass = CssElementCreator.CssClass, ExcludesBuiltInCssClass = true } );
 			}
-			this.AddControlsReturnThis( childControls );
+			this.AddControlsReturnThis( new Block( childControls ) );
 		}
 
 		/// <summary>
