@@ -644,7 +644,6 @@
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.css" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.js" />
-    <Content Include="Ewf\QTip\jquery.qtip-1.0.0-rc3.min.js" />
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
     <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
     <Content Include="Ewf\Styles\Basic.css" />

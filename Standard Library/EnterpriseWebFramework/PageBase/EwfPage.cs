@@ -416,10 +416,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery UI", this.GetClientUrl( "~/Ewf/JQueryUi/js/jquery-ui-1.8.18.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/TimePicker/JavaScript.js" ) );
-
-			// NOTE: Delete first line and uncomment second line when we switch to qTip2.
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip", this.GetClientUrl( "~/Ewf/QTip/jquery.qtip-1.0.0-rc3.min.js" ) );
-			//ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/QTip2/jquery.qtip.min.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/QTip2/jquery.qtip.min.js" ) );
 
 			// From http://stackoverflow.com/a/2548133/35349.
 			ClientScript.RegisterClientScriptBlock( GetType(),

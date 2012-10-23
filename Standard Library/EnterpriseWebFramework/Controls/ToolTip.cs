@@ -29,9 +29,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		string EtherealControl.GetJsInitStatements() {
 			// NOTE: Should we be setting a max width on the tool tip? We had 480px before.
-			return "$( '#" + targetControl.ClientID + "' ).qtip( { content: { text: $( '#" + control.ClientID + "' ).remove()" +
+			return "$( '#" + targetControl.ClientID + "' ).qtip( { content: { text: $( '#" + control.ClientID + "' )" +
 			       ( title.Any() ? ", title: { text: '" + title + "' }" : "" ) + " }" +
-			       ( sticky ? ", show: { delay: 0, when: { event: 'click' }, effect: { length: 0 } }, hide: { when: { event: 'unfocus' } }" : "" ) + " } );";
+			       ( sticky ? ", show: { event: 'click', delay: 0 }, hide: { event: 'unfocus' }" : "" ) + " } );";
 		}
 
 		internal static Control GetToolTipTextControl( string toolTip ) {
