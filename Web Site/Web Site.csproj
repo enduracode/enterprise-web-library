@@ -641,6 +641,7 @@
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-icons_eceaea_256x240.png" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\jquery-ui-1.8.18.custom.css" />
     <Content Include="Ewf\JQueryUi\js\jquery-ui-1.8.18.custom.min.js" />
+    <Content Include="Ewf\JQueryUi\ReadMe.txt" />
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.css" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.js" />
