@@ -36,9 +36,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					                          			                  "Custom script".ToCell() )
 					                          		} ) );
 			toolTipLink.ActionControlStyle = new ButtonActionControlStyle( "Not clickable for some reason", ButtonActionControlStyle.ButtonSize.ShrinkWrap );
-			ph.AddControlsReturnThis( new RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.Box( toolTipLink ) );
+			ph.AddControlsReturnThis( new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( toolTipLink ) );
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.Box(
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
 					new ToolTipButton( new EwfLink( new ExternalPageInfo( "http://www.google.com" ) ) { ActionControlStyle = new TextActionControlStyle( "Google link" ) } )
 						{ ActionControlStyle = new TextActionControlStyle( "Not clickable 2" ) } ) );
 
