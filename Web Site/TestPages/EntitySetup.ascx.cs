@@ -40,7 +40,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				       		               new ToolTipTest.Info( this, DateTime.Now ),
 				       		               new TwoWeekCalendarTest.Info( this, DateTime.Now ),
 				       		               new ExcelManipulation.Info( this ) ),
-				       		new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) )
+				       		new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
+				       		new PageGroup( "Layout", new Box.Info( this ) )
 				       	};
 			}
 

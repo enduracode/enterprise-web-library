@@ -106,6 +106,13 @@
     <Compile Include="TestPages\ActionControls.aspx.designer.cs">
       <DependentUpon>ActionControls.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\Box.aspx.cs">
+      <DependentUpon>Box.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\Box.aspx.designer.cs">
+      <DependentUpon>Box.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\Html5FileUpload.aspx.cs">
       <DependentUpon>Html5FileUpload.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -661,6 +668,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
+    <Content Include="TestPages\Box.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
     <Content Include="TestPages\Email.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />
