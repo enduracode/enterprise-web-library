@@ -18,6 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		/// <summary>
 		/// Creates a custom button. A semicolon will be added to the end of the script.
+		/// NOTE: It would probably be better to take a function that returns the script so script generation can be deferred until all controls have client IDs.
 		/// </summary>
 		public CustomButton( string script ) {
 			ActionControlStyle = new ButtonActionControlStyle();
