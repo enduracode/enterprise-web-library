@@ -22,21 +22,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		}
 
 		void DisplayLink.AddJavaScript() {
-			linkThirdColCheckBoxesToFourthColCellsDisplay( true );
+			linkThirdColCheckBoxesToFourthColCellsDisplay( null );
 		}
 
-		void DisplayLink.SetInitialDisplay() {
-			linkThirdColCheckBoxesToFourthColCellsDisplay( false );
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
+			linkThirdColCheckBoxesToFourthColCellsDisplay( formControlValues );
 		}
 
-		private void linkThirdColCheckBoxesToFourthColCellsDisplay( bool addJavaScript ) {
+		private void linkThirdColCheckBoxesToFourthColCellsDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( Control formChild in form.Controls ) {
 				var panelIndex = 0;
 				foreach( Control rowChild in formChild.Controls ) {
 					if( rowChild is Panel ) {
 						panelIndex += 1;
 						if( panelIndex == 3 ) {
-							linkFirstPanelCheckBoxToNextPanelDisplay( addJavaScript, rowChild );
+							linkFirstPanelCheckBoxToNextPanelDisplay( formControlValues, rowChild );
 							break;
 						}
 					}
@@ -44,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 			}
 		}
 
-		private static void linkFirstPanelCheckBoxToNextPanelDisplay( bool addJavaScript, Control outerPanel ) {
+		private static void linkFirstPanelCheckBoxToNextPanelDisplay( PostBackValueDictionary formControlValues, Control outerPanel ) {
 			var panelIndex = 0;
 			BlockCheckBox checkBox = null;
 			Panel panel = null;
@@ -56,10 +56,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 					panel = control;
 			}
 			if( checkBox != null && panel != null ) {
-				if( addJavaScript )
+				if( formControlValues == null )
 					DisplayLinkingOps.AddDisplayJavaScriptToCheckBox( checkBox, true, panel );
 				else
-					DisplayLinkingOps.SetControlDisplay( panel, checkBox.Checked );
+					DisplayLinkingOps.SetControlDisplay( panel, checkBox.IsCheckedInPostBack( formControlValues ) );
 			}
 		}
 

@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 			}
 		}
 
-		void DisplayLink.SetInitialDisplay() {
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( var c in controls ) {
 				var visible = ( controlsVisibleOnValue && radioList.SelectedValue == selectedValue ) ||
 				              ( !controlsVisibleOnValue && radioList.SelectedValue != selectedValue );

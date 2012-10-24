@@ -38,7 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 			listControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, script );
 		}
 
-		void DisplayLink.SetInitialDisplay() {
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( var c in controls ) {
 				var visible = ( controlsVisibleOnIndex && listControl.SelectedIndex == selectedIndex ) ||
 				              ( !controlsVisibleOnIndex && listControl.SelectedIndex != selectedIndex );

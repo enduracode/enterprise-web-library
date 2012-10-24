@@ -4,6 +4,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 	/// </summary>
 	internal interface DisplayLink {
 		void AddJavaScript();
-		void SetInitialDisplay();
+		void SetInitialDisplay( PostBackValueDictionary formControlValues );
 	}
 }

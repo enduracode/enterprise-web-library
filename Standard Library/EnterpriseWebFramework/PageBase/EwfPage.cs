@@ -318,7 +318,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// FreeFormRadioListToControlArrayDisplayLink's script must be built after all items are added to the list.
 			foreach( var displayLink in displayLinks ) {
 				displayLink.AddJavaScript();
-				displayLink.SetInitialDisplay();
+				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			}
 		}
 

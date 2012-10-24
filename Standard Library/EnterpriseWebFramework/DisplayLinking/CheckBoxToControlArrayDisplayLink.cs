@@ -46,7 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 				addJavaScriptToOtherRadioButtonsInGroup( childControl );
 		}
 
-		void DisplayLink.SetInitialDisplay() {
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( var c in controls ) {
 				if( c is WebControl )
 					DisplayLinkingOps.SetControlDisplay( c as WebControl, controlsVisibleWhenBoxChecked == checkBox.Checked );

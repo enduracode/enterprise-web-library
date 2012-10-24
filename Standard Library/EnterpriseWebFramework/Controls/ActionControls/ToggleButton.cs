@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
@@ -33,7 +34,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
-		private EwfHiddenField controlsToggledHiddenField;
+		private Func<PostBackValueDictionary, string> controlsToggledHiddenFieldValueGetter;
+		private Func<string> controlsToggledHiddenFieldClientIdGetter;
 		private Control textControl;
 
 		/// <summary>
@@ -69,11 +71,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Gets or sets the CSS classes for this button.
-		/// </summary>
-		public override string CssClass { get; set; }
-
-		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
 		/// </summary>
 		public override Unit Width { get { return width; } set { width = value; } }
@@ -86,30 +83,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			EwfPage.Instance.AddDisplayLink( this );
 
-			AlternateText = AlternateText ?? ActionControlStyle.Text;
-
 			// NOTE: Currently this hidden field will always be persisted in page state whether the page cares about that or not. We should put this decision into the
 			// hands of the page, maybe by making ToggleButton sort of like a form control such that it takes a boolean value in its constructor and allows access to
 			// its post back value.
-			controlsToggledHiddenField = new EwfHiddenField( EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString() );
-			Controls.Add( controlsToggledHiddenField );
+			var controlsToggled = false;
+			EwfHiddenField.Create( EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString(),
+			                       postBackValue => controlsToggled = getControlsToggled( postBackValue ),
+			                       EwfPage.Instance.PostBackDataModification,
+			                       out controlsToggledHiddenFieldValueGetter,
+			                       out controlsToggledHiddenFieldClientIdGetter );
 			EwfPage.Instance.PostBackDataModification.AddModificationMethod(
 				cn1 => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
 
-			var button = new WebControl( PostBackButton.GetTagKey( ActionControlStyle ) );
-
-			// Add the button to the page right away since we use UniqueID below.
-			Controls.Add( button );
-
-			if( PostBackButton.GetTagKey( ActionControlStyle ) == HtmlTextWriterTag.Button )
-				PostBackButton.AddButtonAttributes( button );
-			button.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
-			button.CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			textControl = ActionControlStyle.SetUpControl( button, "", width, height, w => base.Width = w );
-
-			// If the action control style has configured the button to be a block container, make this control also a block container.
-			if( button.CssClass.Separate().Contains( "ewfBlockContainer" ) )
-				CssClass = CssClass.ConcatenateWithSpace( "ewfBlockContainer" );
+			if( TagKey == HtmlTextWriterTag.Button )
+				PostBackButton.AddButtonAttributes( this );
+			this.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
+			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			textControl = ActionControlStyle.SetUpControl( this, "", width, height, w => base.Width = w );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
@@ -120,7 +110,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "function " + handlerName + "() {" );
 
-				sw.WriteLine( "var controlsToggled = document.getElementById( '" + controlsToggledHiddenField.ClientID + "' );" );
+				sw.WriteLine( "var controlsToggled = document.getElementById( '" + controlsToggledHiddenFieldClientIdGetter() + "' );" );
 				if( textControl != null )
 					sw.WriteLine( "var textElement = document.getElementById( '" + textControl.ClientID + "' );" );
 
@@ -133,7 +123,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				sw.WriteLine( "else {" );
 				sw.WriteLine( "controlsToggled.value = '" + true + "';" );
 				if( textControl != null ) {
-					sw.WriteLine( "textElement.innerHTML = '" + AlternateText + "';" );
+					sw.WriteLine( "textElement.innerHTML = '" + getAlternateText() + "';" );
 					sw.WriteLine( "if( textElement.innerHTML == '' ) { setElementDisplay( '" + ClientID + "', false ); }" );
 				}
 				sw.WriteLine( "}" );
@@ -148,11 +138,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		private string handlerName { get { return "toggleState_" + ClientID; } }
 
-		void DisplayLink.SetInitialDisplay() {
-			if( controlsToggled ) {
-				if( AlternateText.Length > 0 ) {
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
+			if( getControlsToggled( controlsToggledHiddenFieldValueGetter( formControlValues ) ) ) {
+				if( getAlternateText().Length > 0 ) {
 					textControl.Controls.Clear();
-					textControl.Controls.Add( AlternateText.GetLiteralControl() );
+					textControl.Controls.Add( getAlternateText().GetLiteralControl() );
 				}
 				else
 					this.SetInitialDisplay( false );
@@ -165,16 +155,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private bool controlsToggled {
-			get {
-				bool result;
-				return bool.TryParse( controlsToggledHiddenField.GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ), out result ) && result;
-			}
+		private static bool getControlsToggled( string hiddenFieldValue ) {
+			bool result;
+			return bool.TryParse( hiddenFieldValue, out result ) && result;
+		}
+
+		private string getAlternateText() {
+			return AlternateText ?? ActionControlStyle.Text;
 		}
 
 		/// <summary>
-		/// Returns the span tag, which represents this control in HTML.
+		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Span; } }
+		protected override HtmlTextWriterTag TagKey { get { return PostBackButton.GetTagKey( ActionControlStyle ); } }
 	}
 }
