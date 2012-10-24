@@ -32,6 +32,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public ActionControlStyle ActionControlStyle { get; set; }
 
+		private readonly IEnumerable<string> toggleClasses;
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
 		private Func<PostBackValueDictionary, string> controlsToggledHiddenFieldValueGetter;
@@ -42,9 +43,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a toggle button with ControlsToToggle already populated.
 		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
 		/// </summary>
-		public ToggleButton( IEnumerable<WebControl> controlsToToggle, ActionControlStyle actionControlStyle ) {
+		public ToggleButton( IEnumerable<WebControl> controlsToToggle, ActionControlStyle actionControlStyle, IEnumerable<string> toggleClasses = null ) {
 			AddControlsToToggle( controlsToToggle.ToArray() );
 			ActionControlStyle = actionControlStyle;
+			this.toggleClasses = toggleClasses;
 		}
 
 		/// <summary>
@@ -128,8 +130,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				}
 				sw.WriteLine( "}" );
 
-				foreach( var c in controlsToToggle )
-					sw.WriteLine( "toggleElementDisplay( '" + c.ClientID + "' );" );
+				foreach( var c in controlsToToggle ) {
+					if( toggleClasses != null )
+						sw.WriteLine( "$( '#" + c.ClientID + "' ).toggleClass( '" + StringTools.ConcatenateWithDelimiter( " ", toggleClasses.ToArray() ) + "', 200 );" );
+					else
+						sw.WriteLine( "toggleElementDisplay( '" + c.ClientID + "' );" );
+				}
 
 				sw.WriteLine( "}" );
 				EwfPage.Instance.ClientScript.RegisterClientScriptBlock( GetType(), UniqueID, sw.ToString(), true );
@@ -140,15 +146,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			if( getControlsToggled( controlsToggledHiddenFieldValueGetter( formControlValues ) ) ) {
-				if( getAlternateText().Length > 0 ) {
+				if( getAlternateText().Any() ) {
 					textControl.Controls.Clear();
 					textControl.Controls.Add( getAlternateText().GetLiteralControl() );
 				}
 				else
 					this.SetInitialDisplay( false );
 				foreach( var control in controlsToToggle ) {
-					if( control is WebControl )
-						( control as WebControl ).ToggleInitialDisplay();
+					if( control is WebControl ) {
+						var webControl = control as WebControl;
+						if( toggleClasses != null ) {
+							foreach( var i in toggleClasses )
+								webControl.CssClass = webControl.CssClass.Contains( i ) ? webControl.CssClass.Replace( i, "" ) : webControl.CssClass.ConcatenateWithSpace( i );
+						}
+						else
+							webControl.ToggleInitialDisplay();
+					}
 					else
 						( control as HtmlControl ).ToggleInitialDisplay();
 				}

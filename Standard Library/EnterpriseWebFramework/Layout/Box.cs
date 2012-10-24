@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				       	{
 				       		new CssElement( "BoxBothStates", closedSelector, expandedSelector ), new CssElement( "BoxClosedState", closedSelector ),
 				       		new CssElement( "BoxExpandedState", expandedSelector ),
-				       		new CssElement( "BoxHeadingAllLevels", HeadingLevelStatics.HeadingElements.Select( i => i + "." + headingAndContentClass ).ToArray() ),
+				       		new CssElement( "BoxHeadingAllLevels", HeadingLevelStatics.HeadingElements.Select( i => "* > " + i + "." + headingAndContentClass ).ToArray() ),
 				       		new CssElement( "BoxContentBlock", "div." + headingAndContentClass )
 				       	};
 			}
@@ -56,15 +56,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( !expanded.HasValue || expanded.Value ? expandedClass : closedClass );
+
+			var contentBlock = new Block( childControls ) { CssClass = headingAndContentClass };
 			if( heading.Length > 0 ) {
-				this.AddControlsReturnThis( new Heading( heading.GetLiteralControl() )
-				                            	{ Level = headingLevel, CssClass = headingAndContentClass, ExcludesBuiltInCssClass = true } );
+				var headingControl = new Heading( heading.GetLiteralControl() ) { Level = headingLevel, CssClass = headingAndContentClass, ExcludesBuiltInCssClass = true };
+				this.AddControlsReturnThis( expanded.HasValue
+				                            	? new ToggleButton( this.ToSingleElementArray(),
+				                            	                    new CustomActionControlStyle( c => c.AddControlsReturnThis( headingControl ) ),
+				                            	                    toggleClasses: new[] { closedClass, expandedClass } ) as Control
+				                            	: new Block( headingControl ) );
 			}
-			this.AddControlsReturnThis( new Block( childControls ) { CssClass = headingAndContentClass } );
+			this.AddControlsReturnThis( contentBlock );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
+		/// NOTE: This should eventually use the "section" element instead of just a div.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}
