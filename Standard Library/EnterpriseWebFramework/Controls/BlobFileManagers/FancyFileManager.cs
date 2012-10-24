@@ -85,16 +85,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			chooseUploadMethod.AddDisplayLink( false.ToString(), true, browseForFiles );
 
 			var uploadPending = new Box( "Files to be uploaded",
-			                             new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) ),
-			                             new Heading { CssClass = "upload-count" } ) { CssClass = "queuedFiles" };
+			                             new Control[]
+			                             	{
+			                             		new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) )
+			                             		, new Heading { CssClass = "upload-count" }
+			                             	} ) { CssClass = "queuedFiles" };
 
-			Controls.Add( new Box( new Panel { CssClass = "ewfErrorMessageListBlock" },
-			                       chooseUploadMethod,
-			                       new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ),
-			                       browseForFiles,
-			                       uploadPending,
-			                       new CustomButton( @"uploadButtonClicked(this);" )
-			                       	{ ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ), CssClass = "beginUploadButton" } ) { CssClass = "upload-box" } );
+			Controls.Add(
+				new Box( new Control[]
+				         	{
+				         		new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
+				         		new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
+				         		new CustomButton( @"uploadButtonClicked(this);" )
+				         			{ ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ), CssClass = "beginUploadButton" }
+				         	} ) { CssClass = "upload-box" } );
 		}
 
 		/// <summary>

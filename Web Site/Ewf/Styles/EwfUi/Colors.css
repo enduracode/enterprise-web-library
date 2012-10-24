@@ -12,7 +12,7 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfU
 }
 
 /* borders */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBox {
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBoxBothStates {
 	border-color: #78a0c3;
 }
 ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, div.ewfButtonsBottomBorder {
@@ -20,7 +20,7 @@ ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionCont
 }
 
 /* contrast */
-ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfBox > ewfBoxHeadingAllLevels {
+ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfBoxBothStates > ewfBoxHeadingAllLevels {
 	background-color: #d4e0ec; /* hack for IE8 */
 	background-color: rgba( 0, 0, 0, 0 ); /* cancels out IE8 hack for all other browsers */
 	background-image: url('../Backgrounds/Darker.svg');

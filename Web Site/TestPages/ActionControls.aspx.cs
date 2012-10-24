@@ -12,54 +12,46 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void LoadData( DBConnection cn ) {
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new PostBackButton( new DataModification(),
-				                                                                               () => { },
-				                                                                               new ButtonActionControlStyle( "Tiny Post Back Button",
-				                                                                                                             ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-				                                                                               false ) ) );
-			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( EwfLink.Create( SubFolder.General.GetInfo(),
-				                                                                           new ButtonActionControlStyle( "Tiny EWF Link",
-				                                                                                                         ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new PostBackButton( new DataModification(),
+					                    () => { },
+					                    new ButtonActionControlStyle( "Tiny Post Back Button", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+					                    false ).ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
-					new ToggleButton( new ButtonActionControlStyle( "Tiny Toggle Button", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) ) );
+					EwfLink.Create( SubFolder.General.GetInfo(), new ButtonActionControlStyle( "Tiny EWF Link", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ).
+						ToSingleElementArray() ) );
+			ph.AddControlsReturnThis(
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new ToggleButton( new ButtonActionControlStyle( "Tiny Toggle Button", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ).ToSingleElementArray() ) );
 
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new PostBackButton( new DataModification(), () => { } )
-				                                                           	{
-				                                                           		ActionControlStyle = new ButtonActionControlStyle { Text = "Post Back Button" },
-				                                                           		UsesSubmitBehavior = false,
-				                                                           		Width = Unit.Pixel( 200 )
-				                                                           	} ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new PostBackButton( new DataModification(), () => { } )
+						{ ActionControlStyle = new ButtonActionControlStyle { Text = "Post Back Button" }, UsesSubmitBehavior = false, Width = Unit.Pixel( 200 ) }.
+						ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new EwfLink( EwfTableDemo.GetInfo() )
-				                                                           	{ ActionControlStyle = new ButtonActionControlStyle { Text = "EWF Link" } } ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new EwfLink( EwfTableDemo.GetInfo() ) { ActionControlStyle = new ButtonActionControlStyle { Text = "EWF Link" } }.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new ToggleButton { ActionControlStyle = new ButtonActionControlStyle { Text = "Toggle button" } } ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new ToggleButton { ActionControlStyle = new ButtonActionControlStyle { Text = "Toggle button" } }.ToSingleElementArray() ) );
 
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new PostBackButton( new DataModification(), () => { } )
-				                                                           	{
-				                                                           		ActionControlStyle =
-				                                                           			new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large )
-				                                                           				{ Text = "Large Post Back Button" },
-				                                                           		UsesSubmitBehavior = false
-				                                                           	} ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new PostBackButton( new DataModification(), () => { } )
+						{
+							ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = "Large Post Back Button" },
+							UsesSubmitBehavior = false
+						}.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new EwfLink( EwfTableDemo.GetInfo() )
-				                                                           	{
-				                                                           		ActionControlStyle =
-				                                                           			new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large )
-				                                                           				{ Text = "Large EWF Link" }
-				                                                           	} ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new EwfLink( EwfTableDemo.GetInfo() )
+						{ ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = "Large EWF Link" } }.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
-				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( new ToggleButton
-				                                                           	{
-				                                                           		ActionControlStyle =
-				                                                           			new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large )
-				                                                           				{ Text = "Large Toggle Button" }
-				                                                           	} ) );
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					new ToggleButton { ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = "Large Toggle Button" } }.
+						ToSingleElementArray() ) );
 		}
 	}
 }
