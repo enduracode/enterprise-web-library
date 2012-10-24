@@ -7,10 +7,6 @@
 			<td style="width: 14%;">UnFiltered drop down</td>
 			<td><ewf:EwfListControl runat="server" Type="DropDownList" ID="dropDownList" /></td>
 		</tr>
-		<tr runat="server">
-			<td>Toggle date row</td>
-			<td><ewf:ToggleButton runat="server" ID="toggler" Text="Click here to toggle" /></td>
-		</tr>
 		<tr runat="server" id="dateRow">
 			<td>Date</td>
 			<td><ewf:DatePicker runat="server" ID="datePicker" /></td>

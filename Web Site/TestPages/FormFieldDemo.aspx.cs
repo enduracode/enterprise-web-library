@@ -14,8 +14,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void LoadData( DBConnection cn ) {
 			buttonPlace.AddControlsReturnThis( new PostBackButton( new DataModification(), null, new TextActionControlStyle( "Generate Post back" ) ) );
 
-			toggler.AddControlsToToggle( dateRow );
-			toggler.AlternateText = "woo";
 			textBox.SetWatermarkText( "Watermark" );
 			//datePicker.Date = new DateTime( 2008, 4, 29 );
 			timePicker.Value = new TimeSpan( 14, 24, 32 );

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
@@ -15,12 +16,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private const string pageStateKey = "controlsToggled";
 
 		private readonly List<Control> controlsToToggle = new List<Control>();
-
-		/// <summary>
-		/// Gets or sets the text displayed in the button. Do not set this to null. This is displayed as alternate text for certain action control styles.
-		/// NOTE: Do not use.
-		/// </summary>
-		public string Text { get; set; }
 
 		/// <summary>
 		/// Gets or sets the text to show when this link has been clicked an odd number of times. Pass NULL for this if you want the text to stay the same or the
@@ -42,52 +37,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private Control textControl;
 
 		/// <summary>
-		/// Creates a toggle button.
-		/// NOTE: Do not use.
+		/// Creates a toggle button with ControlsToToggle already populated.
+		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
 		/// </summary>
-		public ToggleButton( ActionControlStyle actionControlStyle = null ) {
-			Text = "";
-			ActionControlStyle = actionControlStyle ?? new ButtonActionControlStyle();
+		public ToggleButton( IEnumerable<WebControl> controlsToToggle, ActionControlStyle actionControlStyle ) {
+			AddControlsToToggle( controlsToToggle.ToArray() );
+			ActionControlStyle = actionControlStyle;
 		}
 
 		/// <summary>
 		/// Creates a toggle button with ControlsToToggle already populated.
 		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
 		/// </summary>
-		public ToggleButton( ActionControlStyle actionControlStyle, params WebControl[] controlsToToggle ): this( actionControlStyle ) {
-			AddControlsToToggle( controlsToToggle );
+		public ToggleButton( IEnumerable<HtmlControl> controlsToToggle, ActionControlStyle actionControlStyle ) {
+			AddControlsToToggle( controlsToToggle.ToArray() );
+			ActionControlStyle = actionControlStyle;
 		}
-
-		/// <summary>
-		/// Creates a toggle button with ControlsToToggle already populated.
-		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
-		/// NOTE: Do not use.
-		/// </summary>
-		public ToggleButton( params WebControl[] controlsToToggle ): this() {
-			AddControlsToToggle( controlsToToggle );
-		}
-
-		/// <summary>
-		/// Creates a toggle button with ControlsToToggle already populated.
-		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
-		/// NOTE: Do not use.
-		/// </summary>
-		public ToggleButton( params HtmlControl[] controlsToToggle ): this() {
-			AddControlsToToggle( controlsToToggle );
-		}
-
-		/// <summary>
-		/// Creates a toggle button with ControlsToToggle already populated.
-		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
-		/// </summary>
-		public ToggleButton( ActionControlStyle actionControlStyle, params HtmlControl[] controlsToToggle ): this( actionControlStyle ) {
-			AddControlsToToggle( controlsToToggle );
-		}
-
-		/// <summary>
-		/// Does nothing. Overriding this method forces Visual Studio to respect white space around the control when it is used in markup.
-		/// </summary>
-		protected override void AddParsedSubObject( object obj ) {}
 
 		/// <summary>
 		/// Add controls that should be toggled. Use SetInitialDisplay on each control to set up its initial visibility.
@@ -121,7 +86,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			EwfPage.Instance.AddDisplayLink( this );
 
-			AlternateText = AlternateText ?? Text;
+			AlternateText = AlternateText ?? ActionControlStyle.Text;
 
 			// NOTE: Currently this hidden field will always be persisted in page state whether the page cares about that or not. We should put this decision into the
 			// hands of the page, maybe by making ToggleButton sort of like a form control such that it takes a boolean value in its constructor and allows access to
@@ -140,7 +105,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				PostBackButton.AddButtonAttributes( button );
 			button.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
 			button.CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			textControl = ActionControlStyle.SetUpControl( button, Text, width, height, w => base.Width = w );
+			textControl = ActionControlStyle.SetUpControl( button, "", width, height, w => base.Width = w );
 
 			// If the action control style has configured the button to be a block container, make this control also a block container.
 			if( button.CssClass.Separate().Contains( "ewfBlockContainer" ) )
@@ -162,7 +127,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				sw.WriteLine( "if( controlsToggled.value == '" + true + "' ) {" );
 				sw.WriteLine( "controlsToggled.value = '" + false + "';" );
 				if( textControl != null )
-					sw.WriteLine( "textElement.innerHTML = '" + ( ActionControlStyle.Text.Length > 0 ? ActionControlStyle.Text : Text ) + "';" );
+					sw.WriteLine( "textElement.innerHTML = '" + ActionControlStyle.Text + "';" );
 				sw.WriteLine( "}" );
 
 				sw.WriteLine( "else {" );

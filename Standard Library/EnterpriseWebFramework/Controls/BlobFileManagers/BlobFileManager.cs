@@ -63,8 +63,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			uploadedFile = new EwfFileUpload();
 			if( file != null ) {
 				uploadedFile.SetInitialDisplay( false );
-				var replaceExistingFileLink = new ToggleButton( new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ), uploadedFile )
-				                              	{ AlternateText = "" };
+				var replaceExistingFileLink = new ToggleButton( uploadedFile.ToSingleElementArray(),
+				                                                new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ) ) { AlternateText = "" };
 				controlStack.AddControls( replaceExistingFileLink );
 			}
 

@@ -23,7 +23,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
-					new ToggleButton( new ButtonActionControlStyle( "Tiny Toggle Button", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ).ToSingleElementArray() ) );
+					new ToggleButton( new WebControl[ 0 ], new ButtonActionControlStyle( "Tiny Toggle Button", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ).
+						ToSingleElementArray() ) );
 
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
@@ -35,7 +36,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					new EwfLink( EwfTableDemo.GetInfo() ) { ActionControlStyle = new ButtonActionControlStyle { Text = "EWF Link" } }.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
-					new ToggleButton { ActionControlStyle = new ButtonActionControlStyle { Text = "Toggle button" } }.ToSingleElementArray() ) );
+					new ToggleButton( new WebControl[ 0 ], new ButtonActionControlStyle( "Toggle button" ) ).ToSingleElementArray() ) );
 
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
@@ -50,7 +51,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						{ ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = "Large EWF Link" } }.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
-					new ToggleButton { ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = "Large Toggle Button" } }.
+					new ToggleButton( new WebControl[ 0 ], new ButtonActionControlStyle( "Large Toggle Button", ButtonActionControlStyle.ButtonSize.Large ) ).
 						ToSingleElementArray() ) );
 		}
 	}

@@ -22,15 +22,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfListControl dropDownList;
         
         /// <summary>
-        /// toggler control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.ToggleButton toggler;
-        
-        /// <summary>
         /// dateRow control.
         /// </summary>
         /// <remarks>
