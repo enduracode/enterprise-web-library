@@ -38,8 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates a box.
 		/// </summary>
 		/// <param name="childControls">The box content.</param>
-		/// <param name="expanded">Set to true or false if you want users to be able to expand or close the box by clicking on the heading.</param>
-		public Box( IEnumerable<Control> childControls, bool? expanded = null ): this( "", childControls, expanded: expanded ) {}
+		public Box( IEnumerable<Control> childControls ): this( "", childControls ) {}
 
 		/// <summary>
 		/// Creates a box. Do not pass null for the heading.
