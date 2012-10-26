@@ -41,8 +41,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal static bool ShouldBeSecureGivenCurrentRequest( this ConnectionSecurity connectionSecurity, bool isIntermediateInstallationPublicPage ) {
+			// Intermediate installations must be secure because the intermediate user cookie is secure.
 			if( AppTools.IsIntermediateInstallation && !isIntermediateInstallationPublicPage )
 				return true;
+
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
 			       	? HttpContext.Current.Request.IsSecureConnection
 			       	: connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfApp.SupportsSecureConnections;
