@@ -5,6 +5,7 @@ using RedStapler.StandardLibrary.DataAccess;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Defines how user management operations will be carried out against the database for a particular application. Supports ASP.NET Forms Authentication.
+	/// NOTE: Include sample supporting schema here, especially a varbinary(20) for saltedPassword.
 	/// </summary>
 	public interface FormsAuthCapableUserManagementProvider: SystemUserManagementProvider {
 		/// <summary>
@@ -25,7 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( DBConnection cn, int? userId, string email, int salt, string saltedPassword, int roleId, DateTime? lastRequestDateTime,
+		void InsertOrUpdateUser( DBConnection cn, int? userId, string email, int salt, byte[] saltedPassword, int roleId, DateTime? lastRequestDateTime,
 		                         bool mustChangePassword );
 
 		/// <summary>

@@ -158,7 +158,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
 			if( user != null ) {
 				// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
-				if( user.SaltedPassword == new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash() )
+				if( user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash() ) )
 					setCookieAndUser( user );
 				else
 					errors.Add( passwordErrorMessage );
@@ -181,7 +181,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public static bool UserCredentialsAreCorrect( DBConnection cn, string userEmailAddress, string providedPassword ) {
 			// NOTE: Could share this with line 160 above. Not sure about the password trimming, though.
 			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, userEmailAddress );
-			return user != null && user.SaltedPassword == new Password( providedPassword, user.Salt ).ComputeSaltedHash();
+			return user != null && user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
 		}
 
 		/// <summary>
