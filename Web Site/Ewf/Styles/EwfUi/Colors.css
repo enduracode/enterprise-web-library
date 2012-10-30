@@ -52,7 +52,11 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWit
 	background-image: url('../Backgrounds/Lighter.svg');
 }
 
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTabActionControl, ewfUiSideTabCell > ewfUiDisabledTabActionControl, ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl {
+ewfActionControlAllStylesAllActionStates {
+	cursor: pointer;
+}
+
+ewfActionControlAllStylesActionlessState {
 	cursor: default;
 }
 
