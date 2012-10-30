@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Security;
 using RedStapler.StandardLibrary.DataAccess;
@@ -155,11 +156,34 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public static FormsAuthCapableUser LogInUser( string validatedEmailAddress, EwfTextBox password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var errors = new List<string>();
 
-			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
+			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
+			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
 			if( user != null ) {
-				// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
-				if( user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash() ) )
-					setCookieAndUser( user );
+				if( user.SaltedPassword != null ) {
+					// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
+					var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
+					if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
+						setCookieAndUser( user );
+						
+						// This system wants to avoid a forced migration and because of this we're adding an exception here.
+						// NOTE: Remove this once enough time has passed when all relevant users have been migrated.
+					else {
+						var asciiEncoding = new ASCIIEncoding();
+						if( AppTools.SystemName == "Health Alliance Enterprise System" &&
+						    user.SaltedPassword.SequenceEqual( asciiEncoding.GetBytes( asciiEncoding.GetString( hashedPassword ) ) ) ) {
+							setCookieAndUser( user );
+							// Migrate the user's account to use the new hash.
+							formsAuthCapableUserManagementProvider.InsertOrUpdateUser( AppRequestState.PrimaryDatabaseConnection,
+							                                                           user.UserId,
+							                                                           user.Email,
+							                                                           user.Salt,
+							                                                           hashedPassword,
+							                                                           user.Role.RoleId,
+							                                                           user.LastRequestDateTime,
+							                                                           user.MustChangePassword );
+						}
+					}
+				}
 				else
 					errors.Add( passwordErrorMessage );
 			}
@@ -204,7 +228,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
 			HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
-			                                          	{ Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } );
+				{
+					Secure = EwfApp.SupportsSecureConnections,
+					HttpOnly = true
+				} );
 
 			AppRequestState.Instance.SetUser( user );
 		}
@@ -224,8 +251,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning,
 					                                              Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
 					                                              ( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now )
-					                                                	? TimeZone.CurrentTimeZone.DaylightName
-					                                                	: TimeZone.CurrentTimeZone.StandardName ) + "." );
+						                                                ? TimeZone.CurrentTimeZone.DaylightName
+						                                                : TimeZone.CurrentTimeZone.StandardName ) + "." );
 				}
 			}
 			catch {} // NOTE: Figure out why the date time field passed from javascript might be empty, and get rid of this catch
