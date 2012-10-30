@@ -55,6 +55,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
+		/// Sets the page actions. Call this only from the page.
+		/// </summary>
+		/// <param name="actions"></param>
+		public static void SetPageActions( params ActionButtonSetup[] actions ) {
+			AppMasterPage.SetPageActions( actions );
+		}
+
+		/// <summary>
 		/// Clears the content foot and adds the specified actions. Call this only from the page. The first action, if it is a post back button, will use submit
 		/// behavior.
 		/// </summary>

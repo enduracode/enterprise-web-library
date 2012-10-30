@@ -9,6 +9,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
+		void SetPageActions( params ActionButtonSetup[] actions );
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
 		void SetContentFootActions( params ActionButtonSetup[] actions );
 
 		/// <summary>

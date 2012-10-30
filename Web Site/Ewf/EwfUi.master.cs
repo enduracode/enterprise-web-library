@@ -49,6 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			internal const string DisabledTabCssClass = "ewfUiDisabledTab";
 
 			internal const string ContentCellCssClass = "ewfContentBox";
+			internal const string ContentBlockCssClass = "ewfContent";
 			internal const string ContentFootCellCssClass = "ewfStandardEntityDisplayButtons";
 			internal const string ContentFootBlockCssClass = "ewfButtons";
 			internal const string ContentFootActionListCssClass = "ewfUiCfActions";
@@ -125,6 +126,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			private static IEnumerable<CssElement> getSideTabAndContentElements( string entityAndTabAndContentBlockSelector ) {
 				var sideTabAndContentBlockSelectors =
 					EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass );
+				var contentCellSelectors = sideTabAndContentBlockSelectors.Select( i => i + " td." + ContentCellCssClass );
 				var contentFootCellSelectors = sideTabAndContentBlockSelectors.Select( i => i + " td." + ContentFootCellCssClass );
 				var contentFootBlockSelectors = from contentFootCellSelector in contentFootCellSelectors
 				                                from tableSelector in EwfTable.CssElementCreator.Selectors
@@ -133,8 +135,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				       	{
 				       		new CssElement( "UiSideTabAndContentBlock", sideTabAndContentBlockSelectors.ToArray() ),
 				       		new CssElement( "UiSideTabCell", sideTabAndContentBlockSelectors.Select( i => i + " td." + SideTabCellCssClass ).ToArray() ),
-				       		new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ),
-				       		new CssElement( "UiContentCell", sideTabAndContentBlockSelectors.Select( i => i + " td." + ContentCellCssClass ).ToArray() ),
+				       		new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelectors.ToArray() ),
+				       		new CssElement( "UiPageActionControlList",
+				       		                ( from contentCellSelector in contentCellSelectors
+				       		                  from controlLineSelector in ControlLine.CssElementCreator.Selectors
+				       		                  select contentCellSelector + " > " + controlLineSelector ).ToArray() ),
+				       		new CssElement( "UiContentBlock", contentCellSelectors.Select( i => i + " > " + "div." + ContentBlockCssClass ).ToArray() ),
 				       		new CssElement( "UiContentFootCell", contentFootCellSelectors.ToArray() ),
 				       		new CssElement( "UiContentFootBlock", contentFootBlockSelectors.ToArray() ),
 				       		new CssElement( "UiContentFootActionControlList",
@@ -155,8 +161,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 		}
 
+		private ActionButtonSetup[] pageActions = new ActionButtonSetup[ 0 ];
 		private ActionButtonSetup[] contentFootActions = new ActionButtonSetup[ 0 ];
 		private Control[] contentFootControls;
+
+		void AppEwfUiMasterPage.SetPageActions( params ActionButtonSetup[] actions ) {
+			pageActions = actions;
+		}
 
 		void AppEwfUiMasterPage.SetContentFootActions( params ActionButtonSetup[] actions ) {
 			contentFootActions = actions;
@@ -175,6 +186,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
+			pageActionPlace.AddControlsReturnThis( getPageActionList() );
 			contentFootCell.Attributes.Add( "class", CssElementCreator.ContentFootCellCssClass );
 			var contentFootBlock = getContentFootBlock();
 			if( contentFootBlock != null )
@@ -319,14 +331,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			       	  	{ TextAlignment = TextAlignment.Right };
 		}
 
-		private static IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
-			return from actionButtonSetup in actionButtonSetups
-			       let actionControl = actionButtonSetup.BuildButton( text => new TextActionControlStyle( text ), false )
-			       let asEwfLink = actionControl as EwfLink
-			       where asEwfLink == null || asEwfLink.UserCanNavigateToDestination()
-			       select actionControl;
-		}
-
 		private static Control getEntitySummaryBlock() {
 			// If the entity setup is a nonempty control, display it as an entity summary.
 			var entitySummary = EwfPage.Instance.EsAsBaseType as Control;
@@ -378,6 +382,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				tabs.Add( tab );
 			}
 			return tabs;
+		}
+
+		private IEnumerable<Control> getPageActionList() {
+			var actionControls = getActionControls( pageActions ).ToArray();
+			if( !actionControls.Any() )
+				yield break;
+			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
+		}
+
+		private static IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
+			return from actionButtonSetup in actionButtonSetups
+			       let actionControl = actionButtonSetup.BuildButton( text => new TextActionControlStyle( text ), false )
+			       let asEwfLink = actionControl as EwfLink
+			       where asEwfLink == null || asEwfLink.UserCanNavigateToDestination()
+			       select actionControl;
 		}
 
 		private Control getContentFootBlock() {

@@ -44,6 +44,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
+		/// Gets whether items in the page action control list are separated with a pipe character.
+		/// </summary>
+		public virtual bool PageActionItemsSeparatedWithPipe() {
+			return true;
+		}
+
+		/// <summary>
 		/// Gets the control to be shown at the bottom of the log in page for systems with forms authentication.
 		/// </summary>
 		public virtual Control GetSpecialInstructionsForLogInPage() {

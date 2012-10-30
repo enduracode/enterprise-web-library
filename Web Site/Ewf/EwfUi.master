@@ -7,7 +7,9 @@
 		<ewf:StaticTable runat="server" IsForm="false" CssClass="ewfUiTabsAndContent">
 			<tr runat="server">
 				<td runat="server" id="tabCell" class="ewfTabs" rowspan="2" visible="false" />
-				<td runat="server" id="contentCell" class="ewfContentBox"><asp:ContentPlaceHolder runat="server" ID="contentPlace" /></td>
+				<td runat="server" id="contentCell" class="ewfContentBox"><asp:PlaceHolder runat="server" ID="pageActionPlace" />
+					<div class="ewfContent"><asp:ContentPlaceHolder runat="server" ID="contentPlace" /></div>
+				</td>
 			</tr>
 			<tr runat="server">
 				<td runat="server" id="contentFootCell">

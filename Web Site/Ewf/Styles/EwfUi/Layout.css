@@ -66,6 +66,7 @@ ewfBoxBothStates {
 	border-style: solid;
 	border-radius: 5px;
 	padding: 4px;
+	clear: both;
 }
 ewfBoxBothStates > ewfBoxHeadingAllLevels {
 	font-size: 1em;
@@ -253,6 +254,11 @@ ewfUiContentCell {
 	border-bottom-width: 0px;
 	padding: 10px 10px 10px 10px;
 	vertical-align: top;
+}
+ewfUiPageActionControlList {
+	float: right;
+	margin-bottom: 1em;
+	margin-left: 1em;
 }
 ewfUiContentFootCell {
 	border-style: solid;
