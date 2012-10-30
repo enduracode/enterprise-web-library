@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -77,7 +78,7 @@ namespace RedStapler.StandardLibrary {
 			if( text == null )
 				return null;
 
-			return new string( text.ToCharArray().Select( ( c, index ) => index == getIndexOfFirstLetterOrDigit( text ) ? char.ToUpper( c ) : c ).ToArray() );
+			return new string( text.ToCharArray().Select( ( c, index ) => index == getIndexOfFirstLetterOrDigit( text ) ? Char.ToUpper( c ) : c ).ToArray() );
 		}
 
 		/// <summary>
@@ -85,11 +86,11 @@ namespace RedStapler.StandardLibrary {
 		/// If the first character is not a letter or number, the first letter is found and capitalized.
 		/// </summary>
 		private static string lowercaseString( this string text ) {
-			return new string( text.ToCharArray().Select( ( c, index ) => index == getIndexOfFirstLetterOrDigit( text ) ? char.ToLower( c ) : c ).ToArray() );
+			return new string( text.ToCharArray().Select( ( c, index ) => index == getIndexOfFirstLetterOrDigit( text ) ? Char.ToLower( c ) : c ).ToArray() );
 		}
 
 		private static int getIndexOfFirstLetterOrDigit( string text ) {
-			return text.IndexOfAny( text.ToCharArray().Where( char.IsLetterOrDigit ).ToArray() );
+			return text.IndexOfAny( text.ToCharArray().Where( Char.IsLetterOrDigit ).ToArray() );
 		}
 
 		/// <summary>
@@ -193,7 +194,7 @@ namespace RedStapler.StandardLibrary {
 		public static string ToEnglishFromCamel( this string text ) {
 			// Don't do anything with null
 			// Skip empty string since we'll get out of range errors
-			if( string.IsNullOrEmpty( text ) )
+			if( String.IsNullOrEmpty( text ) )
 				return text;
 
 			// When a space should be inserted directly before the current character onto the new string:
@@ -208,8 +209,8 @@ namespace RedStapler.StandardLibrary {
 			for( var i = 1; i < text.Length; i++ ) {
 				newText += text[ i - 1 ];
 
-				var previousChar = new { IsUpper = char.IsUpper( text[ i - 1 ] ), IsLower = char.IsLower( text[ i - 1 ] ), IsDigit = char.IsDigit( text[ i - 1 ] ) };
-				var currentChar = new { IsUpper = char.IsUpper( text[ i ] ), IsLower = char.IsLower( text[ i ] ), IsDigit = char.IsDigit( text[ i ] ) };
+				var previousChar = new { IsUpper = Char.IsUpper( text[ i - 1 ] ), IsLower = Char.IsLower( text[ i - 1 ] ), IsDigit = Char.IsDigit( text[ i - 1 ] ) };
+				var currentChar = new { IsUpper = Char.IsUpper( text[ i ] ), IsLower = Char.IsLower( text[ i ] ), IsDigit = Char.IsDigit( text[ i ] ) };
 
 				if( ( currentChar.IsUpper && ( previousChar.IsLower || previousChar.IsDigit ) ) ||
 				    ( currentChar.IsDigit && ( previousChar.IsLower || previousChar.IsUpper ) ) || ( currentChar.IsLower && previousChar.IsDigit ) )
@@ -275,7 +276,7 @@ namespace RedStapler.StandardLibrary {
 		public static string ObjectToString( this object o, bool nullToEmptyString ) {
 			if( o != null )
 				return o.ToString();
-			return nullToEmptyString ? string.Empty : null;
+			return nullToEmptyString ? String.Empty : null;
 		}
 
 		/// <summary>
@@ -476,7 +477,7 @@ namespace RedStapler.StandardLibrary {
 		/// Allows for extension method syntax for string.Format.
 		/// </summary>
 		public static string FormatWith( this string s, params object[] objects ) {
-			return string.Format( s, objects );
+			return String.Format( s, objects );
 		}
 
 		/// <summary>
@@ -498,7 +499,7 @@ namespace RedStapler.StandardLibrary {
 
 		private static int indexOfFirstUpper( this string s ) {
 			for( var i = 0; i < s.Length; i += 1 ) {
-				if( char.IsUpper( s, i ) )
+				if( Char.IsUpper( s, i ) )
 					return i;
 			}
 			return s.Length;
@@ -528,7 +529,7 @@ namespace RedStapler.StandardLibrary {
 			// The word must be at least two characters in length.
 			if( size > 1 ) {
 				// Convert the word to uppercase characters.
-				word = word.ToUpper( System.Globalization.CultureInfo.InvariantCulture );
+				word = word.ToUpper( CultureInfo.InvariantCulture );
 
 				// Convert the word to a character array.
 				var chars = word.ToCharArray();
@@ -611,6 +612,15 @@ namespace RedStapler.StandardLibrary {
 			}
 			// Return the value.
 			return value;
+		}
+
+		/// <summary>
+		/// Converts this string to a given Enum value. Case sensitive.
+		/// This method does not enforce valid Enum values.
+		/// </summary>
+		/// C# doesn't allow constraining the value to an Enum
+		public static T ToEnum<T>( this string s ) {
+			return (T)Enum.Parse( typeof( T ), s );
 		}
 	}
 }

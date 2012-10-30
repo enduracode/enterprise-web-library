@@ -112,13 +112,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeFillListControlMethod( TextWriter writer ) {
-			// NOTE: Possibly remove this version
-			CodeGenerationStatics.AddSummaryDocComment( writer, "Adds all of the name value pairs to the given ListControl." );
-			writer.WriteLine( "public static void FillListControl( ListControl listControl ) {" );
-			writer.WriteLine( "foreach( var pair in valuesAndNames.GetAllPairs() )" );
-			writer.WriteLine( "listControl.Items.Add( new ListItem( pair.Value, pair.Key.ToString() ) );" );
-			writer.WriteLine( "}" ); // method
-
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Adds all of the name value pairs to the given ListControl." );
 			writer.WriteLine( "public static void FillListControl( EwfListControl listControl ) {" );
 			writer.WriteLine( "foreach( var pair in valuesAndNames.GetAllPairs() )" );

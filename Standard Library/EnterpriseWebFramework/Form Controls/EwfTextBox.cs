@@ -41,11 +41,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[]
-				       	{
-				       		new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
-				       		new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
-				       		new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
-				       	};
+					{
+						new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
+						new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
+						new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
+					};
 			}
 		}
 
@@ -133,6 +133,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
+		/// If true, prevents the browser from displaying values the user previously entered.
+		/// </summary>
+		internal bool PreventAutoComplete { get; set; }
+
+		/// <summary>
 		/// Sets this text box up for AJAX autofilling.
 		/// </summary>
 		public void SetupAutoFill( WebMethodDefinition webMethodDefinition, AutoFillOptions option ) {
@@ -209,6 +214,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
+
+			if( PreventAutoComplete )
+				textBox.Attributes.Add( "autocomplete", "off" );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
