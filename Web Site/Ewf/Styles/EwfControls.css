@@ -5,6 +5,7 @@ The rules below are required by the EWF controls. The classes in them should not
 ewfTableStandardAndStandardLayoutOnlyStyles {
 	width: 100%;
 	table-layout: fixed;
+	clear: both;
 }
 .ewfClickable {
 	cursor: pointer;
