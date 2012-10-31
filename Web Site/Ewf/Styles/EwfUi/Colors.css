@@ -74,6 +74,11 @@ ewfActionControlAllStylesStatesWithHover.ewfNewness {
 	color: #ff5500;
 }
 
+/* UI hints */
+ewfBoxBothStates > ewfBoxExpandLabel, ewfBoxBothStates > ewfBoxCloseLabel {
+	opacity: .5;
+}
+
 /* entity nav and action block */
 ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
 	color: #336699;

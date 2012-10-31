@@ -24,6 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				       		new CssElement( "BoxBothStates", closedSelector, expandedSelector ), new CssElement( "BoxClosedState", closedSelector ),
 				       		new CssElement( "BoxExpandedState", expandedSelector ),
 				       		new CssElement( "BoxHeadingAllLevels", HeadingLevelStatics.HeadingElements.Select( i => "* > " + i + "." + headingAndContentClass ).ToArray() ),
+				       		new CssElement( "BoxExpandLabel", "* > span." + closedClass ), new CssElement( "BoxCloseLabel", "* > span." + expandedClass ),
 				       		new CssElement( "BoxContentBlock", "div." + headingAndContentClass )
 				       	};
 			}
@@ -62,7 +63,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var headingControl = new Heading( heading.GetLiteralControl() ) { Level = headingLevel, CssClass = headingAndContentClass, ExcludesBuiltInCssClass = true };
 				this.AddControlsReturnThis( expanded.HasValue
 				                            	? new ToggleButton( this.ToSingleElementArray(),
-				                            	                    new CustomActionControlStyle( c => c.AddControlsReturnThis( headingControl ) ),
+				                            	                    new CustomActionControlStyle(
+				                            	                    	c =>
+				                            	                    	c.AddControlsReturnThis( new EwfLabel { Text = "Click to Expand", CssClass = closedClass },
+				                            	                    	                         new EwfLabel { Text = "Click to Close", CssClass = expandedClass },
+				                            	                    	                         headingControl ) ),
 				                            	                    toggleClasses: new[] { closedClass, expandedClass } ) as Control
 				                            	: new Block( headingControl ) );
 			}

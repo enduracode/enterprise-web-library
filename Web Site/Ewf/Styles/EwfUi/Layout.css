@@ -81,6 +81,12 @@ ewfBoxClosedState > ewfBoxHeadingAllLevels {
 ewfBoxExpandedState > ewfBoxHeadingAllLevels {
 	margin-bottom: 4px;
 }
+ewfBoxBothStates > ewfBoxExpandLabel, ewfBoxBothStates > ewfBoxCloseLabel {
+	float: right;
+}
+ewfBoxClosedState > ewfBoxCloseLabel, ewfBoxExpandedState > ewfBoxExpandLabel {
+	display: none;
+}
 ewfBoxClosedState > ewfBoxContentBlock {
 	display: none;
 }
