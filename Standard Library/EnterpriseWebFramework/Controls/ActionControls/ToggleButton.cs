@@ -146,12 +146,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			if( getControlsToggled( controlsToggledHiddenFieldValueGetter( formControlValues ) ) ) {
-				if( getAlternateText().Any() ) {
-					textControl.Controls.Clear();
-					textControl.Controls.Add( getAlternateText().GetLiteralControl() );
+				if( textControl != null ) {
+					if( getAlternateText().Any() ) {
+						textControl.Controls.Clear();
+						textControl.Controls.Add( getAlternateText().GetLiteralControl() );
+					}
+					else
+						this.SetInitialDisplay( false );
 				}
-				else
-					this.SetInitialDisplay( false );
 				foreach( var control in controlsToToggle ) {
 					if( control is WebControl ) {
 						var webControl = control as WebControl;
