@@ -78,17 +78,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Do not use.
 		/// </summary>
-		public EwfTextBox(): this( "" ) {}
+		public EwfTextBox(): this( string.Empty ) {}
 
 		/// <summary>
 		/// Creates a text box. Do not pass null for value.
 		/// </summary>
-		public EwfTextBox( string value, Action postBackHandler = null ) {
+		/// <param name="value"></param>
+		/// <param name="postBackHandler"></param>
+		/// <param name="preventAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
+		public EwfTextBox( string value, Action postBackHandler = null, bool preventAutoComplete = false ) {
 			durableValue = value;
 			textBox.ID = "theTextBox";
 			base.Controls.Add( textBox );
 			Rows = 1;
 			this.postBackHandler = postBackHandler;
+			this.preventAutoComplete = preventAutoComplete;
 		}
 
 		string FormControl<string>.DurableValue { get { return durableValue; } }
@@ -135,7 +139,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// If true, prevents the browser from displaying values the user previously entered.
 		/// </summary>
-		internal bool PreventAutoComplete { get; set; }
+		private readonly bool preventAutoComplete;
 
 		/// <summary>
 		/// Sets this text box up for AJAX autofilling.
@@ -215,7 +219,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
 
-			if( PreventAutoComplete )
+			if( preventAutoComplete )
 				textBox.Attributes.Add( "autocomplete", "off" );
 		}
 
