@@ -289,8 +289,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Adds an item to the table. Defers creation of the item. We recommend that you avoid using this in foreach statements due to modified closure problems.
-		/// Use List.ForEach instead.
+		/// Adds an item to the table. Defers creation of the item. Do not directly or indirectly create validations inside the function if they will be added to a
+		/// validation list that exists outside the function; this will likely cause your validations to execute in the wrong order or be skipped.
 		/// </summary>
 		public void AddItem( Func<EwfTableItem> item ) {
 			if( itemGroups.Count > 1 )
