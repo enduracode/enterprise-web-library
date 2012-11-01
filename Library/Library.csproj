@@ -63,7 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />
-    <Content Include="Configuration\General.xml" />
+    <Content Include="Configuration\General.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />

@@ -281,23 +281,48 @@ namespace RedStapler.StandardLibrary {
 		/// Gets a valid C# identifier from the specified string.
 		/// </summary>
 		public static string GetCSharpIdentifier( string s ) {
-			// There is no programmatic way to get C# keywords. So we'll expand this list as needed.
-			var cSharpKeywords = new[] { "base" };
-
-			if( cSharpKeywords.Contains( s ) )
+			if( GetCSharpKeywords().Contains( s ) )
 				return "@" + s;
 
+			// GMS: Not sure I agree with just taking digits off the front. What if there's nothing left? What about an underscore prefix?
+			// GMS: I think it is very important that if a valid identifier is passed, the same thing is returned.
 			s = s.RemoveCharacters( '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', ',', '.', '/', '?', '<', '>', '[', ']', '{', '}', '\\', '|', '\'' );
 			s = s.TrimStart( '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' );
 			s = s.Replace( "-", "_" );
 			s = s.ToEnglishFromCamel();
 
+			// GMS: I do not agree with capitalizing the result. Identifiers can be either private member variables or public properties.
 			var identifier = "";
 			var parts = s.Split( ' ' );
 			foreach( var part in parts )
 				identifier += part.ToLower().CapitalizeString();
 
 			return identifier;
+		}
+
+		// GMS: Reconcile these two methods.
+		// GMS: Also reconcile these with Get CSharp class name from the code generator.
+		public static string GetCSharpIdentifierSimple( string desiredIdentifierName ) {
+			if( GetCSharpKeywords().Contains( desiredIdentifierName ) )
+				return "@" + desiredIdentifierName;
+
+			desiredIdentifierName = desiredIdentifierName.Replace( "-", "_" );
+			desiredIdentifierName = desiredIdentifierName.Replace( " ", "_" );
+
+			int dummyInt;
+			if( Int32.TryParse( desiredIdentifierName.Truncate( 1 ), out dummyInt ) )
+				return "_" + desiredIdentifierName;
+
+			return desiredIdentifierName;
+		}
+
+		/// <summary>
+		/// Gets a very limited set of CSharp keywords.
+		/// </summary>
+		public static string[] GetCSharpKeywords() {
+			// There is no programmatic way to get C# keywords. So we'll expand this list as needed.
+			// GMS: This being public puts a lot of burden on us to have this list be complete.
+			return new[] { "base", "enum" };
 		}
 
 		internal static void EmergencyLog( string subject, string body ) {

@@ -65,27 +65,25 @@ namespace RedStapler.StandardLibrary.Encryption {
 		/// <summary>
 		/// Not documented.
 		/// </summary>
-		public string ComputeSaltedHash() {
-			// Create Byte array of password string
-			var encoder = new ASCIIEncoding();
-			var secretBytes = encoder.GetBytes( password );
-
+		public byte[] ComputeSaltedHash() {
 			// Create a new salt
-			var saltBytes = new Byte[4];
+			var saltBytes = new Byte[ 4 ];
 			saltBytes[ 0 ] = (byte)( salt >> 24 );
 			saltBytes[ 1 ] = (byte)( salt >> 16 );
 			saltBytes[ 2 ] = (byte)( salt >> 8 );
 			saltBytes[ 3 ] = (byte)( salt );
 
+			// Create Byte array of password string
+			var encoder = new ASCIIEncoding();
+			var secretBytes = encoder.GetBytes( password );
+
 			// append the two arrays
-			var toHash = new Byte[secretBytes.Length + saltBytes.Length];
+			var toHash = new Byte[ secretBytes.Length + saltBytes.Length ];
 			Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
 			Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
 
 			var sha1 = SHA1.Create();
-			var computedHash = sha1.ComputeHash( toHash );
-
-			return encoder.GetString( computedHash );
+			return sha1.ComputeHash( toHash );
 		}
 	}
 }
