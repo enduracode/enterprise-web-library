@@ -1,12 +1,12 @@
 using System;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
-using RedStapler.StandardLibrary.Validation;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string returnUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	public partial class IntermediateLogIn: EwfPage, DataModifierWithRightButton {
+	public partial class IntermediateLogIn: EwfPage {
 		public partial class Info {
 			protected override void init( DBConnection cn ) {
 				// This guarantees that the page will always be secure, even for non intermediate installations.
@@ -19,23 +19,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void LoadData( DBConnection cn ) {
-			password.MasksCharacters = true;
-		}
+			var dm = new DataModification();
 
-		string DataModifierWithRightButton.RightButtonText { get { return "Log In"; } }
+			ph.AddControlsReturnThis(
+				FormItemBlock.CreateFormItemTable(
+					formItems:
+						FormItem.Create( "Enter your password for this non-live installation",
+						                 new EwfTextBox( "" ) { MasksCharacters = true },
+						                 validationGetter: control => new Validation( ( pbv, validator ) => {
+						                 	// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+						                 	var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
+						                 	if( !passwordMatch )
+						                 		validator.NoteErrorAndAddMessage( "Incorrect password." );
+						                 },
+						                                                              dm ) ).ToSingleElementArray() ) );
 
-		void DataModifierWithRightButton.ValidateFormValues( Validator validator ) {}
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
 
-		string DataModifierWithRightButton.ModifyData( DBConnection cn ) {
-			// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-			var passwordMatch = password.Value == AppTools.SystemProvider.IntermediateLogInPassword;
-			if( !passwordMatch )
-				throw new EwfException( "Incorrect password." );
-
-			IntermediateAuthenticationMethods.SetCookie();
-			AppRequestState.Instance.IntermediateUserExists = true;
-
-			return info.ReturnUrl;
+			dm.AddModificationMethod( delegate {
+				IntermediateAuthenticationMethods.SetCookie();
+				AppRequestState.Instance.IntermediateUserExists = true;
+			} );
 		}
 	}
 }
