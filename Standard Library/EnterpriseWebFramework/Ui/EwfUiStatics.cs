@@ -55,23 +55,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// Sets the page actions. Call this only from the page.
+		/// Sets the page actions. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
-		/// <param name="actions"></param>
 		public static void SetPageActions( params ActionButtonSetup[] actions ) {
 			AppMasterPage.SetPageActions( actions );
 		}
 
 		/// <summary>
-		/// Clears the content foot and adds the specified actions. Call this only from the page. The first action, if it is a post back button, will use submit
-		/// behavior.
+		/// Clears the content foot and adds the specified actions. This must be called before EwfPage.LoadData finishes executing. The first action, if it is a
+		/// post back button, will use submit behavior.
 		/// </summary>
 		public static void SetContentFootActions( params ActionButtonSetup[] actions ) {
 			AppMasterPage.SetContentFootActions( actions );
 		}
 
 		/// <summary>
-		/// Clears the content foot and adds the specified controls. Call this only from the page.
+		/// Clears the content foot and adds the specified controls. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
 		public static void SetContentFootControls( params Control[] controls ) {
 			AppMasterPage.SetContentFootControls( controls );
