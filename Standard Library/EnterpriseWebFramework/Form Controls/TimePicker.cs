@@ -25,7 +25,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private EwfTextBox textBox;
 
 		/// <summary>
-		/// Creates a time picker. The minute interval affects the slider but does not prevent other values from passing validation.
+		/// Creates a time picker. The minute interval allows the user to select values only in the given increments. 
+		/// Be aware that other values can still be sent from the browser via a crafted request.
 		/// </summary>
 		public TimePicker( TimeSpan? value, int minuteInterval = 15 ) {
 			this.value = value;
@@ -60,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "" ) { AutoPostBack = autoPostBack };
+			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "", preventAutoComplete: true ) { AutoPostBack = autoPostBack };
 			Controls.Add( textBox );
 
 			if( ToolTip != null || ToolTipControl != null )

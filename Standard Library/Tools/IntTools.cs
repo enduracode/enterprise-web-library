@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Executes action n times.
+		/// Executes action n times. The zero-based index of the iteration is passed to action.
 		/// </summary>
 		public static void Times( this int n, Action<int> action ) {
 			for( var i = 0; i < n; i++ )

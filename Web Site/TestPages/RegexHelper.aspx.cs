@@ -19,17 +19,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			goPlace.AddControlsReturnThis( new PostBackButton( new DataModification(), null, new TextActionControlStyle( "Test" ) ) );
 
 			var regexOptionsDic = new Dictionary<string, RegexOptions>
-			                      	{
-			                      		{ RegexOptions.Compiled.ToString(), RegexOptions.Compiled },
-			                      		{ RegexOptions.CultureInvariant.ToString(), RegexOptions.CultureInvariant },
-			                      		{ RegexOptions.ECMAScript.ToString(), RegexOptions.ECMAScript },
-			                      		{ RegexOptions.ExplicitCapture.ToString(), RegexOptions.ExplicitCapture },
-			                      		{ RegexOptions.IgnoreCase.ToString(), RegexOptions.IgnoreCase },
-			                      		{ RegexOptions.IgnorePatternWhitespace.ToString(), RegexOptions.IgnorePatternWhitespace },
-			                      		{ RegexOptions.Multiline.ToString(), RegexOptions.Multiline },
-			                      		{ RegexOptions.RightToLeft.ToString(), RegexOptions.RightToLeft },
-			                      		{ RegexOptions.Singleline.ToString(), RegexOptions.Singleline }
-			                      	};
+				{
+					{ RegexOptions.Compiled.ToString(), RegexOptions.Compiled },
+					{ RegexOptions.CultureInvariant.ToString(), RegexOptions.CultureInvariant },
+					{ RegexOptions.ECMAScript.ToString(), RegexOptions.ECMAScript },
+					{ RegexOptions.ExplicitCapture.ToString(), RegexOptions.ExplicitCapture },
+					{ RegexOptions.IgnoreCase.ToString(), RegexOptions.IgnoreCase },
+					{ RegexOptions.IgnorePatternWhitespace.ToString(), RegexOptions.IgnorePatternWhitespace },
+					{ RegexOptions.Multiline.ToString(), RegexOptions.Multiline },
+					{ RegexOptions.RightToLeft.ToString(), RegexOptions.RightToLeft },
+					{ RegexOptions.Singleline.ToString(), RegexOptions.Singleline }
+				};
 
 			foreach( var regexOption in regexOptionsDic )
 				regexOptions.AddItem( regexOption.Value.ToString(), regexOption.Key );
@@ -37,9 +37,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			try {
 				var regexObj = new Regex( regexBox.Value,
-				                          regexOptions.SelectedValues.Aggregate( new RegexOptions(),
-				                                                                 ( current, option ) =>
-				                                                                 current | ( (RegexOptions)Enum.Parse( typeof( RegexOptions ), option ) ) ) );
+				                          regexOptions.SelectedValues.Aggregate( new RegexOptions(), ( current, option ) => current | option.ToEnum<RegexOptions>() ) );
 
 				if( replace.Checked )
 					outputText.Value = regexObj.Replace( input.Value, replacementText.Value );

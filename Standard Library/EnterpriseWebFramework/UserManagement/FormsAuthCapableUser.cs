@@ -10,14 +10,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		private readonly Role role;
 		private readonly DateTime? lastRequestDateTime;
 		private readonly int salt;
-		private readonly string saltedPassword;
+		private readonly byte[] saltedPassword;
 		private readonly bool mustChangePassword;
 		private readonly string friendlyName;
 
 		/// <summary>
 		/// Creates a user object. FriendlyName defaults to the empty string. Do not pass null.
 		/// </summary>
-		public FormsAuthCapableUser( int userId, string email, Role role, DateTime? lastRequestDateTime, int salt, string saltedPassword, bool mustChangePassword,
+		public FormsAuthCapableUser( int userId, string email, Role role, DateTime? lastRequestDateTime, int salt, byte[] saltedPassword, bool mustChangePassword,
 		                             string friendlyName = "" ) {
 			this.userId = userId;
 			this.email = email;
@@ -57,7 +57,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// The salted password for this user.
 		/// </summary>
-		public string SaltedPassword { get { return saltedPassword; } }
+		public byte[] SaltedPassword { get { return saltedPassword; } }
 
 		/// <summary>
 		/// Returns true if this user must change their password at next logon.
