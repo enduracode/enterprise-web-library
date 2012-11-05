@@ -162,13 +162,6 @@
     <Compile Include="TestPages\DynamicTableDemo.aspx.designer.cs">
       <DependentUpon>DynamicTableDemo.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\Email.aspx.cs">
-      <DependentUpon>Email.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\Email.aspx.designer.cs">
-      <DependentUpon>Email.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\EwfTableDemo.aspx.cs">
       <DependentUpon>EwfTableDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -670,7 +663,6 @@
     <Content Include="TestPages\ActionControls.aspx" />
     <Content Include="TestPages\Box.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
-    <Content Include="TestPages\Email.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />
     <Content Include="TestPages\EntitySetup.ascx" />
   </ItemGroup>

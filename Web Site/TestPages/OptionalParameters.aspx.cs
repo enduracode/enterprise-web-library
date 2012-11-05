@@ -19,8 +19,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void LoadData( DBConnection cn ) {
-			field1.Value = info.Field1 ?? "NULL";
-			field2.Value = info.Field2 ?? "NULL";
+			var fib = FormItemBlock.CreateFormItemTable();
+			fib.AddFormItems( parametersModification.GetField1TextFormItem( true ), parametersModification.GetField2TextFormItem( true ) );
+			ph.AddControlsReturnThis( fib );
+
 			ph.AddControlsReturnThis( new PostBackButton( new DataModification(),
 			                                              () => EhRedirect( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) )
 			                          	{ UsesSubmitBehavior = false, ActionControlStyle = new ButtonActionControlStyle { Text = "Navigate and change Field 2" } } );
@@ -56,8 +58,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						} )
 					testUrl( table, additionalUrl );
 			}
-
-			PostBackDataModification.AddValidationMethod( validateFormValues );
 		}
 
 		private static void testUrl( EwfTable table, string url ) {
@@ -66,11 +66,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			table.AddItem( new EwfTableItem( url.ToCell(),
 			                                 new EwfTableCell( ( !validator.ErrorsOccurred ).BooleanToYesNo( false ) )
 			                                 	{ CssClass = validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green } ) );
-		}
-
-		private void validateFormValues( Validator validator ) {
-			parametersModification.Field1 = validator.GetString( new ValidationErrorHandler( "field 1" ), field1.Value, true );
-			parametersModification.Field2 = validator.GetString( new ValidationErrorHandler( "field 2" ), field2.Value, true );
 		}
 
 		public override bool IsAutoDataModifier { get { return true; } }

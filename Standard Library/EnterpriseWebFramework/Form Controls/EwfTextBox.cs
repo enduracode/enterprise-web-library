@@ -41,15 +41,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[]
-					{
-						new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
-						new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
-						new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
-					};
+				       	{
+				       		new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
+				       		new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
+				       		new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
+				       	};
 			}
 		}
 
-		private string durableValue;
+		private readonly string durableValue;
 		private readonly TextBox textBox = new TextBox();
 		private bool masksCharacters;
 		private WebMethodDefinition webMethodDefinition;
@@ -57,6 +57,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private PostBackButton defaultSubmitButton;
 		private string watermarkText = "";
 		private readonly Action postBackHandler;
+		private readonly bool preventAutoComplete;
 
 		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
@@ -74,11 +75,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Gets or sets the maximum number of characters that can be entered in this text box.
 		/// </summary>
 		public int MaxCharacters { get { return textBox.MaxLength; } set { textBox.MaxLength = value; } }
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public EwfTextBox(): this( string.Empty ) {}
 
 		/// <summary>
 		/// Creates a text box. Do not pass null for value.
@@ -101,7 +97,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Do not use.
 		/// </summary>
-		public string Value { get { return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } set { durableValue = value; } }
+		public string Value { get { return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } }
 
 		/// <summary>
 		/// Sets whether an automatic postback occurs when the text box loses focus.
@@ -135,11 +131,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					textBox.TextMode = masksCharacters ? TextBoxMode.Password : TextBoxMode.SingleLine;
 			}
 		}
-
-		/// <summary>
-		/// If true, prevents the browser from displaying values the user previously entered.
-		/// </summary>
-		private readonly bool preventAutoComplete;
 
 		/// <summary>
 		/// Sets this text box up for AJAX autofilling.

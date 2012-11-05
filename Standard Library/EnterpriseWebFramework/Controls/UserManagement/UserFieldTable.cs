@@ -57,9 +57,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				var newPasswordTable = new DynamicTable();
 				newPasswordTable.IsStandard = false;
-				newPasswordTb = new EwfTextBox();
+				newPasswordTb = new EwfTextBox( "" );
 				EwfPage.Instance.DisableAutofillOnForm();
-				confirmPasswordTb = new EwfTextBox();
+				confirmPasswordTb = new EwfTextBox( "" );
 				newPasswordTb.Width = confirmPasswordTb.Width = Unit.Pixel( 200 );
 				newPasswordTb.MasksCharacters = confirmPasswordTb.MasksCharacters = true;
 				newPasswordTable.AddRow( new EwfTableCell( "Password" ), new EwfTableCell( newPasswordTb ) );

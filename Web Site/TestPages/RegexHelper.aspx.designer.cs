@@ -13,75 +13,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
     public partial class RegexHelper {
         
         /// <summary>
-        /// regexBox control.
+        /// ph control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox regexBox;
-        
-        /// <summary>
-        /// regexOptions control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.Checklist regexOptions;
-        
-        /// <summary>
-        /// input control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox input;
-        
-        /// <summary>
-        /// replace control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.BlockCheckBox replace;
-        
-        /// <summary>
-        /// replacementText control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox replacementText;
-        
-        /// <summary>
-        /// outputText control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox outputText;
-        
-        /// <summary>
-        /// goPlace control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder goPlace;
-        
-        /// <summary>
-        /// output control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable output;
+        protected global::System.Web.UI.WebControls.PlaceHolder ph;
     }
 }

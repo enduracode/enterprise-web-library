@@ -13,24 +13,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
     public partial class OptionalParameters {
         
         /// <summary>
-        /// field1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox field1;
-        
-        /// <summary>
-        /// field2 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfTextBox field2;
-        
-        /// <summary>
         /// ph control.
         /// </summary>
         /// <remarks>

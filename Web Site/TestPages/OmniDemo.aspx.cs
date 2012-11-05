@@ -10,10 +10,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void LoadData( DBConnection cn ) {
 			var omni = FormItemBlock.CreateFormItemList( numberOfColumns: 7 );
-			omni.AddFormItems( FormItem.Create( "Model number", new EwfTextBox(), cellSpan: 2 ),
+			omni.AddFormItems( FormItem.Create( "Model number", new EwfTextBox( "" ), cellSpan: 2 ),
 			                   FormItem.Create( "Normal price", new EwfLabel() ),
-			                   FormItem.Create( "Actual price", new EwfTextBox() ),
-			                   FormItem.Create( "Quantity", new EwfTextBox() ),
+			                   FormItem.Create( "Actual price", new EwfTextBox( "" ) ),
+			                   FormItem.Create( "Quantity", new EwfTextBox( "" ) ),
 			                   FormItem.Create( "Inventory", new EwfLabel() ),
 			                   FormItem.Create( "Delivery Type", new EwfListControl() ),
 			                   FormItem.Create( "Bill Number", new EwfLabel() ),

@@ -34,7 +34,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				       		               new OmniDemo.Info( this ) ),
 				       		new PageGroup( "First category",
 				       		               new HtmlEditing.Info( this ),
-				       		               new Email.Info( this ),
 				       		               new RegexHelper.Info( this ),
 				       		               new TestPad.Info( this ),
 				       		               new ToolTipTest.Info( this, DateTime.Now ),
@@ -72,7 +71,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var ln2 = new LaunchWindowLink( three ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
 			var ln3 = new LaunchWindowLink( four ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
 			ph.AddControlsReturnThis( ln, ln1, ln2, ln3 );
-			var t = new EwfTextBox();
+			var t = new EwfTextBox( "" );
 			//parameterFormControls.SomeTextControl = t;
 			ph.AddControlsReturnThis( t );
 		}
@@ -113,7 +112,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                                            	                          				"Custom script".ToCell() ),
 			                                            	                          			() =>
 			                                            	                          			new EwfTableItem(
-			                                            	                          				new LaunchWindowLink( new ModalWindow( new EwfTextBox() ) )
+			                                            	                          				new LaunchWindowLink( new ModalWindow( new EwfTextBox( "" ) ) )
 			                                            	                          					{ ActionControlStyle = new TextActionControlStyle( "Modal" ) }.ToCell() )
 			                                            	                          		} ) ) ) );
 

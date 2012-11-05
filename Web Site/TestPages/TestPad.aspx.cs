@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void LoadData( DBConnection cn ) {
 			var updatePanel = new UpdatePanel { UpdateMode = UpdatePanelUpdateMode.Always };
 
-			var author = new EwfTextBox { AutoPostBack = true };
+			var author = new EwfTextBox( "" ) { AutoPostBack = true };
 			ScriptManager.GetCurrent( this ).RegisterAsyncPostBackControl( author );
 
 			var outputArea = new Box();
