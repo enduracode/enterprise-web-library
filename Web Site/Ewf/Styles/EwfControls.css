@@ -7,12 +7,6 @@ ewfTableStandardAndStandardLayoutOnlyStyles {
 	table-layout: fixed;
 	clear: both;
 }
-.ewfClickable {
-	cursor: pointer;
-}
-.ewfNotClickable {
-	cursor: default;
-}
 
 label.ewfCheckBox > input, label.ewfCheckBox > span {
 	vertical-align: middle;
@@ -73,7 +67,6 @@ ewfTextBoxCompletionList {
 	border: buttonshadow;
 	border-width: 1px !important;
 	border-style: solid;
-	cursor: 'default';
 	overflow: auto;
 	height: 200px;
 	text-align: left;

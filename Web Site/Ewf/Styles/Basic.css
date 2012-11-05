@@ -75,6 +75,14 @@ ewfErrorMessageControlListBlock {
 	color: red;
 }
 
+/* cursors */
+ewfActionControlAllStylesAllActionStates, .ewfClickable {
+	cursor: pointer;
+}
+ewfActionControlAllStylesActionlessState, .ewfNotClickable, ewfTextBoxCompletionList {
+	cursor: default;
+}
+
 /* EwfPage and master page */
 div.ewfNonLiveWarning {
 	margin-bottom: 4px;
