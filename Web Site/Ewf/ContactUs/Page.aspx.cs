@@ -1,36 +1,49 @@
 using System;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebSessionState;
 
 // Parameter: string returnUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
-	public partial class Page: EwfPage, DataModifierWithRightButton {
+	public partial class Page: EwfPage {
 		partial class Info {
 			protected override void init( DBConnection cn ) {}
 			public override string PageName { get { return ""; } }
 		}
 
-		protected override void LoadData( DBConnection cn ) {}
+		private string emailText;
 
-		string DataModifierWithRightButton.RightButtonText { get { return "Send"; } }
+		protected override void LoadData( DBConnection cn ) {
+			var dm = new DataModification();
 
-		void DataModifierWithRightButton.ValidateFormValues( Validator validator ) {}
+			ph.AddControlsReturnThis(
+				FormItem.Create( "You may report any problems, make suggestions, or ask for help here.",
+				                 new EwfTextBox( "" ) { Rows = 20 },
+				                 validationGetter:
+				                 	control =>
+				                 	new Validation(
+				                 		( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ), dm ) )
+					.ToControl() );
 
-		string DataModifierWithRightButton.ModifyData( DBConnection cn ) {
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Send", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
+
+			dm.AddModificationMethod( modifyData );
+		}
+
+		private void modifyData( DBConnection cn ) {
 			var message = new EmailMessage
 			              	{
 			              		Subject = "Contact from " + AppTools.SystemName,
-			              		BodyHtml = ( "Contact from " + AppTools.User.Email + Environment.NewLine + Environment.NewLine + emailText.Value ).GetTextAsEncodedHtml()
+			              		BodyHtml = ( "Contact from " + AppTools.User.Email + Environment.NewLine + Environment.NewLine + emailText ).GetTextAsEncodedHtml()
 			              	};
 			message.ToAddresses.AddRange( AppTools.AdministratorEmailAddresses );
 			message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email ) );
 			AppTools.SendEmailWithDefaultFromAddress( message );
 			StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Your feedback has been sent." );
-			return info.ReturnUrl;
 		}
 	}
 }
