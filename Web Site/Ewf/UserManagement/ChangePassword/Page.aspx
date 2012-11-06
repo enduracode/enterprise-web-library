@@ -1,15 +1,6 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Page.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword.Page"
+<%@ Page Language="C#" CodeBehind="Page.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword.Page"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
-<asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">
-	<ewf:StaticTable runat="server" IsForm="true">
-		<tr runat="server">
-			<td>New password</td>
-			<td><ewf:EwfTextBox runat="server" ID="newPassword" /></td>
-		</tr>
-		<tr runat="server">
-			<td>Re-type new password</td>
-			<td><ewf:EwfTextBox runat="server" ID="newPasswordConfirm" /></td>
-		</tr>
-	</ewf:StaticTable>
+<asp:Content runat="server" ContentPlaceHolderID="contentPlace">
+	<asp:PlaceHolder runat="server" ID="ph" />
 </asp:Content>
