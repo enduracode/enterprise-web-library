@@ -104,7 +104,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			foreach( var num in new List<string> { "one", "two", "three", "four" } )
 				ewfCheckList.AddItem( num, num );
 
-			ewfTextBox.ToolTip = "text box tooltip";
 			//durationPicker.ToolTip = "duration picker tooltip";
 			ewfCheckBox.ToolTip = "ewf check box tooltip";
 			ewfLabel.ToolTip = "label tooltip";

@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( FormFieldDemo.GetInfo() );
+					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( FormFieldDemo.GetInfo() );
+					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
@@ -113,7 +113,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( FormFieldDemo.GetInfo() );
+					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
@@ -134,7 +134,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( FormFieldDemo.GetInfo() );
+					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {

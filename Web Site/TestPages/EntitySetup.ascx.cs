@@ -25,9 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				       	{
 				       		new PageGroup( "Working Stuff",
 				       		               new ActionControls.Info( this ),
-				       		               new Ajax.Info( this ),
 				       		               new ChecklistDemo.Info( this ),
-				       		               new FormFieldDemo.Info( this ),
 				       		               new CalendarDemo.Info( this ),
 				       		               new OptionalParameters.Info( this ),
 				       		               new Html5FileUpload.Info( this ),
@@ -37,8 +35,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				       		               new RegexHelper.Info( this ),
 				       		               new TestPad.Info( this ),
 				       		               new ToolTipTest.Info( this, DateTime.Now ),
-				       		               new TwoWeekCalendarTest.Info( this, DateTime.Now ),
-				       		               new ExcelManipulation.Info( this ) ),
+				       		               new TwoWeekCalendarTest.Info( this, DateTime.Now ) ),
 				       		new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 				       		new PageGroup( "Layout", new Box.Info( this ) )
 				       	};

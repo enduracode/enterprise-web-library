@@ -127,13 +127,6 @@
     <Compile Include="TestPages\HtmlEditing.aspx.designer.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\Ajax.aspx.cs">
-      <DependentUpon>Ajax.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\Ajax.aspx.designer.cs">
-      <DependentUpon>Ajax.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\CalendarDemo.aspx.cs">
       <DependentUpon>CalendarDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -168,20 +161,6 @@
     </Compile>
     <Compile Include="TestPages\EwfTableDemo.aspx.designer.cs">
       <DependentUpon>EwfTableDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ExcelManipulation.aspx.cs">
-      <DependentUpon>ExcelManipulation.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\ExcelManipulation.aspx.designer.cs">
-      <DependentUpon>ExcelManipulation.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\FormFieldDemo.aspx.cs">
-      <DependentUpon>FormFieldDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\FormFieldDemo.aspx.designer.cs">
-      <DependentUpon>FormFieldDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\GetImage.aspx.cs">
       <DependentUpon>GetImage.aspx</DependentUpon>
@@ -672,7 +651,6 @@
     <Content Include="TestPages\CalendarDemo.aspx" />
     <Content Include="TestPages\ChecklistDemo.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
-    <Content Include="TestPages\FormFieldDemo.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
@@ -727,8 +705,6 @@
     <Content Include="Ewf\IntermediateLogIn.aspx" />
     <Content Include="Ewf\Styles\Firefox.css" />
     <Content Include="Service\Service.svc" />
-    <Content Include="TestPages\Ajax.aspx" />
-    <Content Include="TestPages\ExcelManipulation.aspx" />
     <Content Include="TestPages\GetImage.aspx" />
     <Content Include="TestPages\ToolTipTest.aspx" />
     <Content Include="TestPages\TwoWeekCalendarTest.aspx" />
