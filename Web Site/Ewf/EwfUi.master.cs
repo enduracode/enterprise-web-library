@@ -20,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string BodyCssClass = "ewf";
 
-			internal const string GlobalBlockCssClass = "ewfUiGlobal";
+			internal const string GlobalBlockId = "ewfUiGlobal";
 			internal const string AppLogoAndUserInfoBlockCssClass = "ewfUiAppLogoAndUserInfo";
 			internal const string AppLogoBlockCssClass = "ewfUiAppLogo";
 			internal const string UserInfoListCssClass = "ewfUiUserInfo";
@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			internal const string TopErrorMessageListBlockCssClass = "ewfUiStatus";
 
-			internal const string EntityAndTabAndContentBlockCssClass = "ewfUiEntityAndTabsAndContent";
+			internal const string EntityAndTabAndContentBlockId = "ewfUiEntityAndTabsAndContent";
 
 			internal const string EntityAndTopTabBlockCssClass = "ewfUiEntityAndTopTabs";
 
@@ -58,7 +58,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			// Some of the elements below cover a subset of other CSS elements in a more specific way. For example, UiGlobalNavControlList selects the control list
 			// used for global navigation. This control list is also selected, with lower specificity, by the CSS element that selects all control lists. In general
 			// this is a bad situation, but in this case we think it's ok because web apps are not permitted to add their own CSS classes to the controls selected
-			// here and therefore it will be difficult for a web app to accidentally trump a CSS element here by adding classes to a lower specificity element.
+			// here and therefore it will be difficult for a web app to accidentally trump a CSS element here by adding classes to a lower-specificity element. It
+			// would still be possible to accidentally trump some of the rules in the EWF UI style sheets by chaining together several lower-specificity elements, but
+			// we protect against this by incorporating an ID into the selectors here. A selector with an ID should always trump a selector without any IDs.
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				// NOTE: Remove this when applications can have CSS files that are only loaded when the EWF UI is being used.
@@ -68,7 +70,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			private static IEnumerable<CssElement> getGlobalElements() {
-				const string globalBlockSelector = "div." + GlobalBlockCssClass;
+				const string globalBlockSelector = "div#" + GlobalBlockId;
 				const string globalNavBlockSelector = globalBlockSelector + " " + "div." + GlobalNavBlockCssClass;
 				return new[]
 				       	{
@@ -92,61 +94,54 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			private static IEnumerable<CssElement> getEntityAndTabAndContentElements() {
 				var elements = new List<CssElement>();
 
-				const string entityAndTabAndContentBlockSelector = "div." + EntityAndTabAndContentBlockCssClass;
+				const string entityAndTabAndContentBlockSelector = "div#" + EntityAndTabAndContentBlockId;
 				elements.Add( new CssElement( "UiEntityAndTabAndContentBlock", entityAndTabAndContentBlockSelector ) );
 
-				const string entityAndTopTabBlockSelector = entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabBlockCssClass;
-				elements.Add( new CssElement( "UiEntityAndTopTabBlock", entityAndTopTabBlockSelector ) );
-
-				elements.AddRange( getEntityElements( entityAndTopTabBlockSelector ) );
+				elements.Add( new CssElement( "UiEntityAndTopTabBlock", entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabBlockCssClass ) );
+				elements.AddRange( getEntityElements( entityAndTabAndContentBlockSelector ) );
 				elements.Add( new CssElement( "UiTopTabControlList",
-				                              ControlLine.CssElementCreator.Selectors.Select( i => entityAndTopTabBlockSelector + " > " + i + "." + TopTabListCssClass ).
-				                              	ToArray() ) );
+				                              ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + TopTabListCssClass )
+				                              	.ToArray() ) );
 				elements.AddRange( getSideTabAndContentElements( entityAndTabAndContentBlockSelector ) );
 				elements.AddRange( getTabElements() );
 				return elements;
 			}
 
-			private static IEnumerable<CssElement> getEntityElements( string entityAndTopTabBlockSelector ) {
-				var entityBlockSelector = entityAndTopTabBlockSelector + " > " + "div." + EntityBlockCssClass;
+			private static IEnumerable<CssElement> getEntityElements( string entityAndTabAndContentBlockSelector ) {
 				return new[]
 				       	{
-				       		new CssElement( "UiEntityBlock", entityBlockSelector ),
+				       		new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
 				       		new CssElement( "UiEntityNavAndActionBlock",
-				       		                EwfTable.CssElementCreator.Selectors.Select( i => entityBlockSelector + " > " + i + "." + EntityNavAndActionBlockCssClass ).
-				       		                	ToArray() ),
+				       		                EwfTable.CssElementCreator.Selectors.Select(
+				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass ).ToArray() ),
 				       		new CssElement( "UiEntityNavControlList",
-				       		                ControlLine.CssElementCreator.Selectors.Select( i => entityBlockSelector + " " + i + "." + EntityNavListCssClass ).ToArray() ),
+				       		                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass )
+				       		                	.ToArray() ),
 				       		new CssElement( "UiEntityActionControlList",
-				       		                ControlLine.CssElementCreator.Selectors.Select( i => entityBlockSelector + " " + i + "." + EntityActionListCssClass ).ToArray() ),
-				       		new CssElement( "UiEntitySummaryBlock", entityBlockSelector + " > " + "div." + EntitySummaryBlockCssClass )
+				       		                ControlLine.CssElementCreator.Selectors.Select(
+				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass ).ToArray() ),
+				       		new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
 				       	};
 			}
 
 			private static IEnumerable<CssElement> getSideTabAndContentElements( string entityAndTabAndContentBlockSelector ) {
-				var sideTabAndContentBlockSelectors =
-					EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass );
-				var contentCellSelectors = sideTabAndContentBlockSelectors.Select( i => i + " td." + ContentCellCssClass );
-				var contentFootCellSelectors = sideTabAndContentBlockSelectors.Select( i => i + " td." + ContentFootCellCssClass );
-				var contentFootBlockSelectors = from contentFootCellSelector in contentFootCellSelectors
-				                                from tableSelector in EwfTable.CssElementCreator.Selectors
-				                                select contentFootCellSelector + " > " + tableSelector + "." + ContentFootBlockCssClass;
+				var contentCellSelector = entityAndTabAndContentBlockSelector + " td." + ContentCellCssClass;
 				return new[]
 				       	{
-				       		new CssElement( "UiSideTabAndContentBlock", sideTabAndContentBlockSelectors.ToArray() ),
-				       		new CssElement( "UiSideTabCell", sideTabAndContentBlockSelectors.Select( i => i + " td." + SideTabCellCssClass ).ToArray() ),
-				       		new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelectors.ToArray() ),
-				       		new CssElement( "UiPageActionControlList",
-				       		                ( from contentCellSelector in contentCellSelectors
-				       		                  from controlLineSelector in ControlLine.CssElementCreator.Selectors
-				       		                  select contentCellSelector + " > " + controlLineSelector ).ToArray() ),
-				       		new CssElement( "UiContentBlock", contentCellSelectors.Select( i => i + " > " + "div." + ContentBlockCssClass ).ToArray() ),
-				       		new CssElement( "UiContentFootCell", contentFootCellSelectors.ToArray() ),
-				       		new CssElement( "UiContentFootBlock", contentFootBlockSelectors.ToArray() ),
+				       		new CssElement( "UiSideTabAndContentBlock",
+				       		                EwfTable.CssElementCreator.Selectors.Select(
+				       		                	i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
+				       		new CssElement( "UiSideTabCell", entityAndTabAndContentBlockSelector + " td." + SideTabCellCssClass ),
+				       		new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelector ),
+				       		new CssElement( "UiPageActionControlList", ControlLine.CssElementCreator.Selectors.Select( i => contentCellSelector + " > " + i ).ToArray() ),
+				       		new CssElement( "UiContentBlock", contentCellSelector + " > " + "div." + ContentBlockCssClass ),
+				       		new CssElement( "UiContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentFootCellCssClass ),
+				       		new CssElement( "UiContentFootBlock",
+				       		                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass ).
+				       		                	ToArray() ),
 				       		new CssElement( "UiContentFootActionControlList",
-				       		                ( from contentFootBlockSelector in contentFootBlockSelectors
-				       		                  from controlLineSelector in ControlLine.CssElementCreator.Selectors
-				       		                  select contentFootBlockSelector + " " + controlLineSelector + "." + ContentFootActionListCssClass ).ToArray() )
+				       		                ControlLine.CssElementCreator.Selectors.Select(
+				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass ).ToArray() )
 				       	};
 			}
 
@@ -217,7 +212,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return
 				new Block(
 					new[] { getAppLogoAndUserInfoBlock(), getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList ) }.Where( i => i != null ).ToArray() )
-					{ CssClass = CssElementCreator.GlobalBlockCssClass };
+					{ ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
 		}
 
 		private static Control getAppLogoAndUserInfoBlock() {

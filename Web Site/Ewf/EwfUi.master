@@ -3,7 +3,7 @@
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="main">
 	<asp:PlaceHolder runat="server" ID="globalPlace" />
-	<div class="ewfUiEntityAndTabsAndContent"><asp:PlaceHolder runat="server" ID="entityAndTopTabPlace" />
+	<div id="ewfUiEntityAndTabsAndContent"><asp:PlaceHolder runat="server" ID="entityAndTopTabPlace" />
 		<ewf:StaticTable runat="server" IsForm="false" CssClass="ewfUiTabsAndContent">
 			<tr runat="server">
 				<td runat="server" id="tabCell" class="ewfTabs" rowspan="2" visible="false" />
