@@ -23,10 +23,10 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 
 			if( columnValue.Parameter.ValueIsNull )
 				command.CommandText += columnValue.ColumnName + " IS NULL";
-			else
+			else {
 				command.CommandText += columnValue.ColumnName + " = " + columnValue.Parameter.GetNameForCommandText( databaseInfo );
-
-			command.Parameters.Add( columnValue.Parameter.GetAdoDotNetParameter( databaseInfo ) );
+				command.Parameters.Add( columnValue.Parameter.GetAdoDotNetParameter( databaseInfo ) );
+			}
 		}
 	}
 }
