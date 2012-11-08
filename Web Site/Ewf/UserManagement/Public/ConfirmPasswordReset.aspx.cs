@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		string DataModifierWithRightButton.ModifyData( DBConnection cn ) {
 			UserManagementStatics.ResetAndSendPassword( cn, info.UserId );
-			StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
+			EwfPage.AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 			return es.info.DestinationUrl;
 		}
 	}

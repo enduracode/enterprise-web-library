@@ -28,13 +28,6 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 			}
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public static void AddStatusMessage( StatusMessageType type, string messageHtml ) {
-			EwfPage.AddStatusMessage( type, messageHtml );
-		}
-
 		internal List<Tuple<StatusMessageType, string>> StatusMessages { get { return statusMessages; } }
 
 		/// <summary>

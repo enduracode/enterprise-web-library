@@ -154,7 +154,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( passwordToEmail == null )
 				return;
 			UserManagementStatics.SendPassword( Email, passwordToEmail );
-			StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
+			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 
 		/// <summary>

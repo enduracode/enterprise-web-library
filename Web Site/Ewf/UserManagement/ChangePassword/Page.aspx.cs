@@ -44,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			                                                                                                       AppTools.User.Role.RoleId,
 			                                                                                                       AppTools.User.LastRequestDateTime,
 			                                                                                                       false );
-			StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
+			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}
 	}
 }

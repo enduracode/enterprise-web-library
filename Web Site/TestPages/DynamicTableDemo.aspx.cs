@@ -33,14 +33,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				               new EwfTableCell( "Three with Tip" ) { ToolTip = "Cell tool tip" },
 				               new EwfTableCell( "Four with TipControl" ) { ToolTipControl = new DatePicker() } );
 			}
-			table2.AddSelectedRowsAction( "Selected Rows Action",
-			                              delegate( DBConnection cn1, object id ) { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			//Clickable Rows
 			for( var i = 0; i < 7; i++ ) {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -55,8 +54,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 
 			//Mixed
-			table4.AddSelectedRowsAction( "Selected Rows Action",
-			                              delegate( DBConnection cn1, object id ) { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table4.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 10; i += 3 )
 				table4.AddTextRow( new RowSetup { UniqueIdentifier = 2 }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
@@ -64,7 +62,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -89,18 +87,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table5.AddTextRow( new RowSetup { UniqueIdentifier = "6", RankId = 0 }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
 			//Mixed - Single Cell
-			table6.AddSelectedRowsAction( "Selected Rows Action",
-			                              delegate( DBConnection cn1, object id ) { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table6.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 10; i += 3 )
 				table6.AddTextRow( new RowSetup { UniqueIdentifier = 2 }, i.ToString() );
 
 			for( var i = 0; i < 10; i += 3 ) {
 				table6.AddTextRow(
 					new RowSetup
-						{
-							ClickScript = ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Postback!" ); } ),
-							UniqueIdentifier = 3
-						},
+						{ ClickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Info, "Postback!" ); } ), UniqueIdentifier = 3 },
 					"Post" );
 			}
 
@@ -109,7 +103,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -124,13 +118,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 
 			//Recorderable, Clickable, Selectable
-			table8.AddSelectedRowsAction( "Selected Rows Action",
-			                              delegate( DBConnection cn1, object id ) { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table8.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 7; i++ ) {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {

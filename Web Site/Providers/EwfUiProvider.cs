@@ -27,8 +27,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 				() =>
 				new EwfTableItem(
 					new EwfTableItemSetup(
-						clickScript:
-							ClickScript.CreatePostBackScript( delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ); } ) ),
+						clickScript: ClickScript.CreatePostBackScript( delegate { EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ); } ) ),
 					"Test method".ToCell() ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipButton( menu ) ) );
 

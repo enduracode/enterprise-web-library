@@ -175,7 +175,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				if( NewFileNotificationMethod != null )
 					NewFileNotificationMethod( cn, newFileId );
-				StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
+				EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 			} );
 
 			return ControlList.CreateWithControls( true,
@@ -195,7 +195,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                           		}
 			                           	}
 			                           	if( deletesOccurred )
-			                           		StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+			                           		EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 			                           } ),
 			                           new ButtonActionControlStyle( "Delete Selected Files" ),
 			                           false );

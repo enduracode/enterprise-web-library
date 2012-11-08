@@ -132,7 +132,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                                               new PostBackButton( new DataModification(),
 			                                                                   () =>
 			                                                                   EwfPage.Instance.EhExecute(
-			                                                                   	delegate { StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Did Something." ); } ) ) { UsesSubmitBehavior = false } ) );
+			                                                                   	delegate { EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ); } ) )
+			                                               	{ UsesSubmitBehavior = false } ) );
 			actionButtonSetups.Add( new ActionButtonSetup( "Go to Google", new EwfLink( new ExternalPageInfo( "http://www.google.com" ) ) ) );
 			actionButtonSetups.Add( new ActionButtonSetup( "Generate error",
 			                                               new PostBackButton( new DataModification(), () => { throw new ApplicationException(); } )

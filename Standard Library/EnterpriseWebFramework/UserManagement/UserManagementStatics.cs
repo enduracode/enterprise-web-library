@@ -232,10 +232,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
 			HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
-				{
-					Secure = EwfApp.SupportsSecureConnections,
-					HttpOnly = true
-				} );
+			                                          	{ Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } );
 
 			AppRequestState.Instance.SetUser( user );
 		}
@@ -252,11 +249,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				var clockDifference = DateTime.Parse( HttpContext.Current.Request.Form[ utcOffsetHiddenFieldName ].Replace( "UTC", "GMT" ) ) - DateTime.Now;
 
 				if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
-					StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning,
-					                                              Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
-					                                              ( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now )
-						                                                ? TimeZone.CurrentTimeZone.DaylightName
-						                                                : TimeZone.CurrentTimeZone.StandardName ) + "." );
+					EwfPage.AddStatusMessage( StatusMessageType.Warning,
+					                          Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
+					                          ( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now )
+					                            	? TimeZone.CurrentTimeZone.DaylightName
+					                            	: TimeZone.CurrentTimeZone.StandardName ) + "." );
 				}
 			}
 			catch {} // NOTE: Figure out why the date time field passed from javascript might be empty, and get rid of this catch

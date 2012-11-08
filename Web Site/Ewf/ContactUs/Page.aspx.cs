@@ -43,7 +43,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			message.ToAddresses.AddRange( AppTools.AdministratorEmailAddresses );
 			message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email ) );
 			AppTools.SendEmailWithDefaultFromAddress( message );
-			StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Info, "Your feedback has been sent." );
+			AddStatusMessage( StatusMessageType.Info, "Your feedback has been sent." );
 		}
 	}
 }
