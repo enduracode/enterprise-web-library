@@ -150,6 +150,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during ModifyData.
 		/// </summary>
+		// NOTE SJR: This needs to change: You can't see this comment unless you're scrolling through all of the methods. It's easy to not call this
+		// even though the radio button for generating a new password and emailing it to the user is always there.
 		public void SendEmailIfNecessary() {
 			if( passwordToEmail == null )
 				return;
