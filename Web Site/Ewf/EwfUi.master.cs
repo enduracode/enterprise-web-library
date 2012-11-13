@@ -186,7 +186,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var contentFootBlock = getContentFootBlock();
 			if( contentFootBlock != null )
 				contentFootCell.Controls.AddAt( 0, contentFootBlock );
-			globalFootPlace.AddControlsReturnThis( EwfUiStatics.AppProvider.GetGlobalFootControls() );
+
+			// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
+			// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
+			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
+				globalFootPlace.AddControlsReturnThis( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.BodyCssClass;
 
