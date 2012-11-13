@@ -118,10 +118,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					catch( Exception e ) {
 						throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
 					}
-					StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
-					                                   "\"" + webAppPath + "\" -o " + webProject.@namespace + ".Package -a -copyattrs",
-					                                   "",
-					                                   true );
+					try {
+						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
+						                                   "\"" + webAppPath + "\" -o " + webProject.@namespace + ".Package -a -copyattrs",
+						                                   "",
+						                                   true );
+					}
+					catch( Exception e ) {
+						throw new UserCorrectableException( "ASP.NET Merge Tool failed for web project " + webProject.name + ".", e );
+					}
 
 					// Delete files and folders that aren't necessary for installed installations.
 					IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "Generated Code" ) );
