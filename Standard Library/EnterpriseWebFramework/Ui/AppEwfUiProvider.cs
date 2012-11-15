@@ -51,6 +51,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
+		/// Gets whether the browser warning is disabled.
+		/// </summary>
+		public virtual bool BrowserWarningDisabled() {
+			return false;
+		}
+
+		/// <summary>
 		/// Gets the control to be shown at the bottom of the log in page for systems with forms authentication.
 		/// </summary>
 		public virtual Control GetSpecialInstructionsForLogInPage() {

@@ -194,22 +194,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.BodyCssClass;
 
-			if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {
-				EwfPage.AddStatusMessage( StatusMessageType.Warning,
-				                          StringTools.ConcatenateWithDelimiter( " ",
-				                                                                new[]
-				                                                                	{
-				                                                                		"We've detected that you are not using the latest version of your browser.",
-				                                                                		"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
-				                                                                	} ) + "<br/>" +
-				                          NetTools.BuildBasicLink( "Click here to get Internet Explorer 9 (it's free)",
-				                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
-				                                                   true ) + "<br/>" +
-				                          NetTools.BuildBasicLink( "Click here to get Firefox (it's free)",
-				                                                   new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(),
-				                                                   true ) );
+			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
+				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {
+					EwfPage.AddStatusMessage( StatusMessageType.Warning,
+					                          StringTools.ConcatenateWithDelimiter( " ",
+					                                                                new[]
+					                                                                	{
+					                                                                		"We've detected that you are not using the latest version of your browser.",
+					                                                                		"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
+					                                                                	} ) + "<br/>" +
+					                          NetTools.BuildBasicLink( "Click here to get Internet Explorer 9 (it's free)",
+					                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
+					                                                   true ) + "<br/>" +
+					                          NetTools.BuildBasicLink( "Click here to get Firefox (it's free)",
+					                                                   new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(),
+					                                                   true ) );
+				}
+				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 			}
-			StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 		}
 
 		private Control getGlobalBlock() {
