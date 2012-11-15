@@ -79,7 +79,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 				                      	// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
 				                      	selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
 				                      	// NOTE: Does not work for MIT Calendar, etc.
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", AppTools.SystemProvider.IntermediateLogInPassword );
+				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", AppTools.SystemProvider.IntermediateLogInPassword );
 				                      	// NOTE: Move g8Summit to machine configuration file.
 				                      	SubmitForm( selenium );
 				                      	selenium.WaitForPageToLoad( "30000" );
