@@ -12,7 +12,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
@@ -247,10 +246,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
 			if( AppTools.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
-				return null;
-
-			// NOTE: Remove this condition after all ActionButtonSetups are created with PageInfo objects instead of URLs.
-			if( AppTools.User == null && UserManagementStatics.UserManagementEnabled )
 				return null;
 
 			var controls =
