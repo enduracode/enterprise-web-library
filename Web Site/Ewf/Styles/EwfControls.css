@@ -1,12 +1,6 @@
 ﻿/* -----------------------------------------------------
-The rules below are required by the EWF controls. The classes in them should not be used directly. Override if necessary.
+This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
-
-ewfTableStandardAndStandardLayoutOnlyStyles {
-	width: 100%;
-	table-layout: fixed;
-	clear: both;
-}
 
 label.ewfCheckBox > input, label.ewfCheckBox > span {
 	vertical-align: middle;

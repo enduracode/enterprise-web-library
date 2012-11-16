@@ -9,6 +9,11 @@ table {
 	padding: 0;
 	border-spacing: 0;
 }
+ewfTableStandardAndStandardLayoutOnlyStyles {
+	width: 100%;
+	table-layout: fixed;
+	clear: both;
+}
 th {
 	padding: 0;
 	text-align: left;
