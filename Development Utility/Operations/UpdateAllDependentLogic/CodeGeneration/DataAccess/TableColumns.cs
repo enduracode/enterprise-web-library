@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				allColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true );
 
 				foreach( var col in allColumns ) {
-					// NOTE: Greg is responsible for determining if this is the only necessary hack for ASP.NET Application Services. See task 6184.
+					// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
 					var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
 
 					if( cn.DatabaseInfo is SqlServerInfo && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull && !isAspNetApplicationServicesTable )
