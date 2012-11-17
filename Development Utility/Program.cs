@@ -16,7 +16,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				try {
 					// Get installation.
 					var installationPath = args[ 0 ];
-					var installation = getInstallation( installationPath );
+					DevelopmentInstallation installation;
+					try {
+						installation = getInstallation( installationPath );
+					}
+					catch( Exception e ) {
+						throw new UserCorrectableException( "The installation at \"" + installationPath + "\" is invalid.", e );
+					}
 
 					// Get operation.
 					var operations = AssemblyTools.BuildSingletonDictionary<Operation, string>( Assembly.GetExecutingAssembly(), i => i.GetType().Name );
