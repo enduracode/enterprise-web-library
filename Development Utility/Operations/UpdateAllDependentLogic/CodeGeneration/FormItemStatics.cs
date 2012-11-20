@@ -9,6 +9,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		private const string deferredCallWarning =
 			"You almost certainly should not call this method from a deferred block of code since this could cause validations to be added to the data modification in the wrong order.";
 
+		private const string validationListParamDocComment =
+			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's post back data modification.";
+
 		internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {
 			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters, instead of
 			// just adding them to the data modification. This allows client code on a page to specify the order of modification methods, which is important because
@@ -379,10 +382,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter( "IEnumerable<Control>", "nestedControls" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new[]
-			                      	{
-			                      		new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
-			                      		new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
-			                      	},
+				                      {
+					                      new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
+					                      new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
+				                      },
 			                      new CSharpParameter[ 0 ],
 			                      "{ " +
 			                      StringTools.ConcatenateWithDelimiter( " ",
@@ -507,8 +510,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                                           IEnumerable<CSharpParameter> optionalValidationParams ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
 			var body = "return Get" + field.PascalCasedName + controlTypeForName + "FormItem( false, " +
-			           requiredControlParams.Concat( requiredValidationParams ).Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
-				           .GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
+			           requiredControlParams.Concat( requiredValidationParams )
+			                                .Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
+			                                .GetCommaDelimitedStringFromCollection()
+			                                .AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
 			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) +
 			           "cellSpan: cellSpan, textAlignment: textAlignment" + ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
@@ -572,6 +577,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
 				                                            .ConcatenateWithSpace( deferredCallWarning ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
+			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
 			var parameters = new List<CSharpParameter>();
 			if( valueParamTypeName.Length > 0 )
@@ -641,6 +647,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
 				                                            .ConcatenateWithSpace( deferredCallWarning ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
+			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
 			var parameters = new List<CSharpParameter>();
 			if( includeValueParams )
