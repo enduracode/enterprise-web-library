@@ -130,7 +130,13 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			builder.InsertField( "MERGEFIELD TableEnd:Main" );
 
 			doc.MailMerge.FieldMergingCallback = new ImageFieldMergingCallBack();
-			doc.MailMerge.ExecuteWithRegions( new AsposeMergeRowEnumerator( cn, "Main", rowTree.Rows, ensureAllFieldsHaveValues ) );
+			try {
+				doc.MailMerge.ExecuteWithRegions( new AsposeMergeRowEnumerator( cn, "Main", rowTree.Rows, ensureAllFieldsHaveValues ) );
+			}
+			catch( InvalidOperationException e ) {
+				// Aspose throws InvalidOperationException when there are problems with the template, such as a badly-formed region.
+				throw new MailMergingException( e.Message );
+			}
 			doc.Save( destinationStream, saveAsMsWordDoc ? Aspose.Words.SaveFormat.Doc : Aspose.Words.SaveFormat.Pdf );
 		}
 
@@ -221,8 +227,9 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 				var sheet = excelFile.DefaultWorksheet;
 				sheet.AddHeaderToWorksheet(
-					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) ).Select(
-						mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.ToEnglishFromCamel() ).ToArray() );
+					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) )
+					          .Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.ToEnglishFromCamel() )
+					          .ToArray() );
 				sheet.FreezeHeaderRow();
 				foreach( var row in rowTree.Rows ) {
 					sheet.AddRowToWorksheet( fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select( mergeValue => {
