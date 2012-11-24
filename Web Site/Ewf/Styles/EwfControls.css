@@ -2,24 +2,9 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-label.ewfCheckBox > input, label.ewfCheckBox > span {
-	vertical-align: middle;
-}
-
-table.ewfBlockCheckBox {
-	width: 100%;
-}
 .ewfStandardCheckBoxList table.ewfBlockCheckBox {
 	padding-top: 1px;
 	padding-bottom: 1px;
-}
-table.ewfBlockCheckBox > tbody > tr > td:first-child {
-	font-size: 0;
-	line-height: 0;
-}
-table.ewfBlockCheckBox > tbody > tr > td:first-child input {
-	margin-top: 0;
-	margin-bottom: 0;
 }
 
 img.ewfAutoSizer {

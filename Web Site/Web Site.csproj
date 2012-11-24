@@ -113,6 +113,13 @@
     <Compile Include="TestPages\Box.aspx.designer.cs">
       <DependentUpon>Box.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\CheckBox.aspx.cs">
+      <DependentUpon>CheckBox.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\CheckBox.aspx.designer.cs">
+      <DependentUpon>CheckBox.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\Html5FileUpload.aspx.cs">
       <DependentUpon>Html5FileUpload.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -641,6 +648,7 @@
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
     <Content Include="TestPages\Box.aspx" />
+    <Content Include="TestPages\CheckBox.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />
     <Content Include="TestPages\EntitySetup.ascx" />

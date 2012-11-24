@@ -42,6 +42,22 @@ img {
 	border-width: 0;
 }
 
+/* check boxes */
+ewfInlineCheckBox > ewfInlineCheckBoxBox, ewfInlineCheckBox > ewfInlineCheckBoxLabel {
+	vertical-align: middle;
+}
+table.ewfBlockCheckBox {
+	width: 100%;
+}
+table.ewfBlockCheckBox > tbody > tr > td:first-child {
+	font-size: 0;
+	line-height: 0;
+}
+table.ewfBlockCheckBox > tbody > tr > td:first-child input {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 /* date pickers, time pickers, and date and time pickers */
 ewfDatePicker, ewfTimePicker {
 	max-width: 10em;

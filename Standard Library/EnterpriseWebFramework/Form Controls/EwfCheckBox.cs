@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -21,6 +21,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// An in-line check box with the label vertically centered on the box.
 	/// </summary>
 	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl<bool>, ControlWithCustomFocusLogic {
+		internal class CssElementCreator: ControlCssElementCreator {
+			internal const string CssClass = "ewfCheckBox";
+
+			CssElement[] ControlCssElementCreator.CreateCssElements() {
+				return new[]
+					{
+						new CssElement( "InlineCheckBox", "label." + CssClass ), new CssElement( "InlineCheckBoxBox", "input." + CssClass ),
+						new CssElement( "InlineCheckBoxLabel", "span." + CssClass )
+					};
+			}
+		}
+
 		private bool isCheckedDurable;
 		private string text;
 		private readonly List<string> onClickJsMethods = new List<string>();
@@ -100,20 +112,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
-			CssClass = "ewfCheckBox".ConcatenateWithSpace( CssClass );
+			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 
 			checkBox = GroupName.Length > 0 ? new RadioButton { GroupName = GroupName } : new CheckBox();
 			checkBox.Checked = AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this );
 			checkBox.AutoPostBack = AutoPostBack;
+
+			// This is an alternative to using the CssClass property, which causes a span to be created around the check box.
+			checkBox.InputAttributes.Add( "class", CssElementCreator.CssClass );
 
 			checkBox.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "", onClickJsMethods.ToArray() ) );
 			if( defaultSubmitButton != null )
 				EwfPage.Instance.MakeControlPostBackOnEnter( checkBox, defaultSubmitButton );
 
 			Controls.Add( checkBox );
-			HtmlGenericControl label = null;
+			EwfLabel label = null;
 			if( text.Length > 0 ) {
-				label = new HtmlGenericControl( "span" ) { InnerText = text };
+				label = new EwfLabel { Text = text, CssClass = CssElementCreator.CssClass };
 				Controls.Add( label );
 			}
 
