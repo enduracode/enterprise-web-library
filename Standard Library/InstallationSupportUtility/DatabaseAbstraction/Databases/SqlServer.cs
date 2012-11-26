@@ -32,7 +32,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			executeMethodWithDbExceptionHandling( delegate {
 				try {
 					StandardLibraryMethods.RunProgram( "sqlcmd",
-					                                   ( info.Server != null ? "-S " + info.Server : "" ) + "-d " + info.Database + " -e -b",
+					                                   ( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
 					                                   "BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" +
 					                                   Environment.NewLine + "EXIT" + Environment.NewLine,
 					                                   true );
@@ -129,8 +129,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				var command = new InlineSelect( "select TransactionLogFileName from RsisLogBackups", orderByClause: "order by RsisLogBackupId desc" );
 				command.Execute( cn,
 				                 r => {
-				                 	if( r.Read() )
-				                 		lastRestoredTransactionLogFileName = r.GetString( 0 );
+					                 if( r.Read() )
+						                 lastRestoredTransactionLogFileName = r.GetString( 0 );
 				                 } );
 			} );
 
@@ -216,8 +216,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				var numberOfLogsRestored = 0;
 				command.Execute( cn,
 				                 r => {
-				                 	r.Read();
-				                 	numberOfLogsRestored = r.GetInt32( 0 );
+					                 r.Read();
+					                 numberOfLogsRestored = r.GetInt32( 0 );
 				                 } );
 
 				summary = "In the last 24 hours, " + numberOfLogsRestored + " logs were successfully restored.";
@@ -237,8 +237,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
 				cn.ExecuteReaderCommand( command,
 				                         reader => {
-				                         	while( reader.Read() )
-				                         		tables.Add( reader.GetString( 0 ) );
+					                         while( reader.Read() )
+						                         tables.Add( reader.GetString( 0 ) );
 				                         } );
 			} );
 			return tables;
