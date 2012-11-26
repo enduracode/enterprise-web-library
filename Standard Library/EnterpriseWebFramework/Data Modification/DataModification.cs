@@ -51,6 +51,13 @@ namespace RedStapler.StandardLibrary {
 			modificationMethods.Add( modificationMethod );
 		}
 
+		/// <summary>
+		/// Adds a list of modification methods. These only execute if all validation methods succeed.
+		/// </summary>
+		public void AddModificationMethods( IEnumerable<DbMethod> modificationMethods ) {
+			this.modificationMethods.AddRange( modificationMethods );
+		}
+
 		internal bool ContainsAnyValidationsOrModifications() {
 			return validations.Any() || modificationMethods.Any();
 		}
