@@ -31,6 +31,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		// NOTE: Consider using something like http://harvesthq.github.com/chosen/ or http://jamielottering.github.com/DropKick/ to make drop down lists better.
 
+		// NOTE: Remember to use the EwfListItem class for item adding. Also, would it ever make sense to use ChangeBasedListItem?
+
 		/// <summary>
 		/// Creates a select list.
 		/// </summary>
