@@ -25,7 +25,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					{
 						new PageGroup( "Working Stuff",
 						               new ActionControls.Info( this ),
-						               new ChecklistDemo.Info( this ),
 						               new CalendarDemo.Info( this ),
 						               new OptionalParameters.Info( this ),
 						               new Html5FileUpload.Info( this ),

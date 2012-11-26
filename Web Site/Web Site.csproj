@@ -141,13 +141,6 @@
     <Compile Include="TestPages\CalendarDemo.aspx.designer.cs">
       <DependentUpon>CalendarDemo.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\ChecklistDemo.aspx.cs">
-      <DependentUpon>ChecklistDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\ChecklistDemo.aspx.designer.cs">
-      <DependentUpon>ChecklistDemo.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.cs">
       <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -657,7 +650,6 @@
     <Content Include="TestPages\Html5FileUpload.aspx" />
     <Content Include="TestPages\HtmlEditing.aspx" />
     <Content Include="TestPages\CalendarDemo.aspx" />
-    <Content Include="TestPages\ChecklistDemo.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />

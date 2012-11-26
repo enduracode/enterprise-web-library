@@ -223,7 +223,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\BlockCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Calendar\MonthViewCalendar.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\CommonCheckBox.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checklist.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlLine.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlListSpacerCellSetup.cs" />

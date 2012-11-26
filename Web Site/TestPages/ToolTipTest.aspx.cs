@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
@@ -18,35 +17,39 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var toolTipLink =
 				new ToolTipButton(
 					EwfTable.CreateWithItems( items:
-					                          	new Func<EwfTableItem>[]
-					                          		{
-					                          			() =>
-					                          			new EwfTableItem(
-					                          				new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.apple.com" ) ) ),
-					                          				"Apple".ToCell() ),
-					                          			() =>
-					                          			new EwfTableItem(
-					                          				new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.microsoft.com" ) ) ),
-					                          				"Microsoft".ToCell() ),
-					                          			() =>
-					                          			new EwfTableItem(
-					                          				new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.google.com" ) ) ),
-					                          				"Google".ToCell() ),
-					                          			() =>
-					                          			new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ),
-					                          			                  "Custom script".ToCell() )
-					                          		} ) );
+						                          new Func<EwfTableItem>[]
+							                          {
+								                          () =>
+								                          new EwfTableItem(
+									                          new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.apple.com" ) ) ),
+									                          "Apple".ToCell() ),
+								                          () =>
+								                          new EwfTableItem(
+									                          new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.microsoft.com" ) ) ),
+									                          "Microsoft".ToCell() ),
+								                          () =>
+								                          new EwfTableItem(
+									                          new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.google.com" ) ) ),
+									                          "Google".ToCell() ),
+								                          () =>
+								                          new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ),
+								                                            "Custom script".ToCell() )
+							                          } ) );
 			toolTipLink.ActionControlStyle = new ButtonActionControlStyle( "Not clickable for some reason", ButtonActionControlStyle.ButtonSize.ShrinkWrap );
 			ph.AddControlsReturnThis( new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( toolTipLink.ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
 				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
 					new ToolTipButton( new EwfLink( new ExternalPageInfo( "http://www.google.com" ) ) { ActionControlStyle = new TextActionControlStyle( "Google link" ) } )
-						{ ActionControlStyle = new TextActionControlStyle( "Not clickable 2" ) }.ToSingleElementArray() ) );
+						{
+							ActionControlStyle = new TextActionControlStyle( "Not clickable 2" )
+						}.ToSingleElementArray() ) );
 
 			label.ToolTip = "Label tool tip";
 
 			extra.Controls.Add( new ToolTipButton( EwfLink.Create( new ExternalPageInfo( "http://redstapler.biz" ), new TextActionControlStyle( "Testing Controls" ) ) )
-			                    	{ ActionControlStyle = new TextActionControlStyle( "ToolTipLink added to panel" ) } );
+				{
+					ActionControlStyle = new TextActionControlStyle( "ToolTipLink added to panel" )
+				} );
 			//markupLink.ToolTipControl = new EwfImage( "http://www.google.com/images/firefox/sprite2.png" );
 			//boxActionControlStyle.ActionControlStyle = new BoxActionControlStyle( "~/Ewf/BoxActionControlStyleImages/Left.png",
 			//                                                                      6,
@@ -71,7 +74,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			calendarTest.AddContentForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 7 ), "Normal ToolTip".GetLiteralControl() );
 			calendarTest.AddContentForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 9 ),
 			                               new ToolTipButton( "Testing clickable link inside of a calendar".GetLiteralControl() )
-			                               	{ ActionControlStyle = new TextActionControlStyle( "Clickable ToolTipLink" ) } );
+				                               {
+					                               ActionControlStyle = new TextActionControlStyle( "Clickable ToolTipLink" )
+				                               } );
 			calendarTest.AddContentForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 12 ), "Fancy ToolTip!".GetLiteralControl() );
 			calendarTest.AddContentForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 12 ), "Second Control!".GetLiteralControl() );
 			calendarTest.AddContentForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 18 ), "Fancy ToolTip! (Accessible)".GetLiteralControl() );
@@ -80,16 +85,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			calendarTest.SetToolTipForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 7 ), "Normal Text ToolTip".GetLiteralControl() );
 			calendarTest.SetToolTipForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 12 ),
 			                               new Literal
-			                               	{
-			                               		Text =
-			                               			"<div><img src=\"http://www.google.com/intl/en_ALL/images/logo.gif\"><a href=\"http://google.com\">Google!</a></div> "
-			                               	} );
+				                               {
+					                               Text = "<div><img src=\"http://www.google.com/intl/en_ALL/images/logo.gif\"><a href=\"http://google.com\">Google!</a></div> "
+				                               } );
 			calendarTest.SetToolTipForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 18 ),
 			                               new Literal
-			                               	{
-			                               		Text =
-			                               			"<div><img src=\"http://www.google.com/intl/en_ALL/images/logo.gif\"><a href=\"http://google.com\">Google!</a></div> "
-			                               	} );
+				                               {
+					                               Text = "<div><img src=\"http://www.google.com/intl/en_ALL/images/logo.gif\"><a href=\"http://google.com\">Google!</a></div> "
+				                               } );
 			var test2 = new EwfTextBox( "Testing Controls" );
 			//var test = new ToolTip( true )
 			//            { Title = "something", Content = new EwfLink { Text = "Testing Controls", NavigateUrl = "http://redstapler.biz" }, TargetControl = test2 };
@@ -101,16 +104,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			calendarTest.SetToolTipForDay( new DateTime( DateTime.Today.Year, DateTime.Today.Month, 27 ),
 			                               EwfLink.Create( new ExternalPageInfo( "http://redstapler.biz" ), new TextActionControlStyle( "Testing Controls" ) ) );
 
-			foreach( var num in new List<string> { "one", "two", "three", "four" } )
-				ewfCheckList.AddItem( num, num );
-
 			//durationPicker.ToolTip = "duration picker tooltip";
 			ewfCheckBox.ToolTip = "ewf check box tooltip";
 			ewfLabel.ToolTip = "label tooltip";
 			ewfListControl.ToolTip = "ewf list control tooltip";
 			ewfImage.ToolTip = "ewf image tooltip";
 			controlStack.Controls.Add( new Paragraph( "Ewf Paragraph Control".GetLiteralControl() ) { ToolTip = "EwfParagraph tool tip" } );
-			ewfCheckList.ToolTip = " ewf checklist tooltip";
 			ewfDatePicker.ToolTip = "ewf datepicker tooltip";
 			ewfDateTimePicker.ToolTip = "ewf datetimepicker tooltip";
 			mailtolink.ToolTip = "ewf mail to tooltip";

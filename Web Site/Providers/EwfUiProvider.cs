@@ -15,14 +15,10 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
 			navButtonSetups.Add( new ActionButtonSetup( "Contact us",
 			                                            new EwfLink(
-			                                            	RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo(
-			                                            		EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
+				                                            RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo(
+					                                            EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
 
 			var menu = EwfTable.Create();
-			menu.AddItem(
-				() =>
-				new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( ChecklistDemo.GetInfo() ) ),
-				                  ChecklistDemo.GetInfo().PageName.ToCell() ) );
 			menu.AddItem(
 				() =>
 				new EwfTableItem(
@@ -34,7 +30,10 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			navButtonSetups.Add( new ActionButtonSetup( "Calendar",
 			                                            new EwfLink( CalendarDemo.GetInfo( new EntitySetup.OptionalParameterPackage(),
 			                                                                               new CalendarDemo.OptionalParameterPackage
-			                                                                               	{ ReturnUrl = EwfPage.Instance.InfoAsBaseType.GetUrl(), Date = DateTime.Now } ) ) ) );
+				                                                                               {
+					                                                                               ReturnUrl = EwfPage.Instance.InfoAsBaseType.GetUrl(),
+					                                                                               Date = DateTime.Now
+				                                                                               } ) ) ) );
 			return navButtonSetups;
 		}
 

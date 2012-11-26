@@ -7,7 +7,6 @@
 	<ewf:ControlStack runat="server" IsStandard='true' ID="controlStack">
 		<ewf:EwfCheckBox runat="server" ID="ewfCheckBox" Text="label" /><ewf:EwfLabel runat="server" ID="ewfLabel" Text="Label" /><ewf:EwfListControl
 			runat="server" ID="ewfListControl" /><ewf:EwfImage runat="server" ID="ewfImage" ImageUrl="http://www.google.com/intl/en_ALL/images/logo.gif" />
-		<ewf:Checklist runat="server" ID="ewfCheckList" />
 		<ewf:DatePicker runat="server" ID="ewfDatePicker" /><ewf:DateTimePicker runat="server" ID="ewfDateTimePicker" /><ewf:MailtoLink runat="server"
 			ID="mailtolink" Text="mail to link" /><ewf:TimePicker runat="server" ID="timepicker" />
 	</ewf:ControlStack>

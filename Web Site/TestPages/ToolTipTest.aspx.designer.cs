@@ -94,15 +94,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.EwfImage ewfImage;
         
         /// <summary>
-        /// ewfCheckList control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.Checklist ewfCheckList;
-        
-        /// <summary>
         /// ewfDatePicker control.
         /// </summary>
         /// <remarks>
