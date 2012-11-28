@@ -68,29 +68,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				return bodyElement.Concat( getGlobalElements() ).Concat( getEntityAndTabAndContentElements() ).ToArray();
 			}
 
-			private static IEnumerable<CssElement> getGlobalElements() {
+			private IEnumerable<CssElement> getGlobalElements() {
 				const string globalBlockSelector = "div#" + GlobalBlockId;
 				const string globalNavBlockSelector = globalBlockSelector + " " + "div." + GlobalNavBlockCssClass;
 				return new[]
-				       	{
-				       		new CssElement( "UiGlobalBlock", globalBlockSelector ),
-				       		new CssElement( "UiAppLogoAndUserInfoBlock",
-				       		                EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() )
-				       		,
-				       		new CssElement( "UiAppLogoBlock",
-				       		                EwfImage.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() ).Select(
-				       		                	i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass ).ToArray() ),
-				       		new CssElement( "UiUserInfoControlList",
-				       		                ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
-				       		new CssElement( "UiGlobalNavBlock", globalNavBlockSelector ),
-				       		new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
-				       		new CssElement( "UiTopErrorMessageControlListBlock",
-				       		                ErrorMessageControlListBlockStatics.CssElementCreator.Selectors.Select(
-				       		                	i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass ).ToArray() )
-				       	};
+					{
+						new CssElement( "UiGlobalBlock", globalBlockSelector ),
+						new CssElement( "UiAppLogoAndUserInfoBlock",
+						                EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
+						new CssElement( "UiAppLogoBlock",
+						                EwfImage.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
+						                        .Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
+						                        .ToArray() ),
+						new CssElement( "UiUserInfoControlList",
+						                ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
+						new CssElement( "UiGlobalNavBlock", globalNavBlockSelector ),
+						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
+						new CssElement( "UiTopErrorMessageControlListBlock",
+						                ErrorMessageControlListBlockStatics.CssElementCreator.Selectors.Select(
+							                i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass ).ToArray() )
+					};
 			}
 
-			private static IEnumerable<CssElement> getEntityAndTabAndContentElements() {
+			private IEnumerable<CssElement> getEntityAndTabAndContentElements() {
 				var elements = new List<CssElement>();
 
 				const string entityAndTabAndContentBlockSelector = "div#" + EntityAndTabAndContentBlockId;
@@ -100,58 +100,58 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				elements.AddRange( getEntityElements( entityAndTabAndContentBlockSelector ) );
 				elements.Add( new CssElement( "UiTopTabControlList",
 				                              ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + TopTabListCssClass )
-				                              	.ToArray() ) );
+				                                         .ToArray() ) );
 				elements.AddRange( getSideTabAndContentElements( entityAndTabAndContentBlockSelector ) );
 				elements.AddRange( getTabElements() );
 				return elements;
 			}
 
-			private static IEnumerable<CssElement> getEntityElements( string entityAndTabAndContentBlockSelector ) {
+			private IEnumerable<CssElement> getEntityElements( string entityAndTabAndContentBlockSelector ) {
 				return new[]
-				       	{
-				       		new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
-				       		new CssElement( "UiEntityNavAndActionBlock",
-				       		                EwfTable.CssElementCreator.Selectors.Select(
-				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass ).ToArray() ),
-				       		new CssElement( "UiEntityNavControlList",
-				       		                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass )
-				       		                	.ToArray() ),
-				       		new CssElement( "UiEntityActionControlList",
-				       		                ControlLine.CssElementCreator.Selectors.Select(
-				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass ).ToArray() ),
-				       		new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
-				       	};
+					{
+						new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
+						new CssElement( "UiEntityNavAndActionBlock",
+						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass )
+						                        .ToArray() ),
+						new CssElement( "UiEntityNavControlList",
+						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass )
+						                           .ToArray() ),
+						new CssElement( "UiEntityActionControlList",
+						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass )
+						                           .ToArray() ),
+						new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
+					};
 			}
 
-			private static IEnumerable<CssElement> getSideTabAndContentElements( string entityAndTabAndContentBlockSelector ) {
+			private IEnumerable<CssElement> getSideTabAndContentElements( string entityAndTabAndContentBlockSelector ) {
 				var contentCellSelector = entityAndTabAndContentBlockSelector + " td." + ContentCellCssClass;
 				return new[]
-				       	{
-				       		new CssElement( "UiSideTabAndContentBlock",
-				       		                EwfTable.CssElementCreator.Selectors.Select(
-				       		                	i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
-				       		new CssElement( "UiSideTabCell", entityAndTabAndContentBlockSelector + " td." + SideTabCellCssClass ),
-				       		new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelector ),
-				       		new CssElement( "UiPageActionControlList", ControlLine.CssElementCreator.Selectors.Select( i => contentCellSelector + " > " + i ).ToArray() ),
-				       		new CssElement( "UiContentBlock", contentCellSelector + " > " + "div." + ContentBlockCssClass ),
-				       		new CssElement( "UiContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentFootCellCssClass ),
-				       		new CssElement( "UiContentFootBlock",
-				       		                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass ).
-				       		                	ToArray() ),
-				       		new CssElement( "UiContentFootActionControlList",
-				       		                ControlLine.CssElementCreator.Selectors.Select(
-				       		                	i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass ).ToArray() )
-				       	};
+					{
+						new CssElement( "UiSideTabAndContentBlock",
+						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
+						                        .ToArray() ),
+						new CssElement( "UiSideTabCell", entityAndTabAndContentBlockSelector + " td." + SideTabCellCssClass ),
+						new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelector ),
+						new CssElement( "UiPageActionControlList", ControlLine.CssElementCreator.Selectors.Select( i => contentCellSelector + " > " + i ).ToArray() ),
+						new CssElement( "UiContentBlock", contentCellSelector + " > " + "div." + ContentBlockCssClass ),
+						new CssElement( "UiContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentFootCellCssClass ),
+						new CssElement( "UiContentFootBlock",
+						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass )
+						                        .ToArray() ),
+						new CssElement( "UiContentFootActionControlList",
+						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass )
+						                           .ToArray() )
+					};
 			}
 
-			private static IEnumerable<CssElement> getTabElements() {
+			private IEnumerable<CssElement> getTabElements() {
 				return new[]
-				       	{
-				       		new CssElement( "UiCurrentTabActionControl",
-				       		                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
-				       		new CssElement( "UiDisabledTabActionControl",
-				       		                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
-				       	};
+					{
+						new CssElement( "UiCurrentTabActionControl",
+						                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
+						new CssElement( "UiDisabledTabActionControl",
+						                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
+					};
 			}
 		}
 
@@ -198,10 +198,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					EwfPage.AddStatusMessage( StatusMessageType.Warning,
 					                          StringTools.ConcatenateWithDelimiter( " ",
 					                                                                new[]
-					                                                                	{
-					                                                                		"We've detected that you are not using the latest version of your browser.",
-					                                                                		"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
-					                                                                	} ) + "<br/>" +
+						                                                                {
+							                                                                "We've detected that you are not using the latest version of your browser.",
+							                                                                "While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
+						                                                                } ) + "<br/>" +
 					                          NetTools.BuildBasicLink( "Click here to get Internet Explorer 9 (it's free)",
 					                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
 					                                                   true ) + "<br/>" +
@@ -216,16 +216,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private Control getGlobalBlock() {
 			return
 				new Block(
-					new[] { getAppLogoAndUserInfoBlock(), getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList ) }.Where( i => i != null ).ToArray() )
-					{ ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
+					new[] { getAppLogoAndUserInfoBlock(), getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList ) }.Where( i => i != null )
+					                                                                                                                          .ToArray() )
+					{
+						ClientIDMode =
+							ClientIDMode.Static,
+						ID =
+							CssElementCreator.GlobalBlockId
+					};
 		}
 
-		private static Control getAppLogoAndUserInfoBlock() {
+		private Control getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToSingleElementArray() );
 
 			var appLogoBlock = EwfUiStatics.AppProvider.GetLogoControl() ??
 			                   new Panel().AddControlsReturnThis(
-			                   	( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName ).GetLiteralControl() );
+				                   ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName ).GetLiteralControl() );
 			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
 
 			ControlStack userInfoList = null;
@@ -241,7 +247,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return table;
 		}
 
-		private static Control getGlobalNavBlock() {
+		private Control getGlobalNavBlock() {
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
@@ -249,15 +255,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				return null;
 
 			var controls =
-				getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActionControls() ).Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups()
-				                                                                                   select i.BuildLookupBoxPanel() ).ToArray();
+				getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActionControls() )
+					.Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups() select i.BuildLookupBoxPanel() )
+					.ToArray();
 			if( !controls.Any() )
 				return null;
 			return new Block( new ControlLine( controls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe() } )
-			       	{ CssClass = CssElementCreator.GlobalNavBlockCssClass };
+				{
+					CssClass = CssElementCreator.GlobalNavBlockCssClass
+				};
 		}
 
-		private static IEnumerable<Control> getErrorMessageList( IEnumerable<string> errors ) {
+		private IEnumerable<Control> getErrorMessageList( IEnumerable<string> errors ) {
 			if( !errors.Any() )
 				yield break;
 			var list = ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors );
@@ -265,7 +274,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			yield return list;
 		}
 
-		private static Control getEntityAndTopTabBlock() {
+		private Control getEntityAndTopTabBlock() {
 			var controls = new List<Control> { getEntityBlock() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
 				var pageGroups = getEntityPageGroups();
@@ -277,19 +286,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return new Block( controls.ToArray() ) { CssClass = CssElementCreator.EntityAndTopTabBlockCssClass };
 		}
 
-		private static Control getEntityBlock() {
+		private Control getEntityBlock() {
 			return new Block( new[] { getPagePath(), getEntityNavAndActionBlock(), getEntitySummaryBlock() }.Where( i => i != null ).ToArray() )
-			       	{ CssClass = CssElementCreator.EntityBlockCssClass };
+				{
+					CssClass = CssElementCreator.EntityBlockCssClass
+				};
 		}
 
-		private static Control getPagePath() {
+		private Control getPagePath() {
 			var currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists;
 			if( !getEntityPageGroups().Any() )
 				currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage;
 			return new PagePath { CurrentPageBehavior = currentPageBehavior };
 		}
 
-		private static Control getEntityNavAndActionBlock() {
+		private Control getEntityNavAndActionBlock() {
 			var cells = new[] { getEntityNavCell(), getEntityActionCell() }.Where( i => i != null );
 			if( !cells.Any() )
 				return null;
@@ -298,36 +309,36 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return table;
 		}
 
-		private static EwfTableCell getEntityNavCell() {
+		private EwfTableCell getEntityNavCell() {
 			if( entityDisplaySetup == null )
 				return null;
 			var controls =
-				getActionControls( entityDisplaySetup.CreateNavButtonSetups() ).Concat(
-					( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) ).ToArray();
+				getActionControls( entityDisplaySetup.CreateNavButtonSetups() )
+					.Concat( ( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) )
+					.ToArray();
 			return !controls.Any()
-			       	? null
-			       	: new EwfTableCell( new ControlLine( controls )
-			       	                    	{
-			       	                    		CssClass = CssElementCreator.EntityNavListCssClass,
-			       	                    		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-			       	                    	} );
+				       ? null
+				       : new EwfTableCell( new ControlLine( controls )
+					       {
+						       CssClass = CssElementCreator.EntityNavListCssClass,
+						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					       } );
 		}
 
-		private static EwfTableCell getEntityActionCell() {
+		private EwfTableCell getEntityActionCell() {
 			if( entityDisplaySetup == null || EwfPage.Instance.InfoAsBaseType.ParentPage != null )
 				return null;
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			return !actionControls.Any()
-			       	? null
-			       	: new EwfTableCell( new ControlLine( actionControls )
-			       	                    	{
-			       	                    		CssClass = CssElementCreator.EntityActionListCssClass,
-			       	                    		ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-			       	                    	} )
-			       	  	{ TextAlignment = TextAlignment.Right };
+				       ? null
+				       : new EwfTableCell( new ControlLine( actionControls )
+					       {
+						       CssClass = CssElementCreator.EntityActionListCssClass,
+						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					       } ) { TextAlignment = TextAlignment.Right };
 		}
 
-		private static Control getEntitySummaryBlock() {
+		private Control getEntitySummaryBlock() {
 			// If the entity setup is a nonempty control, display it as an entity summary.
 			var entitySummary = EwfPage.Instance.EsAsBaseType as Control;
 			if( entitySummary != null && entitySummary.Controls.Count > 0 )
@@ -336,12 +347,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return null;
 		}
 
-		private static Control getTopTabList( PageGroup pageGroup ) {
+		private Control getTopTabList( PageGroup pageGroup ) {
 			return new ControlLine( getTabControlsForPages( pageGroup ).ToArray() )
-			       	{ CssClass = CssElementCreator.TopTabListCssClass, VerticalAlignment = TableCellVerticalAlignment.Bottom };
+				{
+					CssClass = CssElementCreator.TopTabListCssClass,
+					VerticalAlignment = TableCellVerticalAlignment.Bottom
+				};
 		}
 
-		private static bool entityUsesTabMode( TabMode tabMode ) {
+		private bool entityUsesTabMode( TabMode tabMode ) {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
 			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentPage == null && entitySetupInfo.GetTabMode() == tabMode;
 		}
@@ -359,22 +373,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 		}
 
-		private static ReadOnlyCollection<PageGroup> getEntityPageGroups() {
+		private ReadOnlyCollection<PageGroup> getEntityPageGroups() {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
 			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentPage == null ? entitySetupInfo.Pages : new List<PageGroup>().AsReadOnly();
 		}
 
-		private static IEnumerable<Control> getTabControlsForPages( PageGroup pageGroup ) {
+		private IEnumerable<Control> getTabControlsForPages( PageGroup pageGroup ) {
 			var tabs = new List<Control>();
 			foreach( var page in pageGroup.Pages.Where( p => p.UserCanAccessPageAndAllControls ) ) {
 				// NOTE: Should we use CustomActionControlStyle for the link so it doesn't have any built-in styling?
 				var tab = EwfLink.Create( page.IsIdenticalToCurrent() ? null : page, new TextActionControlStyle( page.PageName ) );
 
 				tab.CssClass = page.IsIdenticalToCurrent()
-				               	? CssElementCreator.CurrentTabCssClass
-				               	: page.AlternativeMode is DisabledPageMode
-				               	  	? CssElementCreator.DisabledTabCssClass
-				               	  	: page.AlternativeMode is NewContentPageMode ? "ewfNewness" : "";
+					               ? CssElementCreator.CurrentTabCssClass
+					               : page.AlternativeMode is DisabledPageMode
+						                 ? CssElementCreator.DisabledTabCssClass
+						                 : page.AlternativeMode is NewContentPageMode ? "ewfNewness" : "";
 				tabs.Add( tab );
 			}
 			return tabs;
@@ -387,7 +401,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
 		}
 
-		private static IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
+		private IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
 			return from actionButtonSetup in actionButtonSetups
 			       let actionControl = actionButtonSetup.BuildButton( text => new TextActionControlStyle( text ), false )
 			       let asEwfLink = actionControl as EwfLink
@@ -431,10 +445,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray() );
 			table.AddItem(
 				new EwfTableItem( new EwfTableCell( new PlaceHolder().AddControlsReturnThis( controls ) )
-				                  	{ TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center } ) );
+					{
+						TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center
+					} ) );
 			return table;
 		}
 
-		private static EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
+		private EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
 	}
 }
