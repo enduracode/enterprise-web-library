@@ -53,7 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private User user;
 		private bool userLoaded;
 
-		private bool cachingEnabled;
+		private bool cachingDisabled;
 		private object cache;
 
 		private string errorPrefix = "";
@@ -139,7 +139,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the specified database connection only if it can be properly initialized.
 		/// </summary>
-		private static DBConnection initDatabaseConnection( DBConnection cn ) {
+		private DBConnection initDatabaseConnection( DBConnection cn ) {
 			cn.Open();
 			cn.BeginTransaction();
 			return cn;
@@ -218,15 +218,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			userLoaded = true;
 		}
 
-		internal void EnableCache() {
-			cachingEnabled = true;
-		}
-
 		/// <summary>
 		/// AppTools.GetCache use only.
 		/// </summary>
 		internal T GetOrAddCache<T>() where T: class, new() {
-			if( !cachingEnabled )
+			if( cachingDisabled )
 				return new T();
 
 			if( cache == null )
@@ -234,12 +230,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return (T)cache;
 		}
 
-		/// <summary>
-		/// EwfPage use only.
-		/// </summary>
-		internal void ClearAndDisableCache() {
+		internal void DisableCache() {
+			cachingDisabled = true;
+		}
+
+		internal void ResetCache() {
+			cachingDisabled = false;
 			cache = null;
-			cachingEnabled = false;
 		}
 
 		internal void SetError( string prefix, Exception exception ) {
@@ -284,8 +281,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			methods.Add( () => {
 				try {
 					if( !transactionMarkedForRollback ) {
-						foreach( var i in nonTransactionalModificationMethods )
-							i();
+						DisableCache();
+						try {
+							foreach( var i in nonTransactionalModificationMethods )
+								i();
+						}
+						finally {
+							ResetCache();
+						}
 					}
 				}
 				finally {

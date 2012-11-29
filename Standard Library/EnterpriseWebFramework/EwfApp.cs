@@ -161,8 +161,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 
-				AppRequestState.Instance.EnableCache();
-
 				var page = resolver.Function();
 				if( page == null )
 					throw new AccessDeniedException( false, resolver.LogInPageGetter != null ? resolver.LogInPageGetter() : null );
@@ -251,6 +249,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch {
 					RequestState.RollbackDatabaseTransactions();
+					RequestState.ResetCache();
 					throw;
 				}
 			},
@@ -278,6 +277,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				Server.ClearError();
 
 				RequestState.RollbackDatabaseTransactions();
+				RequestState.ResetCache();
 
 				var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 
@@ -346,8 +346,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							AppTools.EmailAndLogError( prefix, e );
 					},
 					                                        delegate {
-					                                        	if( set500StatusCode )
-					                                        		this.set500StatusCode( "Exception" );
+						                                        if( set500StatusCode )
+							                                        this.set500StatusCode( "Exception" );
 					                                        } );
 				}
 				catch {}
@@ -387,11 +387,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private bool handleErrorIfOnHandledErrorPage( string errorEvent, Exception exception ) {
 			var handledErrorPages = new List<PageInfo>
-			                        	{
-			                        		MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ),
-			                        		MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
-			                        		MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
-			                        	};
+				{
+					MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ),
+					MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
+					MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
+				};
 			if( handledErrorPages.All( p => getErrorPage( p ).GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ) )
 				return false;
 			RequestState.SetError( errorEvent + " during a request for a handled error page" + ( exception != null ? ":" : "." ), exception );
@@ -429,6 +429,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.
 		/// </summary>
-		protected static void ewfApplicationEnd() {}
+		protected void ewfApplicationEnd() {}
 	}
 }

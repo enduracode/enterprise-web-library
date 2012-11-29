@@ -75,8 +75,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates a new page. Do not call this yourself.
 		/// </summary>
 		protected EwfPage() {
-			AppRequestState.Instance.EnableCache();
-
 			// Use the entire page as the default content container.
 			contentContainer = this;
 
@@ -167,11 +165,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash != null &&
 				    generateFormControlHash( true, false ) != AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash ) {
 					var sentences = new[]
-					                	{
-					                		"Possible developer mistake.",
-					                		"Form controls, modification error display keys, and post back event handlers may not change on a post back with modification errors.",
-					                		"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-					                	};
+						{
+							"Possible developer mistake.",
+							"Form controls, modification error display keys, and post back event handlers may not change on a post back with modification errors.",
+							"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+						};
 					throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 				}
 
@@ -292,9 +290,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				etherealControlsForJsStartUpLogic.Add( etherealControl );
 			}
 
-			// Clear and disable further caching to prevent later methods (such as event handlers) from getting cached data when they want fresh data.
-			AppRequestState.Instance.ClearAndDisableCache();
-
 			var submitButtons = getSubmitButtons( this );
 			if( submitButtons.Count > 1 ) {
 				var helpfulMessage = "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
@@ -324,10 +319,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addMetadataAndFaviconLinks() {
 			Header.Controls.Add( new HtmlMeta
-			                     	{
-			                     		Name = "application-name",
-			                     		Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName
-			                     	} );
+				{
+					Name = "application-name",
+					Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName
+				} );
 
 			// Chrome start URL
 			Header.Controls.Add( new HtmlMeta { Name = "application-url", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
@@ -353,11 +348,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addTypekitLogicIfNecessary() {
 			if( EwfApp.Instance.TypekitId.Length > 0 ) {
 				Header.Controls.Add( new Literal
-				                     	{
-				                     		Text =
-				                     			"<script type=\"text/javascript\" src=\"http" + ( Request.IsSecureConnection ? "s" : "" ) + "://use.typekit.com/" +
-				                     			EwfApp.Instance.TypekitId + ".js\"></script>"
-				                     	} );
+					{
+						Text =
+							"<script type=\"text/javascript\" src=\"http" + ( Request.IsSecureConnection ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
+							".js\"></script>"
+					} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
 		}
@@ -444,7 +439,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract void LoadData( DBConnection cn );
 
-		private static void loadDataForControlAndChildren( DBConnection cn, Control control ) {
+		private void loadDataForControlAndChildren( DBConnection cn, Control control ) {
 			if( control is ControlTreeDataLoader )
 				( control as ControlTreeDataLoader ).LoadData( cn );
 			foreach( Control child in control.Controls )
@@ -522,7 +517,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages { get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); } }
 
-		private static List<Control> getSubmitButtons( Control control ) {
+		private List<Control> getSubmitButtons( Control control ) {
 			var submitButtons = new List<Control>();
 			if( control.Visible &&
 			    ( ( control is PostBackButton && ( control as PostBackButton ).UsesSubmitBehavior ) || ( control is Button && ( control as Button ).UseSubmitBehavior ) ) )
@@ -544,8 +539,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			var controlInitStatements =
-				getImplementersWithinControl<ControlWithJsInitLogic>( this ).Cast<ControlWithJsInitLogic>().Select( i => i.GetJsInitStatements() ).Concat(
-					etherealControls.Select( i => i.GetJsInitStatements() ) ).Aggregate( ( a, b ) => a + b );
+				getImplementersWithinControl<ControlWithJsInitLogic>( this )
+					.Cast<ControlWithJsInitLogic>()
+					.Select( i => i.GetJsInitStatements() )
+					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
+					.Aggregate( ( a, b ) => a + b );
 
 			var statusMessageDialogFadeOutStatement = "";
 			if( StatusMessages.Any() && !StatusMessages.Any( i => i.Item1 == StatusMessageType.Warning ) )
@@ -584,9 +582,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                                                              javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 			                                                                              StringTools.ConcatenateWithDelimiter( " ",
 			                                                                                                                    scrollStatement,
-			                                                                                                                    locationReplaceStatement ).
-			                                                                              	PrependDelimiter( "window.onload = function() { " ).AppendDelimiter( " };" ) ) +
-			                                        " } );",
+			                                                                                                                    locationReplaceStatement )
+			                                                                                         .PrependDelimiter( "window.onload = function() { " )
+			                                                                                         .AppendDelimiter( " };" ) ) + " } );",
 			                                        true );
 
 			setFocus();
@@ -673,14 +671,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal void ExecuteDataModificationValidations( DataModification dataModification, Validator topValidator ) {
 			dataModification.ValidateFormValues( topValidator,
 			                                     ( validation, errorMessages ) => {
-			                                     	if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
-			                                     		return;
-			                                     	foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-			                                     		var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
-			                                     		errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey )
-			                                     		                                	? errorsByDisplay[ displayKey ].Concat( errorMessages )
-			                                     		                                	: errorMessages;
-			                                     	}
+				                                     if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
+					                                     return;
+				                                     foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
+					                                     var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
+					                                     errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey )
+						                                                                     ? errorsByDisplay[ displayKey ].Concat( errorMessages )
+						                                                                     : errorMessages;
+				                                     }
 			                                     } );
 		}
 
@@ -692,7 +690,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 
 			try {
-				method();
+				AppRequestState.Instance.DisableCache();
+				try {
+					method();
+				}
+				finally {
+					AppRequestState.Instance.ResetCache();
+				}
 			}
 			catch( EwfException e ) {
 				AppRequestState.Instance.RollbackDatabaseTransactions();
@@ -727,12 +731,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, RedirectingDbMethod modificationMethod ) {
 			EhExecute( () => executeModification( validationMethod,
 			                                      cn => {
-			                                      	var url = modificationMethod( cn ) ?? "";
-			                                      	redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+				                                      var url = modificationMethod( cn ) ?? "";
+				                                      redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
 			                                      } ) );
 		}
 
-		private static void executeModification( Action<Validator> validationMethod, DbMethod modificationMethod ) {
+		private void executeModification( Action<Validator> validationMethod, DbMethod modificationMethod ) {
 			var validator = new Validator();
 			validationMethod( validator );
 			if( validator.ErrorsOccurred )
@@ -787,6 +791,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch( EwfException e ) {
 					requestState.RollbackDatabaseTransactions();
+					requestState.ResetCache();
 					requestState.EwfPageRequestState.TopModificationErrors = e.Messages;
 				}
 			}
@@ -841,9 +846,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
-					updateLastPageRequestTimeForUser();
-					EwfApp.Instance.ExecuteInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
+				requestState.DisableCache();
+				try {
+					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
+						updateLastPageRequestTimeForUser();
+						EwfApp.Instance.ExecuteInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
+					}
+				}
+				finally {
+					requestState.ResetCache();
 				}
 
 				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by initial request data modifications.
@@ -883,11 +894,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return hashString;
 		}
 
-		private static IEnumerable<FormControl> getChildFormControls( Control control ) {
+		private IEnumerable<FormControl> getChildFormControls( Control control ) {
 			return getImplementersWithinControl<FormControl>( control ).Cast<FormControl>();
 		}
 
-		private static IEnumerable<Control> getImplementersWithinControl<InterfaceType>( Control control ) {
+		private IEnumerable<Control> getImplementersWithinControl<InterfaceType>( Control control ) {
 			var matchingControls = new List<Control>();
 			foreach( Control childControl in control.Controls ) {
 				if( childControl is InterfaceType )
