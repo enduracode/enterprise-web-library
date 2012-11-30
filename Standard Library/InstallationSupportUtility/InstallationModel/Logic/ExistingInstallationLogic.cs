@@ -12,6 +12,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 
+		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths( Environment.GetEnvironmentVariable( "windir" ),
+		                                                                                 @"system32\inetsrv\AppCmd.exe" );
+
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
 
@@ -104,17 +107,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		}
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
-			// NOTE: Eliminate this constant and its use when we switch ISU over to .NET 4.
-			const string dotNet4RuntimeFolderPath = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319";
-
-			StandardLibraryMethods.RunProgram(
-				StandardLibraryMethods.CombinePaths( Directory.Exists( dotNet4RuntimeFolderPath ) ? dotNet4RuntimeFolderPath : RuntimeEnvironment.GetRuntimeDirectory(),
-				                                     "installutil" ),
-				( uninstall ? "/u " : "" ) + "\"" +
-				StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe"
-					/* file extension is required */ ) + "\"",
-				"",
-				true );
+			StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
+			                                   ( uninstall ? "/u " : "" ) + "\"" +
+			                                   StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ),
+			                                                                        service.NamespaceAndAssemblyName + ".exe"
+				                                   /* file extension is required */ ) + "\"",
+			                                   "",
+			                                   true );
 		}
 
 		public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
@@ -124,23 +123,20 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			return path;
 		}
 
-		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths( Environment.GetEnvironmentVariable( "windir" ),
-		                                                                                 @"system32\inetsrv\AppCmd.exe" );
-
 		// NOTE: We do have the power to add and remove web sites here, and we can list just the stopped or just the started sites.
 		// NOTE: When we add web sites with the ISU, we should NOT support host headers since WCF services have some restrictions with these. See http://stackoverflow.com/questions/561823/wcf-error-this-collection-already-contains-an-address-with-scheme-http
-		private static bool siteExistsInIis( string webSiteName ) {
+		private bool siteExistsInIis( string webSiteName ) {
 			if( !File.Exists( appCmdPath ) )
 				return false;
 			return StandardLibraryMethods.RunProgram( appCmdPath, "list sites", "", true ).Contains( "\"" + webSiteName + "\"" );
 		}
 
-		private static void stopWebSite( string webSiteName ) {
+		private void stopWebSite( string webSiteName ) {
 			if( siteExistsInIis( webSiteName ) )
 				StandardLibraryMethods.RunProgram( appCmdPath, "Stop Site \"" + webSiteName + "\"", "", true );
 		}
 
-		private static void startWebSite( string webSiteName ) {
+		private void startWebSite( string webSiteName ) {
 			if( siteExistsInIis( webSiteName ) )
 				StandardLibraryMethods.RunProgram( appCmdPath, "Start Site \"" + webSiteName + "\"", "", true );
 		}
