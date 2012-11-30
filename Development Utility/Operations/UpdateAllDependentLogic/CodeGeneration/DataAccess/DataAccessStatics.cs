@@ -87,8 +87,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "return " + getMemberVariableName( columns.First( c => c.UseToUniquelyIdentifyRow ).Name ) + ".GetHashCode();" );
 			writer.WriteLine( "}" ); // Object override of GetHashCode
 
-			writer.WriteLine(
-				@"	public static bool operator == (Row row1, Row row2 ) {
+			writer.WriteLine( @"	public static bool operator == (Row row1, Row row2 ) {
 				return Equals( row1, row2 );
 			}
 
@@ -115,14 +114,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeColumnProperty( TextWriter writer, Column column, DatabaseInfo databaseInfo ) {
-			var isOracleClob = ColumnIsOracleClob( column, databaseInfo );
+			var isOracleClob = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( column.DbTypeString );
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This object will " + ( column.AllowsNull && !isOracleClob ? "sometimes" : "never" ) + " be null." );
 			writer.WriteLine( "public " + column.DataTypeName + " " + column.Name + " { get { return " + getMemberVariableName( column.Name ) +
 			                  ( isOracleClob ? " ?? \"\"" : "" ) + "; } }" );
-		}
-
-		internal static bool ColumnIsOracleClob( Column column, DatabaseInfo databaseInfo ) {
-			return databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( column.DbTypeString );
 		}
 
 		private static void writeTypedColumnProperty( TextWriter writer, Column column ) {

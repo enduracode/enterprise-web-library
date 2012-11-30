@@ -470,13 +470,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeAddColumnModificationsMethod( IEnumerable<Column> nonIdentityColumns, DatabaseInfo databaseInfo ) {
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
-				// NOTE: Remove this check after all machines are running at least Oracle Database 11g Release 2.
-				if( DataAccessStatics.ColumnIsOracleClob( column, databaseInfo ) && !column.AllowsNull ) {
-					writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed && string.IsNullOrEmpty( " + column.Name + " ) )" );
-					writer.WriteLine(
-						"throw new System.ApplicationException( \"You cannot set a non-nullable Oracle CLOB to the empty string because versions of Oracle prior to 11.1.0.7.0 do not support this.\" );" );
-				}
-
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
 				writer.WriteLine( "cmd.AddColumnModification( new InlineDbCommandColumnValue( \"" + column.Name + "\", new DbParameterValue( " + column.Name + ", \"" +
 				                  column.DbTypeString + "\" ) ) );" );
