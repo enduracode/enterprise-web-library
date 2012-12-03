@@ -7,6 +7,7 @@ using System.Security.AccessControl;
 using System.ServiceProcess;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
+using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstallationLogic {
@@ -107,13 +108,21 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		}
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
-			StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
-			                                   ( uninstall ? "/u " : "" ) + "\"" +
-			                                   StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ),
-			                                                                        service.NamespaceAndAssemblyName + ".exe"
-				                                   /* file extension is required */ ) + "\"",
-			                                   "",
-			                                   true );
+			try {
+				StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
+				                                   ( uninstall ? "/u " : "" ) + "\"" +
+				                                   StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ),
+				                                                                        service.NamespaceAndAssemblyName + ".exe"
+					                                   /* file extension is required */ ) + "\"",
+				                                   "",
+				                                   true );
+			}
+			catch( Exception e ) {
+				const string message = "Installer tool failed.";
+				if( e.Message.Contains( typeof( EmailSendingException ).Name ) )
+					throw new UserCorrectableException( message, e );
+				throw new ApplicationException( message, e );
+			}
 		}
 
 		public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
