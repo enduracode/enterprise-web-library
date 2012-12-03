@@ -54,13 +54,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AjaxControlToolkit.4.1.60919\lib\40\AjaxControlToolkit.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Cells, Version=7.3.3.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Cells, Version=7.3.4.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Cells.7.3.3\lib\net40-client\Aspose.Cells.dll</HintPath>
+      <HintPath>..\packages\Aspose.Cells.7.3.4\lib\net40-client\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Pdf, Version=7.4.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Pdf, Version=7.5.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Pdf.7.4.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
+      <HintPath>..\packages\Aspose.Pdf.7.5.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
     </Reference>
     <Reference Include="Aspose.Words, Version=11.9.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
