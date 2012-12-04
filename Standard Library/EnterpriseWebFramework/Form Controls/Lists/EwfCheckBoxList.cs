@@ -5,8 +5,18 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+	// We can't nest this inside the class below because of the type parameter.
+	internal class CheckBoxListCssElementCreator: ControlCssElementCreator {
+		internal const string CssClass = "ewfStandardCheckBoxList";
+
+		CssElement[] ControlCssElementCreator.CreateCssElements() {
+			return new[] { new CssElement( "CheckBoxList", "div." + CssClass ) };
+		}
+	}
+
 	/// <summary>
 	/// A check box list that allows multiple items to be selected.
 	/// NOTE: Consider using something like the multi select feature of http://harvesthq.github.com/chosen/ to provide a space-saving mode for this control.
@@ -33,7 +43,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
-			CssClass = CssClass.ConcatenateWithSpace( "ewfStandardCheckBoxList" );
+			CssClass = CssClass.ConcatenateWithSpace( CheckBoxListCssElementCreator.CssClass );
 
 			var table = new DynamicTable { Caption = caption };
 			if( includeSelectAndDeselectAllButtons ) {

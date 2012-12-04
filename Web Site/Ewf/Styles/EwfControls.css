@@ -2,11 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-.ewfStandardCheckBoxList table.ewfBlockCheckBox {
-	padding-top: 1px;
-	padding-bottom: 1px;
-}
-
 img.ewfAutoSizer {
 	display: block;
 	width: 100%;

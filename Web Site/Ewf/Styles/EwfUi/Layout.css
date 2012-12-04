@@ -59,6 +59,10 @@ li:first-child {
 .ewfControlList tr:first-child td {
 	padding-top: 0;
 }
+ewfCheckBoxList table.ewfBlockCheckBox {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
 
 /* boxes */
 ewfBoxBothStates {
@@ -154,10 +158,10 @@ ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
 }
 
 /* block element vertical spacing */
-p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, div.ewfStandardCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfBoxBothStates, ewfFormItemBlock, ewfLabeledControl {
+p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfBoxBothStates, ewfFormItemBlock, ewfLabeledControl {
 	margin-top: 1.5em;
 }
-p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, div.ewfStandardCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfBoxBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child {
+p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfBoxBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child {
 	margin-top: 0;
 }
 p, ul {
