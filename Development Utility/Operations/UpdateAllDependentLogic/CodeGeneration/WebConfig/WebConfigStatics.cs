@@ -31,8 +31,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 
 			templateContents = templateContents.Replace( "@@CertificateAuthenticationModulePlace",
 			                                             useCertificateAuth
-			                                             	? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, RedStapler.StandardLibrary\"/>"
-			                                             	: "" );
+				                                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, RedStapler.StandardLibrary\"/>"
+				                                             : "" );
 
 			webConfigContents = webConfigContents.Replace( "<configuration>", templateContents );
 
