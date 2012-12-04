@@ -777,10 +777,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			AppRequestState.Instance.EwfPageRequestState.ControlWithInitialFocusId = control.UniqueID;
 		}
 
-		/// <summary>
-		/// Terminates and restarts page execution instead of performing normal PreRender activities if this is a postback and data modifications were completed
-		/// earlier in the life cycle.
-		/// </summary>
 		protected override sealed void OnPreRender( EventArgs eventArgs ) {
 			var requestState = AppRequestState.Instance;
 
@@ -840,9 +836,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				NetTools.Redirect( redirectInfo.GetUrl() );
 			}
 
+			base.OnPreRender( eventArgs );
+
 			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
-			// happen at the end of the life cycle, in PreRender. This prevents modifications from being executed twice when transfers happen. It also prevents any of
-			// the modified data from being used accidentally, or intentionally, in LoadData.
+			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
+			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
@@ -860,8 +858,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by initial request data modifications.
 				requestState.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
 			}
-
-			base.OnPreRender( eventArgs );
 		}
 
 		private string generateFormControlHash( bool includeValues, bool forConcurrencyCheck ) {
