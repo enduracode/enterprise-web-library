@@ -32,16 +32,22 @@
 	}
 
 	internal static class TableCellVerticalAlignmentOps {
+		// These are used by Standard Library CSS files for alignment rules.
+		private const string topCssClass = "ewfTcTop";
+		private const string middleCssClass = "ewfTcMiddle";
+		private const string bottomCssClass = "ewfTcBottom";
+		private const string baseLineCssClass = "ewfTcBaseLine";
+
 		internal static string Class( TableCellVerticalAlignment verticalAlignment ) {
 			switch( verticalAlignment ) {
 				case TableCellVerticalAlignment.Top:
-					return EwfTable.CssElementCreator.CellAlignmentTopCssClass;
+					return topCssClass;
 				case TableCellVerticalAlignment.Middle:
-					return EwfTable.CssElementCreator.CellAlignmentMiddleCssClass;
+					return middleCssClass;
 				case TableCellVerticalAlignment.Bottom:
-					return EwfTable.CssElementCreator.CellAlignmentBottomCssClass;
+					return bottomCssClass;
 				case TableCellVerticalAlignment.BaseLine:
-					return EwfTable.CssElementCreator.CellAlignmentBaseLineCssClass;
+					return baseLineCssClass;
 				default:
 					return "";
 			}

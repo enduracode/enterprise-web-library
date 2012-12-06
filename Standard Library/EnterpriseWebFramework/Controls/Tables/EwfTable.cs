@@ -12,6 +12,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A table. Do not use this control in markup.
 	/// </summary>
 	public class EwfTable: WebControl, ControlTreeDataLoader {
+		private const string itemLimitPageStateKey = "itemLimit";
+
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
@@ -20,11 +22,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			internal const string StandardExceptLayoutStyleClass = "ewfTblSel";
 			internal const string StandardStyleClass = "ewfStandard";
 
-			// These are used by Standard Library CSS files for alignment rules.
-			internal const string CellAlignmentTopCssClass = "ewfTcTop";
-			internal const string CellAlignmentMiddleCssClass = "ewfTcMiddle";
-			internal const string CellAlignmentBottomCssClass = "ewfTcBottom";
-			internal const string CellAlignmentBaseLineCssClass = "ewfTcBaseLine";
+			// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWL CSS files.
+			internal const string AllCellAlignmentsClass = "ewfTc";
 
 			// NOTE: Rename ewfClickable to ewfAction and try to restrict its use to table rows since action controls have CSS elements that we can use for styling.
 			private const string actionClass = "ewfClickable"; // NOTE: Where will this be used besides here?
@@ -35,25 +34,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// Standard Library use only.
 			/// </summary>
 			public static readonly string[] Selectors = new[]
-			                                            	{
-			                                            		"table", "table." + StandardLayoutOnlyStyleClass, "table." + StandardExceptLayoutStyleClass,
-			                                            		"table." + StandardStyleClass
-			                                            	};
+				{ "table", "table." + StandardLayoutOnlyStyleClass, "table." + StandardExceptLayoutStyleClass, "table." + StandardStyleClass };
 
-			private static readonly string[] cellAlignmentClasses =
-				"".ToSingleElementArray().Concat( new[]
-				                                  	{
-				                                  		TextAlignmentStatics.LeftCssClass, TextAlignmentStatics.RightCssClass, TextAlignmentStatics.CenterCssClass,
-				                                  		TextAlignmentStatics.JustifyCssClass
-				                                  	} ).Concat( new[]
-				                                  	            	{
-				                                  	            		CellAlignmentTopCssClass, CellAlignmentMiddleCssClass,
-				                                  	            		CellAlignmentBottomCssClass, CellAlignmentBaseLineCssClass
-				                                  	            	} ).
-					ToArray();
-
-			internal static readonly string[] CellSelectors =
-				( from e in new[] { "th", "td" } from c in cellAlignmentClasses select StringTools.ConcatenateWithDelimiter( ".", e, c ) ).ToArray();
+			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass ).ToArray();
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				var elements =
@@ -63,9 +46,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							new CssElement( "TableStandardAndStandardLayoutOnlyStyles", "table." + StandardStyleClass, "table." + StandardLayoutOnlyStyleClass ),
 							new CssElement( "TableStandardAndStandardExceptLayoutStyles", "table." + StandardStyleClass, "table." + StandardExceptLayoutStyleClass ),
 							new CssElement( "TableStandardStyle", "table." + StandardStyleClass ), new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ),
-							new CssElement( "ThAndTd", CellSelectors ),
-							new CssElement( "Th", cellAlignmentClasses.Select( i => StringTools.ConcatenateWithDelimiter( ".", "th", i ) ).ToArray() ),
-							new CssElement( "Td", cellAlignmentClasses.Select( i => StringTools.ConcatenateWithDelimiter( ".", "td", i ) ).ToArray() )
+							new CssElement( "ThAndTd", CellSelectors ), new CssElement( "Th", "th." + AllCellAlignmentsClass ),
+							new CssElement( "Td", "td." + AllCellAlignmentsClass )
 						}.ToList();
 
 
@@ -112,20 +94,76 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private const string itemLimitPageStateKey = "itemLimit";
+		internal static void SetUpTableAndCaption( WebControl table, EwfTableStyle style, ReadOnlyCollection<string> classes, string caption, string subCaption ) {
+			table.CssClass = StringTools.ConcatenateWithDelimiter( " ", new[] { getTableStyleClass( style ) }.Concat( classes ).ToArray() );
 
-		private readonly bool hideIfEmpty;
-		private readonly EwfTableStyle style;
-		private readonly ReadOnlyCollection<string> classes;
-		private readonly string caption;
-		private readonly string subCaption;
-		private readonly bool allowExportToExcel;
-		private readonly ReadOnlyCollection<Tuple<string, Action>> tableActions;
-		private readonly EwfTableField[] specifiedFields;
-		private readonly List<EwfTableItem> headItems;
-		private readonly DataRowLimit defaultItemLimit;
-		private readonly bool disableEmptyFieldDetection;
-		private readonly List<EwfTableItemGroup> itemGroups;
+			// NOTE: Axe this when we cut support for IE7.
+			table.Attributes.Add( "cellspacing", "0" );
+
+			addCaptionIfNecessary( table, caption, subCaption );
+		}
+
+		private static string getTableStyleClass( EwfTableStyle style ) {
+			switch( style ) {
+				case EwfTableStyle.StandardLayoutOnly:
+					return CssElementCreator.StandardLayoutOnlyStyleClass;
+				case EwfTableStyle.StandardExceptLayout:
+					return CssElementCreator.StandardExceptLayoutStyleClass;
+				case EwfTableStyle.Standard:
+					return CssElementCreator.StandardStyleClass;
+				default:
+					return "";
+			}
+		}
+
+		private static void addCaptionIfNecessary( WebControl table, string caption, string subCaption ) {
+			if( caption.Length == 0 )
+				return;
+			var subCaptionControls = new List<Control>();
+			if( subCaption.Length > 0 )
+				subCaptionControls.AddRange( new Control[] { new LineBreak(), subCaption.GetLiteralControl() } );
+			table.Controls.Add(
+				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( new Control[] { caption.GetLiteralControl() }.Concat( subCaptionControls ) ) );
+		}
+
+		internal static EwfTableField[] GetFields( EwfTableField[] fields, ReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
+			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
+			if( firstSpecifiedItem == null )
+				return new EwfTableField[ 0 ];
+
+			if( fields != null )
+				return fields;
+
+			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
+			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.FieldSpan );
+			return Enumerable.Repeat( new EwfTableField(), fieldCount ).ToArray();
+		}
+
+		internal static double GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
+			if( fieldOrItemSetups.Any( f => f.Size.IsEmpty ) )
+				return 1;
+			return 100 / fieldOrItemSetups.Where( f => f.Size.Type == UnitType.Percentage ).Sum( f => f.Size.Value );
+		}
+
+		internal static WebControl GetColControl( EwfTableFieldOrItemSetup fieldOrItemSetup, double columnWidthFactor ) {
+			var width = fieldOrItemSetup.Size;
+			return new WebControl( HtmlTextWriterTag.Col )
+				{
+					Width = !width.IsEmpty && width.Type == UnitType.Percentage ? Unit.Percentage( width.Value * columnWidthFactor ) : width
+				};
+		}
+
+		internal static void AssertAtLeastOneCellPerField( EwfTableField[] fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
+			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
+			if( !cellPlaceholderListsForItems.Any() )
+				return;
+
+			// Enforce that there is at least one cell in each field by looking at array of all items.
+			for( var fieldIndex = 0; fieldIndex < fields.Length; fieldIndex += 1 ) {
+				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
+					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
+			}
+		}
 
 		/// <summary>
 		/// Creates a table with no item groups.
@@ -244,6 +282,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                     itemGroups );
 		}
 
+		private readonly bool hideIfEmpty;
+		private readonly EwfTableStyle style;
+		private readonly ReadOnlyCollection<string> classes;
+		private readonly string caption;
+		private readonly string subCaption;
+		private readonly bool allowExportToExcel;
+		private readonly ReadOnlyCollection<Tuple<string, Action>> tableActions;
+		private readonly EwfTableField[] specifiedFields;
+		private readonly List<EwfTableItem> headItems;
+		private readonly DataRowLimit defaultItemLimit;
+		private readonly bool disableEmptyFieldDetection;
+		private readonly List<EwfTableItemGroup> itemGroups;
+
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
 		private EwfTable( bool hideIfEmpty, EwfTableStyle style, IEnumerable<string> classes, string caption, string subCaption, bool allowExportToExcel,
 		                  IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields, IEnumerable<EwfTableItem> headItems,
@@ -347,8 +398,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Value.Count ) % 2 == 1;
 				Controls.Add(
 					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-						buildRows( groupHeadItems, Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(), null, true, null, null, allVisibleItems ).Concat(
-							buildRows( groupAndItems.Value, fields, useContrastForFirstRow, false, null, null, allVisibleItems ) ) ) );
+						buildRows( groupHeadItems, Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(), null, true, null, null, allVisibleItems )
+							.Concat( buildRows( groupAndItems.Value, fields, useContrastForFirstRow, false, null, null, allVisibleItems ) ) ) );
 			}
 
 			var itemCount = itemGroups.Sum( i => i.Items.Count );
@@ -379,67 +430,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 		}
 
-		internal static void SetUpTableAndCaption( WebControl table, EwfTableStyle style, ReadOnlyCollection<string> classes, string caption, string subCaption ) {
-			table.CssClass = StringTools.ConcatenateWithDelimiter( " ", new[] { getTableStyleClass( style ) }.Concat( classes ).ToArray() );
-
-			// NOTE: Axe this when we cut support for IE7.
-			table.Attributes.Add( "cellspacing", "0" );
-
-			addCaptionIfNecessary( table, caption, subCaption );
-		}
-
-		private static string getTableStyleClass( EwfTableStyle style ) {
-			switch( style ) {
-				case EwfTableStyle.StandardLayoutOnly:
-					return CssElementCreator.StandardLayoutOnlyStyleClass;
-				case EwfTableStyle.StandardExceptLayout:
-					return CssElementCreator.StandardExceptLayoutStyleClass;
-				case EwfTableStyle.Standard:
-					return CssElementCreator.StandardStyleClass;
-				default:
-					return "";
-			}
-		}
-
-		private static void addCaptionIfNecessary( WebControl table, string caption, string subCaption ) {
-			if( caption.Length == 0 )
-				return;
-			var subCaptionControls = new List<Control>();
-			if( subCaption.Length > 0 )
-				subCaptionControls.AddRange( new Control[] { new LineBreak(), subCaption.GetLiteralControl() } );
-			table.Controls.Add(
-				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( new Control[] { caption.GetLiteralControl() }.Concat( subCaptionControls ) ) );
-		}
-
-		internal static EwfTableField[] GetFields( EwfTableField[] fields, ReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
-			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
-			if( firstSpecifiedItem == null )
-				return new EwfTableField[ 0 ];
-
-			if( fields != null )
-				return fields;
-
-			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
-			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.FieldSpan );
-			return Enumerable.Repeat( new EwfTableField(), fieldCount ).ToArray();
-		}
-
 		private void addColumnSpecifications( EwfTableField[] fields ) {
 			var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
 			var factor = GetColumnWidthFactor( fieldOrItemSetups );
 			this.AddControlsReturnThis( fieldOrItemSetups.Select( f => GetColControl( f, factor ) ) );
-		}
-
-		internal static double GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
-			if( fieldOrItemSetups.Any( f => f.Size.IsEmpty ) )
-				return 1;
-			return 100 / fieldOrItemSetups.Where( f => f.Size.Type == UnitType.Percentage ).Sum( f => f.Size.Value );
-		}
-
-		internal static WebControl GetColControl( EwfTableFieldOrItemSetup fieldOrItemSetup, double columnWidthFactor ) {
-			var width = fieldOrItemSetup.Size;
-			return new WebControl( HtmlTextWriterTag.Col )
-			       	{ Width = !width.IsEmpty && width.Type == UnitType.Percentage ? Unit.Percentage( width.Value * columnWidthFactor ) : width };
 		}
 
 		// NOTE: This row also needs to include general actions, on the right. Don't forget about Export to Excel.
@@ -473,9 +467,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new EwfTableItem[ 0 ];
 		}
 
-		private static IEnumerable<Control> buildRows( List<EwfTableItem> items, EwfTableField[] fields, bool? useContrastForFirstRow, bool useHeadCells,
-		                                               Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter,
-		                                               List<EwfTableItem> allVisibleItems ) {
+		private IEnumerable<Control> buildRows( List<EwfTableItem> items, EwfTableField[] fields, bool? useContrastForFirstRow, bool useHeadCells,
+		                                        Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter,
+		                                        List<EwfTableItem> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
 			var cellPlaceholderListsForRows = TableOps.BuildCellPlaceholderListsForItems( items, fields.Length );
 
@@ -489,18 +483,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			allVisibleItems.AddRange( items );
 			return rows;
-		}
-
-		internal static void AssertAtLeastOneCellPerField( EwfTableField[] fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
-			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
-			if( !cellPlaceholderListsForItems.Any() )
-				return;
-
-			// Enforce that there is at least one cell in each field by looking at array of all items.
-			for( var fieldIndex = 0; fieldIndex < fields.Length; fieldIndex += 1 ) {
-				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
-					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
-			}
 		}
 
 		/// <summary>

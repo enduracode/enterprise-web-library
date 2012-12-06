@@ -84,12 +84,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				items = separateControls( items );
 			var cells = from i in items
 			            select
-			            	new TableCell { CssClass = TableCellVerticalAlignmentOps.Class( VerticalAlignment ).ConcatenateWithSpace( CssElementCreator.ItemCssClass ) }.
-			            	AddControlsReturnThis( i );
+				            new TableCell
+					            {
+						            CssClass =
+							            StringTools.ConcatenateWithDelimiter( " ",
+							                                                  EwfTable.CssElementCreator.AllCellAlignmentsClass,
+							                                                  TableCellVerticalAlignmentOps.Class( VerticalAlignment ),
+							                                                  CssElementCreator.ItemCssClass )
+					            }.AddControlsReturnThis( i );
 			row.Cells.AddRange( cells.ToArray() );
 		}
 
-		private static IEnumerable<Control> separateControls( IEnumerable<Control> controls ) {
+		private IEnumerable<Control> separateControls( IEnumerable<Control> controls ) {
 			if( !controls.Any() )
 				return controls;
 

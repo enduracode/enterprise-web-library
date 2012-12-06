@@ -31,21 +31,21 @@
 
 	internal static class TextAlignmentStatics {
 		// These are used by Standard Library CSS files for alignment rules.
-		internal const string LeftCssClass = "ewfTaL";
-		internal const string RightCssClass = "ewfTaR";
-		internal const string CenterCssClass = "ewfTaC";
-		internal const string JustifyCssClass = "ewfTaJ";
+		private const string leftCssClass = "ewfTaL";
+		private const string rightCssClass = "ewfTaR";
+		private const string centerCssClass = "ewfTaC";
+		private const string justifyCssClass = "ewfTaJ";
 
 		internal static string Class( TextAlignment textAlignment ) {
 			switch( textAlignment ) {
 				case TextAlignment.Left:
-					return LeftCssClass;
+					return leftCssClass;
 				case TextAlignment.Right:
-					return RightCssClass;
+					return rightCssClass;
 				case TextAlignment.Center:
-					return CenterCssClass;
+					return centerCssClass;
 				case TextAlignment.Justify:
-					return JustifyCssClass;
+					return justifyCssClass;
 				default:
 					return "";
 			}
