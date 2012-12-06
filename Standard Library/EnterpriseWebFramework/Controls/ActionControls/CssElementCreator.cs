@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
@@ -20,6 +21,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		internal const string ImageStyleClass = "ewfActionImage";
 		internal const string TextStyleClass = "ewfActionText";
 
+		internal const string NewContentClass = "ewfNewness";
+
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
@@ -37,50 +40,139 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass ),
 						getElementsForAllStates( "ActionControlLargeButtonStyle", "." + LargeButtonStyleClass ),
 						getElementsForAllStates( "ActionControlImageStyle", "." + ImageStyleClass ), getElementsForAllStates( "ActionControlTextStyle", "." + TextStyleClass )
-					}.
-					SelectMany( i => i ).ToArray();
+					}
+					.SelectMany( i => i ).ToArray();
 		}
 
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
 			// NOTE: Uncomment the things below when we no longer support IE7/IE8.
-			var actionless = styleSelectors.Select( i => "a" + i /*+ ":not([href]):not([" + JsWritingMethods.onclick + "])"*/ );
-			var normal =
-				styleSelectors.SelectMany(
-					i => getActionStateSelectors( i, "" /*+ ":not(:focus):not(:hover):not(:active)"*/, anchorOnlyStateSelector: "" /*+ ":not(:visited)"*/ ) );
-			var visited = styleSelectors.Select( i => "a" + i + ":visited" /*+ ":not(:focus):not(:hover):not(:active)"*/ );
-			var focus = styleSelectors.SelectMany( i => getActionStateSelectors( i, ":focus" /*+ ":not(:active)"*/ ) );
-			var focusNoHover = styleSelectors.SelectMany( i => getActionStateSelectors( i, ":focus" /*+ ":not(:hover):not(:active)"*/ ) );
-			var hover = styleSelectors.SelectMany( i => getActionStateSelectors( i, ":hover" /*+ ":not(:active)"*/ ) );
-			var active = styleSelectors.SelectMany( i => getActionStateSelectors( i, ":active" ) );
+			const string actionless = "" /*+ ":not([href]):not([" + JsWritingMethods.onclick + "])"*/;
+			var normal = Tuple.Create( "" /*+ ":not(:focus):not(:hover):not(:active)"*/, "" /*+ ":not(:visited)"*/ );
+			var visited = Tuple.Create( ":visited" /*+ ":not(:focus):not(:hover):not(:active)"*/, "" );
+			var focus = Tuple.Create( ":focus" /*+ ":not(:active)"*/, "" );
+			var focusNoHover = Tuple.Create( ":focus" /*+ ":not(:hover):not(:active)"*/, "" );
+			var hover = Tuple.Create( ":hover" /*+ ":not(:active)"*/, "" );
+			var active = Tuple.Create( ":active", "" );
 
-			yield return
-				new CssElement( baseName + "AllStates",
-				                actionless.Concat( normal ).Concat( visited ).Concat( focus ).Concat( focusNoHover ).Concat( hover ).Concat( active ).ToArray() );
-			yield return new CssElement( baseName + "ActionlessState", actionless.ToArray() );
-			yield return
-				new CssElement( baseName + "AllActionStates", normal.Concat( visited ).Concat( focus ).Concat( focusNoHover ).Concat( hover ).Concat( active ).ToArray() );
-			yield return new CssElement( baseName + "NormalState", normal.ToArray() );
-			yield return new CssElement( baseName + "VisitedState", visited.ToArray() );
+			yield return getStateElement( baseName, "AllStates", "", "", styleSelectors, null, actionless, normal, visited, focus, focusNoHover, hover, active );
+			yield return getStateElement( baseName, "ActionlessState", "", "", styleSelectors, null, actionless );
 
-			// focus with or without hover
-			yield return new CssElement( baseName + "StatesWithFocus", focus.Concat( focusNoHover ).Concat( active ).ToArray() );
-			yield return new CssElement( baseName + "StatesWithFocusAndWithoutActive", focus.Concat( focusNoHover ).ToArray() );
+			foreach( var newContent in new bool?[] { null, false, true } ) {
+				yield return
+					getStateElement( baseName,
+					                 "AllActionStates",
+					                 "AllNormalContentActionStates",
+					                 "AllNewContentActionStates",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 normal,
+					                 visited,
+					                 focus,
+					                 focusNoHover,
+					                 hover,
+					                 active );
+				yield return getStateElement( baseName, "AllNormalStates", "NormalContentNormalState", "NewContentNormalState", styleSelectors, newContent, null, normal );
+				yield return
+					getStateElement( baseName, "AllVisitedStates", "NormalContentVisitedState", "NewContentVisitedState", styleSelectors, newContent, null, visited );
 
-			// Focus without hover. Hover should trump focus according to http://meyerweb.com/eric/thoughts/2007/06/04/ordering-the-link-states/.
-			yield return new CssElement( baseName + "StatesWithFocusAndWithoutHover", focusNoHover.Concat( active ).ToArray() );
-			yield return new CssElement( baseName + "FocusNoHoverState", focusNoHover.ToArray() );
+				// focus with or without hover
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithFocus",
+					                 "StatesWithNormalContentAndWithFocus",
+					                 "StatesWithNewContentAndWithFocus",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 focus,
+					                 focusNoHover,
+					                 active );
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithFocusAndWithoutActive",
+					                 "StatesWithNormalContentAndWithFocusAndWithoutActive",
+					                 "StatesWithNewContentAndWithFocusAndWithoutActive",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 focus,
+					                 focusNoHover );
 
-			// hover with or without focus
-			yield return new CssElement( baseName + "StatesWithHover", hover.Concat( active ).ToArray() );
-			yield return new CssElement( baseName + "StatesWithHoverAndWithoutActive", hover.ToArray() );
+				// Focus without hover. Hover should trump focus according to http://meyerweb.com/eric/thoughts/2007/06/04/ordering-the-link-states/.
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithFocusAndWithoutHover",
+					                 "StatesWithNormalContentAndWithFocusAndWithoutHover",
+					                 "StatesWithNewContentAndWithFocusAndWithoutHover",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 focusNoHover,
+					                 active );
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithFocusAndWithoutHoverAndWithoutActive",
+					                 "NormalContentFocusNoHoverState",
+					                 "NewContentFocusNoHoverState",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 focusNoHover );
 
-			yield return new CssElement( baseName + "ActiveState", active.ToArray() );
+				// hover with or without focus
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithHover",
+					                 "StatesWithNormalContentAndWithHover",
+					                 "StatesWithNewContentAndWithHover",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 hover,
+					                 active );
+				yield return
+					getStateElement( baseName,
+					                 "StatesWithHoverAndWithoutActive",
+					                 "StatesWithNormalContentAndWithHoverAndWithoutActive",
+					                 "StatesWithNewContentAndWithHoverAndWithoutActive",
+					                 styleSelectors,
+					                 newContent,
+					                 null,
+					                 hover );
+
+				yield return getStateElement( baseName, "AllActiveStates", "NormalContentActiveState", "NewContentActiveState", styleSelectors, newContent, null, active );
+			}
 		}
 
-		private static IEnumerable<string> getActionStateSelectors( string styleSelector, string stateSelector, string anchorOnlyStateSelector = "" ) {
-			yield return "a" + styleSelector + "[href]" + anchorOnlyStateSelector + stateSelector;
-			yield return "a" + styleSelector + "[" + JsWritingMethods.onclick + "]" + anchorOnlyStateSelector + stateSelector;
-			yield return "button" + styleSelector + stateSelector;
+		private static CssElement getStateElement( string baseName, string allContentName, string normalContentName, string newContentName,
+		                                           IEnumerable<string> styleSelectors, bool? newContent, string actionlessSelector,
+		                                           params Tuple<string, string>[] actionStateSelectors ) {
+			const string newContentSelector = "." + NewContentClass;
+
+			// NOTE: Uncomment this when we no longer support IE7/IE8.
+			const string normalContentSelector = "" /*+ ":not(" + newContentSelector + ")"*/;
+
+			var contentSelectors = newContent.HasValue
+				                       ? newContent.Value ? newContentSelector.ToSingleElementArray() : normalContentSelector.ToSingleElementArray()
+				                       : new[] { normalContentSelector, newContentSelector };
+			var selectors = from styleSelector in styleSelectors
+			                from contentSelector in
+				                ( actionlessSelector != null ? ( null as string ).ToSingleElementArray() : new string[ 0 ] ).Concat( contentSelectors )
+			                from stateSelector in contentSelector == null ? Tuple.Create( actionlessSelector, "" ).ToSingleElementArray() : actionStateSelectors
+			                from selectorGetter in
+				                contentSelector == null || stateSelector.Item1.StartsWith( ":visited" )
+					                ? new Func<string, string, string, string, string>[]
+						                { ( style, content, anchorOnlyState, state ) => "a" + style + ( content ?? "" ) + state }
+					                : new Func<string, string, string, string, string>[]
+						                {
+							                ( style, content, anchorOnlyState, state ) => "a" + style + "[href]" + content + anchorOnlyState + state,
+							                ( style, content, anchorOnlyState, state ) => "a" + style + "[" + JsWritingMethods.onclick + "]" + content + anchorOnlyState + state,
+							                ( style, content, anchorOnlyState, state ) => "button" + style + content + state
+						                }
+			                select selectorGetter( styleSelector, contentSelector, stateSelector.Item2, stateSelector.Item1 );
+
+			return new CssElement( baseName + ( newContent.HasValue ? newContent.Value ? newContentName : normalContentName : allContentName ), selectors.ToArray() );
 		}
 	}
 }
