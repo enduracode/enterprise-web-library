@@ -286,8 +286,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				rowColumnSpanPair.RowSpan--;
 
 			previousRowColumnSpans =
-				( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 ).Concat(
-					cells.Where( c => c.ItemSpan != 1 ).Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.ItemSpan - 1, ColumnSpan = rowSpanCell.FieldSpan } ) ) )
+				( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 )
+				                        .Concat(
+					                        cells.Where( c => c.ItemSpan != 1 )
+					                             .Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.ItemSpan - 1, ColumnSpan = rowSpanCell.FieldSpan } ) ) )
 					.ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
@@ -365,7 +367,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( selectedRowActionButtonsToMethods.Count > 0 ) {
 				foreach( var rowSetup in rowSetups ) {
-					var cell = new TableCell { Width = Unit.Percentage( 5 ), CssClass = "ewfNotClickable" };
+					var cell = new TableCell
+						{
+							Width = Unit.Percentage( 5 ),
+							CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+						};
 					if( rowSetup.UniqueIdentifier != null )
 						cell.Controls.Add( new EwfCheckBox() );
 					rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
@@ -399,7 +405,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				}
 
 				// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
-				var cell = new TableCell { Width = Unit.Percentage( 10 ), CssClass = "ewfNotClickable" };
+				var cell = new TableCell
+					{
+						Width = Unit.Percentage( 10 ),
+						CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+					};
 				cell.Controls.Add( controlLine );
 				rowSetup.UnderlyingTableRow.Cells.Add( cell );
 			}
@@ -432,7 +442,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                           false );
 		}
 
-		private static string getDataRowLimitText( DataRowLimit dataRowLimit ) {
+		private string getDataRowLimitText( DataRowLimit dataRowLimit ) {
 			return dataRowLimit == DataRowLimit.Unlimited ? "All" : ( (int)dataRowLimit ).ToString();
 		}
 

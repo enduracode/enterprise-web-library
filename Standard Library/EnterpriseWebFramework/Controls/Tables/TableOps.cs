@@ -37,7 +37,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			underlyingCell.Controls.Add( ewfCell.Control );
 			if( colSpan == 1 )
 				underlyingCell.Width = columnSetup.Width;
-			underlyingCell.CssClass = columnSetup.CssClassOnAllCells.ConcatenateWithSpace( ewfCell.CssClass );
+			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter( " ",
+			                                                                EwfTable.CssElementCreator.AllCellAlignmentsClass,
+			                                                                columnSetup.CssClassOnAllCells,
+			                                                                ewfCell.CssClass );
 			if( ewfCell.ClickScript != null )
 				ewfCell.ClickScript.SetUpClickableControl( underlyingCell );
 
