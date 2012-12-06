@@ -7,6 +7,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// Represents a button that appears in the EWF user interface that performs an action or simply navigates to a URL when clicked.
 	/// </summary>
 	public class ActionButtonSetup {
+		/// <summary>
+		/// NOTE: This method will be deleted. Do not use.
+		/// </summary>
+		public static ActionButtonSetup CreateWithUrl( string text, PageInfo pageInfo ) {
+			return new ActionButtonSetup( text, new EwfLink( pageInfo ) );
+		}
+
 		private readonly ActionControl actionControl;
 		private readonly string text;
 
