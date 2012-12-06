@@ -28,22 +28,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public static readonly string[] Selectors = getElementsForAllStates( "", "." + AllStylesClass ).Single( i => i.Name == "AllStates" ).Selectors.ToArray();
 
-		CssElement[] ControlCssElementCreator.CreateCssElements() {
-			return
-				new[]
-					{
-						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass ), getElementsForAllStates( "ActionControlBoxStyle", "." + BoxStyleClass ),
-						new CssElement( "ActionControlBoxStyleSideAndBackgroundImageBox", "span." + BoxStyleSideAndBackgroundImageBoxClass ).ToSingleElementArray(),
-						new CssElement( "ActionControlBoxStyleText", "span." + BoxStyleTextClass ).ToSingleElementArray(),
-						getElementsForAllStates( "ActionControlAllButtonStyles", "." + ShrinkWrapButtonStyleClass, "." + NormalButtonStyleClass, "." + LargeButtonStyleClass ),
-						getElementsForAllStates( "ActionControlShrinkWrapButtonStyle", "." + ShrinkWrapButtonStyleClass ),
-						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass ),
-						getElementsForAllStates( "ActionControlLargeButtonStyle", "." + LargeButtonStyleClass ),
-						getElementsForAllStates( "ActionControlImageStyle", "." + ImageStyleClass ), getElementsForAllStates( "ActionControlTextStyle", "." + TextStyleClass )
-					}
-					.SelectMany( i => i ).ToArray();
-		}
-
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
 			// NOTE: Uncomment the things below when we no longer support IE7/IE8.
 			const string actionless = "" /*+ ":not([href]):not([" + JsWritingMethods.onclick + "])"*/;
@@ -173,6 +157,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                select selectorGetter( styleSelector, contentSelector, stateSelector.Item2, stateSelector.Item1 );
 
 			return new CssElement( baseName + ( newContent.HasValue ? newContent.Value ? newContentName : normalContentName : allContentName ), selectors.ToArray() );
+		}
+
+		CssElement[] ControlCssElementCreator.CreateCssElements() {
+			return
+				new[]
+					{
+						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass ), getElementsForAllStates( "ActionControlBoxStyle", "." + BoxStyleClass ),
+						new CssElement( "ActionControlBoxStyleSideAndBackgroundImageBox", "span." + BoxStyleSideAndBackgroundImageBoxClass ).ToSingleElementArray(),
+						new CssElement( "ActionControlBoxStyleText", "span." + BoxStyleTextClass ).ToSingleElementArray(),
+						getElementsForAllStates( "ActionControlAllButtonStyles", "." + ShrinkWrapButtonStyleClass, "." + NormalButtonStyleClass, "." + LargeButtonStyleClass ),
+						getElementsForAllStates( "ActionControlShrinkWrapButtonStyle", "." + ShrinkWrapButtonStyleClass ),
+						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass ),
+						getElementsForAllStates( "ActionControlLargeButtonStyle", "." + LargeButtonStyleClass ),
+						getElementsForAllStates( "ActionControlImageStyle", "." + ImageStyleClass ), getElementsForAllStates( "ActionControlTextStyle", "." + TextStyleClass )
+					}
+					.SelectMany( i => i ).ToArray();
 		}
 	}
 }
