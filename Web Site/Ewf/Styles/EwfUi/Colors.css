@@ -27,13 +27,13 @@ ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > e
 }
 
 /* text style action controls */
-ewfActionControlTextStyleNormalState, ewfActionControlTextStyleVisitedState, ewfHtmlBlock a {
+ewfActionControlTextStyleAllNormalStates, ewfActionControlTextStyleAllVisitedStates, ewfHtmlBlock a {
 	color: #7C13B8;
 }
 ewfActionControlTextStyleStatesWithHoverAndWithoutActive {
 	color: #A75DD1;
 }
-ewfActionControlTextStyleActiveState {
+ewfActionControlTextStyleAllActiveStates {
 	color: #7C13B8;
 }
 
