@@ -386,9 +386,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 				tab.CssClass = page.IsIdenticalToCurrent()
 					               ? CssElementCreator.CurrentTabCssClass
-					               : page.AlternativeMode is DisabledPageMode
-						                 ? CssElementCreator.DisabledTabCssClass
-						                 : page.AlternativeMode is NewContentPageMode ? "ewfNewness" : "";
+					               : page.AlternativeMode is DisabledPageMode ? CssElementCreator.DisabledTabCssClass : "";
 				tabs.Add( tab );
 			}
 			return tabs;

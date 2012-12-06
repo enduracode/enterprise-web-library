@@ -63,12 +63,12 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 	background-color: #b3ffb2;
 }
 
-/* newness */
-ewfActionControlAllStylesAllStates.ewfNewness {
+/* new content */
+ewfUiGlobalNavBlock ewfActionControlAllStylesAllNewContentActionStates, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllNewContentActionStates, ewfUiSideTabCell > ewfActionControlAllStylesAllNewContentActionStates {
 	background-color: #ff5500;
 }
-ewfActionControlAllStylesStatesWithHover.ewfNewness {
-	background-image: url('../Backgrounds/Lighter.svg');
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates {
+	color: white;
 }
 .ewfNewness {
 	color: #ff5500;
@@ -80,11 +80,8 @@ ewfBoxBothStates > ewfBoxExpandLabel, ewfBoxBothStates > ewfBoxCloseLabel {
 }
 
 /* entity nav and action block */
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalContentActionStates {
 	color: #336699;
-}
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates.ewfNewness {
-	color: white;
 }
 
 /* shadows */

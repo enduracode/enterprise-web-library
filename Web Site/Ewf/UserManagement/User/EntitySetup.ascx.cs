@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Web.UI;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -43,13 +44,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		public List<ActionButtonSetup> CreateActionButtonSetups() {
 			var actionButtonSetups = new List<ActionButtonSetup>();
 			if( info.User != null ) {
-				actionButtonSetups.Add( ActionButtonSetup.CreateWithAction( "Delete user",
-				                                                            delegate {
-				                                                            	EwfPage.Instance.EhModifyDataAndRedirect( delegate( DBConnection cn ) {
-				                                                            		UserManagementStatics.SystemProvider.DeleteUser( cn, info.User.UserId );
-				                                                            		return UserManager.Users.GetInfo().GetUrl();
-				                                                            	} );
-				                                                            } ) );
+				actionButtonSetups.Add( new ActionButtonSetup( "Delete user",
+				                                               new PostBackButton( new DataModification(),
+				                                                                   () => EwfPage.Instance.EhModifyDataAndRedirect( cn => {
+					                                                                   UserManagementStatics.SystemProvider.DeleteUser( cn, info.User.UserId );
+					                                                                   return UserManager.Users.GetInfo().GetUrl();
+				                                                                   } ) ) ) );
 			}
 			return actionButtonSetups;
 		}

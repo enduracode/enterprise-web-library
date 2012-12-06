@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		internal const string ImageStyleClass = "ewfActionImage";
 		internal const string TextStyleClass = "ewfActionText";
 
-		internal const string NewContentClass = "ewfNewness";
+		internal const string NewContentClass = "ewfNc";
 
 		/// <summary>
 		/// Standard Library use only.

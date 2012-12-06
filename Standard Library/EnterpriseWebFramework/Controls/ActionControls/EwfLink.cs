@@ -10,30 +10,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>
 	public class EwfLink: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
-		private PageInfo navigatePageInfo;
-		private string text = "";
-
-		/// <summary>
-		/// Gets or sets the display style of this button. Do not set this to null.
-		/// Choices are: TextActionControlStyle (default), ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.
-		/// </summary>
-		public ActionControlStyle ActionControlStyle { get; set; }
-
-		private bool navigatesInNewWindow;
-		private PopUpWindowSettings popUpWindowSettings;
-		private bool navigatesInOpeningWindow;
-
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
-
-		/// <summary>
-		/// NOTE: Only exists to support pages that have not yet converted to the immutable static method constructors.
-		/// </summary>
-		public EwfLink( PageInfo navigatePageInfo ) {
-			NavigatePageInfo = navigatePageInfo;
-			ActionControlStyle = new TextActionControlStyle( "" );
-		}
-
 		/// <summary>
 		/// Creates a link.
 		/// </summary>
@@ -56,7 +32,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public static EwfLink CreateForNavigationInNewWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null,
 		                                                      Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo )
-			       	{ ActionControlStyle = actionControlStyle, NavigatesInNewWindow = true, ToolTip = toolTipText, ToolTipControl = toolTipControl };
+				{
+					ActionControlStyle = actionControlStyle,
+					NavigatesInNewWindow = true,
+					ToolTip = toolTipText,
+					ToolTipControl = toolTipControl
+				};
 		}
 
 		/// <summary>
@@ -84,7 +65,36 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public static EwfLink CreateForNavigationInOpeningWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null,
 		                                                          Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo )
-			       	{ ActionControlStyle = actionControlStyle, NavigatesInOpeningWindow = true, ToolTip = toolTipText, ToolTipControl = toolTipControl };
+				{
+					ActionControlStyle = actionControlStyle,
+					NavigatesInOpeningWindow = true,
+					ToolTip = toolTipText,
+					ToolTipControl = toolTipControl
+				};
+		}
+
+		private PageInfo navigatePageInfo;
+		private string text = "";
+
+		private bool navigatesInNewWindow;
+		private PopUpWindowSettings popUpWindowSettings;
+		private bool navigatesInOpeningWindow;
+
+		private Unit width = Unit.Empty;
+		private Unit height = Unit.Empty;
+
+		/// <summary>
+		/// Gets or sets the display style of this button. Do not set this to null.
+		/// Choices are: TextActionControlStyle (default), ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.
+		/// </summary>
+		public ActionControlStyle ActionControlStyle { get; set; }
+
+		/// <summary>
+		/// NOTE: Only exists to support pages that have not yet converted to the immutable static method constructors.
+		/// </summary>
+		public EwfLink( PageInfo navigatePageInfo ) {
+			NavigatePageInfo = navigatePageInfo;
+			ActionControlStyle = new TextActionControlStyle( "" );
 		}
 
 		// NOTE: All action control Text properties should be axed since they're incompatible with some action control styles. Use properties on the styles instead.
@@ -186,6 +196,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			if( navigatePageInfo != null && navigatePageInfo.AlternativeMode is NewContentPageMode )
+				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
 			ActionControlStyle.SetUpControl( this, text.Any() ? text : url, width, height, setWidth );
 
 			if( navigatePageInfo != null && navigatePageInfo.AlternativeMode is DisabledPageMode ) {
