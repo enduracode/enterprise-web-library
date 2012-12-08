@@ -16,6 +16,26 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 	public class SqlServer: Database {
 		private static readonly string sqlServerFilesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "SQL Server Databases" );
 
+		/// <summary>
+		/// Returns the list of file names in the given folder, ordered with the newest log file first (according to ID).
+		/// The predicate uses the database ID to determine if the file should be included in the results.
+		/// </summary>
+		public static IEnumerable<string> GetLogFilesOrderedByNewest( string folderPath, string includeOnlyFilesNewerThanThisLogFileName = "" ) {
+			int? onlyGetFilesNewerThanThisId = null;
+			if( includeOnlyFilesNewerThanThisLogFileName.Length > 0 )
+				onlyGetFilesNewerThanThisId = getLogIdFromFileName( includeOnlyFilesNewerThanThisLogFileName );
+
+			return from fileName in IoMethods.GetFileNamesInFolder( folderPath )
+			       let logId = getLogIdFromFileName( fileName )
+			       where onlyGetFilesNewerThanThisId == null || logId > onlyGetFilesNewerThanThisId
+			       orderby logId descending
+			       select fileName;
+		}
+
+		private static int getLogIdFromFileName( string logFileName ) {
+			return int.Parse( logFileName.Separate().First() );
+		}
+
 		private readonly SqlServerInfo info;
 		private readonly string dataLogicalFileName;
 		private readonly string logLogicalFileName;
@@ -181,26 +201,6 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			} );
 		}
 
-		/// <summary>
-		/// Returns the list of file names in the given folder, ordered with the newest log file first (according to ID).
-		/// The predicate uses the database ID to determine if the file should be included in the results.
-		/// </summary>
-		public static IEnumerable<string> GetLogFilesOrderedByNewest( string folderPath, string includeOnlyFilesNewerThanThisLogFileName = "" ) {
-			int? onlyGetFilesNewerThanThisId = null;
-			if( includeOnlyFilesNewerThanThisLogFileName.Length > 0 )
-				onlyGetFilesNewerThanThisId = getLogIdFromFileName( includeOnlyFilesNewerThanThisLogFileName );
-
-			return from fileName in IoMethods.GetFileNamesInFolder( folderPath )
-			       let logId = getLogIdFromFileName( fileName )
-			       where onlyGetFilesNewerThanThisId == null || logId > onlyGetFilesNewerThanThisId
-			       orderby logId descending
-			       select fileName;
-		}
-
-		private static int getLogIdFromFileName( string logFileName ) {
-			return int.Parse( logFileName.Separate().First() );
-		}
-
 		private string getStandbyFilePath() {
 			return StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + "Standby.ldf" );
 		}
@@ -271,7 +271,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( 0 )" ) );
 		}
 
-		private static void executeLongRunningCommand( DBConnection cn, string commandText ) {
+		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
 			var command = cn.DatabaseInfo.CreateCommand();
 			command.CommandTimeout = 0; // This means the command can take as much time as it needs.
 			command.CommandText = commandText;
@@ -288,12 +288,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 CREATE DATABASE [DatabaseName] ON (
 NAME = Data,
-    FILENAME = 'C:\...\SQL Server Data\[SystemName]Data.mdf',
+    FILENAME = 'C:\Red Stapler\SQL Server Databases\[SystemName]Data.mdf',
     SIZE = 100MB,
     FILEGROWTH = 15% )
 LOG ON
 ( NAME = Log,
-    FILENAME = 'C:\...\SQL Server Data\[SystemName].ldf',
+    FILENAME = 'C:\Red Stapler\SQL Server Databases\[SystemName].ldf',
     SIZE = 10MB,
     MAXSIZE = 1000MB,
     FILEGROWTH = 100MB );
@@ -352,7 +352,7 @@ CREATE TABLE MainSequence(
 				method );
 		}
 
-		private static void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, DbMethod method ) {
+		private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, DbMethod method ) {
 			executeMethodWithDbExceptionHandling(
 				() =>
 				DataAccessMethods.ExecuteDbMethod(
@@ -360,7 +360,7 @@ CREATE TABLE MainSequence(
 					method ) );
 		}
 
-		private static void executeMethodWithDbExceptionHandling( Action method ) {
+		private void executeMethodWithDbExceptionHandling( Action method ) {
 			try {
 				method();
 			}
