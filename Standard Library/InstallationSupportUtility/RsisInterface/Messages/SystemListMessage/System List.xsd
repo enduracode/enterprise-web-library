@@ -75,11 +75,6 @@
 			<element name="DataPackageSize" type="long" nillable="true" />
 			<element name="LatestBuildIdForInstallation" type="int" nillable="true" />
 			<element name="InstallationTypeElements" type="rs:InstallationTypeElements" />
-
-			<!-- These elements are necessary to keep old versions of Program Runner working. Delete them when these versions are no longer supported. -->
-			<element name="DataPackageUrl" type="string" minOccurs="0" />
-			<element name="UpdateDataInstallationId" type="int" minOccurs="0" />
-			<element name="IsUpdateDataSourceForDev" type="boolean" minOccurs="0" />
 		</sequence>
 	</complexType>
 	<complexType name="InstallationTypeElements" />
