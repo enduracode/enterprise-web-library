@@ -117,7 +117,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeColumnProperty( TextWriter writer, Column column, DatabaseInfo databaseInfo ) {
 			var isOracleClob = ColumnIsOracleClob( column, databaseInfo );
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This object will " + ( column.AllowsNull && !isOracleClob ? "sometimes" : "never" ) + " be null." );
-			writer.WriteLine( "public " + column.DataTypeName + " " + column.Name + " { get { return " + getMemberVariableName( column.Name ) +
+			writer.WriteLine( "public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + " { get { return " + getMemberVariableName( column.Name ) +
 			                  ( isOracleClob ? " ?? \"\"" : "" ) + "; } }" );
 		}
 
@@ -133,7 +133,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getMemberVariableName( string columnName ) {
-			return "_" + getCamelCaseName( columnName );
+			return StandardLibraryMethods.GetCSharpIdentifierSimple( "__" + getCamelCaseName( columnName ) );
 		}
 
 		// NOTE: Move this to Standard Library.
