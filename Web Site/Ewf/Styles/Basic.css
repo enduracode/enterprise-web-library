@@ -37,9 +37,13 @@ th.ewfTcBaseLine, td.ewfTcBaseLine {
 	overflow: hidden;
 }
 
-/* Images. Remove default borders around images when they are inside anchor tags. */
+/* images */
 img {
-	border-width: 0;
+	border-width: 0; /* Remove default borders around images when they are inside anchor tags. */
+}
+img.ewfAutoSizer {
+	display: block;
+	width: 100%;
 }
 
 /* check boxes */

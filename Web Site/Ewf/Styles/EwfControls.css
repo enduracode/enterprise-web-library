@@ -2,11 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-img.ewfAutoSizer {
-	display: block;
-	width: 100%;
-}
-
 /* If we change the border or padding below, we also need to change the Width property on EwfTextBox. */
 div.textBoxWrapper {
 	border-color: #8E8E8E #B8B8B8 #B8B8B8 #8E8E8E;
