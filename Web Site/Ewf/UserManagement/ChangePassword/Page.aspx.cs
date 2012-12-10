@@ -24,7 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			fib.AddFormItems( FormItem.Create( "New password", newPassword ) );
 			newPasswordConfirm = new EwfTextBox( "" ) { MasksCharacters = true };
 			fib.AddFormItems( FormItem.Create( "Re-type new password", newPasswordConfirm ) );
-			dm.AddValidationMethod( validator => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
+			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password",

@@ -27,11 +27,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
 				new EwfTableItem( new EwfTableCell( "You may log in to this system if you have registered your email address with " + provider.AdministratingCompanyName )
-				                  	{ FieldSpan = 2 } ) );
+					{
+						FieldSpan = 2
+					} ) );
 			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(), ( emailAddress = new EwfTextBox( "" ) ).ToCell() ) );
 			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(), ( password = new EwfTextBox( "" ) { MasksCharacters = true } ).ToCell() ) );
-			dm.AddValidationMethod(
-				validator => validatedEmailAddress = UserManagementStatics.ValidateAndGetEmailAddress( validator, emailAddress, "Please enter a valid email address." ) );
+			dm.AddTopValidationMethod(
+				( pbv, validator ) =>
+				validatedEmailAddress = UserManagementStatics.ValidateAndGetEmailAddress( validator, emailAddress, "Please enter a valid email address." ) );
 			registeredTable.AddItem(
 				new EwfTableItem(
 					new EwfTableCell(
@@ -56,8 +59,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			                                                           new PostBackButton( dm,
 			                                                                               () =>
 			                                                                               EhRedirect( user.MustChangePassword
-			                                                                                           	? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo
-			                                                                                           	: new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
+				                                                                                           ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo
+				                                                                                           : new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
 
 			UserManagementStatics.SetUpClientSideLogicForLogInPostBack();
 

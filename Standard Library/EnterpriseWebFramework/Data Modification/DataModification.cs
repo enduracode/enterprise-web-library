@@ -17,9 +17,9 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Creates a data modification.
 		/// </summary>
-		public DataModification( Action<Validator> firstValidationMethod = null, DbMethod firstModificationMethod = null ) {
-			if( firstValidationMethod != null )
-				AddValidationMethod( firstValidationMethod );
+		public DataModification( Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, DbMethod firstModificationMethod = null ) {
+			if( firstTopValidationMethod != null )
+				AddTopValidationMethod( firstTopValidationMethod );
 			if( firstModificationMethod != null )
 				AddModificationMethod( firstModificationMethod );
 		}
@@ -38,9 +38,8 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Adds a validation method whose errors are displayed at the top of the window.
 		/// </summary>
-		// NOTE: Rename to AddTopValidationMethod. Also pass PostBackValues to validationMethod.
-		public void AddValidationMethod( Action<Validator> validationMethod ) {
-			var validation = new EnterpriseWebFramework.Validation( ( pbv, validator ) => validationMethod( validator ), this );
+		public void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod ) {
+			var validation = new EnterpriseWebFramework.Validation( validationMethod, this );
 			topValidations.Add( validation );
 		}
 
