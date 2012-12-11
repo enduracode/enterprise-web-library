@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -21,6 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                                     byte numberOfColumns = 1,
 		                                                                                     IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
+		                                                                                     Func<bool> validationPredicate = null,
 		                                                                                     ValidationList validationList = null ) {
 			var checkBoxList = Create( items,
 			                           selectedItemIds,
@@ -33,9 +35,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                        checkBoxList,
 			                        cellSpan: cellSpan,
 			                        textAlignment: textAlignment,
-			                        validationGetter:
-			                        	control =>
-			                        	new Validation( ( pbv, validator ) => control.Validate( pbv ), validationList ?? EwfPage.Instance.PostBackDataModification ) );
+			                        validationGetter: control => new Validation( ( pbv, validator ) => {
+				                        if( validationPredicate != null && !validationPredicate() )
+					                        return;
+				                        control.Validate( pbv );
+			                        },
+			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
 		}
 
 		/// <summary>
@@ -47,6 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
 		                                                                                     int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
+		                                                                                     Func<bool> validationPredicate = null,
 		                                                                                     ValidationList validationList = null ) {
 			var checkBoxList = Create( items, caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns );
 			modificationMethod = checkBoxList.ModifyData;
@@ -54,9 +60,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                        checkBoxList,
 			                        cellSpan: cellSpan,
 			                        textAlignment: textAlignment,
-			                        validationGetter:
-			                        	control =>
-			                        	new Validation( ( pbv, validator ) => control.Validate( pbv ), validationList ?? EwfPage.Instance.PostBackDataModification ) );
+			                        validationGetter: control => new Validation( ( pbv, validator ) => {
+				                        if( validationPredicate != null && !validationPredicate() )
+					                        return;
+				                        control.Validate( pbv );
+			                        },
+			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
 		}
 
 		/// <summary>
@@ -141,6 +150,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Executes the change handlers of the items that were selected or deselected on this post back.
 		/// </summary>
 		public void ModifyData( DBConnection cn ) {
+			if( selectedItemIdsInPostBack == null )
+				return;
 			var changedItemIds = selectedItemIdsInPostBack.Except( selectedItemIds ).Union( selectedItemIds.Except( selectedItemIdsInPostBack ) ).ToArray();
 			foreach( var i in items.Where( i => changedItemIds.Contains( i.Item.Id ) ) )
 				i.ChangeHandler( cn, selectedItemIdsInPostBack.Contains( i.Item.Id ) );
