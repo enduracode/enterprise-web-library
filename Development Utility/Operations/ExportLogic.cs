@@ -13,6 +13,122 @@ using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messag
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
 		private static readonly Operation instance = new ExportLogic();
+
+		internal static byte[] CreateEwlNuGetPackage( DevelopmentInstallation installation, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
+			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
+
+			IoMethods.ExecuteWithTempFolder( folderPath => {
+				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+				                                                               "Standard Library",
+				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
+				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
+				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
+					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
+
+				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+				                    StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
+
+				var webSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
+				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
+				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.EwfFolderName ),
+				                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
+				                      false );
+				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
+				                    StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
+
+				const string duProjectAndFolderName = "Development Utility";
+				IoMethods.CopyFolder(
+					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+					                                     duProjectAndFolderName,
+					                                     StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) ),
+					StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
+					false );
+				packageGeneralFiles( installation, folderPath, false );
+				IoMethods.CopyFolder(
+					StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+					                                     InstallationConfiguration.InstallationConfigurationFolderName,
+					                                     InstallationConfiguration.InstallationsFolderName,
+					                                     ( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
+					StandardLibraryMethods.CombinePaths( folderPath,
+					                                     InstallationConfiguration.ConfigurationFolderName,
+					                                     InstallationConfiguration.InstallationConfigurationFolderName ),
+					false );
+
+				var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
+				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+					writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
+
+				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
+				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+				                                                            "",
+				                                                            true ) );
+			} );
+
+			return
+				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( outputFolderPath,
+				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+					                                                        installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
+					                                                        installation.CurrentMajorVersion,
+					                                                        !prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+					                                                        localExportDateAndTime: localExportDateAndTime ) ) );
+		}
+
+		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
+			// configuration files
+			var configurationFolderPath = StandardLibraryMethods.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
+			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
+			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, StandardLibraryMethods.ProvidersFolderAndNamespaceName ) );
+			if( !includeDatabaseUpdates )
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
+			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
+			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
+
+			// other files
+			var filesFolderInInstallationPath =
+				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+				                                     InstallationFileStatics.FilesFolderName );
+			if( Directory.Exists( filesFolderInInstallationPath ) )
+				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
+		}
+
+		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime, TextWriter writer ) {
+			writer.WriteLine( "<?xml version=\"1.0\"?>" );
+			writer.WriteLine( "<package>" );
+			writer.WriteLine( "<metadata>" );
+			writer.WriteLine( "<id>" +
+			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) +
+			                  "</id>" );
+			writer.WriteLine( "<version>" +
+			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.CurrentMajorVersion,
+			                                                                                    !prerelease.HasValue || prerelease.Value
+				                                                                                    ? installation.NextBuildNumber as int?
+				                                                                                    : null,
+			                                                                                    localExportDateAndTime: localExportDateAndTime ) + "</version>" );
+			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
+			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
+			writer.WriteLine(
+				"<description>The Enterprise Web Library (EWL) is an extremely opinionated library for web applications that trades off performance, scalability, and development flexibility for an ease of maintenance you won't find anywhere else.</description>" );
+			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
+			writer.WriteLine( "<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>" );
+			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
+			writer.WriteLine( "<dependencies>" );
+
+			var lines = from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\packages.config" ) )
+			            let trimmedLine = line.Trim()
+			            where trimmedLine.StartsWith( "<package " )
+			            select trimmedLine;
+			foreach( var line in lines )
+				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net40\"", "" ) );
+
+			writer.WriteLine( "</dependencies>" );
+			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server Oracle</tags>" );
+			writer.WriteLine( "</metadata>" );
+			writer.WriteLine( "</package>" );
+		}
+
 		public static Operation Instance { get { return instance; } }
 		private ExportLogic() {}
 
@@ -98,7 +214,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			} );
 		}
 
-		private static void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			// NOTE: When packaging web apps, try to find a way to exclude data files. Apparently web deployment projects include these in their output even though
 			// they aren't part of the source web projects. NOTE ON NOTE: We don't use WDPs anymore, so maybe we can eliminate this note.
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
@@ -142,7 +258,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
 				IoMethods.CopyFolder( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
 				                      StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, service.Name ),
@@ -150,7 +266,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private static void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		private void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects != null ) {
 				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects )
 					copyServerSideProject( installation, serverSideLogicFolderPath, project );
@@ -162,14 +278,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				copyServerSideProject( installation, serverSideLogicFolderPath, StandardLibraryMethods.TestRunnerProjectName );
 		}
 
-		private static void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
+		private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
 			IoMethods.CopyFolder(
 				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, project, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
 				StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, project ),
 				false );
 		}
 
-		private static void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
+		private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
 			IoMethods.CopyFolder(
 				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                     installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
@@ -178,127 +294,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				false );
 		}
 
-		private static RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
+		private RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
 			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
 			var buildMessageNuGetPackages = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
 			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, true );
 			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;
-		}
-
-		internal static byte[] CreateEwlNuGetPackage( DevelopmentInstallation installation, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
-			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
-
-			IoMethods.ExecuteWithTempFolder( folderPath => {
-				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
-				                                                               "Standard Library",
-				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
-				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
-				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
-					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
-
-				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-				                    StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
-
-				var webSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
-				var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
-				IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.EwfFolderName ),
-				                      StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
-				                      false );
-				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
-				                    StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
-
-				const string duProjectAndFolderName = "Development Utility";
-				IoMethods.CopyFolder(
-					StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
-					                                     duProjectAndFolderName,
-					                                     StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) ),
-					StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
-					false );
-				packageGeneralFiles( installation, folderPath, false );
-				IoMethods.CopyFolder(
-					StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-					                                     InstallationConfiguration.InstallationConfigurationFolderName,
-					                                     InstallationConfiguration.InstallationsFolderName,
-					                                     ( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
-					StandardLibraryMethods.CombinePaths( folderPath,
-					                                     InstallationConfiguration.ConfigurationFolderName,
-					                                     InstallationConfiguration.InstallationConfigurationFolderName ),
-					false );
-
-				var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
-				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-					writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
-
-				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
-				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
-				                                                            "",
-				                                                            true ) );
-			} );
-
-			return
-				File.ReadAllBytes( StandardLibraryMethods.CombinePaths( outputFolderPath,
-				                                                        EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-				                                                        	installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
-				                                                        	installation.CurrentMajorVersion,
-				                                                        	!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
-				                                                        	localExportDateAndTime: localExportDateAndTime ) ) );
-		}
-
-		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
-			// configuration files
-			var configurationFolderPath = StandardLibraryMethods.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
-			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
-			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, StandardLibraryMethods.ProvidersFolderAndNamespaceName ) );
-			if( !includeDatabaseUpdates )
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
-			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
-			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
-
-			// other files
-			var filesFolderInInstallationPath =
-				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-				                                     InstallationFileStatics.FilesFolderName );
-			if( Directory.Exists( filesFolderInInstallationPath ) )
-				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
-		}
-
-		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime, TextWriter writer ) {
-			writer.WriteLine( "<?xml version=\"1.0\"?>" );
-			writer.WriteLine( "<package>" );
-			writer.WriteLine( "<metadata>" );
-			writer.WriteLine( "<id>" +
-			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) +
-			                  "</id>" );
-			writer.WriteLine( "<version>" +
-			                  EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString( installation.CurrentMajorVersion,
-			                                                                                    !prerelease.HasValue || prerelease.Value
-			                                                                                    	? installation.NextBuildNumber as int?
-			                                                                                    	: null,
-			                                                                                    localExportDateAndTime: localExportDateAndTime ) + "</version>" );
-			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
-			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
-			writer.WriteLine(
-				"<description>The Enterprise Web Library (EWL) is an extremely opinionated library for web applications that trades off performance, scalability, and development flexibility for an ease of maintenance you won't find anywhere else.</description>" );
-			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
-			writer.WriteLine( "<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>" );
-			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
-			writer.WriteLine( "<dependencies>" );
-
-			var lines = from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\packages.config" ) )
-			            let trimmedLine = line.Trim()
-			            where trimmedLine.StartsWith( "<package " )
-			            select trimmedLine;
-			foreach( var line in lines )
-				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net40\"", "" ) );
-
-			writer.WriteLine( "</dependencies>" );
-			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server Oracle</tags>" );
-			writer.WriteLine( "</metadata>" );
-			writer.WriteLine( "</package>" );
 		}
 	}
 }
