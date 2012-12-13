@@ -52,6 +52,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NDepend) = preSolution
-		Project = ".\Standard Library.ndproj"
+		Project = ".\Enterprise Web Library.ndproj"
 	EndGlobalSection
 EndGlobal
