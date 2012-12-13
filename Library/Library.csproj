@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RedStapler.StandardLibrary</RootNamespace>
-    <AssemblyName>RedStapler.Library</AssemblyName>
+    <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>

@@ -19,7 +19,7 @@
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>RedStapler.StandardLibraryTester</AssemblyName>
+    <AssemblyName>EnterpriseWebLibrary.Tester</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>

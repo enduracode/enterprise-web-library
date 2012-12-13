@@ -194,7 +194,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                                                               "Standard Library",
 				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
 				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
-				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "RedStapler.StandardLibrary." + i ) )
+				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
 
 				IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
