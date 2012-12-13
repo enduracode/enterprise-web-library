@@ -11,6 +11,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a validation with the specified method and adds it to the specified validation list.
 		/// </summary>
+		/// <param name="method">The method that will be called by the data modification(s) to which this validation has been added.</param>
+		/// <param name="validationList">The DataModification or BasicValidationList to which this validation will be added.</param>
 		public Validation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList ) {
 			this.method = method;
 
