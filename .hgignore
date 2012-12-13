@@ -1,9 +1,9 @@
 syntax: glob
 
-Standard Library.suo
+Enterprise Web Library.suo
 packages/
 _ReSharper*
-Standard Library.sln.DotSettings.user
+Enterprise Web Library.sln.DotSettings.user
 NDependOut/
 DependencyMatrixSnapshot.png
 Logic Packages/
