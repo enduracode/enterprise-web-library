@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<NDepend AppName="Standard Library" Platform="DotNet">
+<NDepend AppName="Enterprise Web Library" Platform="DotNet">
   <OutputDir KeepHistoric="False" KeepXmlFiles="True">C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\NDependOut</OutputDir>
   <Assemblies>
     <Name>RedStapler.StandardLibrary</Name>
