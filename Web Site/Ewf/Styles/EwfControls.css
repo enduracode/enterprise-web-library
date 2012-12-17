@@ -2,32 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-/* If we change the border or padding below, we also need to change the Width property on EwfTextBox. */
-div.textBoxWrapper {
-	border-color: #8E8E8E #B8B8B8 #B8B8B8 #8E8E8E;
-	border-style: solid;
-	border-width: 1px;
-	padding: 2px;
-	background-color: White;
-}
-div.textBoxWrapper:hover {
-	border-color: #515151;
-}
-
-div.textBoxWrapperFocused {
-	border-color: #515151;
-}
-
-div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"], div.textBoxWrapper > textarea {
-	display: block;
-	margin: 0;
-	border-width: 0;
-	padding: 0;
-	width: 100%;
-	font-family: inherit;
-	font-size: inherit;
-}
-
 ewfTextBoxCompletionList {
 	visibility: hidden;
 	margin: 0px !important;
