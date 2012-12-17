@@ -20,9 +20,9 @@ div.textBoxWrapperFocused {
 
 div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"], div.textBoxWrapper > textarea {
 	display: block;
-	margin: 0px;
-	border-width: 0px;
-	padding: 0px;
+	margin: 0;
+	border-width: 0;
+	padding: 0;
 	width: 100%;
 	font-family: inherit;
 	font-size: inherit;
