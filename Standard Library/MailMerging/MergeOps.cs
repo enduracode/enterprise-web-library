@@ -83,7 +83,8 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Merges a row tree with a Microsoft Word document.
+		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
+		/// a page break before it.
 		/// </summary>
 		public static FileToBeSent CreateMsWordDoc( DBConnection cn, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string inputFilePath ) {
 			using( var sourceDocStream = new MemoryStream( File.ReadAllBytes( inputFilePath ) ) )
@@ -91,7 +92,8 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Merges a row tree with a Microsoft Word document.
+		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
+		/// a page break before it.
 		/// </summary>
 		public static FileToBeSent CreateMsWordDoc( DBConnection cn, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Stream inputStream ) {
 			using( var destinationStream = new MemoryStream() ) {
@@ -101,14 +103,16 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Merges a row tree with a Microsoft Word document.
+		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
+		/// a page break before it.
 		/// </summary>
 		public static void CreateMsWordDoc( DBConnection cn, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Stream inputStream, Stream destinationStream ) {
 			createMsWordDocOrPdfFromMsWordDoc( cn, rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream, true );
 		}
 
 		/// <summary>
-		/// Merges a row tree with a Microsoft Word document and writes the result to a stream as a PDF document.
+		/// Merges a row tree with a Microsoft Word document and writes the result to a stream as a PDF document. If you would like each row to be on a separate
+		/// page, set the first paragraph in the input file to have a page break before it.
 		/// </summary>
 		public static void CreatePdfFromMsWordDoc( DBConnection cn, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string inputFilePath,
 		                                           Stream destinationStream ) {
@@ -138,15 +142,6 @@ namespace RedStapler.StandardLibrary.MailMerging {
 				throw new MailMergingException( e.Message );
 			}
 			doc.Save( destinationStream, saveAsMsWordDoc ? Aspose.Words.SaveFormat.Doc : Aspose.Words.SaveFormat.Pdf );
-		}
-
-		private class ImageFieldMergingCallBack: IFieldMergingCallback {
-			void IFieldMergingCallback.FieldMerging( FieldMergingArgs args ) {}
-
-			void IFieldMergingCallback.ImageFieldMerging( ImageFieldMergingArgs e ) {
-				if( e.FieldValue != null )
-					e.ImageStream = new MemoryStream( (byte[])e.FieldValue );
-			}
 		}
 
 		/// <summary>
@@ -414,6 +409,15 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			explanations.Add( Tuple.Create( multipleRowPdf, "Should be {0} with three pages, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
 
 			TestStatics.OutputReadme( outputFolder, explanations );
+		}
+
+		private class ImageFieldMergingCallBack: IFieldMergingCallback {
+			void IFieldMergingCallback.FieldMerging( FieldMergingArgs args ) {}
+
+			void IFieldMergingCallback.ImageFieldMerging( ImageFieldMergingArgs e ) {
+				if( e.FieldValue != null )
+					e.ImageStream = new MemoryStream( (byte[])e.FieldValue );
+			}
 		}
 	}
 }
