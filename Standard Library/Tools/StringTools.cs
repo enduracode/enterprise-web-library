@@ -5,16 +5,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// Provides helpful string methods.
 	/// </summary>
 	public static class StringTools {
-		private static readonly char[] nonAlphaNumericCharacters = {
-		                                                           	'~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', '_', ',', '.', '/', '?', '<',
-		                                                           	'>', '[', ']', '{', '}', '\\', '|'
-		                                                           };
+		private static readonly char[] nonAlphaNumericCharacters =
+			{
+				'~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', '_', ',', '.', '/', '?', '<',
+				'>', '[', ']', '{', '}', '\\', '|'
+			};
 
 		private static readonly char[] numericCharacters = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
 
@@ -476,6 +478,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Allows for extension method syntax for string.Format.
 		/// </summary>
+		[ StringFormatMethod( "s" ) ]
 		public static string FormatWith( this string s, params object[] objects ) {
 			return String.Format( s, objects );
 		}
