@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <NDepend AppName="Enterprise Web Library" Platform="DotNet">
-  <OutputDir KeepHistoric="False" KeepXmlFiles="True">C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\NDependOut</OutputDir>
+  <OutputDir KeepHistoric="False" KeepXmlFiles="True">.\NDependOut</OutputDir>
   <Assemblies>
     <Name>EnterpriseWebLibrary</Name>
     <Name>EnterpriseWebLibrary.DevelopmentUtility</Name>
@@ -32,9 +32,9 @@
   </FrameworkAssemblies>
   <Dirs>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319</Dir>
-    <Dir>C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\Standard Library\bin\Debug</Dir>
-    <Dir>C:\Red Stapler\Revision Control\Supporting Files\Software\Enterprise Web Library\Bill\Development Utility\bin\Debug</Dir>
-    <Dir>C:\Windows\System32\inetsrv</Dir>
+    <Dir>.\Standard Library\bin\Debug</Dir>
+    <Dir>.\Development Utility\bin\Debug</Dir>
+    <Dir>..\..\..\..\..\..\Windows\System32\inetsrv</Dir>
   </Dirs>
   <Report Kind="0" SectionsEnabled="12287" XslPath="" Flags="64512">
     <Section Enabled="True">Application Metrics</Section>
