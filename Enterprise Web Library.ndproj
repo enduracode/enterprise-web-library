@@ -32,6 +32,7 @@
   </FrameworkAssemblies>
   <Dirs>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319</Dir>
+    <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319\WPF</Dir>
     <Dir>.\Standard Library\bin\Debug</Dir>
     <Dir>.\Development Utility\bin\Debug</Dir>
     <Dir>..\..\..\..\..\..\Windows\System32\inetsrv</Dir>
