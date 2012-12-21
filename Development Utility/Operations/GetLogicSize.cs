@@ -78,8 +78,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		public static Operation Instance { get { return instance; } }
 		private GetLogicSize() {}
 
-		bool Operation.IsValid( Installation installation ) {
-			return installation is DevelopmentInstallation;
+		bool Operation.IsValid( Installation genericInstallation ) {
+			var installation = genericInstallation as DevelopmentInstallation;
+			return installation != null && !installation.DevelopmentInstallationLogic.SystemIsEwl;
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
