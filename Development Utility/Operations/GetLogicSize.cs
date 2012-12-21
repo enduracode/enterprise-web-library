@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NDepend;
 using NDepend.Analysis;
@@ -21,8 +22,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			var servicesProvider = new NDependServicesProvider();
 			var projectManager = servicesProvider.ProjectManager;
-			var project = projectManager.CreateTemporaryProject( getAssemblyPaths( installation, debug ).Select( i => i.ToAbsoluteFilePath() ).ToArray(),
-			                                                     TemporaryProjectMode.Temporary );
+			var project =
+				projectManager.CreateTemporaryProject( getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
+				                                       TemporaryProjectMode.Temporary );
 
 			StatusStatics.SetStatus( "Performing NDepend analysis." );
 			var analysisResult = project.RunAnalysis();
