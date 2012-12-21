@@ -3,7 +3,7 @@
 New-Module -ScriptBlock {
 $installPath = $args[0]
 
-function UpdateDependentLogic {
+function Update-DependentLogic {
 	[CmdletBinding()]
 	Param()
 	Process {
@@ -16,6 +16,14 @@ function ExportLogic {
 	Param()
 	Process {
 		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. ExportLogic
+	}
+}
+
+function Measure-LogicSize {
+	[CmdletBinding()]
+	Param()
+	Process {
+		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. GetLogicSize
 	}
 }
 

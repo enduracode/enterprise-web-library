@@ -46,6 +46,8 @@
   </Target>
   -->
   <ItemGroup>
+    <Content Include="Referenced Files\NDepend.API.dll" />
+    <Content Include="Referenced Files\NDepend.API.xml" />
     <Content Include="Selenium Support\selenium-server.jar" />
     <Content Include="Selenium Support\srvany.exe" />
     <Content Include="stdLibDoxySettings.txt" />

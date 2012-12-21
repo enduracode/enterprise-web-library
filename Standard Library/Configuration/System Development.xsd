@@ -3,7 +3,7 @@
 	<element name="systemDevelopmentConfiguration" type="rs:SystemDevelopmentConfiguration" />
 	<complexType name="SystemDevelopmentConfiguration">
 		<sequence>
-			<element name="libraryNamespace" type="string" />
+			<element name="LibraryNamespaceAndAssemblyName" type="string" />
 			<element name="webProjects" minOccurs="0">
 				<complexType>
 					<sequence>
@@ -14,7 +14,7 @@
 			<element name="serverSideConsoleProjects" minOccurs="0">
 				<complexType>
 					<sequence>
-						<element name="project" type="string" maxOccurs="unbounded" />
+						<element name="project" type="rs:ServerSideConsoleProject" maxOccurs="unbounded" />
 					</sequence>
 				</complexType>
 			</element>
@@ -46,10 +46,16 @@
 	<complexType name="WebProject">
 		<sequence>
 			<element name="name" type="string" />
-			<element name="namespace" type="string" />
+			<element name="NamespaceAndAssemblyName" type="string" />
 			<element name="useCertificateAuthentication" type="boolean" minOccurs="0" />
 			<element name="RequiresEnhancedSecurity" type="boolean" minOccurs="0" />
 			<element name="IsUpdateableWhenInstalled" type="boolean" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="ServerSideConsoleProject">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="AssemblyName" type="string" />
 		</sequence>
 	</complexType>
 	<complexType name="XmlSchema">

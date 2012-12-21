@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
+using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
@@ -148,6 +149,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
+			build.LogicSize = GetLogicSize.GetNDependLocCount( installation, false );
 			var serverSideLogicFolderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
@@ -217,44 +219,42 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			// NOTE: When packaging web apps, try to find a way to exclude data files. Apparently web deployment projects include these in their output even though
 			// they aren't part of the source web projects. NOTE ON NOTE: We don't use WDPs anymore, so maybe we can eliminate this note.
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
-				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ) {
-					var webAppPath = StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, webProject.name );
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
+				var webAppPath = StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, webProject.name );
 
-					// Pre-compile the web project.
-					try {
-						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
-						                                   "-v \"/" + webProject.name + ".csproj\" -p \"" +
-						                                   StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
-						                                   ( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" +
-						                                   webAppPath + "\"",
-						                                   "",
-						                                   true );
-					}
-					catch( Exception e ) {
-						throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
-					}
-					try {
-						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
-						                                   "\"" + webAppPath + "\" -o " + webProject.@namespace + ".Package -a -copyattrs",
-						                                   "",
-						                                   true );
-					}
-					catch( Exception e ) {
-						throw new UserCorrectableException( "ASP.NET Merge Tool failed for web project " + webProject.name + ".", e );
-					}
-
-					// Delete files and folders that aren't necessary for installed installations.
-					IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "Generated Code" ) );
-					IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "obj" ) );
-					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
-					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
-					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-					IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
-
-					var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
-					File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
+				// Pre-compile the web project.
+				try {
+					StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
+					                                   "-v \"/" + webProject.name + ".csproj\" -p \"" +
+					                                   StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
+					                                   ( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" +
+					                                   webAppPath + "\"",
+					                                   "",
+					                                   true );
 				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
+				}
+				try {
+					StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
+					                                   "\"" + webAppPath + "\" -o " + webProject.NamespaceAndAssemblyName + ".Package -a -copyattrs",
+					                                   "",
+					                                   true );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "ASP.NET Merge Tool failed for web project " + webProject.name + ".", e );
+				}
+
+				// Delete files and folders that aren't necessary for installed installations.
+				IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "Generated Code" ) );
+				IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "obj" ) );
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
+
+				var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
+				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 			}
 		}
 
@@ -267,10 +267,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects != null ) {
-				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects )
-					copyServerSideProject( installation, serverSideLogicFolderPath, project );
-			}
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
+				copyServerSideProject( installation, serverSideLogicFolderPath, project.Name );
 
 			// Always copy special projects.
 			var testRunnerFolder = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, StandardLibraryMethods.TestRunnerProjectName );

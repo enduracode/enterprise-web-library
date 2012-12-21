@@ -33,19 +33,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( Match match in Regex.Matches( code, @"namespace\s(?<namespace>.*)\s{" ) )
 				itemNamespace = match.Groups[ "namespace" ].Value;
 			if( itemNamespace == null )
-				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.@namespace, pathRelativeToProject );
+				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
 
 			className = StandardLibraryMethods.GetCSharpIdentifier( System.IO.Path.GetFileNameWithoutExtension( path ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
 
-		private static string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
+		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
 			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
 			return CssHandler.CombineNamespacesAndProcessEwfIfNecessary( projectNamespace,
 			                                                             StringTools.ConcatenateWithDelimiter( ".",
 			                                                                                                   tokens.Select( StandardLibraryMethods.GetCSharpIdentifier )
-			                                                                                                   	.ToArray() ) );
+			                                                                                                         .ToArray() ) );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }

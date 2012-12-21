@@ -1,13 +1,50 @@
 using System;
+using System.Linq;
+using System.Reflection;
 using System.ServiceModel;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 	public static class ConfigurationLogic {
 		private const string providerName = "Isu";
+
+		/// <summary>
+		/// This should only be used by the Installation Support Utility.
+		/// </summary>
+		public static string DownloadedDataPackagesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Data Packages" );
+
+		/// <summary>
+		/// This should only be used by the Web Site.
+		/// </summary>
+		public static string DataPackageRepositoryPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
+
+		/// <summary>
+		/// This should only be used by the Installation Support Utility.
+		/// </summary>
+		public static string DownloadedTransactionLogsFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Transaction Logs" );
+
+		public static string TransactionLogBackupsPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Transaction Log Backups" );
+
 		private static SystemIsuProvider provider;
+
+		private static ChannelFactory<RsisInterface.ServiceContracts.Isu> isuServiceFactory;
+		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
+		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
 		internal static void Init( Type systemLogicType ) {
 			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemIsuProvider;
+
+			if( provider != null && provider.NDependFolderPathInUserProfileFolder.Any() ) {
+				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
+					var assemblyName = new AssemblyName( args.Name ).Name;
+					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
+						return null;
+					return
+						Assembly.LoadFrom( StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+						                                                        provider.NDependFolderPathInUserProfileFolder,
+						                                                        "Lib",
+						                                                        assemblyName + ".dll" ) );
+				};
+			}
 		}
 
 		/// <summary>
@@ -25,10 +62,6 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 				return provider;
 			}
 		}
-
-		private static ChannelFactory<RsisInterface.ServiceContracts.Isu> isuServiceFactory;
-		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
-		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
 		public static void Init() {
 			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
@@ -51,16 +84,16 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
 			var binding = new NetTcpBinding
-			              	{
-			              		// Troubleshooting (we give unique values to timeouts so we can figure out which one is the culprit if we have a problem).
-			              		TransferMode = TransferMode.Streamed,
-			              		SendTimeout = TimeSpan.FromMinutes( 123 ),
-			              		MaxReceivedMessageSize = long.MaxValue,
-			              		// Ideally, ReceiveTimeout (which is really inactivity timeout) would be very low. We've found that 3 minutes is too low, though.
-			              		ReceiveTimeout = TimeSpan.FromMinutes( 6 ),
-			              		OpenTimeout = TimeSpan.FromMinutes( 17 ),
-			              		CloseTimeout = TimeSpan.FromMinutes( 23 )
-			              	};
+				{
+					// Troubleshooting (we give unique values to timeouts so we can figure out which one is the culprit if we have a problem).
+					TransferMode = TransferMode.Streamed,
+					SendTimeout = TimeSpan.FromMinutes( 123 ),
+					MaxReceivedMessageSize = long.MaxValue,
+					// Ideally, ReceiveTimeout (which is really inactivity timeout) would be very low. We've found that 3 minutes is too low, though.
+					ReceiveTimeout = TimeSpan.FromMinutes( 6 ),
+					OpenTimeout = TimeSpan.FromMinutes( 17 ),
+					CloseTimeout = TimeSpan.FromMinutes( 23 )
+				};
 
 			// Performance
 			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
@@ -187,29 +220,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			}
 		}
 
-		/// <summary>
-		/// This should only be used by the Installation Support Utility.
-		/// </summary>
-		public static string DownloadedDataPackagesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Data Packages" );
-
-		/// <summary>
-		/// This should only be used by the Web Site.
-		/// </summary>
-		public static string DataPackageRepositoryPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
-
 		public static string GetBuildFilePath( int systemId ) {
 			return StandardLibraryMethods.CombinePaths( DataPackageRepositoryPath
 			                                            /*NOTE: Make this the generic web-site-accessible folder and change this and DataPackageRepositoryPath to be a subfolder of that.*/,
 			                                            "Latest Builds",
 			                                            systemId.ToString() );
 		}
-
-		/// <summary>
-		/// This should only be used by the Installation Support Utility.
-		/// </summary>
-		public static string DownloadedTransactionLogsFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Transaction Logs" );
-
-		public static string TransactionLogBackupsPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Transaction Log Backups" );
 
 		public static string OracleSysPassword {
 			get {

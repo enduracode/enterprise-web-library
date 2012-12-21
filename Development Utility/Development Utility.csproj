@@ -38,6 +38,10 @@
     <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NDepend.API">
+      <HintPath>..\Solution Files\Referenced Files\NDepend.API.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -50,6 +54,7 @@
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="Operations\ExportEwlToLocalFeed.cs" />
     <Compile Include="Operations\ExportLogic.cs" />
+    <Compile Include="Operations\GetLogicSize.cs" />
     <Compile Include="Operations\InstallAndStartServices.cs" />
     <Compile Include="Operations\StopAndUninstallServices.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\CodeGenerationStatics.cs" />

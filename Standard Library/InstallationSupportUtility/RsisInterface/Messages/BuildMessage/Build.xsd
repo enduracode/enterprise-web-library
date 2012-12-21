@@ -8,6 +8,7 @@
 				<element name="SystemShortName" type="string"/>
 				<element name="MajorVersion" type="int"/>
 				<element name="BuildNumber" type="int"/>
+				<element name="LogicSize" type="int" nillable="true"/>
 				<element name="ServerSideLogicPackage" type="base64Binary"/>
 				<element name="ClientSideApp" minOccurs="0">
 					<complexType>
