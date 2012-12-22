@@ -138,12 +138,29 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Return true if the link is broken.
+		/// Gets whether a request for the specified URL returns an HTTP status code other than 200 OK.
 		/// </summary>
-		public static bool IsLinkBroken( string url ) {
-			var request = WebRequest.Create( url );
-			var response = (HttpWebResponse)request.GetResponse();
-			return response.StatusCode != HttpStatusCode.OK;
+		public static bool LinkIsBroken( string url ) {
+			// NOTE: Use WebRequest.CreateHttp when EWL moves to .NET 4.5.
+			var request = WebRequest.Create( url ) as HttpWebRequest;
+
+			request.Method = "HEAD";
+			using( var response = request.getResponseForAnyStatusCode() )
+				return response.StatusCode != HttpStatusCode.OK;
+		}
+
+		/// <summary>
+		/// Gets a response and prevents exceptions caused by HTTP status codes. From http://stackoverflow.com/a/1366869/35349.
+		/// </summary>
+		private static HttpWebResponse getResponseForAnyStatusCode( this HttpWebRequest request ) {
+			try {
+				return (HttpWebResponse)request.GetResponse();
+			}
+			catch( WebException e ) {
+				if( e.Response == null || e.Status != WebExceptionStatus.ProtocolError )
+					throw;
+				return (HttpWebResponse)e.Response;
+			}
 		}
 
 		/// <summary>
