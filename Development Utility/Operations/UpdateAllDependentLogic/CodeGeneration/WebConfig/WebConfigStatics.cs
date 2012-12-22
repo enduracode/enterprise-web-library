@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 
 			sections = sections.Replace( "@@CertificateAuthenticationModulePlace",
 			                             useCertificateAuth
-				                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, RedStapler.StandardLibrary\"/>"
+				                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
 				                             : "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
