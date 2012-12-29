@@ -442,7 +442,7 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\User.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="ExternalPostBackEventHandler.cs" />
-    <Compile Include="EnterpriseWebFramework\FreeFormRadioList.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\FreeFormRadioList.cs" />
     <Compile Include="Tools\CollectionTools.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="Collections\Set.cs" />
