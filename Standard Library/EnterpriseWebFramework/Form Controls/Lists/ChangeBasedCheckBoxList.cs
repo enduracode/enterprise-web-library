@@ -12,7 +12,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	// NOTE: Maybe we should get rid of the control and put all its logic in the form item getters. It would eliminate a lot of parameter duplication.
 	// NOTE: More conservatively, we could get rid of just the Create methods.
-	public class ChangeBasedCheckBoxList {
+	public static class ChangeBasedCheckBoxList {
 		/// <summary>
 		/// Creates a form item with a change based check box list.
 		/// </summary>
