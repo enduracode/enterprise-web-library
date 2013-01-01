@@ -346,19 +346,26 @@ namespace RedStapler.StandardLibrary {
 			AppTools.ExecuteAsCriticalRegion( "{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
 			                                  false,
 			                                  delegate {
-			                                  	using( var serverManager = new ServerManager() ) {
-			                                  		var config = serverManager.GetApplicationHostConfiguration();
+				                                  using( var serverManager = new ServerManager() ) {
+					                                  var config = serverManager.GetApplicationHostConfiguration();
 
-			                                  		var modulesSection = config.GetSection( "system.webServer/modules", "" );
-			                                  		foreach( var element in modulesSection.GetCollection() )
-			                                  			element.SetMetadata( "lockItem", null );
+					                                  var modulesSection = config.GetSection( "system.webServer/modules", "" );
+					                                  foreach( var element in modulesSection.GetCollection() )
+						                                  element.SetMetadata( "lockItem", null );
 
-			                                  		var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-			                                  		serverRuntimeSection.OverrideMode = OverrideMode.Allow;
+					                                  var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+					                                  serverRuntimeSection.OverrideMode = OverrideMode.Allow;
 
-			                                  		serverManager.CommitChanges();
-			                                  	}
+					                                  serverManager.CommitChanges();
+				                                  }
 			                                  } );
+		}
+
+		/// <summary>
+		/// Returns true if the specified objects are equal according to the default equality comparer.
+		/// </summary>
+		public static bool AreEqual<T>( T x, T y ) {
+			return EqualityComparer<T>.Default.Equals( x, y );
 		}
 	}
 }
