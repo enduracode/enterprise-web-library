@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Used to define common attributes and methods among check boxes.
 	/// </summary>

@@ -16,100 +16,103 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	public class UserFieldTable: WebControl {
 		private User user;
 		private FormsAuthCapableUser facUser;
-
-		private EwfTextBox emailBox;
-		private EwfCheckBox keepPassword;
-		private EwfCheckBox generatePassword;
-		private BlockCheckBox providePassword;
-		private EwfTextBox newPasswordTb;
-		private EwfTextBox confirmPasswordTb;
-		private EwfListControl roleList;
-
 		private string passwordToEmail;
 
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
-		public void LoadData( DBConnection cn, int? userId ) {
-			LoadData( cn, userId, UserManagementStatics.SystemProvider.GetRoles( cn ) );
-		}
+		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null ) {
+			availableRoles =
+				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles( cn ) ).ToList();
 
-		/// <summary>
-		/// Call this during LoadData.
-		/// </summary>
-		public void LoadData( DBConnection cn, int? userId, List<Role> availableRoles ) {
-			availableRoles = availableRoles.OrderBy( r => r.Name ).ToList();
 			user = userId.HasValue ? UserManagementStatics.GetUser( cn, userId.Value ) : null;
 			if( includePasswordControls() && user != null )
 				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, user.UserId );
 
-			var table = new DynamicTable { Caption = "Security information" };
+			var b = FormItemBlock.CreateFormItemTable( heading: "Security Information" );
 
-			emailBox = new EwfTextBox( user != null ? user.Email : "" );
-			table.AddRow( new EwfTableCell( "Email address" ), new EwfTableCell( emailBox ) );
+			b.AddFormItems( FormItem.Create( "Email address",
+			                                 new EwfTextBox( user != null ? user.Email : "" ),
+			                                 validationGetter:
+				                                 control =>
+				                                 new Validation(
+					                                 ( pbv, validator ) =>
+					                                 Email =
+					                                 validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false, 50 ),
+					                                 vl ) ) );
 
 			if( includePasswordControls() ) {
-				keepPassword = new EwfCheckBox( userId.HasValue ? "Keep the current password" : "Do not create a password" );
-				generatePassword = new EwfCheckBox( "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" );
-				providePassword = new BlockCheckBox( "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
-				keepPassword.GroupName = generatePassword.GroupName = providePassword.GroupName = "password";
-				keepPassword.Checked = true;
+				var group = new RadioButtonGroup( "password", false );
 
-				var newPasswordTable = new DynamicTable();
-				newPasswordTable.IsStandard = false;
-				newPasswordTb = new EwfTextBox( "" );
+				var keepPassword = FormItem.Create( "",
+				                                    group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
+				                                    validationGetter: control => new Validation( ( pbv, validator ) => {
+					                                    if( !control.IsCheckedInPostBack( pbv ) )
+						                                    return;
+					                                    if( user != null ) {
+						                                    Salt = facUser.Salt;
+						                                    SaltedPassword = facUser.SaltedPassword;
+						                                    MustChangePassword = facUser.MustChangePassword;
+					                                    }
+					                                    else
+						                                    genPassword( false );
+				                                    },
+				                                                                                 vl ) );
+
+				var generatePassword = FormItem.Create( "",
+				                                        group.CreateInlineRadioButton( false,
+				                                                                       label:
+					                                                                       "Generate a " + ( userId.HasValue ? "new, " : "" ) +
+					                                                                       "random password and email it to the user" ),
+				                                        validationGetter: control => new Validation( ( pbv, validator ) => {
+					                                        if( control.IsCheckedInPostBack( pbv ) )
+						                                        genPassword( true );
+				                                        },
+				                                                                                     vl ) );
+
+				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
+				var newPasswordTb = new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true };
+				var confirmPasswordTb = new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true };
 				EwfPage.Instance.DisableAutofillOnForm();
-				confirmPasswordTb = new EwfTextBox( "" );
-				newPasswordTb.Width = confirmPasswordTb.Width = Unit.Pixel( 200 );
-				newPasswordTb.MasksCharacters = confirmPasswordTb.MasksCharacters = true;
-				newPasswordTable.AddRow( new EwfTableCell( "Password" ), new EwfTableCell( newPasswordTb ) );
-				newPasswordTable.AddRow( new EwfTableCell( "Password again" ), new EwfTableCell( confirmPasswordTb ) );
-				providePassword.NestedControls.Add( newPasswordTable );
+				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ), new EwfTableCell( newPasswordTb ) ) );
+				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ), new EwfTableCell( confirmPasswordTb ) ) );
 
-				table.AddRow( new EwfTableCell( "Password" ), new EwfTableCell( ControlStack.CreateWithControls( true, keepPassword, generatePassword, providePassword ) ) );
+				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
+				providePasswordRadio.NestedControls.Add( newPasswordTable );
+				var providePassword = FormItem.Create( "",
+				                                       providePasswordRadio,
+				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
+					                                       if( !control.IsCheckedInPostBack( pbv ) )
+						                                       return;
+					                                       UserManagementStatics.ValidatePassword( validator, newPasswordTb, confirmPasswordTb );
+					                                       var p = new Password( newPasswordTb.Value );
+					                                       Salt = p.Salt;
+					                                       SaltedPassword = p.ComputeSaltedHash();
+					                                       MustChangePassword = false;
+				                                       },
+				                                                                                    vl ) );
+
+				b.AddFormItems( FormItem.Create( "Password",
+				                                 ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
 			}
 
-			roleList = new EwfListControl();
+			var roleList = new EwfListControl();
 			foreach( var role in availableRoles )
 				roleList.AddItem( role.Name, role.RoleId.ToString() );
 			if( user != null )
 				roleList.Value = user.Role.RoleId.ToString();
-			table.AddRow( new EwfTableCell( "Role" ), new EwfTableCell( roleList ) );
+			b.AddFormItems( FormItem.Create( "Role",
+			                                 roleList,
+			                                 validationGetter:
+				                                 control =>
+				                                 new Validation(
+					                                 ( pbv, validator ) => RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), control.GetPostBackValue( pbv ) ),
+					                                 vl ) ) );
 
-			Controls.Add( table );
+			Controls.Add( b );
 		}
 
-		/// <summary>
-		/// Call this during ValidateFormValues.
-		/// </summary>
-		public void ValidateFormValues( Validator validator ) {
-			Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), emailBox.Value, false, 50 );
-
-			if( includePasswordControls() ) {
-				if( keepPassword.Checked ) {
-					if( user != null ) {
-						Salt = facUser.Salt;
-						SaltedPassword = facUser.SaltedPassword;
-						MustChangePassword = facUser.MustChangePassword;
-					}
-					else
-						genPassword( false );
-				}
-				else if( generatePassword.Checked )
-					genPassword( true );
-				else if( providePassword.Checked ) {
-					UserManagementStatics.ValidatePassword( validator, newPasswordTb, confirmPasswordTb );
-					var p = new Password( newPasswordTb.Value );
-					Salt = p.Salt;
-					SaltedPassword = p.ComputeSaltedHash();
-					MustChangePassword = false;
-				}
-			}
-
-			RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), roleList.Value );
-		}
-
-		private static bool includePasswordControls() {
+		private bool includePasswordControls() {
 			return UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider;
 		}
 

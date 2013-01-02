@@ -105,7 +105,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                               EwfLink.Create( new ExternalPageInfo( "http://redstapler.biz" ), new TextActionControlStyle( "Testing Controls" ) ) );
 
 			//durationPicker.ToolTip = "duration picker tooltip";
-			ewfCheckBox.ToolTip = "ewf check box tooltip";
 			ewfLabel.ToolTip = "label tooltip";
 			ewfListControl.ToolTip = "ewf list control tooltip";
 			ewfImage.ToolTip = "ewf image tooltip";

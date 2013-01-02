@@ -5,17 +5,18 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
 	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl<bool>, ControlWithCustomFocusLogic {
-		private bool isCheckedDurable;
-		private string text;
+		private readonly bool isCheckedDurable;
+		private readonly string label;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private Func<bool, bool> postBackValueSelector;
 		private CheckBox checkBox;
@@ -25,34 +26,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public BlockCheckBox( bool isChecked, string label = "" ) {
 			isCheckedDurable = isChecked;
-			text = label;
+			this.label = label;
 			NestedControls = new List<Control>();
 			GroupName = "";
 			postBackValueSelector = isCheckedInPostBack => isCheckedInPostBack;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public BlockCheckBox(): this( false ) {}
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public BlockCheckBox( string text ): this( false, label: text ?? "" ) {}
-
 		bool FormControl<bool>.DurableValue { get { return isCheckedDurable; } }
 		string FormControl.DurableValueAsString { get { return isCheckedDurable.ToString(); } }
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public string Text { get { return text; } set { text = value ?? ""; } }
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public bool Checked { get { return IsCheckedInPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } set { isCheckedDurable = value; } }
 
 		/// <summary>
 		/// Gets or sets the name of the group that this check box belongs to. If this is not the empty string, this control will render as a radio button rather
@@ -122,9 +103,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var row = new TableRow();
 			row.Cells.Add( checkBoxCell );
 
-			var label = new HtmlGenericControl( "label" ) { InnerText = text };
-			row.Cells.Add( new TableCell().AddControlsReturnThis( label ) );
-			PreRender += ( s, e ) => label.Attributes.Add( "for", checkBox.ClientID );
+			var labelControl = new HtmlGenericControl( "label" ) { InnerText = label };
+			row.Cells.Add( new TableCell().AddControlsReturnThis( labelControl ) );
+			PreRender += ( s, e ) => labelControl.Attributes.Add( "for", checkBox.ClientID );
 
 			table.Rows.Add( row );
 
@@ -140,7 +121,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			Controls.Add( table );
 			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), text.Length > 0 ? (Control)label : checkBox );
+				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Length > 0 ? (Control)labelControl : checkBox );
 		}
 
 		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {

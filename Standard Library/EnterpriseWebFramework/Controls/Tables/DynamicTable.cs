@@ -358,7 +358,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				button.ClickHandler = delegate {
 					EwfPage.Instance.EhModifyData( cn1 => {
 						foreach( var rowSetup in rowSetups ) {
-							if( rowSetup.UniqueIdentifier != null && ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).Checked )
+							if( rowSetup.UniqueIdentifier != null &&
+							    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
+								    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
 								method( cn1, rowSetup.UniqueIdentifier );
 						}
 					} );
@@ -373,7 +375,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
 						};
 					if( rowSetup.UniqueIdentifier != null )
-						cell.Controls.Add( new EwfCheckBox() );
+						cell.Controls.Add( new EwfCheckBox( false ) );
 					rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
 				}
 			}

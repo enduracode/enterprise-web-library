@@ -4,10 +4,11 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/* NOTE: This should be named InlineCheckBox. When we do this, rename CommonCheckBox to EwfCheckBox.
 	 * 
 	 * InlineCheckBox is a check box that can be centered with text-align or used within a paragraph of text. This cannot be done with BlockCheckBox for two reasons:
@@ -35,8 +36,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private bool isCheckedDurable;
-		private string text;
+		private readonly bool isCheckedDurable;
+		private readonly string label;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private CheckBox checkBox;
 		private PostBackButton defaultSubmitButton;
@@ -47,33 +48,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public EwfCheckBox( bool isChecked, string label = "" ) {
 			isCheckedDurable = isChecked;
-			text = label;
+			this.label = label;
 			GroupName = "";
 			postBackValueSelector = isCheckedInPostBack => isCheckedInPostBack;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public EwfCheckBox(): this( false ) {}
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public EwfCheckBox( string text ): this( false, label: text ?? "" ) {}
-
 		bool FormControl<bool>.DurableValue { get { return isCheckedDurable; } }
 		string FormControl.DurableValueAsString { get { return isCheckedDurable.ToString(); } }
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public string Text { get { return text; } set { text = value ?? ""; } }
-
-		/// <summary>
-		/// Do not use.
-		/// </summary>
-		public bool Checked { get { return IsCheckedInPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } set { isCheckedDurable = value; } }
 
 		/// <summary>
 		/// Gets or sets the name of the group that this check box belongs to. If this is not the empty string, this control will render as a radio button rather
@@ -137,14 +118,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				EwfPage.Instance.MakeControlPostBackOnEnter( checkBox, defaultSubmitButton );
 
 			Controls.Add( checkBox );
-			EwfLabel label = null;
-			if( text.Length > 0 ) {
-				label = new EwfLabel { Text = text, CssClass = CssElementCreator.CssClass };
-				Controls.Add( label );
+			EwfLabel labelControl = null;
+			if( label.Any() ) {
+				labelControl = new EwfLabel { Text = label, CssClass = CssElementCreator.CssClass };
+				Controls.Add( labelControl );
 			}
 
 			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), text.Length > 0 ? (Control)label : checkBox );
+				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl as Control : checkBox );
 		}
 
 		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
