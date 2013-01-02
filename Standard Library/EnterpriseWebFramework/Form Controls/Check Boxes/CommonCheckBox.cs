@@ -3,10 +3,11 @@
 	/// Used to define common attributes and methods among check boxes.
 	/// </summary>
 	public interface CommonCheckBox {
+		bool IsRadioButton { get; }
 		bool IsChecked { get; }
 
 		/// <summary>
-		/// Gets the name of the group that this check box belongs to.
+		/// Internal use only. This property is only used by CheckBoxToControlArrayDisplayLink and will be deleted.
 		/// </summary>
 		string GroupName { get; }
 

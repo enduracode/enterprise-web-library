@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 
 		void DisplayLink.AddJavaScript() {
 			DisplayLinkingOps.AddDisplayJavaScriptToCheckBox( checkBox, controlsVisibleWhenBoxChecked, controls );
-			if( checkBox.GroupName.Length > 0 )
+			if( checkBox.IsRadioButton )
 				addJavaScriptToOtherRadioButtonsInGroup( EwfPage.Instance );
 		}
 

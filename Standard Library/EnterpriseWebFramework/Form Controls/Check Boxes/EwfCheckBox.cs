@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
@@ -78,7 +79,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Gets or sets the name of the group that this check box belongs to. If this is not the empty string, this control will render as a radio button rather
 		/// than a check box.
 		/// </summary>
-		public string GroupName { get; set; }
+		internal string GroupName { private get; set; }
+
+		string CommonCheckBox.GroupName { get { return GroupName; } }
 
 		/// <summary>
 		/// Gets or sets whether or not the check box automatically posts the page back to the server when it is checked or unchecked.
@@ -116,6 +119,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		internal Func<bool, bool> PostBackValueSelector { set { postBackValueSelector = value; } }
 
+		public bool IsRadioButton { get { return GroupName.Any(); } }
 		public bool IsChecked { get { return isCheckedDurable; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
