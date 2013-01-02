@@ -224,9 +224,9 @@
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\MarkFileAsReadMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\NewFileNotificationMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\BlockCheckBox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Calendar\MonthViewCalendar.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\CommonCheckBox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\CommonCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlLine.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlListSpacerCellSetup.cs" />
@@ -236,7 +236,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\DependentDropDownList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\PostBackButton.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\DurationPicker.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\EwfCheckBox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\EwfCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfImage.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\EwfLink.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
