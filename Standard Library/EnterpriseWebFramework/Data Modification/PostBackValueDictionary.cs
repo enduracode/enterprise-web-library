@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool ValueChangedOnPostBack<ValType>( FormControl<ValType> key ) {
-			return !Equals( GetValue( key ), key.DurableValue );
+			return !StandardLibraryMethods.AreEqual( GetValue( key ), key.DurableValue );
 		}
 	}
 }
