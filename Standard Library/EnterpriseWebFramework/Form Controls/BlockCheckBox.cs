@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -16,6 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private bool isCheckedDurable;
 		private string text;
 		private readonly List<string> onClickJsMethods = new List<string>();
+		private Func<bool, bool> postBackValueSelector;
 		private CheckBox checkBox;
 
 		/// <summary>
@@ -26,6 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			text = label;
 			NestedControls = new List<Control>();
 			GroupName = "";
+			postBackValueSelector = isCheckedInPostBack => isCheckedInPostBack;
 		}
 
 		/// <summary>
@@ -96,6 +99,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				onClickJsMethods.Add( jsMethodInvocation );
 		}
 
+		internal Func<bool, bool> PostBackValueSelector { set { postBackValueSelector = value; } }
+
+		public bool IsChecked { get { return isCheckedDurable; } }
+
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			var table = TableOps.CreateUnderlyingTable();
 			table.CssClass = "ewfBlockCheckBox";
@@ -141,14 +148,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Gets whether the box is checked in the post back.
 		/// </summary>
 		public bool IsCheckedInPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+			return postBackValueSelector( postBackValues.GetValue( this ) );
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			return IsCheckedInPostBack( postBackValues ) != isCheckedDurable;
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
