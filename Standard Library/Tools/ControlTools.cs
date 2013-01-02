@@ -30,5 +30,9 @@ namespace RedStapler.StandardLibrary {
 			list.Add( enumerable.Last() );
 			return list;
 		}
+
+		internal static bool IsOnPage( this Control control ) {
+			return control.Page != null;
+		}
 	}
 }
