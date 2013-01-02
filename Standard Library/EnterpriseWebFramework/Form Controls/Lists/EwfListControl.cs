@@ -42,13 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			VerticalRadioButton
 		}
 
-		private class DisplayLinkData {
-			public string ListItemValue { get; set; }
-			public bool ControlsVisibleWhenSelected { get; set; }
-			public Control[] Controls { get; set; }
-		}
-
-		private FreeFormRadioList freeFormRadioList;
+		private FreeFormRadioList<string> freeFormRadioList;
 		private DropDownList dropDownList;
 		private readonly List<ListItem> listItems = new List<ListItem>();
 		private string durableValue = "";
@@ -56,6 +50,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<DisplayLinkData> displayLinkDataPackages = new List<DisplayLinkData>();
 		private List<EwfCheckBox> checkBoxes;
 		private PostBackButton defaultSubmitButton;
+
+		private class DisplayLinkData {
+			public string ListItemValue { get; set; }
+			public bool ControlsVisibleWhenSelected { get; set; }
+			public Control[] Controls { get; set; }
+		}
 
 		/// <summary>
 		/// Gets or sets the type of list control this is.
@@ -81,14 +81,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				durableValue = value;
 				durableValueSet = true;
 			}
-		}
-
-		// NOTE: Roll into LoadData.
-		private void setValueOnPhysicalControl( string val ) {
-			if( dropDownList != null )
-				dropDownList.SelectedValue = val;
-			else
-				freeFormRadioList.SelectedValue = val;
 		}
 
 		/// <summary>
@@ -207,7 +199,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params WebControl[] controls ) {
 			displayLinkDataPackages.Add( new DisplayLinkData
-			                             	{ ListItemValue = listItemValue, ControlsVisibleWhenSelected = controlsVisibleWhenSelected, Controls = controls } );
+				{
+					ListItemValue = listItemValue,
+					ControlsVisibleWhenSelected = controlsVisibleWhenSelected,
+					Controls = controls
+				} );
 		}
 
 		/// <summary>
@@ -215,7 +211,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params HtmlControl[] controls ) {
 			displayLinkDataPackages.Add( new DisplayLinkData
-			                             	{ ListItemValue = listItemValue, ControlsVisibleWhenSelected = controlsVisibleWhenSelected, Controls = controls } );
+				{
+					ListItemValue = listItemValue,
+					ControlsVisibleWhenSelected = controlsVisibleWhenSelected,
+					Controls = controls
+				} );
 		}
 
 		/// <summary>
@@ -226,14 +226,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+			if( !durableValueSet && listItems.Any() )
+				durableValue = listItems.First().Value;
+
 			if( Type == ListControlType.DropDownList ) {
-				dropDownList = new DropDownList();
+				dropDownList = new DropDownList { AutoPostBack = AutoPostBack };
 				foreach( var listItem in listItems ) {
 					if( listItem.Text.IsNullOrWhiteSpace() )
 						listItem.Text = HttpUtility.HtmlDecode( "&nbsp;" );
 					dropDownList.Items.Add( listItem );
 				}
-				dropDownList.AutoPostBack = AutoPostBack;
+				dropDownList.SelectedValue = AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this );
 				Controls.Add( dropDownList );
 
 				addToolTipIfNeccesary( dropDownList );
@@ -249,19 +252,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 			else {
 				checkBoxes = new List<EwfCheckBox>();
-				freeFormRadioList = new FreeFormRadioList( UniqueID );
+				freeFormRadioList = FreeFormRadioList.Create( UniqueID, false, AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
 
 				foreach( var listItem in listItems ) {
-					var checkBox = new EwfCheckBox( listItem.Text ) { AutoPostBack = AutoPostBack };
+					var radioButton = freeFormRadioList.CreateInlineRadioButton( listItem.Value, label: listItem.Text );
+					radioButton.AutoPostBack = AutoPostBack;
 					if( defaultSubmitButton != null )
-						checkBox.SetDefaultSubmitButton( defaultSubmitButton );
-					freeFormRadioList.AddCheckBox( listItem.Value, checkBox );
-					checkBoxes.Add( checkBox );
+						radioButton.SetDefaultSubmitButton( defaultSubmitButton );
+					checkBoxes.Add( radioButton );
 				}
 
 				var container = Type == ListControlType.HorizontalRadioButton
-				                	? (Control)new ControlLine( checkBoxes.ToArray() )
-				                	: ControlStack.CreateWithControls( true, checkBoxes.ToArray() );
+					                ? (Control)new ControlLine( checkBoxes.ToArray() )
+					                : ControlStack.CreateWithControls( true, checkBoxes.ToArray() );
 
 				Controls.Add( container );
 
@@ -274,10 +277,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					                                                      displayLink.Controls );
 				}
 			}
-
-			if( !durableValueSet && listItems.Any() )
-				durableValue = listItems.First().Value;
-			setValueOnPhysicalControl( AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
 		}
 
 		/// <summary>
@@ -298,14 +297,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Gets the post back value.
 		/// </summary>
 		public string GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return freeFormRadioList != null ? freeFormRadioList.SelectedValue : postBackValues.GetValue( this );
+			return freeFormRadioList != null ? freeFormRadioList.GetSelectedItemIdInPostBack( postBackValues ) : postBackValues.GetValue( this );
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return freeFormRadioList != null ? freeFormRadioList.ValueChangedOnPostBack( postBackValues ) : postBackValues.ValueChangedOnPostBack( this );
+			return freeFormRadioList != null ? freeFormRadioList.SelectionChangedOnPostBack( postBackValues ) : postBackValues.ValueChangedOnPostBack( this );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

@@ -49,9 +49,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( var c in controls ) {
 				if( c is WebControl )
-					DisplayLinkingOps.SetControlDisplay( c as WebControl, controlsVisibleWhenBoxChecked == checkBox.Checked );
+					DisplayLinkingOps.SetControlDisplay( c as WebControl, controlsVisibleWhenBoxChecked == checkBox.IsCheckedInPostBack( formControlValues ) );
 				else
-					DisplayLinkingOps.SetControlDisplay( c as HtmlControl, controlsVisibleWhenBoxChecked == checkBox.Checked );
+					DisplayLinkingOps.SetControlDisplay( c as HtmlControl, controlsVisibleWhenBoxChecked == checkBox.IsCheckedInPostBack( formControlValues ) );
 			}
 		}
 	}
