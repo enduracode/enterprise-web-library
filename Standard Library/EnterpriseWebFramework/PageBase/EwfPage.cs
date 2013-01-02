@@ -45,6 +45,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
 		private readonly List<Tuple<WebControl, Control>> postBackOnEnterControlsAndTargets = new List<Tuple<WebControl, Control>>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
+		private readonly List<Action> controlTreeValidations = new List<Action>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private string formControlHash;
 		private string formControlHashWithValues;
@@ -300,6 +301,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 			var submitButton = submitButtons.FirstOrDefault();
 
+			foreach( var i in controlTreeValidations )
+				i();
+
 			foreach( var controlAndTarget in postBackOnEnterControlsAndTargets.Where( i => i.Item2 != null || submitButton != null ) ) {
 				controlAndTarget.Item1.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
 				                                                 "if(event.which == 13) { " +
@@ -503,6 +507,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			catch {
 				return new string[ 0 ];
 			}
+		}
+
+		internal void AddControlTreeValidation( Action validation ) {
+			controlTreeValidations.Add( validation );
 		}
 
 		/// <summary>
