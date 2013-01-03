@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -38,9 +37,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates a radio button group.
 		/// </summary>
 		/// <param name="groupName"></param>
-		/// <param name="allowNoSelection">Pass true to cause a selected item ID of null (or empty string when the item ID type is string) to represent the state in
-		/// which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
-		/// http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
+		/// <param name="allowNoSelection">Pass true to allow the state in which none of the radio buttons are selected. Note that this is not recommended by the
+		/// Nielsen Norman Group; see http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
 		public RadioButtonGroup( string groupName, bool allowNoSelection ) {
 			this.groupName = groupName;
 			this.allowNoSelection = allowNoSelection;
