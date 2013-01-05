@@ -1,4 +1,6 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿using System;
+
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An item for the list form controls.
 	/// </summary>
@@ -19,6 +21,10 @@
 		private readonly string label;
 
 		internal EwfListItem( IdType id, string label ) {
+			if( typeof( IdType ) == typeof( string ) && (string)(object)id == null ) {
+				throw new ApplicationException(
+					"You cannot specify null for the value of a string; this could cause problems with drop-down lists since null and the empty string must be represented the same way in the HTML option element." );
+			}
 			this.id = id;
 			this.label = label;
 		}
