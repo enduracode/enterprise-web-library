@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -79,14 +78,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private ItemIdType getNoSelectionItemId() {
-			return typeof( ItemIdType ) == typeof( string ) ? (ItemIdType)(object)"" : default( ItemIdType );
+			return StandardLibraryMethods.GetDefaultValue<ItemIdType>( true );
 		}
 
 		/// <summary>
 		/// Returns true if the selection changed on this post back.
 		/// </summary>
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return !EqualityComparer<ItemIdType>.Default.Equals( GetSelectedItemIdInPostBack( postBackValues ), selectedItemId );
+			return !StandardLibraryMethods.AreEqual( GetSelectedItemIdInPostBack( postBackValues ), selectedItemId );
 		}
 
 		internal IEnumerable<Tuple<ItemIdType, CommonCheckBox>> ItemIdsAndCheckBoxes { get { return itemIdsAndCheckBoxes; } }

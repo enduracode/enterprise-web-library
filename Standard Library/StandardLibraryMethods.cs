@@ -367,5 +367,12 @@ namespace RedStapler.StandardLibrary {
 		public static bool AreEqual<T>( T x, T y ) {
 			return EqualityComparer<T>.Default.Equals( x, y );
 		}
+
+		/// <summary>
+		/// Returns the default value of the specified type.
+		/// </summary>
+		public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {
+			return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T );
+		}
 	}
 }
