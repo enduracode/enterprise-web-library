@@ -28,8 +28,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns a System.Web.UI.WebControls.Literal that contains an HTML encoded version of this string.
 		/// // NOTE: This should be renamed to "ToControl."
 		/// </summary>
-		public static Literal GetLiteralControl( this string s ) {
-			return new Literal { Text = s.GetTextAsEncodedHtml() };
+		public static Literal GetLiteralControl( this string s, bool returnNonBreakingSpaceIfEmpty = true ) {
+			return new Literal { Text = s.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: returnNonBreakingSpaceIfEmpty ) };
 		}
 
 		/// <summary>
@@ -46,8 +46,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return true;
 
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-			       	? HttpContext.Current.Request.IsSecureConnection
-			       	: connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfApp.SupportsSecureConnections;
+				       ? HttpContext.Current.Request.IsSecureConnection
+				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfApp.SupportsSecureConnections;
 		}
 
 		/// <summary>

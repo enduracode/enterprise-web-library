@@ -63,10 +63,10 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Encodes the given text as HTML, replacing the empty string with a non-breaking space and instances of \n with &lt;br/&gt;.
+		/// Encodes the given text as HTML, replacing instances of \n with &lt;br/&gt; and optionally replacing the empty string with a non-breaking space.
 		/// </summary>
-		public static string GetTextAsEncodedHtml( this string text ) {
-			if( text.IsNullOrWhiteSpace() )
+		public static string GetTextAsEncodedHtml( this string text, bool returnNonBreakingSpaceIfEmpty = true ) {
+			if( text.IsNullOrWhiteSpace() && returnNonBreakingSpaceIfEmpty )
 				return "&nbsp;";
 			return HttpUtility.HtmlEncode( text ).Replace( "\n", "<br/>" );
 		}
