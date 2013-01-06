@@ -329,6 +329,13 @@
     <Compile Include="TestPages\RegexHelper.aspx.designer.cs">
       <DependentUpon>RegexHelper.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\SelectListDemo.aspx.cs">
+      <DependentUpon>SelectListDemo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\SelectListDemo.aspx.designer.cs">
+      <DependentUpon>SelectListDemo.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\SubFolder\Details.aspx.cs">
       <DependentUpon>Details.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -387,6 +394,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Ewf\Chosen\chosen-sprite%402x.png" />
+    <Content Include="Ewf\Chosen\chosen-sprite.png" />
+    <Content Include="Ewf\Chosen\chosen.css" />
+    <Content Include="Ewf\Chosen\chosen.jquery.min.js" />
     <Content Include="Ewf\CkEditor\adapters\jquery.js" />
     <Content Include="Ewf\CkEditor\ckeditor.js" />
     <Content Include="Ewf\CkEditor\config.js" />
@@ -675,6 +686,7 @@
     <Content Include="Service\Web.config" />
     <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
+    <Content Include="TestPages\SelectListDemo.aspx" />
     <Content Include="TestPages\SubFolder\Details.aspx" />
     <Content Include="TestPages\SubFolder\Disabled.aspx" />
     <Content Include="TestPages\SubFolder\EntitySetup.ascx" />

@@ -1,72 +1,187 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A drop down list or radio button list that allows exactly one item to be selected. Do not use this control in markup.
-	/// NOTE: This control is experimental. It will eventually replace EwfListControl.
+	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ValType>: WebControl, ControlTreeDataLoader, FormControl<ValType> {
-		private readonly ValType durableValue;
-		//private bool valueSet;
-
-		// NOTE: Enforce in constructor that there is at least one item in the list?
-
-		// NOTE: Should we support having at least one item in the list *and* not having a value? Customers have sometimes asked for radio button lists with no default selection.
-
-		// NOTE: If a value is passed to the constructor, it must correspond to an item in the list. We don't want to continue the EwfListControl practice of ignorning an invalid selected value, because it leads to confusion about when ValueChangedOnPostBack should return true. If the user doesn't touch the control, ValueChangedOnPostBack should always return false.
-
-		// NOTE: Should it be possible to *not* pass an initial selected value to the constructor?
-		// NOTE: This might help with "add new entity" page drop downs that don't have a blank item at the top and instead start out with the first real item selected; it would be a pain to have to pass a selected value in this case.
-		// NOTE: Another thing we could do is force there to always be a blank (null) item at the top of the list; "add new entity" page client code could then just pass null as the selected value. How would this work with radio button lists?
-
-		// NOTE: Do not support multiple items with the same value. This might be useful for dividing lines in long drop down lists, or for listing the same logical item multiple times, e.g. listing "The Beatles" twice in an alphabetical list, with the Bs and also with the Ts.
-		// NOTE: But it's not really necessary given that there are plenty of nice JavaScript components out there that can transform a <select> element into something that allows the user to just start typing to filter the choices.
-		// NOTE: And one problem with allowing multiple items with the same value is what to do when the initial selected value corresponds to multiple items. Which one gets selected?
-
-		// NOTE: Use a separate control (EwfTextBox?) to support custom text scenarios. One essential part of this control is that each item has both a name and a value, and when supporting custom text there is really no such thing as a separate value corresponding to each name.
-
-		// NOTE: Don't support change events. Instead, allow a post back event on this control that forces the control into auto post back mode.
-
-		// NOTE: Consider using something like http://harvesthq.github.com/chosen/ or http://jamielottering.github.com/DropKick/ to make drop down lists better.
-
-		// NOTE: Remember to use the EwfListItem class for item adding. Also, would it ever make sense to use ChangeBasedListItem?
-
-		/// <summary>
-		/// Creates a select list.
-		/// </summary>
-		public SelectList( ValType value ) {
-			durableValue = value;
+	public static class SelectList {
+		internal class CssElementCreator: ControlCssElementCreator {
+			CssElement[] ControlCssElementCreator.CreateCssElements() {
+				return new[] { new CssElement( "DropDownList", "select" ) };
+			}
 		}
 
-		ValType FormControl<ValType>.DurableValue { get { return durableValue; } }
-		string FormControl.DurableValueAsString { get { return durableValue.ToString(); } }
+		/// <summary>
+		/// Creates a radio button list.
+		/// </summary>
+		/// <param name="items">The items in the list. There must be at least one.</param>
+		/// <param name="selectedItemId">The ID of the selected item. This must either match a list item or be the default value of the type.</param>
+		/// <param name="useHorizontalLayout">Pass true if you want the radio buttons to be laid out horizontally instead of vertically.</param>
+		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
+		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
+		/// selected if the selected item ID has the default value and none of the list items do.</param>
+		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
+		                                                                  bool useHorizontalLayout = false, string defaultValueItemLabel = "" ) {
+			return new SelectList<ItemIdType>( useHorizontalLayout, defaultValueItemLabel, null, null, items, selectedItemId );
+		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {}
+		/// <summary>
+		/// Creates a drop-down list.
+		/// </summary>
+		/// <param name="items">The items in the list. There must be at least one.</param>
+		/// <param name="selectedItemId">The ID of the selected item. This must either match a list item or be the default value of the type.</param>
+		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
+		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear.</param>
+		/// <param name="placeholderIsValid">Pass true if you would like the list to include a default-value placeholder that is considered a valid selection.
+		/// This will only be included if none of the list items have an ID with the default value and the default-value item label is the empty string. If you pass
+		/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
+		/// case the placeholder will not be considered a valid selection.</param>
+		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
+		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
+		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
+		                                                                 string placeholderText = "Please select" ) {
+			return new SelectList<ItemIdType>( null, defaultValueItemLabel, placeholderIsValid, placeholderText, items, selectedItemId );
+		}
+	}
+
+	/// <summary>
+	/// A drop-down list or radio button list.
+	/// </summary>
+	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType> {
+		private readonly bool? useHorizontalRadioLayout;
+		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
+		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
+		private readonly ItemIdType selectedItemId;
+		private FreeFormRadioList<ItemIdType> radioList;
+		private string postValue;
+
+		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+		                     IEnumerable<EwfListItem<ItemIdType>> listItems, ItemIdType selectedItemId ) {
+			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
+
+			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
+			items = getInitialItem( defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToArray();
+			if( items.All( i => !i.IsValid ) )
+				throw new ApplicationException( "There must be at least one valid selection in the list." );
+
+			// This check is only strictly necessary for drop-down lists.
+			try {
+				itemsByStringId = items.ToDictionary( i => i.StringId, i => i.Item );
+			}
+			catch( ArgumentException ) {
+				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
+			}
+
+			if( !items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemId ) ) )
+				throw new ApplicationException( "The selected item ID must either match a list item or be the default value of the type." );
+			this.selectedItemId = selectedItemId;
+		}
+
+		private IEnumerable<SelectListItem<ItemIdType>> getInitialItem( string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
+			var itemIdDefaultValue = StandardLibraryMethods.GetDefaultValue<ItemIdType>( true );
+			if( items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
+				yield break;
+
+			var selectedItemIdHasDefaultValue = StandardLibraryMethods.AreEqual( selectedItemId, itemIdDefaultValue );
+			var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( !useHorizontalRadioLayout.HasValue && placeholderIsValid.Value );
+			if( !selectedItemIdHasDefaultValue && !includeDefaultValueItemOrValidPlaceholder )
+				yield break;
+
+			var isPlaceholder = !useHorizontalRadioLayout.HasValue && !defaultValueItemLabel.Any();
+			yield return
+				new SelectListItem<ItemIdType>( EwfListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
+				                                includeDefaultValueItemOrValidPlaceholder,
+				                                isPlaceholder );
+		}
+
+		ItemIdType FormControl<ItemIdType>.DurableValue { get { return selectedItemId; } }
+		string FormControl.DurableValueAsString { get { return selectedItemId.ToString(); } }
+
+		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+			if( useHorizontalRadioLayout.HasValue ) {
+				radioList = FreeFormRadioList.Create( UniqueID, items.Any( i => !i.IsValid ), AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
+				var radioButtons = from i in items where i.IsValid select radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label ) as Control;
+				Controls.Add( useHorizontalRadioLayout.Value
+					              ? new ControlLine( radioButtons.ToArray() ) as Control
+					              : ControlStack.CreateWithControls( true, radioButtons.ToArray() ) );
+			}
+			else {
+				Attributes.Add( "name", UniqueID );
+
+				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
+				if( placeholderItem != null )
+					Attributes.Add( "data-placeholder", placeholderItem.Item.Label );
+
+				foreach( var i in items )
+					Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
+			}
+		}
+
+		private Control getOption( string value, ItemIdType id, string label ) {
+			return new Literal
+				{
+					Text =
+						"<option value=\"" + value + "\"" +
+						( StandardLibraryMethods.AreEqual( id, AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) ) ? " selected" : "" ) + ">" +
+						label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
+				};
+		}
+
+		string ControlWithJsInitLogic.GetJsInitStatements() {
+			if( useHorizontalRadioLayout.HasValue )
+				return "";
+			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
+			return "$( '#" + ClientID + "' ).chosen(" + ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) + ");";
+		}
+
+		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
+			if( !useHorizontalRadioLayout.HasValue )
+				postValue = postCollection[ postDataKey ];
+			return false;
+		}
 
 		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			throw new NotImplementedException();
+			if( !useHorizontalRadioLayout.HasValue )
+				postBackValues.Add( this, itemsByStringId.ContainsKey( postValue ) ? itemsByStringId[ postValue ].Id : items.First().Item.Id );
 		}
 
 		/// <summary>
-		/// Gets the post back value.
+		/// Validates and returns the selected item ID in the post back. The default value of the item ID type will be considered valid only if it matches a
+		/// specified list item or the default-value item label is not the empty string or the default-value placeholder (drop-downs only) was specified to be
+		/// valid.
 		/// </summary>
-		public ValType GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator ) {
+			var selectedItemIdInPostBack = useHorizontalRadioLayout.HasValue ? radioList.GetSelectedItemIdInPostBack( postBackValues ) : postBackValues.GetValue( this );
+			if( !items.Single( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
+				validator.NoteErrorAndAddMessage( "Please make a selection." );
+			return selectedItemIdInPostBack;
 		}
 
 		/// <summary>
-		/// Returns true if the value changed on this post back.
+		/// Returns true if the selection changed on this post back.
 		/// </summary>
-		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
+		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return postBackValues.ValueChangedOnPostBack( this );
+		}
+
+		bool FormControl.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
+			return SelectionChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Select; } }
+		protected override HtmlTextWriterTag TagKey { get { return useHorizontalRadioLayout.HasValue ? HtmlTextWriterTag.Div : HtmlTextWriterTag.Select; } }
+
+		void IPostBackDataHandler.RaisePostDataChangedEvent() {}
 	}
 }
