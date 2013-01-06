@@ -191,7 +191,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\EwfListItem.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\SelectListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
@@ -245,7 +245,7 @@
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormControl.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\SelectList.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\Heading.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\HeadingLevel.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
