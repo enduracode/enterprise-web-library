@@ -9,7 +9,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A control that, when clicked, causes a post back and executes code.
 	/// </summary>
 	public class PostBackButton: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
+		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack ) {
+			if( !( targetControl is IPostBackEventHandler ) && isEventPostBack )
+				throw new ApplicationException( "The target must be a post back event handler." );
+			var pbo = new PostBackOptions( targetControl, isEventPostBack ? EwfPage.EventPostBackArgument : "" );
+			return EwfPage.Instance.ClientScript.GetPostBackEventReference( pbo ) + "; return false";
+		}
+
+		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
+			// NOTE: In theory, we should always return the button tag, but buttons are difficult to style in IE7.
+			// NOTE: Another problem with button is that according to the HTML Standard, it can only contain phrasing content.
+			return actionControlStyle is TextActionControlStyle || actionControlStyle is CustomActionControlStyle ? HtmlTextWriterTag.A : HtmlTextWriterTag.Button;
+		}
+
+		internal static void AddButtonAttributes( WebControl control ) {
+			control.Attributes.Add( "name", control.UniqueID );
+			control.Attributes.Add( "value", "v" );
+			control.Attributes.Add( "type", "button" );
+		}
+
 		private readonly DataModification dataModification;
+		private Unit width = Unit.Empty;
+		private Unit height = Unit.Empty;
+		private ModalWindow confirmationWindow;
 
 		/// <summary>
 		/// Gets or sets the display style of this button. Do not set this to null.
@@ -28,9 +50,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// and a link), and absolutely may not be used with form controls.
 		/// </summary>
 		public Control ConfirmationWindowContentControl { get; set; }
-
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
 
 		/// <summary>
 		/// Creates a post back button. You may pass null for the clickHandler.
@@ -72,8 +91,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public override Unit Height { get { return height; } set { height = value; } }
 
-		private ModalWindow confirmationWindow;
-
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( TagKey == HtmlTextWriterTag.Button ) {
 				// IE7 (or at least IE8 Compatibility View) unconditionally submits a value for all "button" elements with type "button" that are on the page,
@@ -96,13 +113,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
-		}
-
-		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack ) {
-			if( !( targetControl is IPostBackEventHandler ) && isEventPostBack )
-				throw new ApplicationException( "The target must be a post back event handler." );
-			var pbo = new PostBackOptions( targetControl, isEventPostBack ? EwfPage.EventPostBackArgument : "" );
-			return EwfPage.Instance.ClientScript.GetPostBackEventReference( pbo ) + "; return false";
 		}
 
 		private void setWidth( Unit w ) {
@@ -132,17 +142,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
-
-		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
-			// NOTE: In theory, we should always return the button tag, but buttons are difficult to style in IE7.
-			// NOTE: Another problem with button is that according to the HTML Standard, it can only contain phrasing content.
-			return actionControlStyle is TextActionControlStyle || actionControlStyle is CustomActionControlStyle ? HtmlTextWriterTag.A : HtmlTextWriterTag.Button;
-		}
-
-		internal static void AddButtonAttributes( WebControl control ) {
-			control.Attributes.Add( "name", control.UniqueID );
-			control.Attributes.Add( "value", "v" );
-			control.Attributes.Add( "type", "button" );
-		}
 	}
 }
