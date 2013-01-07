@@ -23,6 +23,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		public static IEnumerable<EwfListItem<bool?>> GetYesNoItems() {
+			return GetTrueFalseItems( "Yes", "No" );
+		}
+
+		public static IEnumerable<EwfListItem<bool?>> GetTrueFalseItems( string trueLabel, string falseLabel ) {
+			return new[] { EwfListItem.Create<bool?>( true, trueLabel ), EwfListItem.Create<bool?>( false, falseLabel ) };
+		}
+
 		/// <summary>
 		/// Creates a radio button list.
 		/// </summary>
