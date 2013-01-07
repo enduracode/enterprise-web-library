@@ -10,6 +10,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+	// This control should never support custom-text scenarios. An essential element of SelectList is that each item has both a label and an ID, and custom text
+	// cannot meet this requirement. EwfTextBox would be a more appropriate place to implement custom-text "combo boxes".
+
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
