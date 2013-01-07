@@ -70,13 +70,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType> {
+	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType>,
+	                                     ControlWithCustomFocusLogic {
 		private readonly bool? useHorizontalRadioLayout;
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
 		private readonly ItemIdType selectedItemId;
 		private readonly bool autoPostBack;
 		private FreeFormRadioList<ItemIdType> radioList;
+		private EwfCheckBox firstRadioButton;
 		private string postValue;
 
 		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
@@ -126,12 +128,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( useHorizontalRadioLayout.HasValue ) {
 				radioList = FreeFormRadioList.Create( UniqueID, items.Any( i => !i.IsValid ), AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
-				var radioButtons = from i in items
-				                   where i.IsValid
-				                   select radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, autoPostBack: autoPostBack ) as Control;
+				var radioButtons =
+					( from i in items where i.IsValid select radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, autoPostBack: autoPostBack ) ).ToArray();
+				firstRadioButton = radioButtons.First();
+				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
 				Controls.Add( useHorizontalRadioLayout.Value
-					              ? new ControlLine( radioButtons.ToArray() ) as Control
-					              : ControlStack.CreateWithControls( true, radioButtons.ToArray() ) );
+					              ? new ControlLine( radioButtonsAsControls ) as Control
+					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
 				Attributes.Add( "name", UniqueID );
@@ -162,6 +165,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return "";
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 			return "$( '#" + ClientID + "' ).chosen(" + ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) + ");";
+		}
+
+		void ControlWithCustomFocusLogic.SetFocus() {
+			if( useHorizontalRadioLayout.HasValue )
+				( firstRadioButton as ControlWithCustomFocusLogic ).SetFocus();
+			else
+				Page.SetFocus( this );
 		}
 
 		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
