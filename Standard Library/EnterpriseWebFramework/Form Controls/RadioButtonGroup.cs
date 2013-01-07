@@ -48,8 +48,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an in-line radio button that is part of the group.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "" ) {
-			var checkBox = new EwfCheckBox( isSelected, label: label ) { GroupName = groupName };
+		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
+			var checkBox = new EwfCheckBox( isSelected, label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
 			checkBox.PostBackValueSelector =
 				isChecked => checkBox.IsOnPage() && isChecked || !allowNoSelection && checkBox == checkBoxes.First( i => ( i as Control ).IsOnPage() );
 			checkBoxes.Add( checkBox );
@@ -59,8 +59,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "" ) {
-			var checkBox = new BlockCheckBox( isSelected, label: label ) { GroupName = groupName };
+		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
+			var checkBox = new BlockCheckBox( isSelected, label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
 			checkBox.PostBackValueSelector =
 				isChecked => checkBox.IsOnPage() && isChecked || !allowNoSelection && checkBox == checkBoxes.First( i => ( i as Control ).IsOnPage() );
 			checkBoxes.Add( checkBox );

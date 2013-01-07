@@ -98,7 +98,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
 		}
 
-		// NOTE: Nobody is currently passing false for the second parameter, but we expect to use false when we implement AutoPostBack behavior ourselves.
 		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack ) {
 			if( !( targetControl is IPostBackEventHandler ) && isEventPostBack )
 				throw new ApplicationException( "The target must be a post back event handler." );

@@ -47,8 +47,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an in-line radio button that is part of the list.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "" ) {
-			var checkBox = new EwfCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName };
+		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
+			var checkBox = new EwfCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create( listItemId, checkBox as CommonCheckBox ) );
 			return checkBox;
 		}
@@ -56,8 +56,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "" ) {
-			var checkBox = new BlockCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName };
+		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
+			var checkBox = new BlockCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create( listItemId, checkBox as CommonCheckBox ) );
 			return checkBox;
 		}

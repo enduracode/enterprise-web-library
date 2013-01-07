@@ -40,9 +40,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 		/// selected if the selected item ID has the default value and none of the list items do.</param>
+		/// <param name="autoPostBack">Pass true if you want a post back to occur when the selection changes.</param>
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
-		                                                                  bool useHorizontalLayout = false, string defaultValueItemLabel = "" ) {
-			return new SelectList<ItemIdType>( useHorizontalLayout, defaultValueItemLabel, null, null, items, selectedItemId );
+		                                                                  bool useHorizontalLayout = false, string defaultValueItemLabel = "",
+		                                                                  bool autoPostBack = false ) {
+			return new SelectList<ItemIdType>( useHorizontalLayout, defaultValueItemLabel, null, null, items, selectedItemId, autoPostBack );
 		}
 
 		/// <summary>
@@ -57,10 +59,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 		/// case the placeholder will not be considered a valid selection.</param>
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
+		/// <param name="autoPostBack">Pass true if you want a post back to occur when the selection changes.</param>
 		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
 		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
-		                                                                 string placeholderText = "Please select" ) {
-			return new SelectList<ItemIdType>( null, defaultValueItemLabel, placeholderIsValid, placeholderText, items, selectedItemId );
+		                                                                 string placeholderText = "Please select", bool autoPostBack = false ) {
+			return new SelectList<ItemIdType>( null, defaultValueItemLabel, placeholderIsValid, placeholderText, items, selectedItemId, autoPostBack );
 		}
 	}
 
@@ -72,11 +75,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
 		private readonly ItemIdType selectedItemId;
+		private readonly bool autoPostBack;
 		private FreeFormRadioList<ItemIdType> radioList;
 		private string postValue;
 
 		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
-		                     IEnumerable<EwfListItem<ItemIdType>> listItems, ItemIdType selectedItemId ) {
+		                     IEnumerable<EwfListItem<ItemIdType>> listItems, ItemIdType selectedItemId, bool autoPostBack ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 
 			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
@@ -95,6 +99,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemId ) ) )
 				throw new ApplicationException( "The selected item ID must either match a list item or be the default value of the type." );
 			this.selectedItemId = selectedItemId;
+
+			this.autoPostBack = autoPostBack;
 		}
 
 		private IEnumerable<SelectListItem<ItemIdType>> getInitialItem( string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
@@ -120,13 +126,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( useHorizontalRadioLayout.HasValue ) {
 				radioList = FreeFormRadioList.Create( UniqueID, items.Any( i => !i.IsValid ), AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
-				var radioButtons = from i in items where i.IsValid select radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label ) as Control;
+				var radioButtons = from i in items
+				                   where i.IsValid
+				                   select radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, autoPostBack: autoPostBack ) as Control;
 				Controls.Add( useHorizontalRadioLayout.Value
 					              ? new ControlLine( radioButtons.ToArray() ) as Control
 					              : ControlStack.CreateWithControls( true, radioButtons.ToArray() ) );
 			}
 			else {
 				Attributes.Add( "name", UniqueID );
+				if( autoPostBack )
+					this.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( this, false ) );
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 				if( placeholderItem != null )
