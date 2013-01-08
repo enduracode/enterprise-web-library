@@ -96,18 +96,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                 ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
 			}
 
-			var roleList = new EwfListControl();
-			foreach( var role in availableRoles )
-				roleList.AddItem( role.Name, role.RoleId.ToString() );
-			if( user != null )
-				roleList.Value = user.Role.RoleId.ToString();
 			b.AddFormItems( FormItem.Create( "Role",
-			                                 roleList,
+			                                 SelectList.CreateDropDown( from i in availableRoles select EwfListItem.Create( i.RoleId as int?, i.Name ),
+			                                                            user != null ? user.Role.RoleId as int? : null ),
 			                                 validationGetter:
 				                                 control =>
 				                                 new Validation(
-					                                 ( pbv, validator ) => RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), control.GetPostBackValue( pbv ) ),
-					                                 vl ) ) );
+					                                 ( pbv, validator ) => RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ), vl ) ) );
 
 			Controls.Add( b );
 		}
@@ -148,7 +143,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during ValidateFormValues or ModifyData to retrieve the validated role ID.
 		/// </summary>
-		public byte RoleId { get; private set; }
+		public int RoleId { get; private set; }
 
 		/// <summary>
 		/// Call this during ModifyData.

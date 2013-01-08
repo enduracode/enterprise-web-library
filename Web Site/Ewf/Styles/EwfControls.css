@@ -114,7 +114,7 @@ ewfActionControlAllButtonStylesStatesWithFocusAndWithoutHover {
 	background-color: gray;
 }
 
-ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList, ewfControlStackItem > ewfListControlDropDownStyle, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfListControlDropDownStyle {
+ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
 	width: 100%;
 }
 

@@ -106,7 +106,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			//durationPicker.ToolTip = "duration picker tooltip";
 			ewfLabel.ToolTip = "label tooltip";
-			ewfListControl.ToolTip = "ewf list control tooltip";
 			ewfImage.ToolTip = "ewf image tooltip";
 			controlStack.Controls.Add( new Paragraph( "Ewf Paragraph Control".GetLiteralControl() ) { ToolTip = "EwfParagraph tool tip" } );
 			ewfDatePicker.ToolTip = "ewf datepicker tooltip";

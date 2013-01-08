@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
@@ -62,7 +63,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CurrentDateButtonText = "Current Date";
 			CurrentDateButton =
 				new ImageActionControlStyle( IsTwoWeekCalendar ? "~/Ewf/Images/Calendar/button_currentweek.gif" : "~/Ewf/Images/Calendar/button_currentmonth.gif" )
-					{ AlternateText = CurrentDateButtonText };
+					{
+						AlternateText = CurrentDateButtonText
+					};
 
 
 			NextButtonText = "Next";
@@ -115,8 +118,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var localDate = IsTwoWeekCalendar ? date.WeekBeginDate() : new DateTime( date.Year, date.Month, 1 ).WeekBeginDate();
 			var endDrawingDate = IsTwoWeekCalendar
-			                     	? localDate.AddDays( 13 )
-			                     	: new DateTime( date.Year, date.Month, 1 ).AddDays( DateTime.DaysInMonth( date.Year, date.Month ) - 1 );
+				                     ? localDate.AddDays( 13 )
+				                     : new DateTime( date.Year, date.Month, 1 ).AddDays( DateTime.DaysInMonth( date.Year, date.Month ) - 1 );
 
 			do {
 				var row = new TableRow();
@@ -140,12 +143,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private void buildNavigationBox() {
-			var jumpList = new EwfListControl { Width = JumpListWidth, AutoPostBack = true };
-			for( var i = -3; i <= 3; i += 1 )
-				jumpList.AddItem( formatDateTimeForJumpList( adjustDateByNumberOfIntervals( date, i ) ), i.ToString() );
-			jumpList.Value = "0";
-			EwfPage.Instance.PostBackDataModification.AddModificationMethod(
-				cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, int.Parse( jumpList.Value ) ) ) );
+			var jumpList =
+				SelectList.CreateDropDown(
+					from i in Enumerable.Range( -3, 7 ) select EwfListItem.Create( i, formatDateTimeForJumpList( adjustDateByNumberOfIntervals( date, i ) ) ),
+					0,
+					autoPostBack: true );
+			jumpList.Width = JumpListWidth;
+			var numIntervals = 0;
+			EwfPage.Instance.PostBackDataModification.AddTopValidationMethod(
+				( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
+			EwfPage.Instance.PostBackDataModification.AddModificationMethod( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
 			var previousLink = new PostBackButton( new DataModification(),

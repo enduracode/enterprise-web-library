@@ -241,7 +241,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\EwfImage.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\EwfLink.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfListControl.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormControl.cs" />

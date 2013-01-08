@@ -15,9 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                   FormItem.Create( "Actual price", new EwfTextBox( "" ) ),
 			                   FormItem.Create( "Quantity", new EwfTextBox( "" ) ),
 			                   FormItem.Create( "Inventory", new EwfLabel() ),
-			                   FormItem.Create( "Delivery Type", new EwfListControl() ),
-			                   FormItem.Create( "Bill Number", new EwfLabel() ),
-			                   FormItem.Create( "Account number", new EwfListControl() ) );
+			                   FormItem.Create( "Bill Number", new EwfLabel() ) );
 			ph.AddControlsReturnThis( omni );
 		}
 	}
