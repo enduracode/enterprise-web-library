@@ -19,8 +19,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public static class SelectList {
 		internal class CssElementCreator: ControlCssElementCreator {
+			internal const string DropDownCssClass = "ewfDropDown";
+
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "DropDownList", "select" ) };
+				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select" ) };
 			}
 		}
 
@@ -88,6 +90,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private FreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
+		private WebControl selectControl;
 		private string postValue;
 
 		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
@@ -159,19 +162,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
-				Attributes.Add( "name", UniqueID );
+				EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
+				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
+
+				selectControl = new WebControl( HtmlTextWriterTag.Select );
+				selectControl.Attributes.Add( "name", UniqueID );
 				if( autoPostBack )
-					this.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( this, false ) );
+					selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( this, false ) );
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 				if( placeholderItem != null )
-					Attributes.Add( "data-placeholder", placeholderItem.Item.Label );
+					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label );
 
 				foreach( var i in items )
-					Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
+					selectControl.Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
 
-				if( defaultSubmitButton != null )
-					EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
+				Controls.Add( selectControl );
 
 				EwfPage.Instance.AddDisplayLink( this );
 			}
@@ -202,8 +208,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				              select
 					              "setElementDisplay( '" + control.ClientID + "', [ " +
 					              StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ToString() + "'" ).ToArray() ) + " ].indexOf( $( '#" +
-					              ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
-				this.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
+					              selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
+				selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
 			}
 		}
 
@@ -211,7 +217,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( useHorizontalRadioLayout.HasValue )
 				return "";
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			return "$( '#" + ClientID + "' ).chosen(" + ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) + ");";
+			return "$( '#" + selectControl.ClientID + "' ).chosen(" + ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) +
+			       ");";
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
@@ -258,7 +265,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return useHorizontalRadioLayout.HasValue ? HtmlTextWriterTag.Div : HtmlTextWriterTag.Select; } }
+		protected override HtmlTextWriterTag TagKey {
+			get {
+				// Drop-down lists need a wrapping div to allow Chosen to be shown and hidden with display linking and to make the enter key submit the form.
+				return HtmlTextWriterTag.Div;
+			}
+		}
 
 		void IPostBackDataHandler.RaisePostDataChangedEvent() {}
 	}
