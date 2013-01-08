@@ -3,6 +3,8 @@ using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class SelectListDemo: EwfPage {
@@ -11,10 +13,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string PageName { get { return "Select List"; } }
 		}
 
+		private DataModification dm;
+
 		protected override void LoadData( DBConnection cn ) {
+			dm = new DataModification();
 			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
 			                          FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
 			                          FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Submit", new PostBackButton( dm, null ) ) );
 		}
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {
@@ -36,7 +42,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								                                      items.Count() == 4 ? "Default in list" : "Default not in list",
 								                                      selectedItemId.HasValue ? "One selected" : "default selected",
 								                                      defaultValueItemLabel.Any() ? "default label" : "no default label" ),
-								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ) );
+								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
+								validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), dm ) );
 					}
 				}
 			}
@@ -67,7 +74,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									                                      selectedItemId.HasValue ? "One selected" : "default selected",
 									                                      defaultValueItemLabel.Any() ? "default label" : "no default label",
 									                                      placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
-									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ) );
+									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
+									validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), dm ) );
 						}
 					}
 				}
