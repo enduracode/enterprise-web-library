@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -26,10 +28,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A radio button list that allows you to arrange the buttons on the page however you wish. If you want access to the individual selection state of each
 	/// radio button and do not need the concept of a selected item ID for the group, use RadioButtonGroup instead.
 	/// </summary>
-	public class FreeFormRadioList<ItemIdType> {
+	public class FreeFormRadioList<ItemIdType>: DisplayLink {
 		private readonly string groupName;
 		private readonly bool allowNoSelection;
 		private readonly ItemIdType selectedItemId;
+		private readonly List<Action<PostBackValueDictionary>> displayLinkingSetInitialDisplayMethods = new List<Action<PostBackValueDictionary>>();
+		private readonly List<Action> displayLinkingAddJavaScriptMethods = new List<Action>();
 		private readonly List<Tuple<ItemIdType, CommonCheckBox>> itemIdsAndCheckBoxes = new List<Tuple<ItemIdType, CommonCheckBox>>();
 
 		internal FreeFormRadioList( string groupName, bool allowNoSelection, ItemIdType selectedItemId ) {
@@ -42,6 +46,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				RadioButtonGroup.ValidateControls( allowNoSelection,
 				                                   StandardLibraryMethods.AreEqual( getNoSelectionItemId(), selectedItemId ),
 				                                   itemIdsAndCheckBoxes.Select( i => i.Item2 ) ) );
+
+			EwfPage.Instance.AddDisplayLink( this );
+		}
+
+		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<WebControl> controls ) {
+			itemIds = itemIds.ToArray();
+			controls = controls.ToArray();
+			displayLinkingSetInitialDisplayMethods.Add( formControlValues => {
+				var match = itemIds.Contains( GetSelectedItemIdInPostBack( formControlValues ) );
+				var visible = ( controlsVisibleOnMatch && match ) || ( !controlsVisibleOnMatch && !match );
+				foreach( var i in controls )
+					DisplayLinkingOps.SetControlDisplay( i, visible );
+			} );
+			displayLinkingAddJavaScriptMethods.Add( () => {
+				foreach( var pair in itemIdsAndCheckBoxes ) {
+					DisplayLinkingOps.AddDisplayJavaScriptToCheckBox( pair.Item2,
+					                                                  itemIds.Contains( pair.Item1 ) ? controlsVisibleOnMatch : !controlsVisibleOnMatch,
+					                                                  controls.ToArray() );
+				}
+			} );
 		}
 
 		/// <summary>
@@ -68,6 +92,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return StandardLibraryMethods.AreEqual( listItemId, selectedItemId );
 		}
 
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
+			foreach( var i in displayLinkingSetInitialDisplayMethods )
+				i( formControlValues );
+		}
+
+		void DisplayLink.AddJavaScript() {
+			foreach( var i in displayLinkingAddJavaScriptMethods )
+				i();
+		}
+
 		/// <summary>
 		/// Gets the selected item ID in the post back.
 		/// </summary>
@@ -87,7 +121,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return !StandardLibraryMethods.AreEqual( GetSelectedItemIdInPostBack( postBackValues ), selectedItemId );
 		}
-
-		internal IEnumerable<Tuple<ItemIdType, CommonCheckBox>> ItemIdsAndCheckBoxes { get { return itemIdsAndCheckBoxes; } }
 	}
 }

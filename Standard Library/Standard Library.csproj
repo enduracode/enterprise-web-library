@@ -314,7 +314,6 @@
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLinkingOps.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplayLinking\FreeFormRadioListToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\ListControlToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\EwfApp.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\EwfException.cs" />

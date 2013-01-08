@@ -257,12 +257,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				addToolTipIfNeccesary( container );
 
-				foreach( var displayLink in displayLinkDataPackages ) {
-					FreeFormRadioListToControlArrayDisplayLink.AddToPage( freeFormRadioList,
-					                                                      displayLink.ListItemValue,
-					                                                      displayLink.ControlsVisibleWhenSelected,
-					                                                      displayLink.Controls );
-				}
+				foreach( var displayLink in displayLinkDataPackages )
+					freeFormRadioList.AddDisplayLink( displayLink.ListItemValue.ToSingleElementArray(), displayLink.ControlsVisibleWhenSelected, displayLink.Controls );
 			}
 		}
 
