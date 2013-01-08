@@ -69,8 +69,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                                           this.GetClientUrl( "~/Ewf/FileUploader/jquery.progressbar.min.js" ) );
 
 			// Choose between dropping files onto the page or browse for them.
-			var chooseUploadMethod = new EwfListControl { Type = EwfListControl.ListControlType.HorizontalRadioButton };
-			chooseUploadMethod.FillWithTrueFalse( "Drag and drop files", "Browse for files" );
+			var chooseUploadMethod = SelectList.CreateRadioList( SelectList.GetTrueFalseItems( "Drag and drop files", "Browse for files" ),
+			                                                     true,
+			                                                     useHorizontalLayout: true );
 
 			var dragFilesHerePanel = new Panel { CssClass = "dropZone" }.AddControlsReturnThis( new Paragraph( "Drop files here" ) { CssClass = "dropFilesHereMessage" } );
 
@@ -80,8 +81,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			browseForFiles.Attributes.Add( "multiple", "multiple" );
 			browseForFiles.Attributes.Add( "onchange", @"inputChanged(this);" );
 
-			chooseUploadMethod.AddDisplayLink( true.ToString(), true, dragFilesHerePanel );
-			chooseUploadMethod.AddDisplayLink( false.ToString(), true, browseForFiles );
+			chooseUploadMethod.AddDisplayLink( ( true as bool? ).ToSingleElementArray(), true, dragFilesHerePanel.ToSingleElementArray() );
+			chooseUploadMethod.AddDisplayLink( ( false as bool? ).ToSingleElementArray(), true, browseForFiles.ToSingleElementArray() );
 
 			var uploadPending = new Box( "Files to be uploaded",
 			                             new Control[]

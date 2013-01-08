@@ -13,6 +13,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// into the system.
 	/// </summary>
 	public class HtmlBlockEditor: WebControl, ControlTreeDataLoader {
+		private const string internalId = "internal";
+		private const string simpleId = "simple";
+
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -21,13 +24,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private const string internalId = "internal";
-		private const string simpleId = "simple";
-
 		private readonly HtmlBlockEditorModification mod;
 		private WysiwygHtmlEditor wysiwygEditor;
 		private EwfTextBox textBox;
-		private EwfListControl editModes;
+		private SelectList<string> editModes;
 
 		/// <summary>
 		/// Creates an HTML block editor.
@@ -57,12 +57,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// may not work.
 			var wysiwygEditorBlock = new Block( wysiwygEditor );
 
-			editModes = new EwfListControl();
-			editModes.Type = EwfListControl.ListControlType.HorizontalRadioButton;
-			editModes.AddItem( "The built-in editor", internalId );
-			editModes.AddItem( "A simple text box", simpleId );
-			editModes.AddDisplayLink( internalId, true, wysiwygEditorBlock );
-			editModes.AddDisplayLink( simpleId, true, textBox );
+			editModes =
+				SelectList.CreateRadioList( new[] { EwfListItem.Create( internalId, "The built-in editor" ), EwfListItem.Create( simpleId, "A simple text box" ) },
+				                            internalId,
+				                            useHorizontalLayout: true );
+			editModes.AddDisplayLink( internalId.ToSingleElementArray(), true, wysiwygEditorBlock.ToSingleElementArray() );
+			editModes.AddDisplayLink( simpleId.ToSingleElementArray(), true, textBox.ToSingleElementArray() );
 
 			var modeSelection = new Panel().AddControlsReturnThis( new LiteralControl( "View and edit HTML with:&nbsp;&nbsp;" ), editModes );
 			modeSelection.Style.Add( "margin-bottom", "4px" );
@@ -75,7 +75,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public void Validate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
 			mod.Html = validator.GetString( errorHandler,
-			                                editModes.Value == internalId ? wysiwygEditor.GetPostBackValue( postBackValues ) : textBox.GetPostBackValue( postBackValues ),
+			                                editModes.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ) == internalId
+				                                ? wysiwygEditor.GetPostBackValue( postBackValues )
+				                                : textBox.GetPostBackValue( postBackValues ),
 			                                true );
 		}
 

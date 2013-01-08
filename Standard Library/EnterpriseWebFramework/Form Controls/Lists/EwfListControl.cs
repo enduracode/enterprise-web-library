@@ -6,7 +6,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -46,15 +45,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<ListItem> listItems = new List<ListItem>();
 		private string durableValue = "";
 		private bool durableValueSet;
-		private readonly List<DisplayLinkData> displayLinkDataPackages = new List<DisplayLinkData>();
 		private List<EwfCheckBox> checkBoxes;
 		private PostBackButton defaultSubmitButton;
-
-		private class DisplayLinkData {
-			public string ListItemValue { get; set; }
-			public bool ControlsVisibleWhenSelected { get; set; }
-			public WebControl[] Controls { get; set; }
-		}
 
 		/// <summary>
 		/// Gets or sets the type of list control this is.
@@ -194,18 +186,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Creates a display link that toggles the visibility of the given controls when the given list item is selected and unselected.
-		/// </summary>
-		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params WebControl[] controls ) {
-			displayLinkDataPackages.Add( new DisplayLinkData
-				{
-					ListItemValue = listItemValue,
-					ControlsVisibleWhenSelected = controlsVisibleWhenSelected,
-					Controls = controls
-				} );
-		}
-
-		/// <summary>
 		/// Assigns this to submit the given PostBackButton. This will disable the button's submit behavior. Do not pass null.
 		/// </summary>
 		public void SetDefaultSubmitButton( PostBackButton pbb ) {
@@ -228,13 +208,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				addToolTipIfNeccesary( dropDownList );
 
-				foreach( var displayLink in displayLinkDataPackages ) {
-					ListControlToControlArrayDisplayLink.AddToPage( dropDownList,
-					                                                GetIndexByValue( displayLink.ListItemValue ).Value,
-					                                                displayLink.ControlsVisibleWhenSelected,
-					                                                displayLink.Controls );
-				}
-
 				EwfPage.Instance.MakeControlPostBackOnEnter( dropDownList, defaultSubmitButton );
 			}
 			else {
@@ -256,9 +229,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Controls.Add( container );
 
 				addToolTipIfNeccesary( container );
-
-				foreach( var displayLink in displayLinkDataPackages )
-					freeFormRadioList.AddDisplayLink( displayLink.ListItemValue.ToSingleElementArray(), displayLink.ControlsVisibleWhenSelected, displayLink.Controls );
 			}
 		}
 

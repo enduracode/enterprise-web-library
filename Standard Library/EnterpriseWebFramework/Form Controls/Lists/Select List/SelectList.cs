@@ -7,6 +7,7 @@ using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -74,13 +75,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A drop-down list or radio button list.
 	/// </summary>
 	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType>,
-	                                     ControlWithCustomFocusLogic {
+	                                     ControlWithCustomFocusLogic, DisplayLink {
 		private readonly bool? useHorizontalRadioLayout;
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
 		private readonly ItemIdType selectedItemId;
 		private readonly bool autoPostBack;
 		private readonly PostBackButton defaultSubmitButton;
+
+		private readonly List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<WebControl>>> displayLinks =
+			new List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<WebControl>>>();
+
 		private FreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
 		private string postValue;
@@ -127,12 +132,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                                isPlaceholder );
 		}
 
+		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<WebControl> controls ) {
+			displayLinks.Add( Tuple.Create( itemIds, controlsVisibleOnMatch, controls.ToArray() as IEnumerable<WebControl> ) );
+		}
+
 		ItemIdType FormControl<ItemIdType>.DurableValue { get { return selectedItemId; } }
 		string FormControl.DurableValueAsString { get { return selectedItemId.ToString(); } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( useHorizontalRadioLayout.HasValue ) {
 				radioList = FreeFormRadioList.Create( UniqueID, items.Any( i => !i.IsValid ), AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
+				foreach( var i in displayLinks )
+					radioList.AddDisplayLink( i.Item1, i.Item2, i.Item3 );
+
 				var radioButtons = items.Where( i => i.IsValid ).Select( i => {
 					var radioButton = radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, autoPostBack: autoPostBack );
 					if( defaultSubmitButton != null )
@@ -140,6 +152,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					return radioButton;
 				} ).ToArray();
 				firstRadioButton = radioButtons.First();
+
 				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
 				Controls.Add( useHorizontalRadioLayout.Value
 					              ? new ControlLine( radioButtonsAsControls ) as Control
@@ -159,6 +172,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				if( defaultSubmitButton != null )
 					EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
+
+				EwfPage.Instance.AddDisplayLink( this );
 			}
 		}
 
@@ -170,6 +185,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						( StandardLibraryMethods.AreEqual( id, AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) ) ? " selected" : "" ) + ">" +
 						label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
 				};
+		}
+
+		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
+			foreach( var displayLink in displayLinks ) {
+				var match = displayLink.Item1.Contains( formControlValues.GetValue( this ) );
+				var visible = ( displayLink.Item2 && match ) || ( !displayLink.Item2 && !match );
+				foreach( var control in displayLink.Item3 )
+					DisplayLinkingOps.SetControlDisplay( control, visible );
+			}
+		}
+
+		void DisplayLink.AddJavaScript() {
+			foreach( var displayLink in displayLinks ) {
+				var scripts = from control in displayLink.Item3
+				              select
+					              "setElementDisplay( '" + control.ClientID + "', [ " +
+					              StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ToString() + "'" ).ToArray() ) + " ].indexOf( $( '#" +
+					              ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
+				this.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
+			}
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
