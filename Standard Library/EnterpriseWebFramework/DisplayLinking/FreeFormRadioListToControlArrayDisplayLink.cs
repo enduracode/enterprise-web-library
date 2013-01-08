@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
@@ -16,22 +14,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		                                          params WebControl[] controls ) {
 			EwfPage.Instance.AddDisplayLink( new FreeFormRadioListToControlArrayDisplayLink<ItemIdType>( radioList, selectedValue, controlsVisibleOnValue, controls ) );
 		}
-
-		/// <summary>
-		/// Creates a new display link and adds it to the current EwfPage.
-		/// </summary>
-		public static void AddToPage<ItemIdType>( FreeFormRadioList<ItemIdType> radioList, ItemIdType selectedValue, bool controlsVisibleOnValue,
-		                                          params HtmlControl[] controls ) {
-			EwfPage.Instance.AddDisplayLink( new FreeFormRadioListToControlArrayDisplayLink<ItemIdType>( radioList, selectedValue, controlsVisibleOnValue, controls ) );
-		}
-
-		/// <summary>
-		/// Framework use only. Do not include controls other than WebControls or HtmlControls. Creates a new display link and adds it to the current EwfPage.
-		/// </summary>
-		internal static void AddToPage<ItemIdType>( FreeFormRadioList<ItemIdType> radioList, ItemIdType selectedValue, bool controlsVisibleOnValue,
-		                                            params Control[] controls ) {
-			EwfPage.Instance.AddDisplayLink( new FreeFormRadioListToControlArrayDisplayLink<ItemIdType>( radioList, selectedValue, controlsVisibleOnValue, controls ) );
-		}
 	}
 
 	/// <summary>
@@ -41,10 +23,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		private readonly FreeFormRadioList<ItemIdType> radioList;
 		private readonly ItemIdType selectedValue;
 		private readonly bool controlsVisibleOnValue;
-		private readonly IEnumerable<Control> controls;
+		private readonly IEnumerable<WebControl> controls;
 
 		internal FreeFormRadioListToControlArrayDisplayLink( FreeFormRadioList<ItemIdType> radioList, ItemIdType selectedValue, bool controlsVisibleOnValue,
-		                                                     IEnumerable<Control> controls ) {
+		                                                     IEnumerable<WebControl> controls ) {
 			this.radioList = radioList;
 			this.selectedValue = selectedValue;
 			this.controlsVisibleOnValue = controlsVisibleOnValue;
@@ -63,12 +45,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			var itemIdsMatch = StandardLibraryMethods.AreEqual( radioList.GetSelectedItemIdInPostBack( formControlValues ), selectedValue );
 			var visible = ( controlsVisibleOnValue && itemIdsMatch ) || ( !controlsVisibleOnValue && !itemIdsMatch );
-			foreach( var c in controls ) {
-				if( c is WebControl )
-					DisplayLinkingOps.SetControlDisplay( c as WebControl, visible );
-				else
-					DisplayLinkingOps.SetControlDisplay( c as HtmlControl, visible );
-			}
+			foreach( var c in controls )
+				DisplayLinkingOps.SetControlDisplay( c, visible );
 		}
 	}
 }

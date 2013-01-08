@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
@@ -16,7 +15,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	public class ToggleButton: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, DisplayLink, ActionControl {
 		private const string pageStateKey = "controlsToggled";
 
-		private readonly List<Control> controlsToToggle = new List<Control>();
+		private readonly List<WebControl> controlsToToggle = new List<WebControl>();
 
 		/// <summary>
 		/// Gets or sets the text to show when this link has been clicked an odd number of times. Pass NULL for this if you want the text to stay the same or the
@@ -50,25 +49,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Creates a toggle button with ControlsToToggle already populated.
-		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
-		/// </summary>
-		public ToggleButton( IEnumerable<HtmlControl> controlsToToggle, ActionControlStyle actionControlStyle ) {
-			AddControlsToToggle( controlsToToggle.ToArray() );
-			ActionControlStyle = actionControlStyle;
-		}
-
-		/// <summary>
 		/// Add controls that should be toggled. Use SetInitialDisplay on each control to set up its initial visibility.
 		/// </summary>
 		public void AddControlsToToggle( params WebControl[] controlsToToggle ) {
-			this.controlsToToggle.AddRange( controlsToToggle );
-		}
-
-		/// <summary>
-		/// Add controls that should be toggled. Use SetInitialDisplay on each control to set up its initial visibility.
-		/// </summary>
-		public void AddControlsToToggle( params HtmlControl[] controlsToToggle ) {
 			this.controlsToToggle.AddRange( controlsToToggle );
 		}
 
@@ -154,23 +137,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					else
 						this.SetInitialDisplay( false );
 				}
-				foreach( var control in controlsToToggle ) {
-					if( control is WebControl ) {
-						var webControl = control as WebControl;
-						if( toggleClasses != null ) {
-							foreach( var i in toggleClasses )
-								webControl.CssClass = webControl.CssClass.Contains( i ) ? webControl.CssClass.Replace( i, "" ) : webControl.CssClass.ConcatenateWithSpace( i );
-						}
-						else
-							webControl.ToggleInitialDisplay();
+				foreach( var webControl in controlsToToggle ) {
+					if( toggleClasses != null ) {
+						foreach( var i in toggleClasses )
+							webControl.CssClass = webControl.CssClass.Contains( i ) ? webControl.CssClass.Replace( i, "" ) : webControl.CssClass.ConcatenateWithSpace( i );
 					}
 					else
-						( control as HtmlControl ).ToggleInitialDisplay();
+						webControl.ToggleInitialDisplay();
 				}
 			}
 		}
 
-		private static bool getControlsToggled( string hiddenFieldValue ) {
+		private bool getControlsToggled( string hiddenFieldValue ) {
 			bool result;
 			return bool.TryParse( hiddenFieldValue, out result ) && result;
 		}

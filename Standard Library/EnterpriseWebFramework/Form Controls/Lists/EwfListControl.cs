@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
@@ -54,7 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private class DisplayLinkData {
 			public string ListItemValue { get; set; }
 			public bool ControlsVisibleWhenSelected { get; set; }
-			public Control[] Controls { get; set; }
+			public WebControl[] Controls { get; set; }
 		}
 
 		/// <summary>
@@ -198,18 +197,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a display link that toggles the visibility of the given controls when the given list item is selected and unselected.
 		/// </summary>
 		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params WebControl[] controls ) {
-			displayLinkDataPackages.Add( new DisplayLinkData
-				{
-					ListItemValue = listItemValue,
-					ControlsVisibleWhenSelected = controlsVisibleWhenSelected,
-					Controls = controls
-				} );
-		}
-
-		/// <summary>
-		/// Creates a display link that toggles the visibility of the given controls when the given list item is selected and unselected.
-		/// </summary>
-		public void AddDisplayLink( string listItemValue, bool controlsVisibleWhenSelected, params HtmlControl[] controls ) {
 			displayLinkDataPackages.Add( new DisplayLinkData
 				{
 					ListItemValue = listItemValue,

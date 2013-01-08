@@ -92,16 +92,9 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Sets the initial visibility of a web control.  This can be used in tandem with DisplayLinking.
+		/// Sets the initial visibility of a web control. This can be used in tandem with DisplayLinking.
 		/// </summary>
 		public static void SetInitialDisplay( this WebControl control, bool visible ) {
-			DisplayLinkingOps.SetControlDisplay( control, visible );
-		}
-
-		/// <summary>
-		/// Sets the initial visibility of an html control.  This can be used in tandem with DisplayLinking.
-		/// </summary>
-		public static void SetInitialDisplay( this HtmlControl control, bool visible ) {
 			DisplayLinkingOps.SetControlDisplay( control, visible );
 		}
 
@@ -109,13 +102,6 @@ namespace RedStapler.StandardLibrary {
 		/// Sets the initial visibility of the given control to the opposite of what it currently is.
 		/// </summary>
 		internal static void ToggleInitialDisplay( this WebControl control ) {
-			SetInitialDisplay( control, control.Style[ HtmlTextWriterStyle.Display ] == invisibleDisplayCssStyleName );
-		}
-
-		/// <summary>
-		/// Sets the initial visibility of the given control to the opposite of what it currently is.
-		/// </summary>
-		internal static void ToggleInitialDisplay( this HtmlControl control ) {
 			SetInitialDisplay( control, control.Style[ HtmlTextWriterStyle.Display ] == invisibleDisplayCssStyleName );
 		}
 

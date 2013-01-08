@@ -1,7 +1,5 @@
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 	/// <summary>
@@ -15,18 +13,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 			EwfPage.Instance.AddDisplayLink( new CheckBoxToControlArrayDisplayLink( checkBox, controlsVisibleWhenBoxChecked, controls ) );
 		}
 
-		/// <summary>
-		/// Creates a new check box display link and adds it to the current EwfPage.
-		/// </summary>
-		public static void AddToPage( CommonCheckBox checkBox, bool controlsVisibleWhenBoxChecked, params HtmlControl[] controls ) {
-			EwfPage.Instance.AddDisplayLink( new CheckBoxToControlArrayDisplayLink( checkBox, controlsVisibleWhenBoxChecked, controls ) );
-		}
-
 		private readonly CommonCheckBox checkBox;
 		private readonly bool controlsVisibleWhenBoxChecked;
-		private readonly Control[] controls;
+		private readonly WebControl[] controls;
 
-		private CheckBoxToControlArrayDisplayLink( CommonCheckBox checkBox, bool controlsVisibleWhenBoxChecked, params Control[] controls ) {
+		private CheckBoxToControlArrayDisplayLink( CommonCheckBox checkBox, bool controlsVisibleWhenBoxChecked, params WebControl[] controls ) {
 			this.checkBox = checkBox;
 			this.controlsVisibleWhenBoxChecked = controlsVisibleWhenBoxChecked;
 			this.controls = controls;
@@ -47,12 +38,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		}
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
-			foreach( var c in controls ) {
-				if( c is WebControl )
-					DisplayLinkingOps.SetControlDisplay( c as WebControl, controlsVisibleWhenBoxChecked == checkBox.IsCheckedInPostBack( formControlValues ) );
-				else
-					DisplayLinkingOps.SetControlDisplay( c as HtmlControl, controlsVisibleWhenBoxChecked == checkBox.IsCheckedInPostBack( formControlValues ) );
-			}
+			foreach( var c in controls )
+				DisplayLinkingOps.SetControlDisplay( c, controlsVisibleWhenBoxChecked == checkBox.IsCheckedInPostBack( formControlValues ) );
 		}
 	}
 }

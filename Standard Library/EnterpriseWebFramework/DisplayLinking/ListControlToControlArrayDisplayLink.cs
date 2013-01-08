@@ -1,5 +1,3 @@
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
@@ -11,16 +9,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 		/// EwfListControl use only. Do not include controls other than WebControls or HtmlControls. Creates a new list control display link and adds it to the
 		/// current EwfPage.
 		/// </summary>
-		internal static void AddToPage( DropDownList listControl, int selectedIndex, bool controlsVisibleOnIndex, params Control[] controls ) {
+		internal static void AddToPage( DropDownList listControl, int selectedIndex, bool controlsVisibleOnIndex, params WebControl[] controls ) {
 			EwfPage.Instance.AddDisplayLink( new ListControlToControlArrayDisplayLink( listControl, selectedIndex, controlsVisibleOnIndex, controls ) );
 		}
 
 		private readonly DropDownList listControl;
 		private readonly int selectedIndex;
 		private readonly bool controlsVisibleOnIndex;
-		private readonly Control[] controls;
+		private readonly WebControl[] controls;
 
-		private ListControlToControlArrayDisplayLink( DropDownList listControl, int selectedIndex, bool controlsVisibleOnIndex, params Control[] controls ) {
+		private ListControlToControlArrayDisplayLink( DropDownList listControl, int selectedIndex, bool controlsVisibleOnIndex, params WebControl[] controls ) {
 			this.listControl = listControl;
 			this.selectedIndex = selectedIndex;
 			this.controlsVisibleOnIndex = controlsVisibleOnIndex;
@@ -42,10 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
 			foreach( var c in controls ) {
 				var visible = ( controlsVisibleOnIndex && listControl.SelectedIndex == selectedIndex ) ||
 				              ( !controlsVisibleOnIndex && listControl.SelectedIndex != selectedIndex );
-				if( c is WebControl )
-					DisplayLinkingOps.SetControlDisplay( c as WebControl, visible );
-				else
-					DisplayLinkingOps.SetControlDisplay( c as HtmlControl, visible );
+				DisplayLinkingOps.SetControlDisplay( c, visible );
 			}
 		}
 	}

@@ -1,5 +1,4 @@
 ﻿using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
@@ -76,7 +75,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var dragFilesHerePanel = new Panel { CssClass = "dropZone" }.AddControlsReturnThis( new Paragraph( "Drop files here" ) { CssClass = "dropFilesHereMessage" } );
 
 			// Not using an ASP.NET control because I want full control without any magic.
-			var browseForFiles = new HtmlGenericControl( "input" );
+			var browseForFiles = new WebControl( HtmlTextWriterTag.Input );
 			browseForFiles.Attributes.Add( "type", "file" );
 			browseForFiles.Attributes.Add( "multiple", "multiple" );
 			browseForFiles.Attributes.Add( "onchange", @"inputChanged(this);" );
@@ -86,19 +85,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var uploadPending = new Box( "Files to be uploaded",
 			                             new Control[]
-			                             	{
-			                             		new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) )
-			                             		, new Heading { CssClass = "upload-count" }
-			                             	} ) { CssClass = "queuedFiles" };
+				                             {
+					                             new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) )
+					                             , new Heading { CssClass = "upload-count" }
+				                             } ) { CssClass = "queuedFiles" };
 
 			Controls.Add(
 				new Box( new Control[]
-				         	{
-				         		new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
-				         		new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
-				         		new CustomButton( @"uploadButtonClicked(this);" )
-				         			{ ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ), CssClass = "beginUploadButton" }
-				         	} ) { CssClass = "upload-box" } );
+					{
+						new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
+						new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
+						new CustomButton( @"uploadButtonClicked(this);" ) { ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ), CssClass = "beginUploadButton" }
+					} ) { CssClass = "upload-box" } );
 		}
 
 		/// <summary>

@@ -1,5 +1,4 @@
 ﻿using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -28,17 +27,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// any way previous to this.
 		/// </summary>
 		public void AddTab( string label, WebControl content ) {
-			Controls.Add( content );
-			tabs.AddItem( label, label );
-			tabs.AddDisplayLink( label, true, content );
-		}
-
-		/// <summary>
-		/// Adds a tab with the given label and its associated content.
-		/// The given control is added to this control, and thus should not be a control from markup and should not have been added to the page in
-		/// any way previous to this.
-		/// </summary>
-		public void AddTab( string label, HtmlControl content ) {
 			Controls.Add( content );
 			tabs.AddItem( label, label );
 			tabs.AddDisplayLink( label, true, content );
