@@ -304,21 +304,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			foreach( var i in controlTreeValidations )
 				i();
 
+			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
+			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
+			// happen after LoadData is called on all controls.
+			foreach( var displayLink in displayLinks )
+				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+
+			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
 			foreach( var controlAndTarget in postBackOnEnterControlsAndTargets.Where( i => i.Item2 != null || submitButton != null ) ) {
 				controlAndTarget.Item1.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
 				                                                 "if(event.which == 13) { " +
 				                                                 PostBackButton.GetPostBackScript( controlAndTarget.Item2 ?? submitButton, true ) + "; }" );
 			}
+			foreach( var displayLink in displayLinks )
+				displayLink.AddJavaScript();
 
 			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
 			addJavaScriptStartUpLogic( submitButton, etherealControlsForJsStartUpLogic, !AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist );
-
-			// This must be after LoadData is called on all controls. AddJavaScript shouldn't be called during AddDisplayLink since
-			// FreeFormRadioListToControlArrayDisplayLink's script must be built after all items are added to the list.
-			foreach( var displayLink in displayLinks ) {
-				displayLink.AddJavaScript();
-				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-			}
 		}
 
 		private void addMetadataAndFaviconLinks() {
