@@ -9,7 +9,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// ID for the group. Otherwise use FreeFormRadioList.
 	/// </summary>
 	public class RadioButtonGroup {
-		internal static void ValidateControls( bool allowsNoSelection, bool inNoSelectionState, IEnumerable<CommonCheckBox> checkBoxes ) {
+		internal static void ValidateControls( bool allowsNoSelection, bool inNoSelectionState, IEnumerable<CommonCheckBox> checkBoxes,
+		                                       bool disableSingleButtonDetection ) {
 			Control selectedButton = null;
 			if( !allowsNoSelection || !inNoSelectionState ) {
 				var selectedButtons = checkBoxes.Where( i => i.IsChecked ).ToArray();
@@ -22,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( checkBoxesOnPage.Any() ) {
 				if( selectedButton != null && !selectedButton.IsOnPage() )
 					throw new ApplicationException( "The selected radio button must be on the page." );
-				if( checkBoxesOnPage.Count() < 2 ) {
+				if( !disableSingleButtonDetection && checkBoxesOnPage.Count() < 2 ) {
 					const string link = "http://developers.whatwg.org/states-of-the-type-attribute.html#radio-button-state-%28type=radio%29";
 					throw new ApplicationException( "A radio button group must contain more than one element; see " + link + "." );
 				}
@@ -39,10 +40,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="groupName"></param>
 		/// <param name="allowNoSelection">Pass true to allow the state in which none of the radio buttons are selected. Note that this is not recommended by the
 		/// Nielsen Norman Group; see http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
-		public RadioButtonGroup( string groupName, bool allowNoSelection ) {
+		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this group. Use with caution, as this
+		/// violates the HTML specification.</param>
+		public RadioButtonGroup( string groupName, bool allowNoSelection, bool disableSingleButtonDetection = false ) {
 			this.groupName = groupName;
 			this.allowNoSelection = allowNoSelection;
-			EwfPage.Instance.AddControlTreeValidation( () => ValidateControls( allowNoSelection, checkBoxes.All( i => !i.IsChecked ), checkBoxes ) );
+			EwfPage.Instance.AddControlTreeValidation(
+				() => ValidateControls( allowNoSelection, checkBoxes.All( i => !i.IsChecked ), checkBoxes, disableSingleButtonDetection ) );
 		}
 
 		/// <summary>

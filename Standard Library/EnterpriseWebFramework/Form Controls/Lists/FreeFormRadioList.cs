@@ -19,8 +19,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
 		/// http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
 		/// <param name="selectedItemId"></param>
-		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( string groupName, bool allowNoSelection, ItemIdType selectedItemId ) {
-			return new FreeFormRadioList<ItemIdType>( groupName, allowNoSelection, selectedItemId );
+		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
+		/// violates the HTML specification.</param>
+		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( string groupName, bool allowNoSelection, ItemIdType selectedItemId,
+		                                                                bool disableSingleButtonDetection = false ) {
+			return new FreeFormRadioList<ItemIdType>( groupName, allowNoSelection, disableSingleButtonDetection, selectedItemId );
 		}
 	}
 
@@ -36,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly List<Action> displayLinkingAddJavaScriptMethods = new List<Action>();
 		private readonly List<Tuple<ItemIdType, CommonCheckBox>> itemIdsAndCheckBoxes = new List<Tuple<ItemIdType, CommonCheckBox>>();
 
-		internal FreeFormRadioList( string groupName, bool allowNoSelection, ItemIdType selectedItemId ) {
+		internal FreeFormRadioList( string groupName, bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId ) {
 			this.groupName = groupName;
 			this.allowNoSelection = allowNoSelection;
 			this.selectedItemId = selectedItemId;
@@ -45,7 +48,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				() =>
 				RadioButtonGroup.ValidateControls( allowNoSelection,
 				                                   StandardLibraryMethods.AreEqual( getNoSelectionItemId(), selectedItemId ),
-				                                   itemIdsAndCheckBoxes.Select( i => i.Item2 ) ) );
+				                                   itemIdsAndCheckBoxes.Select( i => i.Item2 ),
+				                                   disableSingleButtonDetection ) );
 
 			EwfPage.Instance.AddDisplayLink( this );
 		}
