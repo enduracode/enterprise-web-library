@@ -31,11 +31,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			StatusStatics.SetStatus( "Performed NDepend analysis." );
 
 			var codeBase = analysisResult.CodeBase;
-			var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).Single();
+			var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();
 			var methods = from t in codeBase.Application.Types
-			              where !t.HasAttribute( generatedCodeAttribute )
+			              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
 			              from m in t.MethodsAndContructors
-			              where !m.HasAttribute( generatedCodeAttribute )
+			              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
 			              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
 			              select m;
 
