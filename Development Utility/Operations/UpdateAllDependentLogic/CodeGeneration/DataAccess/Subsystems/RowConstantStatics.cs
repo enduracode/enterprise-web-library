@@ -33,14 +33,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						cmd.CommandText += " ORDER BY " + table.orderByColumn;
 					cn.ExecuteReaderCommand( cmd,
 					                         reader => {
-					                         	while( reader.Read() ) {
-					                         		var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
-					                         		if( valueColumn.DataTypeName == typeof( string ).ToString() )
-					                         			values.Add( "\"" + valueString + "\"" );
-					                         		else
-					                         			values.Add( valueString );
-					                         		names.Add( reader[ nameColumn.Name ].ToString() );
-					                         	}
+						                         while( reader.Read() ) {
+							                         var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
+							                         if( valueColumn.DataTypeName == typeof( string ).ToString() )
+								                         values.Add( "\"" + valueString + "\"" );
+							                         else
+								                         values.Add( valueString );
+							                         names.Add( reader[ nameColumn.Name ].ToString() );
+						                         }
 					                         } );
 				}
 				catch( Exception e ) {
@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writeGetValueFromNameMethod( writer, valueColumn.DataTypeName );
 				if( orderIsSpecified ) {
 					writeGetValuesToNamesMethod( writer, valueColumn.DataTypeName );
-					writeFillListControlMethod( writer );
+					writeFillListControlMethod( writer, valueColumn );
 				}
 
 				writer.WriteLine( "}" ); // class
@@ -111,12 +111,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // method
 		}
 
-		private static void writeFillListControlMethod( TextWriter writer ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer, "Adds all of the name value pairs to the given ListControl." );
-			writer.WriteLine( "public static void FillListControl( EwfListControl listControl ) {" );
-			writer.WriteLine( "foreach( var pair in valuesAndNames.GetAllPairs() )" );
-			writer.WriteLine( "listControl.AddItem( pair.Value, pair.Key.ToString() );" );
-			writer.WriteLine( "}" ); // method
+		private static void writeFillListControlMethod( TextWriter writer, Column valueColumn ) {
+			writer.WriteLine( "public static IEnumerable<EwfListItem<" + valueColumn.NullableDataTypeName + ">> GetListItems() {" );
+			writer.WriteLine( "return from i in valuesAndNames.GetAllPairs() select EwfListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
+			writer.WriteLine( "}" );
 		}
 	}
 }
