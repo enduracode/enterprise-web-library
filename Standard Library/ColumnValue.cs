@@ -1,10 +1,10 @@
 using System;
 
-namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
+namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// Standard Library use only.
 	/// </summary>
-	public class ColumnValue<T> {
+	public class DataValue<T> {
 		private T val;
 		private bool initialized;
 

@@ -226,7 +226,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeFieldsAndPropertiesForColumn( Column column ) {
 			var columnIsReadOnly = !columns.DataColumns.Contains( column );
 
-			writer.WriteLine( "private readonly ColumnValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + " = new ColumnValue<" + column.DataTypeName +
+			writer.WriteLine( "private readonly DataValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + " = new DataValue<" + column.DataTypeName +
 			                  ">();" );
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
