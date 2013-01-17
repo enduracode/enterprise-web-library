@@ -1,8 +1,10 @@
+using System;
+
 namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// A value that knows whether it has been initialized and whether it has changed.
 	/// </summary>
-	public class DataValue<T> {
+	public class DataValue<T>: IEquatable<DataValue<T>> {
 		private readonly InitializationAwareValue<T> val = new InitializationAwareValue<T>();
 
 		public bool Changed { get; private set; }
@@ -19,6 +21,18 @@ namespace RedStapler.StandardLibrary {
 
 		public void ClearChanged() {
 			Changed = false;
+		}
+
+		public override bool Equals( object obj ) {
+			return Equals( obj as DataValue<T> );
+		}
+
+		public bool Equals( DataValue<T> other ) {
+			return other != null && StandardLibraryMethods.AreEqual( val, other.val );
+		}
+
+		public override int GetHashCode() {
+			return val.GetHashCode();
 		}
 	}
 }
