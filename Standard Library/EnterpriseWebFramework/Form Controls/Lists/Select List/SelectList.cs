@@ -245,7 +245,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// valid.
 		/// </summary>
 		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator ) {
-			var selectedItemIdInPostBack = useHorizontalRadioLayout.HasValue ? radioList.GetSelectedItemIdInPostBack( postBackValues ) : postBackValues.GetValue( this );
+			// Use "radioList != null" for the condition instead of "useHorizontalRadioLayout.HasValue" in case this SelectList is never added to the page and
+			// therefore ControlTreeDataLoader.LoadData is never called.
+			var selectedItemIdInPostBack = radioList != null ? radioList.GetSelectedItemIdInPostBack( postBackValues ) : postBackValues.GetValue( this );
+
 			if( !items.Single( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
 				validator.NoteErrorAndAddMessage( "Please make a selection." );
 			return selectedItemIdInPostBack;
@@ -255,7 +258,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns true if the selection changed on this post back.
 		/// </summary>
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			// Use "radioList != null" for the condition instead of "useHorizontalRadioLayout.HasValue" in case this SelectList is never added to the page and
+			// therefore ControlTreeDataLoader.LoadData is never called.
+			return radioList != null ? radioList.SelectionChangedOnPostBack( postBackValues ) : postBackValues.ValueChangedOnPostBack( this );
 		}
 
 		bool FormControl.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
