@@ -54,9 +54,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
 			var checkBox = new EwfCheckBox( isSelected, label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
-			checkBox.PostBackValueSelector =
-				isChecked =>
-				( checkBox.IsOnPage() && isChecked ) || ( noSelection() && !allowNoSelection && checkBox == checkBoxes.First( i => ( i as Control ).IsOnPage() ) );
+			checkBox.PostBackValueSelector = isChecked => {
+				var checkBoxesOnPage = checkBoxes.Where( i => ( i as Control ).IsOnPage() ).ToArray();
+				if( !checkBoxesOnPage.Any() )
+					return checkBox.IsChecked;
+				return ( checkBox.IsOnPage() && isChecked ) || ( noSelection() && !allowNoSelection && checkBox == checkBoxesOnPage.First() );
+			};
 			checkBoxes.Add( checkBox );
 			return checkBox;
 		}
@@ -66,9 +69,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
 			var checkBox = new BlockCheckBox( isSelected, label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
-			checkBox.PostBackValueSelector =
-				isChecked =>
-				( checkBox.IsOnPage() && isChecked ) || ( noSelection() && !allowNoSelection && checkBox == checkBoxes.First( i => ( i as Control ).IsOnPage() ) );
+			checkBox.PostBackValueSelector = isChecked => {
+				var checkBoxesOnPage = checkBoxes.Where( i => ( i as Control ).IsOnPage() ).ToArray();
+				if( !checkBoxesOnPage.Any() )
+					return checkBox.IsChecked;
+				return ( checkBox.IsOnPage() && isChecked ) || ( noSelection() && !allowNoSelection && checkBox == checkBoxesOnPage.First() );
+			};
 			checkBoxes.Add( checkBox );
 			return checkBox;
 		}

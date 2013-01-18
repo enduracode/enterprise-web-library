@@ -111,6 +111,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public ItemIdType GetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues ) {
 			var itemIdsAndCheckBoxesOnPage = itemIdsAndCheckBoxes.Where( i => ( i.Item2 as Control ).IsOnPage() ).ToArray();
+			if( !itemIdsAndCheckBoxesOnPage.Any() )
+				return selectedItemId;
 			var selectedPair = itemIdsAndCheckBoxesOnPage.SingleOrDefault( i => i.Item2.IsCheckedInPostBack( postBackValues ) );
 			return selectedPair != null ? selectedPair.Item1 : allowNoSelection ? getNoSelectionItemId() : itemIdsAndCheckBoxesOnPage.First().Item1;
 		}
