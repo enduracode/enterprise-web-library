@@ -6,8 +6,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop down list whose visible options depend upon the selected value in another drop down list.
 	/// </summary>
-	public class DependentDropDownList {
-		public DependentDropDownList<ItemIdType, ParentItemIdType> Create<ItemIdType, ParentItemIdType>( SelectList<ParentItemIdType> parent ) {
+	public static class DependentDropDownList {
+		public static DependentDropDownList<ItemIdType, ParentItemIdType> Create<ItemIdType, ParentItemIdType>( SelectList<ParentItemIdType> parent ) {
 			return new DependentDropDownList<ItemIdType, ParentItemIdType>( parent );
 		}
 	}
