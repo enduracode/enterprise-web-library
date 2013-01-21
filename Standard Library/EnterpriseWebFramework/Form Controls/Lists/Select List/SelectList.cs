@@ -140,7 +140,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		ItemIdType FormControl<ItemIdType>.DurableValue { get { return selectedItemId; } }
-		string FormControl.DurableValueAsString { get { return selectedItemId.ToString(); } }
+		string FormControl.DurableValueAsString { get { return selectedItemId.ObjectToString( true ); } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( useHorizontalRadioLayout.HasValue ) {
@@ -207,8 +207,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var scripts = from control in displayLink.Item3
 				              select
 					              "setElementDisplay( '" + control.ClientID + "', [ " +
-					              StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ToString() + "'" ).ToArray() ) + " ].indexOf( $( '#" +
-					              selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
+					              StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) +
+					              " ].indexOf( $( '#" + selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
 				selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
 			}
 		}

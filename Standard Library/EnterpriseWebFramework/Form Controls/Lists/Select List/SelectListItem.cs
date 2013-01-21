@@ -11,7 +11,7 @@
 		}
 
 		internal EwfListItem<ItemIdType> Item { get { return item; } }
-		internal string StringId { get { return item.Id.ToString(); } }
+		internal string StringId { get { return item.Id.ObjectToString( true ); } }
 		internal bool IsValid { get { return isValid; } }
 		internal bool IsPlaceholder { get { return isPlaceholder; } }
 	}
