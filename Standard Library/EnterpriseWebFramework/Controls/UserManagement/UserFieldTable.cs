@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -21,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
-		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null ) {
+		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles =
 				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles( cn ) ).ToList();
 
@@ -33,13 +34,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			b.AddFormItems( FormItem.Create( "Email address",
 			                                 new EwfTextBox( user != null ? user.Email : "" ),
-			                                 validationGetter:
-				                                 control =>
-				                                 new Validation(
-					                                 ( pbv, validator ) =>
-					                                 Email =
-					                                 validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false, 50 ),
-					                                 vl ) ) );
+			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
+				                                 if( validationPredicate != null && validationPredicate() )
+					                                 Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ),
+					                                                                    control.GetPostBackValue( pbv ),
+					                                                                    false,
+					                                                                    50 );
+			                                 },
+			                                                                              vl ) ) );
 
 			if( includePasswordControls() ) {
 				var group = new RadioButtonGroup( "password", false );
@@ -47,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var keepPassword = FormItem.Create( "",
 				                                    group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 				                                    validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                    if( !control.IsCheckedInPostBack( pbv ) )
+					                                    if( !control.IsCheckedInPostBack( pbv ) || ( validationPredicate == null || !validationPredicate() ) )
 						                                    return;
 					                                    if( user != null ) {
 						                                    Salt = facUser.Salt;
@@ -65,7 +67,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					                                                                       "Generate a " + ( userId.HasValue ? "new, " : "" ) +
 					                                                                       "random password and email it to the user" ),
 				                                        validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                        if( control.IsCheckedInPostBack( pbv ) )
+					                                        if( validationPredicate != null && validationPredicate() && control.IsCheckedInPostBack( pbv ) )
 						                                        genPassword( true );
 				                                        },
 				                                                                                     vl ) );
@@ -82,7 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var providePassword = FormItem.Create( "",
 				                                       providePasswordRadio,
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                       if( !control.IsCheckedInPostBack( pbv ) )
+					                                       if( !control.IsCheckedInPostBack( pbv ) || validationPredicate == null || !validationPredicate() )
 						                                       return;
 					                                       UserManagementStatics.ValidatePassword( validator, newPasswordTb, confirmPasswordTb );
 					                                       var p = new Password( newPasswordTb.Value );
@@ -103,11 +105,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				roleList.Value = user.Role.RoleId.ToString();
 			b.AddFormItems( FormItem.Create( "Role",
 			                                 roleList,
-			                                 validationGetter:
-				                                 control =>
-				                                 new Validation(
-					                                 ( pbv, validator ) => RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), control.GetPostBackValue( pbv ) ),
-					                                 vl ) ) );
+			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
+				                                 if( validationPredicate != null && validationPredicate() )
+					                                 RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), control.GetPostBackValue( pbv ) );
+			                                 },
+			                                                                              vl ) ) );
 
 			Controls.Add( b );
 		}
@@ -126,27 +128,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData to retrieve the validated email address.
+		/// Call this to retrieve the validated email address.
 		/// </summary>
 		public string Email { get; private set; }
 
 		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
+		/// Only valid for systems which are forms authentication capable.
 		/// </summary>
 		public int Salt { get; private set; }
 
 		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
+		/// Only valid for systems which are forms authentication capable.
 		/// </summary>
 		public byte[] SaltedPassword { get; private set; }
 
 		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
+		/// Only valid for systems which are forms authentication capable.
 		/// </summary>
 		public bool MustChangePassword { get; private set; }
 
 		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData to retrieve the validated role ID.
+		/// Call this to retrieve the validated role ID.
 		/// </summary>
 		public byte RoleId { get; private set; }
 
