@@ -860,6 +860,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 						updateLastPageRequestTimeForUser();
 						EwfApp.Instance.ExecuteInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
+						executeInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
 					}
 				}
 				finally {
@@ -989,6 +990,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				AppRequestState.Instance.RollbackDatabaseTransactions();
 			}
 		}
+
+		/// <summary>
+		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// </summary>
+		protected virtual void executeInitialRequestDataModifications( DBConnection cn ) {}
 
 		/// <summary>
 		/// Saves view state.
