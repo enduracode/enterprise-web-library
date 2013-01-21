@@ -8,12 +8,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );
-				writer.WriteLine( "public class " + table + "Table {" );
+				writer.WriteLine( "public class " + CodeGenerationStatics.GetCSharpSafeClassName( table  ) + "Table {" );
 				CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this table." );
 				writer.WriteLine( "public const string Name = \"" + table + "\";" );
 				foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Contains schema information about this column." );
-					writer.WriteLine( "public class " + column.Name + "Column {" );
+					writer.WriteLine( "public class " + CodeGenerationStatics.GetCSharpSafeClassName( column.Name ) + "Column {" );
 
 					CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this column." );
 					writer.WriteLine( "public const string Name = \"" + column.Name + "\";" );
