@@ -85,6 +85,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal Func<bool, bool> PostBackValueSelector { set { postBackValueSelector = value; } }
 
 		public bool IsRadioButton { get { return GroupName.Any(); } }
+
+		/// <summary>
+		/// Gets whether the box was created in a checked state.
+		/// </summary>
 		public bool IsChecked { get { return isCheckedDurable; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {

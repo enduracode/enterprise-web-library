@@ -4,6 +4,10 @@
 	/// </summary>
 	public interface CommonCheckBox {
 		bool IsRadioButton { get; }
+
+		/// <summary>
+		/// Gets whether the box was created in a checked state.
+		/// </summary>
 		bool IsChecked { get; }
 
 		/// <summary>
