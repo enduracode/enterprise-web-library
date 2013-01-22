@@ -16,10 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class GetLogicSize: Operation {
 		private static readonly Operation instance = new GetLogicSize();
 
-		internal static int? GetNDependLocCount( DevelopmentInstallation installation, bool debug ) {
-			if( !ConfigurationLogic.SystemProviderExists || !ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder.Any() )
-				return null;
-
+		internal static int GetNDependLocCount( DevelopmentInstallation installation, bool debug ) {
 			var servicesProvider = new NDependServicesProvider();
 			var projectManager = servicesProvider.ProjectManager;
 			var project =
@@ -86,14 +83,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
+			if( !ConfigurationLogic.NDependIsPresent )
+				throw new UserCorrectableException( "NDepend is not present." );
 			var installation = genericInstallation as DevelopmentInstallation;
 			var locCount = GetNDependLocCount( installation, true );
-			if( !locCount.HasValue )
-				throw new UserCorrectableException( "NDepend is not present." );
 
 			Console.WriteLine();
 			Console.WriteLine( "LOGIC SIZE (in size points)" );
-			Console.WriteLine( locCount.Value );
+			Console.WriteLine( locCount );
 			Console.WriteLine();
 		}
 	}

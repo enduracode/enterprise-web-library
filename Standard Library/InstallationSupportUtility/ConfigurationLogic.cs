@@ -63,6 +63,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			}
 		}
 
+		/// <summary>
+		/// Standard Library and Development Utility use only.
+		/// </summary>
+		public static bool NDependIsPresent { get { return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any(); } }
+
 		public static void Init() {
 			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );

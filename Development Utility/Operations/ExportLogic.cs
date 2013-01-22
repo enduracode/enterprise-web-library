@@ -149,7 +149,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
-			build.LogicSize = installation.DevelopmentInstallationLogic.SystemIsEwl ? null : GetLogicSize.GetNDependLocCount( installation, false );
+			build.LogicSize = ConfigurationLogic.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
+				                  ? GetLogicSize.GetNDependLocCount( installation, false ) as int?
+				                  : null;
 			var serverSideLogicFolderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
