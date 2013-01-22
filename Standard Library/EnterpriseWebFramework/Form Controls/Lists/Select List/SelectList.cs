@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			internal const string DropDownCssClass = "ewfDropDown";
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select" ) };
+				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .chzn-container" ) };
 			}
 		}
 
@@ -177,8 +177,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( this, false ) );
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-				if( placeholderItem != null )
-					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label );
+				if( placeholderItem != null ) {
+					// Don't let the attribute value be the empty string since that will trigger Chosen's default text, which we don't want.
+					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " );
+				}
 
 				foreach( var i in items )
 					selectControl.Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
