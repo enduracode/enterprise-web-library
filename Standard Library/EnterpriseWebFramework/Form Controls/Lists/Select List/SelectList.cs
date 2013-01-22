@@ -162,7 +162,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
-				EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
+				// The predicate is designed to prevent submission when the drop-down is open. Derived from
+				// https://github.com/harvesthq/chosen/issues/434#issuecomment-9316018.
+				EwfPage.Instance.MakeControlPostBackOnEnter( this,
+				                                             defaultSubmitButton,
+				                                             predicate:
+					                                             "( !( $( this ).find( '.chzn-drop' ).length ) || $( this ).find( '.chzn-drop' ).offset()[ 'left' ] < 0 )" );
+
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new WebControl( HtmlTextWriterTag.Select );

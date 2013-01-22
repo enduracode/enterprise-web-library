@@ -43,7 +43,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private Control contentContainer;
 		private readonly DataModification postBackDataModification = new DataModification();
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
-		private readonly List<Tuple<WebControl, Control>> postBackOnEnterControlsAndTargets = new List<Tuple<WebControl, Control>>();
+		private readonly List<Tuple<WebControl, string, Control>> postBackOnEnterControlsAndPredicatesAndTargets = new List<Tuple<WebControl, string, Control>>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
@@ -311,10 +311,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 
 			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
-			foreach( var controlAndTarget in postBackOnEnterControlsAndTargets.Where( i => i.Item2 != null || submitButton != null ) ) {
+			foreach( var controlAndTarget in postBackOnEnterControlsAndPredicatesAndTargets.Where( i => i.Item3 != null || submitButton != null ) ) {
 				controlAndTarget.Item1.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
-				                                                 "if(event.which == 13) { " +
-				                                                 PostBackButton.GetPostBackScript( controlAndTarget.Item2 ?? submitButton, true ) + "; }" );
+				                                                 "if( event.which == 13 " + controlAndTarget.Item2.PrependDelimiter( " && " ) + " ) { " +
+				                                                 PostBackButton.GetPostBackScript( controlAndTarget.Item3 ?? submitButton, true ) + "; }" );
 			}
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
@@ -483,8 +483,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// to the submit button, which you should do if you want the post back to simulate the user clicking the button. If you specify a non null target, it must
 		/// be a post back event handler. If you specify a post back button, its UsesSubmitBehavior property will be set to false.
 		/// </summary>
-		internal void MakeControlPostBackOnEnter( WebControl control, Control target ) {
-			postBackOnEnterControlsAndTargets.Add( Tuple.Create( control, target ) );
+		internal void MakeControlPostBackOnEnter( WebControl control, Control target, string predicate = "" ) {
+			postBackOnEnterControlsAndPredicatesAndTargets.Add( Tuple.Create( control, predicate, target ) );
 
 			// NOTE: This seems like a hack. Why can't people just tell their buttons not to use submit behavior?
 			if( target is PostBackButton )
