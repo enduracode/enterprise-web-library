@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using RedStapler.StandardLibrary.Validation;
 
@@ -17,7 +19,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class DependentDropDownList<ItemIdType, ParentItemIdType>: Control, INamingContainer {
 		private readonly SelectList<ParentItemIdType> parent;
-		private readonly Dictionary<ParentItemIdType, SelectList<ItemIdType>> dropDownsByParentItemId = new Dictionary<ParentItemIdType, SelectList<ItemIdType>>();
+
+		// We can't use a dictionary since we want to allow a null key, i.e. a parent item ID that is null.
+		private readonly List<Tuple<ParentItemIdType, SelectList<ItemIdType>>> parentItemIdsAndDropDowns = new List<Tuple<ParentItemIdType, SelectList<ItemIdType>>>();
 
 		internal DependentDropDownList( SelectList<ParentItemIdType> parent ) {
 			this.parent = parent;
@@ -28,13 +32,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public void AddDropDown( ParentItemIdType parentItemId, SelectList<ItemIdType> dropDown ) {
 			Controls.Add( dropDown );
-			dropDownsByParentItemId.Add( parentItemId, dropDown );
+
+			if( parentItemIdsAndDropDowns.Any( i => StandardLibraryMethods.AreEqual( i.Item1, parentItemId ) ) )
+				throw new ApplicationException( "There must not be more than one drop-down list per parent item ID." );
+			parentItemIdsAndDropDowns.Add( Tuple.Create( parentItemId, dropDown ) );
+
 			parent.AddDisplayLink( parentItemId.ToSingleElementArray(), true, dropDown.ToSingleElementArray() );
 		}
 
 		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator,
 		                                                          ParentItemIdType parentSelectedItemIdInPostBack ) {
-			return dropDownsByParentItemId[ parentSelectedItemIdInPostBack ].ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
+			return
+				parentItemIdsAndDropDowns.Single( i => StandardLibraryMethods.AreEqual( i.Item1, parentSelectedItemIdInPostBack ) )
+				                         .Item2.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 		}
 	}
 }
