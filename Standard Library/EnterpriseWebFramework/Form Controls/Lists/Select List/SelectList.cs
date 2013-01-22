@@ -222,9 +222,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			if( useHorizontalRadioLayout.HasValue )
 				return "";
+
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			return "$( '#" + selectControl.ClientID + "' ).chosen(" + ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) +
-			       ");";
+			var chosenStatement = "$( '#" + selectControl.ClientID + "' ).chosen(" +
+			                      ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) + ");";
+			var touchStatement = placeholderItem != null
+				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
+				                       "' ).attr( 'data-placeholder' ) );"
+				                     : "";
+			return "if( !Modernizr.touch ) " + chosenStatement + touchStatement.PrependDelimiter( " else " );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
