@@ -101,21 +101,21 @@ namespace RedStapler.StandardLibrary {
 		/// See documentation for IsBetweenDates for more information on the date ranges.
 		/// </summary>
 		public static bool DateRangesOverlap( DateTime? rangeOneBegin, DateTime? rangeOneEnd, DateTime? rangeTwoBegin, DateTime? rangeTwoEnd ) {
-			return ( rangeOneBegin.HasValue && rangeOneBegin.Value.IsBetweenDates( rangeTwoBegin, rangeTwoEnd ) ) ||
-			       ( rangeOneEnd.HasValue && rangeOneEnd.Value.IsBetweenDates( rangeTwoBegin, rangeTwoEnd ) ) ||
-			       ( rangeTwoBegin.HasValue && rangeTwoBegin.Value.IsBetweenDates( rangeOneBegin, rangeOneEnd ) ) ||
-			       ( rangeTwoEnd.HasValue && rangeTwoEnd.Value.IsBetweenDates( rangeOneBegin, rangeOneEnd ) );
+			// Don't short-circuit the OR since this could sometimes bypass the check that there is no time information in the parameters.
+			return ( !rangeOneBegin.HasValue && !rangeTwoBegin.HasValue ) |
+			       ( rangeOneBegin.HasValue && rangeOneBegin.Value.IsBetweenDates( rangeTwoBegin, rangeTwoEnd ) ) |
+			       ( rangeTwoBegin.HasValue && rangeTwoBegin.Value.IsBetweenDates( rangeOneBegin, rangeOneEnd ) );
 		}
 
 		/// <summary>
-		/// Returns true if the two given DateTime ranges overlap. Passing null for any date means infinity in that direction.
-		/// See documentation for IsBetweenDateTimes for more information on the date ranges.
+		/// Returns true if the two given DateTime ranges overlap. Passing null for any date/time means infinity in that direction.
 		/// </summary>
 		public static bool DateTimeRangesOverlap( DateTime? rangeOneBegin, DateTime? rangeOneEnd, DateTime? rangeTwoBegin, DateTime? rangeTwoEnd ) {
-			return ( rangeOneBegin.HasValue && rangeOneBegin.Value.IsBetweenDateTimes( rangeTwoBegin, rangeTwoEnd ) ) ||
-			       ( rangeOneEnd.HasValue && rangeOneEnd.Value.IsBetweenDateTimes( rangeTwoBegin, rangeTwoEnd ) ) ||
-			       ( rangeTwoBegin.HasValue && rangeTwoBegin.Value.IsBetweenDateTimes( rangeOneBegin, rangeOneEnd ) ) ||
-			       ( rangeTwoEnd.HasValue && rangeTwoEnd.Value.IsBetweenDateTimes( rangeOneBegin, rangeOneEnd ) );
+			// It is important to use beginnings instead of endings here because of the way IsBetweenDateTimes handles the beginning and end of the range differently.
+			var oneBeginsInTwo = rangeOneBegin.HasValue && rangeOneBegin.Value.IsBetweenDateTimes( rangeTwoBegin, rangeTwoEnd );
+			var twoBeginsInOne = rangeTwoBegin.HasValue && rangeTwoBegin.Value.IsBetweenDateTimes( rangeOneBegin, rangeOneEnd );
+
+			return ( !rangeOneBegin.HasValue && !rangeTwoBegin.HasValue ) || oneBeginsInTwo || twoBeginsInOne;
 		}
 
 		/// <summary>
