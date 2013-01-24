@@ -136,19 +136,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
-				writeFormItemGetters( writer,
-				                      field,
-				                      "DurationPicker",
-				                      "Duration",
-				                      "int",
-				                      "0",
-				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter[ 0 ],
-				                      new CSharpParameter[ 0 ],
-				                      "new DurationPicker( System.TimeSpan.FromSeconds( (int)v ) )",
-				                      "(int)control.ValidateAndGetPostBackDuration( postBackValues, validator, new ValidationErrorHandler( subject ) ).TotalSeconds",
-				                      "true" );
+				writeDurationFormItemGetters( writer, field );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
 				writeNumberAsTextFormItemGetters( writer,
@@ -212,6 +200,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
+				writeDurationFormItemGetters( writer, field );
 			}
 			if( field.TypeIs( typeof( decimal? ) ) ) {
 				writeNumberAsTextFormItemGetters( writer,
@@ -258,6 +247,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter[ 0 ],
 			                      "{ var control = new BlobFileCollectionManager( sortByName: sortByName ); control.LoadData( AppRequestState.PrimaryDatabaseConnection, (int)v ); return control; }",
 			                      "",
+			                      "true" );
+		}
+
+		private static void writeDurationFormItemGetters( TextWriter writer, ModificationField field ) {
+			writeFormItemGetters( writer,
+			                      field,
+			                      "DurationPicker",
+			                      "Duration",
+			                      field.TypeName,
+			                      "0",
+			                      new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      "new DurationPicker( System.TimeSpan.FromSeconds( (int)v ) )",
+			                      "(" + field.TypeName +
+			                      ")control.ValidateAndGetPostBackDuration( postBackValues, validator, new ValidationErrorHandler( subject ) ).TotalSeconds",
 			                      "true" );
 		}
 
