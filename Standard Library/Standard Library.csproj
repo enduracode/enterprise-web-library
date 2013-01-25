@@ -170,7 +170,6 @@
     <Compile Include="Email\EmailAttachment.cs" />
     <Compile Include="Email\EmailSendingException.cs" />
     <Compile Include="Encryption\EncryptionOps.cs" />
-    <Compile Include="Encryption\MakeshiftEncryptionOps.cs" />
     <Compile Include="EnterpriseWebFramework\ActionButtonSetup.cs" />
     <Compile Include="EnterpriseWebFramework\AlternativePageMode.cs" />
     <Compile Include="EnterpriseWebFramework\AlternativePageModes\DisabledPageMode.cs" />
