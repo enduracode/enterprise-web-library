@@ -31,11 +31,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[]
-				       	{
-				       		new CssElement( "ControlStack" /*NOTE: Rename to ControlStackAllStyles.*/, Selectors ),
-				       		new CssElement( "StandardControlStack" /*NOTE: Rename to ControlStackStandardStyle.*/, "div." + CssClass + ".ewfStandard" ),
-				       		new CssElement( "ControlStackItem", ItemSelector )
-				       	};
+					{
+						new CssElement( "ControlStack" /*NOTE: Rename to ControlStackAllStyles.*/, Selectors ),
+						new CssElement( "StandardControlStack" /*NOTE: Rename to ControlStackStandardStyle.*/, "div." + CssClass + ".ewfStandard" ),
+						new CssElement( "ControlStackItem", ItemSelector )
+					};
 			}
 		}
 
@@ -47,8 +47,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a blank vertical stack of controls.
 		/// </summary>
+		/// <param name="isStandard">Sets whether or not this control stack will have standard styling.</param>
 		public static ControlStack Create( bool isStandard ) {
-			return new ControlStack { isStandard = isStandard };
+			return new ControlStack( isStandard );
 		}
 
 		/// <summary>
@@ -69,27 +70,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return cs;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		private ControlStack( bool isStandard ) {
+			this.isStandard = isStandard;
+		}
+
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public ControlStack() {}
 
-		/// <summary>
-		/// Markup use only.
-		/// </summary>
+		// When we remove this, remember to remove the ParseChildren attribute on the class.
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public List<Control> MarkupControls { get { return markupControls; } }
 
-		/// <summary>
-		/// Sets whether or not this control stack will have standard styling.
-		/// </summary>
-		public bool IsStandard {
-			internal get {
-				if( !isStandard.HasValue )
-					throw new ApplicationException( "Please explicitly specify either true or false for the IsStandard attribute." );
-				return isStandard.Value;
-			}
-			set { isStandard = value; }
-		}
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
+		public bool IsStandard { set { isStandard = value; } }
 
 		/// <summary>
 		/// Add the given list of strings to the control stack. Do not pass null for any of the strings. If you do, it will be converted to the empty string.
@@ -141,8 +134,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		protected override void Render( HtmlTextWriter writer ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			// We use the property here so we get the informative exception if isStandard is null.
-			if( IsStandard )
+			if( !isStandard.HasValue )
+				throw new ApplicationException( "Please explicitly specify either true or false for the IsStandard attribute." );
+			if( isStandard.Value )
 				CssClass = CssClass.ConcatenateWithSpace( "ewfStandard" );
 
 			base.Render( writer );
