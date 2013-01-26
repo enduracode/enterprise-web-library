@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -16,11 +17,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[]
-				       	{
-				       		new CssElement( "LabeledControl", "div." + CssClass ),
-				       		new CssElement( "LabeledControlItem",
-				       		                ControlStack.CssElementCreator.Selectors.Select( i => i + " > " + ControlStack.CssElementCreator.ItemSelector ).ToArray() )
-				       	};
+					{
+						new CssElement( "LabeledControl", "div." + CssClass ),
+						new CssElement( "LabeledControlItem",
+						                ControlStack.CssElementCreator.Selectors.Select( i => i + " > " + ControlStack.CssElementCreator.ItemSelector ).ToArray() )
+					};
 			}
 		}
 
@@ -28,9 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string label;
 		private readonly Validation validation;
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public LabeledControl() {}
 
 		/// <summary>
@@ -47,14 +46,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.validation = validation;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		// When removing this, also remove the ParseChildren attribute on the class.
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public List<Control> MarkupControls { get { return wrappedControls; } }
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public string Label { set { label = value; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
