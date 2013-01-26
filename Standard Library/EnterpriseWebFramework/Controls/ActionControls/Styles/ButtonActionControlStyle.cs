@@ -33,11 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		private readonly ButtonSize buttonSize;
 
-		/// <summary>
-		/// Creates a button action control style.
-		/// Do not use.
-		/// </summary>
-		/// NOTE: Remove this constructor
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public ButtonActionControlStyle( ButtonSize buttonSize = ButtonSize.Normal ) {
 			Text = "";
 			this.buttonSize = buttonSize;
