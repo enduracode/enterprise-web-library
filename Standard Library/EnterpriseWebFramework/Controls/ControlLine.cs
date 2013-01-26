@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -57,16 +58,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			VerticalAlignment = TableCellVerticalAlignment.NotSpecified;
 		}
 
-		/// <summary>
-		/// Do not call this, and do not place control lines in markup.
-		/// </summary>
-		// NOTE: Remove this when we have eliminated control lines from markup.
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public ControlLine(): this( new Control[ 0 ] ) {}
 
-		/// <summary>
-		/// Do not use this property; it will be deleted.
-		/// </summary>
-		// NOTE: Remove this when we have eliminated control lines from markup.
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public List<Control> MarkupControls { get { return markupControls; } }
 
 		/// <summary>
