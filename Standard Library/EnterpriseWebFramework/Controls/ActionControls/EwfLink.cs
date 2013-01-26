@@ -73,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				};
 		}
 
-		private PageInfo navigatePageInfo;
+		private PageInfo destinationPageInfo;
 		private string text = "";
 
 		private bool navigatesInNewWindow;
@@ -108,7 +108,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Gets or sets the page to link to when this control is clicked. Specify null if you don't want the link to do anything.
 		/// NOTE: Do not use the setter; it will be deleted.
 		/// </summary>
-		public PageInfo NavigatePageInfo { get { return navigatePageInfo; } set { navigatePageInfo = value; } }
+		public PageInfo NavigatePageInfo { get { return destinationPageInfo; } set { destinationPageInfo = value; } }
 
 
 		/// <summary>
@@ -174,13 +174,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Standard library use only.
 		/// </summary>
 		public bool UserCanNavigateToDestination() {
-			return navigatePageInfo == null || navigatePageInfo.UserCanAccessPageAndAllControls;
+			return destinationPageInfo == null || destinationPageInfo.UserCanAccessPageAndAllControls;
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			var url = "";
-			if( navigatePageInfo != null && !( navigatePageInfo.AlternativeMode is DisabledPageMode ) ) {
-				url = navigatePageInfo.GetUrl();
+			if( destinationPageInfo != null && !( destinationPageInfo.AlternativeMode is DisabledPageMode ) ) {
+				url = destinationPageInfo.GetUrl();
 				Attributes.Add( "href", this.GetClientUrl( url ) );
 			}
 
@@ -190,18 +190,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Attributes.Add( "target", "_blank" );
 			if( popUpWindowSettings != null && url.Any() )
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, JsWritingMethods.GetPopUpWindowScript( url, this, popUpWindowSettings ) + " return false" );
-			if( navigatesInOpeningWindow && ( navigatePageInfo == null || url.Any() ) ) {
-				var openingWindowNavigationScript = navigatePageInfo != null ? "opener.document.location = '" + this.GetClientUrl( url ) + "'; " : "";
+			if( navigatesInOpeningWindow && ( destinationPageInfo == null || url.Any() ) ) {
+				var openingWindowNavigationScript = destinationPageInfo != null ? "opener.document.location = '" + this.GetClientUrl( url ) + "'; " : "";
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, openingWindowNavigationScript + "window.close(); return false" );
 			}
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			if( navigatePageInfo != null && navigatePageInfo.AlternativeMode is NewContentPageMode )
+			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is NewContentPageMode )
 				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
 			ActionControlStyle.SetUpControl( this, text.Any() ? text : url, width, height, setWidth );
 
-			if( navigatePageInfo != null && navigatePageInfo.AlternativeMode is DisabledPageMode ) {
-				var message = ( navigatePageInfo.AlternativeMode as DisabledPageMode ).Message;
+			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is DisabledPageMode ) {
+				var message = ( destinationPageInfo.AlternativeMode as DisabledPageMode ).Message;
 				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
 			}
 			else if( ToolTip != null || ToolTipControl != null )
@@ -217,7 +217,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.EhRedirect( navigatePageInfo );
+			EwfPage.Instance.EhRedirect( destinationPageInfo );
 		}
 
 		/// <summary>
