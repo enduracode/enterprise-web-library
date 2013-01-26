@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -18,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="toolTipText">EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.</param>
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
 		public static EwfLink Create( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null, Control toolTipControl = null ) {
-			return new EwfLink( navigatePageInfo ) { ActionControlStyle = actionControlStyle, ToolTip = toolTipText, ToolTipControl = toolTipControl };
+			return new EwfLink( navigatePageInfo ) { ActionControlStyle = actionControlStyle, toolTip = toolTipText, toolTipControl = toolTipControl };
 		}
 
 		/// <summary>
@@ -34,9 +35,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new EwfLink( navigatePageInfo )
 				{
 					ActionControlStyle = actionControlStyle,
-					NavigatesInNewWindow = true,
-					ToolTip = toolTipText,
-					ToolTipControl = toolTipControl
+					navigatesInNewWindow = true,
+					toolTip = toolTipText,
+					toolTipControl = toolTipControl
 				};
 		}
 
@@ -50,9 +51,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
 		public static EwfLink CreateForNavigationInPopUpWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle,
 		                                                        PopUpWindowSettings popUpWindowSettings, string toolTipText = null, Control toolTipControl = null ) {
-			var link = new EwfLink( navigatePageInfo ) { ActionControlStyle = actionControlStyle, ToolTip = toolTipText, ToolTipControl = toolTipControl };
-			link.NavigateInPopUpWindow( popUpWindowSettings );
-			return link;
+			return new EwfLink( navigatePageInfo )
+				{
+					ActionControlStyle = actionControlStyle,
+					popUpWindowSettings = popUpWindowSettings,
+					toolTip = toolTipText,
+					toolTipControl = toolTipControl
+				};
 		}
 
 		/// <summary>
@@ -67,9 +72,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new EwfLink( navigatePageInfo )
 				{
 					ActionControlStyle = actionControlStyle,
-					NavigatesInOpeningWindow = true,
-					ToolTip = toolTipText,
-					ToolTipControl = toolTipControl
+					navigatesInOpeningWindow = true,
+					toolTip = toolTipText,
+					toolTipControl = toolTipControl
 				};
 		}
 
@@ -83,6 +88,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
 
+		private string toolTip;
+		private Control toolTipControl;
+
 		/// <summary>
 		/// Gets or sets the display style of this button. Do not set this to null.
 		/// Choices are: TextActionControlStyle (default), ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.
@@ -90,30 +98,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public ActionControlStyle ActionControlStyle { get; set; }
 
 		/// <summary>
-		/// NOTE: Only exists to support pages that have not yet converted to the immutable static method constructors.
+		/// Guaranteed to stay public through 28 February 2013.
 		/// </summary>
-		public EwfLink( PageInfo navigatePageInfo ) {
-			NavigatePageInfo = navigatePageInfo;
+		public EwfLink( PageInfo destinationPageInfo ) {
+			this.destinationPageInfo = destinationPageInfo;
 			ActionControlStyle = new TextActionControlStyle( "" );
 		}
 
-		// NOTE: All action control Text properties should be axed since they're incompatible with some action control styles. Use properties on the styles instead.
-		/// <summary>
-		/// Gets or sets the text caption for this control. The text will be HTML-encoded before being rendered on the page. Do not pass null; if you do, it will be
-		/// converted to the empty string.
-		/// </summary>
+		public PageInfo DestinationPageInfo { get { return destinationPageInfo; } }
+
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public string Text { get { return text; } set { text = value ?? ""; } }
 
-		/// <summary>
-		/// Gets or sets the page to link to when this control is clicked. Specify null if you don't want the link to do anything.
-		/// NOTE: Do not use the setter; it will be deleted.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public PageInfo NavigatePageInfo { get { return destinationPageInfo; } set { destinationPageInfo = value; } }
 
-
-		/// <summary>
-		/// NOTE: Do not use. Will be deleted.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public bool NavigatesInNewWindow {
 			set {
 				navigatesInNewWindow = value;
@@ -124,9 +124,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// NOTE: Do not use. Will be deleted.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void NavigateInPopUpWindow( PopUpWindowSettings popUpWindowSettings ) {
 			this.popUpWindowSettings = popUpWindowSettings;
 			if( popUpWindowSettings != null ) {
@@ -135,9 +133,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// NOTE: Do not use. Will be deleted.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public bool NavigatesInOpeningWindow {
 			set {
 				navigatesInOpeningWindow = value;
@@ -148,17 +144,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
-		/// NOTE: Do not use the setter; it will be deleted.
-		/// </summary>
-		public override string ToolTip { get; set; }
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
+		public new string ToolTip { get { return toolTip; } set { toolTip = value; } }
 
-		/// <summary>
-		/// Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.
-		/// NOTE: Do not use the setter; it will be deleted.
-		/// </summary>
-		public Control ToolTipControl { get; set; }
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
+		public Control ToolTipControl { get { return toolTipControl; } set { toolTipControl = value; } }
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
@@ -204,8 +194,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var message = ( destinationPageInfo.AlternativeMode as DisabledPageMode ).Message;
 				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
 			}
-			else if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+			else if( toolTip != null || toolTipControl != null )
+				new ToolTip( toolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( toolTip ), this );
 		}
 
 		private void setWidth( Unit w ) {
