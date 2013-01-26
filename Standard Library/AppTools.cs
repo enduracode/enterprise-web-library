@@ -188,7 +188,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Do not use.
+		/// This will be removed when RSIS Goal 944 is complete.
 		/// </summary>
 		public static SystemLogic SystemLogic {
 			get {
@@ -478,7 +478,10 @@ namespace RedStapler.StandardLibrary {
 					var pickupFolderPath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Outgoing Dev Mail" );
 					Directory.CreateDirectory( pickupFolderPath );
 					smtpClient = new System.Net.Mail.SmtpClient
-					             	{ DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory, PickupDirectoryLocation = pickupFolderPath };
+						{
+							DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory,
+							PickupDirectoryLocation = pickupFolderPath
+						};
 				}
 				else if( isClientSideProgram )
 					smtpClient = provider.CreateClientSideAppSmtpClient();
