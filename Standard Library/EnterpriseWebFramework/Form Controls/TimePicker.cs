@@ -33,9 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.minuteInterval = minuteInterval;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public TimePicker(): this( null ) {}
 
 		/// <summary>
@@ -53,9 +51,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public Control ToolTipControl { get; set; }
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public TimeSpan? Value { set { this.value = value; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
@@ -87,9 +83,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                               allowEmpty );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public TimeSpan? ValidateAndGetNullableTimeSpan( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
 			return ValidateAndGetNullableTimeSpan( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
 		}
@@ -103,9 +97,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                       DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public TimeSpan ValidateAndGetTimeSpan( Validator validator, ValidationErrorHandler errorHandler ) {
 			return ValidateAndGetTimeSpan( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
