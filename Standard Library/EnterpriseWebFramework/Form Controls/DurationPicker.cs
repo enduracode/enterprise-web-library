@@ -51,9 +51,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return validator.GetTimeSpan( validationErrorHandler, parseTimeSpan( durationPicker.GetPostBackValue( postBackValues ) ) );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public TimeSpan ValidateAndGetDuration( Validator validator, ValidationErrorHandler validationErrorHandler ) {
 			return ValidateAndGetPostBackDuration( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, validationErrorHandler );
 		}
@@ -63,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Requires a value. Must be less than maxValueLength.
 		/// May only contain numbers.
 		/// </summary>
-		private static bool tooLongOrInvalidCharacters( string value ) {
+		private bool tooLongOrInvalidCharacters( string value ) {
 			return ( value.Length > ( value.Contains( ":" ) ? maxValueLength + 1 : maxValueLength ) || value.Length == 0 ) ||
 			       !( value.Equals( Regex.Replace( value, "[^0-9:]", "" ) ) );
 		}
@@ -71,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Supports browsers with Javascript disabled.
 		/// </summary>
-		private static TimeSpan parseTimeSpan( string value ) {
+		private TimeSpan parseTimeSpan( string value ) {
 			if( value.Contains( ":" ) ) {
 				var splitPartsArray = value.Split( ':' );
 				return new TimeSpan( int.Parse( splitPartsArray[ 0 ] ), int.Parse( splitPartsArray[ 1 ] ), 0 );
