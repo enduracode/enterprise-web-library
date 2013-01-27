@@ -36,9 +36,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.value = value.HasValue ? value.Value.Date as DateTime? : null;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DatePicker(): this( null ) {}
 
 		/// <summary>
@@ -46,9 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool AutoPostBack { set { autoPostBack = value; } }
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime? Value { set { this.value = value.HasValue ? value.Value.Date as DateTime? : null; } }
 
 		/// <summary>
@@ -124,9 +120,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return validator.GetNullableDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, allowEmpty, min, max );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime? ValidateAndGetNullableDate( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
 			return ValidateAndGetNullablePostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
 		}
@@ -138,9 +132,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return validator.GetDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, min, max );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime ValidateAndGetDate( Validator validator, ValidationErrorHandler errorHandler ) {
 			return ValidateAndGetPostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
