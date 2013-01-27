@@ -1,7 +1,7 @@
+using System;
+
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page {
-	/// <summary>
-	/// NOTE: Do not use this interface. It will be deleted.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 	public interface PageWithRightButton {
 		/// <summary>
 		/// Returns information about the right button.
