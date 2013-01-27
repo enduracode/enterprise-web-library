@@ -1,4 +1,5 @@
-﻿using System.Web.UI;
+﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.IO;
@@ -28,9 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return postBackValues.GetValue( this );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public RsFile GetPostBackValueOld() {
 			return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 		}
