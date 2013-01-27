@@ -38,9 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.minuteInterval = minuteInterval;
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTimePicker(): this( null ) {}
 
 		/// <summary>
@@ -48,9 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool AutoPostBack { set { autoPostBack = value; } }
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime? DateAndTime { set { this.value = value; } }
 
 		/// <summary>
@@ -81,7 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "", preventAutoComplete : true )
+			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "", preventAutoComplete: true )
 				{
 					AutoPostBack = autoPostBack
 				};
@@ -125,9 +121,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                      max );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime? ValidateAndGetNullableDate( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
 			return ValidateAndGetNullablePostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
 		}
@@ -143,9 +137,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                              max );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public DateTime ValidateAndGetDate( Validator validator, ValidationErrorHandler errorHandler ) {
 			return ValidateAndGetPostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
