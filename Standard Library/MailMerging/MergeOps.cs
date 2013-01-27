@@ -166,12 +166,11 @@ namespace RedStapler.StandardLibrary.MailMerging {
 					streams.Add( stream );
 
 					using( var sourcePdfMemoryStreamCopy = new MemoryStream() ) {
-						// Aspose has decided that in the new Facades PDF library, they will close your source stream form you when you call doc.Save();
+						// Aspose has decided that in the new Facades PDF library, they will close your source stream for you when you call doc.Save.
 						sourcePdfStream.Reset();
 						IoMethods.CopyStream( sourcePdfStream, sourcePdfMemoryStreamCopy );
 
-						var doc = new Aspose.Pdf.Facades.Form( sourcePdfMemoryStreamCopy, stream );
-
+						var doc = new Aspose.Pdf.Facades.Form( sourcePdfMemoryStreamCopy );
 						foreach( var mergeField in doc.FieldNames.Where( mergeField => !mergeField.StartsWith( "noMerge" ) ) ) {
 							var mergeValue = row.Values.SingleOrDefault( v => v.Name == mergeField );
 							if( mergeValue == null ) {
@@ -189,7 +188,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 							doc.FillField( mergeValue.Name, value );
 						}
-						doc.Save();
+						doc.Save( stream );
 					}
 				}
 
