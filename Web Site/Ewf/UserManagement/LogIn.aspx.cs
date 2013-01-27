@@ -4,7 +4,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
 
 // Parameter: string returnUrl
 
@@ -15,14 +14,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private FormsAuthCapableUserManagementProvider provider;
-		private EwfTextBox emailAddress;
-		private EwfTextBox password;
-		private string validatedEmailAddress;
+		private DataValue<string> emailAddress;
+		private DataValue<string> password;
 		private FormsAuthCapableUser user;
 
 		protected override void LoadData( DBConnection cn ) {
 			provider = (FormsAuthCapableUserManagementProvider)UserManagementStatics.SystemProvider;
-			var dm = new DataModification();
+			var logInDm = new DataModification();
+			var newPasswordDm = new DataModification();
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
@@ -30,17 +29,30 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					{
 						FieldSpan = 2
 					} ) );
-			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(), ( emailAddress = new EwfTextBox( "" ) ).ToCell() ) );
-			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(), ( password = new EwfTextBox( "" ) { MasksCharacters = true } ).ToCell() ) );
-			dm.AddTopValidationMethod(
-				( pbv, validator ) =>
-				validatedEmailAddress = UserManagementStatics.ValidateAndGetEmailAddress( validator, emailAddress, "Please enter a valid email address." ) );
+
+			emailAddress = new DataValue<string>();
+			var emailVl = new BasicValidationList();
+			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(),
+			                                           emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
+			logInDm.AddValidations( emailVl );
+			newPasswordDm.AddValidations( emailVl );
+
+			password = new DataValue<string>();
+			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
+			                                           FormItem.Create( "",
+			                                                            new EwfTextBox( "" ) { MasksCharacters = true },
+			                                                            validationGetter:
+				                                                            control =>
+				                                                            new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInDm ) )
+			                                                   .ToControl()
+			                                                   .ToCell() ) );
+
 			registeredTable.AddItem(
 				new EwfTableItem(
 					new EwfTableCell(
 						new PlaceHolder().AddControlsReturnThis(
 							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-							new PostBackButton( new DataModification(),
+							new PostBackButton( newPasswordDm,
 							                    handleSendNewPasswordClick,
 							                    new TextActionControlStyle( "click here to immediately send yourself a new password" ),
 							                    usesSubmitBehavior: false ) ) ) { FieldSpan = 2 } ) );
@@ -56,7 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In",
-			                                                           new PostBackButton( dm,
+			                                                           new PostBackButton( logInDm,
 			                                                                               () =>
 			                                                                               EhRedirect( user.MustChangePassword
 				                                                                                           ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo
@@ -64,22 +76,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			UserManagementStatics.SetUpClientSideLogicForLogInPostBack();
 
-			dm.AddModificationMethod( modifyData );
+			logInDm.AddModificationMethod( modifyData );
 		}
 
 		private void handleSendNewPasswordClick() {
-			EhValidateAndModifyDataAndRedirect(
-				delegate( Validator validator ) { validatedEmailAddress = UserManagementStatics.ValidateAndGetEmailAddress( validator, emailAddress, "Please enter a valid email address." ); },
-				delegate( DBConnection cn ) {
-					var userLocal = UserManagementStatics.GetUser( cn, validatedEmailAddress );
-					if( userLocal == null )
-						throw new EwfException( getUnregisteredEmailMessage() );
-					return ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ).GetUrl();
-				} );
+			EhModifyDataAndRedirect( delegate( DBConnection cn ) {
+				var userLocal = UserManagementStatics.GetUser( cn, emailAddress.Value );
+				if( userLocal == null )
+					throw new EwfException( getUnregisteredEmailMessage() );
+				return ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ).GetUrl();
+			} );
 		}
 
 		private void modifyData( DBConnection cn ) {
-			user = UserManagementStatics.LogInUser( validatedEmailAddress,
+			user = UserManagementStatics.LogInUser( emailAddress,
 			                                        password,
 			                                        getUnregisteredEmailMessage(),
 			                                        "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );

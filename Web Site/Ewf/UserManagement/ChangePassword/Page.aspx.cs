@@ -13,17 +13,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			protected override bool userCanAccessPage { get { return AppTools.User != null; } }
 		}
 
-		private EwfTextBox newPassword;
-		private EwfTextBox newPasswordConfirm;
+		private DataValue<string> newPassword;
 
 		protected override void LoadData( DBConnection cn ) {
 			var dm = new DataModification();
 			var fib = FormItemBlock.CreateFormItemTable();
 
-			newPassword = new EwfTextBox( "" ) { MasksCharacters = true };
-			fib.AddFormItems( FormItem.Create( "New password", newPassword ) );
-			newPasswordConfirm = new EwfTextBox( "" ) { MasksCharacters = true };
-			fib.AddFormItems( FormItem.Create( "Re-type new password", newPasswordConfirm ) );
+			newPassword = new DataValue<string>();
+			fib.AddFormItems( FormItem.Create( "New password",
+			                                   new EwfTextBox( "" ) { MasksCharacters = true },
+			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), dm ) ) );
+			var newPasswordConfirm = new DataValue<string>();
+			fib.AddFormItems( FormItem.Create( "Re-type new password",
+			                                   new EwfTextBox( "" ) { MasksCharacters = true },
+			                                   validationGetter:
+				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );
 			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );

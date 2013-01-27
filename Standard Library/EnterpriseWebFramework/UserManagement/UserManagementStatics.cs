@@ -87,13 +87,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Returns a validated email address from the specified text box or adds the specified error message to the validator.
+		/// Gets an email address form item for use on log-in pages. The validation sets this data value to the post back value of the text box, if valid, or adds
+		/// the specified error message to the form item.
 		/// </summary>
-		public static string ValidateAndGetEmailAddress( Validator validator, EwfTextBox emailAddress, string errorMessage ) {
-			return validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ),
-			                                  emailAddress.Value,
-			                                  false,
-			                                  int.MaxValue );
+		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, string label, string errorMessage, ValidationList vl ) {
+			return FormItem.Create( label,
+			                        new EwfTextBox( "" ),
+			                        validationGetter:
+				                        control =>
+				                        new Validation(
+					                        ( pbv, validator ) =>
+					                        emailAddress.Value =
+					                        validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ),
+					                                                   control.GetPostBackValue( pbv ),
+					                                                   false ),
+					                        vl ) );
 		}
 
 		/// <summary>
@@ -153,11 +161,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Only call this method if LoadData contains a call to SetUpClientSideLogicForLogInPostBack. Do not call if the system does not implement the forms
 		/// authentication capable user management provider.
 		/// </summary>
-		public static FormsAuthCapableUser LogInUser( string validatedEmailAddress, EwfTextBox password, string emailAddressErrorMessage, string passwordErrorMessage ) {
+		public static FormsAuthCapableUser LogInUser( DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage,
+		                                              string passwordErrorMessage ) {
 			var errors = new List<string>();
 
 			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
-			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
+			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, emailAddress.Value );
 			if( user != null ) {
 				var passwordError = true;
 				if( user.SaltedPassword != null ) {
@@ -232,7 +241,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
 			HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
-			                                          	{ Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } );
+				{
+					Secure = EwfApp.SupportsSecureConnections,
+					HttpOnly = true
+				} );
 
 			AppRequestState.Instance.SetUser( user );
 		}
@@ -252,8 +264,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					EwfPage.AddStatusMessage( StatusMessageType.Warning,
 					                          Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
 					                          ( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now )
-					                            	? TimeZone.CurrentTimeZone.DaylightName
-					                            	: TimeZone.CurrentTimeZone.StandardName ) + "." );
+						                            ? TimeZone.CurrentTimeZone.DaylightName
+						                            : TimeZone.CurrentTimeZone.StandardName ) + "." );
 				}
 			}
 			catch {} // NOTE: Figure out why the date time field passed from javascript might be empty, and get rid of this catch
@@ -268,11 +280,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Ensures that the specified text boxes contain identical, valid password values.
+		/// Ensures that the specified data values contain identical, valid password values.
 		/// </summary>
-		public static void ValidatePassword( Validator validator, EwfTextBox password, EwfTextBox passwordAgain ) {
-			// This method is not in Validator because we do not want Validator to know about controls.  We want a unidirectional using relationship.
-			// This method is not in EwfTextBox because there are two text boxes involved and it would not be clear which one to call it on.
+		public static void ValidatePassword( Validator validator, DataValue<string> password, DataValue<string> passwordAgain ) {
 			if( password.Value != passwordAgain.Value )
 				validator.NoteErrorAndAddMessage( "Passwords do not match." );
 			else if( password.Value.Length < 7 )

@@ -70,12 +70,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                        },
 				                                                                                     vl ) );
 
+				var newPassword = new DataValue<string>();
+				var confirmPassword = new DataValue<string>();
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
-				var newPasswordTb = new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true };
-				var confirmPasswordTb = new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true };
+				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
+				                                            FormItem.Create( "",
+				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
+				                                                             validationGetter:
+					                                                             control =>
+					                                                             new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) )
+				                                                    .ToControl()
+				                                                    .ToCell() ) );
+				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
+				                                            FormItem.Create( "",
+				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
+				                                                             validationGetter:
+					                                                             control =>
+					                                                             new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) )
+				                                                    .ToControl()
+				                                                    .ToCell() ) );
 				EwfPage.Instance.DisableAutofillOnForm();
-				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ), new EwfTableCell( newPasswordTb ) ) );
-				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ), new EwfTableCell( confirmPasswordTb ) ) );
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );
@@ -84,8 +98,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
 					                                       if( !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
-					                                       UserManagementStatics.ValidatePassword( validator, newPasswordTb, confirmPasswordTb );
-					                                       var p = new Password( newPasswordTb.Value );
+					                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
+					                                       var p = new Password( newPassword.Value );
 					                                       Salt = p.Salt;
 					                                       SaltedPassword = p.ComputeSaltedHash();
 					                                       MustChangePassword = false;
