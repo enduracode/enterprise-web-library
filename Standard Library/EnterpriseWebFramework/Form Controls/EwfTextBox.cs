@@ -41,11 +41,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[]
-				       	{
-				       		new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
-				       		new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
-				       		new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
-				       	};
+					{
+						new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
+						new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
+						new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
+					};
 			}
 		}
 
@@ -94,9 +94,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		string FormControl<string>.DurableValue { get { return durableValue; } }
 		string FormControl.DurableValueAsString { get { return durableValue; } }
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public string Value { get { return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } }
 
 		/// <summary>
@@ -264,5 +262,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Width = (int)Width.Value - 6;
 			base.Render( writer );
 		}
-	                         }
+	}
 }
