@@ -6,17 +6,13 @@ using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// This control is not supported and will be removed. Do not use.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 	public class ColumnPrimaryDynamicTable: WebControl, ControlTreeDataLoader {
 		private List<RowSetup> rowSetups;
 		private readonly List<ColumnSetup> columnSetups = new List<ColumnSetup>();
 		private readonly List<List<CellPlaceholder>> columnPlaceholders = new List<List<CellPlaceholder>>();
 
-		/// <summary>
-		/// Creates a table.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public ColumnPrimaryDynamicTable() {
 			createChildControlsAndWireUpEvents();
 		}
@@ -26,9 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			Controls.Add( UnderlyingTable );
 		}
 
-		/// <summary>
-		/// Configures this table with the specified rows. This is optional, but must be done before adding any columns.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void SetUpRows( params RowSetup[] rowSetups ) {
 			if( this.rowSetups != null )
 				throw new ApplicationException( "SetUpRows cannot be called multiple times." );
@@ -51,33 +45,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public int NumberOfRows { get { return rowSetups.Count; } }
 
-		/// <summary>
-		/// Adds a text-only column to this table.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void AddTextColumn( params string[] cellText ) {
 			AddTextColumn( null, cellText );
 		}
 
-		/// <summary>
-		/// Adds a column to this table.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void AddColumn( params EwfTableCell[] cells ) {
 			AddColumn( null, cells );
 		}
 
-		/// <summary>
-		/// Adds a text-only column to this table.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void AddTextColumn( ColumnSetup columnSetup, params string[] cellText ) {
-			var cells = new EwfTableCell[cellText.Length];
+			var cells = new EwfTableCell[ cellText.Length ];
 			for( var i = 0; i < cellText.Length; i += 1 )
 				cells[ i ] = new EwfTableCell( cellText[ i ] );
 			AddColumn( columnSetup, cells );
 		}
 
-		/// <summary>
-		/// Adds a column to this table.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public void AddColumn( ColumnSetup columnSetup, params EwfTableCell[] cells ) {
 			// If SetUpRows was never called, implicitly set up the rows based on this first column.
 			if( rowSetups == null ) {
