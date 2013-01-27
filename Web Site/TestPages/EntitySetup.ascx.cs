@@ -5,8 +5,8 @@ using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.WebSessionState;
 
 // OptionalParameter: string someText

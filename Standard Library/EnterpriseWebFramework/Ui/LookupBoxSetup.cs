@@ -3,7 +3,7 @@ using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// Represents a textbox that appears in the navigation bar allowing users to lookup a record by number.
 	/// </summary>
@@ -40,14 +40,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements {
 		/// <summary>
 		/// Builds this LookupBox and returns the panel.
 		/// </summary>
-		public Panel BuildLookupBoxPanel() {
-			EwfTextBox textBox = null;
-			textBox = new EwfTextBox( "", postBackHandler: () => EwfPage.Instance.EhModifyDataAndRedirect( cn => handler( cn, textBox.Value ) ) )
-			          	{ Width = new Unit( pixelWidth ) };
+		public WebControl BuildLookupBoxPanel() {
+			var textBox = new EwfTextBox( "", postBackHandler: postBackValue => EwfPage.Instance.EhModifyDataAndRedirect( cn => handler( cn, postBackValue ) ) )
+				{
+					Width = new Unit( pixelWidth )
+				};
 			textBox.SetWatermarkText( defaultText );
 			if( webMethodDefinition != null )
 				textBox.SetupAutoFill( webMethodDefinition, AutoFillOptions.PostBackOnItemSelect );
-			return new Panel { CssClass = "ewfLookupBox" }.AddControlsReturnThis( textBox );
+			return new Block( textBox ) { CssClass = "ewfLookupBox" };
 		}
 	}
 }

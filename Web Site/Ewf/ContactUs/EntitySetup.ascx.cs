@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Web.UI;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity {
 	/// <summary>

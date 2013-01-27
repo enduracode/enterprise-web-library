@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private AutoFillOptions autoFillOption;
 		private PostBackButton defaultSubmitButton;
 		private string watermarkText = "";
-		private readonly Action postBackHandler;
+		private readonly Action<string> postBackHandler;
 		private readonly bool preventAutoComplete;
 
 		/// <summary>
@@ -80,9 +80,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a text box. Do not pass null for value.
 		/// </summary>
 		/// <param name="value"></param>
-		/// <param name="postBackHandler"></param>
+		/// <param name="postBackHandler">The handler that will be executed when the user hits Enter on the text box or selects an autocomplete item. The parameter
+		/// is the post back value.</param>
 		/// <param name="preventAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
-		public EwfTextBox( string value, Action postBackHandler = null, bool preventAutoComplete = false ) {
+		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false ) {
 			durableValue = value;
 			textBox.ID = "theTextBox";
 			base.Controls.Add( textBox );
@@ -241,7 +242,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
 			if( postBackHandler != null )
-				postBackHandler();
+				postBackHandler( GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
