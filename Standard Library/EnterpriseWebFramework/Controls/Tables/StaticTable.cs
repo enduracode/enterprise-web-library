@@ -5,10 +5,8 @@ using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// This control is not supported and will be removed. Do not use.
-	/// </summary>
 	[ ParseChildren( false ) ]
+	[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 	public class StaticTable: WebControl, ControlTreeDataLoader {
 		private bool? isForm;
 
