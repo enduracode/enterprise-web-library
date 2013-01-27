@@ -74,7 +74,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a post back button. Do not pass null for the data modification.
 		/// </summary>
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
-		public PostBackButton( DataModification dataModification, Action clickHandler ): this( dataModification, clickHandler, new ButtonActionControlStyle() ) {}
+		public PostBackButton( DataModification dataModification, Action clickHandler ): this( dataModification, clickHandler, new ButtonActionControlStyle( "" ) ) {}
 
 		/// <summary>
 		/// Sets the method to be invoked when this button is clicked.

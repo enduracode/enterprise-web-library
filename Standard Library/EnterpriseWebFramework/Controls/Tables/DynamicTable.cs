@@ -328,12 +328,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			// Row limiting
 			if( defaultDataRowLimit != DataRowLimit.Unlimited ) {
-				var dataRowLimitSelector = new ControlLine();
-				dataRowLimitSelector.AddControls( new LiteralControl( "Show:" ) );
-				dataRowLimitSelector.AddControls( getDataRowLimitControl( DataRowLimit.Fifty ) );
-				dataRowLimitSelector.AddControls( getDataRowLimitControl( DataRowLimit.FiveHundred ) );
-				dataRowLimitSelector.AddControls( getDataRowLimitControl( DataRowLimit.Unlimited ) );
-				captionStack.AddControls( dataRowLimitSelector );
+				captionStack.AddControls( new ControlLine( new LiteralControl( "Show:" ),
+				                                           getDataRowLimitControl( DataRowLimit.Fifty ),
+				                                           getDataRowLimitControl( DataRowLimit.FiveHundred ),
+				                                           getDataRowLimitControl( DataRowLimit.Unlimited ) ) );
 			}
 
 			// Excel export
@@ -395,7 +393,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                     () => { },
 				                                     new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 				                                     false );
-				var controlLine = new ControlLine();
+				var controlLine = new ControlLine( new Control[ 0 ] );
 
 				if( previousRowSetup != null ) {
 					upButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( cn1, previousRowSetup.RankId.Value, rowSetup.RankId.Value ) );

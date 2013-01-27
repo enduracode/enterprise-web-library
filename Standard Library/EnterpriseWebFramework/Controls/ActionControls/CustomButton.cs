@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// NOTE: It would probably be better to take a function that returns the script so script generation can be deferred until all controls have client IDs.
 		/// </summary>
 		public CustomButton( string script ) {
-			ActionControlStyle = new ButtonActionControlStyle();
+			ActionControlStyle = new ButtonActionControlStyle( "" );
 			this.script = script;
 		}
 

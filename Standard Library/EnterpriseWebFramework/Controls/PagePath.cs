@@ -53,16 +53,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var pagePath = EwfPage.Instance.InfoAsBaseType.PagePath;
 			foreach( var page in pagePath.Take( pagePath.Count - 1 ) ) {
-				Controls.Add( new EwfLink( page )
-				              	{ Text = page.PageFullName, ActionControlStyle = new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.ShrinkWrap ) } );
+				Controls.Add( EwfLink.Create( page, new ButtonActionControlStyle( page.PageFullName, buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) );
 				Controls.Add( PageInfo.PagePathSeparator.GetLiteralControl() );
 			}
 			if( CurrentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage ) {
 				Controls.Add( new PageName
-				              	{
-				              		ExcludesPageNameIfEntitySetupExists =
-				              			CurrentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
-				              	} );
+					{
+						ExcludesPageNameIfEntitySetupExists = CurrentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+					} );
 			}
 			else if( Controls.Count > 0 )
 				Controls.RemoveAt( Controls.Count - 1 );
