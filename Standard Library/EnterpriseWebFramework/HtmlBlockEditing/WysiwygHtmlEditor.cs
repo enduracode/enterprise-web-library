@@ -36,7 +36,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// does in their System.Web.UI.WebControls.TextBox implementation. It probably doesn't matter in this case since CKEditor is gutting the textarea, but we
 			// want to have this somewhere for reference to assist us when we reimplement EwfTextBox to not use System.Web.UI.WebControls.TextBox under the hood.
 			Controls.Add( new Literal
-			              	{ Text = HttpUtility.HtmlEncode( Environment.NewLine + AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) ) } );
+				{
+					Text = HttpUtility.HtmlEncode( Environment.NewLine + AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) )
+				} );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
@@ -64,9 +66,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return postBackValues.GetValue( this );
 		}
 
-		/// <summary>
-		/// Do not use.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
 		public string GetPostBackValueOld() {
 			return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 		}
