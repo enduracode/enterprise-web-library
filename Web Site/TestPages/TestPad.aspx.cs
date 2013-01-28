@@ -1,5 +1,4 @@
 using System.Web.UI;
-using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -30,7 +29,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					lifeCycleType = "Full postback";
 
 				outputArea.AddControlsReturnThis( lifeCycleType.GetLiteralControl() );
-				author.Value.Length.Times( () => outputArea.AddControlsReturnThis( "Fred".GetLiteralControl() ) );
+				//author.Value.Length.Times( () => outputArea.AddControlsReturnThis( "Fred".GetLiteralControl() ) );
 			};
 		}
 	}

@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				               new EwfTableCell( "One" ),
 				               new EwfTableCell( "Two" ),
 				               new EwfTableCell( "Three with Tip" ) { ToolTip = "Cell tool tip" },
-				               new EwfTableCell( "Four with TipControl" ) { ToolTipControl = new DatePicker() } );
+				               new EwfTableCell( "Four with TipControl" ) { ToolTipControl = new DatePicker( null ) } );
 			}
 			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			//Clickable Rows
@@ -76,7 +76,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 				table4.AddTextRow(
 					new RowSetup
-						{ ClickScript = clickScript, UniqueIdentifier = 3, ToolTipControl = new EwfImage { ImageUrl = "http://redstapler.biz/images/logo_blkgradient.png" } },
+						{
+							ClickScript = clickScript,
+							UniqueIdentifier = 3,
+							ToolTipControl = new EwfImage { ImageUrl = "http://redstapler.biz/images/logo_blkgradient.png" }
+						},
 					cells[ 0 ],
 					cells[ 1 ],
 					cells[ 2 ] );
@@ -94,7 +98,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			for( var i = 0; i < 10; i += 3 ) {
 				table6.AddTextRow(
 					new RowSetup
-						{ ClickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Info, "Postback!" ); } ), UniqueIdentifier = 3 },
+						{
+							ClickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Info, "Postback!" ); } ),
+							UniqueIdentifier = 3
+						},
 					"Post" );
 			}
 

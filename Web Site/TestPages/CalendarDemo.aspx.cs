@@ -1,15 +1,14 @@
+using System;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
-using System;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 // OptionalParameter: string returnUrl
 // OptionalParameter: DateTime date
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class CalendarDemo: EwfPage, PageWithRightButton {
+	public partial class CalendarDemo: EwfPage {
 		partial class Info {
 			partial void initDefaultOptionalParameterPackage( OptionalParameterPackage package ) {
 				package.ReturnUrl = ActionControls.GetInfo().GetUrl();
@@ -25,10 +24,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void LoadData( DBConnection cn ) {
 			calendar.SetParameters( info.Date, date => parametersModification.Date = date );
-		}
-
-		NavButtonSetup PageWithRightButton.CreateRightButtonSetup() {
-			return new NavButtonSetup( "OK", info.ReturnUrl );
+			EwfUiStatics.SetContentFootActions( ActionButtonSetup.CreateWithUrl( "OK", new ExternalPageInfo( info.ReturnUrl ) ) );
 		}
 	}
 }

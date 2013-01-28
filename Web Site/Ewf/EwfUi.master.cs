@@ -423,9 +423,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() ) {
 					var first = from i in contentFootActions.Take( 1 )
-					            select i.BuildButton( text => new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = text }, true );
+					            select i.BuildButton( text => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large ), true );
 					var remaining = from i in contentFootActions.Skip( 1 )
-					                select i.BuildButton( text => new ButtonActionControlStyle( ButtonActionControlStyle.ButtonSize.Large ) { Text = text }, false );
+					                select i.BuildButton( text => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large ), false );
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
 				else if( EwfPage.Instance.IsAutoDataModifier )

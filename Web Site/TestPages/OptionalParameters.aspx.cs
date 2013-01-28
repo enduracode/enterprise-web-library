@@ -25,7 +25,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis( new PostBackButton( new DataModification(),
 			                                              () => EhRedirect( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) )
-			                          	{ UsesSubmitBehavior = false, ActionControlStyle = new ButtonActionControlStyle { Text = "Navigate and change Field 2" } } );
+				{
+					UsesSubmitBehavior = false,
+					ActionControlStyle = new ButtonActionControlStyle( "Navigate and change Field 2" )
+				} );
 
 			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url".ToCell(), "Valid?".ToCell() ) } );
 			ph.AddControlsReturnThis( table );
@@ -60,12 +63,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		private static void testUrl( EwfTable table, string url ) {
+		private void testUrl( EwfTable table, string url ) {
 			var validator = new Validator();
 			validator.GetUrl( new ValidationErrorHandler( "" ), url, false );
 			table.AddItem( new EwfTableItem( url.ToCell(),
 			                                 new EwfTableCell( ( !validator.ErrorsOccurred ).BooleanToYesNo( false ) )
-			                                 	{ CssClass = validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green } ) );
+				                                 {
+					                                 CssClass = validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green
+				                                 } ) );
 		}
 
 		public override bool IsAutoDataModifier { get { return true; } }
