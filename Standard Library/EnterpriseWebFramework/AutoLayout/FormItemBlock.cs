@@ -20,6 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		private readonly bool hideIfEmpty;
 		private readonly string heading;
 		private readonly bool useFormItemListMode;
 		private readonly int? numberOfColumns;
@@ -44,22 +45,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// While this method shares numberOfColumns semantics with ControlList, it is fundamentally different because instead of dealing with plain old controls,
 		// this method deals with form items, which can span multiple cells. ControlList is designed to represent simple ordered and unordered lists and should
 		// never support cell spanning.
-		public static FormItemBlock CreateFormItemList( string heading = "", int? numberOfColumns = null, int defaultFormItemCellSpan = 1,
+		public static FormItemBlock CreateFormItemList( bool hideIfEmpty = false, string heading = "", int? numberOfColumns = null, int defaultFormItemCellSpan = 1,
 		                                                TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified,
 		                                                IEnumerable<FormItem> formItems = null ) {
-			return new FormItemBlock( heading, true, numberOfColumns, defaultFormItemCellSpan, null, null, verticalAlignment, formItems );
+			return new FormItemBlock( hideIfEmpty, heading, true, numberOfColumns, defaultFormItemCellSpan, null, null, verticalAlignment, formItems );
 		}
 
 		/// <summary>
 		/// Creates a block with a classic "label on the left, value on the right" layout.
 		/// </summary>
-		public static FormItemBlock CreateFormItemTable( string heading = "", Unit? firstColumnWidth = null, Unit? secondColumnWidth = null,
+		public static FormItemBlock CreateFormItemTable( bool hideIfEmpty = false, string heading = "", Unit? firstColumnWidth = null, Unit? secondColumnWidth = null,
 		                                                 IEnumerable<FormItem> formItems = null ) {
-			return new FormItemBlock( heading, false, null, 1, firstColumnWidth, secondColumnWidth, TableCellVerticalAlignment.NotSpecified, formItems );
+			return new FormItemBlock( hideIfEmpty, heading, false, null, 1, firstColumnWidth, secondColumnWidth, TableCellVerticalAlignment.NotSpecified, formItems );
 		}
 
-		private FormItemBlock( string heading, bool useFormItemListMode, int? numberOfColumns, int defaultFormItemCellSpan, Unit? firstColumnWidth,
+		private FormItemBlock( bool hideIfEmpty, string heading, bool useFormItemListMode, int? numberOfColumns, int defaultFormItemCellSpan, Unit? firstColumnWidth,
 		                       Unit? secondColumnWidth, TableCellVerticalAlignment verticalAlignment, IEnumerable<FormItem> formItems ) {
+			this.hideIfEmpty = hideIfEmpty;
 			this.heading = heading;
 			this.useFormItemListMode = useFormItemListMode;
 			this.numberOfColumns = numberOfColumns;
@@ -78,6 +80,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+			if( hideIfEmpty && !formItems.Any() ) {
+				Visible = false;
+				return;
+			}
+
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			if( IncludeButtonWithThisText != null ) {
 				// We need to do logic to get the button to be on the right of the row.
@@ -93,7 +100,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				formItems.Add( FormItem.Create( "",
 				                                new PostBackButton( new DataModification(), new ButtonActionControlStyle( IncludeButtonWithThisText ) )
-				                                	{ Width = Unit.Percentage( 50 ) },
+					                                {
+						                                Width = Unit.Percentage( 50 )
+					                                },
 				                                textAlignment: TextAlignment.Right,
 				                                cellSpan: defaultFormItemCellSpan ) );
 			}
@@ -115,8 +124,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				( actualNumberOfColumns - row.Sum( r => getCellSpan( r ) ) ).Times( () => items.Add( getPlaceholderFormItem() ) );
 
 				table.AddItem( new EwfTableItem( new EwfTableItemSetup( verticalAlignment: verticalAlignment ),
-				                                 items.Select( i => new EwfTableCell( i.ToControl() ) { FieldSpan = getCellSpan( i ), TextAlignment = i.TextAlignment } ).
-				                                 	ToArray() ) );
+				                                 items.Select( i => new EwfTableCell( i.ToControl() ) { FieldSpan = getCellSpan( i ), TextAlignment = i.TextAlignment } )
+				                                      .ToArray() ) );
 			}
 			return table;
 		}
@@ -141,7 +150,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return results;
 		}
 
-		private static FormItem<Literal> getPlaceholderFormItem() {
+		private FormItem<Literal> getPlaceholderFormItem() {
 			return FormItem.Create( "", "".GetLiteralControl(), cellSpan: 1 );
 		}
 
@@ -153,12 +162,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var table = EwfTable.Create( caption: heading, fields: new[] { new EwfTableField( size: firstColumnWidth ), new EwfTableField( size: secondColumnWidth ) } );
 			table.AddData( formItems,
 			               i => {
-			               	var stack = ControlStack.Create( true );
-			               	if( i.Validation != null )
-			               		stack.AddModificationErrorItem( i.Validation,
-			               		                                errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
-			               	stack.AddControls( i.Control );
-			               	return new EwfTableItem( i.Label.ToCell(), new EwfTableCell( stack ) { TextAlignment = i.TextAlignment } );
+				               var stack = ControlStack.Create( true );
+				               if( i.Validation != null )
+					               stack.AddModificationErrorItem( i.Validation,
+					                                               errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+				               stack.AddControls( i.Control );
+				               return new EwfTableItem( i.Label.ToCell(), new EwfTableCell( stack ) { TextAlignment = i.TextAlignment } );
 			               } );
 			return table;
 		}
