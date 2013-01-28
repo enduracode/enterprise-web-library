@@ -22,6 +22,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
+		/// <param name="cn"></param>
+		/// <param name="userId"></param>
+		/// <param name="vl"></param>
+		/// <param name="availableRoles"></param>
+		/// <param name="validationPredicate">Function that returns true if this control should validate.</param>
 		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles =
 				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles( cn ) ).ToList();
@@ -35,7 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems( FormItem.Create( "Email address",
 			                                 new EwfTextBox( user != null ? user.Email : "" ),
 			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
-				                                 if( validationPredicate != null && validationPredicate() )
+				                                 if( validationPredicate == null || validationPredicate() )
 					                                 Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ),
 					                                                                    control.GetPostBackValue( pbv ),
 					                                                                    false,
@@ -49,7 +54,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var keepPassword = FormItem.Create( "",
 				                                    group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 				                                    validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                    if( !control.IsCheckedInPostBack( pbv ) || ( validationPredicate == null || !validationPredicate() ) )
+					                                    if( ( validationPredicate != null && !validationPredicate() ) || !control.IsCheckedInPostBack( pbv ) )
 						                                    return;
 					                                    if( user != null ) {
 						                                    Salt = facUser.Salt;
@@ -67,8 +72,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					                                                                       "Generate a " + ( userId.HasValue ? "new, " : "" ) +
 					                                                                       "random password and email it to the user" ),
 				                                        validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                        if( validationPredicate != null && validationPredicate() && control.IsCheckedInPostBack( pbv ) )
-						                                        genPassword( true );
+					                                        if( ( validationPredicate != null && !validationPredicate() ) || !control.IsCheckedInPostBack( pbv ) )
+						                                        return;
+					                                        genPassword( true );
 				                                        },
 				                                                                                     vl ) );
 
@@ -84,7 +90,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var providePassword = FormItem.Create( "",
 				                                       providePasswordRadio,
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                       if( !control.IsCheckedInPostBack( pbv ) || validationPredicate == null || !validationPredicate() )
+					                                       if( ( validationPredicate != null && !validationPredicate() ) || !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
 					                                       UserManagementStatics.ValidatePassword( validator, newPasswordTb, confirmPasswordTb );
 					                                       var p = new Password( newPasswordTb.Value );
@@ -106,7 +112,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems( FormItem.Create( "Role",
 			                                 roleList,
 			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
-				                                 if( validationPredicate != null && validationPredicate() )
+				                                 if( validationPredicate == null || validationPredicate() )
 					                                 RoleId = validator.GetByte( new ValidationErrorHandler( "role" ), control.GetPostBackValue( pbv ) );
 			                                 },
 			                                                                              vl ) ) );
