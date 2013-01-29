@@ -43,12 +43,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 		/// selected if the selected item ID has the default value and none of the list items do.</param>
+		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
+		/// violates the HTML specification.</param>
 		/// <param name="autoPostBack">Pass true if you want a post back to occur when the selection changes.</param>
 		/// <param name="defaultSubmitButton">The post-back button that will be submitted by this control.</param>
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
 		                                                                  bool useHorizontalLayout = false, string defaultValueItemLabel = "",
-		                                                                  bool autoPostBack = false, PostBackButton defaultSubmitButton = null ) {
-			return new SelectList<ItemIdType>( useHorizontalLayout, defaultValueItemLabel, null, null, items, selectedItemId, autoPostBack, defaultSubmitButton );
+		                                                                  bool disableSingleButtonDetection = false, bool autoPostBack = false,
+		                                                                  PostBackButton defaultSubmitButton = null ) {
+			return new SelectList<ItemIdType>( useHorizontalLayout,
+			                                   defaultValueItemLabel,
+			                                   null,
+			                                   null,
+			                                   items,
+			                                   disableSingleButtonDetection,
+			                                   selectedItemId,
+			                                   autoPostBack,
+			                                   defaultSubmitButton );
 		}
 
 		/// <summary>
@@ -69,7 +80,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
 		                                                                 string placeholderText = "Please select", bool autoPostBack = false,
 		                                                                 PostBackButton defaultSubmitButton = null ) {
-			return new SelectList<ItemIdType>( null, defaultValueItemLabel, placeholderIsValid, placeholderText, items, selectedItemId, autoPostBack, defaultSubmitButton );
+			return new SelectList<ItemIdType>( null,
+			                                   defaultValueItemLabel,
+			                                   placeholderIsValid,
+			                                   placeholderText,
+			                                   items,
+			                                   null,
+			                                   selectedItemId,
+			                                   autoPostBack,
+			                                   defaultSubmitButton );
 		}
 	}
 
@@ -81,6 +100,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly bool? useHorizontalRadioLayout;
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
+		private readonly bool? disableSingleRadioButtonDetection;
 		private readonly ItemIdType selectedItemId;
 		private readonly bool autoPostBack;
 		private readonly PostBackButton defaultSubmitButton;
@@ -94,7 +114,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private string postValue;
 
 		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
-		                     IEnumerable<EwfListItem<ItemIdType>> listItems, ItemIdType selectedItemId, bool autoPostBack, PostBackButton defaultSubmitButton ) {
+		                     IEnumerable<EwfListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, bool autoPostBack,
+		                     PostBackButton defaultSubmitButton ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 
 			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
@@ -109,6 +130,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			catch( ArgumentException ) {
 				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
 			}
+
+			this.disableSingleRadioButtonDetection = disableSingleRadioButtonDetection;
 
 			if( !items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemId ) ) )
 				throw new ApplicationException( "The selected item ID must either match a list item or be the default value of the type." );
@@ -144,7 +167,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( useHorizontalRadioLayout.HasValue ) {
-				radioList = FreeFormRadioList.Create( UniqueID, items.Any( i => !i.IsValid ), AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
+				radioList = FreeFormRadioList.Create( UniqueID,
+				                                      items.Any( i => !i.IsValid ),
+				                                      AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ),
+				                                      disableSingleButtonDetection: disableSingleRadioButtonDetection.Value );
 				foreach( var i in displayLinks )
 					radioList.AddDisplayLink( i.Item1, i.Item2, i.Item3 );
 
