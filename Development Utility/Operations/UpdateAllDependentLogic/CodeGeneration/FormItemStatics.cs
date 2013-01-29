@@ -101,10 +101,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new[]
 				                      {
 					                      new CSharpParameter( "bool", "useHorizontalLayout", "false" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+					                      new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "bool", "autoPostBack", "false" )
 				                      },
 			                      new CSharpParameter[ 0 ],
-			                      "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, autoPostBack: autoPostBack )",
+			                      "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
 			                      "control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 			                      "true" );
 			writeFormItemGetters( writer,
@@ -367,12 +367,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                                                                            : new CSharpParameter( "string",
 				                                                                                                                   "defaultValueItemLabel",
 				                                                                                                                   "\"None\"" ).ToSingleElementArray() )
-			                                                                                   .Concat(
-				                                                                                   new CSharpParameter( "bool", "autoPostBack", "false" )
-					                                                                                   .ToSingleElementArray() ),
+			                                                                                   .Concat( new[]
+				                                                                                   {
+					                                                                                   new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ),
+					                                                                                   new CSharpParameter( "bool", "autoPostBack", "false" )
+				                                                                                   } ),
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: " +
-			                      ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) + ", autoPostBack: autoPostBack )",
+			                      ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
+			                      ", disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
 			                      "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 			                      ( nonNullableField
 				                        ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
