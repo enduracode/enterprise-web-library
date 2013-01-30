@@ -17,10 +17,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal ValType GetValue<ValType>( FormControl<ValType> key ) {
-			// We want to suppress all of the exceptions that could happen, such as the key not existing or the value being the wrong type. If a problem occurs here
-			// that matters, it's ok to suppress it because it should be caught in a more helpful way by EwfPage when it compares form control hashes.
+			// We want to ignore all of the problems that could happen, such as the key not existing or the value being the wrong type. Any problem that matters
+			// should be caught in a more helpful way by EwfPage when it compares form control hashes.
+			//
+			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
+			// each when debugging.
+
+			object value;
+			if( !dictionary.TryGetValue( ( key as Control ).UniqueID, out value ) )
+				return key.DurableValue;
+
+			// It would be nice to figure out a way to do this without using exceptions.
 			try {
-				return (ValType)dictionary[ ( key as Control ).UniqueID ];
+				return (ValType)value;
 			}
 			catch {
 				return key.DurableValue;
