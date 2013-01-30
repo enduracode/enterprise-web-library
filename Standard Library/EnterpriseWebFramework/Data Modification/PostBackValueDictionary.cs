@@ -23,8 +23,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
 			// each when debugging.
 
+			var id = ( key as Control ).UniqueID;
+			if( id == null )
+				return key.DurableValue;
+
 			object value;
-			if( !dictionary.TryGetValue( ( key as Control ).UniqueID, out value ) )
+			if( !dictionary.TryGetValue( id, out value ) )
 				return key.DurableValue;
 
 			// It would be nice to figure out a way to do this without using exceptions.
