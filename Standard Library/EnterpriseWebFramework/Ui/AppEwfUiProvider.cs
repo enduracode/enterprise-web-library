@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
@@ -69,6 +68,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// </summary>
 		public virtual IEnumerable<Control> GetGlobalFootControls() {
 			return new Control[ 0 ];
+		}
+
+		/// <summary>
+		/// Gets whether the "Powered by the Enterprise Web Library" footer is disabled.
+		/// </summary>
+		public virtual bool PoweredByEwlFooterDisabled() {
+			return false;
 		}
 	}
 }

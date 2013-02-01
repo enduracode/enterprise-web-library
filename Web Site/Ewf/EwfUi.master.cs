@@ -53,6 +53,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			internal const string ContentFootBlockCssClass = "ewfButtons";
 			internal const string ContentFootActionListCssClass = "ewfUiCfActions";
 
+			internal const string GlobalFootBlockId = "ewfUiGlobalFoot";
+			internal const string PoweredByEwlFooterCssClass = "ewfUiPoweredBy";
+
 
 			// Some of the elements below cover a subset of other CSS elements in a more specific way. For example, UiGlobalNavControlList selects the control list
 			// used for global navigation. This control list is also selected, with lower specificity, by the CSS element that selects all control lists. In general
@@ -65,7 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				// NOTE: Remove this when applications can have CSS files that are only loaded when the EWF UI is being used.
 				var bodyElement = new CssElement( "UiBody", "body." + BodyCssClass ).ToSingleElementArray();
 
-				return bodyElement.Concat( getGlobalElements() ).Concat( getEntityAndTabAndContentElements() ).ToArray();
+				return bodyElement.Concat( getGlobalElements() ).Concat( getEntityAndTabAndContentElements() ).Concat( getGlobalFootElements() ).ToArray();
 			}
 
 			private IEnumerable<CssElement> getGlobalElements() {
@@ -153,6 +156,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
 					};
 			}
+
+			private IEnumerable<CssElement> getGlobalFootElements() {
+				const string globalFootBlockSelector = "div#" + GlobalFootBlockId;
+				return new[]
+					{
+						new CssElement( "UiGlobalFootBlock", globalFootBlockSelector ),
+						new CssElement( "UiPoweredByEwlFooterBlock", globalFootBlockSelector + " ." + PoweredByEwlFooterCssClass )
+					};
+			}
 		}
 
 		private ActionButtonSetup[] pageActions = new ActionButtonSetup[ 0 ];
@@ -185,11 +197,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var contentFootBlock = getContentFootBlock();
 			if( contentFootBlock != null )
 				contentFootCell.Controls.AddAt( 0, contentFootBlock );
-
-			// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
-			// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
-			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
-				globalFootPlace.AddControlsReturnThis( EwfUiStatics.AppProvider.GetGlobalFootControls() );
+			var globalFootBlock = getGlobalFootBlock();
+			if( globalFootBlock != null )
+				globalFootPlace.AddControlsReturnThis( globalFootBlock );
 
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.BodyCssClass;
 
@@ -447,6 +457,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center
 					} ) );
 			return table;
+		}
+
+		private Control getGlobalFootBlock() {
+			var controls = new List<Control>();
+
+			// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
+			// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
+			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
+				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
+
+			if( !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
+				controls.Add( new Paragraph( "Powered by the ".GetLiteralControl(),
+				                             EwfLink.Create( new ExternalPageInfo( "http://enterpriseweblibrary.org/" ),
+				                                             new TextActionControlStyle( "Enterprise Web Library" ) ) )
+					{
+						CssClass = CssElementCreator.PoweredByEwlFooterCssClass
+					} );
+			}
+
+			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
 		}
 
 		private EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
