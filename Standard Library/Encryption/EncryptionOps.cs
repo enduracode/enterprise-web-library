@@ -69,8 +69,10 @@ namespace RedStapler.StandardLibrary.Encryption {
 		}
 
 		/// <summary>
-		/// Encrypts the specified string and returns a base64 string that contains both the init vector as well as the encrypted data.
-		/// This can be used to encrypt query parameters or to store the value in a page or cookie.
+		/// Encrypts the specified string and returns a base64 string that contains both the init vector as well as the encrypted data. This can be used to encrypt
+		/// query parameters or to store the value in a page or cookie. If you want to repeatedly get the same encrypted string for a specified value, be sure to
+		/// use the same initialization vector.
+		/// 
 		/// It's okay to visibly store the init vector (though, it's not obvious what is the init vector and what is the encrypted data in the
 		/// resulting string) because what keeps the data truly secure is the key used to encrypt. Init vectors are used to insure variety when encrypting
 		/// the same data with the same key (providing you pass a different init vector each time), thus preventing rainbow table attacks.
