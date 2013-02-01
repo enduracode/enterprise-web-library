@@ -37,7 +37,7 @@ namespace RedStapler.StandardLibrary.Encryption {
 		/// encryption algorithm's block size is 16 bytes.
 		/// </summary>
 		public static byte[] EncryptString( byte[] initVector, string value ) {
-			SymmetricAlgorithm algorithm = Rijndael.Create();
+			SymmetricAlgorithm algorithm = Aes.Create();
 			algorithm.Key = SystemProvider.Key;
 			algorithm.IV = initVector;
 			byte[] encryptedValue;
