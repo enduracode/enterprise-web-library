@@ -164,5 +164,22 @@ namespace RedStapler.StandardLibrary {
 			}
 			return true;
 		}
+
+		/// <summary>
+		/// This is useful for calculating someone's age. Beginning date must be before or equal to end date.
+		/// </summary>
+		public static int GetNumberOfFullYearsBetweenDates( DateTime beginDate, DateTime endDate ) {
+			if( beginDate > endDate )
+				throw new ApplicationException( "The begin date must be before or the same as the end date." );
+
+			// get the age by comparing the two years...
+			var age = endDate.Year - beginDate.Year;
+
+			// ...then check for the 1-year offset
+			if( endDate.Month < beginDate.Month || ( endDate.Month == beginDate.Month && endDate.Day < beginDate.Day ) )
+				age -= 1;
+
+			return age;
+		}
 	}
 }
