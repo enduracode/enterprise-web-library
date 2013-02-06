@@ -160,10 +160,10 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                              byteAsString,
 			                                                                              allowEmpty,
 			                                                                              delegate {
-			                                                                              	return validateGenericIntegerType<byte>( errorHandler,
-			                                                                              	                                         byteAsString,
-			                                                                              	                                         byte.MinValue,
-			                                                                              	                                         byte.MaxValue );
+				                                                                              return validateGenericIntegerType<byte>( errorHandler,
+				                                                                                                                       byteAsString,
+				                                                                                                                       byte.MinValue,
+				                                                                                                                       byte.MaxValue );
 			                                                                              } );
 		}
 
@@ -201,10 +201,10 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                               shortAsString,
 			                                                                               allowEmpty,
 			                                                                               delegate {
-			                                                                               	return validateGenericIntegerType<short>( errorHandler,
-			                                                                               	                                          shortAsString,
-			                                                                               	                                          min,
-			                                                                               	                                          max );
+				                                                                               return validateGenericIntegerType<short>( errorHandler,
+				                                                                                                                         shortAsString,
+				                                                                                                                         min,
+				                                                                                                                         max );
 			                                                                               } );
 		}
 
@@ -234,10 +234,10 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                             intAsString,
 			                                                                             allowEmpty,
 			                                                                             delegate {
-			                                                                             	return validateGenericIntegerType<int>( errorHandler,
-			                                                                             	                                        intAsString,
-			                                                                             	                                        int.MinValue,
-			                                                                             	                                        int.MaxValue );
+				                                                                             return validateGenericIntegerType<int>( errorHandler,
+				                                                                                                                     intAsString,
+				                                                                                                                     int.MinValue,
+				                                                                                                                     int.MaxValue );
 			                                                                             } );
 		}
 
@@ -398,14 +398,14 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                 text,
 			                                                 allowEmpty,
 			                                                 delegate {
-			                                                 	var errorMessage = "The length of the " + errorHandler.Subject + " must be between " + minLength + " and " +
-			                                                 	                   maxLength + " characters.";
-			                                                 	if( text.Length > maxLength )
-			                                                 		errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooLong, errorMessage ) );
-			                                                 	else if( text.Length < minLength )
-			                                                 		errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooShort, errorMessage ) );
+				                                                 var errorMessage = "The length of the " + errorHandler.Subject + " must be between " + minLength + " and " +
+				                                                                    maxLength + " characters.";
+				                                                 if( text.Length > maxLength )
+					                                                 errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooLong, errorMessage ) );
+				                                                 else if( text.Length < minLength )
+					                                                 errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooShort, errorMessage ) );
 
-			                                                 	return text.Trim();
+				                                                 return text.Trim();
 			                                                 } );
 		}
 
@@ -421,28 +421,28 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                 emailAddress,
 			                                                 allowEmpty,
 			                                                 delegate {
-			                                                 	// Validate as a string with same restrictions - if it fails on that, return
-			                                                 	emailAddress = GetString( errorHandler, emailAddress, allowEmpty, maxLength );
-			                                                 	if( errorHandler.LastResult == ErrorCondition.NoError ) {
-			                                                 		// [^@ \n] means any character but a @ or a newline or a space.  This forces only one @ to exist.
-			                                                 		//([^@ \n\.]+\.)+ forces any positive number of (anything.)s to exist in a row.  Doesn't allow "..".
-			                                                 		// Allows anything.anything123-anything@anything.anything123.anything
-			                                                 		const string localPartUnconditionallyPermittedCharacters = @"[a-z0-9!#\$%&'\*\+\-/=\?\^_`\{\|}~]";
-			                                                 		const string localPart =
-			                                                 			"(" + localPartUnconditionallyPermittedCharacters + @"+\.?)*" +
-			                                                 			localPartUnconditionallyPermittedCharacters + "+";
-			                                                 		const string domainUnconditionallyPermittedCharacters = @"[a-z0-9-]";
-			                                                 		const string domain =
-			                                                 			"(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters +
-			                                                 			"+";
-			                                                 		// The first two conditions are for performance only.
-			                                                 		if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
-			                                                 		    !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
-			                                                 			errorHandler.SetValidationResult( ValidationResult.Invalid() );
-			                                                 		// Max length is already checked by the string validation
-			                                                 		// NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
-			                                                 	}
-			                                                 	return emailAddress;
+				                                                 // Validate as a string with same restrictions - if it fails on that, return
+				                                                 emailAddress = GetString( errorHandler, emailAddress, allowEmpty, maxLength );
+				                                                 if( errorHandler.LastResult == ErrorCondition.NoError ) {
+					                                                 // [^@ \n] means any character but a @ or a newline or a space.  This forces only one @ to exist.
+					                                                 //([^@ \n\.]+\.)+ forces any positive number of (anything.)s to exist in a row.  Doesn't allow "..".
+					                                                 // Allows anything.anything123-anything@anything.anything123.anything
+					                                                 const string localPartUnconditionallyPermittedCharacters = @"[a-z0-9!#\$%&'\*\+\-/=\?\^_`\{\|}~]";
+					                                                 const string localPart =
+						                                                 "(" + localPartUnconditionallyPermittedCharacters + @"+\.?)*" +
+						                                                 localPartUnconditionallyPermittedCharacters + "+";
+					                                                 const string domainUnconditionallyPermittedCharacters = @"[a-z0-9-]";
+					                                                 const string domain =
+						                                                 "(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters +
+						                                                 "+";
+					                                                 // The first two conditions are for performance only.
+					                                                 if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
+					                                                     !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
+						                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
+					                                                 // Max length is already checked by the string validation
+					                                                 // NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
+				                                                 }
+				                                                 return emailAddress;
 			                                                 } );
 		}
 
@@ -464,27 +464,27 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                 url,
 			                                                 allowEmpty,
 			                                                 delegate {
-			                                                 	url = GetString( errorHandler,
-			                                                 	                 validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url,
-			                                                 	                 true,
-			                                                 	                 maxUrlLength );
-			                                                 	if( errorHandler.LastResult == ErrorCondition.NoError ) {
-			                                                 		try {
-			                                                 			// Don't allow relative URLs
-			                                                 			var uri = new Uri( url, UriKind.Absolute );
-			                                                 			// Must be a valid DNS-style hostname or IP address
-			                                                 			// Must contain at least one '.', to prevent just host names
-			                                                 			// Must be one of the common web browser-accessible schemes
-			                                                 			if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 &&
-			                                                 			    uri.HostNameType != UriHostNameType.IPv6 || !uri.Host.Any( c => c == '.' ) ||
-			                                                 			    !validSchemes.Any( s => s == uri.Scheme ) )
-			                                                 				throw new UriFormatException();
-			                                                 		}
-			                                                 		catch( UriFormatException ) {
-			                                                 			errorHandler.SetValidationResult( ValidationResult.Invalid() );
-			                                                 		}
-			                                                 	}
-			                                                 	return url;
+				                                                 url = GetString( errorHandler,
+				                                                                  validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url,
+				                                                                  true,
+				                                                                  maxUrlLength );
+				                                                 if( errorHandler.LastResult == ErrorCondition.NoError ) {
+					                                                 try {
+						                                                 // Don't allow relative URLs
+						                                                 var uri = new Uri( url, UriKind.Absolute );
+						                                                 // Must be a valid DNS-style hostname or IP address
+						                                                 // Must contain at least one '.', to prevent just host names
+						                                                 // Must be one of the common web browser-accessible schemes
+						                                                 if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 &&
+						                                                     uri.HostNameType != UriHostNameType.IPv6 || !uri.Host.Any( c => c == '.' ) ||
+						                                                     !validSchemes.Any( s => s == uri.Scheme ) )
+							                                                 throw new UriFormatException();
+					                                                 }
+					                                                 catch( UriFormatException ) {
+						                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
+					                                                 }
+				                                                 }
+				                                                 return url;
 			                                                 } );
 		}
 
@@ -536,61 +536,61 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                       input,
 			                                                                       allowEmpty,
 			                                                                       delegate {
-			                                                                       	var invalidPrefix = "The " + errorHandler.Subject + " (" + input + ") is invalid.";
-			                                                                       	// Remove all of the valid delimiter characters so we can just deal with numbers and whitespace
-			                                                                       	input = input.RemoveCharacters( new[] { '-', '(', ')', '.' } ).Trim();
+				                                                                       var invalidPrefix = "The " + errorHandler.Subject + " (" + input + ") is invalid.";
+				                                                                       // Remove all of the valid delimiter characters so we can just deal with numbers and whitespace
+				                                                                       input = input.RemoveCharacters( new[] { '-', '(', ')', '.' } ).Trim();
 
-			                                                                       	var invalidMessage = invalidPrefix +
-			                                                                       	                     " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
-			                                                                       	var phoneNumber = PhoneNumber.CreateFromParts( "", "", "" );
+				                                                                       var invalidMessage = invalidPrefix +
+				                                                                                            " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
+				                                                                       var phoneNumber = PhoneNumber.CreateFromParts( "", "", "" );
 
-			                                                                       	// NOTE: AllowSurroundingGarbage does not apply to first five or international numbers.
+				                                                                       // NOTE: AllowSurroundingGarbage does not apply to first five or international numbers.
 
-			                                                                       	// First-five shortcut (intra-org phone numbers)
-			                                                                       	if( firstFives != null && Regex.IsMatch( input, @"^\d{5}$" ) ) {
-			                                                                       		string firstFive;
-			                                                                       		if( firstFives.ContainsKey( input.Substring( 0, 1 ) ) ) {
-			                                                                       			firstFive = firstFives[ input.Substring( 0, 1 ) ];
-			                                                                       			phoneNumber = PhoneNumber.CreateFromParts( firstFive.Substring( 0, 3 ),
-			                                                                       			                                           firstFive.Substring( 3 ) + input,
-			                                                                       			                                           "" );
-			                                                                       		}
-			                                                                       		else
-			                                                                       			errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
-			                                                                       			                                                           "The five digit phone number you entered isn't recognized." ) );
-			                                                                       	}
-			                                                                       		// International phone numbers
-			                                                                       		// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
-			                                                                       		// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
-			                                                                       		// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
-			                                                                       	else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
-			                                                                       		phoneNumber = PhoneNumber.CreateInternational( input );
-			                                                                       		// Validated it as a North American Numbering Plan phone number
-			                                                                       	else {
-			                                                                       		var regex =
-			                                                                       			@"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
-			                                                                       		if( !allowSurroundingGarbage )
-			                                                                       			regex = "^" + regex + "$";
+				                                                                       // First-five shortcut (intra-org phone numbers)
+				                                                                       if( firstFives != null && Regex.IsMatch( input, @"^\d{5}$" ) ) {
+					                                                                       string firstFive;
+					                                                                       if( firstFives.ContainsKey( input.Substring( 0, 1 ) ) ) {
+						                                                                       firstFive = firstFives[ input.Substring( 0, 1 ) ];
+						                                                                       phoneNumber = PhoneNumber.CreateFromParts( firstFive.Substring( 0, 3 ),
+						                                                                                                                  firstFive.Substring( 3 ) + input,
+						                                                                                                                  "" );
+					                                                                       }
+					                                                                       else
+						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
+						                                                                                                                                  "The five digit phone number you entered isn't recognized." ) );
+				                                                                       }
+					                                                                       // International phone numbers
+					                                                                       // We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
+					                                                                       // We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
+					                                                                       // We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
+				                                                                       else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
+					                                                                       phoneNumber = PhoneNumber.CreateInternational( input );
+					                                                                       // Validated it as a North American Numbering Plan phone number
+				                                                                       else {
+					                                                                       var regex =
+						                                                                       @"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
+					                                                                       if( !allowSurroundingGarbage )
+						                                                                       regex = "^" + regex + "$";
 
-			                                                                       		var match = Regex.Match( input, regex );
+					                                                                       var match = Regex.Match( input, regex );
 
-			                                                                       		if( match.Success ) {
-			                                                                       			var areaCode = match.Groups[ "ac" ].Value;
-			                                                                       			var number = match.Groups[ "num1" ].Value + match.Groups[ "num2" ].Value;
-			                                                                       			var extension = match.Groups[ "ext" ].Value;
-			                                                                       			phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
-			                                                                       			if( !allowExtension && phoneNumber.Extension.Length > 0 ) {
-			                                                                       				errorHandler.SetValidationResult( ValidationResult.Custom(
-			                                                                       					ErrorCondition.Invalid,
-			                                                                       					invalidPrefix +
-			                                                                       					" Extensions are not permitted in this field. Use the separate extension field." ) );
-			                                                                       			}
-			                                                                       		}
-			                                                                       		else
-			                                                                       			errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
-			                                                                       			                                                           invalidMessage ) );
-			                                                                       	}
-			                                                                       	return phoneNumber;
+					                                                                       if( match.Success ) {
+						                                                                       var areaCode = match.Groups[ "ac" ].Value;
+						                                                                       var number = match.Groups[ "num1" ].Value + match.Groups[ "num2" ].Value;
+						                                                                       var extension = match.Groups[ "ext" ].Value;
+						                                                                       phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
+						                                                                       if( !allowExtension && phoneNumber.Extension.Length > 0 ) {
+							                                                                       errorHandler.SetValidationResult( ValidationResult.Custom(
+								                                                                       ErrorCondition.Invalid,
+								                                                                       invalidPrefix +
+								                                                                       " Extensions are not permitted in this field. Use the separate extension field." ) );
+						                                                                       }
+					                                                                       }
+					                                                                       else
+						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
+						                                                                                                                                  invalidMessage ) );
+				                                                                       }
+				                                                                       return phoneNumber;
 			                                                                       },
 			                                                                       PhoneNumber.CreateFromParts( "", "", "" ) );
 		}
@@ -604,11 +604,11 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                 extension,
 			                                                 allowEmpty,
 			                                                 delegate {
-			                                                 	extension = extension.Trim();
-			                                                 	if( !Regex.IsMatch( extension, @"^ *(?<ext>\d{1,5}) *$" ) )
-			                                                 		errorHandler.SetValidationResult( ValidationResult.Invalid() );
+				                                                 extension = extension.Trim();
+				                                                 if( !Regex.IsMatch( extension, @"^ *(?<ext>\d{1,5}) *$" ) )
+					                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
 
-			                                                 	return extension;
+				                                                 return extension;
 			                                                 } );
 		}
 
@@ -629,12 +629,12 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                 text,
 			                                                 allowEmpty,
 			                                                 delegate {
-			                                                 	foreach( var garbageString in acceptableGarbageStrings )
-			                                                 		text = text.Replace( garbageString, "" );
-			                                                 	text = text.Trim();
-			                                                 	if( !Regex.IsMatch( text, @"^\d{" + numberOfDigits + "}$" ) )
-			                                                 		errorHandler.SetValidationResult( ValidationResult.Invalid() );
-			                                                 	return text;
+				                                                 foreach( var garbageString in acceptableGarbageStrings )
+					                                                 text = text.Replace( garbageString, "" );
+				                                                 text = text.Trim();
+				                                                 if( !Regex.IsMatch( text, @"^\d{" + numberOfDigits + "}$" ) )
+					                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
+				                                                 return text;
 			                                                 } );
 		}
 
@@ -669,11 +669,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		public DateTime GetSqlSmallDateTime( ValidationErrorHandler errorHandler, string dateAsString ) {
 			return executeValidationMethodAndTreatInvalidResultAsUnusable<DateTime>( errorHandler,
 			                                                                         delegate {
-			                                                                         	return validateDateTime( errorHandler,
-			                                                                         	                         dateAsString,
-			                                                                         	                         null,
-			                                                                         	                         SqlSmallDateTimeMinValue,
-			                                                                         	                         SqlSmallDateTimeMaxValue );
+				                                                                         return validateDateTime( errorHandler,
+				                                                                                                  dateAsString,
+				                                                                                                  null,
+				                                                                                                  SqlSmallDateTimeMinValue,
+				                                                                                                  SqlSmallDateTimeMaxValue );
 			                                                                         } );
 		}
 
@@ -687,11 +687,11 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                                  dateAsString,
 			                                                                                  allowEmpty,
 			                                                                                  delegate {
-			                                                                                  	return validateDateTime( errorHandler,
-			                                                                                  	                         dateAsString,
-			                                                                                  	                         null,
-			                                                                                  	                         SqlSmallDateTimeMinValue,
-			                                                                                  	                         SqlSmallDateTimeMaxValue );
+				                                                                                  return validateDateTime( errorHandler,
+				                                                                                                           dateAsString,
+				                                                                                                           null,
+				                                                                                                           SqlSmallDateTimeMinValue,
+				                                                                                                           SqlSmallDateTimeMaxValue );
 			                                                                                  } );
 		}
 
@@ -739,7 +739,9 @@ namespace RedStapler.StandardLibrary.Validation {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>( errorHandler,
 			                                                                                  dateAsString,
 			                                                                                  allowEmpty,
-			                                                                                  delegate { return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern ); } );
+			                                                                                  delegate {
+				                                                                                  return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern );
+			                                                                                  } );
 		}
 
 		private static DateTime validateSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern ) {
