@@ -111,7 +111,10 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public bool GetBoolean( ValidationErrorHandler errorHandler, string booleanAsString ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<bool>( errorHandler, delegate { return validateBoolean( booleanAsString, errorHandler ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<bool>( errorHandler,
+			                                                                             booleanAsString,
+			                                                                             false,
+			                                                                             delegate { return validateBoolean( booleanAsString, errorHandler ); } );
 		}
 
 		/// <summary>
@@ -147,8 +150,12 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public byte GetByte( ValidationErrorHandler errorHandler, string byteAsString, byte min, byte max ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<byte>( errorHandler,
-			                                                                     delegate { return validateGenericIntegerType<byte>( errorHandler, byteAsString, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<byte>( errorHandler,
+			                                                                             byteAsString,
+			                                                                             false,
+			                                                                             delegate {
+				                                                                             return validateGenericIntegerType<byte>( errorHandler, byteAsString, min, max );
+			                                                                             } );
 		}
 
 		/// <summary>
@@ -180,8 +187,15 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public short GetShort( ValidationErrorHandler errorHandler, string shortAsString, short min, short max ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<short>( errorHandler,
-			                                                                      delegate { return validateGenericIntegerType<short>( errorHandler, shortAsString, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<short>( errorHandler,
+			                                                                              shortAsString,
+			                                                                              false,
+			                                                                              delegate {
+				                                                                              return validateGenericIntegerType<short>( errorHandler,
+				                                                                                                                        shortAsString,
+				                                                                                                                        min,
+				                                                                                                                        max );
+			                                                                              } );
 		}
 
 		/// <summary>
@@ -221,8 +235,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public int GetInt( ValidationErrorHandler errorHandler, string intAsString, int min, int max ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<int>( errorHandler,
-			                                                                    delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>( errorHandler,
+			                                                                            intAsString,
+			                                                                            false,
+			                                                                            delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, min, max );
+			                                                                            } );
 		}
 
 		/// <summary>
@@ -273,8 +290,10 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public float GetFloat( ValidationErrorHandler errorHandler, string floatAsString, float min, float max ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<float>( errorHandler,
-			                                                                      delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<float>( errorHandler,
+			                                                                              floatAsString,
+			                                                                              false,
+			                                                                              delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
 		}
 
 		/// <summary>
@@ -326,8 +345,10 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public Decimal GetDecimal( ValidationErrorHandler errorHandler, string decimalAsString, Decimal min, Decimal max ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<decimal>( errorHandler,
-			                                                                        delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal>( errorHandler,
+			                                                                                decimalAsString,
+			                                                                                false,
+			                                                                                delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
 		}
 
 		/// <summary>
@@ -667,14 +688,16 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public DateTime GetSqlSmallDateTime( ValidationErrorHandler errorHandler, string dateAsString ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<DateTime>( errorHandler,
-			                                                                         delegate {
-				                                                                         return validateDateTime( errorHandler,
-				                                                                                                  dateAsString,
-				                                                                                                  null,
-				                                                                                                  SqlSmallDateTimeMinValue,
-				                                                                                                  SqlSmallDateTimeMaxValue );
-			                                                                         } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( errorHandler,
+			                                                                                 dateAsString,
+			                                                                                 false,
+			                                                                                 delegate {
+				                                                                                 return validateDateTime( errorHandler,
+				                                                                                                          dateAsString,
+				                                                                                                          null,
+				                                                                                                          SqlSmallDateTimeMinValue,
+				                                                                                                          SqlSmallDateTimeMaxValue );
+			                                                                                 } );
 		}
 
 		/// <summary>
@@ -727,8 +750,12 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Pattern specifies the date format, such as "MM/dd/yyyy".
 		/// </summary>
 		public DateTime GetSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<DateTime>( errorHandler,
-			                                                                         delegate { return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( errorHandler,
+			                                                                                 dateAsString,
+			                                                                                 false,
+			                                                                                 delegate {
+				                                                                                 return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern );
+			                                                                                 } );
 		}
 
 		/// <summary>
@@ -801,7 +828,10 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Validates the date using given min and max constraints.
 		/// </summary>
 		public DateTime GetDateTime( ValidationErrorHandler handler, string dateAsString, string[] formats, DateTime minDate, DateTime maxDate ) {
-			return executeValidationMethodAndTreatInvalidResultAsUnusable<DateTime>( handler, () => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( handler,
+			                                                                                 dateAsString,
+			                                                                                 false,
+			                                                                                 () => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
 		}
 
 		/// <summary>
@@ -849,15 +879,6 @@ namespace RedStapler.StandardLibrary.Validation {
 			                                                                                                   formats,
 			                                                                                                   DateTime.MinValue,
 			                                                                                                   DateTime.MaxValue ).TimeOfDay );
-		}
-
-		/// <summary>
-		/// Do not use. Use executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid instead.
-		/// </summary>
-		private T executeValidationMethodAndTreatInvalidResultAsUnusable<T>( ValidationErrorHandler handler, ValidationMethod<T> method ) {
-			var result = method();
-			handler.HandleResult( this, true );
-			return result;
 		}
 
 		private T executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<T>( ValidationErrorHandler handler, object valueAsObject, bool allowEmpty,
