@@ -117,7 +117,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public DateTime? ValidateAndGetNullablePostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
 		                                                     bool allowEmpty ) {
-			return validator.GetNullableDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, allowEmpty, min, max );
+			var date = validator.GetNullableDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, allowEmpty, min, max );
+			if( errorHandler.LastResult == ErrorCondition.NoError && date.HasTime() )
+				validator.NoteErrorAndAddMessage( "Time information is not allowed." );
+			return date;
 		}
 
 		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
@@ -129,7 +132,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Validates the date and returns the date.
 		/// </summary>
 		public DateTime ValidateAndGetPostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
-			return validator.GetDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, min, max );
+			var date = validator.GetDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, min, max );
+			if( errorHandler.LastResult == ErrorCondition.NoError && date.HasTime() )
+				validator.NoteErrorAndAddMessage( "Time information is not allowed." );
+			return date;
 		}
 
 		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
