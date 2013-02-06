@@ -861,12 +861,7 @@ namespace RedStapler.StandardLibrary.Validation {
 		}
 
 		private T executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<T>( ValidationErrorHandler handler, object valueAsObject, bool allowEmpty,
-		                                                                             ValidationMethod<T> method ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( handler, valueAsObject, allowEmpty, method, default( T ) );
-		}
-
-		private T executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<T>( ValidationErrorHandler handler, object valueAsObject, bool allowEmpty,
-		                                                                             ValidationMethod<T> method, T customDefaultReturnValue ) {
+		                                                                             ValidationMethod<T> method, T customDefaultReturnValue = default( T ) ) {
 			var result = customDefaultReturnValue;
 			if( !isEmpty( handler, valueAsObject, allowEmpty ) )
 				result = method();
