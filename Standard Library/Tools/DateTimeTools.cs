@@ -14,6 +14,7 @@ namespace RedStapler.StandardLibrary {
 		private const string dayMonthYearFormatLz = "dd MMM yyyy";
 		private const string dayMonthYearFormat = "d MMM yyyy";
 		private const string monthDayYearFormat = "MM/dd/yyyy";
+		private const string monthYearFormat = "MMMM yyyy";
 
 		/// <summary>
 		/// Formats the date portion of the specified date/time in "day month year" style, e.g. 5 Apr 2008. Returns stringIfNull if the
@@ -43,6 +44,13 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static string ToMonthDayYearString( this DateTime dateTime ) {
 			return dateTime.ToString( monthDayYearFormat );
+		}
+
+		/// <summary>
+		/// Formats the date portion of the specified date/time in "month year" style, e.g. April 2008.
+		/// </summary>
+		public static string ToMonthYearString( this DateTimeOffset dateTime ) {
+			return dateTime.ToString( monthYearFormat );
 		}
 
 		/// <summary>
