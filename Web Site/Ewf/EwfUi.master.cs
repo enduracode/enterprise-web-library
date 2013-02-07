@@ -470,10 +470,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			if( !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
 				controls.Add( new Paragraph( "Powered by the ".GetLiteralControl(),
 				                             EwfLink.Create( new ExternalPageInfo( "http://enterpriseweblibrary.org/" ),
-				                                             new TextActionControlStyle( "Enterprise Web Library" ) ) )
-					{
-						CssClass = CssElementCreator.PoweredByEwlFooterCssClass
-					} );
+				                                             new TextActionControlStyle( "Enterprise Web Library" ) ),
+				                             ( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" )
+					                             .GetLiteralControl() ) { CssClass = CssElementCreator.PoweredByEwlFooterCssClass } );
 			}
 
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
