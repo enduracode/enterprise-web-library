@@ -51,8 +51,31 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				generateAssemblyInfoCodeFile( installation, "Standard Library", "" );
-				generateAssemblyInfoCodeFile( installation, "Development Utility", "Development Utility" );
+				generateCodeForEwlProject( installation,
+				                           "Standard Library",
+				                           writer => {
+					                           writer.WriteLine( "using System;" );
+					                           writer.WriteLine( "using System.Globalization;" );
+					                           writer.WriteLine( "using System.Reflection;" );
+					                           writer.WriteLine( "using System.Runtime.InteropServices;" );
+					                           writer.WriteLine();
+					                           writeAssemblyInfo( writer, installation, "" );
+					                           writer.WriteLine();
+					                           writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
+					                           writer.WriteLine( "partial class AppTools {" );
+					                           CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
+					                           writer.WriteLine( "public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" +
+					                                             DateTimeOffset.UtcNow.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind );" );
+					                           writer.WriteLine( "}" );
+					                           writer.WriteLine( "}" );
+				                           } );
+				generateCodeForEwlProject( installation,
+				                           "Development Utility",
+				                           writer => {
+					                           writer.WriteLine( "using System.Reflection;" );
+					                           writer.WriteLine( "using System.Runtime.InteropServices;" );
+					                           writeAssemblyInfo( writer, installation, "Development Utility" );
+				                           } );
 			}
 			generateLibraryCode( installation );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
@@ -119,16 +142,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return text.Replace( "EnterpriseWebLibrary.WebSite", webProject.NamespaceAndAssemblyName );
 		}
 
-		private void generateAssemblyInfoCodeFile( DevelopmentInstallation installation, string projectName, string projectNameForAssemblyInfo ) {
+		private void generateCodeForEwlProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
 			var generatedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
 			Directory.CreateDirectory( generatedCodeFolderPath );
 			var isuFilePath = StandardLibraryMethods.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
-			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
-				writer.WriteLine( "using System.Reflection;" );
-				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writeAssemblyInfo( writer, installation, projectNameForAssemblyInfo );
-			}
+			using( TextWriter writer = new StreamWriter( isuFilePath ) )
+				codeWriter( writer );
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {

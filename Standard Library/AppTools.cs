@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// Provides a suite of static methods to make database connection operations easy.
 	/// </summary>
-	public static class AppTools {
+	public static partial class AppTools {
 		private static bool initialized;
 		internal static string AppName { get; private set; }
 		private static bool isClientSideProgram;
