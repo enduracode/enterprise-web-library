@@ -43,8 +43,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			                                                                                    includeEsInfoParameter ? "EntitySetup.Info esInfo" : "",
 			                                                                                    WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
 			                                                                                    optionalParameters.Count > 0
-			                                                                                    	? "OptionalParameterPackage optionalParameterPackage = null"
-			                                                                                    	: "",
+				                                                                                    ? "OptionalParameterPackage optionalParameterPackage = null"
+				                                                                                    : "",
 			                                                                                    !isEsInfo ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 			writer.WriteLine( "internal Info" + constructorAndInitialParameterArguments );
 
@@ -114,10 +114,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					writer.WriteLine( "}" );
 				}
 
-				// This is called after specified optional parameter fields are initialized in case default values are affected by specified parameters.
-				writer.WriteLine( "initDefaultOptionalParameterPackage( " + DefaultOptionalParameterPackageName + " );" );
-
-				// Initialize remaining fields from the current info object if it is the same type.
+				// If the current info object is the same type, use it to initialize fields whose values have not been specified.
 				if( isEsInfo ) {
 					writer.WriteLine(
 						"var currentInfo = EwfPage.Instance != null && EwfPage.Instance.EsAsBaseType != null ? EwfPage.Instance.EsAsBaseType.InfoAsBaseType as Info : null;" );
@@ -131,10 +128,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				}
 				writer.WriteLine( "}" );
 
+				// This is called after all specified values and all current info object values have been incorporated since these can affect default values.
+				writer.WriteLine( "initDefaultOptionalParameterPackage( " + DefaultOptionalParameterPackageName + " );" );
 
-				// Otherwise, initialize them with the default values.
 
-				writer.WriteLine( "else {" );
+				// If the current info object is *not* the same type, use default values to initialize fields whose values have not been specified.
+
+				writer.WriteLine( "if( currentInfo == null ) {" );
 				foreach( var optionalParameter in optionalParameters ) {
 					writer.WriteLine( "if( !" + GetWasSpecifiedFieldName( optionalParameter ) + " && " + DefaultOptionalParameterPackageName + "." +
 					                  OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( optionalParameter ) + " )" );
