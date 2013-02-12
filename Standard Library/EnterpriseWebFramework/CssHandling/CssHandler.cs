@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Web;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 	/// <summary>
@@ -24,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 		/// </summary>
 		public static string CombineNamespacesAndProcessEwfIfNecessary( string appNamespace, string appRelativeNamespace ) {
 			if( appRelativeNamespace.StartsWith( "Ewf." ) )
-				return "RedStapler.StandardLibrary.EnterpriseWebFramework" + "." + appNamespace + "." + appRelativeNamespace.Substring( 4 );
+				return StandardLibraryMethods.EwfFolderBaseNamespace + "." + appNamespace + "." + appRelativeNamespace.Substring( 4 );
 
 			// App-relative namespace can be empty when this method is called from the ISU.
 			return appNamespace + appRelativeNamespace.PrependDelimiter( "." );
@@ -37,9 +36,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 				throw new ResourceNotAvailableException( "Failed to find the version and extension in the URL.", null );
 			var cssInfo =
 				EwfApp.GlobalType.Assembly.CreateInstance( CombineNamespacesAndProcessEwfIfNecessary( EwfApp.GlobalType.Namespace,
-				                                                                                      url.Remove( removalIndex ).Separate( "/", false ).Select(
-				                                                                                      	StandardLibraryMethods.GetCSharpIdentifier ).Aggregate(
-				                                                                                      		( a, b ) => a + "." + b ) + "+Info" ) ) as CssInfo;
+				                                                                                      url.Remove( removalIndex )
+				                                                                                         .Separate( "/", false )
+				                                                                                         .Select( StandardLibraryMethods.GetCSharpIdentifier )
+				                                                                                         .Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as CssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 			if( cssInfo.GetUrl() != context.Request.AppRelativeCurrentExecutionFilePath && !url.StartsWith( WysiwygHtmlEditor.CkEditorFolderUrl ) )

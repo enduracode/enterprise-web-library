@@ -19,6 +19,11 @@ namespace RedStapler.StandardLibrary {
 		public const string ProvidersFolderAndNamespaceName = "Providers";
 
 		/// <summary>
+		/// Standard Library and Development Utility use only.
+		/// </summary>
+		public const string EwfFolderBaseNamespace = "RedStapler.StandardLibrary.EnterpriseWebFramework";
+
+		/// <summary>
 		/// Standard Library and RSIS use only.
 		/// </summary>
 		public const string TestRunnerProjectName = "Test Runner";

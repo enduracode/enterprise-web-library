@@ -29,7 +29,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			var codeBase = analysisResult.CodeBase;
 			var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();
-			var methods = from t in codeBase.Application.Types
+			var methods = from n in codeBase.Application.Namespaces
+			              where !n.Name.StartsWith( StandardLibraryMethods.EwfFolderBaseNamespace )
+			              from t in n.ChildTypes
 			              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
 			              from m in t.MethodsAndContructors
 			              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
