@@ -467,10 +467,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
 				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
-			if( !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
+			var ewlWebSite = new ExternalPageInfo( "http://enterpriseweblibrary.org/" );
+			if( ewlWebSite.UserCanAccessPageAndAllControls && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
 				controls.Add( new Paragraph( "Powered by the ".GetLiteralControl(),
-				                             EwfLink.Create( new ExternalPageInfo( "http://enterpriseweblibrary.org/" ),
-				                                             new TextActionControlStyle( "Enterprise Web Library" ) ),
+				                             EwfLink.Create( ewlWebSite, new TextActionControlStyle( "Enterprise Web Library" ) ),
 				                             ( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" )
 					                             .GetLiteralControl() ) { CssClass = CssElementCreator.PoweredByEwlFooterCssClass } );
 			}
