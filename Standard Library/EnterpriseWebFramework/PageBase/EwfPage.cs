@@ -153,13 +153,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected override sealed void OnInitComplete( EventArgs e ) {
 			base.OnInitComplete( e );
 			if( !IsPostBack ) {
-				if( AppRequestState.Instance.EwfPageRequestState == null ) {
-					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState ??
-					                                               new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+				if( AppRequestState.Instance.EwfPageRequestState != null )
+					PageState.ClearCustomStateControlKeys();
+				else if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
+					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
 					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
+					PageState.ClearCustomStateControlKeys();
 				}
 				else
-					PageState.ClearCustomStateControlKeys();
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 
 				onLoadData();
 
