@@ -119,6 +119,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 
 			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
+			this.selectedItemId = selectedItemId;
 			items = getInitialItem( defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToArray();
 			if( items.All( i => !i.IsValid ) )
 				throw new ApplicationException( "There must be at least one valid selection in the list." );
@@ -135,7 +136,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			if( !items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemId ) ) )
 				throw new ApplicationException( "The selected item ID must either match a list item or be the default value of the type." );
-			this.selectedItemId = selectedItemId;
 
 			this.autoPostBack = autoPostBack;
 			this.defaultSubmitButton = defaultSubmitButton;
