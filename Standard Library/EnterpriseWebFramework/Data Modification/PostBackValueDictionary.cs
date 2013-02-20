@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
 			// each when debugging.
 
-			var id = ( key as Control ).UniqueID;
+			var id = ( (Control)key ).UniqueID;
 			if( id == null )
 				return key.DurableValue;
 
