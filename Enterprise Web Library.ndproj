@@ -29,6 +29,7 @@
     <Name>AjaxControlToolkit</Name>
     <Name>System.Web.Extensions</Name>
     <Name>EnterpriseWebLibrary.Library</Name>
+    <Name>NDepend.API</Name>
   </FrameworkAssemblies>
   <Dirs>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319</Dir>
@@ -36,6 +37,7 @@
     <Dir>.\Standard Library\bin\Debug</Dir>
     <Dir>.\Development Utility\bin\Debug</Dir>
     <Dir>..\..\..\..\..\..\Windows\System32\inetsrv</Dir>
+    <Dir>.\Solution Files\Referenced Files</Dir>
   </Dirs>
   <Report Kind="0" SectionsEnabled="12287" XslPath="" Flags="64512">
     <Section Enabled="True">Application Metrics</Section>
