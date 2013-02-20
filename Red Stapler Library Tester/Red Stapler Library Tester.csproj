@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="TestFiles\MergeOps\pdf.pdf" />
     <None Include="TestFiles\MergeOps\word.docx" />
