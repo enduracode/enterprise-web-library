@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			internal const string DropDownCssClass = "ewfDropDown";
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .chzn-container" ) };
+				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .select2-container" ) };
 			}
 		}
 
@@ -188,13 +188,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
-				// The predicate is designed to prevent submission when the drop-down is open. Derived from
-				// https://github.com/harvesthq/chosen/issues/434#issuecomment-9316018.
-				EwfPage.Instance.MakeControlPostBackOnEnter( this,
-				                                             defaultSubmitButton,
-				                                             predicate:
-					                                             "( !( $( this ).find( '.chzn-drop' ).length ) || $( this ).find( '.chzn-drop' ).offset()[ 'left' ] < 0 )" );
-
+				EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new WebControl( HtmlTextWriterTag.Select );
@@ -204,7 +198,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 				if( placeholderItem != null ) {
-					// Don't let the attribute value be the empty string since that will trigger Chosen's default text, which we don't want.
+					// Don't let the attribute value be the empty string since this seems to confuse Select2.
 					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " );
 				}
 
@@ -252,13 +246,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return "";
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			var chosenStatement = "$( '#" + selectControl.ClientID + "' ).chosen(" +
-			                      ( placeholderItem != null && placeholderItem.IsValid ? " { allow_single_deselect: true } " : "" ) + ");";
+			var select2Statement = "$( '#" + selectControl.ClientID + "' ).select2( { " +
+			                       ( placeholderItem != null && placeholderItem.IsValid ? "allowClear: true, " : "" ) + "openOnEnter: false } );";
 			var touchStatement = placeholderItem != null
 				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
 				                       "' ).attr( 'data-placeholder' ) );"
 				                     : "";
-			return "if( !Modernizr.touch ) " + chosenStatement + touchStatement.PrependDelimiter( " else " );
+			return "if( !Modernizr.touch ) " + select2Statement + touchStatement.PrependDelimiter( " else " );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
@@ -312,7 +306,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey {
 			get {
-				// Drop-down lists need a wrapping div to allow Chosen to be shown and hidden with display linking and to make the enter key submit the form.
+				// Drop-down lists need a wrapping div to allow Select2 to be shown and hidden with display linking and to make the enter key submit the form.
 				return HtmlTextWriterTag.Div;
 			}
 		}

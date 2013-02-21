@@ -394,10 +394,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Ewf\Chosen\chosen-sprite%402x.png" />
-    <Content Include="Ewf\Chosen\chosen-sprite.png" />
-    <Content Include="Ewf\Chosen\chosen.css" />
-    <Content Include="Ewf\Chosen\chosen.jquery.min.js" />
     <Content Include="Ewf\CkEditor\adapters\jquery.js" />
     <Content Include="Ewf\CkEditor\ckeditor.js" />
     <Content Include="Ewf\CkEditor\config.js" />
@@ -643,6 +639,15 @@
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.css" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.js" />
+    <Content Include="Ewf\Select2-3.3.1\select2-spinner.gif" />
+    <Content Include="Ewf\Select2-3.3.1\select2.css" />
+    <Content Include="Ewf\Select2-3.3.1\select2.js" />
+    <Content Include="Ewf\Select2-3.3.1\select2.min.js" />
+    <Content Include="Ewf\Select2-3.3.1\select2.png" />
+    <Content Include="Ewf\Select2-3.3.1\select2x2.png" />
+    <Content Include="Ewf\Select2-3.3.1\select2_locale_es.js" />
+    <Content Include="Ewf\Select2-3.3.1\select2_locale_hu.js" />
+    <Content Include="Ewf\Select2-3.3.1\select2_locale_it.js" />
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
     <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
     <Content Include="Ewf\Styles\Basic.css" />
@@ -684,6 +689,11 @@
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
+    <None Include="Ewf\Select2-3.3.1\component.json" />
+    <None Include="Ewf\Select2-3.3.1\LICENSE" />
+    <None Include="Ewf\Select2-3.3.1\README.md" />
+    <None Include="Ewf\Select2-3.3.1\release.sh" />
+    <None Include="Ewf\Select2-3.3.1\select2.jquery.json" />
     <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
