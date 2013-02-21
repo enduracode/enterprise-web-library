@@ -1669,10 +1669,10 @@ the specific language governing permissions and limitations under the Apache Lic
                     return;
                 }
 
-                if (this.opts.openOnEnter === false && e.which === KEY.ENTER) {
-                    killEvent(e);
-                    return;
-                }
+//                if (this.opts.openOnEnter === false && e.which === KEY.ENTER) {
+//                    killEvent(e);
+//                    return;
+//                }
 
                 if (e.which == KEY.DOWN || e.which == KEY.UP
                     || (e.which == KEY.ENTER && this.opts.openOnEnter)) {
