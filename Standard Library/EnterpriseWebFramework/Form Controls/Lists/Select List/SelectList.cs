@@ -52,6 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                  bool disableSingleButtonDetection = false, bool autoPostBack = false,
 		                                                                  PostBackButton defaultSubmitButton = null ) {
 			return new SelectList<ItemIdType>( useHorizontalLayout,
+			                                   null,
 			                                   defaultValueItemLabel,
 			                                   null,
 			                                   null,
@@ -67,6 +68,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="items">The items in the list. There must be at least one.</param>
 		/// <param name="selectedItemId">The ID of the selected item. This must either match a list item or be the default value of the type.</param>
+		/// <param name="width">The width of the list. This overrides any value that may be specified via CSS. If no width is specified via CSS and you pass null
+		/// for this parameter, the list will be just wide enough to show the selected item and will resize whenever the selected item is changed.</param>
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear.</param>
 		/// <param name="placeholderIsValid">Pass true if you would like the list to include a default-value placeholder that is considered a valid selection.
@@ -76,11 +79,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
 		/// <param name="autoPostBack">Pass true if you want a post back to occur when the selection changes.</param>
 		/// <param name="defaultSubmitButton">The post-back button that will be submitted by this control.</param>
-		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
+		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId, Unit? width = null,
 		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
 		                                                                 string placeholderText = "Please select", bool autoPostBack = false,
 		                                                                 PostBackButton defaultSubmitButton = null ) {
 			return new SelectList<ItemIdType>( null,
+			                                   width,
 			                                   defaultValueItemLabel,
 			                                   placeholderIsValid,
 			                                   placeholderText,
@@ -98,6 +102,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType>,
 	                                     ControlWithCustomFocusLogic, DisplayLink {
 		private readonly bool? useHorizontalRadioLayout;
+		private readonly Unit? width;
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
 		private readonly bool? disableSingleRadioButtonDetection;
@@ -113,10 +118,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private WebControl selectControl;
 		private string postValue;
 
-		internal SelectList( bool? useHorizontalRadioLayout, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+		internal SelectList( bool? useHorizontalRadioLayout, Unit? width, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
 		                     IEnumerable<EwfListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, bool autoPostBack,
 		                     PostBackButton defaultSubmitButton ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
+			this.width = width;
 
 			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
 			this.selectedItemId = selectedItemId;
@@ -191,7 +197,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
-				selectControl = new WebControl( HtmlTextWriterTag.Select );
+				selectControl = new WebControl( HtmlTextWriterTag.Select ) { Width = width ?? Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
 				if( autoPostBack )
 					selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( this, false ) );
@@ -246,7 +252,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return "";
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			var select2Statement = "$( '#" + selectControl.ClientID + "' ).select2( { " +
+			var select2Statement = "$( '#" + selectControl.ClientID + "' ).select2( { width: 'copy', " +
 			                       ( placeholderItem != null && placeholderItem.IsValid ? "allowClear: true, " : "" ) + "openOnEnter: false } );";
 			var touchStatement = placeholderItem != null
 				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
