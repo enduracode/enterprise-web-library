@@ -165,7 +165,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Web.UI;" );
-				writer.WriteLine( "using System.Web.UI.WebControls;" ); // Necessary for the fill list control functionality in row constants
+				writer.WriteLine( "using System.Web.UI.WebControls;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Collections;" ); // Necessary for row constants
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
@@ -320,6 +320,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Web;" );
 				writer.WriteLine( "using System.Web.UI;" );
+				writer.WriteLine( "using System.Web.UI.WebControls;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
