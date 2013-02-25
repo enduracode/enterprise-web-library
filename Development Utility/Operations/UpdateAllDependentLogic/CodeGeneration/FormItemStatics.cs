@@ -117,11 +117,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter[ 0 ],
 			                      new[]
 				                      {
-					                      new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ), new CSharpParameter( "bool", "placeholderIsValid", "false" ),
-					                      new CSharpParameter( "string", "placeholderText", "\"Please select\"" ), new CSharpParameter( "bool", "autoPostBack", "false" )
+					                      new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
+					                      new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" )
+					                      , new CSharpParameter( "bool", "autoPostBack", "false" )
 				                      },
 			                      new CSharpParameter[ 0 ],
-			                      "SelectList.CreateDropDown( items, v, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
+			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
 			                      "control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 			                      "true" );
 		}
@@ -394,11 +395,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                                                                                                                                "defaultValueItemLabel" )
 					                                                                                                                           .ToSingleElementArray() ),
 			                      new CSharpParameter[ 0 ],
-			                      ( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToSingleElementArray() )
-				                      .Concat( new[]
-					                      { new CSharpParameter( "string", "placeholderText", "\"Please select\"" ), new CSharpParameter( "bool", "autoPostBack", "false" ) } ),
+			                      new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray()
+			                                                                     .Concat( ( nonNullableField
+				                                                                                ? new CSharpParameter[ 0 ]
+				                                                                                : new CSharpParameter( "bool", "placeholderIsValid", "true" )
+					                                                                                  .ToSingleElementArray() ) )
+			                                                                     .Concat( new[]
+				                                                                     {
+					                                                                     new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
+					                                                                     new CSharpParameter( "bool", "autoPostBack", "false" )
+				                                                                     } ),
 			                      new CSharpParameter[ 0 ],
-			                      "SelectList.CreateDropDown( items, v, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
+			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
 			                      ", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) +
 			                      ", placeholderText: placeholderText, autoPostBack: autoPostBack )",
 			                      "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
