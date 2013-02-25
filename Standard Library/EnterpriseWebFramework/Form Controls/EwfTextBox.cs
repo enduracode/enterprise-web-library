@@ -84,7 +84,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// is the post back value.</param>
 		/// <param name="preventAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
 		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false ) {
+			if( value == null )
+				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
 			durableValue = value;
+
 			textBox.ID = "theTextBox";
 			base.Controls.Add( textBox );
 			Rows = 1;
