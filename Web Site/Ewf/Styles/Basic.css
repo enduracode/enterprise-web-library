@@ -69,6 +69,29 @@ div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="passwo
 	font-family: inherit;
 	font-size: inherit;
 }
+ewfTextBoxCompletionList {
+	visibility: hidden;
+	margin: 0 !important;
+	background-color: window;
+	color: windowtext;
+	border: buttonshadow;
+	border-width: 1px !important;
+	border-style: solid;
+	overflow: auto;
+	height: 200px;
+	text-align: left;
+	list-style-type: none;
+}
+ewfTextBoxCompletionList > ewfTextBoxCompletionListItemAllStates {
+	background-color: window;
+	color: windowtext;
+	padding: 1px !important;
+	margin: 0 !important;
+}
+ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
+	background-color: #ffff99;
+	color: black;
+}
 
 /* check boxes */
 ewfInlineCheckBox > ewfInlineCheckBoxBox, ewfInlineCheckBox > ewfInlineCheckBoxLabel {

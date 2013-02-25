@@ -2,30 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-ewfTextBoxCompletionList {
-	visibility: hidden;
-	margin: 0px !important;
-	background-color: window;
-	color: windowtext;
-	border: buttonshadow;
-	border-width: 1px !important;
-	border-style: solid;
-	overflow: auto;
-	height: 200px;
-	text-align: left;
-	list-style-type: none;
-}
-ewfTextBoxCompletionList > ewfTextBoxCompletionListItemAllStates {
-	background-color: window;
-	color: windowtext;
-	padding: 1px !important;
-	margin: 0px !important;
-}
-ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
-	background-color: #ffff99;
-	color: black;
-}
-
 table.ewfBlockCheckBox > tbody > tr > td {
 	padding-top: 4px;
 }
