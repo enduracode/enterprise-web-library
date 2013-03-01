@@ -237,14 +237,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void setCookieAndUser( FormsAuthCapableUser user ) {
-			// If the user's role requires enhanced security, require re-authentication every 12 minutes.  Otherwise, make it the same as a session timeout.
-			var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
-			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
-			HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
-				{
-					Secure = EwfApp.SupportsSecureConnections,
-					HttpOnly = true
-				} );
+			AppRequestState.AddNonTransactionalModificationMethod( () => {
+				// If the user's role requires enhanced security, require re-authentication every 12 minutes.  Otherwise, make it the same as a session timeout.
+				var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
+				HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
+					{
+						Secure = EwfApp.SupportsSecureConnections,
+						HttpOnly = true
+					} );
+			} );
 
 			AppRequestState.Instance.SetUser( user );
 		}
@@ -253,7 +255,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			return HttpContext.Current.Request.Cookies[ testCookieName ] == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
 		}
 
-		// NOTE: The warning from this method will appear above any errors in the status area. We should find a way for it to appear below the errors.
 		private static void addStatusMessageIfClockNotSynchronized() {
 			try {
 				// IE uses a "UTC" suffix and Firefox uses a "GMT" suffix.  For our purposes, they are the same thing. Ironically, Microsoft fails to parse the time
