@@ -71,7 +71,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Returns the begin date of the specified date's month.
 		/// </summary>
-		public static DateTime MonthBeginDate( DateTime date ) {
+		public static DateTime MonthBeginDate( this DateTime date ) {
 			return new DateTime( date.Year, date.Month, 1 );
 		}
 
