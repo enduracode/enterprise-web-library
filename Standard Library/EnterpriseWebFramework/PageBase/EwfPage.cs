@@ -711,9 +711,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					AppRequestState.Instance.ResetCache();
 				}
 			}
-			catch( EwfException e ) {
+			catch( Exception e ) {
+				var ewfException = e.GetChain().OfType<EwfException>().FirstOrDefault();
+				if( ewfException == null )
+					throw;
 				AppRequestState.Instance.RollbackDatabaseTransactions();
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = e.Messages;
+				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
 			}
 		}
 
