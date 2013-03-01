@@ -69,6 +69,13 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
+		/// Returns the begin date of the specified date's month.
+		/// </summary>
+		public static DateTime MonthBeginDate( DateTime date ) {
+			return new DateTime( date.Year, date.Month, 1 );
+		}
+
+		/// <summary>
 		/// Returns the date that the given week starts on.
 		/// </summary>
 		public static DateTime WeekBeginDate( this DateTime dateTime ) {
