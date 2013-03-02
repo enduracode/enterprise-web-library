@@ -119,6 +119,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
     <Compile Include="RsLibraryTester.cs">
       <SubType>Code</SubType>
     </Compile>
