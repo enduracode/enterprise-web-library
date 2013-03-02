@@ -102,7 +102,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( dateModificationMethod == null ) {
 				throw new ApplicationException(
-					"In order to place this calendar on a page, the page's info object must implement the CalendarViewInfo interface, and you must call SetParameters before the end of LoadData." );
+					"In order to place this calendar on a page, you must call SetParameters before the end of LoadData." );
 			}
 			buildNavigationBox();
 
