@@ -224,11 +224,11 @@ ewfUiTopTabControlList {
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates {
 	display: block;
 	margin-bottom: -1px; /*NOTE: This really needs to be the same as whatever the border width of the content area is. Another use for constants.*/
-	border-width: .1em .1em 0 .1em;
+	border-width: 1px 1px 0 1px;
 	border-style: solid;
 	border-top-left-radius: .5em;
 	border-top-right-radius: .5em;
-	padding: .3em;
+	padding: 4px;
 	position: relative;
 	text-decoration: none;
 }
