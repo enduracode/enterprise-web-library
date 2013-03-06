@@ -181,6 +181,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\Validation.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
+    <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\ErrorMessageControlListBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
