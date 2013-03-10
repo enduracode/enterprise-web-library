@@ -417,7 +417,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// versions.
 			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" );
 
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery UI", this.GetClientUrl( "~/Ewf/JQueryUi/js/jquery-ui-1.9.0.custom.min.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery UI", this.GetClientUrl( "~/Ewf/JQueryUi/js/jquery-ui-1.10.1.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Chosen", this.GetClientUrl( "~/Ewf/Chosen/chosen.jquery.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/TimePicker/JavaScript.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/QTip2/jquery.qtip.min.js" ) );
