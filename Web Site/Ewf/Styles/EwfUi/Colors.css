@@ -88,3 +88,7 @@ ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalContentActionStat
 ewfUiGlobalNavBlock ewfActionControlAllStylesStatesWithHover, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesStatesWithHover {
 	box-shadow: 0 0 1em #336699;
 }
+
+.icon-calendar {
+	color: #7C13B8;
+}
