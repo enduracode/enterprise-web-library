@@ -470,7 +470,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var ewlWebSite = new ExternalPageInfo( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessPageAndAllControls && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
 				controls.Add( new Paragraph( "Powered by the ".GetLiteralControl(),
-				                             EwfLink.Create( ewlWebSite, new TextActionControlStyle( "Enterprise Web Library" ) ),
+				                             EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( "Enterprise Web Library" ) ),
 				                             ( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" )
 					                             .GetLiteralControl() ) { CssClass = CssElementCreator.PoweredByEwlFooterCssClass } );
 			}
