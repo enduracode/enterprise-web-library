@@ -201,6 +201,7 @@ ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiEntityNavAndActionB
 	text-decoration: none;
 }
 ewfUiEntityNavAndActionBlock {
+	margin: .3em 0;
 	width: 100%;
 }
 ewfUiEntityActionControlList {
@@ -216,7 +217,7 @@ ewfUiEntityNavControlList {
 	margin: 0;
 }
 ewfUiEntitySummaryBlock {
-	padding: .3em 0;
+	margin: .3em 0;
 }
 ewfUiTopTabControlList {
 	margin-top: 1.2em; /*NOTE: I want to eliminate this entirely when entity summary and friends share a background color that isn't white.*/

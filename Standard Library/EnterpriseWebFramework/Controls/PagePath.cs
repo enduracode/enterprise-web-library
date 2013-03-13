@@ -37,17 +37,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the current page behavior.
-		/// </summary>
-		public PagePathCurrentPageBehavior CurrentPageBehavior { get; set; }
+		private readonly PageName pageName;
 
 		/// <summary>
 		/// Creates a page path control.
 		/// </summary>
-		public PagePath() {
-			CurrentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage;
+		public PagePath( PagePathCurrentPageBehavior currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage ) {
+			if( currentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage ) {
+				pageName = new PageName
+					{
+						ExcludesPageNameIfEntitySetupExists = currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+					};
+			}
 		}
+
+		/// <summary>
+		/// Returns true if this control will not display any content.
+		/// </summary>
+		public bool IsEmpty { get { return EwfPage.Instance.InfoAsBaseType.PagePath.Count() == 1 && ( pageName == null || pageName.IsEmpty ); } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
@@ -56,12 +63,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Controls.Add( EwfLink.Create( page, new ButtonActionControlStyle( page.PageFullName, buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) );
 				Controls.Add( PageInfo.PagePathSeparator.GetLiteralControl() );
 			}
-			if( CurrentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage ) {
-				Controls.Add( new PageName
-					{
-						ExcludesPageNameIfEntitySetupExists = CurrentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
-					} );
-			}
+			if( pageName != null )
+				Controls.Add( pageName );
 			else if( Controls.Count > 0 )
 				Controls.RemoveAt( Controls.Count - 1 );
 		}

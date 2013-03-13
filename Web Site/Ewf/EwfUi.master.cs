@@ -304,10 +304,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private Control getPagePath() {
-			var currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists;
-			if( !getEntityPageGroups().Any() )
-				currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage;
-			return new PagePath { CurrentPageBehavior = currentPageBehavior };
+			var pagePath =
+				new PagePath( currentPageBehavior:
+					              getEntityPageGroups().Any()
+						              ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+						              : PagePathCurrentPageBehavior.IncludeCurrentPage );
+			return pagePath.IsEmpty ? null : pagePath;
 		}
 
 		private Control getEntityNavAndActionBlock() {
