@@ -2,13 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-table.ewfBlockCheckBox > tbody > tr > td {
-	padding-top: 4px;
-}
-table.ewfBlockCheckBox > tbody > tr:first-child > td {
-	padding-top: 0;
-}
-
 ewfControlLine {
 	display: inline-block;
 	vertical-align: top; /* We need any value except baseline to prevent extra vertical spacing. */
