@@ -145,11 +145,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// provider.
 		/// </summary>
 		public static void SetUpClientSideLogicForLogInPostBack() {
-			EwfPage.Instance.PreRender += delegate {
-				// It is important to set an expiration because that makes the cookie get persisted to disk, and we need to know the browser supports that.
-				// NOTE: Why? Log in cookie is not persistent.
-				HttpContext.Current.Response.Cookies.Add( new HttpCookie( testCookieName, "No data" ) { Expires = DateTime.Now.AddMonths( 1 ), HttpOnly = true } );
-			};
+			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
 			EwfPage.Instance.ClientScript.RegisterHiddenField( utcOffsetHiddenFieldName, "" );
 			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( typeof( UserManagementStatics ),
@@ -241,14 +237,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes.  Otherwise, make it the same as a session timeout.
 				var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
-				HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) )
-					{
-						Secure = EwfApp.SupportsSecureConnections,
-						HttpOnly = true
-					} );
+				setCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) );
 			} );
 
 			AppRequestState.Instance.SetUser( user );
+		}
+
+		private static void setCookie( string name, string value ) {
+			HttpContext.Current.Response.Cookies.Add( new HttpCookie( name, value ) { Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } );
 		}
 
 		private static string[] verifyTestCookie() {
