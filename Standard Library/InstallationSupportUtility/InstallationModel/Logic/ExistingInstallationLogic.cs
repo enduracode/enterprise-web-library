@@ -49,20 +49,27 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 				foreach( var site in runtimeConfiguration.WebSiteNames )
 					stopWebSite( site );
 			}
-			if( stopServices ) {
-				var allServices = ServiceController.GetServices();
-				var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
-				foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) && sc.Status != ServiceControllerStatus.Stopped ) ) {
-					service.Stop();
-					service.WaitForStatusWithTimeOut( ServiceControllerStatus.Stopped );
-				}
-			}
+			if( stopServices )
+				this.stopServices();
 		}
 
 		public void UninstallServices() {
+			// Installutil tries to stop services during uninstallation, but doesn't report failure if a service doesn't stop. That's why we stop the services
+			// ourselves first.
+			stopServices();
+
 			var allServices = ServiceController.GetServices();
 			foreach( var service in runtimeConfiguration.WindowsServices.Where( s => allServices.Any( sc => sc.ServiceName == s.InstalledName ) ) )
 				runInstallutil( service, true );
+		}
+
+		private void stopServices() {
+			var allServices = ServiceController.GetServices();
+			var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
+			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) && sc.Status != ServiceControllerStatus.Stopped ) ) {
+				service.Stop();
+				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Stopped );
+			}
 		}
 
 		/// <summary>
