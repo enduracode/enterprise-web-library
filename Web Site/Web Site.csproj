@@ -617,7 +617,10 @@
     <Content Include="Ewf\FileUploader\progressbar.gif" />
     <Content Include="Ewf\FileUploader\progressbg_orange.gif" />
     <Content Include="Ewf\FileUploader\Upload.aspx" />
+    <Content Include="Ewf\FontAwesome\font-awesome.min.css" />
+    <Content Include="Ewf\FontAwesome\font\fontawesome-webfont.svg" />
     <Content Include="Ewf\Images\ajax-loader.gif" />
+    <Content Include="Ewf\JQueryUi\css\custom-theme\images\animated-overlay.gif" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-bg_carbon-fiber_0_aaaaaa_8x9.png" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-bg_flat_55_fbf9ee_40x100.png" />
@@ -633,8 +636,9 @@
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-icons_888888_256x240.png" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-icons_eceaea_256x240.png" />
-    <Content Include="Ewf\JQueryUi\css\custom-theme\jquery-ui-1.9.0.custom.min.css" />
-    <Content Include="Ewf\JQueryUi\js\jquery-ui-1.9.0.custom.min.js" />
+    <Content Include="Ewf\JQueryUi\css\custom-theme\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Ewf\JQueryUi\css\custom-theme\jquery-ui-1.10.1.custom.min.css" />
+    <Content Include="Ewf\JQueryUi\js\jquery-ui-1.10.1.custom.min.js" />
     <Content Include="Ewf\JQueryUi\ReadMe.txt" />
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\QTip2\jquery.qtip.min.css" />
@@ -689,6 +693,10 @@
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
+    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.eot" />
+    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.ttf" />
+    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.woff" />
+    <None Include="Ewf\FontAwesome\font\FontAwesome.otf" />
     <None Include="Ewf\Select2-3.3.1\component.json" />
     <None Include="Ewf\Select2-3.3.1\LICENSE" />
     <None Include="Ewf\Select2-3.3.1\README.md" />

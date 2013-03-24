@@ -58,6 +58,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string watermarkText = "";
 		private readonly Action<string> postBackHandler;
 		private readonly bool preventAutoComplete;
+		// NOTE: Make this readonly when this is added to form item generation.
+		private bool? suggestSpellCheck;
 
 		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
@@ -83,16 +85,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="postBackHandler">The handler that will be executed when the user hits Enter on the text box or selects an autocomplete item. The parameter
 		/// is the post back value.</param>
 		/// <param name="preventAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
-		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false ) {
+		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox
+		/// does spell check multi-line text boxes. Setting this parameter to a value will set the spellcheck attribute on the
+		/// text box to enable/disable spell checking, if the user agent supports it.</param>
+		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false, bool? suggestSpellCheck = null ) {
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
 			durableValue = value;
-
 			textBox.ID = "theTextBox";
 			base.Controls.Add( textBox );
 			Rows = 1;
 			this.postBackHandler = postBackHandler;
 			this.preventAutoComplete = preventAutoComplete;
+			this.suggestSpellCheck = suggestSpellCheck;
 		}
 
 		string FormControl<string>.DurableValue { get { return durableValue; } }
@@ -110,6 +115,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Sets whether the contents of the text box can be changed.
 		/// </summary>
 		public bool ReadOnly { set { textBox.ReadOnly = value; } }
+
+		/// <summary>
+		/// By default, Firefox does not spell check single-line text boxes. By default, Firefox
+		/// does spell check multi-line text boxes. Setting this parameter to a value will set the spellcheck attribute on the
+		/// text box to enable/disable spell checking, if the user agent supports it.
+		/// </summary>
+		public bool SuggestSpellCheck { set { suggestSpellCheck = value; } }
 
 		/// <summary>
 		/// Gets or sets the number of rows in the text box.
@@ -214,6 +226,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( preventAutoComplete )
 				textBox.Attributes.Add( "autocomplete", "off" );
+
+			if( suggestSpellCheck.HasValue )
+				textBox.Attributes.Add( "spellcheck", suggestSpellCheck.Value.ToString().ToLower() );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
