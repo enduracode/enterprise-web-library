@@ -14,9 +14,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
-	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl<bool>, ControlWithCustomFocusLogic {
+	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl<bool>, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
 		private readonly bool isCheckedDurable;
 		private readonly string label;
+		private readonly bool highlightWhenChecked;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private Func<bool, bool> postBackValueSelector;
 		private CheckBox checkBox;
@@ -24,9 +25,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
 		/// </summary>
-		public BlockCheckBox( bool isChecked, string label = "" ) {
+		public BlockCheckBox( bool isChecked, string label = "", bool highlightWhenChecked = false ) {
 			isCheckedDurable = isChecked;
 			this.label = label;
+			this.highlightWhenChecked = highlightWhenChecked;
 			NestedControls = new List<Control>();
 			GroupName = "";
 			postBackValueSelector = isCheckedInPostBack => isCheckedInPostBack;
@@ -92,6 +94,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return isCheckedDurable; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+			if( highlightWhenChecked && AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) )
+				CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
+
 			var table = TableOps.CreateUnderlyingTable();
 			table.CssClass = "ewfBlockCheckBox";
 
@@ -126,6 +131,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Controls.Add( table );
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Length > 0 ? (Control)labelControl : checkBox );
+		}
+
+		string ControlWithJsInitLogic.GetJsInitStatements() {
+			return highlightWhenChecked ? "$( '#" + checkBox.ClientID + "' ).click( function() { changeCheckBoxColor( this ); } );" : "";
 		}
 
 		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {

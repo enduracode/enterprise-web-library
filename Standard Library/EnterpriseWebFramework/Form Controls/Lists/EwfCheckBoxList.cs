@@ -21,9 +21,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A check box list that allows multiple items to be selected.
 	/// NOTE: Consider using something like the multi select feature of http://harvesthq.github.com/chosen/ to provide a space-saving mode for this control.
 	/// </summary>
-	public class EwfCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic, ControlWithJsInitLogic {
-		private const string checkboxContainerClass = "checkboxContainer";
-		private const string checkedCheckboxContainerClass = "checkedChecklistCheckboxDiv";
+	public class EwfCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
 		private readonly IEnumerable<EwfListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
 		private readonly string caption;
@@ -60,10 +58,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var place = new PlaceHolder();
 				for( var j = i * itemsPerColumn; j < maxIndex; j += 1 ) {
 					var item = items.ElementAt( j );
-					var isChecked = selectedItemIds.Contains( item.Id );
-
-					var checkBox = new BlockCheckBox( isChecked, label: item.Label ) { CssClass = checkboxContainerClass };
-
+					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}
@@ -96,13 +91,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
-
-		public string GetJsInitStatements() {
-			// All Checkboxes need the click handler to change their color when toggled.
-			// Checked checkboxes need to be highlighted.
-			return
-				@"var allCheckboxes=$('.{0} :checkbox'); allCheckboxes.click(function(eventObj) {{ changeCheckBoxColor( this ) }}); allCheckboxes.filter(':checked').parents('.{1}').addClass('{2}');"
-					.FormatWith( CssClass, checkboxContainerClass, checkedCheckboxContainerClass );
-		}
 	}
 }
