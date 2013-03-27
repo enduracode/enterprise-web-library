@@ -8,6 +8,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// require the tool tip to support being visible in multiple places at the same time. The WebControl content of the tool tip doesn't support this.
 	/// </summary>
 	internal class ToolTip: EtherealControl {
+		internal static Control GetToolTipTextControl( string toolTip ) {
+			return toolTip.GetLiteralControl();
+		}
+
 		private readonly WebControl control;
 		private readonly Control targetControl;
 		private readonly string title;
@@ -30,12 +34,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		string EtherealControl.GetJsInitStatements() {
 			// NOTE: Should we be setting a max width on the tool tip? We had 480px before.
 			return "$( '#" + targetControl.ClientID + "' ).qtip( { content: { text: $( '#" + control.ClientID + "' )" +
-			       ( title.Any() ? ", title: { text: '" + title + "' }" : "" ) + " }" +
+			       ( title.Any() ? ", title: { text: '" + title + "' }" : "" ) + " }, position: { container: $( '#" + EwfPage.Instance.Form.ClientID + "' ) }" +
 			       ( sticky ? ", show: { event: 'click', delay: 0 }, hide: { event: 'unfocus' }" : "" ) + " } );";
-		}
-
-		internal static Control GetToolTipTextControl( string toolTip ) {
-			return toolTip.GetLiteralControl();
 		}
 	}
 }
