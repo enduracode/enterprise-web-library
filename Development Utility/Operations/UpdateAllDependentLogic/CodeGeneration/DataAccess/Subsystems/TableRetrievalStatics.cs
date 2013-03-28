@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
-				var classDeclaration = "public static partial class " + CodeGenerationStatics.GetCSharpSafeClassName( table ) + "TableRetrieval {";
+				var classDeclaration = "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( table ) + "TableRetrieval {";
 				writer.WriteLine( classDeclaration );
 
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table, configuration );
@@ -55,7 +55,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getClassDeclaration( string tableName ) {
-			return "public static partial class " + CodeGenerationStatics.GetCSharpSafeClassName( tableName ) + "TableRetrieval {";
+			return "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( tableName ) + "TableRetrieval {";
 		}
 
 		private static void writeGetRowsMethod( TextWriter writer, Database database, string table, TableColumns tableColumns, bool isRevisionHistoryTable,

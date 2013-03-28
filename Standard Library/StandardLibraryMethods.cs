@@ -305,8 +305,7 @@ namespace RedStapler.StandardLibrary {
 			return identifier;
 		}
 
-		// GMS: Reconcile these two methods.
-		// GMS: Also reconcile these with Get CSharp class name from the code generator.
+		// NOTE: Reconcile this with GetCSharpIdentifier and GetCSharpSafeClassName.
 		public static string GetCSharpIdentifierSimple( string desiredIdentifierName ) {
 			if( GetCSharpKeywords().Contains( desiredIdentifierName ) )
 				return "@" + desiredIdentifierName;
@@ -319,6 +318,13 @@ namespace RedStapler.StandardLibrary {
 				return "_" + desiredIdentifierName;
 
 			return desiredIdentifierName;
+		}
+
+		public static string GetCSharpSafeClassName( string desiredClassName ) {
+			desiredClassName = desiredClassName.Replace( ' ', '_' );
+			if( Char.IsDigit( desiredClassName.First() ) )
+				return "_" + desiredClassName;
+			return desiredClassName;
 		}
 
 		/// <summary>

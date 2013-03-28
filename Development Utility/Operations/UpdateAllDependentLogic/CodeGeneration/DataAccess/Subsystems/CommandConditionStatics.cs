@@ -39,12 +39,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetTableEqualityConditionsClassName( string table ) {
-			return CodeGenerationStatics.GetCSharpSafeClassName( table + "TableEqualityConditions" );
+			return StandardLibraryMethods.GetCSharpSafeClassName( table + "TableEqualityConditions" );
 		}
 
 		private static void writeInequalityConditionClasses( DBConnection cn, TextWriter writer, string table ) {
 			// NOTE: This kind of sucks. It seems like we could use generics to not have to write N of these methods into ISU.cs.
-			writer.WriteLine( "public static class " + CodeGenerationStatics.GetCSharpSafeClassName( table ) + "TableInequalityConditions {" );
+			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table ) + "TableInequalityConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 				writer.WriteLine( "public class " + GetConditionClassName( column.Name ) + ": " + table + "TableCondition {" );
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeLikeConditionClasses( DBConnection cn, TextWriter writer, string table ) {
-			writer.WriteLine( "public static class " + CodeGenerationStatics.GetCSharpSafeClassName( table ) + "TableLikeConditions {" );
+			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table ) + "TableLikeConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 				writer.WriteLine( "public class " + GetConditionClassName( column.Name ) + ": " + table + "TableCondition {" );
@@ -90,7 +90,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static string GetConditionClassName( string column ) {
 			var capitalizedColumn = column.CapitalizeString();
-			return CodeGenerationStatics.GetCSharpSafeClassName( capitalizedColumn == "Value" ? "_Value" : capitalizedColumn );
+			return StandardLibraryMethods.GetCSharpSafeClassName( capitalizedColumn == "Value" ? "_Value" : capitalizedColumn );
 		}
 	}
 }

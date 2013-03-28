@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class CodeGenerationStatics {
@@ -21,13 +19,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		internal static void AddGeneratedCodeUseOnlyComment( TextWriter writer ) {
 			AddSummaryDocComment( writer, "Auto-generated code use only." );
-		}
-
-		internal static string GetCSharpSafeClassName( string desiredClassName ) {
-			desiredClassName = desiredClassName.Replace( ' ', '_' );
-			if( Char.IsDigit( desiredClassName.First() ) )
-				return "_" + desiredClassName;
-			return desiredClassName;
 		}
 	}
 }
