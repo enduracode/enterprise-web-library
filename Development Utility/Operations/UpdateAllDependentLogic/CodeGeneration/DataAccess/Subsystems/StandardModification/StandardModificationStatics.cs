@@ -117,9 +117,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeEqualityConditionClass( string tableName, Column column ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This class will be deleted. Use the corresponding version in the CommandConditions namespace instead." );
-			writer.WriteLine( "public class " + column.Name + "WhereClauseParam: " + getEqualityConditionClassName( tableName, column ) + " {" );
+			writer.WriteLine( "public class " + CodeGenerationStatics.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam: " + getEqualityConditionClassName( tableName, column ) + " {" );
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This class will be deleted. Use the corresponding version in the CommandConditions namespace instead." );
-			writer.WriteLine( "public " + column.Name + "WhereClauseParam( " + column.DataTypeName + " value ): base( value ) {}" );
+			writer.WriteLine( "public " + CodeGenerationStatics.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam( " + column.DataTypeName + " value ): base( value ) {}" );
 			writer.WriteLine( "}" );
 		}
 
@@ -231,7 +231,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			                                            " column. Throws an exception if the value has not been initialized. " + getComment( column ) );
-			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + column.Name + " { get { return " + getColumnFieldName( column ) + ".Value; } ";
+			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + " { get { return " + getColumnFieldName( column ) + ".Value; } ";
 			if( columnIsReadOnly )
 				writer.WriteLine( propertyDeclarationBeginning + "}" );
 			else {
@@ -240,7 +240,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				CodeGenerationStatics.AddSummaryDocComment( writer,
 				                                            "Indicates whether or not the value for the " + column.Name +
 				                                            " has been set since object creation or the last call to Execute, whichever was latest." );
-				writer.WriteLine( "public bool " + column.Name + "HasChanged { get { return " + getColumnFieldName( column ) + ".Changed; } }" );
+				writer.WriteLine( "public bool " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + "HasChanged { get { return " + getColumnFieldName( column ) + ".Changed; } }" );
 			}
 		}
 
@@ -326,10 +326,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static string getModClassName( string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			if( isRevisionHistoryTable ) {
 				if( isRevisionHistoryClass )
-					return tableName + "Modification";
-				return "Direct" + tableName + "ModificationWithRevisionBypass";
+					tableName = tableName + "Modification";
+				else
+					tableName = "Direct" + tableName + "ModificationWithRevisionBypass";
 			}
-			return tableName + "Modification";
+			else
+				tableName = tableName + "Modification";
+			return CodeGenerationStatics.GetCSharpSafeClassName( tableName );
 		}
 
 		private static void writeSetAllDataMethod() {
@@ -356,12 +359,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {
-			writer.Write( StringTools.ConcatenateWithDelimiter( ", ", columns.Select( i => i.DataTypeName + " " + i.Name ).ToArray() ) );
+			writer.Write( StringTools.ConcatenateWithDelimiter( ", ",
+			                                                    columns.Select( i => i.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( i.Name ) ).
+			                                                    	ToArray() ) );
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
-			foreach( var column in columns )
-				writer.WriteLine( modObjectName + "." + column.Name + " = " + column.Name + ";" );
+			foreach( var column in columns ) {
+				writer.WriteLine( modObjectName + "." + StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + " = " +
+				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + ";" );
+			}
 		}
 
 		private static void writeExecuteMethod( string tableName ) {
@@ -471,7 +478,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
-				writer.WriteLine( "cmd.AddColumnModification( new InlineDbCommandColumnValue( \"" + column.Name + "\", new DbParameterValue( " + column.Name + ", \"" +
+				writer.WriteLine( "cmd.AddColumnModification( new InlineDbCommandColumnValue( \"" + column.Name + "\", new DbParameterValue( " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name ) + ", \"" +
 				                  column.DbTypeString + "\" ) ) );" );
 			}
 			writer.WriteLine( "}" );
@@ -544,7 +551,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getColumnFieldName( Column column ) {
-			return column.Name.ToLower() + "ColumnValue";
+			return StandardLibraryMethods.GetCSharpIdentifierSimple( column.Name.ToLower() + "ColumnValue" );
 		}
 	}
 }

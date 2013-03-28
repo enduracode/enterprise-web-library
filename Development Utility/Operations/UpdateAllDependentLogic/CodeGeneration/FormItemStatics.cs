@@ -528,7 +528,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                                           IEnumerable<CSharpParameter> optionalControlParams,
 		                                                           IEnumerable<CSharpParameter> optionalValidationParams ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
-			var body = "return Get" + field.PascalCasedName + controlTypeForName + "FormItem( false, " +
+			var body = "return " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( false, " +
 			           requiredControlParams.Concat( requiredValidationParams )
 			                                .Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
 			                                .GetCommaDelimitedStringFromCollection()
@@ -563,7 +563,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                                        string controlGetterExpressionOrBlock, string validationMethodExpressionOrBlock,
 		                                                        string putLabelOnFormItemExpression, string postFormItemGetterStatements ) {
 			var validationMethod = "( control, postBackValues, subject, validator ) => " + validationMethodExpressionOrBlock;
-			var formItemGetterStatement = "var formItem = Get" + field.PascalCasedName + "FormItem( useValueParameter, ( v, ls ) => " + controlGetterExpressionOrBlock +
+			var formItemGetterStatement = "var formItem = " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + "FormItem" ) + "( useValueParameter, ( v, ls ) => " + controlGetterExpressionOrBlock +
 			                              ( validationMethodExpressionOrBlock.Any() ? ", " + validationMethod : "" ) +
 			                              ", labelAndSubject: labelAndSubject, putLabelOnFormItem: " + putLabelOnFormItemExpression +
 			                              ", value: value, cellSpan: cellSpan, textAlignment: textAlignment" +
@@ -618,7 +618,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( "ValidationList", "validationList", "null" ) );
 			}
 
-			writer.WriteLine( "public FormItem<" + controlType + "> Get" + field.PascalCasedName + controlTypeForName + "FormItem( " +
+			writer.WriteLine( "public FormItem<" + controlType + "> " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) +"( " +
 			                  parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );
 			writer.WriteLine( body );
 			writer.WriteLine( "}" );
@@ -630,7 +630,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		private static void writeGenericGetterWithoutValueParams( TextWriter writer, ModificationField field, bool? includeValidationMethodReturnValue ) {
 			var controlGetter = "( v, ls ) => controlGetter( v" + ( field.TypeName != field.NullableTypeName ? ".Value" : "" ) + ", ls )";
-			var body = "return Get" + field.PascalCasedName + "FormItem( false, " + controlGetter +
+			var body = "return " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + "FormItem" ) + "( false, " + controlGetter +
 			           ( includeValidationMethodReturnValue.HasValue ? ", validationMethod" : "" ) +
 			           ", labelAndSubject: labelAndSubject, putLabelOnFormItem: putLabelOnFormItem, cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
@@ -640,7 +640,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeGenericGetterWithValueParams( TextWriter writer, ModificationField field, bool? includeValidationMethodReturnValue ) {
-			var control = "useValueParameter ? controlGetter( value, labelAndSubject ) : controlGetter( " + field.PropertyName + ", labelAndSubject )";
+			var control = "useValueParameter ? controlGetter( value, labelAndSubject ) : controlGetter( " + StandardLibraryMethods.GetCSharpIdentifierSimple( field.PropertyName ) + ", labelAndSubject )";
 			var body = "return FormItem.Create( putLabelOnFormItem ? labelAndSubject : \"\", " + control + ", cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
 				             ? ", validationGetter: " + getValidationGetter( field, includeValidationMethodReturnValue.Value )
@@ -649,10 +649,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static string getValidationGetter( ModificationField field, bool includeValidationMethodReturnValue ) {
+			var fieldPropertyName = StandardLibraryMethods.GetCSharpIdentifierSimple( field.PropertyName );
 			var statements = new[]
 				{
 					"if( validationPredicate != null && !validationPredicate() ) return;",
-					( includeValidationMethodReturnValue ? field.PropertyName + " = " : "" ) + "validationMethod( control, postBackValues, labelAndSubject, validator );",
+					( includeValidationMethodReturnValue ? fieldPropertyName + " = " : "" ) + "validationMethod( control, postBackValues, labelAndSubject, validator );",
 					"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
 					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
 				};
@@ -691,7 +692,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( "ValidationList", "validationList", "null" ) );
 			}
 
-			writer.WriteLine( "public FormItem<ControlType> Get" + field.PascalCasedName + "FormItem<ControlType>( " +
+			writer.WriteLine( "public FormItem<ControlType> " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + "FormItem")+ "<ControlType>( " +
 			                  parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) where ControlType: Control {" );
 			writer.WriteLine( body );
 			writer.WriteLine( "}" );
