@@ -3,6 +3,28 @@ html {
 	overflow-y: scroll;
 }
 
+/* lists */
+ewfStandardControlStack > ewfControlStackItem {
+	margin-top: 4px;
+}
+ewfStandardControlStack > ewfControlStackItem:first-child {
+	margin-top: 0;
+}
+ewfControlLine {
+	display: inline-block;
+	vertical-align: top; /* We need any value except baseline to prevent extra vertical spacing. */
+}
+ewfControlLine > ewfControlLineItem {
+	padding-left: 8px;
+}
+ewfControlLine > ewfControlLineItem:first-child {
+	padding-left: 0;
+}
+div.ewfControlList > div > table {
+	width: 100%;
+	table-layout: fixed;
+}
+
 /* tables */
 table {
 	border-width: 0;
