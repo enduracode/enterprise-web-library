@@ -133,6 +133,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			builder.MoveToDocumentEnd();
 			builder.InsertField( "MERGEFIELD TableEnd:Main" );
 
+			doc.MailMerge.CleanupOptions = MailMergeCleanupOptions.RemoveUnusedRegions;
 			doc.MailMerge.FieldMergingCallback = new ImageFieldMergingCallBack();
 			try {
 				doc.MailMerge.ExecuteWithRegions( new AsposeMergeRowEnumerator( cn, "Main", rowTree.Rows, ensureAllFieldsHaveValues ) );
