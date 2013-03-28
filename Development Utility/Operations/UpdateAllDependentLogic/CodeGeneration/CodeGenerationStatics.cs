@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using RedStapler.StandardLibrary;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class CodeGenerationStatics {
@@ -25,11 +25,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		internal static string GetCSharpSafeClassName( string desiredClassName ) {
 			desiredClassName = desiredClassName.Replace( ' ', '_' );
-			// GMS: There may be a better way to see if something starts with a number, or to more general ask if something is an acceptable class name.
-			int dummyInt;
-			if( Int32.TryParse( desiredClassName.Truncate( 1 ), out dummyInt ) )
+			if( Char.IsDigit( desiredClassName.First() ) )
 				return "_" + desiredClassName;
-
 			return desiredClassName;
 		}
 	}
