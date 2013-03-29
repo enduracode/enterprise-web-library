@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RedStapler.StandardLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class OptionalParameterPackageStatics {
@@ -28,7 +27,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				                                            "Gets or sets the value for the " + parameter.Name +
 				                                            " optional parameter. Throws an exception if you try to get the value before it has been set." + warning );
 
-				writer.WriteLine( "public " + parameter.TypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( parameter.PropertyName ) + " { get { return " + parameter.Name + ".Value; } set { " + setCheck +
+				writer.WriteLine( "public " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.Name + ".Value; } set { " + setCheck +
 				                  parameter.Name + ".Value = value; } }" );
 				writer.WriteLine( "public bool " + GetWasSpecifiedPropertyName( parameter ) + " { get { return " + parameter.Name + ".Initialized; } }" );
 			}
