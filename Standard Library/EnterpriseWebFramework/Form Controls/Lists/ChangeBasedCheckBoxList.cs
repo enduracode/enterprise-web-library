@@ -10,12 +10,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A check box list that is based on changes to the selections rather than the absolute set of selected items.
 	/// </summary>
-	// NOTE: Maybe we should get rid of the control and put all its logic in the form item getters. It would eliminate a lot of parameter duplication.
-	// NOTE: More conservatively, we could get rid of just the Create methods.
 	public static class ChangeBasedCheckBoxList {
 		/// <summary>
-		/// Creates a form item with a change based check box list.
+		/// Creates a form item with a change based check box list, which is a check box list that is based on changes to the selections rather than the absolute
+		/// set of selected items.
 		/// </summary>
+		/// <typeparam name="ItemIdType"></typeparam>
+		/// <param name="label"></param>
+		/// <param name="items"></param>
+		/// <param name="selectedItemIds"></param>
+		/// <param name="modificationMethod">A method that executes the change handlers of the items that were selected or deselected on this post back.</param>
+		/// <param name="caption"></param>
+		/// <param name="includeSelectAndDeselectAllButtons"></param>
+		/// <param name="numberOfColumns"></param>
+		/// <param name="uiSelectedItemIds"></param>
+		/// <param name="cellSpan"></param>
+		/// <param name="textAlignment"></param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationList"></param>
+		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items,
 		                                                                                     IEnumerable<ItemIdType> selectedItemIds, out DbMethod modificationMethod,
 		                                                                                     string caption = "", bool includeSelectAndDeselectAllButtons = false,
@@ -44,8 +57,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a form item with a change based check box list.
+		/// Creates a form item with a change based check box list, which is a check box list that is based on changes to the selections rather than the absolute
+		/// set of selected items.
 		/// </summary>
+		/// <typeparam name="ItemIdType"></typeparam>
+		/// <param name="label"></param>
+		/// <param name="items"></param>
+		/// <param name="modificationMethod">A method that executes the change handlers of the items that were selected or deselected on this post back.</param>
+		/// <param name="caption"></param>
+		/// <param name="includeSelectAndDeselectAllButtons"></param>
+		/// <param name="numberOfColumns"></param>
+		/// <param name="cellSpan"></param>
+		/// <param name="textAlignment"></param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationList"></param>
+		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label,
 		                                                                                     IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
 		                                                                                     out DbMethod modificationMethod, string caption = "",
@@ -68,9 +94,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
 		}
 
-		/// <summary>
-		/// Creates a change based check box list.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 		public static ChangeBasedCheckBoxList<ItemIdType> Create<ItemIdType>( IEnumerable<ChangeBasedListItem<ItemIdType>> items,
 		                                                                      IEnumerable<ItemIdType> selectedItemIds, string caption = "",
 		                                                                      bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
@@ -83,9 +107,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                                uiSelectedItemIds ?? selectedItemIds );
 		}
 
-		/// <summary>
-		/// Creates a change based check box list.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 		public static ChangeBasedCheckBoxList<ItemIdType> Create<ItemIdType>( IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
 		                                                                      string caption = "", bool includeSelectAndDeselectAllButtons = false,
 		                                                                      byte numberOfColumns = 1 ) {
@@ -101,9 +123,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 	}
 
-	/// <summary>
-	/// A check box list that is based on changes to the selections rather than the absolute set of selected items.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 	public class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
 		private readonly IEnumerable<ChangeBasedListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
@@ -139,16 +159,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			( checkBoxList as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
-		/// <summary>
-		/// Validates the selected items in the post back and stores them for use by ModifyData.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 		public void Validate( PostBackValueDictionary postBackValues ) {
 			selectedItemIdsInPostBack = checkBoxList.GetSelectedItemIdsInPostBack( postBackValues );
 		}
 
-		/// <summary>
-		/// Executes the change handlers of the items that were selected or deselected on this post back.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 		public void ModifyData( DBConnection cn ) {
 			if( selectedItemIdsInPostBack == null )
 				return;
