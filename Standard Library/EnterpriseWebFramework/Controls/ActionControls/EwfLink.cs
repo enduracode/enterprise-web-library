@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -78,8 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				};
 		}
 
-		private PageInfo destinationPageInfo;
-		private string text = "";
+		private readonly PageInfo destinationPageInfo;
 
 		private bool navigatesInNewWindow;
 		private PopUpWindowSettings popUpWindowSettings;
@@ -106,49 +104,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		public PageInfo DestinationPageInfo { get { return destinationPageInfo; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public string Text { get { return text; } set { text = value ?? ""; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public PageInfo NavigatePageInfo { get { return destinationPageInfo; } set { destinationPageInfo = value; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public bool NavigatesInNewWindow {
-			set {
-				navigatesInNewWindow = value;
-				if( value ) {
-					popUpWindowSettings = null;
-					navigatesInOpeningWindow = false;
-				}
-			}
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public void NavigateInPopUpWindow( PopUpWindowSettings popUpWindowSettings ) {
-			this.popUpWindowSettings = popUpWindowSettings;
-			if( popUpWindowSettings != null ) {
-				navigatesInNewWindow = false;
-				navigatesInOpeningWindow = false;
-			}
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public bool NavigatesInOpeningWindow {
-			set {
-				navigatesInOpeningWindow = value;
-				if( value ) {
-					navigatesInNewWindow = false;
-					popUpWindowSettings = null;
-				}
-			}
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public new string ToolTip { get { return toolTip; } set { toolTip = value; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public Control ToolTipControl { get { return toolTipControl; } set { toolTipControl = value; } }
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
@@ -188,7 +143,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is NewContentPageMode )
 				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
-			ActionControlStyle.SetUpControl( this, text.Any() ? text : url, width, height, setWidth );
+			ActionControlStyle.SetUpControl( this, url, width, height, setWidth );
 
 			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is DisabledPageMode ) {
 				var message = ( destinationPageInfo.AlternativeMode as DisabledPageMode ).Message;

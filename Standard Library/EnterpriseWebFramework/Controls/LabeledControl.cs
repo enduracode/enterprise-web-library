@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -10,9 +9,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control wrapper that puts a label near the control being wrapped.
 	/// </summary>
-	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "MarkupControls" ) ]
 	public class LabeledControl: WebControl, ControlTreeDataLoader {
-		private class CssElementCreator: ControlCssElementCreator {
+		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfLabeledControl";
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
@@ -26,11 +24,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private readonly List<Control> wrappedControls = new List<Control>();
-		private string label;
+		private readonly string label;
 		private readonly Validation validation;
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public LabeledControl() {}
 
 		/// <summary>
 		/// Creates a new instance of a LabeledControl with the specified control and label. Do not pass null for label.
@@ -45,13 +40,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			wrappedControls.Add( control );
 			this.validation = validation;
 		}
-
-		// When removing this, also remove the ParseChildren attribute on the class.
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public List<Control> MarkupControls { get { return wrappedControls; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public string Label { set { label = value; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );

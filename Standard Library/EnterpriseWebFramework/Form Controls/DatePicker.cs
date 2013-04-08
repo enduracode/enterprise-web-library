@@ -36,16 +36,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.value = value.HasValue ? value.Value.Date as DateTime? : null;
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DatePicker(): this( null ) {}
-
 		/// <summary>
 		/// Sets whether this date picker will post back automatically.
 		/// </summary>
 		public bool AutoPostBack { set { autoPostBack = value; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime? Value { set { this.value = value.HasValue ? value.Value.Date as DateTime? : null; } }
 
 		/// <summary>
 		/// The earliest acceptable date.
@@ -123,11 +117,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return date;
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime? ValidateAndGetNullableDate( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
-			return ValidateAndGetNullablePostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
-		}
-
 		/// <summary>
 		/// Validates the date and returns the date.
 		/// </summary>
@@ -136,11 +125,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( errorHandler.LastResult == ErrorCondition.NoError && date.HasTime() )
 				validator.NoteErrorAndAddMessage( "Time information is not allowed." );
 			return date;
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime ValidateAndGetDate( Validator validator, ValidationErrorHandler errorHandler ) {
-			return ValidateAndGetPostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
 
 		/// <summary>

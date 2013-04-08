@@ -10,7 +10,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Used to stack inline controls vertically. Implemented with div blocks.
 	/// </summary>
-	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "MarkupControls" ) ]
 	public class ControlStack: WebControl, ControlTreeDataLoader {
 		/// <summary>
 		/// Standard Library use only.
@@ -39,11 +38,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private readonly List<Control> markupControls = new List<Control>();
-		private readonly List<Tuple<Func<IEnumerable<Control>>, bool>> codeControls = new List<Tuple<Func<IEnumerable<Control>>, bool>>();
-		private bool? isStandard;
-		private int modErrorDisplayKeySuffix;
-
 		/// <summary>
 		/// Creates a blank vertical stack of controls.
 		/// </summary>
@@ -70,19 +64,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return cs;
 		}
 
+		private readonly List<Tuple<Func<IEnumerable<Control>>, bool>> items = new List<Tuple<Func<IEnumerable<Control>>, bool>>();
+		private readonly bool? isStandard;
+		private int modErrorDisplayKeySuffix;
+
 		private ControlStack( bool isStandard ) {
 			this.isStandard = isStandard;
 		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public ControlStack() {}
-
-		// When we remove this, remember to remove the ParseChildren attribute on the class.
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public List<Control> MarkupControls { get { return markupControls; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public bool IsStandard { set { isStandard = value; } }
 
 		/// <summary>
 		/// Add the given list of strings to the control stack. Do not pass null for any of the strings. If you do, it will be converted to the empty string.
@@ -96,7 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Adds the specified controls to the stack.
 		/// </summary>
 		public void AddControls( params Control[] controls ) {
-			codeControls.AddRange( controls.Select( i => Tuple.Create( new Func<IEnumerable<Control>>( i.ToSingleElementArray ), false ) ) );
+			items.AddRange( controls.Select( i => Tuple.Create( new Func<IEnumerable<Control>>( i.ToSingleElementArray ), false ) ) );
 		}
 
 		/// <summary>
@@ -104,17 +92,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// added.
 		/// </summary>
 		public void AddModificationErrorItem( Validation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
-			codeControls.Add( Tuple.Create( new Func<IEnumerable<Control>>( () => {
+			items.Add( Tuple.Create( new Func<IEnumerable<Control>>( () => {
 				var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
 				return errors.Any() ? controlGetter( errors ) : new Control[ 0 ];
 			} ),
-			                                true ) );
+			                         true ) );
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
-			this.AddControlsReturnThis( markupControls.SelectMany( i => getItemControl( i.ToSingleElementArray() ) ) );
 			this.AddControlsReturnThis(
-				codeControls.SelectMany( i => i.Item2 ? new NamingPlaceholder( getItemControl( i.Item1() ).ToArray() ).ToSingleElementArray() : getItemControl( i.Item1() ) ) );
+				items.SelectMany( i => i.Item2 ? new NamingPlaceholder( getItemControl( i.Item1() ).ToArray() ).ToSingleElementArray() : getItemControl( i.Item1() ) ) );
 		}
 
 		private IEnumerable<Control> getItemControl( IEnumerable<Control> controls ) {

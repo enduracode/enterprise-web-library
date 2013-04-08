@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web;
+﻿using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
@@ -52,7 +51,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
-		private string text;
 
 		/// <summary>
 		/// Creates a new Mailto Link.
@@ -76,9 +74,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public override Unit Height { get { return height; } set { height = value; } }
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public string Text { get { return text; } set { text = value; } }
-
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			Attributes.Add( "href",
 			                "mailto:" +
@@ -91,7 +86,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                                                                            HttpUtility.UrlEncode( Body ).PrependDelimiter( "body=" ) ) ) );
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, text, width, height, setWidth );
+			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );

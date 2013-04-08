@@ -51,11 +51,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return validator.GetTimeSpan( validationErrorHandler, parseTimeSpan( durationPicker.GetPostBackValue( postBackValues ) ) );
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public TimeSpan ValidateAndGetDuration( Validator validator, ValidationErrorHandler validationErrorHandler ) {
-			return ValidateAndGetPostBackDuration( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, validationErrorHandler );
-		}
-
 		/// <summary>
 		/// Supports ':' being present or not.
 		/// Requires a value. Must be less than maxValueLength.

@@ -33,9 +33,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.minuteInterval = minuteInterval;
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public TimePicker(): this( null ) {}
-
 		/// <summary>
 		/// Sets whether this time picker will post back automatically.
 		/// </summary>
@@ -50,9 +47,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.
 		/// </summary>
 		public Control ToolTipControl { get; set; }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public TimeSpan? Value { set { this.value = value; } }
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
@@ -83,11 +77,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                               allowEmpty );
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public TimeSpan? ValidateAndGetNullableTimeSpan( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
-			return ValidateAndGetNullableTimeSpan( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
-		}
-
 		/// <summary>
 		/// Validates the time and returns the time. The value is expressed in time since 12AM on an arbitrary day.
 		/// </summary>
@@ -95,11 +84,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return validator.GetTimeOfDayTimeSpan( errorHandler,
 			                                       textBox.GetPostBackValue( postBackValues ).ToUpper(),
 			                                       DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public TimeSpan ValidateAndGetTimeSpan( Validator validator, ValidationErrorHandler errorHandler ) {
-			return ValidateAndGetTimeSpan( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
 
 		/// <summary>

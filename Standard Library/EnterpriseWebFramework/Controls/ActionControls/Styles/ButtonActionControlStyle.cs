@@ -6,9 +6,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A style that renders an action control as a button with rounded corners.
 	/// </summary>
 	public class ButtonActionControlStyle: ActionControlStyle {
-		/// <summary>
-		/// Sets the text. Do not set this to null.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
 		public string Text { get; set; }
 
 		/// <summary>
@@ -32,12 +30,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private readonly ButtonSize buttonSize;
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public ButtonActionControlStyle( ButtonSize buttonSize = ButtonSize.Normal ) {
-			Text = "";
-			this.buttonSize = buttonSize;
-		}
 
 		/// <summary>
 		/// Creates a button action control style. Do not pass null for text.

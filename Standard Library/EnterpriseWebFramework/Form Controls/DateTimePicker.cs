@@ -38,16 +38,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.minuteInterval = minuteInterval;
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTimePicker(): this( null ) {}
-
 		/// <summary>
 		/// Sets whether this date picker will post back automatically.
 		/// </summary>
 		public bool AutoPostBack { set { autoPostBack = value; } }
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime? DateAndTime { set { this.value = value; } }
 
 		/// <summary>
 		/// The earliest acceptable date.
@@ -121,11 +115,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                      max );
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime? ValidateAndGetNullableDate( Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
-			return ValidateAndGetNullablePostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler, allowEmpty );
-		}
-
 		/// <summary>
 		/// Validates the date and returns the date.
 		/// </summary>
@@ -135,11 +124,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                              DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
 			                              min,
 			                              max );
-		}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public DateTime ValidateAndGetDate( Validator validator, ValidationErrorHandler errorHandler ) {
-			return ValidateAndGetPostBackDate( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator, errorHandler );
 		}
 
 		/// <summary>

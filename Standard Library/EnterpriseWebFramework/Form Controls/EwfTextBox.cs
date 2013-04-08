@@ -98,9 +98,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		string FormControl<string>.DurableValue { get { return durableValue; } }
 		string FormControl.DurableValueAsString { get { return durableValue; } }
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public string Value { get { return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ); } }
-
 		/// <summary>
 		/// Sets whether an automatic postback occurs when the text box loses focus.
 		/// </summary>

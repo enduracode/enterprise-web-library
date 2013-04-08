@@ -259,7 +259,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\CellPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\ClickScript.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Tables\ColumnPrimaryDynamicTable.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\ColumnPrimaryItemGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\ColumnPrimaryTable.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\ColumnSetup.cs" />
@@ -279,7 +278,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\Tables\RowMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\RowSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\SpaceForMultiColOrRowCell.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Tables\StaticTable.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\TableCellVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\TableOps.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\TabStrip.cs" />
@@ -306,9 +304,6 @@
     <Compile Include="EnterpriseWebFramework\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\EntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\NavButtonSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Page\DataModifierWithRightButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Page\PageWithRightButton.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLinkingOps.cs" />

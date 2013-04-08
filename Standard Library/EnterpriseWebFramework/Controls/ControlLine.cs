@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -31,11 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private readonly TableRow row;
-
-		// NOTE: Remove this when we have eliminated control lines from markup.
-		private readonly List<Control> markupControls = new List<Control>();
-
-		private readonly List<Control> codeControls = new List<Control>();
+		private readonly List<Control> items = new List<Control>();
 
 		/// <summary>
 		/// Gets or sets the vertical alignment of this control line.
@@ -58,26 +53,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			VerticalAlignment = TableCellVerticalAlignment.NotSpecified;
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public ControlLine(): this( new Control[ 0 ] ) {}
-
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public List<Control> MarkupControls { get { return markupControls; } }
-
 		/// <summary>
 		/// Adds the specified controls to the line.
 		/// </summary>
 		public void AddControls( params Control[] controls ) {
-			codeControls.AddRange( controls );
+			items.AddRange( controls );
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			var items = markupControls.Concat( codeControls );
-			if( ItemsSeparatedWithPipe )
-				items = separateControls( items );
-			var cells = from i in items
+			var cells = from i in ItemsSeparatedWithPipe ? separateControls( items ) : items
 			            select
 				            new TableCell
 					            {

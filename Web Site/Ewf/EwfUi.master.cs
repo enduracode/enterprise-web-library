@@ -9,7 +9,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Page;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 using RedStapler.StandardLibrary.WebSessionState;
@@ -420,17 +419,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private Control getContentFootBlock() {
-			if( Page is DataModifierWithRightButton ) {
-				var dmWithRb = Page as DataModifierWithRightButton;
-				var button = new PostBackButton( new DataModification(),
-				                                 () => EwfPage.Instance.EhValidateAndModifyDataAndRedirect( dmWithRb.ValidateFormValues, dmWithRb.ModifyData ) );
-				EwfUiStatics.SetContentFootActions( new ActionButtonSetup( dmWithRb.RightButtonText, button ) );
-			}
-			else if( Page is PageWithRightButton ) {
-				var rbs = ( Page as PageWithRightButton ).CreateRightButtonSetup();
-				EwfUiStatics.SetContentFootActions( new ActionButtonSetup( rbs.Text, new EwfLink( new ExternalPageInfo( rbs.Url ) ) ) );
-			}
-
 			var controls = new List<Control>();
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() ) {

@@ -66,11 +66,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return postBackValues.GetValue( this );
 		}
 
-		[ Obsolete( "Guaranteed through 28 February 2013." ) ]
-		public string GetPostBackValueOld() {
-			return GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-		}
-
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
