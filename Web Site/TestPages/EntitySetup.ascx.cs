@@ -33,7 +33,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						               new HtmlEditing.Info( this ),
 						               new RegexHelper.Info( this ),
 						               new TestPad.Info( this ),
-						               new ToolTipTest.Info( this, DateTime.Now ),
 						               new TwoWeekCalendarTest.Info( this, DateTime.Now ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new Box.Info( this ) ),

@@ -378,13 +378,6 @@
     <Compile Include="TestPages\TestPad.aspx.designer.cs">
       <DependentUpon>TestPad.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\ToolTipTest.aspx.cs">
-      <DependentUpon>ToolTipTest.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\ToolTipTest.aspx.designer.cs">
-      <DependentUpon>ToolTipTest.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\TwoWeekCalendarTest.aspx.cs">
       <DependentUpon>TwoWeekCalendarTest.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -736,7 +729,6 @@
     <Content Include="Ewf\Styles\Firefox.css" />
     <Content Include="Service\Service.svc" />
     <Content Include="TestPages\GetImage.aspx" />
-    <Content Include="TestPages\ToolTipTest.aspx" />
     <Content Include="TestPages\TwoWeekCalendarTest.aspx" />
   </ItemGroup>
   <ItemGroup>
