@@ -128,7 +128,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getMemberVariableName( string columnName ) {
-			return StandardLibraryMethods.GetCSharpIdentifierSimple( "_" + getCamelCaseName( columnName ) );
+			// A single underscore is a pretty common thing for other code generators and even some developers to use, so two is more unique and avoids problems.
+			return StandardLibraryMethods.GetCSharpIdentifierSimple( "__" + getCamelCaseName( columnName ) );
 		}
 
 		// NOTE: Move this to Standard Library.
