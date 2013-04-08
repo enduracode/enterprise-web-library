@@ -43,9 +43,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				image.IsAutoSizer = true;
 			}
 			else {
-				// If the control is a button element, this makes it the proper width in IE7.
-				control.Style.Add( "overflow", "visible" );
-
 				image.Width = width;
 				image.Height = height;
 			}

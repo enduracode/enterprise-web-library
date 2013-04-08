@@ -149,6 +149,58 @@ ewfDateAndTimePicker {
 button {
 	font: inherit;
 }
+a.ewfBlockContainer, span.ewfBlockContainer {
+	display: inline-block;
+}
+ewfActionControlAllStylesAllStates {
+	margin: 0;
+	border-style: none;
+	background-color: Transparent;
+	padding: 0;
+}
+ewfActionControlAllStylesAllStates::-moz-focus-inner {
+	border-style: none;
+	padding: 0;
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox {
+	display: block;
+	background-repeat: repeat-x;
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.left {
+	float: left;
+	margin-right: 4px;
+}
+ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.right {
+	float: right;
+	margin-left: 4px;
+}
+ewfActionControlAllButtonStylesAllStates {
+	display: inline-block;
+	text-decoration: none; /*-moz-box-shadow: 2px 2px 2px Black;*/
+	background: transparent -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.6)), color-stop(0.5, rgba(255,255,255,0.15)), color-stop(0.5, rgba(255,255,255,0.01)), to(transparent));
+	background: transparent -moz-linear-gradient(top, rgba(255,255,255,0.6), rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.01) 50%, transparent);
+	background-color: #7C13B8;
+	color: white;
+}
+ewfActionControlShrinkWrapButtonStyleAllStates {
+	padding: .01em .2em .01em .2em;
+	border-radius: .2em;
+}
+ewfActionControlNormalButtonStyleAllStates {
+	padding: .4em;
+	border-radius: .3em;
+}
+ewfActionControlLargeButtonStyleAllStates {
+	padding: 1em;
+	font-size: 1.4em;
+	border-radius: .3em;
+}
+ewfActionControlAllButtonStylesStatesWithHoverAndWithoutActive {
+	background-color: black;
+}
+ewfActionControlAllButtonStylesStatesWithFocusAndWithoutHover {
+	background-color: gray;
+}
 
 /* Text alignment. NOTE: The classes ewfCurrencyCell, ewfRightAlignCell, and ewfCenterCell are deprecated. Eliminate them from all systems and then remove them from these rules. */
 .ewfTaL {
