@@ -43,9 +43,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
-			                      new CSharpParameter( "int", "textBoxRows", "1" ).ToSingleElementArray(),
+			                      new[] { new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool?", "suggestSpellCheck", "null" ) },
 			                      new CSharpParameter[ 0 ],
-			                      "new EwfTextBox( v ) { " + ( field.Size.HasValue ? "MaxCharacters = " + field.Size.Value + ", " : "" ) + "Rows = textBoxRows }",
+			                      "new EwfTextBox( v, suggestSpellCheck: suggestSpellCheck ) { " +
+			                      ( field.Size.HasValue ? "MaxCharacters = " + field.Size.Value + ", " : "" ) + "Rows = textBoxRows }",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
 			                      "true" );

@@ -106,8 +106,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			// Set up the icon to open the dialog when clicked.
 			hookUpDatePicker =
 				hookUpDatePicker.ConcatenateWithSpace(
-					@"$('#{0}').closest('.{1}').find('.{2}').click(function() {{ $('#{0}').datepicker('show'); }});".FormatWith(
-						textBox.TextBoxClientId,ControlLine.CssElementCreator.CssClass, iconClass ) );
+					@"$('#{0}').closest('.{1}').find('.{2}').click(function() {{ $('#{0}').datepicker('show'); }});".FormatWith( textBox.TextBoxClientId,
+					                                                                                                             ControlLine.CssElementCreator.CssClass,
+					                                                                                                             iconClass ) );
 			return hookUpDatePicker;
 		}
 
