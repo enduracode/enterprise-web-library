@@ -253,7 +253,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 			var select2Statement = "$( '#" + selectControl.ClientID + "' ).select2( { width: 'copy', " +
-			                       ( placeholderItem != null && placeholderItem.IsValid ? "allowClear: true, " : "" ) + "openOnEnter: false } );";
+			                       ( placeholderItem != null && placeholderItem.IsValid ? "allowClear: true, " : "" ) +
+			                       "openOnEnter: false, sortResults: select2ResultSort } );";
 			var touchStatement = placeholderItem != null
 				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
 				                       "' ).attr( 'data-placeholder' ) );"
