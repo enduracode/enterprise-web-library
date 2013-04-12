@@ -19,26 +19,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		internal static int GetNDependLocCount( DevelopmentInstallation installation, bool debug ) {
 			var servicesProvider = new NDependServicesProvider();
 			var projectManager = servicesProvider.ProjectManager;
-			var project =
-				projectManager.CreateTemporaryProject( getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
-				                                       TemporaryProjectMode.Temporary );
 
-			StatusStatics.SetStatus( "Performing NDepend analysis." );
-			var analysisResult = project.RunAnalysis();
-			StatusStatics.SetStatus( "Performed NDepend analysis." );
+			// NOTE: This loop avoids an NDepend bug and is temporary.
+			var totalLoc = 0;
+			foreach( var assemblyPath in getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ) ) {
+				var project = projectManager.CreateTemporaryProject( assemblyPath.ToSingleElementArray(), TemporaryProjectMode.Temporary );
 
-			var codeBase = analysisResult.CodeBase;
-			var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();
-			var methods = from n in codeBase.Application.Namespaces
-			              where !n.Name.StartsWith( StandardLibraryMethods.EwfFolderBaseNamespace )
-			              from t in n.ChildTypes
-			              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
-			              from m in t.MethodsAndContructors
-			              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
-			              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
-			              select m;
+				StatusStatics.SetStatus( "Performing NDepend analysis." );
+				var analysisResult = project.RunAnalysis();
+				StatusStatics.SetStatus( "Performed NDepend analysis." );
 
-			return methods.Where( i => i.NbLinesOfCode.HasValue ).Sum( i => Convert.ToInt32( i.NbLinesOfCode.Value ) );
+				var codeBase = analysisResult.CodeBase;
+				var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();
+				var methods = from n in codeBase.Application.Namespaces
+				              where !n.Name.StartsWith( StandardLibraryMethods.EwfFolderBaseNamespace )
+				              from t in n.ChildTypes
+				              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
+				              from m in t.MethodsAndContructors
+				              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
+				              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
+				              select m;
+
+				totalLoc += methods.Where( i => i.NbLinesOfCode.HasValue ).Sum( i => Convert.ToInt32( i.NbLinesOfCode.Value ) );
+			}
+			return totalLoc;
 		}
 
 		private static IEnumerable<string> getAssemblyPaths( DevelopmentInstallation installation, bool debug ) {
