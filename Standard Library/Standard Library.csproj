@@ -54,17 +54,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AjaxControlToolkit.7.0123\lib\40\AjaxControlToolkit.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Cells, Version=7.4.1.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Cells, Version=7.4.2.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Cells.7.4.1\lib\net40-client\Aspose.Cells.dll</HintPath>
+      <HintPath>..\packages\Aspose.Cells.7.4.2\lib\net40-client\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Pdf, Version=7.7.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Pdf, Version=7.8.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Pdf.7.7.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
+      <HintPath>..\packages\Aspose.Pdf.7.9.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Words, Version=13.2.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Words, Version=13.3.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Words.13.2.0\lib\net3.5\Aspose.Words.dll</HintPath>
+      <HintPath>..\packages\Aspose.Words.13.3.0\lib\net3.5\Aspose.Words.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.0.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\AjaxControlToolkit.7.0123\lib\40\SanitizerProviders\HtmlAgilityPack.dll</HintPath>
@@ -110,9 +110,9 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.31.2.0, Culture=neutral, PublicKeyToken=1c2bd1631853048f, processorArchitecture=MSIL">
+    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.32.0.0, Culture=neutral, PublicKeyToken=1c2bd1631853048f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Selenium.RC.2.31.2\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
+      <HintPath>..\packages\Selenium.RC.2.32.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
