@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -21,7 +22,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
-		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null ) {
+		/// <param name="cn"></param>
+		/// <param name="userId"></param>
+		/// <param name="vl"></param>
+		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available 
+		/// in the System Provider are used.</param>
+		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
+		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles =
 				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles( cn ) ).ToList();
 
@@ -29,17 +36,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( includePasswordControls() && user != null )
 				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, user.UserId );
 
+			Func<bool> validationShouldRun = () => validationPredicate == null || validationPredicate();
+
 			var b = FormItemBlock.CreateFormItemTable( heading: "Security Information" );
 
 			b.AddFormItems( FormItem.Create( "Email address",
 			                                 new EwfTextBox( user != null ? user.Email : "" ),
-			                                 validationGetter:
-				                                 control =>
-				                                 new Validation(
-					                                 ( pbv, validator ) =>
-					                                 Email =
-					                                 validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false, 50 ),
-					                                 vl ) ) );
+			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
+				                                 if( validationShouldRun() )
+					                                 Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
+			                                 },
+			                                                                              vl ) ) );
 
 			if( includePasswordControls() ) {
 				var group = new RadioButtonGroup( "password", false );
@@ -47,7 +54,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var keepPassword = FormItem.Create( "",
 				                                    group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 				                                    validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                    if( !control.IsCheckedInPostBack( pbv ) )
+					                                    if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 						                                    return;
 					                                    if( user != null ) {
 						                                    Salt = facUser.Salt;
@@ -65,7 +72,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					                                                                       "Generate a " + ( userId.HasValue ? "new, " : "" ) +
 					                                                                       "random password and email it to the user" ),
 				                                        validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                        if( control.IsCheckedInPostBack( pbv ) )
+					                                        if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
 						                                        genPassword( true );
 				                                        },
 				                                                                                     vl ) );
@@ -76,19 +83,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
 				                                            FormItem.Create( "",
 				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
-				                                                             validationGetter:
-					                                                             control =>
-					                                                             new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) )
-				                                                    .ToControl()
-				                                                    .ToCell() ) );
+				                                                             validationGetter: control => new Validation( ( pbv, v ) => {
+					                                                             if( validationShouldRun() )
+						                                                             newPassword.Value = control.GetPostBackValue( pbv );
+				                                                             },
+				                                                                                                          vl ) ).ToControl().ToCell() ) );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
 				                                            FormItem.Create( "",
 				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
-				                                                             validationGetter:
-					                                                             control =>
-					                                                             new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) )
-				                                                    .ToControl()
-				                                                    .ToCell() ) );
+				                                                             validationGetter: control => new Validation( ( pbv, v ) => {
+					                                                             if( validationShouldRun() )
+						                                                             confirmPassword.Value = control.GetPostBackValue( pbv );
+				                                                             },
+				                                                                                                          vl ) ).ToControl().ToCell() ) );
 				EwfPage.Instance.DisableAutofillOnForm();
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
@@ -96,7 +103,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var providePassword = FormItem.Create( "",
 				                                       providePasswordRadio,
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
-					                                       if( !control.IsCheckedInPostBack( pbv ) )
+					                                       if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
 					                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
 					                                       var p = new Password( newPassword.Value );
@@ -113,10 +120,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems( FormItem.Create( "Role",
 			                                 SelectList.CreateDropDown( from i in availableRoles select EwfListItem.Create( i.RoleId as int?, i.Name ),
 			                                                            user != null ? user.Role.RoleId as int? : null ),
-			                                 validationGetter:
-				                                 control =>
-				                                 new Validation(
-					                                 ( pbv, validator ) => RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ), vl ) ) );
+			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
+				                                 if( validationShouldRun() )
+					                                 RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
+			                                 },
+			                                                                              vl ) ) );
 
 			Controls.Add( b );
 		}
