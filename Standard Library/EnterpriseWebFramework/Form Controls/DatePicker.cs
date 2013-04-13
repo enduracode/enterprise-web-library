@@ -10,6 +10,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A date picker.
 	/// </summary>
 	public class DatePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+		private const string iconClass = "icon-calendar";
+
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDatePicker";
 
@@ -80,7 +82,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( defaultSubmitButton != null )
 				textBox.SetDefaultSubmitButton( defaultSubmitButton );
-			Controls.Add( textBox );
+
+			Controls.Add( new ControlLine( textBox, new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( iconClass ) } ) );
 
 			min = DateTime.MinValue;
 			max = DateTime.MaxValue;
@@ -98,8 +101,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return "$( '#" + textBox.TextBoxClientId + "' ).datepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
-			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ) } );";
+			var hookUpDatePicker = "$( '#" + textBox.TextBoxClientId + "' ).datepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
+			                       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ) } );";
+			// Set up the icon to open the dialog when clicked.
+			hookUpDatePicker =
+				hookUpDatePicker.ConcatenateWithSpace(
+					@"$('#{0}').closest('.{1}').find('.{2}').click(function() {{ $('#{0}').datepicker('show'); }});".FormatWith(
+						textBox.TextBoxClientId,ControlLine.CssElementCreator.CssClass, iconClass ) );
+			return hookUpDatePicker;
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
