@@ -2,10 +2,6 @@
 This file is being gradually eliminated. All rules are moving to either Basic.css or the EwfUi folder.
 ----------------------------------------------------- */
 
-ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
-	width: 100%;
-}
-
 .upload-box > div.dropWrapper {
 	width: 90%;
 	margin: 5px auto;

@@ -115,6 +115,11 @@ ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
 	color: black;
 }
 
+/* drop-down lists */
+ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
+	width: 100%;
+}
+
 /* check boxes */
 ewfInlineCheckBox > ewfInlineCheckBoxBox, ewfInlineCheckBox > ewfInlineCheckBoxLabel {
 	vertical-align: middle;
