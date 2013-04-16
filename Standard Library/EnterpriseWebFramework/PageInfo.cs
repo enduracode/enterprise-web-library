@@ -150,9 +150,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// It's important to do the entity setup check first so the page doesn't have to repeat any of it. For example, if the entity setup verifies that the
 				// authenticated user is not null, the page should be able to assume this when doing its own checks.
 				return ( EsInfoAsBaseType != null
-				         	? ( EsInfoAsBaseType.ParentPage != null ? EsInfoAsBaseType.ParentPage.UserCanAccessPageAndAllControls : true ) &&
-				         	  EsInfoAsBaseType.UserCanAccessEntitySetup
-				         	: true ) && ( ParentPage != null ? ParentPage.UserCanAccessPageAndAllControls : true ) && userCanAccessPage;
+					         ? ( EsInfoAsBaseType.ParentPage != null ? EsInfoAsBaseType.ParentPage.UserCanAccessPageAndAllControls : true ) &&
+					           EsInfoAsBaseType.UserCanAccessEntitySetup
+					         : true ) && ( ParentPage != null ? ParentPage.UserCanAccessPageAndAllControls : true ) && userCanAccessPage;
 			}
 		}
 
@@ -211,17 +211,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns an absolute URL that can be used to request the page. This method uses HttpContext.Current and can only be called from within web requests.
 		/// </summary>
-		public string GetUrl() {
+		/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
+		/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
+		/// <returns></returns>
+		public string GetUrl( bool disableAuthorizationCheck = false ) {
 			// App relative URLs can be a problem when stored in returnUrl query parameters or otherwise stored across requests since a stored page might have a
 			// different security level than the current page, and when redirecting to the stored page we wouldn't switch. Therefore we always use absolute URLs.
-			return GetUrl( true, true );
+			return GetUrl( true, true, true );
 		}
 
-		internal string GetUrl( bool ensureUserCanAccessAndPageNotDisabled, bool makeAbsolute ) {
+		internal string GetUrl( bool ensureUserCanAccessPage, bool ensurePageNotDisabled, bool makeAbsolute ) {
 			var url = buildUrl() + uriFragmentIdentifier.PrependDelimiter( "#" );
-			if( ensureUserCanAccessAndPageNotDisabled && !UserCanAccessPageAndAllControls )
+			if( ensureUserCanAccessPage && !UserCanAccessPageAndAllControls )
 				throw new ApplicationException( "GetUrl was called for a page that the authenticated user cannot access. The URL would have been " + url + "." );
-			if( ensureUserCanAccessAndPageNotDisabled && AlternativeMode is DisabledPageMode )
+			if( ensurePageNotDisabled && AlternativeMode is DisabledPageMode )
 				throw new ApplicationException( "GetUrl was called for a page that is disabled. The URL would have been " + url + "." );
 			if( makeAbsolute )
 				url = url.Replace( "~", AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( ShouldBeSecureGivenCurrentRequest ) );

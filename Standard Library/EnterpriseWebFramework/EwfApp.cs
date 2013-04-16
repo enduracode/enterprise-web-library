@@ -411,7 +411,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private string getTransferPath( PageInfo page ) {
-			var url = page.GetUrl( true, false );
+			var url = page.GetUrl( true, true, false );
 			if( page.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
 			return url;

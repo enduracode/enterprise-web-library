@@ -106,7 +106,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// page since in certificate authentication systems this can be affected by the connection security level.
 				// NOTE: Also redirect if the domain isn't correct. Probably only do this on GET requests since we don't want to wipe out post backs.
 				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
-					NetTools.Redirect( InfoAsBaseType.GetUrl( false, true ) );
+					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
 			}
 			finally {
 				AppRequestState.Instance.UserDisabledByPage = false;
