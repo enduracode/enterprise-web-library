@@ -456,11 +456,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the page's post back data modification, which executes on every post back. Do *not* use this for modifications that should happen as a result of
-		/// clicking a particular button, e.g. adding a new item to the database. Instead, create your own data modification and pass it to your post back button.
-		/// There are two reasons for this. First, there may be other post back controls such as buttons or lookup boxes on the page, any of which could cause the
-		/// post back data modification to execute. Second, the post back data modification currently only runs if form controls were modified, which would not be
-		/// the case if a user clicks the button on an add item page before entering any data.
+		/// Gets the page's Post-Back Data Modification (PBDM), which executes on every post back. The PBDM executes prior to the post back event's data
+		/// modification and handler if they exist. WARNING: Do *not* use the PBDM for modifications that should happen as a result of the post back event, e.g.
+		/// adding a new item to the database when a button is clicked. There are two reasons for this. First, there may be other post back controls such as buttons
+		/// or lookup boxes on the page, any of which could cause the PBDM to execute. Second, the PBDM currently only runs if form controls were modified, which
+		/// would not be the case if a user clicks the button on an add item page before entering any data.
 		/// </summary>
 		public DataModification PostBackDataModification { get { return postBackDataModification; } }
 
