@@ -308,6 +308,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeCheckBoxFormItemGetters( writer, field, "bool" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 			}
+			if( field.TypeIs( typeof( bool? ) ) )
+				writeNumberAsSelectListFormItemGetters( writer, field );
 		}
 
 		private static void writeCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
