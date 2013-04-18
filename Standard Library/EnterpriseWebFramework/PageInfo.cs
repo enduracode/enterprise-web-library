@@ -217,7 +217,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public string GetUrl( bool disableAuthorizationCheck = false ) {
 			// App relative URLs can be a problem when stored in returnUrl query parameters or otherwise stored across requests since a stored page might have a
 			// different security level than the current page, and when redirecting to the stored page we wouldn't switch. Therefore we always use absolute URLs.
-			return GetUrl( true, true, true );
+			return GetUrl( !disableAuthorizationCheck, true, true );
 		}
 
 		internal string GetUrl( bool ensureUserCanAccessPage, bool ensurePageNotDisabled, bool makeAbsolute ) {
