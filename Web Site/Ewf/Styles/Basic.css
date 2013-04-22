@@ -149,6 +149,9 @@ ewfDatePicker, ewfTimePicker {
 ewfDateAndTimePicker {
 	max-width: 15em;
 }
+.icon-calendar {
+	font-size: 1.4em;
+}
 
 /* action controls */
 button {

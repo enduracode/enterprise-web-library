@@ -82,9 +82,3 @@ tr.queuedFile > td {
 	50% { box-shadow: 0 0 30px #FFC87B; }	
 	100% { box-shadow: 0 0 0px #FFC87B; }
 }
-
-.icon-calendar {
-	font-size: 1.4em;
-	cursor: pointer;
-	color: #7C13B8;
-}

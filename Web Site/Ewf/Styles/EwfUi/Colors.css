@@ -27,13 +27,13 @@ ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > e
 }
 
 /* text style action controls */
-ewfActionControlTextStyleAllNormalStates, ewfActionControlTextStyleAllVisitedStates, ewfHtmlBlock a {
+ewfActionControlTextStyleAllNormalStates, ewfActionControlTextStyleAllVisitedStates, ewfActionControlAllStylesAllNormalStates.icon, ewfActionControlAllStylesAllVisitedStates.icon, ewfHtmlBlock a {
 	color: #7C13B8;
 }
-ewfActionControlTextStyleStatesWithHoverAndWithoutActive {
+ewfActionControlTextStyleStatesWithHoverAndWithoutActive, ewfActionControlAllStylesStatesWithHoverAndWithoutActive.icon {
 	color: #A75DD1;
 }
-ewfActionControlTextStyleAllActiveStates {
+ewfActionControlTextStyleAllActiveStates, ewfActionControlAllStylesAllActiveStates.icon {
 	color: #7C13B8;
 }
 

@@ -10,8 +10,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A date picker.
 	/// </summary>
 	public class DatePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
-		private const string iconClass = "icon-calendar";
-
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDatePicker";
 
@@ -83,7 +81,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( defaultSubmitButton != null )
 				textBox.SetDefaultSubmitButton( defaultSubmitButton );
 
-			Controls.Add( new ControlLine( textBox, new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( iconClass ) } ) );
+			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
 			min = DateTime.MinValue;
 			max = DateTime.MaxValue;
@@ -100,16 +98,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}
 
+		private WebControl getIconButton() {
+			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "icon-calendar" ) };
+			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
+			return new CustomButton( () => "$( '#{0}' ).datepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
+		}
+
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			var hookUpDatePicker = "$( '#" + textBox.TextBoxClientId + "' ).datepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
-			                       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ) } );";
-			// Set up the icon to open the dialog when clicked.
-			hookUpDatePicker =
-				hookUpDatePicker.ConcatenateWithSpace(
-					@"$('#{0}').closest('.{1}').find('.{2}').click(function() {{ $('#{0}').datepicker('show'); }});".FormatWith( textBox.TextBoxClientId,
-					                                                                                                             ControlLine.CssElementCreator.CssClass,
-					                                                                                                             iconClass ) );
-			return hookUpDatePicker;
+			return "$( '#" + textBox.TextBoxClientId + "' ).datepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
+			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ) } );";
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
