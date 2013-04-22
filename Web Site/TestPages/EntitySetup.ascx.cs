@@ -36,7 +36,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						               new TwoWeekCalendarTest.Info( this, DateTime.Now ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new Box.Info( this ) ),
-						new PageGroup( "Form Controls", new CheckBox.Info( this ), new CheckBoxList.Info( this ), new SelectListDemo.Info( this ) )
+						new PageGroup( "Form Controls",
+						               new CheckBox.Info( this ),
+						               new CheckBoxList.Info( this ),
+						               new SelectListDemo.Info( this ),
+						               new DateAndTimePickers.Info( this ) )
 					};
 			}
 
