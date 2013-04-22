@@ -39,7 +39,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new TimePicker.Styles.Info() );
 			infos.Add( new Qtip2.Jqueryqtipmin.Info() );
 			infos.Add( new Styles.Basic.Info() );
-			infos.Add( new Styles.EwfControls.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
 				infos.Add( new Styles.EwfUi.Colors.Info() );
 				infos.Add( new Styles.EwfUi.Fonts.Info() );

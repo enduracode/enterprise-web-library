@@ -655,7 +655,6 @@
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
     <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
     <Content Include="Ewf\Styles\Basic.css" />
-    <Content Include="Ewf\Styles\EwfControls.css" />
     <Content Include="Ewf\Styles\EwfUi\Colors.css" />
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
