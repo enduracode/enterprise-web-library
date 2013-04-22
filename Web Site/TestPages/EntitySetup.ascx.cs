@@ -76,7 +76,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var navButtonSetups = new List<ActionButtonSetup>();
 			navButtonSetups.Add( new ActionButtonSetup( "Calendar", new EwfLink( new CalendarDemo.Info( info ) ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Go to Microsoft", new EwfLink( new ExternalPageInfo( "http://www.microsoft.com" ) ) ) );
-			navButtonSetups.Add( new ActionButtonSetup( "Custom script", new CustomButton( "alert('test')" ) ) );
+			navButtonSetups.Add( new ActionButtonSetup( "Custom script", new CustomButton( () => "alert('test')" ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Menu",
 			                                            new ToolTipButton(
 				                                            EwfTable.CreateWithItems( items:

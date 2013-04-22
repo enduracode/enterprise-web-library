@@ -33,14 +33,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				elements.Add( new CssElement( "StatusMessageDialogBlock", statusMessageDialogBlockSelector ) );
 				elements.Add( new CssElement( "StatusMessageDialogControlListInfoItem",
 				                              ControlStack.CssElementCreator.Selectors.Select(
-				                              	i =>
-				                              	statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-				                              	StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
+					                              i =>
+					                              statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
+					                              StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
 				elements.Add( new CssElement( "StatusMessageDialogControlListWarningItem",
 				                              ControlStack.CssElementCreator.Selectors.Select(
-				                              	i =>
-				                              	statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-				                              	StatusMessageDialogControlListWarningItemCssClass ).ToArray() ) );
+					                              i =>
+					                              statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
+					                              StatusMessageDialogControlListWarningItemCssClass ).ToArray() ) );
 
 				return elements.ToArray();
 			}
@@ -67,8 +67,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add( new PostBackButton( new DataModification(),
 					                                  () => EwfPage.Instance.EhModifyDataAndRedirect( delegate {
-					                                  	IntermediateAuthenticationMethods.ClearCookie();
-					                                  	return NetTools.HomeUrl;
+						                                  IntermediateAuthenticationMethods.ClearCookie();
+						                                  return NetTools.HomeUrl;
 					                                  } ),
 					                                  new ButtonActionControlStyle( "Log Out" ),
 					                                  false ) );
@@ -81,8 +81,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
 				ph.AddControlsReturnThis(
 					new Block(
-						"This is a standby version of the system. This operates off a read-only database, and any attempt to make a modification will result in an error.".
-							GetLiteralControl() ) { CssClass = "ewfNonLiveWarning" } );
+						"This is a standby version of the system. This operates off a read-only database, and any attempt to make a modification will result in an error."
+							.GetLiteralControl() ) { CssClass = "ewfNonLiveWarning" } );
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
@@ -95,17 +95,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted();" );
 		}
 
-		private static Control getProcessingDialog() {
+		private Control getProcessingDialog() {
 			var image = new EwfImage( "Images/Progress.gif" );
 			image.Style.Add( "display", "inline" );
 			return new Block( new Paragraph( image, " ".GetLiteralControl(), Translation.Processing.GetLiteralControl() ),
-			                  new Paragraph( new CustomButton( "stopPostBackRequest()" )
-			                                 	{ ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile ) } )
-			                  	{ CssClass = "ewfTimeOut" /* This is used by the Standard Library JavaScript file. */ } )
-			       	{ CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
+			                  new Paragraph( new CustomButton( () => "stopPostBackRequest()" )
+				                  {
+					                  ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile )
+				                  } )
+				                  {
+					                  CssClass = "ewfTimeOut"
+					                  /* This is used by the Standard Library JavaScript file. */
+				                  } ) { CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
 		}
 
-		private static IEnumerable<Control> getStatusMessageDialog() {
+		private IEnumerable<Control> getStatusMessageDialog() {
 			if( !EwfPage.Instance.StatusMessages.Any() )
 				yield break;
 
@@ -123,7 +127,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						} as Control ).ToArray() );
 
 			if( EwfPage.Instance.StatusMessages.Any( i => i.Item1 == StatusMessageType.Warning ) )
-				list.AddControls( new CustomButton( "fadeOutStatusMessageDialog( 0 )" ) { ActionControlStyle = new ButtonActionControlStyle( "OK" ) } );
+				list.AddControls( new CustomButton( () => "fadeOutStatusMessageDialog( 0 )" ) { ActionControlStyle = new ButtonActionControlStyle( "OK" ) } );
 
 			yield return new Block( list ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass };
 		}

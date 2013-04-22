@@ -96,7 +96,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					{
 						new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
 						new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
-						new CustomButton( @"uploadButtonClicked(this);" ) { ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ), CssClass = "beginUploadButton" }
+						new CustomButton( () => @"uploadButtonClicked(this);" )
+							{
+								ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ),
+								CssClass = "beginUploadButton"
+							}
 					} ) { CssClass = "upload-box" } );
 		}
 

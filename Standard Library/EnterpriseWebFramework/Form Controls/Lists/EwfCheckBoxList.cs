@@ -47,8 +47,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var table = new DynamicTable { Caption = caption };
 			if( includeSelectAndDeselectAllButtons ) {
-				table.AddActionLink( new ActionButtonSetup( "Select All", new CustomButton( string.Format( @"toggleCheckBoxes( '{0}', true )", ClientID ) ) ) );
-				table.AddActionLink( new ActionButtonSetup( "Deselect All", new CustomButton( string.Format( @"toggleCheckBoxes( '{0}', false )", ClientID ) ) ) );
+				table.AddActionLink( new ActionButtonSetup( "Select All", new CustomButton( () => string.Format( @"toggleCheckBoxes( '{0}', true )", ClientID ) ) ) );
+				table.AddActionLink( new ActionButtonSetup( "Deselect All", new CustomButton( () => string.Format( @"toggleCheckBoxes( '{0}', false )", ClientID ) ) ) );
 			}
 
 			var itemsPerColumn = (int)Math.Ceiling( (decimal)items.Count() / numberOfColumns );
