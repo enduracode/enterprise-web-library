@@ -52,6 +52,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "true" );
 			writeFormItemGetters( writer,
 			                      field,
+			                      "WysiwygHtmlEditor",
+			                      "RichText",
+			                      "string",
+			                      "\"\"",
+			                      new CSharpParameter[ 0 ],
+			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
+														new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      "new WsyiwygHtmlEditor( v )",
+			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
+			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
+			                      "true" );
+			writeFormItemGetters( writer,
+			                      field,
 			                      "EwfTextBox",
 			                      "EmailAddress",
 			                      "string",
@@ -100,10 +114,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new[] { new CSharpParameter( "IEnumerable<EwfListItem<string>>", "items" ) },
 			                      new CSharpParameter[ 0 ],
 			                      new[]
-				                      {
-					                      new CSharpParameter( "bool", "useHorizontalLayout", "false" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-					                      new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "bool", "autoPostBack", "false" )
-				                      },
+			                      	{
+			                      		new CSharpParameter( "bool", "useHorizontalLayout", "false" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
+			                      		new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "bool", "autoPostBack", "false" )
+			                      	},
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
 			                      "control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
@@ -117,11 +131,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new[] { new CSharpParameter( "IEnumerable<EwfListItem<string>>", "items" ) },
 			                      new CSharpParameter[ 0 ],
 			                      new[]
-				                      {
-					                      new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-					                      new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" )
-					                      , new CSharpParameter( "bool", "autoPostBack", "false" )
-				                      },
+			                      	{
+			                      		new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
+			                      		new CSharpParameter( "bool", "placeholderIsValid", "false" ),
+			                      		new CSharpParameter( "string", "placeholderText", "\"Please select\"" ), new CSharpParameter( "bool", "autoPostBack", "false" )
+			                      	},
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
 			                      "control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
@@ -163,10 +177,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  field,
 				                                  "short?",
 				                                  new[]
-					                                  {
-						                                  getAllowEmptyParameter( true ), new CSharpParameter( "short", "min", "short.MinValue" ),
-						                                  new CSharpParameter( "short", "max", "short.MaxValue" )
-					                                  },
+				                                  	{
+				                                  		getAllowEmptyParameter( true ), new CSharpParameter( "short", "min", "short.MinValue" ),
+				                                  		new CSharpParameter( "short", "max", "short.MaxValue" )
+				                                  	},
 				                                  "validator.GetNullableShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 			}
@@ -193,10 +207,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  field,
 				                                  "decimal?",
 				                                  new[]
-					                                  {
-						                                  new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
-						                                  new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
-					                                  },
+				                                  	{
+				                                  		new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
+				                                  		new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
+				                                  	},
 				                                  "validator.GetDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeCheckBoxFormItemGetters( writer, field, "decimal" );
@@ -209,18 +223,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                                  field,
 				                                  "decimal?",
 				                                  new[]
-					                                  {
-						                                  getAllowEmptyParameter( true ), new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
-						                                  new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
-					                                  },
+				                                  	{
+				                                  		getAllowEmptyParameter( true ), new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
+				                                  		new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
+				                                  	},
 				                                  "validator.GetNullableDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
 		}
 
-		private static void writeNumberAsTextFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName,
-		                                                      IEnumerable<CSharpParameter> optionalValidationParams, string validationMethodExpressionOrBlock ) {
+		private static void writeNumberAsTextFormItemGetters( TextWriter writer,
+		                                                      ModificationField field,
+		                                                      string valueParamTypeName,
+		                                                      IEnumerable<CSharpParameter> optionalValidationParams,
+		                                                      string validationMethodExpressionOrBlock ) {
 			writeFormItemGetters( writer,
 			                      field,
 			                      "EwfTextBox",
@@ -340,10 +357,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter( "IEnumerable<Control>", "nestedControls" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new[]
-				                      {
-					                      new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
-					                      new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
-				                      },
+			                      	{
+			                      		new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
+			                      		new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
+			                      	},
 			                      new CSharpParameter[ 0 ],
 			                      "{ " +
 			                      StringTools.ConcatenateWithDelimiter( " ",
@@ -365,25 +382,32 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "null",
 			                      new[] { new CSharpParameter( "IEnumerable<EwfListItem<" + field.NullableTypeName + ">>", "items" ) },
 			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToSingleElementArray()
-			                                                                                   .Concat( nonNullableField
-				                                                                                            ? new CSharpParameter[ 0 ]
-				                                                                                            : new CSharpParameter( "string",
-				                                                                                                                   "defaultValueItemLabel",
-				                                                                                                                   "\"None\"" ).ToSingleElementArray() )
-			                                                                                   .Concat( new[]
-				                                                                                   {
-					                                                                                   new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ),
-					                                                                                   new CSharpParameter( "bool", "autoPostBack", "false" )
-				                                                                                   } ),
+			                      new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToSingleElementArray().Concat( nonNullableField
+			                                                                                                                   	? new CSharpParameter[ 0 ]
+			                                                                                                                   	: new CSharpParameter( "string",
+			                                                                                                                   	                       "defaultValueItemLabel",
+			                                                                                                                   	                       "\"None\"" ).
+			                                                                                                                   	  	ToSingleElementArray() ).Concat(
+			                                                                                                                   	  	                                new[]
+			                                                                                                                   	  	                                	{
+			                                                                                                                   	  	                                		new CSharpParameter
+			                                                                                                                   	  	                                			( "bool",
+			                                                                                                                   	  	                                			  "disableSingleButtonDetection",
+			                                                                                                                   	  	                                			  "false" )
+			                                                                                                                   	  	                                		,
+			                                                                                                                   	  	                                		new CSharpParameter
+			                                                                                                                   	  	                                			( "bool",
+			                                                                                                                   	  	                                			  "autoPostBack",
+			                                                                                                                   	  	                                			  "false" )
+			                                                                                                                   	  	                                	} ),
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: " +
 			                      ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
 			                      ", disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
 			                      "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 			                      ( nonNullableField
-				                        ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
-				                        : "selectedItemIdInPostBack" ) + "; }",
+			                        	? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
+			                        	: "selectedItemIdInPostBack" ) + "; }",
 			                      "true" );
 			writeFormItemGetters( writer,
 			                      field,
@@ -391,31 +415,35 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "DropDown",
 			                      field.NullableTypeName,
 			                      "null",
-			                      new CSharpParameter( "IEnumerable<EwfListItem<" + field.NullableTypeName + ">>", "items" ).ToSingleElementArray()
-			                                                                                                                .Concat( nonNullableField
-				                                                                                                                         ? new CSharpParameter[ 0 ]
-				                                                                                                                         : new CSharpParameter( "string",
-				                                                                                                                                                "defaultValueItemLabel" )
-					                                                                                                                           .ToSingleElementArray() ),
+			                      new CSharpParameter( "IEnumerable<EwfListItem<" + field.NullableTypeName + ">>", "items" ).ToSingleElementArray().Concat(
+			                                                                                                                                               nonNullableField
+			                                                                                                                                               	? new CSharpParameter
+			                                                                                                                                               	  	[ 0 ]
+			                                                                                                                                               	: new CSharpParameter
+			                                                                                                                                               	  	( "string",
+			                                                                                                                                               	  	  "defaultValueItemLabel" )
+			                                                                                                                                               	  	.
+			                                                                                                                                               	  	ToSingleElementArray
+			                                                                                                                                               	  	() ),
 			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray()
-			                                                                     .Concat( ( nonNullableField
-				                                                                                ? new CSharpParameter[ 0 ]
-				                                                                                : new CSharpParameter( "bool", "placeholderIsValid", "true" )
-					                                                                                  .ToSingleElementArray() ) )
-			                                                                     .Concat( new[]
-				                                                                     {
-					                                                                     new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
-					                                                                     new CSharpParameter( "bool", "autoPostBack", "false" )
-				                                                                     } ),
+			                      new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray().Concat( ( nonNullableField
+			                                                                                                       	? new CSharpParameter[ 0 ]
+			                                                                                                       	: new CSharpParameter( "bool",
+			                                                                                                       	                       "placeholderIsValid",
+			                                                                                                       	                       "true" ).ToSingleElementArray() ) )
+			                      	.Concat( new[]
+			                      	         	{
+			                      	         		new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
+			                      	         		new CSharpParameter( "bool", "autoPostBack", "false" )
+			                      	         	} ),
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
 			                      ", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) +
 			                      ", placeholderText: placeholderText, autoPostBack: autoPostBack )",
 			                      "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 			                      ( nonNullableField
-				                        ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
-				                        : "selectedItemIdInPostBack" ) + "; }",
+			                        	? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
+			                        	: "selectedItemIdInPostBack" ) + "; }",
 			                      "true" );
 		}
 
@@ -430,10 +458,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                      new CSharpParameter[ 0 ],
 				                      new CSharpParameter[ 0 ],
 				                      new[]
-					                      {
-						                      new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
-						                      new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
-					                      },
+				                      	{
+				                      		new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
+				                      		new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
+				                      	},
 				                      getAllowEmptyParameter( true ).ToSingleElementArray(),
 				                      "{ " +
 				                      StringTools.ConcatenateWithDelimiter( " ",
@@ -454,10 +482,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				                      new CSharpParameter[ 0 ],
 				                      new CSharpParameter[ 0 ],
 				                      new[]
-					                      {
-						                      new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
-						                      new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
-					                      },
+				                      	{
+				                      		new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
+				                      		new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" )
+				                      	},
 				                      new CSharpParameter[ 0 ],
 				                      "{ " +
 				                      StringTools.ConcatenateWithDelimiter( " ",
@@ -482,10 +510,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter( "IEnumerable<EwfListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new[]
-				                      {
-					                      new CSharpParameter( "string", "caption", "\"\"" ), new CSharpParameter( "bool", "includeSelectAndDeselectAllButtons", "false" ),
-					                      new CSharpParameter( "byte", "numberOfColumns", "1" )
-				                      },
+			                      	{
+			                      		new CSharpParameter( "string", "caption", "\"\"" ), new CSharpParameter( "bool", "includeSelectAndDeselectAllButtons", "false" ),
+			                      		new CSharpParameter( "byte", "numberOfColumns", "1" )
+			                      	},
 			                      new CSharpParameter[ 0 ],
 			                      "new EwfCheckBoxList<" + field.EnumerableElementTypeName + ">( items, v ?? new " + field.EnumerableElementTypeName +
 			                      "[ 0 ], caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns )",
@@ -493,12 +521,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "true" );
 		}
 
-		private static void writeFormItemGetters( TextWriter writer, ModificationField field, string controlType, string controlTypeForName, string valueParamTypeName,
-		                                          string valueParamDefaultValue, IEnumerable<CSharpParameter> requiredControlParams,
-		                                          IEnumerable<CSharpParameter> requiredValidationParams, IEnumerable<CSharpParameter> optionalControlParams,
-		                                          IEnumerable<CSharpParameter> optionalValidationParams, string controlGetterExpressionOrBlock,
-		                                          string validationMethodExpressionOrBlock, string putLabelOnFormItemExpression,
-		                                          string preFormItemGetterStatements = "", string postFormItemGetterStatements = "" ) {
+		private static void writeFormItemGetters( TextWriter writer,
+		                                          ModificationField field,
+		                                          string controlType,
+		                                          string controlTypeForName,
+		                                          string valueParamTypeName,
+		                                          string valueParamDefaultValue,
+		                                          IEnumerable<CSharpParameter> requiredControlParams,
+		                                          IEnumerable<CSharpParameter> requiredValidationParams,
+		                                          IEnumerable<CSharpParameter> optionalControlParams,
+		                                          IEnumerable<CSharpParameter> optionalValidationParams,
+		                                          string controlGetterExpressionOrBlock,
+		                                          string validationMethodExpressionOrBlock,
+		                                          string putLabelOnFormItemExpression,
+		                                          string preFormItemGetterStatements = "",
+		                                          string postFormItemGetterStatements = "" ) {
 			writeFormItemGetterWithoutValueParams( writer,
 			                                       controlType,
 			                                       field,
@@ -525,23 +562,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                    postFormItemGetterStatements );
 		}
 
-		private static void writeFormItemGetterWithoutValueParams( TextWriter writer, string controlType, ModificationField field, string controlTypeForName,
-		                                                           bool includeValidationParams, IEnumerable<CSharpParameter> requiredControlParams,
+		private static void writeFormItemGetterWithoutValueParams( TextWriter writer,
+		                                                           string controlType,
+		                                                           ModificationField field,
+		                                                           string controlTypeForName,
+		                                                           bool includeValidationParams,
+		                                                           IEnumerable<CSharpParameter> requiredControlParams,
 		                                                           IEnumerable<CSharpParameter> requiredValidationParams,
 		                                                           IEnumerable<CSharpParameter> optionalControlParams,
 		                                                           IEnumerable<CSharpParameter> optionalValidationParams ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
 			var body = "return " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( false, " +
-			           requiredControlParams.Concat( requiredValidationParams )
-			                                .Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
-			                                .GetCommaDelimitedStringFromCollection()
-			                                .AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
+			           requiredControlParams.Concat( requiredValidationParams ).Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
+			           	.GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, " +
 			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) +
 			           "cellSpan: cellSpan, textAlignment: textAlignment" + ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
 			           ( includeValidationParams
-				             ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
-				             : "" ) + " );";
+			             	? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
+			             	: "" ) + " );";
 
 			writeFormItemGetter( writer,
 			                     controlType,
@@ -557,14 +596,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                     body );
 		}
 
-		private static void writeFormItemGetterWithValueParams( TextWriter writer, string controlType, ModificationField field, string controlTypeForName,
-		                                                        string valueParamTypeName, string valueParamDefaultValue,
+		private static void writeFormItemGetterWithValueParams( TextWriter writer,
+		                                                        string controlType,
+		                                                        ModificationField field,
+		                                                        string controlTypeForName,
+		                                                        string valueParamTypeName,
+		                                                        string valueParamDefaultValue,
 		                                                        IEnumerable<CSharpParameter> requiredControlParams,
 		                                                        IEnumerable<CSharpParameter> requiredValidationParams,
 		                                                        IEnumerable<CSharpParameter> optionalControlParams,
-		                                                        IEnumerable<CSharpParameter> optionalValidationParams, string preFormItemGetterStatements,
-		                                                        string controlGetterExpressionOrBlock, string validationMethodExpressionOrBlock,
-		                                                        string putLabelOnFormItemExpression, string postFormItemGetterStatements ) {
+		                                                        IEnumerable<CSharpParameter> optionalValidationParams,
+		                                                        string preFormItemGetterStatements,
+		                                                        string controlGetterExpressionOrBlock,
+		                                                        string validationMethodExpressionOrBlock,
+		                                                        string putLabelOnFormItemExpression,
+		                                                        string postFormItemGetterStatements ) {
 			var validationMethod = "( control, postBackValues, subject, validator ) => " + validationMethodExpressionOrBlock;
 			var formItemGetterStatement = "var formItem = " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + "FormItem" ) +
 			                              "( useValueParameter, ( v, ls ) => " + controlGetterExpressionOrBlock +
@@ -572,8 +618,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                              ", labelAndSubject: labelAndSubject, putLabelOnFormItem: " + putLabelOnFormItemExpression +
 			                              ", value: value, cellSpan: cellSpan, textAlignment: textAlignment" +
 			                              ( validationMethodExpressionOrBlock.Any()
-				                                ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
-				                                : "" ) + " );";
+			                                	? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
+			                                	: "" ) + " );";
 			writeFormItemGetter( writer,
 			                     controlType,
 			                     field,
@@ -592,13 +638,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                                           "return formItem;" ) );
 		}
 
-		private static void writeFormItemGetter( TextWriter writer, string controlType, ModificationField field, string controlTypeForName, string valueParamTypeName,
-		                                         IEnumerable<CSharpParameter> requiredControlParams, IEnumerable<CSharpParameter> requiredValidationParams,
-		                                         string valueParamDefaultValue, IEnumerable<CSharpParameter> optionalControlParams, bool includeValidationParams,
-		                                         IEnumerable<CSharpParameter> optionalValidationParams, string body ) {
+		private static void writeFormItemGetter( TextWriter writer,
+		                                         string controlType,
+		                                         ModificationField field,
+		                                         string controlTypeForName,
+		                                         string valueParamTypeName,
+		                                         IEnumerable<CSharpParameter> requiredControlParams,
+		                                         IEnumerable<CSharpParameter> requiredValidationParams,
+		                                         string valueParamDefaultValue,
+		                                         IEnumerable<CSharpParameter> optionalControlParams,
+		                                         bool includeValidationParams,
+		                                         IEnumerable<CSharpParameter> optionalValidationParams,
+		                                         string body ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
-				                                            .ConcatenateWithSpace( deferredCallWarning ) );
+			                                            	.ConcatenateWithSpace( deferredCallWarning ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
 			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
@@ -639,8 +693,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			           ( includeValidationMethodReturnValue.HasValue ? ", validationMethod" : "" ) +
 			           ", labelAndSubject: labelAndSubject, putLabelOnFormItem: putLabelOnFormItem, cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
-				             ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
-				             : "" ) + " );";
+			             	? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
+			             	: "" ) + " );";
 			writeGenericGetter( writer, field, false, includeValidationMethodReturnValue, body );
 		}
 
@@ -649,29 +703,33 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			              StandardLibraryMethods.GetCSharpIdentifierSimple( field.PropertyName ) + ", labelAndSubject )";
 			var body = "return FormItem.Create( putLabelOnFormItem ? labelAndSubject : \"\", " + control + ", cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
-				             ? ", validationGetter: " + getValidationGetter( field, includeValidationMethodReturnValue.Value )
-				             : "" ) + " );";
+			             	? ", validationGetter: " + getValidationGetter( field, includeValidationMethodReturnValue.Value )
+			             	: "" ) + " );";
 			writeGenericGetter( writer, field, true, includeValidationMethodReturnValue, body );
 		}
 
 		private static string getValidationGetter( ModificationField field, bool includeValidationMethodReturnValue ) {
 			var fieldPropertyName = StandardLibraryMethods.GetCSharpIdentifierSimple( field.PropertyName );
 			var statements = new[]
-				{
-					"if( validationPredicate != null && !validationPredicate() ) return;",
-					( includeValidationMethodReturnValue ? fieldPropertyName + " = " : "" ) + "validationMethod( control, postBackValues, labelAndSubject, validator );",
-					"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
-					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
-				};
+			                 	{
+			                 		"if( validationPredicate != null && !validationPredicate() ) return;",
+			                 		( includeValidationMethodReturnValue ? fieldPropertyName + " = " : "" ) +
+			                 		"validationMethod( control, postBackValues, labelAndSubject, validator );",
+			                 		"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
+			                 		"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
+			                 	};
 			return "control => new Validation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) +
 			       " }, validationList ?? EwfPage.Instance.PostBackDataModification )";
 		}
 
-		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, bool? includeValidationMethodReturnValue,
+		private static void writeGenericGetter( TextWriter writer,
+		                                        ModificationField field,
+		                                        bool includeValueParams,
+		                                        bool? includeValidationMethodReturnValue,
 		                                        string body ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
-				                                            .ConcatenateWithSpace( deferredCallWarning ) );
+			                                            	.ConcatenateWithSpace( deferredCallWarning ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
 			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
@@ -682,8 +740,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                     "controlGetter" ) );
 			if( includeValidationMethodReturnValue.HasValue ) {
 				parameters.Add( includeValidationMethodReturnValue.Value
-					                ? new CSharpParameter( "System.Func<ControlType,PostBackValueDictionary,string,Validator," + field.TypeName + ">", "validationMethod" )
-					                : new CSharpParameter( "System.Action<ControlType,PostBackValueDictionary,string,Validator>", "validationMethod" ) );
+				                	? new CSharpParameter( "System.Func<ControlType,PostBackValueDictionary,string,Validator," + field.TypeName + ">", "validationMethod" )
+				                	: new CSharpParameter( "System.Action<ControlType,PostBackValueDictionary,string,Validator>", "validationMethod" ) );
 			}
 			parameters.Add( new CSharpParameter( "string", "labelAndSubject", "\"" + getDefaultLabelAndSubject( field ) + "\"" ) );
 			parameters.Add( new CSharpParameter( "bool", "putLabelOnFormItem", "true" ) );
