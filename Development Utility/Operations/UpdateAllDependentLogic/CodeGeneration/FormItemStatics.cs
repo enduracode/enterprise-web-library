@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
-														new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
 			                      "new WsyiwygHtmlEditor( v )",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
