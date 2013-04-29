@@ -6,11 +6,8 @@ using RedStapler.StandardLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class FormItemStatics {
-		private const string deferredCallWarning =
-			"You almost certainly should not call this method from a deferred block of code since this could cause validations to be added to the data modification in the wrong order.";
-
 		private const string validationListParamDocComment =
-			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's post back data modification.";
+			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's Post-Back Data Modification.";
 
 		internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {
 			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters, instead of
@@ -53,7 +50,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeFormItemGetters( writer,
 			                      field,
 			                      "WysiwygHtmlEditor",
-			                      "RichText",
+			                      "Html",
 			                      "string",
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
@@ -63,7 +60,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "new WsyiwygHtmlEditor( v )",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
-			                      "true" );
+			                      "true",
+			                      additionalSummarySentences:
+				                      new[]
+					                      {
+						                      "WARNING: Do not use this form-item getter unless you know exactly what you're doing.",
+						                      "If you want to store HTML, it is almost always better to use an HTML block instead of just a string field.",
+						                      "HTML blocks have special handling for intra-site URIs and may include additional features in the future.",
+						                      "They also cause all of your HTML to be stored in one place, which is usually a good practice."
+					                      } );
 			writeFormItemGetters( writer,
 			                      field,
 			                      "EwfTextBox",
@@ -512,7 +517,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                          IEnumerable<CSharpParameter> requiredValidationParams, IEnumerable<CSharpParameter> optionalControlParams,
 		                                          IEnumerable<CSharpParameter> optionalValidationParams, string controlGetterExpressionOrBlock,
 		                                          string validationMethodExpressionOrBlock, string putLabelOnFormItemExpression,
-		                                          string preFormItemGetterStatements = "", string postFormItemGetterStatements = "" ) {
+		                                          string preFormItemGetterStatements = "", string postFormItemGetterStatements = "",
+		                                          IEnumerable<string> additionalSummarySentences = null ) {
 			writeFormItemGetterWithoutValueParams( writer,
 			                                       controlType,
 			                                       field,
@@ -521,7 +527,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                       requiredControlParams,
 			                                       requiredValidationParams,
 			                                       optionalControlParams,
-			                                       optionalValidationParams );
+			                                       optionalValidationParams,
+			                                       additionalSummarySentences ?? new string[ 0 ] );
 			writeFormItemGetterWithValueParams( writer,
 			                                    controlType,
 			                                    field,
@@ -536,14 +543,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                    controlGetterExpressionOrBlock,
 			                                    validationMethodExpressionOrBlock,
 			                                    putLabelOnFormItemExpression,
-			                                    postFormItemGetterStatements );
+			                                    postFormItemGetterStatements,
+			                                    additionalSummarySentences ?? new string[ 0 ] );
 		}
 
 		private static void writeFormItemGetterWithoutValueParams( TextWriter writer, string controlType, ModificationField field, string controlTypeForName,
 		                                                           bool includeValidationParams, IEnumerable<CSharpParameter> requiredControlParams,
 		                                                           IEnumerable<CSharpParameter> requiredValidationParams,
 		                                                           IEnumerable<CSharpParameter> optionalControlParams,
-		                                                           IEnumerable<CSharpParameter> optionalValidationParams ) {
+		                                                           IEnumerable<CSharpParameter> optionalValidationParams,
+		                                                           IEnumerable<string> additionalSummarySentences ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
 			var body = "return " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( false, " +
 			           requiredControlParams.Concat( requiredValidationParams )
@@ -568,7 +577,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                     optionalControlParams,
 			                     includeValidationParams,
 			                     optionalValidationParams,
-			                     body );
+			                     body,
+			                     additionalSummarySentences );
 		}
 
 		private static void writeFormItemGetterWithValueParams( TextWriter writer, string controlType, ModificationField field, string controlTypeForName,
@@ -578,7 +588,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		                                                        IEnumerable<CSharpParameter> optionalControlParams,
 		                                                        IEnumerable<CSharpParameter> optionalValidationParams, string preFormItemGetterStatements,
 		                                                        string controlGetterExpressionOrBlock, string validationMethodExpressionOrBlock,
-		                                                        string putLabelOnFormItemExpression, string postFormItemGetterStatements ) {
+		                                                        string putLabelOnFormItemExpression, string postFormItemGetterStatements,
+		                                                        IEnumerable<string> additionalSummarySentences ) {
 			var validationMethod = "( control, postBackValues, subject, validator ) => " + validationMethodExpressionOrBlock;
 			var formItemGetterStatement = "var formItem = " + StandardLibraryMethods.GetCSharpIdentifierSimple( "Get" + field.PascalCasedName + "FormItem" ) +
 			                              "( useValueParameter, ( v, ls ) => " + controlGetterExpressionOrBlock +
@@ -603,16 +614,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                                                           preFormItemGetterStatements,
 			                                                           formItemGetterStatement,
 			                                                           postFormItemGetterStatements,
-			                                                           "return formItem;" ) );
+			                                                           "return formItem;" ),
+			                     additionalSummarySentences );
 		}
 
 		private static void writeFormItemGetter( TextWriter writer, string controlType, ModificationField field, string controlTypeForName, string valueParamTypeName,
 		                                         IEnumerable<CSharpParameter> requiredControlParams, IEnumerable<CSharpParameter> requiredValidationParams,
 		                                         string valueParamDefaultValue, IEnumerable<CSharpParameter> optionalControlParams, bool includeValidationParams,
-		                                         IEnumerable<CSharpParameter> optionalValidationParams, string body ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
-				                                            .ConcatenateWithSpace( deferredCallWarning ) );
+		                                         IEnumerable<CSharpParameter> optionalValidationParams, string body, IEnumerable<string> additionalSummarySentences ) {
+			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
 			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
@@ -683,9 +693,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, bool? includeValidationMethodReturnValue,
 		                                        string body ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a form item for the field, which includes its label, its control, and its validation. The validation is added to the specified validation list, or the page's post back data modification if no validation list is specified."
-				                                            .ConcatenateWithSpace( deferredCallWarning ) );
+			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
 			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
@@ -717,6 +725,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                  " ) where ControlType: Control {" );
 			writer.WriteLine( body );
 			writer.WriteLine( "}" );
+		}
+
+		private static string getFormItemGetterSummary( ModificationField field, string controlType, IEnumerable<string> additionalSentences ) {
+			var sentences = new[]
+				{
+					"Creates a " + field.PropertyName + controlType.PrependDelimiter( " " ) + " form item, which includes a label, a control, and a validation.",
+					controlType.Any() ? "" : "This is a generic form-item getter; use it only if there is no specific getter for the control type that you need.",
+					"You almost certainly should not call this method from a deferred block of code since this could cause validations to be added to the data modification in the wrong order."
+				};
+			return StringTools.ConcatenateWithDelimiter( " ", sentences.Concat( additionalSentences ).ToArray() );
 		}
 
 		private static string getDefaultLabelAndSubject( ModificationField field ) {
