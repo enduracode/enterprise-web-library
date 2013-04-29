@@ -49,28 +49,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "true" );
 			writeFormItemGetters( writer,
 			                      field,
-			                      "WysiwygHtmlEditor",
-			                      "Html",
-			                      "string",
-			                      "\"\"",
-			                      new CSharpParameter[ 0 ],
-			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
-			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter[ 0 ],
-			                      "new WsyiwygHtmlEditor( v )",
-			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
-			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
-			                      "true",
-			                      additionalSummarySentences:
-				                      new[]
-					                      {
-						                      "WARNING: Do not use this form-item getter unless you know exactly what you're doing.",
-						                      "If you want to store HTML, it is almost always better to use an HTML block instead of just a string field.",
-						                      "HTML blocks have special handling for intra-site URIs and may include additional features in the future.",
-						                      "They also cause all of your HTML to be stored in one place, which is usually a good practice."
-					                      } );
-			writeFormItemGetters( writer,
-			                      field,
 			                      "EwfTextBox",
 			                      "EmailAddress",
 			                      "string",
@@ -145,6 +123,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
 			                      "control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 			                      "true" );
+			writeFormItemGetters( writer,
+			                      field,
+			                      "WysiwygHtmlEditor",
+			                      "Html",
+			                      "string",
+			                      "\"\"",
+			                      new CSharpParameter[ 0 ],
+			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
+			                      new CSharpParameter[ 0 ],
+			                      new CSharpParameter[ 0 ],
+			                      "new WsyiwygHtmlEditor( v )",
+			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
+			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
+			                      "true",
+			                      additionalSummarySentences:
+				                      new[]
+					                      {
+						                      "WARNING: Do not use this form-item getter unless you know exactly what you're doing.",
+						                      "If you want to store HTML, it is almost always better to use an HTML block instead of just a string field.",
+						                      "HTML blocks have special handling for intra-site URIs and may include additional features in the future.",
+						                      "They also cause all of your HTML to be stored in one place, which is usually a good practice."
+					                      } );
 		}
 
 		private static void writeNumericFormItemGetters( TextWriter writer, ModificationField field ) {
