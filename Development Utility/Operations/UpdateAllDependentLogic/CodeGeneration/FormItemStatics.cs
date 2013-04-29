@@ -133,7 +133,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
-			                      "new WsyiwygHtmlEditor( v )",
+			                      "new WysiwygHtmlEditor( v )",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
 			                      "true",
