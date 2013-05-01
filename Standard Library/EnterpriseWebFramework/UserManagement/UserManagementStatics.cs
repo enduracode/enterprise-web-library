@@ -166,9 +166,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
 			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, emailAddress.Value );
-			if( SystemProvider is EnhancedSecurityProvider ) {
-				( (EnhancedSecurityProvider)SystemProvider ).PreAuthorize( user );
-			}
 			if( user != null ) {
 				var passwordError = true;
 				if( user.SaltedPassword != null ) {
@@ -197,6 +194,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 							                                                           user.LastRequestDateTime,
 							                                                           user.MustChangePassword );
 						}
+					}
+
+					if( SystemProvider is EnhancedSecurityProvider ) {
+						( (EnhancedSecurityProvider)SystemProvider ).PreAuthorize( user, !passwordError );
 					}
 				}
 				if( passwordError )

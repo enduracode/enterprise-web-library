@@ -11,10 +11,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		void ValidatePassword( Validator validator, string password );
 
 		/// <summary>
-		/// This method will be called before a user is authenticated (i.e. before their password is checked).
+		/// This method will be called before a user is authenticated. Only called if <see cref="user"/> is not null.
 		/// Runs at modification time. It is safe to throw <see cref="EwfException"/> here.
 		/// </summary>
-		void PreAuthorize( FormsAuthCapableUser user );
+		void PreAuthorize( FormsAuthCapableUser user, bool passwordIsValid );
 
 		/// <summary>
 		/// If null, defaults to 12 minutes.
