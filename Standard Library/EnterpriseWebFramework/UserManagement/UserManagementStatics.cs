@@ -25,6 +25,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 10 );
 
+		/// <summary>
+		/// Do not use directly. Use <see cref="SystemProvider"/>
+		/// </summary>
 		private static SystemUserManagementProvider provider;
 
 		internal static void Init( Type systemLogicType ) {
@@ -163,6 +166,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
 			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, emailAddress.Value );
+			if( SystemProvider is EnhancedSecurityProvider ) {
+				( (EnhancedSecurityProvider)SystemProvider ).PreAuthorize( user );
+			}
 			if( user != null ) {
 				var passwordError = true;
 				if( user.SaltedPassword != null ) {
@@ -236,6 +242,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			AppRequestState.AddNonTransactionalModificationMethod( () => {
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes.  Otherwise, make it the same as a session timeout.
 				var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				if( SystemProvider is EnhancedSecurityProvider ) {
+					var inActivityTimeout = ( (EnhancedSecurityProvider)SystemProvider ).InActivityTimeoutMinutes;
+					if( inActivityTimeout.HasValue )
+						authenticationDuration = TimeSpan.FromMinutes( inActivityTimeout.Value );
+				}
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
 				setCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) );
 			} );

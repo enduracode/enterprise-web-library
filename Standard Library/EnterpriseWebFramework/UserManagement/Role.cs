@@ -33,7 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public bool CanManageUsers { get; private set; }
 
 		/// <summary>
-		/// Returns true if the role requires enhanced security measures such as a shorter session duration.
+		/// Returns true if the role requires a shorter session duration of 12 minutes.
 		/// </summary>
 		public bool RequiresEnhancedSecurity { get; private set; }
 	}
