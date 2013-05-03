@@ -105,15 +105,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
 					                                       if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
-					                                       if( UserManagementStatics.SystemProvider is EnhancedSecurityProvider ) {
-						                                       if( newPassword.Value != confirmPassword.Value )
-							                                       validator.NoteErrorAndAddMessage( "Passwords do not match." );
-																									 ( (EnhancedSecurityProvider)UserManagementStatics.SystemProvider ).ValidatePassword( validator, newPassword.Value );
-					                                       }
-					                                       else
-						                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
-
-
+					                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
 					                                       var p = new Password( newPassword.Value );
 					                                       Salt = p.Salt;
 					                                       SaltedPassword = p.ComputeSaltedHash();

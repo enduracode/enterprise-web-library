@@ -28,15 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			                                   new EwfTextBox( "" ) { MasksCharacters = true },
 			                                   validationGetter:
 				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );
-			dm.AddTopValidationMethod( ( pbv, validator ) => {
-				if( UserManagementStatics.SystemProvider is EnhancedSecurityProvider ) {
-					if( newPassword.Value != newPasswordConfirm.Value )
-						validator.NoteErrorAndAddMessage( "Passwords do not match." );
-					( (EnhancedSecurityProvider)UserManagementStatics.SystemProvider ).ValidatePassword( validator, newPassword.Value );
-				}
-				else
-					UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm );
-			} );
+			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password",
