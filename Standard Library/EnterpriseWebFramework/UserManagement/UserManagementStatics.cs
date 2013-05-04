@@ -249,8 +249,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
 
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeout.HasValue
-					                             ? strictProvider.AuthenticationTimeout.Value
+				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
 					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );

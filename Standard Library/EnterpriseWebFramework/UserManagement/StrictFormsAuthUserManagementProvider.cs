@@ -1,5 +1,4 @@
-﻿using System;
-using RedStapler.StandardLibrary.Validation;
+﻿using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -15,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Gets the authentication timeout. Returns null if the default should be used.
 		/// </summary>
-		TimeSpan? AuthenticationTimeout { get; }
+		int? AuthenticationTimeoutInMinutes { get; }
 
 		/// <summary>
 		/// Validates the specified password. Called when a user changes their password.
