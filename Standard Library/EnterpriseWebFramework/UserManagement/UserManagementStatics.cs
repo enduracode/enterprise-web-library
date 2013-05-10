@@ -25,6 +25,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 10 );
 
+		/// <summary>
+		/// Do not use directly. Use <see cref="SystemProvider"/>.
+		/// </summary>
 		private static SystemUserManagementProvider provider;
 
 		internal static void Init( Type systemLogicType ) {
@@ -164,23 +167,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
 			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, emailAddress.Value );
 			if( user != null ) {
-				var passwordError = true;
+				var authenticationSuccessful = false;
 				if( user.SaltedPassword != null ) {
 					// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
 					var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
-					if( user.SaltedPassword.SequenceEqual( hashedPassword ) ) {
-						setCookieAndUser( user );
-						passwordError = false;
-					}
+					if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
+						authenticationSuccessful = true;
 
 						// This system wants to avoid a forced migration and because of this we're adding an exception here.
-						// NOTE: Remove this once enough time has passed when all relevant users have been migrated.
+						// NOTE: Remove after 30 September 2013.
 					else {
 						var asciiEncoding = new ASCIIEncoding();
 						if( AppTools.SystemName == "Health Alliance Enterprise System" &&
 						    user.SaltedPassword.SequenceEqual( asciiEncoding.GetBytes( asciiEncoding.GetString( hashedPassword ) ) ) ) {
-							setCookieAndUser( user );
-							passwordError = false;
+							authenticationSuccessful = true;
+
 							// Migrate the user's account to use the new hash.
 							formsAuthCapableUserManagementProvider.InsertOrUpdateUser( AppRequestState.PrimaryDatabaseConnection,
 							                                                           user.UserId,
@@ -193,7 +194,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 						}
 					}
 				}
-				if( passwordError )
+
+				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+				if( strictProvider != null ) {
+					strictProvider.PostAuthenticate( user, authenticationSuccessful );
+
+					// Re-retrieve the user in case PostAuthenticate modified it.
+					user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, user.UserId );
+				}
+
+				if( authenticationSuccessful )
+					setCookieAndUser( user );
+				else
 					errors.Add( passwordErrorMessage );
 			}
 			else
@@ -234,8 +246,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 		private static void setCookieAndUser( FormsAuthCapableUser user ) {
 			AppRequestState.AddNonTransactionalModificationMethod( () => {
-				// If the user's role requires enhanced security, require re-authentication every 12 minutes.  Otherwise, make it the same as a session timeout.
-				var authenticationDuration = user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+
+				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
+				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
+					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
 				setCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) );
 			} );
@@ -282,8 +299,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public static void ValidatePassword( Validator validator, DataValue<string> password, DataValue<string> passwordAgain ) {
 			if( password.Value != passwordAgain.Value )
 				validator.NoteErrorAndAddMessage( "Passwords do not match." );
-			else if( password.Value.Length < 7 )
-				validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+			else {
+				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+				if( strictProvider != null )
+					strictProvider.ValidatePassword( validator, password.Value );
+				else if( password.Value.Length < 7 )
+					validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+			}
 		}
 	}
 }

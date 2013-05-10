@@ -320,6 +320,7 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\WebMethodDefinition.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
