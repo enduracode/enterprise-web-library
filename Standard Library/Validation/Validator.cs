@@ -107,6 +107,7 @@ namespace RedStapler.StandardLibrary.Validation {
 		}
 
 		/// <summary>
+		/// Accepts either true/false (case-sensitive) or 1/0.
 		/// Returns the validated boolean type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
@@ -118,6 +119,7 @@ namespace RedStapler.StandardLibrary.Validation {
 		}
 
 		/// <summary>
+		/// Accepts either true/false (case-sensitive) or 1/0.
 		/// Returns the validated boolean type from the given string and validation package.
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
