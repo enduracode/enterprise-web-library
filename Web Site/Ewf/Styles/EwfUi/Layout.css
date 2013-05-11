@@ -168,11 +168,6 @@ p, ul {
 	margin-bottom: 0;
 }
 
-/* Eliminate this when we no longer use stock ASP.NET drop down lists. */
-ewfTableStandardStyle > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > select {
-	width: 100%;
-}
-
 /* This rule is a workaround for drop downs in IE showing up too narrow to show their own content. */
 ewfControlLine > ewfControlLineItem div.ewfListControlWrapper.unspecifiedWidth > select {
 	width: auto;
