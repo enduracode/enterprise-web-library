@@ -178,6 +178,18 @@ ewfControlLine > ewfControlLineItem div.ewfListControlWrapper.unspecifiedWidth >
 	width: auto;
 }
 
+/* modal confirmation blocks */
+ewfModalConfirmationBlock {
+	width: 590px;
+	height: 120px;
+	overflow: hidden;
+	border-style: none;
+	table-layout: fixed;
+}
+ewfModalConfirmationBlock > tbody > tr td {
+	padding: 5px;
+}
+
 /* master page */
 ewfUiAppLogoBlock {
 	margin-bottom: .2em;

@@ -164,16 +164,3 @@ table.ewfMonthView > tbody > tr > td > p.dayLabel {
 textarea {
 	resize: none;
 }
-
-/*NOTE: Move to Ewf UI style sheet.*/
-body.ewf ewfModalConfirmationBlock {
-	width: 590px;
-	height: 120px;
-	overflow: hidden;
-	border-style: none;
-	table-layout: fixed;
-}
-
-body.ewf ewfModalConfirmationBlock > tbody > tr td {
-	padding: 5px;
-}
