@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
@@ -259,7 +260,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
 				                       "' ).attr( 'data-placeholder' ) );"
 				                     : "";
-			return "if( !Modernizr.touch ) " + select2Statement + touchStatement.PrependDelimiter( " else " );
+
+			// Windows 8 always identifies as "touch" even if it's desktop.
+			// To allow select2 for Windows 8, but fall-back if it's touch-based,
+			// check for "Windows NT 6.2", without "Touch" in the user agent string.
+			// http://msdn.microsoft.com/en-us/library/ie/hh920767%28v=vs.85%29.aspx
+			var agent = HttpContext.Current.Request.UserAgent;
+			return "if( !Modernizr.touch || {0} ) ".FormatWith( agent.Contains( "Windows NT 6.2" ) && !agent.Contains( "Touch" ) ? "true" : "false" ) + select2Statement +
+			       touchStatement.PrependDelimiter( " else " );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
