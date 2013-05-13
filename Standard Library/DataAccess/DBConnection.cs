@@ -19,19 +19,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 	public class DBConnection {
 		private const string saveName = "child";
 
-		private readonly ProfiledDbConnection cn;
-
-		/// <summary>
-		/// NOTE: Do not use. Experimental LINQ use only.
-		/// </summary>
-		public ProfiledDbConnection UnderlyingConnection { get { return cn; } }
-
-		/// <summary>
-		/// NOTE: Do not use. Experimental LINQ use only.
-		/// </summary>
-		public ProfiledDbTransaction UnderlyingTransaction { get { return tx; } }
-
 		private readonly DatabaseInfo databaseInfo;
+		private readonly ProfiledDbConnection cn;
 
 		// transaction-related fields
 		private int nestLevel;
