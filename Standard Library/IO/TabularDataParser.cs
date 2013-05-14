@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -93,7 +94,7 @@ namespace RedStapler.StandardLibrary.IO {
 					reader.ReadLine();
 
 				string line;
-				for( var lineNumber = headerRowsToSkip + 1; ( line = reader.ReadLine() ) != null; lineNumber++ ) {
+				for( var lineNumber = HeaderRows + 1; ( line = reader.ReadLine() ) != null; lineNumber++ ) {
 					NonHeaderRows++;
 					var parsedLine = parser.Parse( line );
 					if( parsedLine.ContainsData ) {
@@ -122,5 +123,15 @@ namespace RedStapler.StandardLibrary.IO {
 			}
 			return columnHeadersToIndexes;
 		}
+
+		//internal static void Test() {
+		//  var localPath = StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Salesforce.csv" );
+		//  var csvParser = CreateForCsvFile( localPath, true );
+		//  var validationErrors = new List<ValidationError>();
+		//  // GMS: Can't actually test this because MiniProfiler blows up with a blank database connection.
+		//  AppTools.ExecuteInDbConnection( cn => csvParser.ParseAndProcessAllLines( cn, importLine, validationErrors ) );
+		//}
+
+		//private static void importLine( DBConnection cn, Validator validator, ParsedLine line ) {}
 	}
 }
