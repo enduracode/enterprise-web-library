@@ -75,6 +75,15 @@
 			<element name="Password" type="string" />
 		</sequence>
 	</complexType>
+	<complexType name="MySqlDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<sequence>
+					<element name="database" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
 	<complexType name="OracleDatabase">
 		<complexContent>
 			<extension base="rs:Database">

@@ -245,9 +245,13 @@ namespace RedStapler.StandardLibrary.Configuration {
 				                          sqlServerDatabase.server,
 				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
 				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
-				                          sqlServerDatabase.database ?? SystemShortName + InstallationShortName,
+				                          sqlServerDatabase.database ?? FullShortName,
 				                          true,
 				                          sqlServerDatabase.FullTextCatalog );
+			}
+			if( database is MySqlDatabase ) {
+				var mySqlDatabase = database as MySqlDatabase;
+				return new MySqlInfo( secondaryDatabaseName, mySqlDatabase.database ?? FullShortName, true );
 			}
 			if( database is OracleDatabase ) {
 				var oracleDatabase = database as OracleDatabase;
