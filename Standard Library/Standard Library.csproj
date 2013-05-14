@@ -135,6 +135,7 @@
     <Compile Include="DataAccess\DbConnectionFailureException.cs" />
     <Compile Include="DataAccess\Ranking\RankingMethods.cs" />
     <Compile Include="DataAccess\Ranking\RankingSetup.cs" />
+    <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
     <Compile Include="DataValue.cs" />
     <Compile Include="DataAccess\CommandWriting\DbCommandParameter.cs" />
     <Compile Include="DataAccess\CommandWriting\DbParameterValue.cs" />
