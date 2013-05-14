@@ -137,11 +137,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 					if( databaseInfo is SqlServerInfo )
 						innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Snapshot );
-					else {
+					else if( databaseInfo is OracleInfo )
+						innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Serializable );
+					else
 						innerTx = cn.WrappedConnection.BeginTransaction();
-						// NOTE: Oracle has no or really poor support for setting the isolation level to anything other than Read Committed.
-						// NOTE: We want to set the Oracle isolation level to serializable here.
-					}
 					tx = new ProfiledDbTransaction( innerTx, cn );
 
 					commitTimeValidationMethods = new List<Func<DBConnection, string>>();
@@ -267,8 +266,6 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			commitTimeValidationMethods = null;
 			tx = null;
 			innerTx = null;
-
-			// NOTE: We want to set the Oracle isolation level back to read committed here.
 		}
 
 		private Exception createConnectionException( string action, Exception innerException ) {
@@ -368,8 +365,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 
 			if( databaseInfo is OracleInfo ) {
-				// ORA-00060 is the code for deadlock.
-				if( innerException.Message.Contains( "ORA-00060" ) )
+				// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
+				if( new[] { "ORA-00060", "ORA-08177" }.Any( i => innerException.Message.Contains( i ) ) )
 					return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
 
 				// This has happened on RLE servers when Dave Foss has manually shut down Oracle.
