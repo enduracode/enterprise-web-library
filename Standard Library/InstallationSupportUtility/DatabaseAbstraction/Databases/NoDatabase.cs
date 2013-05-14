@@ -11,9 +11,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		int Database.GetLineMarker() {
-			// We can't throw an exception here because the update data operation uses this method to determine if the database is available.
-			// NOTE: Can't we, if we make DatabaseOps.WaitForDatabaseRecovery do an if( !NoDatabase) condition?
-			return 0;
+			throw new NotSupportedException();
 		}
 
 		void Database.UpdateLineMarker( int value ) {
@@ -21,19 +19,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.ExportToFile( string filePath ) {}
-
 		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {}
+		void Database.BackupTransactionLog( string folderPath ) {}
+		void Database.RestoreNewTransactionLogs( string folderPath ) {}
 
-		void Database.BackupTransactionLog( string folderPath ) {
-			throw new NotImplementedException();
-		}
-
-		void Database.RestoreNewTransactionLogs( string folderPath ) {
-			throw new NotImplementedException();
-		}
-
-		public string GetLogSummary( string folderPath ) {
-			throw new NotImplementedException();
+		string Database.GetLogSummary( string folderPath ) {
+			throw new NotSupportedException();
 		}
 
 		List<string> Database.GetTables() {
@@ -49,10 +40,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.PerformMaintenance() {}
-
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
 
-		public void ExecuteDbMethod( DbMethod method ) {
+		void Database.ExecuteDbMethod( DbMethod method ) {
 			throw new NotSupportedException();
 		}
 	}

@@ -83,6 +83,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		/// SQL Server takes awhile to recover to a usable state after restoring.  Wait until it is.
 		/// </summary>
 		public static void WaitForDatabaseRecovery( Database database ) {
+			if( database is NoDatabase )
+				return;
 			StatusStatics.SetStatus( "Waiting for database to be ready..." );
 			StandardLibraryMethods.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
 			StatusStatics.SetStatus( "Database is ready." );
