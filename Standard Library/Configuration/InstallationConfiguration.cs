@@ -46,6 +46,20 @@ namespace RedStapler.StandardLibrary.Configuration {
 			return Directory.Exists( StandardLibraryMethods.CombinePaths( installationPath, ConfigurationFolderName ) );
 		}
 
+		/// <summary>
+		/// Gets the full name of the given system and installation.  For example, 'Red Stapler Information System - Live'.
+		/// </summary>
+		public static string GetFullNameFromSystemAndInstallationNames( string systemName, string installationName ) {
+			return systemName + " - " + installationName;
+		}
+
+		/// <summary>
+		/// Gets the full short name of the given system and installation.  For example, 'RsisLive'.
+		/// </summary>
+		public static string GetFullShortNameFromSystemAndInstallationNames( string systemShortName, string installationShortName ) {
+			return systemShortName + installationShortName;
+		}
+
 		private readonly string installationPath;
 		private readonly string configurationFolderPath;
 		private readonly SystemGeneralConfiguration systemGeneralConfiguration;
@@ -82,11 +96,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
-			                                          	? StandardLibraryMethods.CombinePaths( ConfigurationFolderPath,
-			                                          	                                       InstallationConfigurationFolderName,
-			                                          	                                       InstallationsFolderName,
-			                                          	                                       DevelopmentInstallationFolderName )
-			                                          	: StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
+				                                          ? StandardLibraryMethods.CombinePaths( ConfigurationFolderPath,
+				                                                                                 InstallationConfigurationFolderName,
+				                                                                                 InstallationsFolderName,
+				                                                                                 DevelopmentInstallationFolderName )
+				                                          : StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
 
 			// installation standard configuration
 			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath,
@@ -121,27 +135,13 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public string FullShortName { get { return GetFullShortNameFromSystemAndInstallationNames( SystemShortName, InstallationShortName ); } }
 
 		/// <summary>
-		/// Gets the full name of the given system and installation.  For example, 'Red Stapler Information System - Live'.
-		/// </summary>
-		public static string GetFullNameFromSystemAndInstallationNames( string systemName, string installationName ) {
-			return systemName + " - " + installationName;
-		}
-
-		/// <summary>
-		/// Gets the full short name of the given system and installation.  For example, 'RsisLive'.
-		/// </summary>
-		public static string GetFullShortNameFromSystemAndInstallationNames( string systemShortName, string installationShortName ) {
-			return systemShortName + installationShortName;
-		}
-
-		/// <summary>
 		/// Gets the email default from name.
 		/// </summary>
 		public string EmailDefaultFromName {
 			get {
 				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
-				       	? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.Name
-				       	: AppTools.SystemProvider.EmailDefaultFromName;
+					       ? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.Name
+					       : AppTools.SystemProvider.EmailDefaultFromName;
 			}
 		}
 
@@ -151,8 +151,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public string EmailDefaultFromAddress {
 			get {
 				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
-				       	? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.EmailAddress
-				       	: AppTools.SystemProvider.EmailDefaultFromAddress;
+					       ? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.EmailAddress
+					       : AppTools.SystemProvider.EmailDefaultFromAddress;
 			}
 		}
 
@@ -167,8 +167,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public IEnumerable<WindowsService> WindowsServices {
 			get {
 				return systemGeneralConfiguration.WindowsServices != null
-				       	? systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) )
-				       	: new WindowsService[ 0 ];
+					       ? systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) )
+					       : new WindowsService[ 0 ];
 			}
 		}
 
@@ -268,8 +268,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public string[] WebSiteNames {
 			get {
 				return ( isDevelopmentInstallation || installationStandardConfiguration.installedInstallation.webSiteNames == null )
-				       	? new string[ 0 ]
-				       	: installationStandardConfiguration.installedInstallation.webSiteNames;
+					       ? new string[ 0 ]
+					       : installationStandardConfiguration.installedInstallation.webSiteNames;
 			}
 		}
 
