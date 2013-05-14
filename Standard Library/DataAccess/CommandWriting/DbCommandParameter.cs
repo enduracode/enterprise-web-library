@@ -48,12 +48,9 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 				return parameter;
 			parameter = databaseInfo.CreateParameter();
 
-			// SQL Server requires @ in front of parameter names. Although Oracle requires : in front of parameters in the command text, it does not require this
-			// colon in front of parameter names here.
-			// NOTE: I think we should use the colon even though it is not required, because it will change 3 lines plus a comment into one line.
-			if( databaseInfo is SqlServerInfo )
-				name = "@" + name;
-			parameter.ParameterName = name;
+			// SQL Server requires the prefix here. Although Oracle requires it in the command text, it does not require it here and it's questionable whether it is
+			// even allowed. We do not know whether MySQL requires it here, but the examples we've seen do include it.
+			parameter.ParameterName = ( databaseInfo is OracleInfo ? "" : databaseInfo.ParameterPrefix ) + name;
 
 			parameter.Value = value.Value ?? DBNull.Value;
 			if( value.DbTypeString != null )
