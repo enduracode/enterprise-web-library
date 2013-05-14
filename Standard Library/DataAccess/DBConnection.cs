@@ -53,6 +53,12 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( !sqlServerInfo.SupportsConnectionPooling )
 					connectionString += "; Pooling=false";
 			}
+			else if( databaseInfo is MySqlInfo ) {
+				var mySqlInfo = databaseInfo as MySqlInfo;
+				connectionString = "Host=localhost; User Id=root; Password=password; Initial Catalog=" + mySqlInfo.Database;
+				if( !mySqlInfo.SupportsConnectionPooling )
+					connectionString += "; Pooling=false";
+			}
 			else if( databaseInfo is OracleInfo ) {
 				var oracleInfo = databaseInfo as OracleInfo;
 				connectionString = "Data Source=" + oracleInfo.DataSource + "; User Id=" + oracleInfo.UserAndSchema + "; Password=" + oracleInfo.Password +
@@ -152,6 +158,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private void saveTransaction() {
 			if( databaseInfo is SqlServerInfo )
 				( (SqlTransaction)innerTx ).Save( saveName + nestLevel );
+			else if( databaseInfo is MySqlInfo )
+				throw new ApplicationException( "We do not currently support MySQL transaction savepoints." );
 			else {
 				var saveMethod = innerTx.GetType().GetMethod( "Save" );
 				saveMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
