@@ -182,8 +182,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			var currentTableSpaces = new List<string>();
 			cn.ExecuteReaderCommand( command,
 			                         reader => {
-			                         	while( reader.Read() )
-			                         		currentTableSpaces.Add( reader.GetString( 0 ).ToLower() );
+				                         while( reader.Read() )
+					                         currentTableSpaces.Add( reader.GetString( 0 ).ToLower() );
 			                         } );
 
 			// Create necessary tablespaces that don't already exist.
@@ -200,7 +200,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			return info.UserAndSchema + "/" + info.Password + "@" + info.DataSource;
 		}
 
-		private static void throwUserCorrectableExceptionIfNecessary( Exception e ) {
+		private void throwUserCorrectableExceptionIfNecessary( Exception e ) {
 			if( e.Message.Contains( "ORA-04031" ) )
 				throw new UserCorrectableException( "Oracle has insufficient memory. You may need to follow the Oracle process to increase the memory_target parameters.", e );
 		}
@@ -230,7 +230,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			}
 		}
 
-		private static void executeUserReCreationCommand( DBConnection cn, string commandText ) {
+		private void executeUserReCreationCommand( DBConnection cn, string commandText ) {
 			var command = cn.DatabaseInfo.CreateCommand();
 			command.CommandTimeout = 0; // This means the command can take as much time as it needs.
 			command.CommandText = commandText;
@@ -240,15 +240,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.BackupTransactionLog( string folderPath ) {
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 
 		void Database.RestoreNewTransactionLogs( string folderPath ) {
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 
 		public string GetLogSummary( string folderPath ) {
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
 
 		List<string> Database.GetTables() {
@@ -258,8 +258,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				command.CommandText = "SELECT table_name FROM user_tables";
 				cn.ExecuteReaderCommand( command,
 				                         reader => {
-				                         	while( reader.Read() )
-				                         		tables.Add( reader.GetString( 0 ) );
+					                         while( reader.Read() )
+						                         tables.Add( reader.GetString( 0 ) );
 				                         } );
 			} );
 			return tables;
@@ -296,7 +296,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			return parameters;
 		}
 
-		private static ParameterDirection getParameterDirection( string direction ) {
+		private ParameterDirection getParameterDirection( string direction ) {
 			if( direction == "IN" )
 				return ParameterDirection.Input;
 			if( direction == "OUT" )
@@ -331,7 +331,7 @@ CREATE SEQUENCE main_sequence;
 			executeDbMethodWithSpecifiedDatabaseInfo( info, method );
 		}
 
-		private static void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, DbMethod method ) {
+		private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, DbMethod method ) {
 			executeMethodWithDbExceptionHandling( delegate {
 				// Before we disabled pooling, we couldn't repeatedly perform Update Data operations since users with open connections can't be dropped.
 				DataAccessMethods.ExecuteDbMethod(
@@ -340,7 +340,7 @@ CREATE SEQUENCE main_sequence;
 			} );
 		}
 
-		private static void executeMethodWithDbExceptionHandling( Action method ) {
+		private void executeMethodWithDbExceptionHandling( Action method ) {
 			try {
 				method();
 			}
