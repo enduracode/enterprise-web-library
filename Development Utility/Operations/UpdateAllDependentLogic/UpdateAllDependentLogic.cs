@@ -356,8 +356,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static void Main() {" );
 				writer.WriteLine( "InitAppTools();" );
-				writer.WriteLine( "AppTools.ExecuteAppWithStandardExceptionHandling( delegate { ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.ToPascalCase() +
-				                  "() ) ); } );" );
+				writer.WriteLine( "AppTools.ExecuteAppWithStandardExceptionHandling( delegate { ServiceBase.Run( new ServiceBaseAdapter( new " +
+				                  service.Name.EnglishToPascal() + "() ) ); } );" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal static void InitAppTools() {" );
@@ -377,7 +377,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "Program.InitAppTools();" );
 				writer.WriteLine( "var code = AppTools.ExecuteAppWithStandardExceptionHandling( delegate {" );
 				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceProcessInstaller() );" );
-				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceInstaller( new " + service.Name.ToPascalCase() + "() ) );" );
+				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceInstaller( new " + service.Name.EnglishToPascal() + "() ) );" );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "if( code != 0 )" );
 				writer.WriteLine(
@@ -386,8 +386,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "internal partial class " + service.Name.ToPascalCase() + ": WindowsServiceBase {" );
-				writer.WriteLine( "internal " + service.Name.ToPascalCase() + "() {}" );
+				writer.WriteLine( "internal partial class " + service.Name.EnglishToPascal() + ": WindowsServiceBase {" );
+				writer.WriteLine( "internal " + service.Name.EnglishToPascal() + "() {}" );
 				writer.WriteLine( "string WindowsServiceBase.Name { get { return \"" + service.Name + "\"; } }" );
 				writer.WriteLine( "}" );
 

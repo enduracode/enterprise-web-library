@@ -223,7 +223,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 				var sheet = excelFile.DefaultWorksheet;
 				sheet.AddHeaderToWorksheet(
 					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) )
-					          .Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.ToEnglishFromCamel() )
+					          .Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.CamelToEnglish() )
 					          .ToArray() );
 				sheet.FreezeHeaderRow();
 				foreach( var row in rowTree.Rows ) {

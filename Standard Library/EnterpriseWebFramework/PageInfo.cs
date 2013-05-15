@@ -106,7 +106,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the name of the page.
 		/// </summary>
-		public virtual string PageName { get { return GetType().DeclaringType.Name.ToEnglishFromCamel(); } }
+		public virtual string PageName { get { return GetType().DeclaringType.Name.CamelToEnglish(); } }
 
 		/// <summary>
 		/// Returns the name of the page, including the entity setup name if an entity setup exists.

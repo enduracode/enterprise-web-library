@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using EnterpriseWebLibrary.WebSite.TestPages;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSite.TestPages;
 
 namespace EnterpriseWebLibrary.WebSite {
 	public class Global: EwfApp {
@@ -22,8 +22,8 @@ namespace EnterpriseWebLibrary.WebSite {
 
 			foreach( var i in GlobalLogic.ConfigurationXsdFileNames ) {
 				var fileName = i;
-				yield return new ShortcutUrlResolver( "ConfigurationSchemas/" + fileName.ToPascalCase(), ConnectionSecurity.NonSecure, () => GetSchema.GetInfo( fileName ) )
-					;
+				yield return
+					new ShortcutUrlResolver( "ConfigurationSchemas/" + fileName.EnglishToPascal(), ConnectionSecurity.NonSecure, () => GetSchema.GetInfo( fileName ) );
 			}
 		}
 

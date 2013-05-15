@@ -71,12 +71,12 @@ namespace RedStapler.StandardLibraryTester {
 			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"Inetpub", @"Files" ) );
 			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
-			Console.WriteLine( StringTools.ToEnglishFromCamel( null ) );
-			Console.WriteLine( "".ToEnglishFromCamel() );
-			Console.WriteLine( "L".ToEnglishFromCamel() );
-			Console.WriteLine( "l".ToEnglishFromCamel() );
-			Console.WriteLine( "LeftLeg".ToEnglishFromCamel() );
-			Console.WriteLine( "hits you in the Head and the LeftLeg!  That hurts.".ToEnglishFromCamel() );
+			Console.WriteLine( StringTools.CamelToEnglish( null ) );
+			Console.WriteLine( "".CamelToEnglish() );
+			Console.WriteLine( "L".CamelToEnglish() );
+			Console.WriteLine( "l".CamelToEnglish() );
+			Console.WriteLine( "LeftLeg".CamelToEnglish() );
+			Console.WriteLine( "hits you in the Head and the LeftLeg!  That hurts.".CamelToEnglish() );
 
 			var mySet = new Set { "a", "c", "", "b", "fred" };
 

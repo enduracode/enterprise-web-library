@@ -294,7 +294,7 @@ namespace RedStapler.StandardLibrary {
 			s = s.RemoveCharacters( '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', ',', '.', '/', '?', '<', '>', '[', ']', '{', '}', '\\', '|', '\'' );
 			s = s.TrimStart( '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' );
 			s = s.Replace( "-", "_" );
-			s = s.ToEnglishFromCamel();
+			s = s.CamelToEnglish();
 
 			// GMS: I do not agree with capitalizing the result. Identifiers can be either private member variables or public properties.
 			var identifier = "";

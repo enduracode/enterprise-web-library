@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
 			name = (string)schemaTableRow[ "ColumnName" ];
-			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().ToCamelCase().CapitalizeString() : Name;
+			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToCamel().CapitalizeString() : Name;
 			size = (int)schemaTableRow[ "ColumnSize" ];
 			if( includeKeyInfo )
 				isKey = (bool)schemaTableRow[ "IsKey" ];

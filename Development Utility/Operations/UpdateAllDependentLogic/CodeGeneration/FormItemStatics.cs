@@ -738,7 +738,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static string getDefaultLabelAndSubject( ModificationField field ) {
-			var result = field.PascalCasedName.ToEnglishFromCamel();
+			var result = field.PascalCasedName.CamelToEnglish();
 			if( result.ToLower().EndsWith( " id" ) )
 				result = result.Substring( 0, result.Length - 3 );
 			return result;
