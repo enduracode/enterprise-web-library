@@ -193,7 +193,7 @@ namespace RedStapler.StandardLibrary {
 		/// letter and Y is a capital letter with "x Y".  Therefore, "LeftLeg" becomes "Left Leg".
 		/// Also handles digits and converts a string such as "Reference1Name" to "Reference 1 Name".
 		/// </summary>
-		public static string ToEnglishFromCamel( this string text ) {
+		public static string CamelToEnglish( this string text ) {
 			// Don't do anything with null
 			// Skip empty string since we'll get out of range errors
 			if( String.IsNullOrEmpty( text ) )
@@ -234,8 +234,8 @@ namespace RedStapler.StandardLibrary {
 		/// and lowercases the first letter of the whole string (ex: "One two" becomes "oneTwo"). Trims the resulting string.
 		/// Do not call this on the null string.
 		/// </summary>
-		public static string ToCamelCase( this string text ) {
-			return ToPascalCase( text ).lowercaseString();
+		public static string EnglishToCamel( this string text ) {
+			return text.EnglishToPascal().lowercaseString();
 		}
 
 		/// <summary>
@@ -243,7 +243,7 @@ namespace RedStapler.StandardLibrary {
 		/// Trims the resulting string.
 		/// Do not call this on the null string.
 		/// </summary>
-		public static string ToPascalCase( this string text ) {
+		public static string EnglishToPascal( this string text ) {
 			return ConcatenateWithDelimiter( "", text.Separate().Select( t => t.ToLower().CapitalizeString() ).ToArray() );
 		}
 
@@ -260,7 +260,7 @@ namespace RedStapler.StandardLibrary {
 		/// Do not call this on the null string.
 		/// </summary>
 		public static string ToSafeFileName( this string text ) {
-			return ToPascalCase( text.RemoveCharacters( Path.GetInvalidFileNameChars() ).TrimEnd( '.' ) );
+			return text.RemoveCharacters( Path.GetInvalidFileNameChars() ).TrimEnd( '.' ).EnglishToPascal();
 		}
 
 		/// <summary>
@@ -631,6 +631,21 @@ namespace RedStapler.StandardLibrary {
 		/// C# doesn't allow constraining the value to an Enum
 		public static T ToEnum<T>( this string s ) {
 			return (T)Enum.Parse( typeof( T ), s );
+		}
+
+		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
+		public static string ToEnglishFromCamel( this string text ) {
+			return text.CamelToEnglish();
+		}
+
+		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
+		public static string ToCamelCase( this string text ) {
+			return text.EnglishToCamel();
+		}
+
+		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
+		public static string ToPascalCase( this string text ) {
+			return text.EnglishToPascal();
 		}
 	}
 }
