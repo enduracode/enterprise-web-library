@@ -334,6 +334,7 @@
     <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\DatabaseOps.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\MySql.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\NoDatabase.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\Oracle.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\SqlServer.cs" />

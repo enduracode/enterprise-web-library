@@ -143,6 +143,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				}
 			}
 
+			if( databaseInfo is MySqlInfo ) {
+				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
+					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
+			}
+
 			if( databaseInfo is OracleInfo ) {
 				if( innerException.Message.Contains( "ORA-12154" ) )
 					customMessage = "Failed to connect to Oracle. There may be a problem with your network connection to the server.";
@@ -174,8 +179,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 
 			return customMessage.Length > 0
-			       	? new DbConnectionFailureException( generalMessage + " " + customMessage, innerException )
-			       	: new ApplicationException( generalMessage, innerException );
+				       ? new DbConnectionFailureException( generalMessage + " " + customMessage, innerException )
+				       : new ApplicationException( generalMessage, innerException );
 		}
 
 		internal static string GetDbName( DatabaseInfo databaseInfo ) {

@@ -12,6 +12,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				return new NoDatabase();
 			if( databaseInfo is SqlServerInfo )
 				return new SqlServer( databaseInfo as SqlServerInfo, "Data", "Log" );
+			if( databaseInfo is MySqlInfo )
+				return new MySql( databaseInfo as MySqlInfo );
 			if( databaseInfo is OracleInfo )
 				return new Oracle( databaseInfo as OracleInfo, oracleTableSpaces );
 			throw new ApplicationException( "Invalid database information object type." );
