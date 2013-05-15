@@ -248,6 +248,13 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
+		/// Lowercases the specified string and replaces spaces with underscores.
+		/// </summary>
+		public static string EnglishToOracle( this string text ) {
+			return ConcatenateWithDelimiter( "_", text.Separate().Select( i => i.ToLower() ).ToArray() );
+		}
+
+		/// <summary>
 		/// Removes all invalid file name characters from the string, and then returns ToPascalCase for the resulting string.
 		/// Also guarantees the string will not end in a period or space.
 		/// Do not call this on the null string.

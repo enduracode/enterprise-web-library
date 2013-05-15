@@ -251,7 +251,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			}
 			if( database is MySqlDatabase ) {
 				var mySqlDatabase = database as MySqlDatabase;
-				return new MySqlInfo( secondaryDatabaseName, mySqlDatabase.database ?? FullShortName, true );
+				return new MySqlInfo( secondaryDatabaseName, mySqlDatabase.database ?? FullShortName.ToEnglishFromCamel().EnglishToOracle(), true );
 			}
 			if( database is OracleDatabase ) {
 				var oracleDatabase = database as OracleDatabase;
