@@ -50,7 +50,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			dataType = (Type)schemaTableRow[ "DataType" ];
 			dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
 			allowsNull = (bool)schemaTableRow[ "AllowDBNull" ];
-			isIdentity = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ];
+			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
+			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
 		}
 
 		internal string Name { get { return name; } }
