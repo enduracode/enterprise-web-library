@@ -84,10 +84,9 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Do not pass null. Returns the given string with its first character lowercased.
-		/// If the first character is not a letter or number, the first letter is found and capitalized.
+		/// Returns the given string with its first letter-or-digit character lowercased. Do not pass null.
 		/// </summary>
-		private static string lowercaseString( this string text ) {
+		public static string LowercaseString( this string text ) {
 			return new string( text.ToCharArray().Select( ( c, index ) => index == getIndexOfFirstLetterOrDigit( text ) ? Char.ToLower( c ) : c ).ToArray() );
 		}
 
@@ -235,7 +234,7 @@ namespace RedStapler.StandardLibrary {
 		/// Do not call this on the null string.
 		/// </summary>
 		public static string EnglishToCamel( this string text ) {
-			return text.EnglishToPascal().lowercaseString();
+			return text.EnglishToPascal().LowercaseString();
 		}
 
 		/// <summary>
