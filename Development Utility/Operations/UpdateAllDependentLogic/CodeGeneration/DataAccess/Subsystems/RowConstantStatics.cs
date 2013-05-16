@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
@@ -27,21 +28,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					valueColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
 					var nameColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
-					var cmd = cn.DatabaseInfo.CreateCommand();
-					cmd.CommandText = "SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName;
-					if( orderIsSpecified )
-						cmd.CommandText += " ORDER BY " + table.orderByColumn;
-					cn.ExecuteReaderCommand( cmd,
-					                         reader => {
-						                         while( reader.Read() ) {
-							                         var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
-							                         if( valueColumn.DataTypeName == typeof( string ).ToString() )
-								                         values.Add( "\"" + valueString + "\"" );
-							                         else
-								                         values.Add( valueString );
-							                         names.Add( reader[ nameColumn.Name ].ToString() );
-						                         }
-					                         } );
+					var cmd = new InlineSelect( "SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName,
+					                            orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
+					cmd.Execute( cn,
+					             reader => {
+						             while( reader.Read() ) {
+							             var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
+							             if( valueColumn.DataTypeName == typeof( string ).ToString() )
+								             values.Add( "\"" + valueString + "\"" );
+							             else
+								             values.Add( valueString );
+							             names.Add( reader[ nameColumn.Name ].ToString() );
+						             }
+					             } );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException(
@@ -50,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				}
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Provides constants copied from the " + table.tableName + " table." );
-				var className = table.tableName + "Rows";
+				var className = table.tableName.TableNameToPascal( cn ) + "Rows";
 				writer.WriteLine( "public class " + className + " {" );
 
 				// constants
