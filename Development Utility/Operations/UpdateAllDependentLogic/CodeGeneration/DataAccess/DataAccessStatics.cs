@@ -166,5 +166,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "command.AddCondition( new InCondition( \"" + revisionIdColumn + "\", revisionHistorySetup.GetLatestRevisionsQuery() ) );" );
 			writer.WriteLine( "}" );
 		}
+
+		internal static string TableNameToPascal( this string tableName, DBConnection cn ) {
+			return cn.DatabaseInfo is MySqlInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
+		}
 	}
 }
