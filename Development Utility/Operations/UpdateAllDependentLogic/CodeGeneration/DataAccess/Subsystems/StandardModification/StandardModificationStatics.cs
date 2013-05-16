@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// NOTE: Get rid of this and migrate systems to use CommandConditions namespace instead.
 			foreach( var column in columns.AllColumns )
-				writeEqualityConditionClass( tableName, column );
+				writeEqualityConditionClass( cn, tableName, column );
 
 			var revisionHistorySuffix = isRevisionHistoryClass ? "AsRevision" : "";
 
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// Write constructors.
 			writeCreateForInsertMethod( tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
-			writeCreateForUpdateMethod( tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
+			writeCreateForUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			if( columns.DataColumns.Any() )
 				writeCreateForUpdateWithInitialDataMethod( tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			writeGetConditionListMethod( tableName );
@@ -100,7 +100,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "partial void preInsert( DBConnection cn );" );
 			writer.WriteLine( "partial void preUpdate( DBConnection cn );" );
 			writeExecuteWithoutAdditionalLogicMethod( tableName );
-			writeExecuteInsertOrUpdateMethod( tableName, isRevisionHistoryClass, columns.KeyColumns, columns.IdentityColumn );
+			writeExecuteInsertOrUpdateMethod( cn, tableName, isRevisionHistoryClass, columns.KeyColumns, columns.IdentityColumn );
 			writeAddColumnModificationsMethod( columns.NonIdentityColumns, cn.DatabaseInfo );
 			if( isRevisionHistoryClass ) {
 				writeCopyLatestRevisionsMethod( tableName, columns.NonIdentityColumns );
@@ -115,10 +115,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeEqualityConditionClass( string tableName, Column column ) {
+		private static void writeEqualityConditionClass( DBConnection cn, string tableName, Column column ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This class will be deleted. Use the corresponding version in the CommandConditions namespace instead." );
 			writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam: " +
-			                  getEqualityConditionClassName( tableName, column ) + " {" );
+			                  getEqualityConditionClassName( cn, tableName, column ) + " {" );
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This class will be deleted. Use the corresponding version in the CommandConditions namespace instead." );
 			writer.WriteLine( "public " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam( " + column.DataTypeName +
 			                  " value ): base( value ) {}" );
@@ -258,7 +258,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeCreateForUpdateMethod( string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
+		private static void writeCreateForUpdateMethod( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass,
+		                                                string methodNameSuffix ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " +
@@ -277,8 +278,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "foreach( var condition in mod.conditions ) {" );
 			var prefix = "if";
 			foreach( var column in columns.AllColumns ) {
-				writer.WriteLine( prefix + "( condition is " + getEqualityConditionClassName( tableName, column ) + " )" );
-				writer.WriteLine( "mod." + getColumnFieldName( column ) + ".Value = ( condition as " + getEqualityConditionClassName( tableName, column ) + " ).Value;" );
+				writer.WriteLine( prefix + "( condition is " + getEqualityConditionClassName( cn, tableName, column ) + " )" );
+				writer.WriteLine( "mod." + getColumnFieldName( column ) + ".Value = ( condition as " + getEqualityConditionClassName( cn, tableName, column ) + " ).Value;" );
 				prefix = "else if";
 			}
 			writer.WriteLine( "}" );
@@ -416,7 +417,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeExecuteInsertOrUpdateMethod( string tableName, bool isRevisionHistoryClass, IEnumerable<Column> keyColumns, Column identityColumn ) {
+		private static void writeExecuteInsertOrUpdateMethod( DBConnection cn, string tableName, bool isRevisionHistoryClass, IEnumerable<Column> keyColumns,
+		                                                      Column identityColumn ) {
 			writer.WriteLine( "private void executeInsertOrUpdate( DBConnection cn ) {" );
 			writer.WriteLine( "try {" );
 
@@ -444,7 +446,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "modType = ModificationType.Update;" );
 			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( database, tableName ) + ">();" );
 			foreach( var column in keyColumns )
-				writer.WriteLine( "conditions.Add( new " + getEqualityConditionClassName( tableName, column ) + "( " + column.Name + " ) );" );
+				writer.WriteLine( "conditions.Add( new " + getEqualityConditionClassName( cn, tableName, column ) + "( " + column.Name + " ) );" );
 
 			writer.WriteLine( "}" ); // if insert
 
@@ -473,9 +475,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // method
 		}
 
-		private static string getEqualityConditionClassName( string tableName, Column column ) {
-			return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( tableName ) + "." +
-			       CommandConditionStatics.GetConditionClassName( column.Name );
+		private static string getEqualityConditionClassName( DBConnection cn, string tableName, Column column ) {
+			return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( cn, tableName ) + "." +
+			       CommandConditionStatics.GetConditionClassName( column );
 		}
 
 		private static void writeAddColumnModificationsMethod( IEnumerable<Column> nonIdentityColumns, DatabaseInfo databaseInfo ) {
