@@ -107,6 +107,21 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
 
+		/*
+		private void setupNewDatabase() {
+			var script = @"
+CREATE TABLE global_ints(
+	ParameterName VARCHAR( 50 )
+		KEY,
+	ParameterValue INT
+		NOT NULL
+);
+
+INSERT INTO global_ints VALUES( 'LineMarker', 0 );
+";
+		}
+*/
+
 		public void ExecuteDbMethod( DbMethod method ) {
 			executeMethodWithDbExceptionHandling(
 				() => DataAccessMethods.ExecuteDbMethod( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ), method ) );
