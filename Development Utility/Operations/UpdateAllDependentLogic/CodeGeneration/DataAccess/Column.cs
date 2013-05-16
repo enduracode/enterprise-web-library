@@ -9,15 +9,6 @@ using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal class Column {
-		private readonly string name;
-		private readonly string pascalCasedName;
-		private readonly int size;
-		private readonly bool? isKey;
-		private readonly Type dataType;
-		private readonly string dbTypeString;
-		private readonly bool allowsNull;
-		private readonly bool isIdentity;
-
 		/// <summary>
 		/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 		/// </summary>
@@ -37,9 +28,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return columns;
 		}
 
+		private readonly string name;
+		private readonly string pascalCasedName;
+		private readonly int size;
+		private readonly bool? isKey;
+		private readonly Type dataType;
+		private readonly string dbTypeString;
+		private readonly bool allowsNull;
+		private readonly bool isIdentity;
+
+		// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
+		private readonly string pascalCasedNameExceptForOracle;
+
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
 			name = (string)schemaTableRow[ "ColumnName" ];
-			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToCamel().CapitalizeString() : Name;
+			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : Name;
+			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
 			size = (int)schemaTableRow[ "ColumnSize" ];
 			if( includeKeyInfo )
 				isKey = (bool)schemaTableRow[ "IsKey" ];
@@ -50,7 +54,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal string Name { get { return name; } }
-		public int Size { get { return size; } }
+		internal string PascalCasedName { get { return pascalCasedName; } }
+		internal string PascalCasedNameExceptForOracle { get { return pascalCasedNameExceptForOracle; } }
+		internal int Size { get { return size; } }
 		internal bool IsKey { get { return isKey.Value; } }
 
 		/// <summary>
