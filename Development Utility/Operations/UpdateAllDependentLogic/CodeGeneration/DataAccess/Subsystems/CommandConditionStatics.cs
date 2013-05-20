@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "CommandConditions {" );
 			foreach( var table in database.GetTables() ) {
 				// Write the interface for all of the table's conditions.
-				writer.WriteLine( "public interface " + getTableConditionInterfaceName( cn, table ) + ": TableCondition {}" );
+				writer.WriteLine( "public interface " + GetTableConditionInterfaceName( cn, table ) + ": TableCondition {}" );
 
 				writeEqualityConditionClasses( cn, writer, table );
 				writeInequalityConditionClasses( cn, writer, table );
@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static class " + GetTableEqualityConditionsClassName( cn, table ) + " {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
-				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + getTableConditionInterfaceName( cn, table ) + " {" );
+				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
 				writer.WriteLine( "private readonly " + column.DataTypeName + " value;" );
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a condition to narrow the scope of a command." );
@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableInequalityConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
-				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + getTableConditionInterfaceName( cn, table ) + " {" );
+				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
 				writer.WriteLine( "private readonly InequalityCondition.Operator op; " );
 				writer.WriteLine( "private readonly " + column.DataTypeName + " value;" );
 
@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableLikeConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumns ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
-				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + getTableConditionInterfaceName( cn, table ) + " {" );
+				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
 				writer.WriteLine( "private readonly LikeCondition.Behavior behavior; " );
 				writer.WriteLine( "private readonly string value;" );
 
@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // class
 		}
 
-		private static string getTableConditionInterfaceName( DBConnection cn, string tableName ) {
+		internal static string GetTableConditionInterfaceName( DBConnection cn, string tableName ) {
 			return tableName.TableNameToPascal( cn ) + "TableCondition";
 		}
 

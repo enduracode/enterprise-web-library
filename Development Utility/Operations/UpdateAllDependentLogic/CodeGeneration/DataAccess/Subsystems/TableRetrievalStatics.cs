@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
-				var classDeclaration = "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( table ) + "TableRetrieval {";
+				var classDeclaration = "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableRetrieval {";
 				writer.WriteLine( classDeclaration );
 
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table, configuration );
@@ -25,9 +25,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// Write nested classes.
 				DataAccessStatics.WriteRowClass( writer, columns.AllColumns, cn.DatabaseInfo );
 
-				writeGetRowsMethod( writer, database, table, columns, isRevisionHistoryTable, false );
+				writeGetRowsMethod( cn, writer, database, table, columns, isRevisionHistoryTable, false );
 				if( isRevisionHistoryTable ) {
-					writeGetRowsMethod( writer, database, table, columns, true, true );
+					writeGetRowsMethod( cn, writer, database, table, columns, true, true );
 					DataAccessStatics.WriteAddLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 				}
 
@@ -58,13 +58,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( tableName ) + "TableRetrieval {";
 		}
 
-		private static void writeGetRowsMethod( TextWriter writer, Database database, string table, TableColumns tableColumns, bool isRevisionHistoryTable,
-		                                        bool excludePreviousRevisions ) {
+		private static void writeGetRowsMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
+		                                        bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
 			// header
 			var methodName = isRevisionHistoryTable && !excludePreviousRevisions ? "GetRowsIncludingPreviousRevisions" : "GetRows";
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Retrieves the rows from the table that match the specified conditions, ordered in a stable way." );
 			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( DBConnection cn, params " +
-			                  DataAccessStatics.GetTableConditionInterfaceName( database, table ) + "[] conditions ) {" );
+			                  DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
 
 			// body
 			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +

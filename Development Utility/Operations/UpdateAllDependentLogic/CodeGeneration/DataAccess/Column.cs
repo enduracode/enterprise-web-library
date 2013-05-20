@@ -57,6 +57,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal string Name { get { return name; } }
 		internal string PascalCasedName { get { return pascalCasedName; } }
 		internal string PascalCasedNameExceptForOracle { get { return pascalCasedNameExceptForOracle; } }
+		internal string CamelCasedName { get { return pascalCasedName.LowercaseString(); } }
 		internal int Size { get { return size; } }
 		internal bool IsKey { get { return isKey.Value; } }
 
