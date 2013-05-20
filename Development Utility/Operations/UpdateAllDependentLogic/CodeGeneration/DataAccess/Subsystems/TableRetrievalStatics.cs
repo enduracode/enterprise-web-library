@@ -16,8 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
-				var classDeclaration = "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableRetrieval {";
-				writer.WriteLine( classDeclaration );
+				writer.WriteLine( getClassDeclaration( cn, table ) );
 
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table, configuration );
 				var columns = new TableColumns( cn, table, isRevisionHistoryTable );
@@ -39,14 +38,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		/// <summary>
 		/// Writer user-editable partial class file.
 		/// </summary>
-		public static void WritePartialClass( string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
+		public static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
 			var userEditableFileFolder = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "TableRetrieval" );
 			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder, tableName + "TableRetrieval.cs" );
 			// The file will already exist if it is in source control. We want to generate a blank one if it isn't in source control to make them much easier to add.
 			if( !File.Exists( userEditableFilePath ) ) {
 				using( var userEditableFileWriter = IoMethods.GetTextWriterForWrite( userEditableFilePath ) ) {
 					userEditableFileWriter.WriteLine( namespaceDeclaration );
-					userEditableFileWriter.WriteLine( "	" + getClassDeclaration( tableName ) );
+					userEditableFileWriter.WriteLine( "	" + getClassDeclaration( cn, tableName ) );
 					userEditableFileWriter.WriteLine();
 					userEditableFileWriter.WriteLine( "	}" ); // class
 					userEditableFileWriter.WriteLine( "}" ); // namespace
@@ -54,8 +53,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static string getClassDeclaration( string tableName ) {
-			return "public static partial class " + StandardLibraryMethods.GetCSharpSafeClassName( tableName ) + "TableRetrieval {";
+		private static string getClassDeclaration( DBConnection cn, string tableName ) {
+			return "public static partial class " + GetClassName( cn, tableName ) + " {";
+		}
+
+		internal static string GetClassName( DBConnection cn, string table ) {
+			return StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableRetrieval" );
 		}
 
 		private static void writeGetRowsMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,

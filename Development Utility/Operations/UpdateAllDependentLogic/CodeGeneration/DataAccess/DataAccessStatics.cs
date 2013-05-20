@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		// NOTE: Delete this after 31 August 2013 since we now use nullable types in the main properties.
 		private static void writeTypedColumnProperty( TextWriter writer, Column column ) {
-			writer.WriteLine( "[ Obsolete( \"Guaranteed through 31 August 2013.\" ) ]" );
+			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013.\" ) ]" );
 			writer.WriteLine( "public " + column.DataTypeIfNotNullName + " " + column.PascalCasedNameExceptForOracle + "Typed { get { return (" +
 			                  column.DataTypeIfNotNullName + ")" + getMemberVariableName( column ) + "; } }" );
 		}
