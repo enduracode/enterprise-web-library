@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net40\"", "" ) );
 
 			writer.WriteLine( "</dependencies>" );
-			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server Oracle</tags>" );
+			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
 			writer.WriteLine( "</metadata>" );
 			writer.WriteLine( "</package>" );
 		}
