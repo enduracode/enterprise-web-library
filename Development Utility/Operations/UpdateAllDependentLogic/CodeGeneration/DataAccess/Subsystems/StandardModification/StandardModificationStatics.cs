@@ -41,7 +41,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// We do not write a partial class for direct modification classes.
 
 			var userEditableFileFolder = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
-			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder, tableName + "Modification.cs" );
+			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder,
+			                                                                getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" );
 			// The file will already exist if it is in source control. We want to generate a blank one if it isn't in source control to make them much easier to add.
 			if( !File.Exists( userEditableFilePath ) ) {
 				using( var userEditableFileWriter = IoMethods.GetTextWriterForWrite( userEditableFilePath ) ) {

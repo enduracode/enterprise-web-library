@@ -276,8 +276,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, configuration );
 
 					foreach( var tableName in database.GetTables() ) {
-						TableRetrievalStatics.WritePartialClass( libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
-						StandardModificationStatics.WritePartialClass( libraryBasePath,
+						TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
+						StandardModificationStatics.WritePartialClass( cn,
+						                                               libraryBasePath,
 						                                               modNamespaceDeclaration,
 						                                               database,
 						                                               tableName,

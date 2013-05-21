@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		/// </summary>
 		public static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
 			var userEditableFileFolder = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "TableRetrieval" );
-			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder, tableName + "TableRetrieval.cs" );
+			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder, GetClassName( cn, tableName ) + ".cs" );
 			// The file will already exist if it is in source control. We want to generate a blank one if it isn't in source control to make them much easier to add.
 			if( !File.Exists( userEditableFilePath ) ) {
 				using( var userEditableFileWriter = IoMethods.GetTextWriterForWrite( userEditableFilePath ) ) {
