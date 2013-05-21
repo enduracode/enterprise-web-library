@@ -30,8 +30,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				executeMethodWithDbExceptionHandling( delegate {
 					try {
 						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
-						                                   "--host=localhost --user=root --password=password " + info.Database +
-						                                   " --disable-reconnect --batch --disable-auto-rehash",
+						                                   getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
 						                                   sw.ToString(),
 						                                   true );
 					}
@@ -62,11 +61,44 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.ExportToFile( string filePath ) {
-			throw new NotImplementedException();
+			executeMethodWithDbExceptionHandling( delegate {
+				try {
+					File.WriteAllText( filePath,
+					                   StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
+					                                                      getHostAndAuthenticationArguments() + " --single-transaction " + info.Database,
+					                                                      "",
+					                                                      true ) );
+				}
+				catch( Exception e ) {
+					throw DataAccessMethods.CreateDbConnectionException( info, "exporting (to file)", e );
+				}
+			} );
 		}
 
 		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
-			throw new NotImplementedException();
+			using( var sw = new StringWriter() ) {
+				sw.WriteLine( "DROP DATABASE IF EXISTS {0};".FormatWith( info.Database ) );
+				sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
+				sw.WriteLine( "use {0}".FormatWith( info.Database ) );
+				sw.Write( File.ReadAllText( filePath ) );
+				sw.WriteLine( "quit" );
+
+				executeMethodWithDbExceptionHandling( delegate {
+					try {
+						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
+						                                   getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
+						                                   sw.ToString(),
+						                                   true );
+					}
+					catch( Exception e ) {
+						throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
+					}
+				} );
+			}
+		}
+
+		private string getHostAndAuthenticationArguments() {
+			return "--host=localhost --user=root --password=password";
 		}
 
 		void Database.BackupTransactionLog( string folderPath ) {
