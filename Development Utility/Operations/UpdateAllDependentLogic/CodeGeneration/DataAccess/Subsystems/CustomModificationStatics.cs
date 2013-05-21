@@ -34,7 +34,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// We don't test commands in Oracle because:
 			// 1. There's no good junk value to pass in.
 			// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that unless absolutely necessary.
-			if( cn.DatabaseInfo is OracleInfo )
+			// And we don't test commands in MySQL because of reason 2 above.
+			if( cn.DatabaseInfo is MySqlInfo || cn.DatabaseInfo is OracleInfo )
 				return;
 
 			foreach( var mod in mods ) {
