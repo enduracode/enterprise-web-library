@@ -112,12 +112,18 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			var script = @"
 CREATE TABLE global_ints(
 	ParameterName VARCHAR( 50 )
-		KEY,
+		PRIMARY KEY,
 	ParameterValue INT
 		NOT NULL
 );
 
 INSERT INTO global_ints VALUES( 'LineMarker', 0 );
+
+CREATE TABLE main_sequence(
+	MainSequenceId INT
+		AUTO_INCREMENT
+		PRIMARY KEY
+);
 ";
 		}
 */
