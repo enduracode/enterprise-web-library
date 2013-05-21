@@ -92,27 +92,21 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( databaseInfo is OracleInfo ) {
 					// Make Oracle case-insensitive, like SQL Server.
 					if( ( databaseInfo as OracleInfo ).SupportsLinguisticIndexes ) {
-						executeConfigCommand( "ALTER SESSION SET NLS_COMP = LINGUISTIC" );
-						executeConfigCommand( "ALTER SESSION SET NLS_SORT = BINARY_CI" );
+						executeText( "ALTER SESSION SET NLS_COMP = LINGUISTIC" );
+						executeText( "ALTER SESSION SET NLS_SORT = BINARY_CI" );
 					}
 
 					// This tells Oracle that times passed in should be interpreted as EST or EDT, depending on the time of the year. By default, the Oracle client uses a
 					// "-05:00" zone with no daylight savings time, and this is not what we want.
-					executeConfigCommand( "ALTER SESSION SET TIME_ZONE = 'US/Eastern'" );
+					executeText( "ALTER SESSION SET TIME_ZONE = 'US/Eastern'" );
 
 					// This makes Oracle blow up if times during a "fall back" hour, when the eastern US switches from EDT to EST, are passed in. These times are ambiguous.
-					executeConfigCommand( "ALTER SESSION SET ERROR_ON_OVERLAP_TIME = TRUE" );
+					executeText( "ALTER SESSION SET ERROR_ON_OVERLAP_TIME = TRUE" );
 				}
 			}
 			catch( Exception e ) {
 				throw createConnectionException( "opening a connection to", e );
 			}
-		}
-
-		private void executeConfigCommand( string commandText ) {
-			var command = databaseInfo.CreateCommand();
-			command.CommandText = commandText;
-			ExecuteNonQueryCommand( command );
 		}
 
 		/// <summary>
@@ -158,7 +152,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			if( databaseInfo is SqlServerInfo )
 				( (SqlTransaction)innerTx ).Save( saveName + nestLevel );
 			else if( databaseInfo is MySqlInfo )
-				throw new ApplicationException( "We do not currently support MySQL transaction savepoints." );
+				executeText( "SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
 			else {
 				var saveMethod = innerTx.GetType().GetMethod( "Save" );
 				saveMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
@@ -184,6 +178,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 						if( !transactionDead ) {
 							if( databaseInfo is SqlServerInfo )
 								( (SqlTransaction)innerTx ).Rollback( saveName + nestLevel );
+							else if( databaseInfo is MySqlInfo )
+								executeText( "ROLLBACK TO SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
 							else {
 								var rollbackMethod = innerTx.GetType().GetMethod( "Rollback", new[] { typeof( string ) } );
 								rollbackMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
@@ -216,6 +212,12 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			catch( Exception e ) {
 				throw createConnectionException( "rolling back a transaction for", e );
 			}
+		}
+
+		private void executeText( string commandText ) {
+			var command = databaseInfo.CreateCommand();
+			command.CommandText = commandText;
+			ExecuteNonQueryCommand( command );
 		}
 
 		/// <summary>
