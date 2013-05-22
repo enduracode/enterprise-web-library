@@ -159,8 +159,3 @@ table.ewfMonthView > tbody > tr > td > p.dayLabel {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
 	filter: alpha(opacity=80);
 }
-
-/* This prevents Chrome and Safari from allowing the user to resize textareas */
-textarea {
-	resize: none;
-}

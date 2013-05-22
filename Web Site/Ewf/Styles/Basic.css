@@ -114,6 +114,10 @@ ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
 	background-color: #ffff99;
 	color: black;
 }
+/* This prevents Chrome and Safari from allowing the user to resize textareas. */
+textarea {
+	resize: none;
+}
 
 /* drop-down lists */
 ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
