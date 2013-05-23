@@ -131,8 +131,19 @@ namespace RedStapler.StandardLibrary {
 			var request = WebRequest.Create( url ) as HttpWebRequest;
 
 			request.Method = "HEAD";
-			using( var response = request.getResponseForAnyStatusCode() )
-				return response.StatusCode != HttpStatusCode.OK;
+			using( var response = request.getResponseIfPossible() )
+				return response == null || response.StatusCode != HttpStatusCode.OK;
+		}
+
+		private static HttpWebResponse getResponseIfPossible( this HttpWebRequest request ) {
+			try {
+				return getResponseForAnyStatusCode( request );
+			}
+			catch( WebException e ) {
+				if( new[] { WebExceptionStatus.ConnectFailure, WebExceptionStatus.Timeout }.Contains( e.Status ) )
+					return null;
+				throw;
+			}
 		}
 
 		/// <summary>
