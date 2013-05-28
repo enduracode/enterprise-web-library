@@ -951,7 +951,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			AppTools.ExecuteInDbConnection( cn => {
+			AppTools.ExecuteDbMethod( cn => {
 				try {
 					// NOTE: Why do I not know that it's going to be one provider or the other?
 					// NOTE: We could make a GetUserAsBaseType method in the base interface
