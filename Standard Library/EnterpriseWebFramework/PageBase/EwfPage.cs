@@ -434,9 +434,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                        CssHandler.GetFileVersionString( WysiwygHtmlEditor.CkEditorInstallationDate ) + ".css'; }",
 			                                        true );
 			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(),
-			                                          "CKEditor jQuery Adapter",
-			                                          this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/adapters/jquery.js" ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
 			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )

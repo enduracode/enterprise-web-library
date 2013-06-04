@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal const string CkEditorFolderUrl = "Ewf/CkEditor";
 
 		// Update this if you upgrade to a new version of CKEditor.
-		internal static readonly DateTime CkEditorInstallationDate = new DateTime( 2012, 3, 30 );
+		internal static readonly DateTime CkEditorInstallationDate = new DateTime( 2013, 6, 4 );
 
 		private readonly string durableValue;
 		private string postValue;
@@ -42,8 +42,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return "$( '#" + ClientID + "' ).ckeditor( function() { /* callback code */ }, { toolbar: 'Basic', contentsCss: '" +
-			       this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( CkEditorInstallationDate ) + ".css" ) + "' } );";
+			const string toolbar = "[ 'Source', '-', 'Bold', 'Italic', 'NumberedList', 'BulletedList', 'Link', 'Unlink' ]";
+			var contentsCss = this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( CkEditorInstallationDate ) + ".css" );
+			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ], contentsCss: '" + contentsCss + "' } );";
 		}
 
 		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
