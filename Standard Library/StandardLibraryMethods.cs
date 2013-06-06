@@ -391,6 +391,7 @@ namespace RedStapler.StandardLibrary {
 			var message = new EmailMessage();
 			message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
 			message.Subject = "Health check from " + appFullName;
+			message.BodyHtml = ( "{0} free on C drive.".FormatWith( FormattingMethods.GetFormattedBytes( new DriveInfo( "c" ).TotalFreeSpace ) ) ).GetTextAsEncodedHtml();
 			AppTools.SendEmailWithDefaultFromAddress( message );
 		}
 	}
