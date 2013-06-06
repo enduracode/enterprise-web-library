@@ -138,7 +138,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Remove the "~/" since it's part of every URL and is therefore useless when distinguishing between URLs.
 			var url = Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
 
-			var ewfResolver = new ShortcutUrlResolver( "ewf", ConnectionSecurity.SecureIfPossible, () => MetaLogicFactory.CreateBasicTestsPageInfo() );
+			var ewfResolver = new ShortcutUrlResolver( "ewf",
+			                                           ConnectionSecurity.SecureIfPossible,
+			                                           () => {
+				                                           var page = MetaLogicFactory.CreateBasicTestsPageInfo();
+				                                           return page.UserCanAccessPageAndAllControls ? page : null;
+			                                           } );
+
 			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
 					continue;

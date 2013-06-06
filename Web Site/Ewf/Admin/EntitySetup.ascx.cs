@@ -3,6 +3,7 @@ using System.Web.UI;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
@@ -18,6 +19,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			public override string EntitySetupName { get { return "EWF Admin"; } }
+
+			protected override bool UserCanAccessEntitySetup {
+				get {
+					if( !UserManagementStatics.UserManagementEnabled )
+						return true;
+					return AppTools.User != null && AppTools.User.Role.CanManageUsers;
+				}
+			}
 		}
 
 		public void LoadData( DBConnection cn ) {}
