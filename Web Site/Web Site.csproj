@@ -65,12 +65,26 @@
     <Compile Include="Ewf\Admin\BasicTests.aspx.designer.cs">
       <DependentUpon>BasicTests.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\Admin\EditUser.aspx.cs">
+      <DependentUpon>EditUser.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\Admin\EditUser.aspx.designer.cs">
+      <DependentUpon>EditUser.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\Admin\EntitySetup.ascx.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Ewf\Admin\EntitySetup.ascx.designer.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="Ewf\Admin\SystemUsers.aspx.cs">
+      <DependentUpon>SystemUsers.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
+      <DependentUpon>SystemUsers.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
@@ -302,40 +316,12 @@
     <Compile Include="Ewf\UserManagement\Public\EntitySetup.ascx.designer.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\UserManagement\UserManager\EntitySetup.ascx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\UserManager\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\UserManagement\LogIn.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>LogIn.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\UserManagement\LogIn.aspx.designer.cs">
       <DependentUpon>LogIn.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\UserManager\Users.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>Users.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\UserManager\Users.aspx.designer.cs">
-      <DependentUpon>Users.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\User\Edit.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>Edit.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\User\Edit.aspx.designer.cs">
-      <DependentUpon>Edit.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\User\EntitySetup.ascx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\User\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
     <Compile Include="Generated Code\ISU.cs">
       <SubType>ASPXCodeBehind</SubType>
@@ -409,7 +395,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Ewf\Admin\BasicTests.aspx" />
+    <Content Include="Ewf\Admin\EditUser.aspx" />
     <Content Include="Ewf\Admin\EntitySetup.ascx" />
+    <Content Include="Ewf\Admin\SystemUsers.aspx" />
     <Content Include="Ewf\CkEditor\build-config.js" />
     <Content Include="Ewf\CkEditor\ckeditor.js" />
     <Content Include="Ewf\CkEditor\config.js" />
@@ -725,11 +713,7 @@
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx" />
     <Content Include="Ewf\UserManagement\Public\EntitySetup.ascx" />
-    <Content Include="Ewf\UserManagement\UserManager\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\LogIn.aspx" />
-    <Content Include="Ewf\UserManagement\UserManager\Users.aspx" />
-    <Content Include="Ewf\UserManagement\User\Edit.aspx" />
-    <Content Include="Ewf\UserManagement\User\EntitySetup.ascx" />
     <Content Include="Test.css" />
   </ItemGroup>
   <ItemGroup>

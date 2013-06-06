@@ -1,4 +1,4 @@
-<%@ Page Language="C#" CodeBehind="Edit.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.UserNs.Edit"
+<%@ Page Language="C#" CodeBehind="SystemUsers.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.SystemUsers"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ContentPlaceHolderID="contentPlace">
