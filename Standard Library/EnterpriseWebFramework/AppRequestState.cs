@@ -68,8 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal AppRequestState( string hostHeader ) {
 			beginTime = DateTime.Now;
-			if( !AppTools.IsLiveInstallation )
-				MiniProfiler.Start();
+			MiniProfiler.Start();
 
 			// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer will
 			// bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances running this
@@ -170,6 +169,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		internal void EnableUser() {
 			userEnabled = true;
+
+			// Abandon the profiling session if it's not needed.
+			if( AppTools.IsLiveInstallation )
+				MiniProfiler.Stop( discardResults: true );
 		}
 
 		/// <summary>
