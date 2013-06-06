@@ -3,7 +3,6 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using RedStapler.StandardLibrary.Configuration.Machine;
-using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -61,12 +60,8 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 				try {
 					var now = DateTime.Now;
 					if( AppTools.IsLiveInstallation && !MachineConfiguration.GetIsStandbyServer() &&
-					    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) ) {
-						var message = new EmailMessage();
-						message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
-						message.Subject = "Health check from " + WindowsServiceMethods.GetServiceInstalledName( service );
-						AppTools.SendEmailWithDefaultFromAddress( message );
-					}
+					    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
+						StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 					lastHealthCheckDateAndTime = now;
 
 					service.Tick();

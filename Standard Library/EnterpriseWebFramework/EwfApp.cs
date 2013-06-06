@@ -138,7 +138,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Remove the "~/" since it's part of every URL and is therefore useless when distinguishing between URLs.
 			var url = Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
 
-			foreach( var resolver in GetShortcutUrlResolvers() ) {
+			var ewfResolver = new ShortcutUrlResolver( "ewf", ConnectionSecurity.SecureIfPossible, () => MetaLogicFactory.CreateBasicTestsPageInfo() );
+			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
 					continue;
 
@@ -219,6 +220,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.
 		/// </summary>
 		protected internal virtual string JavaScriptDocumentReadyFunctionCall { get { return ""; } }
+
+		/// <summary>
+		/// Standard library use only.
+		/// </summary>
+		public void SendHealthCheck() {
+			StandardLibraryMethods.SendHealthCheckEmail( AppTools.InstallationConfiguration.FullShortName + " - " + AppTools.AppName );
+		}
 
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.

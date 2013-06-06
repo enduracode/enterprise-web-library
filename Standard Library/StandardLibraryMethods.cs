@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using Microsoft.Web.Administration;
+using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -384,6 +385,13 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {
 			return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T );
+		}
+
+		internal static void SendHealthCheckEmail( string appFullName ) {
+			var message = new EmailMessage();
+			message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
+			message.Subject = "Health check from " + appFullName;
+			AppTools.SendEmailWithDefaultFromAddress( message );
 		}
 	}
 }

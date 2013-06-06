@@ -31,6 +31,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return new ErrorPages.UnhandledException.Info( "" );
 		}
 
+		PageInfo AppMetaLogicFactory.CreateBasicTestsPageInfo() {
+			return Admin.BasicTests.GetInfo();
+		}
+
 		IEnumerable<CssInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
 			var infos = new List<CssInfo>();
 			infos.Add( new JqueryUi.Css.Custom_theme.Jquery_ui_1101Custommin.Info() );

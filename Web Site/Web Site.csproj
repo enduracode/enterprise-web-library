@@ -58,6 +58,20 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ewf\Admin\BasicTests.aspx.cs">
+      <DependentUpon>BasicTests.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\Admin\BasicTests.aspx.designer.cs">
+      <DependentUpon>BasicTests.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Ewf\Admin\EntitySetup.ascx.cs">
+      <DependentUpon>EntitySetup.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\Admin\EntitySetup.ascx.designer.cs">
+      <DependentUpon>EntitySetup.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -394,6 +408,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Ewf\Admin\BasicTests.aspx" />
+    <Content Include="Ewf\Admin\EntitySetup.ascx" />
     <Content Include="Ewf\CkEditor\build-config.js" />
     <Content Include="Ewf\CkEditor\ckeditor.js" />
     <Content Include="Ewf\CkEditor\config.js" />

@@ -41,6 +41,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		PageInfo CreateUnhandledExceptionErrorPageInfo();
 
 		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		PageInfo CreateBasicTestsPageInfo();
+
+		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
 		IEnumerable<CssInfo> GetDisplayMediaCssInfos();
