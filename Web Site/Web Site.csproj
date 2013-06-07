@@ -79,6 +79,13 @@
     <Compile Include="Ewf\Admin\EntitySetup.ascx.designer.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\Admin\RequestProfiling.aspx.cs">
+      <DependentUpon>RequestProfiling.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\Admin\RequestProfiling.aspx.designer.cs">
+      <DependentUpon>RequestProfiling.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\Admin\SystemUsers.aspx.cs">
       <DependentUpon>SystemUsers.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -397,6 +404,7 @@
     <Content Include="Ewf\Admin\BasicTests.aspx" />
     <Content Include="Ewf\Admin\EditUser.aspx" />
     <Content Include="Ewf\Admin\EntitySetup.ascx" />
+    <Content Include="Ewf\Admin\RequestProfiling.aspx" />
     <Content Include="Ewf\Admin\SystemUsers.aspx" />
     <Content Include="Ewf\CkEditor\build-config.js" />
     <Content Include="Ewf\CkEditor\ckeditor.js" />

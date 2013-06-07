@@ -15,7 +15,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			protected override List<PageGroup> createPageInfos() {
-				return new List<PageGroup> { new PageGroup( new BasicTests.Info( this ), new SystemUsers.Info( this ) ) };
+				return new List<PageGroup> { new PageGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ) };
 			}
 
 			public override string EntitySetupName { get { return "EWF Admin"; } }
