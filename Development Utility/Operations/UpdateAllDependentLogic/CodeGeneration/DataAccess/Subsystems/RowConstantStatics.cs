@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "static " + className + "() {" );
 
 			for( var i = 0; i < names.Count; i++ )
-				writer.WriteLine( dictionaryName + ".Add( (" + valueTypeName + ")" + values[ i ] + ", \"" + names[ i ] + "\" );" );
+				writer.WriteLine( @"{0}.Add( ({1})({2}), ""{3}"" );".FormatWith( dictionaryName, valueTypeName, values[ i ], names[ i ] ) );
 
 			writer.WriteLine( "}" ); // constructor
 		}
