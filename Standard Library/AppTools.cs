@@ -225,7 +225,8 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Framework use only.
+		/// Gets whether this is a live installation. Use with caution. If you do not deliberately test code that only runs in live installations, you may not
+		/// discover problems with it until it is live.
 		/// </summary>
 		public static bool IsLiveInstallation {
 			get {
