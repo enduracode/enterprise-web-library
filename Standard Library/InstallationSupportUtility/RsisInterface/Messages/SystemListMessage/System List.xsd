@@ -12,7 +12,10 @@
 									<element name="Id" type="int" />
 									<element name="Name" type="string" />
 									<element name="ShortName" type="string" />
-									<element name="VaultPath" type="string" />
+									<element name="VaultPath" type="string" minOccurs="0" />
+									<element name="HgRepositoryUrl" type="string" minOccurs="0" />
+									<element name="KilnAccessToken" type="string" minOccurs="0" />
+									<element name="WorkingFolderPath" type="string" minOccurs="0" />
 									<element name="EwlSystemId" type="int" nillable="true" />
 									<element name="CurrentMajorVersion" type="int" />
 									<element name="NextBuildNumber" type="int" />
