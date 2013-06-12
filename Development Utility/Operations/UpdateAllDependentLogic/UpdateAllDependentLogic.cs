@@ -22,6 +22,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// Configuration repository. Remember to fix the CruiseControl.NET config generator and the place in ExportLogic where we reference the batch file name when
 	// packaging general files.
 	internal class UpdateAllDependentLogic: Operation {
+		private const string asposeLicenseFileName = "Aspose.Total.lic";
+
 		private static readonly Operation instance = new UpdateAllDependentLogic();
 		public static Operation Instance { get { return instance; } }
 		private UpdateAllDependentLogic() {}
@@ -87,6 +89,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
+
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
+			    Directory.Exists( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
+				generateMercurialIgnoreFile( installation );
 		}
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
@@ -100,12 +106,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 			}
 			else {
-				var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, "Aspose.Total.lic" );
+				var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
 				if( File.Exists( asposeLicenseFilePath ) ) {
 					IoMethods.CopyFile( asposeLicenseFilePath,
 					                    StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 					                                                         InstallationFileStatics.FilesFolderName,
-					                                                         "Aspose.Total.lic" ) );
+					                                                         asposeLicenseFileName ) );
 				}
 
 				// If web projects exist for this installation, copy appropriate files into them.
@@ -468,6 +474,40 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					}
 					catch( IOException e ) {
 						throw new UserCorrectableException( "Failed to move the generated code file for an XML schema. Please try the operation again.", e );
+					}
+				}
+			}
+		}
+
+		private void generateMercurialIgnoreFile( DevelopmentInstallation installation ) {
+			var filePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
+			IoMethods.DeleteFile( filePath );
+			using( TextWriter writer = new StreamWriter( filePath ) ) {
+				writer.WriteLine( "syntax: glob" );
+				writer.WriteLine();
+				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".suo" );
+				writer.WriteLine( ".hgignore" );
+				writer.WriteLine( "packages/" );
+				writer.WriteLine( "_ReSharper*" );
+				writer.WriteLine( "Error Log.txt" );
+				writer.WriteLine( "*.csproj.user" );
+				writer.WriteLine();
+				writer.WriteLine( "Solution Files/bin/" );
+				writer.WriteLine( "Solution Files/obj/" );
+				writer.WriteLine();
+				writer.WriteLine( "Library/bin/" );
+				writer.WriteLine( "Library/obj/" );
+				writer.WriteLine( "Library/Generated Code/" );
+				writer.WriteLine( "Library/" + InstallationFileStatics.FilesFolderName + "/" + asposeLicenseFileName );
+
+				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
+					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ) {
+						writer.WriteLine();
+						writer.WriteLine( webProject.name + "/bin/" );
+						writer.WriteLine( webProject.name + "/obj/" );
+						writer.WriteLine( webProject.name + "/" + AppStatics.EwfFolderName + "/" );
+						writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
+						writer.WriteLine( webProject.name + "/Generated Code/" );
 					}
 				}
 			}
