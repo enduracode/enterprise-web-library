@@ -52,6 +52,11 @@ namespace RedStapler.StandardLibrary {
 		/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
 		/// it got in init.
 		/// </summary>
+		/// <param name="appName"></param>
+		/// <param name="isClientSideProgram"></param>
+		/// <param name="systemLogic"></param>
+		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested. If you pass null, the data
+		/// access subsystem will not be available in the application.</param>
 		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic, Func<DataAccessState> mainDataAccessStateGetter = null ) {
 			var initializationLog = "Starting init";
 			try {
