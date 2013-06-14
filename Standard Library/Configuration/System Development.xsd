@@ -55,7 +55,7 @@
 	<complexType name="ServerSideConsoleProject">
 		<sequence>
 			<element name="Name" type="string" />
-			<element name="AssemblyName" type="string" />
+			<element name="NamespaceAndAssemblyName" type="string" />
 		</sequence>
 	</complexType>
 	<complexType name="XmlSchema">

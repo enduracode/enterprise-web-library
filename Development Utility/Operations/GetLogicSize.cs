@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					                             StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 					                                                                  i.Name,
 					                                                                  StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
-					                                                                  i.AssemblyName + ".exe" ) )
+					                                                                  i.NamespaceAndAssemblyName + ".exe" ) )
 			                             .Concat( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
 				                                      ? StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                                                             installation.DevelopmentInstallationLogic.DevelopmentConfiguration

@@ -80,12 +80,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                           } );
 			}
 			generateLibraryCode( installation );
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
-				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
-					generateWebConfigAndCodeForWebProject( installation, webProject );
-			}
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
+				generateWebConfigAndCodeForWebProject( installation, webProject );
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				generateWindowsServiceCode( installation, service );
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
+				generateServerSideConsoleProjectCode( installation, project );
 
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
@@ -401,6 +401,39 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "string WindowsServiceBase.Name { get { return \"" + service.Name + "\"; } }" );
 				writer.WriteLine( "}" );
 
+				writer.WriteLine( "}" );
+			}
+		}
+
+		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
+			var projectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, project.Name, "Generated Code" );
+			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
+			var isuFilePath = StandardLibraryMethods.CombinePaths( projectGeneratedCodeFolderPath, "ISU.cs" );
+			IoMethods.DeleteFile( isuFilePath );
+			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
+				writer.WriteLine( "using System;" );
+				writer.WriteLine( "using System.Threading;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
+				writer.WriteLine();
+				writeAssemblyInfo( writer, installation, project.Name );
+				writer.WriteLine();
+				writer.WriteLine( "namespace " + project.NamespaceAndAssemblyName + " {" );
+				writer.WriteLine( "internal static partial class Program {" );
+
+				writer.WriteLine( "[ MTAThread ]" );
+				writer.WriteLine( "private static int Main( string[] args ) {" );
+				writer.WriteLine( "SystemLogic globalLogic = null;" );
+				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
+				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );" );
+				writer.WriteLine( "AppTools.Init( \"" + project.Name + "\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+				writer.WriteLine( "return AppTools.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
+				writer.WriteLine( "}" );
+
+				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
+				writer.WriteLine( "static partial void ewlMain( string[] args );" );
+
+				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 			}
 		}
