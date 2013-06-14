@@ -700,12 +700,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 
 			try {
-				AppRequestState.Instance.DisableCache();
+				DataAccessState.Main.DisableCache();
 				try {
 					method();
 				}
 				finally {
-					AppRequestState.Instance.ResetCache();
+					DataAccessState.Main.ResetCache();
 				}
 			}
 			catch( Exception e ) {
@@ -800,7 +800,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch( EwfException e ) {
 					requestState.RollbackDatabaseTransactions();
-					requestState.ResetCache();
+					DataAccessState.Main.ResetCache();
 					requestState.EwfPageRequestState.TopModificationErrors = e.Messages;
 				}
 			}
@@ -857,7 +857,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				requestState.DisableCache();
+				DataAccessState.Main.DisableCache();
 				try {
 					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 						updateLastPageRequestTimeForUser();
@@ -866,7 +866,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					}
 				}
 				finally {
-					requestState.ResetCache();
+					DataAccessState.Main.ResetCache();
 				}
 
 				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by initial request data modifications.

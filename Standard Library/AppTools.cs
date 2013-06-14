@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary {
 		/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
 		/// it got in init.
 		/// </summary>
-		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic ) {
+		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic, Func<DataAccessState> mainDataAccessStateGetter = null ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
@@ -133,6 +133,7 @@ namespace RedStapler.StandardLibrary {
 
 					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
 					BlobFileOps.Init( systemLogic.GetType() );
+					DataAccessState.Init( mainDataAccessStateGetter );
 					EncryptionOps.Init( systemLogic.GetType() );
 					HtmlBlockStatics.Init( systemLogic.GetType() );
 					InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
@@ -334,24 +335,6 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// PRE: DatabaseExists is true.
-		/// NOTE: Why is this public? Non web apps should be using methods like ExecuteInDbConnection.
-		/// </summary>
-		public static DBConnection GetNewPrimaryDatabaseConnection() {
-			assertClassInitialized();
-			return new DBConnection( InstallationConfiguration.PrimaryDatabaseInfo );
-		}
-
-		/// <summary>
-		/// Gets a new database connection to the given secondary database.
-		/// NOTE: Why is this public? Non web apps should be using methods like ExecuteInDbConnection.
-		/// </summary>
-		public static DBConnection GetNewSecondaryDatabaseConnection( string secondaryDatabaseName ) {
-			assertClassInitialized();
-			return new DBConnection( InstallationConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseName ) );
-		}
-
-		/// <summary>
 		/// Gets the user object for the authenticated user. Returns null if the user has not been authenticated. In a web application, do not use from the
 		/// initDefaultOptionalParameterPackage or init methods of Info classes because the page has not yet been able to correct the connection security of the
 		/// request, if necessary, and because parent authorization logic has not yet executed. To use from initUserDefaultOptionalParameterPackage you must
@@ -365,14 +348,6 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.User : null;
 			}
-		}
-
-		/// <summary>
-		/// Gets the cache object.
-		/// </summary>
-		public static T GetCache<T>() where T: class, new() {
-			assertClassInitialized();
-			return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.GetOrAddCache<T>() : new T();
 		}
 
 		/// <summary>

@@ -48,7 +48,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// that don't want to use EWF.
 		protected void ewfApplicationStart( SystemLogic systemLogic ) {
 			// Initialize system.
-			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ), false, systemLogic );
+			DataAccessState initTimeDataAccessState = null;
+			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
+			               false,
+			               systemLogic,
+			               mainDataAccessStateGetter: () => RequestState != null ? RequestState.DataAccessState : initTimeDataAccessState );
 			if( AppTools.SecondaryInitFailed )
 				return;
 
@@ -66,14 +70,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( MetaLogicFactory == null )
 					throw new ApplicationException( "Meta logic factory not found." );
 
-				// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
-				if( systemLogic != null )
-					CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
-				else
-					CssHandlingStatics.Init( GlobalType.Assembly );
-				EwfUiStatics.Init( GlobalType );
+				initTimeDataAccessState = new DataAccessState( ( connection, secondaryDatabaseName ) => { } );
+				try {
+					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
+					if( systemLogic != null )
+						CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+					else
+						CssHandlingStatics.Init( GlobalType.Assembly );
+					EwfUiStatics.Init( GlobalType );
 
-				initializeWebApp();
+					initializeWebApp();
+				}
+				finally {
+					initTimeDataAccessState = null;
+				}
+
 				initialized = true;
 			},
 			                                   false,
@@ -263,7 +274,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch {
 					RequestState.RollbackDatabaseTransactions();
-					RequestState.ResetCache();
+					DataAccessState.Main.ResetCache();
 					throw;
 				}
 			},
@@ -291,7 +302,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				Server.ClearError();
 
 				RequestState.RollbackDatabaseTransactions();
-				RequestState.ResetCache();
+				DataAccessState.Main.ResetCache();
 
 				var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 

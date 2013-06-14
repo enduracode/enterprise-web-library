@@ -132,6 +132,7 @@
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\InequalityCondition.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\LikeCondition.cs" />
     <Compile Include="DataAccess\DataAccessSetup.cs" />
+    <Compile Include="DataAccess\DataAccessState.cs" />
     <Compile Include="DataAccess\DbCommandTimeoutException.cs" />
     <Compile Include="DataAccess\DbConcurrencyException.cs" />
     <Compile Include="DataAccess\DbConnectionFailureException.cs" />

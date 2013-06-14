@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -18,13 +19,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets an open connection to the primary database.
 		/// </summary>
-		public static DBConnection PrimaryDatabaseConnection { get { return Instance.primaryDatabaseConnection; } }
+		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Main.PrimaryDatabaseConnection; } }
 
 		/// <summary>
 		/// Gets an open connection to the specified secondary database.
 		/// </summary>
 		public static DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
-			return Instance.getSecondaryDatabaseConnection( databaseName );
+			return DataAccessState.Main.GetSecondaryDatabaseConnection( databaseName );
 		}
 
 		/// <summary>
@@ -38,8 +39,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Uri url;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
-		private DBConnection primaryConnection;
-		private readonly Dictionary<string, DBConnection> secondaryDatabaseNamesToConnections = new Dictionary<string, DBConnection>();
+		private readonly DataAccessState dataAccessState;
+		private bool primaryDatabaseConnectionInitialized;
+		private readonly List<string> secondaryDatabasesWithInitializedConnections = new List<string>();
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
@@ -52,9 +54,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal bool UserDisabledByPage { get; set; }
 		private User user;
 		private bool userLoaded;
-
-		private bool cachingDisabled;
-		private object cache;
 
 		private string errorPrefix = "";
 		private Exception errorException;
@@ -85,6 +84,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".", e );
 			}
 
+			dataAccessState = new DataAccessState( initDatabaseConnection );
+			dataAccessState.ResetCache();
+
 			TransferRequestPath = "";
 
 			// We cache the browser capabilities so we can determine the actual browser making the request even after modifying the capabilities, which we do later in
@@ -103,45 +105,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 
 		/// <summary>
-		/// If a primary connection does not already exist, creates a new connection, opens it, and begins a transaction.
-		/// Otherwise, returns the existing connection which is already open and in a transaction.
-		/// If the system does not have a database, returns null.
+		/// EwfApp.ewfApplicationStart use only.
 		/// </summary>
-		private DBConnection primaryDatabaseConnection {
-			get {
-				if( !AppTools.DatabaseExists )
-					return null;
+		internal DataAccessState DataAccessState { get { return dataAccessState; } }
 
-				if( primaryConnection == null ) {
-					// We must ensure that primary connection does not get initialized unless it is successfully created, opened, and has a transaction begun on it.
-					primaryConnection = initDatabaseConnection( AppTools.GetNewPrimaryDatabaseConnection() );
-				}
-				return primaryConnection;
-			}
-		}
-
-		/// <summary>
-		/// Returns the database connection associated with the given secondary database.  If a connection does not already exist
-		/// for that database, creats a new connection, opens it, and begins a new transaction.
-		/// Otherwise, returns the existing connection which is already open and in a transaction.
-		/// </summary>
-		private DBConnection getSecondaryDatabaseConnection( string secondaryDatabaseName ) {
-			DBConnection secondaryCn;
-			secondaryDatabaseNamesToConnections.TryGetValue( secondaryDatabaseName, out secondaryCn );
-			if( secondaryCn == null ) {
-				secondaryCn = initDatabaseConnection( AppTools.GetNewSecondaryDatabaseConnection( secondaryDatabaseName ) );
-				secondaryDatabaseNamesToConnections.Add( secondaryDatabaseName, secondaryCn );
-			}
-			return secondaryCn;
-		}
-
-		/// <summary>
-		/// Returns the specified database connection only if it can be properly initialized.
-		/// </summary>
-		private DBConnection initDatabaseConnection( DBConnection cn ) {
-			cn.Open();
-			cn.BeginTransaction();
-			return cn;
+		private void initDatabaseConnection( DBConnection connection, string secondaryDatabaseName ) {
+			connection.Open();
+			connection.BeginTransaction();
+			if( secondaryDatabaseName.Any() )
+				secondaryDatabasesWithInitializedConnections.Add( secondaryDatabaseName );
+			else
+				primaryDatabaseConnectionInitialized = true;
 		}
 
 		private void addNonTransactionalModificationMethod( Action modificationMethod ) {
@@ -149,10 +123,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
-			if( primaryConnection != null )
-				primaryConnection.PreExecuteCommitTimeValidationMethods();
-			foreach( var secondaryConnection in secondaryDatabaseNamesToConnections.Values )
-				secondaryConnection.PreExecuteCommitTimeValidationMethods();
+			if( primaryDatabaseConnectionInitialized )
+				DataAccessState.Main.PrimaryDatabaseConnection.PreExecuteCommitTimeValidationMethods();
+			foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
+				DataAccessState.Main.GetSecondaryDatabaseConnection( databaseName ).PreExecuteCommitTimeValidationMethods();
 		}
 
 		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
@@ -223,27 +197,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			userLoaded = true;
 		}
 
-		/// <summary>
-		/// AppTools.GetCache use only.
-		/// </summary>
-		internal T GetOrAddCache<T>() where T: class, new() {
-			if( cachingDisabled )
-				return new T();
-
-			if( cache == null )
-				cache = new T();
-			return (T)cache;
-		}
-
-		internal void DisableCache() {
-			cachingDisabled = true;
-		}
-
-		internal void ResetCache() {
-			cachingDisabled = false;
-			cache = null;
-		}
-
 		internal void SetError( string prefix, Exception exception ) {
 			errorPrefix = prefix;
 			errorException = exception;
@@ -269,30 +222,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods() {
 			var methods = new List<Action>();
-			if( primaryConnection != null ) {
+			if( primaryDatabaseConnectionInitialized ) {
 				methods.Add( delegate {
-					var tempConnection = primaryConnection;
-					primaryConnection = null;
-					cleanUpDatabaseConnection( tempConnection );
+					primaryDatabaseConnectionInitialized = false;
+					cleanUpDatabaseConnection( DataAccessState.Main.PrimaryDatabaseConnection );
 				} );
 			}
-			foreach( var connection in secondaryDatabaseNamesToConnections.Values ) {
-				var connectionCopy = connection;
+			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
+				var databaseNameCopy = databaseName;
 				methods.Add( delegate {
-					secondaryDatabaseNamesToConnections.Remove( connectionCopy.DatabaseInfo.SecondaryDatabaseName );
-					cleanUpDatabaseConnection( connectionCopy );
+					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
+					cleanUpDatabaseConnection( DataAccessState.Main.GetSecondaryDatabaseConnection( databaseNameCopy ) );
 				} );
 			}
 			methods.Add( () => {
 				try {
 					if( !transactionMarkedForRollback ) {
-						DisableCache();
+						DataAccessState.Main.DisableCache();
 						try {
 							foreach( var i in nonTransactionalModificationMethods )
 								i();
 						}
 						finally {
-							ResetCache();
+							DataAccessState.Main.ResetCache();
 						}
 					}
 				}
