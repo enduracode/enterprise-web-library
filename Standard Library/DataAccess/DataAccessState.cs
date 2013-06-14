@@ -36,7 +36,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private bool cacheEnabled;
 		private object cache;
 
-		internal DataAccessState( Action<DBConnection, string> databaseConnectionInitializer ) {
+		/// <summary>
+		/// This should only be used to create objects that will be returned by the mainDataAccessStateGetter argument of AppTools.Init.
+		/// </summary>
+		public DataAccessState( Action<DBConnection, string> databaseConnectionInitializer ) {
 			connectionInitializer = databaseConnectionInitializer;
 		}
 
