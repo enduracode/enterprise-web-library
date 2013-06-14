@@ -412,6 +412,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				writer.WriteLine( "using System;" );
+				writer.WriteLine( "using System.Reflection;" );
+				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
