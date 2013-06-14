@@ -52,7 +52,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 			               false,
 			               systemLogic,
-			               mainDataAccessStateGetter: () => RequestState != null ? RequestState.DataAccessState : initTimeDataAccessState );
+			               mainDataAccessStateGetter: () => {
+				               // We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
+				               return Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState;
+			               } );
 			if( AppTools.SecondaryInitFailed )
 				return;
 
