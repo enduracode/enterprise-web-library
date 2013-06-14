@@ -351,7 +351,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.ServiceProcess;" );
+				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.WindowsServiceFramework;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, service.Name );
@@ -370,7 +372,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "internal static void InitAppTools() {" );
 				writer.WriteLine( "SystemLogic globalLogic = null;" );
 				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
-				writer.WriteLine( "AppTools.Init( \"" + service.Name + "\" + \" Executable\", false, globalLogic );" );
+				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );" );
+				writer.WriteLine( "AppTools.Init( \"" + service.Name + "\" + \" Executable\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
