@@ -162,7 +162,9 @@ CREATE TABLE main_sequence(
 
 		public void ExecuteDbMethod( DbMethod method ) {
 			executeMethodWithDbExceptionHandling(
-				() => DataAccessMethods.ExecuteDbMethod( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ), method ) );
+				() =>
+				DataAccessMethods.ExecuteWithConnectionOpen( new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) ),
+				                                             method ) );
 		}
 
 		private void executeMethodWithDbExceptionHandling( Action method ) {

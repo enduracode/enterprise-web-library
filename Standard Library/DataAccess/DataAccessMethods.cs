@@ -11,28 +11,20 @@ namespace RedStapler.StandardLibrary.DataAccess {
 	/// A collection of static methods related to data access.
 	/// </summary>
 	public static class DataAccessMethods {
-		/// <summary>
-		/// Standard Library and Red Stapler Information System use only.
-		/// </summary>
-		public static void ExecuteDbMethod( DatabaseInfo databaseInfo, DbMethod dbMethod ) {
-			var cn = new DBConnection( databaseInfo );
+		public static void ExecuteWithConnectionOpen( DBConnection cn, DbMethod method ) {
 			cn.Open();
 			try {
-				dbMethod( cn );
+				method( cn );
 			}
 			finally {
 				cn.Close();
 			}
 		}
 
-		/// <summary>
-		/// Standard Library and Red Stapler Information System use only.
-		/// </summary>
-		public static T ExecuteDbMethod<T>( DatabaseInfo databaseInfo, Func<DBConnection, T> dbMethod ) {
-			var cn = new DBConnection( databaseInfo );
+		public static T ExecuteWithConnectionOpen<T>( DBConnection cn, Func<DBConnection, T> method ) {
 			cn.Open();
 			try {
-				return dbMethod( cn );
+				return method( cn );
 			}
 			finally {
 				cn.Close();

@@ -258,12 +258,10 @@ namespace RedStapler.StandardLibrary {
 			}
 		}
 
-		/// <summary>
-		/// Opens a connection to the primary database, executes the specified method, and closes the connection using a finally block.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethod( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.PrimaryDatabaseInfo, dbMethod );
+			DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection, dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -271,12 +269,10 @@ namespace RedStapler.StandardLibrary {
 			ExecuteDbMethod( dbMethod );
 		}
 
-		/// <summary>
-		/// Opens a connection to the primary database, executes the specified method, and closes the connection using a finally block.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethod<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.PrimaryDatabaseInfo, dbMethod );
+			return DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection, dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -284,14 +280,11 @@ namespace RedStapler.StandardLibrary {
 			return ExecuteDbMethod( dbMethod );
 		}
 
-		/// <summary>
-		/// Opens a connection to the primary database, executes the specified method in a transaction, and closes the connection using a finally block.
-		/// This overload allows you to throw a DoNotCommitException, which will gracefully not commit the transaction.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethodInTransaction( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.PrimaryDatabaseInfo,
-			                                   cn => DataAccessMethods.ExecuteInTransaction( cn, delegate { dbMethod( cn ); } ) );
+			DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection,
+			                                             cn => DataAccessMethods.ExecuteInTransaction( cn, () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -299,44 +292,16 @@ namespace RedStapler.StandardLibrary {
 			ExecuteDbMethodInTransaction( dbMethod );
 		}
 
-		/// <summary>
-		/// Opens a connection to the primary database, executes the specified method in a transaction, and closes the connection using a finally block.
-		/// This overload does not handle DoNotCommitExceptions for you.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethodInTransaction<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.PrimaryDatabaseInfo,
-			                                          cn => DataAccessMethods.ExecuteInTransaction( cn, delegate { return dbMethod( cn ); } ) );
+			return DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection,
+			                                                    cn => DataAccessMethods.ExecuteInTransaction( cn, () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
 		public static T ExecuteInDbConnectionWithTransaction<T>( Func<DBConnection, T> dbMethod ) {
 			return ExecuteDbMethodInTransaction( dbMethod );
-		}
-
-		/// <summary>
-		/// Opens a connection to the specified secondary database, executes the specified method, and closes the connection using a finally block.
-		/// </summary>
-		public static void ExecuteDbMethodWithSecondaryDatabase( string databaseName, DbMethod dbMethod ) {
-			assertClassInitialized();
-			DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ), dbMethod );
-		}
-
-		/// <summary>
-		/// Opens a connection to the specified secondary database, executes the specified method, and closes the connection using a finally block.
-		/// </summary>
-		public static T ExecuteDbMethodWithSecondaryDatabase<T>( string databaseName, Func<DBConnection, T> dbMethod ) {
-			assertClassInitialized();
-			return DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ), dbMethod );
-		}
-
-		/// <summary>
-		/// Opens a connection to the specified secondary database, executes the specified method in a transaction, and closes the connection using a finally block.
-		/// </summary>
-		public static void ExecuteDbMethodWithSecondaryDatabaseInTransaction( string databaseName, DbMethod dbMethod ) {
-			assertClassInitialized();
-			DataAccessMethods.ExecuteDbMethod( InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ),
-			                                   cn => DataAccessMethods.ExecuteInTransaction( cn, () => dbMethod( cn ) ) );
 		}
 
 		/// <summary>

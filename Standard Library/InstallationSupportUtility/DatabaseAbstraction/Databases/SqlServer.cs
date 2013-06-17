@@ -355,8 +355,14 @@ CREATE TABLE MainSequence(
 		private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, DbMethod method ) {
 			executeMethodWithDbExceptionHandling(
 				() =>
-				DataAccessMethods.ExecuteDbMethod(
-					new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Server, info.LoginName, info.Password, info.Database, false, info.FullTextCatalog ),
+				DataAccessMethods.ExecuteWithConnectionOpen(
+					new DBConnection( new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
+					                                     info.Server,
+					                                     info.LoginName,
+					                                     info.Password,
+					                                     info.Database,
+					                                     false,
+					                                     info.FullTextCatalog ) ),
 					method ) );
 		}
 
