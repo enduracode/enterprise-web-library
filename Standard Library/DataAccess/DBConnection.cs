@@ -78,6 +78,32 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public DatabaseInfo DatabaseInfo { get { return databaseInfo; } }
 
 		/// <summary>
+		/// Opens the connection, executes the specified method, and closes the connection.
+		/// </summary>
+		public void ExecuteWithConnectionOpen( DbMethod method ) {
+			Open();
+			try {
+				method( this );
+			}
+			finally {
+				Close();
+			}
+		}
+
+		/// <summary>
+		/// Opens the connection, executes the specified method, and closes the connection.
+		/// </summary>
+		public T ExecuteWithConnectionOpen<T>( Func<DBConnection, T> method ) {
+			Open();
+			try {
+				return method( this );
+			}
+			finally {
+				Close();
+			}
+		}
+
+		/// <summary>
 		/// Opens the database connection.
 		/// </summary>
 		public void Open() {
@@ -118,6 +144,44 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 			catch( Exception e ) {
 				throw createConnectionException( "closing a connection to", e );
+			}
+		}
+
+		/// <summary>
+		/// Executes the given block of code inside a transaction using the given database connection.  Does not
+		/// create, open, or close a database connection.
+		/// This overload allows you to throw a DoNotCommitException, which will gracefully not commit the transaction.
+		/// </summary>
+		public void ExecuteInTransaction( Action method ) {
+			BeginTransaction();
+			try {
+				method();
+				CommitTransaction();
+			}
+			catch( DoNotCommitException ) {
+				RollbackTransaction();
+			}
+			catch {
+				RollbackTransaction();
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Executes the given block of code inside a transaction using the given database connection.  Does not
+		/// create, open, or close a database connection.
+		/// This overload does not handle DoNotCommitExceptions for you.
+		/// </summary>
+		public T ExecuteInTransaction<T>( Func<T> method ) {
+			BeginTransaction();
+			try {
+				var result = method();
+				CommitTransaction();
+				return result;
+			}
+			catch {
+				RollbackTransaction();
+				throw;
 			}
 		}
 

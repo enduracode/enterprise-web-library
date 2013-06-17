@@ -11,64 +11,6 @@ namespace RedStapler.StandardLibrary.DataAccess {
 	/// A collection of static methods related to data access.
 	/// </summary>
 	public static class DataAccessMethods {
-		public static void ExecuteWithConnectionOpen( DBConnection cn, DbMethod method ) {
-			cn.Open();
-			try {
-				method( cn );
-			}
-			finally {
-				cn.Close();
-			}
-		}
-
-		public static T ExecuteWithConnectionOpen<T>( DBConnection cn, Func<DBConnection, T> method ) {
-			cn.Open();
-			try {
-				return method( cn );
-			}
-			finally {
-				cn.Close();
-			}
-		}
-
-		/// <summary>
-		/// Executes the given block of code inside a transaction using the given database connection.  Does not
-		/// create, open, or close a database connection.
-		/// This overload allows you to throw a DoNotCommitException, which will gracefully not commit the transaction.
-		/// </summary>
-		public static void ExecuteInTransaction( DBConnection cn, Action method ) {
-			cn.BeginTransaction();
-			try {
-				method();
-				cn.CommitTransaction();
-			}
-			catch( DoNotCommitException ) {
-				cn.RollbackTransaction();
-			}
-			catch {
-				cn.RollbackTransaction();
-				throw;
-			}
-		}
-
-		/// <summary>
-		/// Executes the given block of code inside a transaction using the given database connection.  Does not
-		/// create, open, or close a database connection.
-		/// This overload does not handle DoNotCommitExceptions for you.
-		/// </summary>
-		public static T ExecuteInTransaction<T>( DBConnection cn, Func<T> method ) {
-			cn.BeginTransaction();
-			try {
-				var result = method();
-				cn.CommitTransaction();
-				return result;
-			}
-			catch {
-				cn.RollbackTransaction();
-				throw;
-			}
-		}
-
 		/// <summary>
 		/// Retries the given operation in the case of a deadlock (when using pessimistic concurrency) or snapshot isolation error
 		/// (when using optimistic concurrency) until it succeeds.
