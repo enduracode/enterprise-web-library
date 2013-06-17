@@ -195,7 +195,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private static int deleteRows( DBConnection cn, List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
 			                  "> conditions, bool executeAdditionalLogic ) {" );
 			writer.WriteLine( "var rowsDeleted = 0;" );
-			writer.WriteLine( "DataAccessMethods.ExecuteInTransaction( cn, delegate {" );
+			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
 
 			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall = null;" );
 			writer.WriteLine( "if( executeAdditionalLogic )" );
@@ -378,7 +378,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                                            "Executes this " + tableName +
 			                                            " modification, persisting all changes. Executes any pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void Execute( DBConnection cn ) {" );
-			writer.WriteLine( "DataAccessMethods.ExecuteInTransaction( cn, delegate {" );
+			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
 
 			// The mod type may change during execute.
 			writer.WriteLine( "var frozenModType = modType;" );
@@ -407,7 +407,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                                            "Executes this " + tableName +
 			                                            " modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic( DBConnection cn ) {" );
-			writer.WriteLine( "DataAccessMethods.ExecuteInTransaction( cn, delegate {" );
+			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
 			writer.WriteLine( "executeInsertOrUpdate( cn );" );
 			writer.WriteLine( "markDataColumnValuesUnchanged();" );
 			writer.WriteLine( "} );" );

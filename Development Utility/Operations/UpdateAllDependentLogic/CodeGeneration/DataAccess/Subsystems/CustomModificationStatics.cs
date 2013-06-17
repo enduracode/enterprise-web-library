@@ -55,7 +55,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static void " + mod.name + "( " +
 			                  DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );
 
-			writer.WriteLine( "DataAccessMethods.ExecuteInTransaction( cn, delegate {" );
+			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
 			var cnt = 0;
 			foreach( var command in mod.commands ) {
 				var commandVariableName = "cmd" + cnt++;
