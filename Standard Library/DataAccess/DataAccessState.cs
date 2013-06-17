@@ -24,11 +24,6 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 		}
 
-		// This can be removed when all types of EWL apps (Windows services, console apps, etc.) support the main data-access state.
-		public static T GetCacheWebOnly<T>() where T: class, new() {
-			return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? Main.GetCache<T>() : new T();
-		}
-
 		private DBConnection primaryConnection;
 		private readonly Dictionary<string, DBConnection> secondaryConnectionsByName = new Dictionary<string, DBConnection>();
 		private readonly Action<DBConnection, string> connectionInitializer;
