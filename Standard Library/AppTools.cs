@@ -261,7 +261,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethod( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection, dbMethod );
+			DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -272,7 +272,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethod<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection, dbMethod );
+			return DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -283,8 +283,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethodInTransaction( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection,
-			                                             cn => DataAccessMethods.ExecuteInTransaction( cn, () => dbMethod( cn ) ) );
+			DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -295,8 +294,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethodInTransaction<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessMethods.ExecuteWithConnectionOpen( DataAccessState.Main.PrimaryDatabaseConnection,
-			                                                    cn => DataAccessMethods.ExecuteInTransaction( cn, () => dbMethod( cn ) ) );
+			return DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]

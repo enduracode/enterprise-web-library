@@ -334,14 +334,12 @@ CREATE SEQUENCE main_sequence;
 		private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, DbMethod method ) {
 			executeMethodWithDbExceptionHandling( delegate {
 				// Before we disabled pooling, we couldn't repeatedly perform Update Data operations since users with open connections can't be dropped.
-				DataAccessMethods.ExecuteWithConnectionOpen(
-					new DBConnection( new OracleInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
-					                                  info.DataSource,
-					                                  info.UserAndSchema,
-					                                  info.Password,
-					                                  false,
-					                                  info.SupportsLinguisticIndexes ) ),
-					method );
+				new DBConnection( new OracleInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
+				                                  info.DataSource,
+				                                  info.UserAndSchema,
+				                                  info.Password,
+				                                  false,
+				                                  info.SupportsLinguisticIndexes ) ).ExecuteWithConnectionOpen( method );
 			} );
 		}
 

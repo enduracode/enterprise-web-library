@@ -948,20 +948,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			DataAccessMethods.ExecuteWithConnectionOpen( new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ),
-			                                             cn => {
-				                                             try {
-					                                             // NOTE: Why do I not know that it's going to be one provider or the other?
-					                                             // NOTE: We could make a GetUserAsBaseType method in the base interface
-					                                             if( formsAuthProvider != null )
-						                                             newlyQueriedUser = formsAuthProvider.GetUser( cn, AppTools.User.UserId );
-					                                             else if( externalAuthProvider != null )
-						                                             newlyQueriedUser = externalAuthProvider.GetUser( cn, AppTools.User.UserId );
-				                                             }
-				                                             catch {
-					                                             // If we can't get the user for any reason, we don't really care. We'll just not do the update.
-				                                             }
-			                                             } );
+			new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ).ExecuteWithConnectionOpen( cn => {
+				try {
+					// NOTE: Why do I not know that it's going to be one provider or the other?
+					// NOTE: We could make a GetUserAsBaseType method in the base interface
+					if( formsAuthProvider != null )
+						newlyQueriedUser = formsAuthProvider.GetUser( cn, AppTools.User.UserId );
+					else if( externalAuthProvider != null )
+						newlyQueriedUser = externalAuthProvider.GetUser( cn, AppTools.User.UserId );
+				}
+				catch {
+					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
+				}
+			} );
 
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;

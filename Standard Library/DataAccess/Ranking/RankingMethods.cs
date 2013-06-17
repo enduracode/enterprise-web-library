@@ -17,16 +17,15 @@
 		/// Swaps the values of the specified ranks.
 		/// </summary>
 		internal static void SwapRanks( DBConnection cn, int rank1Id, int rank2Id ) {
-			DataAccessMethods.ExecuteInTransaction( cn,
-			                                        delegate {
-			                                        	var rankingSetup = AppTools.SystemLogic as RankingSetup;
+			cn.ExecuteInTransaction( delegate {
+				var rankingSetup = AppTools.SystemLogic as RankingSetup;
 
-			                                        	var rank1Value = rankingSetup.GetRank( cn, rank1Id );
-			                                        	var rank2Value = rankingSetup.GetRank( cn, rank2Id );
+				var rank1Value = rankingSetup.GetRank( cn, rank1Id );
+				var rank2Value = rankingSetup.GetRank( cn, rank2Id );
 
-			                                        	rankingSetup.UpdateRank( cn, rank1Id, rank2Value );
-			                                        	rankingSetup.UpdateRank( cn, rank2Id, rank1Value );
-			                                        } );
+				rankingSetup.UpdateRank( cn, rank1Id, rank2Value );
+				rankingSetup.UpdateRank( cn, rank2Id, rank1Value );
+			} );
 		}
 	}
 }
