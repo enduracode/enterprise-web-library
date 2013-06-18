@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
@@ -48,13 +49,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// that don't want to use EWF.
 		protected void ewfApplicationStart( SystemLogic systemLogic ) {
 			// Initialize system.
-			DataAccessState initTimeDataAccessState = null;
+			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );
 			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 			               false,
 			               systemLogic,
 			               mainDataAccessStateGetter: () => {
 				               // We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
-				               return Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState;
+				               return Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value;
 			               } );
 			if( AppTools.SecondaryInitFailed )
 				return;
@@ -73,21 +74,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( MetaLogicFactory == null )
 					throw new ApplicationException( "Meta logic factory not found." );
 
-				initTimeDataAccessState = new DataAccessState( ( connection, secondaryDatabaseName ) => { } );
-				try {
-					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
-					if( systemLogic != null )
-						CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
-					else
-						CssHandlingStatics.Init( GlobalType.Assembly );
-					EwfUiStatics.Init( GlobalType );
+				// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
+				if( systemLogic != null )
+					CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+				else
+					CssHandlingStatics.Init( GlobalType.Assembly );
+				EwfUiStatics.Init( GlobalType );
 
-					initializeWebApp();
-				}
-				finally {
-					initTimeDataAccessState = null;
-				}
+				initializeWebApp();
 
+				initTimeDataAccessState = null;
 				initialized = true;
 			},
 			                                   false,
