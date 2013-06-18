@@ -55,8 +55,9 @@ namespace RedStapler.StandardLibrary {
 		/// <param name="appName"></param>
 		/// <param name="isClientSideProgram"></param>
 		/// <param name="systemLogic"></param>
-		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested. If you pass null, the data
-		/// access subsystem will not be available in the application.</param>
+		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
+		/// AppTools.Init call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
+		/// available in the application.</param>
 		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic, Func<DataAccessState> mainDataAccessStateGetter = null ) {
 			var initializationLog = "Starting init";
 			try {
