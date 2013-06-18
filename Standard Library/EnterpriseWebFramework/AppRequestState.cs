@@ -110,6 +110,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal DataAccessState DataAccessState { get { return dataAccessState; } }
 
 		private void initDatabaseConnection( DBConnection connection, string secondaryDatabaseName ) {
+			if( secondaryDatabaseName.Any() ? secondaryDatabasesWithInitializedConnections.Contains( secondaryDatabaseName ) : primaryDatabaseConnectionInitialized )
+				return;
 			connection.Open();
 			connection.BeginTransaction();
 			if( secondaryDatabaseName.Any() )
@@ -224,15 +226,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var methods = new List<Action>();
 			if( primaryDatabaseConnectionInitialized ) {
 				methods.Add( delegate {
+					var tempConnection = DataAccessState.Main.PrimaryDatabaseConnection;
 					primaryDatabaseConnectionInitialized = false;
-					cleanUpDatabaseConnection( DataAccessState.Main.PrimaryDatabaseConnection );
+					cleanUpDatabaseConnection( tempConnection );
 				} );
 			}
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
 				var databaseNameCopy = databaseName;
 				methods.Add( delegate {
+					var tempConnection = DataAccessState.Main.GetSecondaryDatabaseConnection( databaseNameCopy );
 					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
-					cleanUpDatabaseConnection( DataAccessState.Main.GetSecondaryDatabaseConnection( databaseNameCopy ) );
+					cleanUpDatabaseConnection( tempConnection );
 				} );
 			}
 			methods.Add( () => {

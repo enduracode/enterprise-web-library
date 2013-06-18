@@ -47,8 +47,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && !AppTools.DatabaseExists )
 					return null;
 
-				// Do not store the connection unless it is successfully initialized.
-				return primaryConnection ?? ( primaryConnection = initConnection( new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ), "" ) );
+				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ), "" );
 			}
 		}
 
@@ -58,17 +57,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
 			DBConnection connection;
 			secondaryConnectionsByName.TryGetValue( databaseName, out connection );
-			if( connection == null ) {
-				// Do not store the connection unless it is successfully initialized.
-				connection = initConnection( new DBConnection( AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ), databaseName );
-				secondaryConnectionsByName.Add( databaseName, connection );
-			}
-			return connection;
+			if( connection == null )
+				secondaryConnectionsByName.Add( databaseName, connection = new DBConnection( AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
+			return initConnection( connection, databaseName );
 		}
 
-		/// <summary>
-		/// Returns the specified connection only if it is successfully initialized.
-		/// </summary>
 		private DBConnection initConnection( DBConnection connection, string secondaryDatabaseName ) {
 			connectionInitializer( connection, secondaryDatabaseName );
 			return connection;
