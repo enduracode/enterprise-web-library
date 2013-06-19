@@ -428,11 +428,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                        "function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
 			                                        true );
 
+			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
 			ClientScript.RegisterClientScriptBlock( GetType(),
 			                                        "CKEditor GetUrl",
-			                                        "function CKEDITOR_GETURL( resource ) { if( endsWith( resource, '.css' ) ) return resource.substring( 0, resource.length - 4 ) + '" +
-			                                        CssHandler.GetFileVersionString( WysiwygHtmlEditor.CkEditorInstallationDate ) + ".css'; }",
+			                                        "function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
+				                                        .FormatWith( CssHandler.GetFileVersionString( WysiwygHtmlEditor.CkEditorInstallationDate ) ),
 			                                        true );
+
 			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
