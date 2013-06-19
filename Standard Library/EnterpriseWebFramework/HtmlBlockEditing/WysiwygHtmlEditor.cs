@@ -42,7 +42,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			const string toolbar = "[ 'Source', '-', 'Bold', 'Italic', 'NumberedList', 'BulletedList', 'Link', 'Unlink' ]";
+			const string toolbar =
+				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink' ]";
 			var contentsCss = this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( CkEditorInstallationDate ) + ".css" );
 			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ], contentsCss: '" + contentsCss + "' } );";
 		}
