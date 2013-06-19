@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.ServiceModel;
 using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
@@ -48,6 +49,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// method and would probably also cause this method to run at start up time in *all* web applications that reference the Standard Library, even the ones
 		// that don't want to use EWF.
 		protected void ewfApplicationStart( SystemLogic systemLogic ) {
+			// This is a hack to support data-access state in WCF services.
+			var wcfDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );
+
 			// Initialize system.
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );
 			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
@@ -55,7 +59,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			               systemLogic,
 			               mainDataAccessStateGetter: () => {
 				               // We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
-				               return Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value;
+				               return Instance != null
+					                      ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
+					                      : OperationContext.Current != null ? wcfDataAccessState.Value : null;
 			               } );
 			if( AppTools.SecondaryInitFailed )
 				return;
