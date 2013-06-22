@@ -92,7 +92,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
 			    Directory.Exists( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
-				generateMercurialIgnoreFile( installation );
+				updateMercurialIgnoreFile( installation );
 		}
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
@@ -517,10 +517,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private void generateMercurialIgnoreFile( DevelopmentInstallation installation ) {
+		private void updateMercurialIgnoreFile( DevelopmentInstallation installation ) {
 			var filePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
+			var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : new string[ 0 ];
 			IoMethods.DeleteFile( filePath );
 			using( TextWriter writer = new StreamWriter( filePath ) ) {
+				const string regionBegin = "# EWL-REGION";
+				const string regionEnd = "# END-EWL-REGION";
+
+				writer.WriteLine( regionBegin );
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".suo" );
@@ -547,6 +552,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
 						writer.WriteLine( webProject.name + "/Generated Code/" );
 					}
+				}
+
+				writer.WriteLine();
+				writer.WriteLine( regionEnd );
+
+				var skipping = false;
+				foreach( var line in lines ) {
+					if( line == regionBegin )
+						skipping = true;
+					if( !skipping )
+						writer.WriteLine( line );
+					if( line == regionEnd )
+						skipping = false;
 				}
 			}
 		}
