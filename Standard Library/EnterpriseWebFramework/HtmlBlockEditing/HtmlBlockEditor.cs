@@ -3,19 +3,14 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A control for editing an HTML block either by using a browser-based WYSIWYG HTML editor or downloading it as a file, modifying it, and uploading it back
-	/// into the system.
+	/// A control for editing an HTML block.
 	/// </summary>
 	public class HtmlBlockEditor: WebControl, ControlTreeDataLoader {
-		private const string internalId = "internal";
-		private const string simpleId = "simple";
-
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -26,8 +21,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private readonly HtmlBlockEditorModification mod;
 		private WysiwygHtmlEditor wysiwygEditor;
-		private EwfTextBox textBox;
-		private SelectList<string> editModes;
 
 		/// <summary>
 		/// Creates an HTML block editor.
@@ -47,42 +40,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-
-			wysiwygEditor = new WysiwygHtmlEditor( mod.Html );
-			textBox = new EwfTextBox( mod.Html ) { Rows = 20 };
-
-			// This block control is necessary because the CKEditor hides the textarea and creates a sibling control immediately after it. We want display linking to
-			// affect both the textarea and the sibling.
-			// NOTE: It might be better for the block control to be part of the WYSIWYG editor since right now, when the editor is used on its own, display linking
-			// may not work.
-			var wysiwygEditorBlock = new Block( wysiwygEditor );
-
-			editModes =
-				SelectList.CreateRadioList( new[] { EwfListItem.Create( internalId, "The built-in editor" ), EwfListItem.Create( simpleId, "A simple text box" ) },
-				                            internalId,
-				                            useHorizontalLayout: true );
-			editModes.AddDisplayLink( internalId.ToSingleElementArray(), true, wysiwygEditorBlock.ToSingleElementArray() );
-			editModes.AddDisplayLink( simpleId.ToSingleElementArray(), true, textBox.ToSingleElementArray() );
-
-			var modeSelection = new Panel().AddControlsReturnThis( new LiteralControl( "View and edit HTML with:&nbsp;&nbsp;" ), editModes );
-			modeSelection.Style.Add( "margin-bottom", "4px" );
-
-			this.AddControlsReturnThis( modeSelection, wysiwygEditorBlock, textBox );
+			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html ) );
 		}
 
 		/// <summary>
 		/// Validates the HTML.
 		/// </summary>
 		public void Validate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
-			mod.Html = validator.GetString( errorHandler,
-			                                editModes.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ) == internalId
-				                                ? wysiwygEditor.GetPostBackValue( postBackValues )
-				                                : textBox.GetPostBackValue( postBackValues ),
-			                                true );
+			mod.Html = validator.GetString( errorHandler, wysiwygEditor.GetPostBackValue( postBackValues ), true );
 		}
 
 		/// <summary>
-		/// Returns the div tag, which represents this control in HTML.
+		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}
