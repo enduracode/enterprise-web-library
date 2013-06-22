@@ -11,7 +11,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		}
 
 		/// <summary>
-		/// Gets the current main data-access state.
+		/// Gets the current main data-access state. In EWF web applications, this will throw an exception when called from the worker threads used by parallel
+		/// programming tools such as PLINQ and the Task Parallel Library. While it would be possible for us to create an implementation that returns a separate
+		/// data-access state object for each thread, we've decided against it because we feel it's a leaky abstraction. Each thread would silently have its own
+		/// database transactions and its own cache, and not being aware of this fact could be extremely frustrating. Therefore we require developers to manually
+		/// create data-access state objects in worker threads.
 		/// </summary>
 		public static DataAccessState Main {
 			get {
@@ -26,16 +30,20 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		private DBConnection primaryConnection;
 		private readonly Dictionary<string, DBConnection> secondaryConnectionsByName = new Dictionary<string, DBConnection>();
-		private readonly Action<DBConnection, string> connectionInitializer;
+		private readonly Action<DBConnection> connectionInitializer;
 
 		private bool cacheEnabled;
 		private object cache;
 
 		/// <summary>
-		/// This should only be used to create objects that will be returned by the mainDataAccessStateGetter argument of AppTools.Init.
+		/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of AppTools.Init.
+		/// Second, to create supplemental data-access state objects, which you may need if you want to communicate with a database outside of the main transaction.
+		/// When using a supplemental data-access state, don't forget to actually pass it to the data-access methods you call.
 		/// </summary>
-		public DataAccessState( Action<DBConnection, string> databaseConnectionInitializer ) {
-			connectionInitializer = databaseConnectionInitializer;
+		/// <param name="databaseConnectionInitializer">A method that is called whenever a database connection is requested. Can be used to initialize the
+		/// connection.</param>
+		public DataAccessState( Action<DBConnection> databaseConnectionInitializer = null ) {
+			connectionInitializer = databaseConnectionInitializer ?? ( connection => { } );
 		}
 
 		/// <summary>
@@ -47,7 +55,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && !AppTools.DatabaseExists )
 					return null;
 
-				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ), "" );
+				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
 			}
 		}
 
@@ -59,11 +67,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			secondaryConnectionsByName.TryGetValue( databaseName, out connection );
 			if( connection == null )
 				secondaryConnectionsByName.Add( databaseName, connection = new DBConnection( AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
-			return initConnection( connection, databaseName );
+			return initConnection( connection );
 		}
 
-		private DBConnection initConnection( DBConnection connection, string secondaryDatabaseName ) {
-			connectionInitializer( connection, secondaryDatabaseName );
+		private DBConnection initConnection( DBConnection connection ) {
+			connectionInitializer( connection );
 			return connection;
 		}
 

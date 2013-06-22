@@ -50,10 +50,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// that don't want to use EWF.
 		protected void ewfApplicationStart( SystemLogic systemLogic ) {
 			// This is a hack to support data-access state in WCF services.
-			var wcfDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );
+			var wcfDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 
 			// Initialize system.
-			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState( ( connection, secondaryDatabaseName ) => { } ) );
+			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 			               false,
 			               systemLogic,

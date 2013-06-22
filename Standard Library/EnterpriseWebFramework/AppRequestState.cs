@@ -84,7 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".", e );
 			}
 
-			dataAccessState = new DataAccessState( initDatabaseConnection );
+			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
 
 			TransferRequestPath = "";
@@ -109,13 +109,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		internal DataAccessState DataAccessState { get { return dataAccessState; } }
 
-		private void initDatabaseConnection( DBConnection connection, string secondaryDatabaseName ) {
-			if( secondaryDatabaseName.Any() ? secondaryDatabasesWithInitializedConnections.Contains( secondaryDatabaseName ) : primaryDatabaseConnectionInitialized )
+		private void initDatabaseConnection( DBConnection connection ) {
+			if( connection.DatabaseInfo.SecondaryDatabaseName.Any()
+				    ? secondaryDatabasesWithInitializedConnections.Contains( connection.DatabaseInfo.SecondaryDatabaseName )
+				    : primaryDatabaseConnectionInitialized )
 				return;
 			connection.Open();
 			connection.BeginTransaction();
-			if( secondaryDatabaseName.Any() )
-				secondaryDatabasesWithInitializedConnections.Add( secondaryDatabaseName );
+			if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
+				secondaryDatabasesWithInitializedConnections.Add( connection.DatabaseInfo.SecondaryDatabaseName );
 			else
 				primaryDatabaseConnectionInitialized = true;
 		}
