@@ -434,7 +434,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptBlock( GetType(),
 			                                        "CKEditor GetUrl",
 			                                        "function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-				                                        .FormatWith( CssHandler.GetFileVersionString( WysiwygHtmlEditor.CkEditorInstallationDate ) ),
+				                                        .FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
 			                                        true );
 
 			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
