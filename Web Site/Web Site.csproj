@@ -637,6 +637,7 @@
     <Content Include="Ewf\ThirdParty\JQueryUi\ReadMe.txt" />
     <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.css" />
     <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.js" />
+    <Content Include="Ewf\ThirdParty\ReadMe.txt" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2-spinner.gif" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2.css" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2.js" />

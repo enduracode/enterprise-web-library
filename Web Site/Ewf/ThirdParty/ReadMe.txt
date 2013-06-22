@@ -1,0 +1,2 @@
+﻿We've placed several third-party components in version-specific folders because they self-reference their files from within CSS, and there's no way we can
+append time stamps to those requests to force new versions to be downloaded.
