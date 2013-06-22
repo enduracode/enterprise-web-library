@@ -390,8 +390,13 @@ namespace RedStapler.StandardLibrary {
 		internal static void SendHealthCheckEmail( string appFullName ) {
 			var message = new EmailMessage();
 			message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
-			message.Subject = "Health check from " + appFullName;
-			message.BodyHtml = ( "{0} free on C drive.".FormatWith( FormattingMethods.GetFormattedBytes( new DriveInfo( "c" ).TotalFreeSpace ) ) ).GetTextAsEncodedHtml();
+
+			var bytesFreeOnCDrive = new DriveInfo( "c" ).TotalFreeSpace;
+			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
+			var freeSpaceIsLow = bytesFreeOnCDrive < tenGibibytes;
+
+			message.Subject = StringTools.ConcatenateWithDelimiter( " ", "Health check", freeSpaceIsLow ? "and WARNING" : "", "from " + appFullName );
+			message.BodyHtml = ( "{0} free on C drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFreeOnCDrive ) ) ).GetTextAsEncodedHtml();
 			AppTools.SendEmailWithDefaultFromAddress( message );
 		}
 	}
