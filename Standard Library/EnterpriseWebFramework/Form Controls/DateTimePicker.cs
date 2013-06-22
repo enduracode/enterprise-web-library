@@ -94,8 +94,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return "$( '#" + textBox.TextBoxClientId + "' ).datetimepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
-			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ), ampm: true, timeFormat: 'h:mmt', stepMinute: " + minuteInterval +
-			       " } );";
+			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ), timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

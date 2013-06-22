@@ -59,7 +59,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return "$( '#" + textBox.TextBoxClientId + "' ).timepicker( { ampm: true, timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
+			return "$( '#" + textBox.TextBoxClientId + "' ).timepicker( { timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
