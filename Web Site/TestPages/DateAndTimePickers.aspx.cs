@@ -1,3 +1,4 @@
+using System;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -13,7 +14,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var table = FormItemBlock.CreateFormItemTable();
 			table.AddFormItems( FormItem.Create( "Date Picker", new DatePicker( null ) ),
 			                    FormItem.Create( "Time Picker", new TimePicker( null ) ),
-			                    FormItem.Create( "Date/Time Picker", new DateTimePicker( null ) ) );
+			                    FormItem.Create( "Date/Time Picker", new DateTimePicker( null ) ),
+			                    FormItem.Create( "Duration Picker", new DurationPicker( TimeSpan.Zero ) ) );
 			ph.AddControlsReturnThis( table );
 		}
 	}
