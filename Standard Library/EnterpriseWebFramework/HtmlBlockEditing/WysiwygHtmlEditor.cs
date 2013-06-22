@@ -11,7 +11,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A WYSIWYG HTML editor.
 	/// </summary>
 	public class WysiwygHtmlEditor: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<string> {
-		internal const string CkEditorFolderUrl = "Ewf/ThirdParty/CkEditor/ckeditor-4.1.1";
+		internal const string CkEditorFolderUrl = "Ewf/ThirdParty/CkEditor/ckeditor-4.1.2";
 
 		private readonly string durableValue;
 		private string postValue;
