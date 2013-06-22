@@ -104,15 +104,15 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Uses GetFormattedBytes to return a string in the form "60.1 GB/s".
+		/// Uses GetFormattedBytes to return a string in the form "60.1 GiB/s".
 		/// </summary>
 		public static string GetFormattedBytesPerSecond( long numberOfBytes, TimeSpan elapsedTime ) {
 			return GetFormattedBytes( (long)( numberOfBytes / elapsedTime.TotalSeconds ) ) + "/s";
 		}
 
 		/// <summary>
-		/// Returns the given number of bytes in the most useful way possible. For example, 64 will return 64 bytes. 64,000 will return 62 KB.
-		/// 64,500,000,000 will return 60.1 GB. Maximum precision is 3 significant digits. GB is the largest unit returned.
+		/// Returns the given number of bytes in the most useful way possible. For example, 64 will return 64 bytes. 64,000 will return 62 KiB. 64,500,000,000 will
+		/// return 60.1 GiB. Maximum precision is 3 significant digits. GiB is the largest unit returned.
 		/// </summary>
 		public static string GetFormattedBytes( long numberOfBytes ) {
 			const int stepMultiplier = 1024;
@@ -121,10 +121,10 @@ namespace RedStapler.StandardLibrary {
 			if( numberOfBytes < stepMultiplier )
 				return numberOfBytes + " bytes";
 			if( numberOfBytes < Math.Pow( stepMultiplier, 2 ) )
-				return ( numberOfBytes / stepMultiplier ).ToString( doubleFormattingString ) + " KB";
+				return ( numberOfBytes / stepMultiplier ).ToString( doubleFormattingString ) + " KiB";
 			if( numberOfBytes < Math.Pow( stepMultiplier, 3 ) )
-				return ( numberOfBytes / Math.Pow( stepMultiplier, 2 ) ).ToString( doubleFormattingString ) + " MB";
-			return ( numberOfBytes / Math.Pow( stepMultiplier, 3 ) ).ToString( doubleFormattingString ) + " GB";
+				return ( numberOfBytes / Math.Pow( stepMultiplier, 2 ) ).ToString( doubleFormattingString ) + " MiB";
+			return ( numberOfBytes / Math.Pow( stepMultiplier, 3 ) ).ToString( doubleFormattingString ) + " GiB";
 		}
 	}
 }
