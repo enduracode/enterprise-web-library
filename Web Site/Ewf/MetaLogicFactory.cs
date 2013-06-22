@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new FontAwesome.Font_awesomemin.Info() );
 			infos.Add( new ThirdParty.Select2.Select2_340.Select2.Info() );
 			infos.Add( new TimePicker.Styles.Info() );
-			infos.Add( new Qtip2.Jqueryqtipmin.Info() );
+			infos.Add( new ThirdParty.Qtip2.Jqueryqtipmin.Info() );
 			infos.Add( new Styles.Basic.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
 				infos.Add( new Styles.EwfUi.Colors.Info() );

@@ -620,8 +620,6 @@
     <Content Include="Ewf\JQueryUi\js\jquery-ui-1.10.1.custom.min.js" />
     <Content Include="Ewf\JQueryUi\ReadMe.txt" />
     <Content Include="Ewf\Modernizr.js" />
-    <Content Include="Ewf\QTip2\jquery.qtip.min.css" />
-    <Content Include="Ewf\QTip2\jquery.qtip.min.js" />
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
     <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
     <Content Include="Ewf\Styles\Basic.css" />
@@ -629,6 +627,8 @@
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
     <Content Include="Ewf\Styles\ToDeleteOrMove.css" />
+    <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.css" />
+    <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.js" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2-spinner.gif" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2.css" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.0\select2.js" />
