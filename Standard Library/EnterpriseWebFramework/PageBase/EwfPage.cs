@@ -415,7 +415,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addJavaScriptIncludes() {
 			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
 			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" );
 
 			ClientScript.RegisterClientScriptInclude( GetType(),
 			                                          "jQuery UI",
