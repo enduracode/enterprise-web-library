@@ -184,8 +184,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para><para>WARNING: After calling this method, delete referenced rows in other tables that are no longer needed.</para>" );
 			writer.WriteLine( "public static int DeleteRows" + methodNameSuffix + "( DBConnection cn, " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
-			writer.WriteLine( "return deleteRows( cn, getConditionList( requiredCondition, additionalConditions ), " + ( executeAdditionalLogic ? "true" : "false" ) +
-			                  " );" );
+			if( executeAdditionalLogic )
+				writer.WriteLine( "return cn.ExecuteInTransaction( () => {" );
+
+			writer.WriteLine( "var conditions = getConditionList( requiredCondition, additionalConditions );" );
+
+			if( executeAdditionalLogic ) {
+				writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall = null;" );
+				writer.WriteLine( "preDelete( cn, conditions, ref postDeleteCall );" );
+			}
+
+			writer.WriteLine( "var rowsDeleted = deleteRows( cn, conditions );" );
+
+			if( executeAdditionalLogic ) {
+				writer.WriteLine( "if( postDeleteCall != null )" );
+				writer.WriteLine( "postDeleteCall.Execute( cn );" );
+			}
+
+			writer.WriteLine( "return rowsDeleted;" );
+
+			if( executeAdditionalLogic )
+				writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
 			writer.WriteLine( "}" );
 		}
 
@@ -193,33 +212,29 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when doing direct-with-revision-bypass deletions.
 
 			writer.WriteLine( "private static int deleteRows( DBConnection cn, List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
-			                  "> conditions, bool executeAdditionalLogic ) {" );
-			writer.WriteLine( "var rowsDeleted = 0;" );
-			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
+			                  "> conditions ) {" );
+			if( isRevisionHistoryClass )
+				writer.WriteLine( "return cn.ExecuteInTransaction( () => {" );
 
-			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall = null;" );
-			writer.WriteLine( "if( executeAdditionalLogic )" );
-			writer.WriteLine( "preDelete( cn, conditions, ref postDeleteCall );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "copyLatestRevisions( cn, conditions );" );
+
 			writer.WriteLine( "var delete = new InlineDelete( \"" + tableName + "\" );" );
 			writer.WriteLine( "conditions.ForEach( condition => delete.AddCondition( condition.CommandCondition ) );" );
+
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "addLatestRevisionsCondition( delete );" );
 
 			writer.WriteLine( "try {" );
-			writer.WriteLine( "rowsDeleted = delete.Execute( cn );" );
+			writer.WriteLine( "return delete.Execute( cn );" );
 			writer.WriteLine( "}" ); // try
 			writer.WriteLine( "catch( System.Exception e ) {" );
 			writer.WriteLine( "rethrowAsEwfExceptionIfNecessary( e );" );
 			writer.WriteLine( "throw;" );
 			writer.WriteLine( "}" ); // catch
 
-			writer.WriteLine( "if( postDeleteCall != null )" );
-			writer.WriteLine( "postDeleteCall.Execute( cn );" );
-
-			writer.WriteLine( "} );" );
-			writer.WriteLine( "return rowsDeleted;" );
+			if( isRevisionHistoryClass )
+				writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
 			writer.WriteLine( "}" );
 		}
 
@@ -407,10 +422,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                                            "Executes this " + tableName +
 			                                            " modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic( DBConnection cn ) {" );
-			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
 			writer.WriteLine( "executeInsertOrUpdate( cn );" );
 			writer.WriteLine( "markDataColumnValuesUnchanged();" );
-			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
 		}
 
@@ -418,6 +431,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		                                                      Column identityColumn ) {
 			writer.WriteLine( "private void executeInsertOrUpdate( DBConnection cn ) {" );
 			writer.WriteLine( "try {" );
+			if( isRevisionHistoryClass )
+				writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
+
 
 			// insert
 
@@ -449,12 +465,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 
 			// update
-
 			writer.WriteLine( "else {" );
-
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "copyLatestRevisions( cn, conditions );" );
-
 			writer.WriteLine( "var update = new InlineUpdate( \"" + tableName + "\" );" );
 			writer.WriteLine( "addColumnModifications( update );" );
 			writer.WriteLine( "conditions.ForEach( condition => update.AddCondition( condition.CommandCondition ) );" );
@@ -463,7 +476,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "update.Execute( cn );" );
 			writer.WriteLine( "}" ); // else
 
+			if( isRevisionHistoryClass )
+				writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
 			writer.WriteLine( "}" ); // try
+
 			writer.WriteLine( "catch( System.Exception e ) {" );
 			writer.WriteLine( "rethrowAsEwfExceptionIfNecessary( e );" );
 			writer.WriteLine( "throw;" );
