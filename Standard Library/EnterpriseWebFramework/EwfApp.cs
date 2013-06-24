@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
@@ -61,7 +60,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				               // We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
 				               return Instance != null
 					                      ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
-					                      : OperationContext.Current != null ? wcfDataAccessState.Value : null;
+					                      : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
 			               } );
 			if( AppTools.SecondaryInitFailed )
 				return;
@@ -279,7 +278,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch {
 					RequestState.RollbackDatabaseTransactions();
-					DataAccessState.Main.ResetCache();
+					DataAccessState.Current.ResetCache();
 					throw;
 				}
 			},
@@ -307,7 +306,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				Server.ClearError();
 
 				RequestState.RollbackDatabaseTransactions();
-				DataAccessState.Main.ResetCache();
+				DataAccessState.Current.ResetCache();
 
 				var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 

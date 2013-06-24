@@ -262,7 +262,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethod( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -273,7 +273,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethod<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
+			return DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -284,7 +284,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static void ExecuteDbMethodInTransaction( DbMethod dbMethod ) {
 			assertClassInitialized();
-			DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -295,7 +295,7 @@ namespace RedStapler.StandardLibrary {
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethodInTransaction<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessState.Main.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
+			return DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]

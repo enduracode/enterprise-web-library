@@ -19,13 +19,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets an open connection to the primary database.
 		/// </summary>
-		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Main.PrimaryDatabaseConnection; } }
+		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Current.PrimaryDatabaseConnection; } }
 
 		/// <summary>
 		/// Gets an open connection to the specified secondary database.
 		/// </summary>
 		public static DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
-			return DataAccessState.Main.GetSecondaryDatabaseConnection( databaseName );
+			return DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
 		}
 
 		/// <summary>
@@ -128,9 +128,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
 			if( primaryDatabaseConnectionInitialized )
-				DataAccessState.Main.PrimaryDatabaseConnection.PreExecuteCommitTimeValidationMethods();
+				DataAccessState.Current.PrimaryDatabaseConnection.PreExecuteCommitTimeValidationMethods();
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
-				DataAccessState.Main.GetSecondaryDatabaseConnection( databaseName ).PreExecuteCommitTimeValidationMethods();
+				DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName ).PreExecuteCommitTimeValidationMethods();
 		}
 
 		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
@@ -228,7 +228,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var methods = new List<Action>();
 			if( primaryDatabaseConnectionInitialized ) {
 				methods.Add( delegate {
-					var tempConnection = DataAccessState.Main.PrimaryDatabaseConnection;
+					var tempConnection = DataAccessState.Current.PrimaryDatabaseConnection;
 					primaryDatabaseConnectionInitialized = false;
 					cleanUpDatabaseConnection( tempConnection );
 				} );
@@ -236,7 +236,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
 				var databaseNameCopy = databaseName;
 				methods.Add( delegate {
-					var tempConnection = DataAccessState.Main.GetSecondaryDatabaseConnection( databaseNameCopy );
+					var tempConnection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy );
 					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
 					cleanUpDatabaseConnection( tempConnection );
 				} );
@@ -244,13 +244,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			methods.Add( () => {
 				try {
 					if( !transactionMarkedForRollback ) {
-						DataAccessState.Main.DisableCache();
+						DataAccessState.Current.DisableCache();
 						try {
 							foreach( var i in nonTransactionalModificationMethods )
 								i();
 						}
 						finally {
-							DataAccessState.Main.ResetCache();
+							DataAccessState.Current.ResetCache();
 						}
 					}
 				}

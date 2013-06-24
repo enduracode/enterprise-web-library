@@ -704,12 +704,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 
 			try {
-				DataAccessState.Main.DisableCache();
+				DataAccessState.Current.DisableCache();
 				try {
 					method();
 				}
 				finally {
-					DataAccessState.Main.ResetCache();
+					DataAccessState.Current.ResetCache();
 				}
 			}
 			catch( Exception e ) {
@@ -804,7 +804,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				catch( EwfException e ) {
 					requestState.RollbackDatabaseTransactions();
-					DataAccessState.Main.ResetCache();
+					DataAccessState.Current.ResetCache();
 					requestState.EwfPageRequestState.TopModificationErrors = e.Messages;
 				}
 			}
@@ -861,7 +861,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				DataAccessState.Main.DisableCache();
+				DataAccessState.Current.DisableCache();
 				try {
 					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 						updateLastPageRequestTimeForUser();
@@ -870,7 +870,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					}
 				}
 				finally {
-					DataAccessState.Main.ResetCache();
+					DataAccessState.Current.ResetCache();
 				}
 
 				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by initial request data modifications.
@@ -952,7 +952,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			new DataAccessState().PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => {
+			new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => {
 				try {
 					// NOTE: Why do I not know that it's going to be one provider or the other?
 					// NOTE: We could make a GetUserAsBaseType method in the base interface
@@ -964,7 +964,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				catch {
 					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
 				}
-			} );
+			} ) );
 
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
