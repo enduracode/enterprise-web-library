@@ -5,13 +5,13 @@ namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
 	/// A post delete method and the required table retrieval row collection.
 	/// </summary>
 	public class PostDeleteCall<T> {
-		private readonly Action<DBConnection, T> method;
+		private readonly Action<T> method;
 		private readonly T rowCollection;
 
 		/// <summary>
 		/// Creates a post delete call with the specified method and row collection. The row collection should be retrieved based on the conditions in preDelete.
 		/// </summary>
-		public PostDeleteCall( Action<DBConnection, T> method, T rowCollection ) {
+		public PostDeleteCall( Action<T> method, T rowCollection ) {
 			this.method = method;
 			this.rowCollection = rowCollection;
 		}
@@ -19,8 +19,8 @@ namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public void Execute( DBConnection cn ) {
-			method( cn, rowCollection );
+		public void Execute() {
+			method( rowCollection );
 		}
 	}
 }
