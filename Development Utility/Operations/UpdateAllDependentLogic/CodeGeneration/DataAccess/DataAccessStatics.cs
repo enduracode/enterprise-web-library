@@ -134,16 +134,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
-			var methodParams = "DBConnection cn";
-			foreach( var param in GetNamedParamList( info, commandText ) )
-				methodParams += ", " + "object " + param;
-			return methodParams;
+			return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object " + i ).ToArray() );
 		}
 
-		internal static void WriteAddParamBlockFromCommandText( TextWriter writer, string commandVariable, DatabaseInfo info, string commandText ) {
+		internal static void WriteAddParamBlockFromCommandText( TextWriter writer, string commandVariable, DatabaseInfo info, string commandText, Database database ) {
 			foreach( var param in GetNamedParamList( info, commandText ) ) {
 				writer.WriteLine( commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param +
-				                  " ) ).GetAdoDotNetParameter( cn.DatabaseInfo ) );" );
+				                  " ) ).GetAdoDotNetParameter( " + GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
 			}
 		}
 

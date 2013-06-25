@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				writer.WriteLine( "private const string selectFromClause = @\"" + query.selectFromClause + " \";" );
 				foreach( var postSelectFromClause in query.postSelectFromClauses )
-					writeQueryMethod( writer, query, postSelectFromClause );
+					writeQueryMethod( writer, database, query, postSelectFromClause );
 				writer.WriteLine( "}" ); // class
 			}
 			writer.WriteLine( "}" ); // namespace
@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
 		}
 
-		private static void writeQueryMethod( TextWriter writer, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
+		private static void writeQueryMethod( TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
 		                                      RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Queries the database and returns the full results collection immediately." );
@@ -59,13 +59,35 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                  DataAccessStatics.GetMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
 
 			// body
-			writer.WriteLine( "var cmd = cn.DatabaseInfo.CreateCommand();" );
+			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );
-			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value );
+			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
 			writer.WriteLine( "var results = new List<Row>();" );
-			writer.WriteLine( "cn.ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) +
+			                  ".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
 			writer.WriteLine( "return results;" );
 			writer.WriteLine( "}" ); // GetRows
+
+			// NOTE: Delete this after 30 September 2013.
+			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
+			writer.WriteLine( "public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
+			                  getOldMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
+			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );
+			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
+			writer.WriteLine( "var results = new List<Row>();" );
+			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) +
+			                  ".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine( "return results;" );
+			writer.WriteLine( "}" ); // GetRows
+		}
+
+		// NOTE: Delete this after 30 September 2013.
+		private static string getOldMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
+			var methodParams = "DBConnection cn";
+			foreach( var param in DataAccessStatics.GetNamedParamList( info, commandText ) )
+				methodParams += ", " + "object " + param;
+			return methodParams;
 		}
 	}
 }

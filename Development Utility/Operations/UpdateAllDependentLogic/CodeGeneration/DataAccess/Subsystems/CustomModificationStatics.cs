@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "public static class " + database.SecondaryDatabaseName + "CustomModifications {" );
 
 				foreach( var mod in configuration.customModifications )
-					writeMethod( writer, mod );
+					writeMethod( writer, database, mod );
 
 				writer.WriteLine( "}" ); // class
 				writer.WriteLine( "}" ); // namespace
@@ -51,18 +51,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static void writeMethod( TextWriter writer, RedStapler.StandardLibrary.Configuration.SystemDevelopment.CustomModification mod ) {
+		private static void writeMethod( TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.CustomModification mod ) {
 			writer.WriteLine( "public static void " + mod.name + "( " +
 			                  DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );
 
-			writer.WriteLine( "cn.ExecuteInTransaction( delegate {" );
+			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
 			var cnt = 0;
 			foreach( var command in mod.commands ) {
 				var commandVariableName = "cmd" + cnt++;
-				writer.WriteLine( "DbCommand " + commandVariableName + " = cn.DatabaseInfo.CreateCommand();" );
+				writer.WriteLine( "DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 				writer.WriteLine( commandVariableName + ".CommandText = @\"" + command + "\";" );
-				DataAccessStatics.WriteAddParamBlockFromCommandText( writer, commandVariableName, info, command );
-				writer.WriteLine( "cn.ExecuteNonQueryCommand( " + commandVariableName + " );" );
+				DataAccessStatics.WriteAddParamBlockFromCommandText( writer, commandVariableName, info, command, database );
+				writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( " + commandVariableName + " );" );
 			}
 			writer.WriteLine( "} );" ); // execute in transaction call
 
