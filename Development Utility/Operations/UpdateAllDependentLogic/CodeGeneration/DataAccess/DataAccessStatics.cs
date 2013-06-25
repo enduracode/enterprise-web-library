@@ -166,5 +166,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal static string TableNameToPascal( this string tableName, DBConnection cn ) {
 			return cn.DatabaseInfo is MySqlInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
 		}
+
+		internal static string GetConnectionExpression( Database database ) {
+			return
+				"DataAccessState.Current.{0}".FormatWith( database.SecondaryDatabaseName.Any()
+					                                          ? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
+					                                          : "PrimaryDatabaseConnection" );
+		}
 	}
 }

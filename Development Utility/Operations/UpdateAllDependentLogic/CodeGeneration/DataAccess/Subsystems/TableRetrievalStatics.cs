@@ -62,8 +62,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// header
 			var methodName = isRevisionHistoryTable && !excludePreviousRevisions ? "GetRowsIncludingPreviousRevisions" : "GetRows";
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Retrieves the rows from the table that match the specified conditions, ordered in a stable way." );
-			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( DBConnection cn, params " +
-			                  DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
+			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
+			                  "[] conditions ) {" );
 
 			// body
 			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
@@ -73,9 +73,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			if( excludePreviousRevisions )
 				writer.WriteLine( "addLatestRevisionsCondition( command );" );
 			writer.WriteLine( "var results = new List<Row>();" );
-			writer.WriteLine( "command.Execute( cn, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
+			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
 			writer.WriteLine( "return results;" );
 			writer.WriteLine( "}" ); // GetRows
+
+			// NOTE: Delete this after 30 September 2013.
+			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
+			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( DBConnection cn, params " +
+			                  DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
+			writer.WriteLine( "return " + methodName + "( conditions );" );
+			writer.WriteLine( "}" );
 		}
 	}
 }
