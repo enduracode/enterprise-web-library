@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.IO;
 using System.Linq;
+using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
@@ -14,16 +15,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				// header
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Executes the " + procedure + " procedure." );
-				writer.Write( "public static void " + procedure + "( DBConnection cn" );
-				foreach( var parameter in parameters ) {
-					var parameterType = "";
-					if( parameter.Direction == ParameterDirection.Output )
-						parameterType = "out ";
-					else if( parameter.Direction == ParameterDirection.InputOutput )
-						parameterType = "ref ";
-					writer.Write( ", " + parameterType + parameter.DataTypeName + " " + parameter.Name );
-				}
-				writer.WriteLine( " ) { " );
+				var parameterDeclarations =
+					parameters.Select(
+						i => ( i.Direction == ParameterDirection.Output ? "out " : i.Direction == ParameterDirection.InputOutput ? "ref " : "" ) + i.DataTypeName + " " + i.Name );
+				writer.WriteLine( "public static void " + procedure + "( " + StringTools.ConcatenateWithDelimiter( ", ", parameterDeclarations.ToArray() ) + " ) {" );
 
 				// body
 				writer.WriteLine( "var cmd = new SprocExecution( \"" + procedure + "\" );" );
@@ -32,20 +27,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						writer.WriteLine( "cmd.AddParameter( " + getDbCommandParameterCreationExpression( parameter ) + " );" );
 					else {
 						writer.WriteLine( "var " + parameter.Name + "Parameter = " + getDbCommandParameterCreationExpression( parameter ) + ";" );
-						writer.WriteLine( parameter.Name + "Parameter.GetAdoDotNetParameter( cn.DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
+						writer.WriteLine( parameter.Name + "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
+						                  ".DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
 						writer.WriteLine( "cmd.AddParameter( " + parameter.Name + "Parameter );" );
 					}
 				}
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) )
 					writer.WriteLine( parameter.DataTypeName + " " + parameter.Name + "Local = " + parameter.DataTypeDefaultValueExpression + ";" );
-				writer.WriteLine( "cmd.ExecuteReader( cn, r => {" );
+				writer.WriteLine( "cmd.ExecuteReader( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => {" );
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) ) {
 					// NOTE: This is a hack. We would like to use a simple cast to convert the value of the database parameter to the method parameter's type, but we
 					// can't because the types in Oracle.DataAccess.Types, like OracleDecimal, do not support any kind of conversion to .NET types when they are boxed.
 					writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")StandardLibraryMethods.ChangeType( " + parameter.Name +
-					                  "Parameter.GetAdoDotNetParameter( cn.DatabaseInfo ).Value.ToString(), typeof( " + parameter.DataTypeName + " ) );" );
-					//writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")" + parameter.Name +
-					//                  "Parameter.GetAdoDotNetParameter( cn.DatabaseInfo ).Value;" );
+					                  "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
+					                  ".DatabaseInfo ).Value.ToString(), typeof( " + parameter.DataTypeName + " ) );" );
+					//writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")" + parameter.Name + "Parameter.GetAdoDotNetParameter( " +
+					//                  DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo ).Value;" );
 				}
 				writer.WriteLine( "} );" );
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) )
