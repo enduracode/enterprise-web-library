@@ -11,17 +11,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			cmd.CommandText = "SELECT * FROM USER_SEQUENCES";
 			cn.ExecuteReaderCommand( cmd,
 			                         reader => {
-			                         	while( reader.Read() ) {
-			                         		var sequenceName = reader[ "SEQUENCE_NAME" ].ToString();
-			                         		writer.WriteLine();
-			                         		writer.WriteLine( "public class " + sequenceName + " {" );
-			                         		writer.WriteLine( "public static decimal GetNextValue( DBConnection cn ) {" );
-			                         		writer.WriteLine( "DbCommand cmd = cn.DatabaseInfo.CreateCommand();" );
-			                         		writer.WriteLine( "cmd.CommandText = \"SELECT " + sequenceName + ".NEXTVAL FROM DUAL\";" );
-			                         		writer.WriteLine( "return (decimal)cn.ExecuteScalarCommand( cmd );" );
-			                         		writer.WriteLine( "}" );
-			                         		writer.WriteLine( "}" );
-			                         	}
+				                         while( reader.Read() ) {
+					                         var sequenceName = reader[ "SEQUENCE_NAME" ].ToString();
+					                         writer.WriteLine();
+					                         writer.WriteLine( "public class " + sequenceName + " {" );
+					                         writer.WriteLine( "public static decimal GetNextValue( DBConnection cn ) {" );
+					                         writer.WriteLine( "DbCommand cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+					                         writer.WriteLine( "cmd.CommandText = \"SELECT " + sequenceName + ".NEXTVAL FROM DUAL\";" );
+					                         writer.WriteLine( "return (decimal)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( cmd );" );
+					                         writer.WriteLine( "}" );
+					                         writer.WriteLine( "}" );
+				                         }
 			                         } );
 
 			writer.WriteLine();
