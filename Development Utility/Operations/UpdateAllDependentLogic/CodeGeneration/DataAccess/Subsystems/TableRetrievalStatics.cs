@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
-				writer.WriteLine( getClassDeclaration( cn, table ) );
+				writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
 
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table, configuration );
 				var columns = new TableColumns( cn, table, isRevisionHistoryTable );
@@ -35,26 +35,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // namespace
 		}
 
-		/// <summary>
-		/// Writer user-editable partial class file.
-		/// </summary>
-		public static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
-			var userEditableFileFolder = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "TableRetrieval" );
-			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder, GetClassName( cn, tableName ) + ".cs" );
-			// The file will already exist if it is in source control. We want to generate a blank one if it isn't in source control to make them much easier to add.
-			if( !File.Exists( userEditableFilePath ) ) {
-				using( var userEditableFileWriter = IoMethods.GetTextWriterForWrite( userEditableFilePath ) ) {
-					userEditableFileWriter.WriteLine( namespaceDeclaration );
-					userEditableFileWriter.WriteLine( "	" + getClassDeclaration( cn, tableName ) );
-					userEditableFileWriter.WriteLine();
-					userEditableFileWriter.WriteLine( "	}" ); // class
-					userEditableFileWriter.WriteLine( "}" ); // namespace
-				}
-			}
-		}
+		internal static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
+			var folderPath = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "TableRetrieval" );
+			var templateFilePath = StandardLibraryMethods.CombinePaths( folderPath, GetClassName( cn, tableName ) + DataAccessStatics.CSharpTemplateFileExtension );
+			IoMethods.DeleteFile( templateFilePath );
 
-		private static string getClassDeclaration( DBConnection cn, string tableName ) {
-			return "public static partial class " + GetClassName( cn, tableName ) + " {";
+			// If a real file exists, don't create a template.
+			if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, GetClassName( cn, tableName ) + ".cs" ) ) )
+				return;
+
+			using( var writer = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
+				writer.WriteLine( namespaceDeclaration );
+				writer.WriteLine( "	partial class " + GetClassName( cn, tableName ) );
+				writer.WriteLine( "		// IMPORTANT: Change extension from \".ewlt.cs\" to \".cs\" before including in project and editing." );
+				writer.WriteLine( "	}" ); // class
+				writer.WriteLine( "}" ); // namespace
+			}
 		}
 
 		internal static string GetClassName( DBConnection cn, string table ) {

@@ -33,25 +33,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		/// <summary>
-		/// Writer user-editable partial class file.
-		/// </summary>
-		public static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName,
-		                                      bool isRevisionHistoryTable ) {
-			// We do not write a partial class for direct modification classes.
+		internal static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName,
+		                                        bool isRevisionHistoryTable ) {
+			// We do not create templates for direct modification classes.
+			var folderPath = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
+			var templateFilePath = StandardLibraryMethods.CombinePaths( folderPath,
+			                                                            getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) +
+			                                                            DataAccessStatics.CSharpTemplateFileExtension );
+			IoMethods.DeleteFile( templateFilePath );
 
-			var userEditableFileFolder = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
-			var userEditableFilePath = StandardLibraryMethods.CombinePaths( userEditableFileFolder,
-			                                                                getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" );
-			// The file will already exist if it is in source control. We want to generate a blank one if it isn't in source control to make them much easier to add.
-			if( !File.Exists( userEditableFilePath ) ) {
-				using( var userEditableFileWriter = IoMethods.GetTextWriterForWrite( userEditableFilePath ) ) {
-					userEditableFileWriter.WriteLine( namespaceDeclaration );
-					userEditableFileWriter.WriteLine( "	partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + " {" );
-					userEditableFileWriter.WriteLine();
-					userEditableFileWriter.WriteLine( "	}" ); // class
-					userEditableFileWriter.WriteLine( "}" ); // namespace
-				}
+			// If a real file exists, don't create a template.
+			if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
+				return;
+
+			using( var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
+				templateWriter.WriteLine( namespaceDeclaration );
+				templateWriter.WriteLine( "	partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) );
+				templateWriter.WriteLine( "		// IMPORTANT: Change extension from \".ewlt.cs\" to \".cs\" before including in project and editing." );
+				templateWriter.WriteLine( "	}" ); // class
+				templateWriter.WriteLine( "}" ); // namespace
 			}
 		}
 

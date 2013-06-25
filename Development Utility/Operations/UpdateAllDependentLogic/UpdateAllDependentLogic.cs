@@ -534,6 +534,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "_ReSharper*" );
 				writer.WriteLine( "Error Log.txt" );
 				writer.WriteLine( "*.csproj.user" );
+				writer.WriteLine( "*" + DataAccessStatics.CSharpTemplateFileExtension );
 				writer.WriteLine();
 				writer.WriteLine( "Solution Files/bin/" );
 				writer.WriteLine( "Solution Files/obj/" );

@@ -14,6 +14,8 @@ using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal static class DataAccessStatics {
+		internal const string CSharpTemplateFileExtension = ".ewlt.cs";
+
 		// Matches spaced followed by @abc. The space prevents @@identity, etc. from getting matched.
 		private const string sqlServerParamRegex = @"(?<!@)@\w*\w";
 
