@@ -131,5 +131,18 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				mainStateOverrideStack.Value.Pop();
 			}
 		}
+
+		/// <summary>
+		/// Executes the specified method with this as the current data-access state. Only necessary when using supplemental data-access state objects.
+		/// </summary>
+		public T ExecuteWithThis<T>( Func<T> method ) {
+			mainStateOverrideStack.Value.Push( this );
+			try {
+				return method();
+			}
+			finally {
+				mainStateOverrideStack.Value.Pop();
+			}
+		}
 	}
 }

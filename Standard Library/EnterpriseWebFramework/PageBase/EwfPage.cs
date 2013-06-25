@@ -947,25 +947,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
 			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
-			// in another browser window while the first one is still running.			
-			User newlyQueriedUser = null;
-
+			// in another browser window while the first one is still running.
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => {
+			var newlyQueriedUser = new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => {
 				try {
 					// NOTE: Why do I not know that it's going to be one provider or the other?
 					// NOTE: We could make a GetUserAsBaseType method in the base interface
 					if( formsAuthProvider != null )
-						newlyQueriedUser = formsAuthProvider.GetUser( cn, AppTools.User.UserId );
-					else if( externalAuthProvider != null )
-						newlyQueriedUser = externalAuthProvider.GetUser( cn, AppTools.User.UserId );
+						return (User)formsAuthProvider.GetUser( cn, AppTools.User.UserId );
+					if( externalAuthProvider != null )
+						return (User)externalAuthProvider.GetUser( cn, AppTools.User.UserId );
 				}
 				catch {
 					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
 				}
+				return null;
 			} ) );
-
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
 
