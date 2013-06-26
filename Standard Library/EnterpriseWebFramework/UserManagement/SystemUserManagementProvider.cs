@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -9,11 +8,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Deletes the user with the specified ID.
 		/// </summary>
-		void DeleteUser( DBConnection cn, int userId );
+		void DeleteUser( int userId );
 
 		/// <summary>
 		/// Retrieves all roles.
 		/// </summary>
-		List<Role> GetRoles( DBConnection cn );
+		List<Role> GetRoles();
 	}
 }

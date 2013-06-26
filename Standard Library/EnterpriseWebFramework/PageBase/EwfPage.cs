@@ -955,9 +955,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					// NOTE: Why do I not know that it's going to be one provider or the other?
 					// NOTE: We could make a GetUserAsBaseType method in the base interface
 					if( formsAuthProvider != null )
-						return (User)formsAuthProvider.GetUser( cn, AppTools.User.UserId );
+						return (User)formsAuthProvider.GetUser( AppTools.User.UserId );
 					if( externalAuthProvider != null )
-						return (User)externalAuthProvider.GetUser( cn, AppTools.User.UserId );
+						return (User)externalAuthProvider.GetUser( AppTools.User.UserId );
 				}
 				catch {
 					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
@@ -970,8 +970,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			try {
 				if( formsAuthProvider != null ) {
 					var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
-					formsAuthProvider.InsertOrUpdateUser( AppRequestState.PrimaryDatabaseConnection,
-					                                      AppTools.User.UserId,
+					formsAuthProvider.InsertOrUpdateUser( AppTools.User.UserId,
 					                                      AppTools.User.Email,
 					                                      formsAuthCapableUser.Salt,
 					                                      formsAuthCapableUser.SaltedPassword,
@@ -979,13 +978,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					                                      DateTime.Now,
 					                                      formsAuthCapableUser.MustChangePassword );
 				}
-				else if( externalAuthProvider != null ) {
-					externalAuthProvider.InsertOrUpdateUser( AppRequestState.PrimaryDatabaseConnection,
-					                                         AppTools.User.UserId,
-					                                         AppTools.User.Email,
-					                                         AppTools.User.Role.RoleId,
-					                                         DateTime.Now );
-				}
+				else if( externalAuthProvider != null )
+					externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
 			}
 			catch( DbConcurrencyException ) {
 				// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and

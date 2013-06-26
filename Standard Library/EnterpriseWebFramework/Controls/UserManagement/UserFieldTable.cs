@@ -30,11 +30,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
 		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles =
-				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles( cn ) ).ToList();
+				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			user = userId.HasValue ? UserManagementStatics.GetUser( cn, userId.Value ) : null;
 			if( includePasswordControls() && user != null )
-				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, user.UserId );
+				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( user.UserId );
 
 			Func<bool> validationShouldRun = () => validationPredicate == null || validationPredicate();
 

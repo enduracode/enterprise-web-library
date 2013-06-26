@@ -40,8 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private void modifyData( DBConnection cn ) {
 			var password = new Password( newPassword.Value );
-			( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).InsertOrUpdateUser( cn,
-			                                                                                                       AppTools.User.UserId,
+			( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).InsertOrUpdateUser( AppTools.User.UserId,
 			                                                                                                       AppTools.User.Email,
 			                                                                                                       password.Salt,
 			                                                                                                       password.ComputeSaltedHash(),

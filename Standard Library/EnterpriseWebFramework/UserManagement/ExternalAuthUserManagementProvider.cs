@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -10,21 +9,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Retrieves all users.
 		/// </summary>
-		List<ExternalAuthUser> GetUsers( DBConnection cn );
+		List<ExternalAuthUser> GetUsers();
 
 		/// <summary>
 		/// Retrieves the user with the specified ID.
 		/// </summary>
-		ExternalAuthUser GetUser( DBConnection cn, int userId );
+		ExternalAuthUser GetUser( int userId );
 
 		/// <summary>
 		/// Retrieves the user with the specified email address.
 		/// </summary>
-		ExternalAuthUser GetUser( DBConnection cn, string email );
+		ExternalAuthUser GetUser( string email );
 
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( DBConnection cn, int? userId, string email, int roleId, DateTime? lastRequestDateTime );
+		void InsertOrUpdateUser( int? userId, string email, int roleId, DateTime? lastRequestDateTime );
 	}
 }

@@ -42,15 +42,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private void deleteUser( DBConnection cn ) {
-			UserManagementStatics.SystemProvider.DeleteUser( cn, info.User.UserId );
+			UserManagementStatics.SystemProvider.DeleteUser( info.User.UserId );
 		}
 
 		private void modifyData( DBConnection cn ) {
 			if( UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider;
 				if( info.UserId.HasValue ) {
-					provider.InsertOrUpdateUser( cn,
-					                             info.User.UserId,
+					provider.InsertOrUpdateUser( info.User.UserId,
 					                             userFieldTable.Email,
 					                             userFieldTable.Salt,
 					                             userFieldTable.SaltedPassword,
@@ -59,8 +58,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					                             userFieldTable.MustChangePassword );
 				}
 				else {
-					provider.InsertOrUpdateUser( cn,
-					                             null,
+					provider.InsertOrUpdateUser( null,
 					                             userFieldTable.Email,
 					                             userFieldTable.Salt,
 					                             userFieldTable.SaltedPassword,
@@ -71,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-				provider.InsertOrUpdateUser( cn, info.UserId, userFieldTable.Email, userFieldTable.RoleId, info.User != null ? info.User.LastRequestDateTime : null );
+				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email, userFieldTable.RoleId, info.User != null ? info.User.LastRequestDateTime : null );
 			}
 			userFieldTable.SendEmailIfNecessary();
 		}

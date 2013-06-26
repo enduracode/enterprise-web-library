@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -11,23 +10,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Retrieves all users.
 		/// </summary>
-		List<FormsAuthCapableUser> GetUsers( DBConnection cn );
+		List<FormsAuthCapableUser> GetUsers();
 
 		/// <summary>
 		/// Retrieves the user with the specified ID.
 		/// </summary>
-		FormsAuthCapableUser GetUser( DBConnection cn, int userId );
+		FormsAuthCapableUser GetUser( int userId );
 
 		/// <summary>
 		/// Retrieves the user with the specified email address.
 		/// </summary>
-		FormsAuthCapableUser GetUser( DBConnection cn, string email );
+		FormsAuthCapableUser GetUser( string email );
 
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( DBConnection cn, int? userId, string email, int salt, byte[] saltedPassword, int roleId, DateTime? lastRequestDateTime,
-		                         bool mustChangePassword );
+		void InsertOrUpdateUser( int? userId, string email, int salt, byte[] saltedPassword, int roleId, DateTime? lastRequestDateTime, bool mustChangePassword );
 
 		/// <summary>
 		/// Gets the subject and body of the message that will be sent to the specified user when a password reset is requested.

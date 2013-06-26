@@ -57,7 +57,7 @@
     <Compile Include="Configuration\Providers\Encryption.cs" />
     <Compile Include="Configuration\Providers\General.cs" />
     <Compile Include="Configuration\Providers\Isu.cs" />
-    <Compile Include="Configuration\Providers\UserManagementProvider.cs" />
+    <Compile Include="Configuration\Providers\UserManagement.cs" />
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="GlobalLogic.cs" />
   </ItemGroup>

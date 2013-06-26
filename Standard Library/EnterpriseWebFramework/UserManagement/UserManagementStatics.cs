@@ -59,9 +59,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static List<User> GetUsers( DBConnection cn ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
-				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUsers( cn ).ConvertAll( input => input as User );
+				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUsers().ConvertAll( input => input as User );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
-				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUsers( cn ).ConvertAll( input => input as User );
+				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUsers().ConvertAll( input => input as User );
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
@@ -71,9 +71,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static User GetUser( DBConnection cn, int userId ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
-				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, userId );
+				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
-				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( cn, userId );
+				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( userId );
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
@@ -83,9 +83,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static User GetUser( DBConnection cn, string emailAddress ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
-				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, emailAddress );
+				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( emailAddress );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
-				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( cn, emailAddress );
+				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( emailAddress );
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
@@ -124,11 +124,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static void ResetAndSendPassword( DBConnection cn, int userId ) {
 			var sp = SystemProvider as FormsAuthCapableUserManagementProvider;
-			User user = sp.GetUser( cn, userId );
+			User user = sp.GetUser( userId );
 
 			// reset the password
 			var newPassword = new Password();
-			sp.InsertOrUpdateUser( cn, userId, user.Email, newPassword.Salt, newPassword.ComputeSaltedHash(), user.Role.RoleId, user.LastRequestDateTime, true );
+			sp.InsertOrUpdateUser( userId, user.Email, newPassword.Salt, newPassword.ComputeSaltedHash(), user.Role.RoleId, user.LastRequestDateTime, true );
 
 			// send the email
 			SendPassword( user.Email, newPassword.PasswordText );
@@ -165,7 +165,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var errors = new List<string>();
 
 			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
-			var user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, emailAddress.Value );
+			var user = formsAuthCapableUserManagementProvider.GetUser( emailAddress.Value );
 			if( user != null ) {
 				var authenticationSuccessful = false;
 				if( user.SaltedPassword != null ) {
@@ -183,8 +183,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 							authenticationSuccessful = true;
 
 							// Migrate the user's account to use the new hash.
-							formsAuthCapableUserManagementProvider.InsertOrUpdateUser( AppRequestState.PrimaryDatabaseConnection,
-							                                                           user.UserId,
+							formsAuthCapableUserManagementProvider.InsertOrUpdateUser( user.UserId,
 							                                                           user.Email,
 							                                                           user.Salt,
 							                                                           hashedPassword,
@@ -200,7 +199,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					strictProvider.PostAuthenticate( user, authenticationSuccessful );
 
 					// Re-retrieve the user in case PostAuthenticate modified it.
-					user = formsAuthCapableUserManagementProvider.GetUser( AppRequestState.PrimaryDatabaseConnection, user.UserId );
+					user = formsAuthCapableUserManagementProvider.GetUser( user.UserId );
 				}
 
 				if( authenticationSuccessful )
@@ -225,7 +224,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static bool UserCredentialsAreCorrect( DBConnection cn, string userEmailAddress, string providedPassword ) {
 			// NOTE: Could share this with line 160 above. Not sure about the password trimming, though.
-			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( cn, userEmailAddress );
+			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userEmailAddress );
 			return user != null && user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
 		}
 
@@ -234,7 +233,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// authentication capable user management provider.
 		/// </summary>
 		public static void LogInSpecifiedUser( int userId ) {
-			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( AppRequestState.PrimaryDatabaseConnection, userId );
+			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
 			setCookieAndUser( user );
 
 			var errors = new List<string>();
