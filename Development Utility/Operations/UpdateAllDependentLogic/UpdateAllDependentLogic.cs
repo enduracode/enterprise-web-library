@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
@@ -288,7 +287,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						                                               modNamespaceDeclaration,
 						                                               database,
 						                                               tableName,
-						                                               DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
+						                                               CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
 					}
 				}
 
@@ -534,7 +533,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "_ReSharper*" );
 				writer.WriteLine( "Error Log.txt" );
 				writer.WriteLine( "*.csproj.user" );
-				writer.WriteLine( "*" + DataAccessStatics.CSharpTemplateFileExtension );
+				writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
 				writer.WriteLine();
 				writer.WriteLine( "Solution Files/bin/" );
 				writer.WriteLine( "Solution Files/obj/" );

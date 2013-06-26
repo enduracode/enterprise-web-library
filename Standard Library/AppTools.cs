@@ -29,10 +29,6 @@ namespace RedStapler.StandardLibrary {
 		private static Assembly appAssembly;
 		internal static InstallationConfiguration InstallationConfiguration { get; private set; }
 		private static SystemGeneralProvider provider;
-
-		// NOTE: Get rid of this when there are providers for all functionality that is now implemented with additional GlobalLogic interfaces.
-		private static SystemLogic systemLogic;
-
 		private static bool secondaryInitFailed;
 
 		/// <summary>
@@ -119,11 +115,6 @@ namespace RedStapler.StandardLibrary {
 				if( provider == null )
 					throw new ApplicationException( "General provider not found in system" );
 
-				initializationLog += Environment.NewLine + "Loaded system General provider.";
-
-				// NOTE: Get rid of this when there are providers for all functionality that is now implemented with additional GlobalLogic interfaces.
-				AppTools.systemLogic = systemLogic;
-
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";
 
 				try {
@@ -139,6 +130,7 @@ namespace RedStapler.StandardLibrary {
 
 					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
 					BlobFileOps.Init( systemLogic.GetType() );
+					DataAccessStatics.Init( systemLogic.GetType() );
 					DataAccessState.Init( mainDataAccessStateGetter );
 					EncryptionOps.Init( systemLogic.GetType() );
 					HtmlBlockStatics.Init( systemLogic.GetType() );
@@ -191,16 +183,6 @@ namespace RedStapler.StandardLibrary {
 			get {
 				assertClassInitialized();
 				return machineConfiguration;
-			}
-		}
-
-		/// <summary>
-		/// This will be removed when RSIS Goal 944 is complete.
-		/// </summary>
-		public static SystemLogic SystemLogic {
-			get {
-				assertClassInitialized();
-				return systemLogic;
 			}
 		}
 

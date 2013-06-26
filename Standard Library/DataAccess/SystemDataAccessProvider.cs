@@ -1,11 +1,11 @@
 ﻿namespace RedStapler.StandardLibrary.DataAccess {
 	/// <summary>
-	/// Defines how data access operations will be carried out for a particular system.
+	/// System-specific data-access logic.
 	/// </summary>
-	public interface DataAccessSetup {
+	public interface SystemDataAccessProvider {
 		/// <summary>
 		/// Retrieves the next value from the system's main sequence.
 		/// </summary>
-		int GetNextMainSequenceValue( DBConnection cn );
+		int GetNextMainSequenceValue();
 	}
 }

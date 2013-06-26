@@ -7,22 +7,20 @@
 	/// rank NUMBER CONSTRAINT order_ranks_r_nn NOT NULL /*This would be unique but it can't be because the swap action would creating a key violation*/
 	/// );
 	/// </summary>
-	public interface RankingSetup: DataAccessSetup {
-		// NOTE: This should be a provider.
-
+	public interface RankingProvider: SystemDataAccessProvider {
 		/// <summary>
 		/// Retrieves the rank matching the specified ID.
 		/// </summary>
-		int GetRank( DBConnection cn, int rankId );
+		int GetRank( int rankId );
 
 		/// <summary>
 		/// Inserts a new rank.
 		/// </summary>
-		void InsertRank( DBConnection cn, int rankId, int rank );
+		void InsertRank( int rankId, int rank );
 
 		/// <summary>
 		/// Updates the rank matching the specified ID.
 		/// </summary>
-		void UpdateRank( DBConnection cn, int rankId, int rank );
+		void UpdateRank( int rankId, int rank );
 	}
 }

@@ -479,9 +479,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( AppTools.User != null )
 					userId = AppTools.User.UserId;
 
-				var revisionHistorySetup = AppTools.SystemLogic as RevisionHistorySetup;
-				userTransactionId = revisionHistorySetup.GetNextMainSequenceValue( this );
-				revisionHistorySetup.InsertUserTransaction( this, userTransactionId.Value, DateTime.Now, userId );
+				var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;
+				userTransactionId = revisionHistorySetup.GetNextMainSequenceValue();
+				revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, DateTime.Now, userId );
 			}
 			return userTransactionId.Value;
 		}

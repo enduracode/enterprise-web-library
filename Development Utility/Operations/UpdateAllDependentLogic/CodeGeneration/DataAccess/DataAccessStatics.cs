@@ -155,7 +155,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void WriteAddLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
 			writer.WriteLine( "private static void addLatestRevisionsCondition( InlineDbCommandWithConditions command ) {" );
-			writer.WriteLine( "var revisionHistorySetup = AppTools.SystemLogic as RevisionHistorySetup;" );
+			writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
 			writer.WriteLine( "command.AddCondition( new InCondition( \"" + revisionIdColumn + "\", revisionHistorySetup.GetLatestRevisionsQuery() ) );" );
 			writer.WriteLine( "}" );
 		}

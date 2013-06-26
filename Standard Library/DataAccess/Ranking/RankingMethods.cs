@@ -7,9 +7,9 @@
 		/// Inserts a new rank and returns its ID.
 		/// </summary>
 		public static int InsertRank( DBConnection cn ) {
-			var rankingSetup = AppTools.SystemLogic as RankingSetup;
-			var id = rankingSetup.GetNextMainSequenceValue( cn );
-			rankingSetup.InsertRank( cn, id, id );
+			var rankingSetup = (RankingProvider)DataAccessStatics.SystemProvider;
+			var id = rankingSetup.GetNextMainSequenceValue();
+			rankingSetup.InsertRank( id, id );
 			return id;
 		}
 
@@ -18,13 +18,13 @@
 		/// </summary>
 		internal static void SwapRanks( DBConnection cn, int rank1Id, int rank2Id ) {
 			cn.ExecuteInTransaction( delegate {
-				var rankingSetup = AppTools.SystemLogic as RankingSetup;
+				var rankingSetup = (RankingProvider)DataAccessStatics.SystemProvider;
 
-				var rank1Value = rankingSetup.GetRank( cn, rank1Id );
-				var rank2Value = rankingSetup.GetRank( cn, rank2Id );
+				var rank1Value = rankingSetup.GetRank( rank1Id );
+				var rank2Value = rankingSetup.GetRank( rank2Id );
 
-				rankingSetup.UpdateRank( cn, rank1Id, rank2Value );
-				rankingSetup.UpdateRank( cn, rank2Id, rank1Value );
+				rankingSetup.UpdateRank( rank1Id, rank2Value );
+				rankingSetup.UpdateRank( rank2Id, rank1Value );
 			} );
 		}
 	}

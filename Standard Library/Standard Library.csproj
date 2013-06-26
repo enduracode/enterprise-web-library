@@ -131,13 +131,15 @@
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\InequalityCondition.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\LikeCondition.cs" />
-    <Compile Include="DataAccess\DataAccessSetup.cs" />
     <Compile Include="DataAccess\DataAccessState.cs" />
+    <Compile Include="DataAccess\DataAccessStatics.cs" />
     <Compile Include="DataAccess\DbCommandTimeoutException.cs" />
     <Compile Include="DataAccess\DbConcurrencyException.cs" />
     <Compile Include="DataAccess\DbConnectionFailureException.cs" />
     <Compile Include="DataAccess\Ranking\RankingMethods.cs" />
-    <Compile Include="DataAccess\Ranking\RankingSetup.cs" />
+    <Compile Include="DataAccess\Ranking\RankingProvider.cs" />
+    <Compile Include="DataAccess\RevisionHistory\RevisionHistoryProvider.cs" />
+    <Compile Include="DataAccess\SystemDataAccessProvider.cs" />
     <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
     <Compile Include="DataValue.cs" />
     <Compile Include="DataAccess\CommandWriting\DbCommandParameter.cs" />
@@ -150,7 +152,6 @@
     <Compile Include="DataAccess\DomainDbCommand.cs" />
     <Compile Include="DataAccess\StandardModification\ModificationType.cs" />
     <Compile Include="DataAccess\RevisionHistory\Revision.cs" />
-    <Compile Include="DataAccess\RevisionHistory\RevisionHistorySetup.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\InlineDbCommandCondition.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\InlineDbCommandWithConditions.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\EqualityCondition.cs" />

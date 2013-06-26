@@ -494,13 +494,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 			if( isRevisionHistoryClass ) {
-				writer.WriteLine( "var revisionHistorySetup = AppTools.SystemLogic as RevisionHistorySetup;" );
-				writer.WriteLine( getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value = revisionHistorySetup.GetNextMainSequenceValue( " +
-				                  DataAccessStatics.GetConnectionExpression( database ) + " );" );
-				writer.WriteLine( "revisionHistorySetup.InsertRevision( " + DataAccessStatics.GetConnectionExpression( database ) + ", System.Convert.ToInt32( " +
-				                  getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value ), System.Convert.ToInt32( " +
-				                  getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value ), " + DataAccessStatics.GetConnectionExpression( database ) +
-				                  ".GetUserTransactionId() );" );
+				writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
+				writer.WriteLine( getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
+				writer.WriteLine( "revisionHistorySetup.InsertRevision( System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) +
+				                  ".Value ), System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value ), " +
+				                  DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
 			}
 
 			writer.WriteLine( "var insert = new InlineInsert( \"" + tableName + "\" );" );
@@ -564,7 +562,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
 			                  "> conditions ) {" );
 
-			writer.WriteLine( "var revisionHistorySetup = AppTools.SystemLogic as RevisionHistorySetup;" );
+			writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
 
 			writer.WriteLine( "var command = new InlineSelect( \"SELECT " + columns.PrimaryKeyAndRevisionIdColumn.Name + " FROM " + tableName + "\" );" );
 			writer.WriteLine( "conditions.ForEach( condition => command.AddCondition( condition.CommandCondition ) );" );
@@ -575,7 +573,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "foreach( var latestRevisionId in latestRevisionIds ) {" );
 
 			// Get the latest revision.
-			writer.WriteLine( "var latestRevision = revisionHistorySetup.GetRevision( " + DataAccessStatics.GetConnectionExpression( database ) + ", latestRevisionId );" );
+			writer.WriteLine( "var latestRevision = revisionHistorySetup.GetRevision( latestRevisionId );" );
 
 			// If this condition is true, we've already modified the row in this transaction. If we were to copy it, we'd end up with two revisions of the same entity
 			// in the same user transaction, which we don't support.
@@ -583,13 +581,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "continue;" );
 
 			// Update the latest revision with a new user transaction.
-			writer.WriteLine( "revisionHistorySetup.UpdateRevision( " + DataAccessStatics.GetConnectionExpression( database ) + ", latestRevisionId, latestRevisionId, " +
-			                  DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId(), latestRevisionId );" );
+			writer.WriteLine( "revisionHistorySetup.UpdateRevision( latestRevisionId, latestRevisionId, " + DataAccessStatics.GetConnectionExpression( database ) +
+			                  ".GetUserTransactionId(), latestRevisionId );" );
 
 			// Insert a copy of the latest revision with a new ID. This will represent the revision of the data before it was changed.
-			writer.WriteLine( "var copiedRevisionId = revisionHistorySetup.GetNextMainSequenceValue( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
-			writer.WriteLine( "revisionHistorySetup.InsertRevision( " + DataAccessStatics.GetConnectionExpression( database ) +
-			                  ", copiedRevisionId, latestRevisionId, latestRevision.UserTransactionId );" );
+			writer.WriteLine( "var copiedRevisionId = revisionHistorySetup.GetNextMainSequenceValue();" );
+			writer.WriteLine( "revisionHistorySetup.InsertRevision( copiedRevisionId, latestRevisionId, latestRevision.UserTransactionId );" );
 
 			// Insert a copy of the data row and make it correspond to the copy of the latest revision.
 			writer.WriteLine( "var copyCommand = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
