@@ -180,9 +180,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Try to associate a user with the current identity, if it is authenticated. Expose this user via the AuthenticatedUser property.
 			if( identity.IsAuthenticated && UserManagementStatics.UserManagementEnabled ) {
 				if( identity.AuthenticationType == "Forms" )
-					user = UserManagementStatics.GetUser( PrimaryDatabaseConnection, int.Parse( identity.Name ) );
+					user = UserManagementStatics.GetUser( int.Parse( identity.Name ) );
 				else if( identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
-					user = UserManagementStatics.GetUser( PrimaryDatabaseConnection, identity.Name );
+					user = UserManagementStatics.GetUser( identity.Name );
 			}
 
 			userLoaded = true;

@@ -12,7 +12,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			protected override void init( DBConnection cn ) {
 				if( UserId.HasValue )
-					User = UserManagementStatics.GetUser( cn, UserId.Value );
+					User = UserManagementStatics.GetUser( UserId.Value );
 			}
 
 			protected override PageInfo createParentPageInfo() {
@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var dm = new DataModification();
 
 			userFieldTable = new UserFieldTable();
-			userFieldTable.LoadData( cn, info.UserId, dm );
+			userFieldTable.LoadData( info.UserId, dm );
 			ph.AddControlsReturnThis( userFieldTable );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( dm, () => EhRedirect( es.info.ParentPage ) ) ) );
 

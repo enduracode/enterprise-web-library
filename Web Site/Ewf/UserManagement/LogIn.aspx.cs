@@ -80,8 +80,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private void handleSendNewPasswordClick() {
-			EhModifyDataAndRedirect( delegate( DBConnection cn ) {
-				var userLocal = UserManagementStatics.GetUser( cn, emailAddress.Value );
+			EhModifyDataAndRedirect( delegate {
+				var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
 				if( userLocal == null )
 					throw new EwfException( getUnregisteredEmailMessage() );
 				return ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ).GetUrl();

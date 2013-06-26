@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.Validation;
@@ -22,17 +21,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
-		/// <param name="cn"></param>
 		/// <param name="userId"></param>
 		/// <param name="vl"></param>
 		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available 
 		/// in the System Provider are used.</param>
 		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
-		public void LoadData( DBConnection cn, int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
+		public void LoadData( int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles =
 				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
-			user = userId.HasValue ? UserManagementStatics.GetUser( cn, userId.Value ) : null;
+			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value ) : null;
 			if( includePasswordControls() && user != null )
 				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( user.UserId );
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Security;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -57,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public static List<User> GetUsers( DBConnection cn ) {
+		public static List<User> GetUsers() {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
 				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUsers().ConvertAll( input => input as User );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
@@ -69,7 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public static User GetUser( DBConnection cn, int userId ) {
+		public static User GetUser( int userId ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
 				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
@@ -81,7 +80,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public static User GetUser( DBConnection cn, string emailAddress ) {
+		public static User GetUser( string emailAddress ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
 				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( emailAddress );
 			if( SystemProvider is ExternalAuthUserManagementProvider )
@@ -112,7 +111,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// system does not implement the forms authentication capable user management provider.
 		/// </summary>
 		public static void ResetAndSendPassword( string validatedEmailAddress, string emailAddressErrorMessage ) {
-			var user = GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
+			var user = GetUser( validatedEmailAddress );
 			if( user == null )
 				throw new EwfException( emailAddressErrorMessage );
 			ResetAndSendPassword( user.UserId );
@@ -222,7 +221,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// PRE: SystemProvider is a FormsAuthCapableUserManagementProvider.
 		/// Returns true if the given credentials correspond to a user and are correct.
 		/// </summary>
-		public static bool UserCredentialsAreCorrect( DBConnection cn, string userEmailAddress, string providedPassword ) {
+		public static bool UserCredentialsAreCorrect( string userEmailAddress, string providedPassword ) {
 			// NOTE: Could share this with line 160 above. Not sure about the password trimming, though.
 			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userEmailAddress );
 			return user != null && user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
