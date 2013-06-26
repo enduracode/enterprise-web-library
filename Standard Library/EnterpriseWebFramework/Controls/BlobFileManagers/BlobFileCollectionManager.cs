@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
@@ -104,7 +103,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
 			var deleteDm = new DataModification();
-			var deleteModMethods = new List<Func<DBConnection, bool>>();
+			var deleteModMethods = new List<Func<bool>>();
 			foreach( var file in files )
 				addFileRow( table, file, deleteDm, deleteModMethods );
 			if( !ReadOnly ) {
@@ -116,7 +115,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					              } );
 			}
 			deleteDm.AddModificationMethod( () => {
-				if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method( DataAccessState.Current.PrimaryDatabaseConnection ) || deletesOccurred ) )
+				if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 			} );
 
@@ -126,7 +125,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Visible = false;
 		}
 
-		private void addFileRow( DynamicTable table, BlobFile file, DataModification deleteDm, List<Func<DBConnection, bool>> deleteModMethods ) {
+		private void addFileRow( DynamicTable table, BlobFile file, DataModification deleteDm, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
 			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
@@ -153,7 +152,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                 new EwfCheckBox( false ),
 				                 validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deleteDm ) ).ToControl();
 			cells.Add( new EwfTableCell( ReadOnly ? null : deleteCheckBox ) );
-			deleteModMethods.Add( cn => {
+			deleteModMethods.Add( () => {
 				if( !delete )
 					return false;
 				BlobFileOps.SystemProvider.DeleteFile( file.FileId );
