@@ -26,11 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates an HTML block editor.
 		/// </summary>
 		public HtmlBlockEditor( int? htmlBlockId, Action<int> idSetter, out HtmlBlockEditorModification mod ) {
-			this.mod =
-				mod =
-				new HtmlBlockEditorModification( htmlBlockId,
-				                                 htmlBlockId.HasValue ? HtmlBlockStatics.GetHtml( AppRequestState.PrimaryDatabaseConnection, htmlBlockId.Value ) : "",
-				                                 idSetter );
+			this.mod = mod = new HtmlBlockEditorModification( htmlBlockId, htmlBlockId.HasValue ? HtmlBlockStatics.GetHtml( htmlBlockId.Value ) : "", idSetter );
 		}
 
 		/// <summary>

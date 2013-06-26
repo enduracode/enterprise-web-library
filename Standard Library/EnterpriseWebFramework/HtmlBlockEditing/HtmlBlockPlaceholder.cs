@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an HTML block placeholder.
 		/// </summary>
-		public HtmlBlockPlaceholder( int htmlBlockId ): this( HtmlBlockStatics.GetHtml( AppRequestState.PrimaryDatabaseConnection, htmlBlockId ) ) {}
+		public HtmlBlockPlaceholder( int htmlBlockId ): this( HtmlBlockStatics.GetHtml( htmlBlockId ) ) {}
 
 		/// <summary>
 		/// Creates an HTML block placeholder. Do not pass null for HTML. This overload is useful when you've already loaded the HTML.

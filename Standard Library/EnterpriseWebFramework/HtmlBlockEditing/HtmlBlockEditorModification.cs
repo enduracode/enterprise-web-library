@@ -1,5 +1,4 @@
 ﻿using System;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -24,16 +23,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes the modification and calls the ID setter with the ID of the created or modified HTML block.
 		/// </summary>
-		public void Execute( DBConnection cn ) {
+		public void Execute() {
 			// Do this after all validation so that validation doesn't get confused by our app-relative URL prefix "merge fields". We have seen a system run into
 			// problems while doing additional validation to verify that all words preceded by @@ were valid system-specific merge fields; it was mistakenly picking
 			// up our app-relative prefixes, thinking that they were merge fields, and complaining that they were not valid.
 			var encodedHtml = HtmlBlockStatics.EncodeIntraSiteUris( Html );
 
 			if( htmlBlockId == null )
-				htmlBlockId = HtmlBlockStatics.SystemProvider.InsertHtmlBlock( cn, encodedHtml );
+				htmlBlockId = HtmlBlockStatics.SystemProvider.InsertHtmlBlock( encodedHtml );
 			else
-				HtmlBlockStatics.SystemProvider.UpdateHtml( cn, htmlBlockId.Value, encodedHtml );
+				HtmlBlockStatics.SystemProvider.UpdateHtml( htmlBlockId.Value, encodedHtml );
 
 			idSetter( htmlBlockId.Value );
 		}

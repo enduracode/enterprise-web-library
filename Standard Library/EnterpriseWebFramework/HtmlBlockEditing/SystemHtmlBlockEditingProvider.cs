@@ -1,5 +1,3 @@
-using RedStapler.StandardLibrary.DataAccess;
-
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Defines how HTML block editing operations will be carried out against a database.
@@ -17,16 +15,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Retrieves the HTML from the specified HTML block.
 		/// </summary>
-		string GetHtml( DBConnection cn, int htmlBlockId );
+		string GetHtml( int htmlBlockId );
 
 		/// <summary>
 		/// Updates the HTML in a specified HTML block.
 		/// </summary>
-		void UpdateHtml( DBConnection cn, int htmlBlockId, string html );
+		void UpdateHtml( int htmlBlockId, string html );
 
 		/// <summary>
 		/// Inserts a new row into the database with the given html.
 		/// </summary>
-		int InsertHtmlBlock( DBConnection cn, string html );
+		int InsertHtmlBlock( string html );
 	}
 }

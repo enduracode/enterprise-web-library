@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -30,8 +29,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the HTML from the specified HTML block, after decoding intra site URIs.
 		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
-		public static string GetHtml( DBConnection cn, int htmlBlockId, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
-			var html = SystemProvider.GetHtml( cn, htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
+		public static string GetHtml( int htmlBlockId, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
+			var html = SystemProvider.GetHtml( htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
 			return GetDecodedHtml( html, nonSecureBaseUrl: nonSecureBaseUrl, secureBaseUrl: secureBaseUrl );
 		}
 
@@ -94,8 +93,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				html = Regex.Replace( html,
 				                      secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
 				                      secure
-				                      	? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
-				                      	: nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
+					                      ? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
+					                      : nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
 			}
 			return html;
 		}
