@@ -1,21 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class RegexHelper: EwfPage {
-		public partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			// NOTE: This was the markup:
 			//<ewf:ControlStack runat="server" IsStandard="true">
 			//  <p>This page can be used to help develop and test regular expressions.</p>

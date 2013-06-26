@@ -1,5 +1,4 @@
 using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -15,14 +14,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				package.Date = DateTime.Now;
 			}
 
-			protected override void init( DBConnection cn ) {}
-
 			protected override AlternativePageMode createAlternativeMode() {
 				return new NewContentPageMode();
 			}
 		}
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			calendar.SetParameters( info.Date, date => parametersModification.Date = date );
 			EwfUiStatics.SetContentFootActions( ActionButtonSetup.CreateWithUrl( "OK", new ExternalPageInfo( info.ReturnUrl ) ) );
 		}

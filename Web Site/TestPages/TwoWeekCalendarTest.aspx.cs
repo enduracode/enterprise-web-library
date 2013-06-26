@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
@@ -9,11 +8,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class TwoWeekCalendarTest: EwfPage {
-		partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			twoWeek.SetParameters( info.Date, date => parametersModification.Date = date );
 			twoWeek.SetToolTipForDay( DateTime.Today, "tool tip test".GetLiteralControl() );
 

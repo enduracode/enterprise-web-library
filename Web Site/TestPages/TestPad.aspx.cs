@@ -1,15 +1,10 @@
 using System.Web.UI;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class TestPad: EwfPage {
-		partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var updatePanel = new UpdatePanel { UpdateMode = UpdatePanelUpdateMode.Always };
 
 			var author = new EwfTextBox( "" ) { AutoPostBack = true };

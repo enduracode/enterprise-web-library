@@ -1,5 +1,4 @@
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -9,16 +8,12 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	public partial class LogIn: EwfPage {
-		partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
 		private FormsAuthCapableUserManagementProvider provider;
 		private DataValue<string> emailAddress;
 		private DataValue<string> password;
 		private FormsAuthCapableUser user;
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			provider = (FormsAuthCapableUserManagementProvider)UserManagementStatics.SystemProvider;
 			var logInDm = new DataModification();
 			var newPasswordDm = new DataModification();

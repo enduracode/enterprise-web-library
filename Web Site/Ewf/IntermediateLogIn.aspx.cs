@@ -1,5 +1,4 @@
 using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
@@ -8,7 +7,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class IntermediateLogIn: EwfPage {
 		public partial class Info {
-			protected override void init( DBConnection cn ) {
+			protected override void init() {
 				// This guarantees that the page will always be secure, even for non intermediate installations.
 				if( !EwfApp.SupportsSecureConnections )
 					throw new ApplicationException();
@@ -18,7 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			protected override bool IsIntermediateInstallationPublicPage { get { return true; } }
 		}
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var dm = new DataModification();
 
 			ph.AddControlsReturnThis(

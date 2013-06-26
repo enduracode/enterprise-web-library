@@ -1,5 +1,4 @@
 using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -11,13 +10,12 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	public partial class Page: EwfPage {
 		partial class Info {
-			protected override void init( DBConnection cn ) {}
 			public override string PageName { get { return ""; } }
 		}
 
 		private string emailText;
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var dm = new DataModification();
 
 			ph.AddControlsReturnThis(

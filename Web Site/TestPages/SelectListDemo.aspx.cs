@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -9,13 +8,12 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class SelectListDemo: EwfPage {
 		public partial class Info {
-			protected override void init( DBConnection cn ) {}
 			public override string PageName { get { return "Select List"; } }
 		}
 
 		private DataModification dm;
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			dm = new DataModification();
 			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
 			                          FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),

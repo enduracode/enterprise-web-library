@@ -1,6 +1,4 @@
-﻿using RedStapler.StandardLibrary.DataAccess;
-
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A web resource outside of the system.
 	/// </summary>
@@ -16,11 +14,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			base.uriFragmentIdentifier = uriFragmentIdentifier;
 			this.name = name;
 		}
-
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		protected override void init( DBConnection cn ) {}
 
 		/// <summary>
 		/// Standard Library use only.

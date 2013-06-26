@@ -8,7 +8,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		public partial class Info {
-			protected override void init( DBConnection cn ) {}
+			protected override void init() {}
 
 			protected override PageInfo createParentPageInfo() {
 				return null;

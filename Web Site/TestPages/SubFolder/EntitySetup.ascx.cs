@@ -9,8 +9,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		public partial class Info: TabModeOverrider {
-			protected override void init( DBConnection cn ) {}
-
 			protected override PageInfo createParentPageInfo() {
 				return ActionControls.GetInfo();
 			}

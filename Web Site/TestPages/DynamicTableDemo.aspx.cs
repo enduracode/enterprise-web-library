@@ -7,7 +7,6 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class DynamicTableDemo: EwfPage {
 		partial class Info {
-			protected override void init( DBConnection cn ) {}
 			public override string PageName { get { return "Old Table"; } }
 
 			protected override AlternativePageMode createAlternativeMode() {
@@ -15,7 +14,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			//Nothing Special
 			for( var i = 0; i < 20; i += 3 )
 				table.AddTextRow( i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );

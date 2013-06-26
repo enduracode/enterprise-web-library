@@ -1,14 +1,9 @@
 using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class BasicTests: EwfPage {
-		public partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			ph.AddControlsReturnThis( ControlStack.CreateWithControls( true,
 			                                                           new PostBackButton(
 				                                                           new DataModification( firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),

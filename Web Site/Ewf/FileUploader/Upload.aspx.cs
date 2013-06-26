@@ -1,18 +1,11 @@
 using System.IO;
 using System.Reflection;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader {
 	public partial class Upload: EwfPage {
-		public partial class Info {
-			protected override void init( DBConnection cn ) {}
-		}
-
-		protected override void LoadData( DBConnection cn ) {}
-
 		protected override bool sendsFileInline { get { return true; } }
 
 		protected override FileCreator fileCreator {

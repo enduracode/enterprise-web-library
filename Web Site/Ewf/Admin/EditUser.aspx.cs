@@ -1,4 +1,3 @@
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -10,7 +9,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		public partial class Info {
 			internal User User { get; private set; }
 
-			protected override void init( DBConnection cn ) {
+			protected override void init() {
 				if( UserId.HasValue )
 					User = UserManagementStatics.GetUser( UserId.Value );
 			}
@@ -24,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private UserFieldTable userFieldTable;
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			if( info.UserId.HasValue ) {
 				EwfUiStatics.SetPageActions( new ActionButtonSetup( "Delete User",
 				                                                    new PostBackButton( new DataModification( firstModificationMethod: deleteUser ),

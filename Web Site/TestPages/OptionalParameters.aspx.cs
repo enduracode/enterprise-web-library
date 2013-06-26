@@ -1,5 +1,4 @@
 using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.Validation;
@@ -11,14 +10,12 @@ using RedStapler.StandardLibrary.Validation;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class OptionalParameters: EwfPage {
 		partial class Info {
-			protected override void init( DBConnection cn ) {}
-
 			partial void initDefaultOptionalParameterPackage( OptionalParameterPackage package ) {
 				package.Field1 = "Default value";
 			}
 		}
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var fib = FormItemBlock.CreateFormItemTable();
 			fib.AddFormItems( parametersModification.GetField1TextFormItem( true ), parametersModification.GetField2TextFormItem( true ) );
 			ph.AddControlsReturnThis( fib );

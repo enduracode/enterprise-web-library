@@ -14,8 +14,6 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
-			protected override void init( DBConnection cn ) {}
-
 			protected override PageInfo createParentPageInfo() {
 				return null;
 			}

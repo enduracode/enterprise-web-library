@@ -1,5 +1,4 @@
 using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -7,8 +6,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class RequestProfiling: EwfPage {
 		public partial class Info {
-			protected override void init( DBConnection cn ) {}
-
 			protected override AlternativePageMode createAlternativeMode() {
 				return UserManagementStatics.UserManagementEnabled
 					       ? null
@@ -16,7 +13,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 		}
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( AppTools.User.UserId );
 			ph.AddControlsReturnThis( new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ) ),
 			                          new Paragraph(

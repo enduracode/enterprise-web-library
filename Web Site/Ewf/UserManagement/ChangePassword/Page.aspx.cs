@@ -1,4 +1,3 @@
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -8,14 +7,13 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
 	public partial class Page: EwfPage {
 		partial class Info {
-			protected override void init( DBConnection cn ) {}
 			public override string PageName { get { return ""; } }
 			protected override bool userCanAccessPage { get { return AppTools.User != null; } }
 		}
 
 		private DataValue<string> newPassword;
 
-		protected override void LoadData( DBConnection cn ) {
+		protected override void loadData() {
 			var dm = new DataModification();
 			var fib = FormItemBlock.CreateFormItemTable();
 
