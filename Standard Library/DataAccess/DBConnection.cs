@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private int nestLevel;
 		private ProfiledDbTransaction tx;
 		private DbTransaction innerTx;
-		private List<Func<DBConnection, string>> commitTimeValidationMethods;
+		private List<Func<string>> commitTimeValidationMethods;
 		private int? userTransactionId;
 
 		// This is true only if SQL returned an error indicating rollback outside a transaction at the database level (error 3903).
@@ -201,7 +201,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 						innerTx = cn.WrappedConnection.BeginTransaction();
 					tx = new ProfiledDbTransaction( innerTx, cn );
 
-					commitTimeValidationMethods = new List<Func<DBConnection, string>>();
+					commitTimeValidationMethods = new List<Func<string>>();
 				}
 				else
 					saveTransaction();
@@ -319,7 +319,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private void executeCommitTimeValidationMethods() {
 			var errors = new List<string>();
 			foreach( var method in commitTimeValidationMethods ) {
-				var result = method( this );
+				var result = method();
 				if( result.Length > 0 )
 					errors.Add( result );
 			}
@@ -461,7 +461,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// Adds a commit-time validation method to the connection. These will be executed immediately before the transaction is committed, in the order they were
 		/// added.
 		/// </summary>
-		public void AddCommitTimeValidationMethod( Func<DBConnection, string> method ) {
+		public void AddCommitTimeValidationMethod( Func<string> method ) {
 			if( nestLevel == 0 )
 				throw new ApplicationException( "A commit-time validation method can only be added during a database transaction." );
 			commitTimeValidationMethods.Add( method );
