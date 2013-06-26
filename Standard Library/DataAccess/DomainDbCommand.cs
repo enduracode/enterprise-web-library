@@ -4,8 +4,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 	/// </summary>
 	public interface DomainDbCommand {
 		/// <summary>
-		/// Executes the database command on the given open connection.
+		/// Executes the database command.
 		/// </summary>
-		void Execute( DBConnection cn );
+		void Execute();
 	}
 }
