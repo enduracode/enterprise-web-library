@@ -16,14 +16,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static AppRequestState Instance { get { return EwfApp.Instance.RequestState; } }
 
-		/// <summary>
-		/// Gets an open connection to the primary database.
-		/// </summary>
+		[ Obsolete(
+			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessStatics.Current."
+			) ]
 		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Current.PrimaryDatabaseConnection; } }
 
-		/// <summary>
-		/// Gets an open connection to the specified secondary database.
-		/// </summary>
+		[ Obsolete(
+			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessStatics.Current."
+			) ]
 		public static DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
 			return DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
 		}

@@ -737,7 +737,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Performs a secondary validation/modification unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
 		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			EhExecute( delegate { executeModification( validationMethod, modificationMethod ); } );
+			EhExecute( delegate { executeModification( validationMethod, () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ); } );
 		}
 
 		/// <summary>
@@ -752,18 +752,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
 			EhExecute( () => executeModification( validationMethod,
-			                                      cn => {
-				                                      var url = modificationMethod( cn ) ?? "";
+			                                      () => {
+				                                      var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
 				                                      redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
 			                                      } ) );
 		}
 
-		private void executeModification( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
+		private void executeModification( Action<Validator> validationMethod, Action modificationMethod ) {
 			var validator = new Validator();
 			validationMethod( validator );
 			if( validator.ErrorsOccurred )
 				throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( validator.ErrorMessages ).ToArray() );
-			modificationMethod( AppRequestState.PrimaryDatabaseConnection );
+			modificationMethod();
 		}
 
 		/// <summary>
