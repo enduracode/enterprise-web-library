@@ -1,6 +1,4 @@
-﻿using RedStapler.StandardLibrary.DataAccess;
-
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control that allows several EWF pages to share query parameters, authorization logic, data, etc.
 	/// </summary>
@@ -23,6 +21,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Loads data needed by the entity setup and by all pages that use the entity setup. This is called prior to the page's LoadData method.
 		/// </summary>
-		void LoadData( DBConnection cn );
+		void LoadData();
 	}
 }

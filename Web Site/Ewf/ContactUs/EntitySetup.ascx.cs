@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
@@ -19,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			protected override bool UserCanAccessEntitySetup { get { return AppTools.User != null; } }
 		}
 
-		public void LoadData( DBConnection cn ) {}
+		void EntitySetupBase.LoadData() {}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			var navButtonSetups = new List<ActionButtonSetup>();

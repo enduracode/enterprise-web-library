@@ -276,7 +276,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                                                               InfoAsBaseType.PageFullName ) );
 
 			if( EsAsBaseType != null )
-				EsAsBaseType.LoadData( AppRequestState.PrimaryDatabaseConnection );
+				EsAsBaseType.LoadData();
 			loadData();
 			loadDataForControlAndChildren( this );
 

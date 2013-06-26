@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -24,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 			}
 		}
 
-		public void LoadData( DBConnection cn ) {}
+		void EntitySetupBase.LoadData() {}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			return new List<ActionButtonSetup>();

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -21,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			public override string EntitySetupName { get { return "Confirm Password Reset"; } }
 		}
 
-		public void LoadData( DBConnection cn ) {}
+		void EntitySetupBase.LoadData() {}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			return new List<ActionButtonSetup> { new ActionButtonSetup( "Back", new EwfLink( new ExternalPageInfo( info.DestinationUrl ) ) ) };

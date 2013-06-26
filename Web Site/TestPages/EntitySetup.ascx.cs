@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Web.UI;
 using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
@@ -50,7 +49,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private ModalWindow three;
 		private ModalWindow four;
 
-		public void LoadData( DBConnection cn ) {
+		void EntitySetupBase.LoadData() {
 			one = new ModalWindow( new EwfImage( "http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" ) );
 			two = new ModalWindow( new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) );
 			three =
