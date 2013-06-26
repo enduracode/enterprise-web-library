@@ -58,12 +58,12 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
-		public void AddModificationMethod( Action<DBConnection> modificationMethod ) {
+		public void AddModificationMethodCn( Action<DBConnection> modificationMethod ) {
 			AddModificationMethod( () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) );
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
-		public void AddModificationMethods( IEnumerable<Action<DBConnection>> modificationMethods ) {
+		public void AddModificationMethodsCn( IEnumerable<Action<DBConnection>> modificationMethods ) {
 			AddModificationMethods( from i in modificationMethods select new Action( () => i( DataAccessState.Current.PrimaryDatabaseConnection ) ) );
 		}
 
