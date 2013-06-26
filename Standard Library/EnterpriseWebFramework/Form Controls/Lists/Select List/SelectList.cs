@@ -171,7 +171,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		ItemIdType FormControl<ItemIdType>.DurableValue { get { return selectedItemId; } }
 		string FormControl.DurableValueAsString { get { return selectedItemId.ObjectToString( true ); } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( useHorizontalRadioLayout.HasValue ) {
 				radioList = FreeFormRadioList.Create( UniqueID,
 				                                      items.Any( i => !i.IsValid ),

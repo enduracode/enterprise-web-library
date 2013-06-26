@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool IsEmpty { get { return EwfPage.Instance.InfoAsBaseType.PagePath.Count() == 1 && ( pageName == null || pageName.IsEmpty ); } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var pagePath = EwfPage.Instance.InfoAsBaseType.PagePath;
 			foreach( var page in pagePath.Take( pagePath.Count - 1 ) ) {

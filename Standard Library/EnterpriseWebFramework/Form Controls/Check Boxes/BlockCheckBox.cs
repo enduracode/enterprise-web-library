@@ -93,7 +93,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool IsChecked { get { return isCheckedDurable; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( highlightWhenChecked && AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) )
 				CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
 

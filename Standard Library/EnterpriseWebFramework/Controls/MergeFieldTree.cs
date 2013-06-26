@@ -35,22 +35,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.emptyRowTree = emptyRowTree;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfMergeFieldTree" );
-			Controls.Add( buildTree( cn, name, emptyRowTree.Rows ) );
+			Controls.Add( buildTree( name, emptyRowTree.Rows ) );
 		}
 
-		private static DynamicTable buildTree( DBConnection cn, string name, IEnumerable<MergeRow> emptyRowTree ) {
+		private DynamicTable buildTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
 			var singleRow = emptyRowTree.Single();
 
 			var table = new DynamicTable( new EwfTableColumn( "Field name" ), new EwfTableColumn( "Description" ) ) { Caption = name };
 			foreach( var field in singleRow.Values )
-				table.AddTextRow( getFieldNameCellText( field ), field.GetDescription( cn ) );
+				table.AddTextRow( getFieldNameCellText( field ), field.GetDescription( DataAccessState.Current.PrimaryDatabaseConnection ) );
 
 			foreach( var child in singleRow.Children ) {
 				var panel = new Panel();
 				panel.Style.Add( HtmlTextWriterStyle.MarginLeft, "2em" );
-				panel.Controls.Add( buildTree( cn, child.NodeName, child.Rows ) );
+				panel.Controls.Add( buildTree( child.NodeName, child.Rows ) );
 
 				table.AddRow( new EwfTableCell( panel ) { FieldSpan = 2 } );
 			}
@@ -58,7 +58,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return table;
 		}
 
-		private static string getFieldNameCellText( MergeValue field ) {
+		private string getFieldNameCellText( MergeValue field ) {
 			var name = field.Name;
 			var msWordName = field.MsWordName;
 			if( name == msWordName )

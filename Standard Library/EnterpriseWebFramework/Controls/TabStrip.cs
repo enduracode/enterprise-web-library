@@ -32,7 +32,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			tabs.Add( Tuple.Create( label, content ) );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			var selectList = SelectList.CreateRadioList( tabs.Select( i => EwfListItem.Create( i.Item1, i.Item1 ) ), tabs.First().Item1, useHorizontalLayout: true );
 			foreach( var i in tabs ) {
 				Controls.Add( i.Item2 );

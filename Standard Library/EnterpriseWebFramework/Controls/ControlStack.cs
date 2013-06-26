@@ -99,7 +99,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                         true ) );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis(
 				items.SelectMany( i => i.Item2 ? new NamingPlaceholder( getItemControl( i.Item1() ).ToArray() ).ToSingleElementArray() : getItemControl( i.Item1() ) ) );
 		}

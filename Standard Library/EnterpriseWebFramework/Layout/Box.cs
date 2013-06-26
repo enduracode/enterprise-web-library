@@ -55,7 +55,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.expanded = expanded;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( !expanded.HasValue || expanded.Value ? expandedClass : closedClass );
 
 			var contentBlock = new Block( childControls ) { CssClass = headingAndContentClass };

@@ -16,7 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.childControls = childControls;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis( childControls );
 		}
 

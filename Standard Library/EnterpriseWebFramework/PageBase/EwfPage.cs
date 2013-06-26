@@ -278,7 +278,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData( AppRequestState.PrimaryDatabaseConnection );
 			loadData();
-			loadDataForControlAndChildren( AppRequestState.PrimaryDatabaseConnection, this );
+			loadDataForControlAndChildren( this );
 
 			// It's important to handle new ethereal controls getting added during this loop.
 			var etherealControlsForJsStartUpLogic = new List<EtherealControl>();
@@ -289,7 +289,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				etherealControl.Control.Style.Add( HtmlTextWriterStyle.Display, "none" );
 
 				Form.Controls.Add( etherealControl.Control );
-				loadDataForControlAndChildren( AppRequestState.PrimaryDatabaseConnection, etherealControl.Control );
+				loadDataForControlAndChildren( etherealControl.Control );
 				etherealControlsForJsStartUpLogic.Add( etherealControl );
 			}
 
@@ -454,11 +454,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		[ Obsolete( "Guaranteed through 30 September 2013. Please use loadData (lowercase L) instead." ) ]
 		protected virtual void LoadData( DBConnection cn ) {}
 
-		private void loadDataForControlAndChildren( DBConnection cn, Control control ) {
+		private void loadDataForControlAndChildren( Control control ) {
 			if( control is ControlTreeDataLoader )
-				( control as ControlTreeDataLoader ).LoadData( cn );
+				( control as ControlTreeDataLoader ).LoadData();
 			foreach( Control child in control.Controls )
-				loadDataForControlAndChildren( cn, child );
+				loadDataForControlAndChildren( child );
 		}
 
 		/// <summary>

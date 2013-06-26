@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Checks that WindowToLaunch has been set and applies the attributes for this LaunchWindowLink.
 		/// </summary>
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );

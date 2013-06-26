@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.controlGetter = controlGetter;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis(
 				controlGetter( validation != null
 				               	? EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, "", validation )

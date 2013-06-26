@@ -99,7 +99,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			daysOfMonthToolTips[ date.Date ] = new ToolTipProperties { Content = toolTipContent };
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( dateModificationMethod == null )
 				throw new ApplicationException( "In order to place this calendar on a page, you must call SetParameters before the end of LoadData." );
 			buildNavigationBox();

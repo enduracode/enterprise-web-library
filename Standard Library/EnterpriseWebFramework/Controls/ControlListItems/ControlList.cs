@@ -93,7 +93,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			codeControls.AddRange( controls );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			var table = new DynamicTable { IsStandard = false };
 
 			var controls = codeControls;

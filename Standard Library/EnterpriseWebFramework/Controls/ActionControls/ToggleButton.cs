@@ -65,7 +65,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public override Unit Height { get { return height; } set { height = value; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			EwfPage.Instance.AddDisplayLink( this );
 
 			// NOTE: Currently this hidden field will always be persisted in page state whether the page cares about that or not. We should put this decision into the

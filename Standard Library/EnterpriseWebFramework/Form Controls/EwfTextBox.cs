@@ -172,7 +172,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			watermarkText = text;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			var value = AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this );
 			textBox.Text = watermarkText.Any() && !value.Any() ? watermarkText : value;
 

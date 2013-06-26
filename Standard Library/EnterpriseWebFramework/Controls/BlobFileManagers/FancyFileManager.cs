@@ -1,6 +1,5 @@
 ﻿using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Encryption;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -31,10 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			Parameters = parameters;
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public void LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( uniqueIdentifierAttribute, UniqueUdentifier );
 			Attributes.Add( parmetersAttribute, Parameters );
 			// This gives us some ability to be slightly more strongly typed, allowing us to change the actual attribute names here while not breaking script.

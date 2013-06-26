@@ -79,7 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.fileIdsMarkedAsRead = fileIdsMarkedAsRead;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
 
 			if( AppRequestState.Instance.Browser.IsInternetExplorer() ) {

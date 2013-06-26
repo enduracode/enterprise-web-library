@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.toolTipControl = toolTipControl;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( toolTipControl == null )
 				throw new ApplicationException( "ToolTipControl must be set on ToolTipLink" );
 

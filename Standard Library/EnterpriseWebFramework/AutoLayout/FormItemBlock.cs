@@ -79,7 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.formItems.AddRange( formItems );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( hideIfEmpty && !formItems.Any() ) {
 				Visible = false;
 				return;

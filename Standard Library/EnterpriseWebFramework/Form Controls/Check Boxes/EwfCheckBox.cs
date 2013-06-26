@@ -107,7 +107,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool IsChecked { get { return isCheckedDurable; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 
 			checkBox = GroupName.Length > 0 ? new RadioButton { GroupName = GroupName } : new CheckBox();

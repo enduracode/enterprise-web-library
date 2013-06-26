@@ -122,7 +122,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return destinationPageInfo == null || destinationPageInfo.UserCanAccessPageAndAllControls;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			var url = "";
 			if( destinationPageInfo != null && !( destinationPageInfo.AlternativeMode is DisabledPageMode ) ) {
 				url = destinationPageInfo.GetUrl();

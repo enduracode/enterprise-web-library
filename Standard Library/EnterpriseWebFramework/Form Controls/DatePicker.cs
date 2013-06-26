@@ -73,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			defaultSubmitButton = pbb;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() : "", preventAutoComplete: true ) { AutoPostBack = autoPostBack };

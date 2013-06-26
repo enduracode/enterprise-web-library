@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool IsEmpty { get { return !getPageName().Any(); } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Controls.Add( getPageName().GetLiteralControl() );
 		}
 

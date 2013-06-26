@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.validation = validation;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var controlStack = ControlStack.Create( false );
 			if( label.Length > 0 )

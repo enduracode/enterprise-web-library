@@ -91,7 +91,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public override Unit Height { get { return height; } set { height = value; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button ) {
 				// IE7 (or at least IE8 Compatibility View) unconditionally submits a value for all "button" elements with type "button" that are on the page,
 				// regardless of what was clicked. We prevent these bad submissions from raising post back events by mangling the "name" attribute so it does not

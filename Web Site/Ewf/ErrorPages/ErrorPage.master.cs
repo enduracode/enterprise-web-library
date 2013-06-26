@@ -5,6 +5,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 	public partial class ErrorPage: MasterPage, ControlTreeDataLoader {
 		protected ErrorPage() {}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {}
+		void ControlTreeDataLoader.LoadData() {}
 	}
 }

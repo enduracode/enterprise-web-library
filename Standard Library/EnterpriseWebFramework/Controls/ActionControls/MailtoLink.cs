@@ -74,7 +74,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public override Unit Height { get { return height; } set { height = value; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "href",
 			                "mailto:" +
 			                StringTools.ConcatenateWithDelimiter( "?",

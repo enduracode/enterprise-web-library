@@ -31,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public Control ToolTipControl { get { return durationPicker.ToolTipControl; } set { durationPicker.ToolTipControl = value; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			durationPicker.Width = Unit.Pixel( 65 );
 			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onblur, "ApplyTimeSpanFormat(this)" );
 			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onkeypress, "return NumericalOnly(event, this)" );

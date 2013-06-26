@@ -25,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, scriptGetter() ); };
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );

@@ -13,7 +13,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		RsFile FormControl<RsFile>.DurableValue { get { return null; } }
 		string FormControl.DurableValueAsString { get { return ""; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis( fileUpload = new FileUpload() );
 		}
 

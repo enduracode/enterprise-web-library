@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		// NOTE: EVERYTHING should be done here. We shouldn't have LoadData. We should audit everyone using this control and see if we can improve things.
 		// NOTE: This should also be full of delegates that run when events (such as deleting a file) are occurring.
 		// NOTE: There should be a way to tell if a file was uploaded.
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( fileCollectionId != null )
 				file = BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value );
 

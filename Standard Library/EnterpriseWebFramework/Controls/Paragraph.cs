@@ -44,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			codeControls.AddRange( controls );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis( codeControls );
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );

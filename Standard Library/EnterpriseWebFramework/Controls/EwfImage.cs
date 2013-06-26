@@ -66,7 +66,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			ImageUrl = imageUrl;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( !SizesToAvailableWidth ) {
 				Attributes.Add( "src", this.GetClientUrl( ImageUrl ) );
 				Attributes.Add( "alt", AlternateText ?? "" );

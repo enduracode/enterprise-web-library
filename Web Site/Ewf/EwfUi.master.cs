@@ -184,7 +184,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			contentFootControls = controls;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			EwfPage.Instance.SetContentContainer( contentPlace );
 
 			globalPlace.AddControlsReturnThis( getGlobalBlock() );

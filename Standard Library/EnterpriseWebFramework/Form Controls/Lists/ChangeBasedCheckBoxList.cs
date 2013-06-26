@@ -145,7 +145,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.uiSelectedItemIds = uiSelectedItemIds.ToArray();
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Controls.Add(
 				checkBoxList =
 				new EwfCheckBoxList<ItemIdType>( items.Select( i => i.Item ),

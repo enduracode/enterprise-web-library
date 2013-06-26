@@ -98,7 +98,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.itemGroups = ( itemGroups ?? new ColumnPrimaryItemGroup[ 0 ] ).ToList();
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
 				Visible = false;
 				return;

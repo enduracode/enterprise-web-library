@@ -60,7 +60,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			items.AddRange( controls );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			var cells = from i in ItemsSeparatedWithPipe ? separateControls( items ) : items

@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			codeControls.AddRange( controls );
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			if( !ExcludesBuiltInCssClass )
 				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			this.AddControlsReturnThis( markupControls.Concat( codeControls ) );

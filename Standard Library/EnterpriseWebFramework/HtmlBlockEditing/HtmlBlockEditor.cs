@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool HasHtml { get { return mod.Html.Any(); } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html ) );
 		}

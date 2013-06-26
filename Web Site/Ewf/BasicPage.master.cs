@@ -57,7 +57,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		public HtmlGenericControl Body { get { return basicBody; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			basicBody.Attributes.Add( "onpagehide", "hideProcessingDialog();" );
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 

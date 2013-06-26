@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.numberOfColumns = numberOfColumns;
 		}
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CheckBoxListCssElementCreator.CssClass );
 
 			var table = new DynamicTable { Caption = caption };

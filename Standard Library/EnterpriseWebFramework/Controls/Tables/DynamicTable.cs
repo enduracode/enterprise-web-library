@@ -306,7 +306,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool HasContentRows { get { return dataRowCount > 0; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			var modifiedCaption = caption;
 
 			// Display the caption and the sub caption.

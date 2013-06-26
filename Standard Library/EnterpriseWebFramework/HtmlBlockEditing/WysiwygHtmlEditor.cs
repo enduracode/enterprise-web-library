@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string FormControl<string>.DurableValue { get { return durableValue; } }
 		string FormControl.DurableValueAsString { get { return durableValue; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "name", UniqueID );
 
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft

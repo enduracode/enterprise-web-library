@@ -33,7 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		WebControl EtherealControl.Control { get { return this; } }
 
-		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
+		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "name", UniqueID );
 			Attributes.Add( "value", AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
 			Attributes.Add( "type", "hidden" );
