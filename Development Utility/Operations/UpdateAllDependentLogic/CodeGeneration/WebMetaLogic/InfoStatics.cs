@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			                                                        !isEsInfo ? "uriFragmentIdentifier: uriFragmentIdentifier" : "" ) + " );" );
 
 			// Call init.
-			writer.WriteLine( "init( " + "AppRequestState.PrimaryDatabaseConnection );" );
+			writer.WriteLine( "init();" );
 
 			writer.WriteLine( "}" );
 
@@ -75,15 +75,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void writeConstructorDocComments( TextWriter writer, List<VariableSpecification> requiredParameters ) {
-			writer.WriteLine( "/// <summary>" );
-			writer.WriteLine( "/// This can only be called from web applications because it gets a database connection from EwfPage." );
 			foreach( var parameter in requiredParameters ) {
 				var warning = "";
 				if( parameter.IsString || parameter.IsEnumerable )
 					warning = " Do not pass null.";
 				CodeGenerationStatics.AddParamDocComment( writer, parameter.Name, parameter.Comment + warning );
 			}
-			writer.WriteLine( "/// </summary>" );
 		}
 
 		private static void writeInitParametersMethod( TextWriter writer, List<VariableSpecification> requiredParameters,

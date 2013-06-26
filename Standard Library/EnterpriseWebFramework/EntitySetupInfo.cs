@@ -24,7 +24,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Throws an exception if the parameter values or any non URL elements of the current request make the entity setup invalid.
 		/// </summary>
-		protected abstract void init( DBConnection cn );
+		protected virtual void init() {
+			init( DataAccessState.Current.PrimaryDatabaseConnection );
+		}
+
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
+		protected virtual void init( DBConnection cn ) {}
 
 		/// <summary>
 		/// Creates a page info object for the parent page of this entity setup. Returns null if there is no parent page.

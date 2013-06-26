@@ -252,7 +252,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
 		/// </summary>
-		public virtual void ExecuteInitialRequestDataModifications( DBConnection cn ) {}
+		public virtual void ExecuteInitialRequestDataModifications() {}
 
 		/// <summary>
 		/// Returns true if Spanish should be used. Default is false.

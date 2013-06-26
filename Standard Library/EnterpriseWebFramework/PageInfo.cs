@@ -35,7 +35,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Throws an exception if the parameter values or any non URL elements of the current request make the page invalid.
 		/// </summary>
-		protected abstract void init( DBConnection cn );
+		protected virtual void init() {
+			init( DataAccessState.Current.PrimaryDatabaseConnection );
+		}
+
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
+		protected virtual void init( DBConnection cn ) {}
 
 		/// <summary>
 		/// Executes the specified fragment identifier validator, which takes the page's fragment identifier and should return a non empty string, i.e. an error

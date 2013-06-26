@@ -277,7 +277,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData( AppRequestState.PrimaryDatabaseConnection );
-			LoadData( AppRequestState.PrimaryDatabaseConnection );
+			loadData();
 			loadDataForControlAndChildren( AppRequestState.PrimaryDatabaseConnection, this );
 
 			// It's important to handle new ethereal controls getting added during this loop.
@@ -447,7 +447,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Loads and displays data on the page. This is a replacement for the Init event that provides access to EWF page state.
 		/// </summary>
-		protected abstract void LoadData( DBConnection cn );
+		protected virtual void loadData() {
+			LoadData( DataAccessState.Current.PrimaryDatabaseConnection );
+		}
+
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use loadData (lowercase L) instead." ) ]
+		protected virtual void LoadData( DBConnection cn ) {}
 
 		private void loadDataForControlAndChildren( DBConnection cn, Control control ) {
 			if( control is ControlTreeDataLoader )
@@ -865,8 +870,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				try {
 					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 						updateLastPageRequestTimeForUser();
-						EwfApp.Instance.ExecuteInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
-						executeInitialRequestDataModifications( AppRequestState.PrimaryDatabaseConnection );
+						EwfApp.Instance.ExecuteInitialRequestDataModifications();
+						executeInitialRequestDataModifications();
 					}
 				}
 				finally {
@@ -992,7 +997,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
 		/// </summary>
-		protected virtual void executeInitialRequestDataModifications( DBConnection cn ) {}
+		protected virtual void executeInitialRequestDataModifications() {}
 
 		/// <summary>
 		/// Saves view state.
