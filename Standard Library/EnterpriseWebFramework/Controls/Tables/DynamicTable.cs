@@ -396,11 +396,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var controlLine = new ControlLine( new Control[ 0 ] );
 
 				if( previousRowSetup != null ) {
-					upButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( cn1, previousRowSetup.RankId.Value, rowSetup.RankId.Value ) );
+					upButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) );
 					controlLine.AddControls( upButton );
 				}
 				if( nextRowSetup != null ) {
-					downButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( cn1, rowSetup.RankId.Value, nextRowSetup.RankId.Value ) );
+					downButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) );
 					controlLine.AddControls( downButton );
 				}
 

@@ -6,7 +6,7 @@
 		/// <summary>
 		/// Inserts a new rank and returns its ID.
 		/// </summary>
-		public static int InsertRank( DBConnection cn ) {
+		public static int InsertRank() {
 			var rankingSetup = (RankingProvider)DataAccessStatics.SystemProvider;
 			var id = rankingSetup.GetNextMainSequenceValue();
 			rankingSetup.InsertRank( id, id );
@@ -16,8 +16,8 @@
 		/// <summary>
 		/// Swaps the values of the specified ranks.
 		/// </summary>
-		internal static void SwapRanks( DBConnection cn, int rank1Id, int rank2Id ) {
-			cn.ExecuteInTransaction( delegate {
+		internal static void SwapRanks( int rank1Id, int rank2Id ) {
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( delegate {
 				var rankingSetup = (RankingProvider)DataAccessStatics.SystemProvider;
 
 				var rank1Value = rankingSetup.GetRank( rank1Id );
