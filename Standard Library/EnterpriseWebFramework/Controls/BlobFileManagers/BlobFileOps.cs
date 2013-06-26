@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using Aspose.Pdf.Facades;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
@@ -32,17 +31,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the first file in the specified file collection, or null if the collection is empty.
 		/// </summary>
-		public static BlobFile GetFirstFileFromCollection( DBConnection cn, int fileCollectionId ) {
-			return SystemProvider.GetFilesLinkedToFileCollection( cn, fileCollectionId ).FirstOrDefault();
+		public static BlobFile GetFirstFileFromCollection( int fileCollectionId ) {
+			return SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ).FirstOrDefault();
 		}
 
 		/// <summary>
 		/// Copies the specified file collection and returns the ID of the copy.
 		/// </summary>
-		public static int CopyFileCollection( DBConnection cn, int fileCollectionId ) {
-			var newFileCollectionId = SystemProvider.InsertFileCollection( cn );
-			foreach( var file in SystemProvider.GetFilesLinkedToFileCollection( cn, fileCollectionId ) )
-				SystemProvider.InsertFile( cn, newFileCollectionId, file.FileName, SystemProvider.GetFileContents( cn, file.FileId ), file.ContentType );
+		public static int CopyFileCollection( int fileCollectionId ) {
+			var newFileCollectionId = SystemProvider.InsertFileCollection();
+			foreach( var file in SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ) )
+				SystemProvider.InsertFile( newFileCollectionId, file.FileName, SystemProvider.GetFileContents( file.FileId ), file.ContentType );
 			return newFileCollectionId;
 		}
 
@@ -117,8 +116,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// The file name is used as the label unless labelOverride is specified.
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
-		public static Control GetFileLink( DBConnection cn, int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
-			var file = GetFirstFileFromCollection( cn, fileCollectionId );
+		public static Control GetFileLink( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
+			var file = GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
 			return new PostBackButton( new DataModification(),
@@ -133,8 +132,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// The file name is used as the label unless labelOverride is specified.
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
-		public static Control GetFileLinkFromFileId( DBConnection cn, int fileId, string labelOverride = null, string textIfNoFile = "" ) {
-			var file = SystemProvider.GetFile( cn, fileId );
+		public static Control GetFileLinkFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
+			var file = SystemProvider.GetFile( fileId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
 			return new PostBackButton( new DataModification(),
@@ -147,8 +146,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// You should check other meta information about the file (such as the extension) before calling this expensive method.
 		/// </summary>
-		public static bool IsValidPdfFile( DBConnection cn, int fileId ) {
-			var contents = SystemProvider.GetFileContents( cn, fileId );
+		public static bool IsValidPdfFile( int fileId ) {
+			var contents = SystemProvider.GetFileContents( fileId );
 			return IsValidPdfFile( contents );
 		}
 

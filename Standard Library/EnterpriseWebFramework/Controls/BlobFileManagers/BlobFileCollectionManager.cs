@@ -64,8 +64,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.
 		/// </summary>
-		public void LoadData( DBConnection cn, int fileCollectionId ) {
-			LoadData( cn, fileCollectionId, null, null );
+		public void LoadData( int fileCollectionId ) {
+			LoadData( fileCollectionId, null, null );
 		}
 
 		/// <summary>
@@ -73,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// The fileIdsMarkedAsRead collection indicates which files should be not marked with a UI element drawing the user's attention to the fact that they haven't read it.
 		/// All other files not in this collection will be marked. FileIdsMarkedAsRead can be null, and will result as nothing being shown as new.
 		/// </summary>
-		public void LoadData( DBConnection cn, int fileCollectionId, MarkFileAsReadMethod markFileAsReadMethod, IEnumerable<int> fileIdsMarkedAsRead ) {
+		public void LoadData( int fileCollectionId, MarkFileAsReadMethod markFileAsReadMethod, IEnumerable<int> fileIdsMarkedAsRead ) {
 			this.fileCollectionId = fileCollectionId;
 			this.markFileAsReadMethod = markFileAsReadMethod;
 			this.fileIdsMarkedAsRead = fileIdsMarkedAsRead;
@@ -100,7 +100,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var table = new DynamicTable( columnSetups.ToArray() ) { Caption = Caption };
 
-			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( cn, fileCollectionId );
+			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
 			var deleteDm = new DataModification();
@@ -135,15 +135,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var fileIsUnread = fileIdsMarkedAsRead != null && !fileIdsMarkedAsRead.Contains( file.FileId );
 
-			cells.Add(
-				new EwfTableCell( new PostBackButton( new DataModification(),
-				                                      () => EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( delegate( DBConnection cn1 ) {
-					                                      if( fileIsUnread && markFileAsReadMethod != null )
-						                                      markFileAsReadMethod( cn1, file.FileId );
-					                                      return file.FileId;
-				                                      } ) ),
-				                                      new TextActionControlStyle( file.FileName ),
-				                                      false ) { ToolTip = file.FileName } ) );
+			cells.Add( new EwfTableCell( new PostBackButton( new DataModification(),
+			                                                 () => EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( () => {
+				                                                 if( fileIsUnread && markFileAsReadMethod != null )
+					                                                 markFileAsReadMethod( file.FileId );
+				                                                 return file.FileId;
+			                                                 } ) ),
+			                                                 new TextActionControlStyle( file.FileName ),
+			                                                 false ) { ToolTip = file.FileName } ) );
 
 			cells.Add( new EwfTableCell( file.UploadedDate.ToDayMonthYearString( false ) ) );
 			cells.Add( new EwfTableCell( fileIsUnread ? "New!" : "" ) { CssClass = "ewfNewness" } );
@@ -157,7 +156,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			deleteModMethods.Add( cn => {
 				if( !delete )
 					return false;
-				BlobFileOps.SystemProvider.DeleteFile( cn, file.FileId );
+				BlobFileOps.SystemProvider.DeleteFile( file.FileId );
 				return true;
 			} );
 
@@ -183,23 +182,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
 				int newFileId;
 				if( existingFile != null ) {
-					BlobFileOps.SystemProvider.UpdateFile( DataAccessState.Current.PrimaryDatabaseConnection,
-					                                       existingFile.FileId,
-					                                       file.FileName,
-					                                       file.Contents,
-					                                       BlobFileOps.GetContentTypeForPostedFile( file ) );
+					BlobFileOps.SystemProvider.UpdateFile( existingFile.FileId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
 					newFileId = existingFile.FileId;
 				}
-				else {
-					newFileId = BlobFileOps.SystemProvider.InsertFile( DataAccessState.Current.PrimaryDatabaseConnection,
-					                                                   fileCollectionId,
-					                                                   file.FileName,
-					                                                   file.Contents,
-					                                                   BlobFileOps.GetContentTypeForPostedFile( file ) );
-				}
+				else
+					newFileId = BlobFileOps.SystemProvider.InsertFile( fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
 
 				if( NewFileNotificationMethod != null )
-					NewFileNotificationMethod( DataAccessState.Current.PrimaryDatabaseConnection, newFileId );
+					NewFileNotificationMethod( newFileId );
 				EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 			} );
 

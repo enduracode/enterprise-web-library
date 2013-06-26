@@ -175,7 +175,7 @@ namespace RedStapler.StandardLibrary {
 		/// Do not pass null for text. Passing null for font will result in a generic Sans Serif, 10pt font.
 		/// </summary>
 		public static FileCreator CreateImageFromText( string text, Font font ) {
-			return new FileCreator( ( cn1, stream ) => {
+			return new FileCreator( stream => {
 				font = font ?? new Font( FontFamily.GenericSansSerif, 10 );
 
 				const int startingBitmapWidth = 800;

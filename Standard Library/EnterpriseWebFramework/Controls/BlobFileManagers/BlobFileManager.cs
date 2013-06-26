@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Call this during LoadData.  This does not need to be called if there is no existing file collection.
 		/// </summary>
-		public void LoadData( DBConnection cn, int fileCollectionId ) {
+		public void LoadData( int fileCollectionId ) {
 			this.fileCollectionId = fileCollectionId;
 		}
 
@@ -44,15 +44,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		// NOTE: There should be a way to tell if a file was uploaded.
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
 			if( fileCollectionId != null )
-				file = BlobFileOps.GetFirstFileFromCollection( cn, fileCollectionId.Value );
+				file = BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value );
 
 			var controlStack = ControlStack.Create( true );
 			if( file != null ) {
 				var download = new PostBackButton( new DataModification(),
 				                                   () =>
 				                                   EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( // Refresh the file here in case a new one was uploaded on the same post back
-				                                                                             	cn1 =>
-				                                                                             	BlobFileOps.GetFirstFileFromCollection( cn1, fileCollectionId.Value ).FileId ) ),
+					                                                                             () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId ) ),
 				                                   new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
 				                                   false );
 				controlStack.AddControls( download );
@@ -117,14 +116,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// This will return an ID even if there are 0 files in the collection (in other words, no file). No file should always be
 		/// represented by a non-null file collection ID which happens to have 0 files in it.  Null file collection IDs are not supported.
 		/// </summary>
-		public int ModifyData( DBConnection cn ) {
+		public int ModifyData() {
 			if( fileCollectionId == null )
-				fileCollectionId = BlobFileOps.SystemProvider.InsertFileCollection( cn );
+				fileCollectionId = BlobFileOps.SystemProvider.InsertFileCollection();
 
 			var rsFile = uploadedFile.GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			if( rsFile != null ) {
-				BlobFileOps.SystemProvider.DeleteFilesLinkedToFileCollection( cn, fileCollectionId.Value );
-				BlobFileOps.SystemProvider.InsertFile( cn, fileCollectionId.Value, rsFile.FileName, rsFile.Contents, BlobFileOps.GetContentTypeForPostedFile( rsFile ) );
+				BlobFileOps.SystemProvider.DeleteFilesLinkedToFileCollection( fileCollectionId.Value );
+				BlobFileOps.SystemProvider.InsertFile( fileCollectionId.Value, rsFile.FileName, rsFile.Contents, BlobFileOps.GetContentTypeForPostedFile( rsFile ) );
 			}
 			return fileCollectionId.Value;
 		}

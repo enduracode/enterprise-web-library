@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.WebFileSending;
@@ -18,7 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Automatically executes inside an EhModifyDataAndSendFile method. Automatically converts the given file name to a safe file name.
 		/// </summary>
 		public static void SendExcelFile( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( delegate( DBConnection cn, Stream stream ) {
+			EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( stream => {
 				workbook.SaveToStream( stream );
 				return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
 			} ) );

@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.NonSecure; } }
 		}
 
-		protected override FileCreator fileCreator { get { return new FileCreator( cn => new FileToBeSent( info.FileName + FileExtensions.Xsd, ContentTypes.Xml, File.ReadAllText( info.FilePath ) ) ); } }
+		protected override FileCreator fileCreator { get { return new FileCreator( () => new FileToBeSent( info.FileName + FileExtensions.Xsd, ContentTypes.Xml, File.ReadAllText( info.FilePath ) ) ); } }
 		protected override bool sendsFileInline { get { return true; } }
 		protected override void LoadData( DBConnection cn ) {}
 	}

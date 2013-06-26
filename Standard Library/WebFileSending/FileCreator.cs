@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.WebFileSending {
@@ -12,7 +10,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// <summary>
 		/// Method.
 		/// </summary>
-		protected Func<DBConnection, FileToBeSent> method;
+		protected Func<FileToBeSent> method;
 
 		/// <summary>
 		/// Constructor.
@@ -22,7 +20,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// <summary>
 		/// Creates a file creator with a file ID.
 		/// </summary>
-		public FileCreator( int fileId ): this( cn => fileId ) {}
+		public FileCreator( int fileId ): this( () => fileId ) {}
 
 		// NOTE: This method is impossible to discover because we also use non-static constructors.
 		/// <summary>
@@ -32,17 +30,17 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// that takes a file ID.
 		/// </summary>
 		public static FileCreator CreateFromFileCollection( int fileCollectionId ) {
-			return new FileCreator( cn => BlobFileOps.GetFirstFileFromCollection( cn, fileCollectionId ).FileId );
+			return new FileCreator( () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId ).FileId );
 		}
 
 		/// <summary>
 		/// Creates a file creator with a method that returns a file ID.
 		/// </summary>
-		public FileCreator( Func<DBConnection, int> fileIdReturner ) {
-			method = delegate( DBConnection cn ) {
-				var fileId = fileIdReturner( cn );
-				var file = BlobFileOps.SystemProvider.GetFile( cn, fileId );
-				var contents = BlobFileOps.SystemProvider.GetFileContents( cn, fileId );
+		public FileCreator( Func<int> fileIdReturner ) {
+			method = () => {
+				var fileId = fileIdReturner();
+				var file = BlobFileOps.SystemProvider.GetFile( fileId );
+				var contents = BlobFileOps.SystemProvider.GetFileContents( fileId );
 				return new FileToBeSent( file.FileName, file.ContentType, contents );
 			};
 		}
@@ -50,24 +48,24 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// <summary>
 		/// Creates a file creator with a method that returns a file.
 		/// </summary>
-		public FileCreator( Func<DBConnection, FileToBeSent> fileCreationMethod ) {
+		public FileCreator( Func<FileToBeSent> fileCreationMethod ) {
 			method = fileCreationMethod;
 		}
 
 		/// <summary>
 		/// Creates a file creator with a method that writes a file to a stream and returns the name and content type of the file.
 		/// </summary>
-		public FileCreator( Func<DBConnection, Stream, FileInfoToBeSent> streamFileCreationMethod ) {
-			method = delegate( DBConnection cn ) {
+		public FileCreator( Func<Stream, FileInfoToBeSent> streamFileCreationMethod ) {
+			method = () => {
 				using( var stream = new MemoryStream() ) {
-					var fileInfo = streamFileCreationMethod( cn, stream );
+					var fileInfo = streamFileCreationMethod( stream );
 					return new FileToBeSent( fileInfo.FileName, fileInfo.ContentType, stream.ToArray() );
 				}
 			};
 		}
 
 		internal FileToBeSent CreateFile() {
-			return method( AppRequestState.PrimaryDatabaseConnection );
+			return method();
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+﻿using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.WebFileSending {
 	/// <summary>
@@ -11,9 +10,9 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// </summary>
 		public ImageFileCreator( int fileId, int? forcedWidth ) {
 			// NOTE: I do not like how I have to duplicate this from FileCreator or how FileCreator has to have a blank constructor to let me do this.
-			method = delegate( DBConnection cn ) {
-				var file = BlobFileOps.SystemProvider.GetFile( cn, fileId );
-				var contents = BlobFileOps.SystemProvider.GetFileContents( cn, fileId );
+			method = () => {
+				var file = BlobFileOps.SystemProvider.GetFile( fileId );
+				var contents = BlobFileOps.SystemProvider.GetFileContents( fileId );
 				return new ImageToBeSent( file.FileName, file.ContentType, contents, forcedWidth );
 			};
 		}

@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		protected override FileCreator fileCreator {
 			get {
-				return new FileCreator( cn => {
+				return new FileCreator( () => {
 					string responseString = null;
 					AppTools.ExecuteWebServiceWithStandardExceptionHandling( delegate {
 						var file = Request.InputStream;
@@ -48,10 +48,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								                     null,
 								                     type,
 								                     new object[]
-								                     	{
-								                     		Request.Headers[ "x-upload-identifier" ], Request.Headers[ "x-page-parameters" ],
-								                     		new RsFile( memory.ToArray(), Request.Headers[ "x-file-name" ], Request.Headers[ "x-file-type" ] )
-								                     	} ) );
+									                     {
+										                     Request.Headers[ "x-upload-identifier" ], Request.Headers[ "x-page-parameters" ],
+										                     new RsFile( memory.ToArray(), Request.Headers[ "x-file-name" ], Request.Headers[ "x-file-type" ] )
+									                     } ) );
 
 
 							// NOTE: Do something about the fact there might not be any files.
