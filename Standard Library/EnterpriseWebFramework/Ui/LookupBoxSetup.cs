@@ -1,6 +1,5 @@
 using System;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
@@ -10,7 +9,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 	public class LookupBoxSetup {
 		private readonly int pixelWidth;
 		private readonly string defaultText;
-		private readonly Func<DBConnection, string, string> handler;
+		private readonly Func<string, string> handler;
 		private readonly WebMethodDefinition webMethodDefinition;
 
 		/// <summary>
@@ -18,8 +17,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// </summary>
 		/// <param name="pixelWidth"></param>
 		/// <param name="defaultText">Text displayed when the LookupBox does not have focus.</param>
-		/// <param name="handler">Supplies a database connection and the string entered into the LookupBox from the user. Returns the URL the user will be redirected to.</param>
-		public LookupBoxSetup( int pixelWidth, string defaultText, Func<DBConnection, string, string> handler ) {
+		/// <param name="handler">Supplies the string entered into the LookupBox from the user. Returns the URL the user will be redirected to.</param>
+		public LookupBoxSetup( int pixelWidth, string defaultText, Func<string, string> handler ) {
 			this.pixelWidth = pixelWidth;
 			this.defaultText = defaultText;
 			this.handler = handler;
@@ -31,8 +30,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// <param name="pixelWidth"></param>
 		/// <param name="defaultText">Text displayed when the LookupBox does not have focus.</param>
 		/// <param name="webMethodDefinition">The method in this WebMethodDefinition must accept (string textPassedFromUser, int count) and return an array of strings.</param>
-		/// <param name="handler">Supplies a database connection and the string entered into the LookupBox from the user. Returns the URL the user will be redirected to.</param>
-		public LookupBoxSetup( int pixelWidth, string defaultText, Func<DBConnection, string, string> handler, WebMethodDefinition webMethodDefinition )
+		/// <param name="handler">Supplies the string entered into the LookupBox from the user. Returns the URL the user will be redirected to.</param>
+		public LookupBoxSetup( int pixelWidth, string defaultText, Func<string, string> handler, WebMethodDefinition webMethodDefinition )
 			: this( pixelWidth, defaultText, handler ) {
 			this.webMethodDefinition = webMethodDefinition;
 		}
@@ -41,7 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// Builds this LookupBox and returns the panel.
 		/// </summary>
 		public WebControl BuildLookupBoxPanel() {
-			var textBox = new EwfTextBox( "", postBackHandler: postBackValue => EwfPage.Instance.EhModifyDataAndRedirect( cn => handler( cn, postBackValue ) ) )
+			var textBox = new EwfTextBox( "", postBackHandler: postBackValue => EwfPage.Instance.EhModifyDataAndRedirect( cn => handler( postBackValue ) ) )
 				{
 					Width = new Unit( pixelWidth )
 				};
