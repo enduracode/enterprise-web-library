@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -30,9 +29,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items,
-		                                                                                     IEnumerable<ItemIdType> selectedItemIds,
-		                                                                                     out Action<DBConnection> modificationMethod, string caption = "",
-		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
+		                                                                                     IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
+		                                                                                     string caption = "", bool includeSelectAndDeselectAllButtons = false,
+		                                                                                     byte numberOfColumns = 1,
 		                                                                                     IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
 		                                                                                     Func<bool> validationPredicate = null,
@@ -74,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label,
 		                                                                                     IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
-		                                                                                     out Action<DBConnection> modificationMethod, string caption = "",
+		                                                                                     out Action modificationMethod, string caption = "",
 		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
 		                                                                                     int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
@@ -165,12 +164,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public void ModifyData( DBConnection cn ) {
+		public void ModifyData() {
 			if( selectedItemIdsInPostBack == null )
 				return;
 			var changedItemIds = selectedItemIdsInPostBack.Except( selectedItemIds ).Union( selectedItemIds.Except( selectedItemIdsInPostBack ) ).ToArray();
 			foreach( var i in items.Where( i => changedItemIds.Contains( i.Item.Id ) ) )
-				i.ChangeHandler( cn, selectedItemIdsInPostBack.Contains( i.Item.Id ) );
+				i.ChangeHandler( selectedItemIdsInPostBack.Contains( i.Item.Id ) );
 		}
 
 		/// <summary>

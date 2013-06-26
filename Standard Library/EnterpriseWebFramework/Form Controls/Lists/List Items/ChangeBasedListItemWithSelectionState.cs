@@ -1,5 +1,4 @@
 ﻿using System;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -9,7 +8,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a change based list item.
 		/// </summary>
-		public static ChangeBasedListItemWithSelectionState<IdType> Create<IdType>( IdType id, string label, Action<DBConnection, bool> changeHandler, bool isSelected,
+		public static ChangeBasedListItemWithSelectionState<IdType> Create<IdType>( IdType id, string label, Action<bool> changeHandler, bool isSelected,
 		                                                                            bool? isSelectedInUi = null ) {
 			return new ChangeBasedListItemWithSelectionState<IdType>( ChangeBasedListItem.Create( id, label, changeHandler ), isSelected, isSelectedInUi ?? isSelected );
 		}
