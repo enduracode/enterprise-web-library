@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.IO {
@@ -14,7 +12,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// <summary>
 		/// Method that knows how to process a line from a particular file.  The validator is new for each row and has no errors, initially.
 		/// </summary>
-		public delegate void LineProcessingMethod( DBConnection cn, Validator validator, ParsedLine line );
+		public delegate void LineProcessingMethod( Validator validator, ParsedLine line );
 
 		private FileReader fileReader;
 		private Parser parser;
@@ -61,7 +59,11 @@ namespace RedStapler.StandardLibrary.IO {
 		/// </summary>
 		public static TabularDataParser CreateForFixedWidthFile( string filePath, int headerRowsToSkip, params int[] columnStartPositions ) {
 			return new TabularDataParser
-			       	{ fileReader = new FileReader( filePath ), headerRowsToSkip = headerRowsToSkip, parser = new FixedWidthParser( columnStartPositions ) };
+				{
+					fileReader = new FileReader( filePath ),
+					headerRowsToSkip = headerRowsToSkip,
+					parser = new FixedWidthParser( columnStartPositions )
+				};
 		}
 
 		/// <summary>
@@ -84,7 +86,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// For every line (after headerRowsToSkip) in the file with the given path, calls the line handling method you pass.
 		/// The validationErrors collection will hold all validation errors encountered during the processing of all lines.
 		/// </summary>
-		public void ParseAndProcessAllLines( DBConnection cn, LineProcessingMethod lineHandler, ICollection<ValidationError> validationErrors ) {
+		public void ParseAndProcessAllLines( LineProcessingMethod lineHandler, ICollection<ValidationError> validationErrors ) {
 			fileReader.ExecuteInStreamReader( delegate( StreamReader reader ) {
 				IDictionary columnHeadersToIndexes = null;
 				if( hasHeaderRow )
@@ -102,7 +104,7 @@ namespace RedStapler.StandardLibrary.IO {
 						parsedLine.LineNumber = lineNumber;
 						parsedLine.ColumnHeadersToIndexes = columnHeadersToIndexes;
 						var validator = new Validator();
-						lineHandler( cn, validator, parsedLine );
+						lineHandler( validator, parsedLine );
 						if( validator.ErrorsOccurred ) {
 							foreach( var error in validator.Errors )
 								validationErrors.Add( new ValidationError( "Line " + lineNumber, error.UnusableValueReturned, error.Message ) );
