@@ -12,12 +12,12 @@ namespace RedStapler.StandardLibrary {
 	public class DataModification: ValidationList {
 		private readonly List<EnterpriseWebFramework.Validation> validations = new List<EnterpriseWebFramework.Validation>();
 		private readonly List<EnterpriseWebFramework.Validation> topValidations = new List<EnterpriseWebFramework.Validation>();
-		private readonly List<DbMethod> modificationMethods = new List<DbMethod>();
+		private readonly List<Action> modificationMethods = new List<Action>();
 
 		/// <summary>
 		/// Creates a data modification.
 		/// </summary>
-		public DataModification( Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, DbMethod firstModificationMethod = null ) {
+		public DataModification( Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null ) {
 			if( firstTopValidationMethod != null )
 				AddTopValidationMethod( firstTopValidationMethod );
 			if( firstModificationMethod != null )
@@ -46,15 +46,25 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Adds a modification method. These only execute if all validation methods succeed.
 		/// </summary>
-		public void AddModificationMethod( DbMethod modificationMethod ) {
+		public void AddModificationMethod( Action modificationMethod ) {
 			modificationMethods.Add( modificationMethod );
 		}
 
 		/// <summary>
 		/// Adds a list of modification methods. These only execute if all validation methods succeed.
 		/// </summary>
-		public void AddModificationMethods( IEnumerable<DbMethod> modificationMethods ) {
+		public void AddModificationMethods( IEnumerable<Action> modificationMethods ) {
 			this.modificationMethods.AddRange( modificationMethods );
+		}
+
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
+		public void AddModificationMethod( Action<DBConnection> modificationMethod ) {
+			AddModificationMethod( () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) );
+		}
+
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
+		public void AddModificationMethods( IEnumerable<Action<DBConnection>> modificationMethods ) {
+			AddModificationMethods( from i in modificationMethods select new Action( () => i( DataAccessState.Current.PrimaryDatabaseConnection ) ) );
 		}
 
 		internal bool ContainsAnyValidationsOrModifications() {
@@ -77,7 +87,7 @@ namespace RedStapler.StandardLibrary {
 
 		internal void ModifyData( DBConnection cn ) {
 			foreach( var method in modificationMethods )
-				method( cn );
+				method();
 		}
 	}
 }

@@ -38,7 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			dm.AddModificationMethod( modifyData );
 		}
 
-		private void modifyData( DBConnection cn ) {
+		private void modifyData() {
 			var password = new Password( newPassword.Value );
 			( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).InsertOrUpdateUser( AppTools.User.UserId,
 			                                                                                                       AppTools.User.Email,

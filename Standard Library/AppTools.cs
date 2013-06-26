@@ -260,20 +260,20 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
-		public static void ExecuteDbMethod( DbMethod dbMethod ) {
+		public static void ExecuteDbMethod( Action<DBConnection> dbMethod ) {
 			assertClassInitialized();
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => dbMethod( DataAccessState.Current.PrimaryDatabaseConnection ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static void ExecuteInDbConnection( DbMethod dbMethod ) {
+		public static void ExecuteInDbConnection( Action<DBConnection> dbMethod ) {
 			ExecuteDbMethod( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethod<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( dbMethod );
+			return DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => dbMethod( DataAccessState.Current.PrimaryDatabaseConnection ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
@@ -282,20 +282,23 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
-		public static void ExecuteDbMethodInTransaction( DbMethod dbMethod ) {
+		public static void ExecuteDbMethodInTransaction( Action<DBConnection> dbMethod ) {
 			assertClassInitialized();
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
+				() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => dbMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static void ExecuteInDbConnectionWithTransaction( DbMethod dbMethod ) {
+		public static void ExecuteInDbConnectionWithTransaction( Action<DBConnection> dbMethod ) {
 			ExecuteDbMethodInTransaction( dbMethod );
 		}
 
 		[ Obsolete( "Guaranteed through 30 September 2013." ) ]
 		public static T ExecuteDbMethodInTransaction<T>( Func<DBConnection, T> dbMethod ) {
 			assertClassInitialized();
-			return DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => cn.ExecuteInTransaction( () => dbMethod( cn ) ) );
+			return
+				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => dbMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ) );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2013." ) ]

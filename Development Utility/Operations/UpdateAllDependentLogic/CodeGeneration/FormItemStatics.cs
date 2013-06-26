@@ -310,7 +310,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "File",
 			                      valueParamTypeName,
 			                      "null",
-			                      new CSharpParameter( "out DbMethod", "modificationMethod" ).ToSingleElementArray(),
+			                      new CSharpParameter( "out System.Action<DBConnection>", "modificationMethod" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToSingleElementArray(),
@@ -318,7 +318,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      field.PropertyName + " = control.ModifyData( cn ); return control; }",
 			                      "control.ValidateFormValues( validator, subject, requireUploadIfNoFile )",
 			                      "true",
-			                      preFormItemGetterStatements: "DbMethod mm = null;",
+			                      preFormItemGetterStatements: "System.Action<DBConnection> mm = null;",
 			                      postFormItemGetterStatements: "modificationMethod = mm;" );
 		}
 

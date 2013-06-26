@@ -115,8 +115,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 						              CssClass = "ewfRightAlignCell"
 					              } );
 			}
-			deleteDm.AddModificationMethod( cn1 => {
-				if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method( cn1 ) || deletesOccurred ) )
+			deleteDm.AddModificationMethod( () => {
+				if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method( DataAccessState.Current.PrimaryDatabaseConnection ) || deletesOccurred ) )
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 			} );
 
@@ -176,21 +176,30 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                          },
 			                                                                       dm ) );
 
-			dm.AddModificationMethod( cn => {
+			dm.AddModificationMethod( () => {
 				if( file == null )
 					return;
 
 				var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
 				int newFileId;
 				if( existingFile != null ) {
-					BlobFileOps.SystemProvider.UpdateFile( cn, existingFile.FileId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+					BlobFileOps.SystemProvider.UpdateFile( DataAccessState.Current.PrimaryDatabaseConnection,
+					                                       existingFile.FileId,
+					                                       file.FileName,
+					                                       file.Contents,
+					                                       BlobFileOps.GetContentTypeForPostedFile( file ) );
 					newFileId = existingFile.FileId;
 				}
-				else
-					newFileId = BlobFileOps.SystemProvider.InsertFile( cn, fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+				else {
+					newFileId = BlobFileOps.SystemProvider.InsertFile( DataAccessState.Current.PrimaryDatabaseConnection,
+					                                                   fileCollectionId,
+					                                                   file.FileName,
+					                                                   file.Contents,
+					                                                   BlobFileOps.GetContentTypeForPostedFile( file ) );
+				}
 
 				if( NewFileNotificationMethod != null )
-					NewFileNotificationMethod( cn, newFileId );
+					NewFileNotificationMethod( DataAccessState.Current.PrimaryDatabaseConnection, newFileId );
 				EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 			} );
 

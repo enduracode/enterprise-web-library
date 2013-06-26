@@ -336,11 +336,11 @@ CREATE TABLE MainSequence(
 		  GO
  */
 
-		public void ExecuteDbMethod( DbMethod method ) {
+		public void ExecuteDbMethod( Action<DBConnection> method ) {
 			executeDbMethodWithSpecifiedDatabaseInfo( info, method );
 		}
 
-		private void executeDbMethodAgainstMaster( DbMethod method ) {
+		private void executeDbMethodAgainstMaster( Action<DBConnection> method ) {
 			executeDbMethodWithSpecifiedDatabaseInfo(
 				new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
 				                   info.Server,
@@ -352,16 +352,18 @@ CREATE TABLE MainSequence(
 				method );
 		}
 
-		private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, DbMethod method ) {
-			executeMethodWithDbExceptionHandling(
-				() =>
-				new DBConnection( new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
-				                                     info.Server,
-				                                     info.LoginName,
-				                                     info.Password,
-				                                     info.Database,
-				                                     false,
-				                                     info.FullTextCatalog ) ).ExecuteWithConnectionOpen( method ) );
+		private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, Action<DBConnection> method ) {
+			executeMethodWithDbExceptionHandling( () => {
+				var connection =
+					new DBConnection( new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
+					                                     info.Server,
+					                                     info.LoginName,
+					                                     info.Password,
+					                                     info.Database,
+					                                     false,
+					                                     info.FullTextCatalog ) );
+				connection.ExecuteWithConnectionOpen( () => method( connection ) );
+			} );
 		}
 
 		private void executeMethodWithDbExceptionHandling( Action method ) {

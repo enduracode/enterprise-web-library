@@ -11,7 +11,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		protected override void LoadData( DBConnection cn ) {
 			ph.AddControlsReturnThis( ControlStack.CreateWithControls( true,
 			                                                           new PostBackButton(
-				                                                           new DataModification( firstModificationMethod: cn1 => EwfApp.Instance.SendHealthCheck() ),
+				                                                           new DataModification( firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
 				                                                           new ButtonActionControlStyle( "Send Health Check" ),
 				                                                           usesSubmitBehavior: false ),
 			                                                           new PostBackButton( new DataModification( firstModificationMethod: throwException ),
@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			                                                                               usesSubmitBehavior: false ) ) );
 		}
 
-		private void throwException( DBConnection cn ) {
+		private void throwException() {
 			throw new ApplicationException( "This is a test from the {0} page.".FormatWith( info.PageFullName ) );
 		}
 	}

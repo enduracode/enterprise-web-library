@@ -41,11 +41,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			dm.AddModificationMethod( modifyData );
 		}
 
-		private void deleteUser( DBConnection cn ) {
+		private void deleteUser() {
 			UserManagementStatics.SystemProvider.DeleteUser( info.User.UserId );
 		}
 
-		private void modifyData( DBConnection cn ) {
+		private void modifyData() {
 			if( UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider;
 				if( info.UserId.HasValue ) {

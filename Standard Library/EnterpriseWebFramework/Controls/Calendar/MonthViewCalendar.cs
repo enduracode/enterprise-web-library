@@ -100,10 +100,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData( DBConnection cn ) {
-			if( dateModificationMethod == null ) {
-				throw new ApplicationException(
-					"In order to place this calendar on a page, you must call SetParameters before the end of LoadData." );
-			}
+			if( dateModificationMethod == null )
+				throw new ApplicationException( "In order to place this calendar on a page, you must call SetParameters before the end of LoadData." );
 			buildNavigationBox();
 
 			// Begin drawing calendar
@@ -152,7 +150,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var numIntervals = 0;
 			EwfPage.Instance.PostBackDataModification.AddTopValidationMethod(
 				( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
-			EwfPage.Instance.PostBackDataModification.AddModificationMethod( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
+			EwfPage.Instance.PostBackDataModification.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
 			var previousLink = new PostBackButton( new DataModification(),

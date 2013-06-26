@@ -80,10 +80,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// <summary>
 		/// Opens the connection, executes the specified method, and closes the connection.
 		/// </summary>
-		public void ExecuteWithConnectionOpen( DbMethod method ) {
+		public void ExecuteWithConnectionOpen( Action method ) {
 			Open();
 			try {
-				method( this );
+				method();
 			}
 			finally {
 				Close();
@@ -93,10 +93,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// <summary>
 		/// Opens the connection, executes the specified method, and closes the connection.
 		/// </summary>
-		public T ExecuteWithConnectionOpen<T>( Func<DBConnection, T> method ) {
+		public T ExecuteWithConnectionOpen<T>( Func<T> method ) {
 			Open();
 			try {
-				return method( this );
+				return method();
 			}
 			finally {
 				Close();

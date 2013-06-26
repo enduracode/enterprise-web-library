@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RedStapler.StandardLibrary.DataAccess;
 
@@ -42,6 +43,6 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		/// <summary>
 		/// Executes the given method inside a DBConnection for this Database.
 		/// </summary>
-		void ExecuteDbMethod( DbMethod method );
+		void ExecuteDbMethod( Action<DBConnection> method );
 	}
 }

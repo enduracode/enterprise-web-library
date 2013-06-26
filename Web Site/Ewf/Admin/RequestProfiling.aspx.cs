@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				                          new PostBackButton(
 					                          new DataModification(
 						                          firstModificationMethod:
-							                          cn1 =>
+							                          () =>
 							                          AppRequestState.AddNonTransactionalModificationMethod(
 								                          () =>
 								                          AppMemoryCache.SetRequestProfilingForUser( AppTools.User.UserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),

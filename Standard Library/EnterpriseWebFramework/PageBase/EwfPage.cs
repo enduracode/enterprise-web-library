@@ -659,7 +659,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( IsPostBack && postBackDataModification.ContainsAnyValidationsOrModifications() &&
 			    getChildFormControls( this ).Any( fc => fc.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ) {
 				var validationMethod = new Action<Validator>( validator => ExecuteDataModificationValidations( postBackDataModification, validator ) );
-				var modificationMethod = new DbMethod( cn => postBackDataModification.ModifyData( cn ) );
+				var modificationMethod = new Action<DBConnection>( cn => postBackDataModification.ModifyData( cn ) );
 				EhValidateAndModifyData( validationMethod, modificationMethod );
 			}
 		}
@@ -724,28 +724,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Performs a secondary modification unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
-		public void EhModifyData( DbMethod modificationMethod ) {
+		public void EhModifyData( Action<DBConnection> modificationMethod ) {
 			EhValidateAndModifyData( delegate { }, modificationMethod );
 		}
 
 		/// <summary>
 		/// Performs a secondary validation/modification unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
-		public void EhValidateAndModifyData( Action<Validator> validationMethod, DbMethod modificationMethod ) {
+		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
 			EhExecute( delegate { executeModification( validationMethod, modificationMethod ); } );
 		}
 
 		/// <summary>
 		/// Performs a secondary modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
-		public void EhModifyDataAndRedirect( RedirectingDbMethod method ) {
+		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
 			EhValidateAndModifyDataAndRedirect( delegate { }, method );
 		}
 
 		/// <summary>
 		/// Performs a secondary validation/modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
 		/// </summary>
-		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, RedirectingDbMethod modificationMethod ) {
+		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
 			EhExecute( () => executeModification( validationMethod,
 			                                      cn => {
 				                                      var url = modificationMethod( cn ) ?? "";
@@ -753,7 +753,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                      } ) );
 		}
 
-		private void executeModification( Action<Validator> validationMethod, DbMethod modificationMethod ) {
+		private void executeModification( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
 			var validator = new Validator();
 			validationMethod( validator );
 			if( validator.ErrorsOccurred )
@@ -950,7 +950,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// in another browser window while the first one is still running.
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser = new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( cn => {
+			var newlyQueriedUser = new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => {
 				try {
 					// NOTE: Why do I not know that it's going to be one provider or the other?
 					// NOTE: We could make a GetUserAsBaseType method in the base interface

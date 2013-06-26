@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                       out controlsToggledHiddenFieldValueGetter,
 			                       out controlsToggledHiddenFieldClientIdGetter );
 			EwfPage.Instance.PostBackDataModification.AddModificationMethod(
-				cn1 => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
+				() => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
 
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );

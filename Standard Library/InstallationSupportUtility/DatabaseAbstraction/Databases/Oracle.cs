@@ -327,19 +327,22 @@ CREATE SEQUENCE main_sequence;
 	}
 */
 
-		public void ExecuteDbMethod( DbMethod method ) {
+		public void ExecuteDbMethod( Action<DBConnection> method ) {
 			executeDbMethodWithSpecifiedDatabaseInfo( info, method );
 		}
 
-		private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, DbMethod method ) {
+		private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, Action<DBConnection> method ) {
 			executeMethodWithDbExceptionHandling( delegate {
 				// Before we disabled pooling, we couldn't repeatedly perform Update Data operations since users with open connections can't be dropped.
-				new DBConnection( new OracleInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
-				                                  info.DataSource,
-				                                  info.UserAndSchema,
-				                                  info.Password,
-				                                  false,
-				                                  info.SupportsLinguisticIndexes ) ).ExecuteWithConnectionOpen( method );
+				var connection =
+					new DBConnection( new OracleInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
+					                                  info.DataSource,
+					                                  info.UserAndSchema,
+					                                  info.Password,
+					                                  false,
+					                                  info.SupportsLinguisticIndexes ) );
+
+				connection.ExecuteWithConnectionOpen( () => method( connection ) );
 			} );
 		}
 

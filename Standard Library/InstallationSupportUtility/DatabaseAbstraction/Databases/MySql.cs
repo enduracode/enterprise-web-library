@@ -160,9 +160,11 @@ CREATE TABLE main_sequence(
 		}
 */
 
-		public void ExecuteDbMethod( DbMethod method ) {
-			executeMethodWithDbExceptionHandling(
-				() => new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) ).ExecuteWithConnectionOpen( method ) );
+		public void ExecuteDbMethod( Action<DBConnection> method ) {
+			executeMethodWithDbExceptionHandling( () => {
+				var connection = new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
+				connection.ExecuteWithConnectionOpen( () => method( connection ) );
+			} );
 		}
 
 		private void executeMethodWithDbExceptionHandling( Action method ) {

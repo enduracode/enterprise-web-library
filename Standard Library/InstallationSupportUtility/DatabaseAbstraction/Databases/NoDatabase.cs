@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		void Database.PerformMaintenance() {}
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
 
-		void Database.ExecuteDbMethod( DbMethod method ) {
+		void Database.ExecuteDbMethod( Action<DBConnection> method ) {
 			throw new NotSupportedException();
 		}
 	}

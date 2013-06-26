@@ -88,7 +88,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			} );
 		}
 
-		private void modifyData( DBConnection cn ) {
+		private void modifyData() {
 			user = UserManagementStatics.LogInUser( emailAddress,
 			                                        password,
 			                                        getUnregisteredEmailMessage(),

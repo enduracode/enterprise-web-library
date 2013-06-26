@@ -27,16 +27,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						FormItem.Create( "Enter your password for this non-live installation",
 						                 new EwfTextBox( "" ) { MasksCharacters = true },
 						                 validationGetter: control => new Validation( ( pbv, validator ) => {
-						                 	// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-						                 	var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
-						                 	if( !passwordMatch )
-						                 		validator.NoteErrorAndAddMessage( "Incorrect password." );
+							                 // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+							                 var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
+							                 if( !passwordMatch )
+								                 validator.NoteErrorAndAddMessage( "Incorrect password." );
 						                 },
 						                                                              dm ) ).ToSingleElementArray() ) );
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
 
-			dm.AddModificationMethod( delegate {
+			dm.AddModificationMethod( () => {
 				IntermediateAuthenticationMethods.SetCookie();
 				AppRequestState.Instance.IntermediateUserExists = true;
 			} );

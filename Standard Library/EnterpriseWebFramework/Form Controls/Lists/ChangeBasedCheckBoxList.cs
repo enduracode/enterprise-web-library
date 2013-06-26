@@ -30,9 +30,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items,
-		                                                                                     IEnumerable<ItemIdType> selectedItemIds, out DbMethod modificationMethod,
-		                                                                                     string caption = "", bool includeSelectAndDeselectAllButtons = false,
-		                                                                                     byte numberOfColumns = 1,
+		                                                                                     IEnumerable<ItemIdType> selectedItemIds,
+		                                                                                     out Action<DBConnection> modificationMethod, string caption = "",
+		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
 		                                                                                     IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
 		                                                                                     Func<bool> validationPredicate = null,
@@ -74,7 +74,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <returns></returns>
 		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label,
 		                                                                                     IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
-		                                                                                     out DbMethod modificationMethod, string caption = "",
+		                                                                                     out Action<DBConnection> modificationMethod, string caption = "",
 		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
 		                                                                                     int? cellSpan = null,
 		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,

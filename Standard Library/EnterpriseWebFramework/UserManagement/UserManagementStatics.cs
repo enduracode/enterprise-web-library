@@ -115,14 +115,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			var user = GetUser( AppRequestState.PrimaryDatabaseConnection, validatedEmailAddress );
 			if( user == null )
 				throw new EwfException( emailAddressErrorMessage );
-			ResetAndSendPassword( AppRequestState.PrimaryDatabaseConnection, user.UserId );
+			ResetAndSendPassword( user.UserId );
 		}
 
 		/// <summary>
 		/// Resets the password of the given user and sends a message with the new password to their email address. Do not call if the system does not implement the
 		/// forms authentication capable user management provider.
 		/// </summary>
-		public static void ResetAndSendPassword( DBConnection cn, int userId ) {
+		public static void ResetAndSendPassword( int userId ) {
 			var sp = SystemProvider as FormsAuthCapableUserManagementProvider;
 			User user = sp.GetUser( userId );
 

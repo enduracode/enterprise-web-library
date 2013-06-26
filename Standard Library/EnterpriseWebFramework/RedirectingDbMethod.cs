@@ -1,11 +1,7 @@
-using RedStapler.StandardLibrary.DataAccess;
 using System;
+using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
-
-	/// <summary>
-	/// A method that takes a database connection and returns a URL.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 September 2013. Please avoid passing database connections around." ) ]
 	public delegate string RedirectingDbMethod( DBConnection cn );
-
 }
