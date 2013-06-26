@@ -266,7 +266,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
-			                      "{ var control = new BlobFileCollectionManager( sortByName: sortByName ); control.LoadData( AppRequestState.PrimaryDatabaseConnection, (int)v ); return control; }",
+			                      "{ var control = new BlobFileCollectionManager( sortByName: sortByName ); control.LoadData( (int)v ); return control; }",
 			                      "",
 			                      "true" );
 		}
@@ -310,15 +310,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "File",
 			                      valueParamTypeName,
 			                      "null",
-			                      new CSharpParameter( "out System.Action<DBConnection>", "modificationMethod" ).ToSingleElementArray(),
+			                      new CSharpParameter( "out System.Action", "modificationMethod" ).ToSingleElementArray(),
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToSingleElementArray(),
-			                      "{ var control = new BlobFileManager(); if( v.HasValue ) control.LoadData( AppRequestState.PrimaryDatabaseConnection, (int)v.Value ); mm = cn => " +
-			                      field.PropertyName + " = control.ModifyData( cn ); return control; }",
+			                      "{ var control = new BlobFileManager(); if( v.HasValue ) control.LoadData( (int)v.Value ); mm = () => " + field.PropertyName +
+			                      " = control.ModifyData(); return control; }",
 			                      "control.ValidateFormValues( validator, subject, requireUploadIfNoFile )",
 			                      "true",
-			                      preFormItemGetterStatements: "System.Action<DBConnection> mm = null;",
+			                      preFormItemGetterStatements: "System.Action mm = null;",
 			                      postFormItemGetterStatements: "modificationMethod = mm;" );
 		}
 
