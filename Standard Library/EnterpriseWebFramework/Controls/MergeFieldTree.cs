@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.MailMerging.RowTree;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -45,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var table = new DynamicTable( new EwfTableColumn( "Field name" ), new EwfTableColumn( "Description" ) ) { Caption = name };
 			foreach( var field in singleRow.Values )
-				table.AddTextRow( getFieldNameCellText( field ), field.GetDescription( DataAccessState.Current.PrimaryDatabaseConnection ) );
+				table.AddTextRow( getFieldNameCellText( field ), field.GetDescription() );
 
 			foreach( var child in singleRow.Children ) {
 				var panel = new Panel();

@@ -1,5 +1,4 @@
 ﻿using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
 using RedStapler.StandardLibrary.MailMerging.RowTree;
 
@@ -20,18 +19,17 @@ namespace RedStapler.StandardLibrary.MailMerging.Fields {
 
 		string MergeField<RowType>.MsWordName { get { return implementation.MsWordNamePrefix + adaptedField.MsWordName; } }
 
-		string MergeField<RowType>.GetDescription( DBConnection cn ) {
-			return adaptedField.GetDescription( cn ) + implementation.DescriptionSuffix;
+		string MergeField<RowType>.GetDescription() {
+			return adaptedField.GetDescription() + implementation.DescriptionSuffix;
 		}
 
-		MergeValue MergeField<RowType>.CreateValue( string name, string msWordName, Func<DBConnection, string> descriptionGetter,
-		                                            Func<DBConnection, RowType> rowGetter ) {
+		MergeValue MergeField<RowType>.CreateValue( string name, string msWordName, Func<string> descriptionGetter, Func<RowType> rowGetter ) {
 			return adaptedField.CreateValue( name,
 			                                 msWordName,
 			                                 descriptionGetter,
-			                                 delegate( DBConnection cn ) {
-			                                 	var row = rowGetter( cn );
-			                                 	return row != null ? implementation.GetAdaptedFieldRow( cn, row ) : null;
+			                                 () => {
+				                                 var row = rowGetter();
+				                                 return row != null ? implementation.GetAdaptedFieldRow( row ) : null;
 			                                 } );
 		}
 	}

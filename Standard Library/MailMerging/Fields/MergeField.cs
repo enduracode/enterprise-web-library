@@ -1,5 +1,4 @@
 ﻿using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.MailMerging.RowTree;
 
 namespace RedStapler.StandardLibrary.MailMerging.Fields {
@@ -20,11 +19,11 @@ namespace RedStapler.StandardLibrary.MailMerging.Fields {
 		/// <summary>
 		/// Gets a description of the field.
 		/// </summary>
-		string GetDescription( DBConnection cn );
+		string GetDescription();
 
 		/// <summary>
 		/// Creates a value for the combination of this field and the specified row. Mail Merging subsystem use only.
 		/// </summary>
-		MergeValue CreateValue( string name, string msWordName, Func<DBConnection, string> descriptionGetter, Func<DBConnection, RowType> rowGetter );
+		MergeValue CreateValue( string name, string msWordName, Func<string> descriptionGetter, Func<RowType> rowGetter );
 	}
 }

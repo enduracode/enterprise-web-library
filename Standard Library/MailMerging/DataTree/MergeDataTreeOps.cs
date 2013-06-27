@@ -21,9 +21,9 @@ namespace RedStapler.StandardLibrary.MailMerging.DataTree {
 		                                                          ReadOnlyCollection<MergeDataTreeChild<RowType>> children, MergeDataTreeRemapping remapping ) {
 			return new MergeRowTree( remapping.NodeNameOverride.Any() ? remapping.NodeNameOverride : nodeName,
 			                         dataRows.Select(
-			                         	row =>
-			                         	new MergeRow( fields.Select( i => i.CreateValue( remapping.GetFieldName( i.Name ), i.MsWordName, i.GetDescription, cn => row ) ),
-			                         	              children != null ? children.Select( i => i.CreateRowTreeForParentRow( row, remapping ) ) : new MergeRowTree[ 0 ] ) ),
+				                         row =>
+				                         new MergeRow( fields.Select( i => i.CreateValue( remapping.GetFieldName( i.Name ), i.MsWordName, i.GetDescription, () => row ) ),
+				                                       children != null ? children.Select( i => i.CreateRowTreeForParentRow( row, remapping ) ) : new MergeRowTree[ 0 ] ) ),
 			                         remapping.XmlRowElementName.Any() ? remapping.XmlRowElementName : "Row" );
 		}
 	}

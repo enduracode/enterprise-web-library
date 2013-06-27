@@ -1,5 +1,4 @@
 ﻿using System;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
 
 namespace RedStapler.StandardLibrary.MailMerging.RowTree {
@@ -20,7 +19,7 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 		/// <summary>
 		/// Gets a description of the value.
 		/// </summary>
-		string GetDescription( DBConnection cn );
+		string GetDescription();
 	}
 
 	/// <summary>
@@ -31,18 +30,18 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 		/// Evaluates the merge field for the row. Throws an exception if true is specified for ensureValueExists and the merge field has no value for the current
 		/// row.
 		/// </summary>
-		ValType Evaluate( DBConnection cn, bool ensureValueExists );
+		ValType Evaluate( bool ensureValueExists );
 	}
 
 	internal class MergeValue<RowType, ValType>: MergeValue<ValType> where RowType: class {
 		private readonly BasicMergeFieldImplementation<RowType, ValType> field;
 		private readonly string name;
 		private readonly string msWordName;
-		private readonly Func<DBConnection, string> descriptionGetter;
-		private readonly Func<DBConnection, RowType> rowGetter;
+		private readonly Func<string> descriptionGetter;
+		private readonly Func<RowType> rowGetter;
 
-		internal MergeValue( BasicMergeFieldImplementation<RowType, ValType> field, string name, string msWordName, Func<DBConnection, string> descriptionGetter,
-		                     Func<DBConnection, RowType> rowGetter ) {
+		internal MergeValue( BasicMergeFieldImplementation<RowType, ValType> field, string name, string msWordName, Func<string> descriptionGetter,
+		                     Func<RowType> rowGetter ) {
 			this.field = field;
 			this.name = name;
 			this.msWordName = msWordName;
@@ -53,15 +52,15 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 		public string Name { get { return name; } }
 		public string MsWordName { get { return msWordName; } }
 
-		public string GetDescription( DBConnection cn ) {
-			return descriptionGetter( cn );
+		public string GetDescription() {
+			return descriptionGetter();
 		}
 
-		ValType MergeValue<ValType>.Evaluate( DBConnection cn, bool ensureValueExists ) {
-			var row = rowGetter( cn );
+		ValType MergeValue<ValType>.Evaluate( bool ensureValueExists ) {
+			var row = rowGetter();
 
 			if( field is BasicMergeFieldImplementation<RowType, string> ) {
-				var stringValue = row != null ? ( field as BasicMergeFieldImplementation<RowType, string> ).Evaluate( cn, row ) : "";
+				var stringValue = row != null ? ( field as BasicMergeFieldImplementation<RowType, string> ).Evaluate( row ) : "";
 				if( stringValue == null )
 					throw new ApplicationException( "String merge fields must never evaluate to null. (" + Name + ")" );
 				if( ensureValueExists && stringValue.Length == 0 )
@@ -69,7 +68,7 @@ namespace RedStapler.StandardLibrary.MailMerging.RowTree {
 				return (ValType)(object)stringValue;
 			}
 
-			var value = row != null ? field.Evaluate( cn, row ) : default( ValType );
+			var value = row != null ? field.Evaluate( row ) : default( ValType );
 			if( ensureValueExists && Equals( value, default( ValType ) ) )
 				throw new MailMergingException( "Merge field " + Name + " has no value for the current row." );
 			return value;

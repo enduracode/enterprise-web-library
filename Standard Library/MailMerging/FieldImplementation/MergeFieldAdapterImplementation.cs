@@ -1,10 +1,8 @@
-﻿using RedStapler.StandardLibrary.DataAccess;
-
-namespace RedStapler.StandardLibrary.MailMerging.FieldImplementation {
+﻿namespace RedStapler.StandardLibrary.MailMerging.FieldImplementation {
 	/// <summary>
 	/// An implementation for a merge field adapter.
 	/// </summary>
-	public interface MergeFieldAdapterImplementation<RowType, AdaptedFieldRowType> {
+	public interface MergeFieldAdapterImplementation<in RowType, out AdaptedFieldRowType> {
 		/// <summary>
 		/// Gets the prefix that will be added to the name of the adapted merge field.
 		/// </summary>
@@ -23,6 +21,6 @@ namespace RedStapler.StandardLibrary.MailMerging.FieldImplementation {
 		/// <summary>
 		/// Gets the adapted field row that corresponds to the specified row.
 		/// </summary>
-		AdaptedFieldRowType GetAdaptedFieldRow( DBConnection cn, RowType row );
+		AdaptedFieldRowType GetAdaptedFieldRow( RowType row );
 	}
 }
