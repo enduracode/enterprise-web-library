@@ -1,4 +1,4 @@
- // Parameter: string message
+// Parameter: string message
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	public partial class PageDisabled: EwfPage {
