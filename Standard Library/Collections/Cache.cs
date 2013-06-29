@@ -7,7 +7,13 @@ namespace RedStapler.StandardLibrary.Collections {
 	/// Provides a convenient way to maintain a cache of values.
 	/// </summary>
 	public class Cache<Key, Value> {
-		private Dictionary<Key, Value> keysToValues = new Dictionary<Key, Value>();
+		private Dictionary<Key, Value> keysToValues;
+		private readonly IEqualityComparer<Key> comparer;
+
+		public Cache( IEqualityComparer<Key> comparer = null ) {
+			keysToValues = new Dictionary<Key, Value>( comparer );
+			this.comparer = comparer;
+		}
 
 		/// <summary>
 		/// Returns the value associated with the given key. If there is no value cached for the given key yet, the value is created and added to the cache, then returned.
@@ -25,7 +31,7 @@ namespace RedStapler.StandardLibrary.Collections {
 		/// Destroys any existing cache and prefills the cache with the given values.
 		/// </summary>
 		public void PreFill( IEnumerable<Value> values, Func<Value, Key> keyCreator ) {
-			keysToValues = values.ToDictionary( keyCreator );
+			keysToValues = values.ToDictionary( keyCreator, comparer );
 		}
 	}
 }
