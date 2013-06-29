@@ -2,6 +2,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
@@ -119,6 +120,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		internal static string GetDbName( DatabaseInfo databaseInfo ) {
 			return databaseInfo.SecondaryDatabaseName.Length == 0 ? "primary" : databaseInfo.SecondaryDatabaseName + " secondary";
+		}
+
+		internal static int CompareCommandConditionTypes( InlineDbCommandCondition x, InlineDbCommandCondition y ) {
+			return StringComparer.InvariantCulture.Compare( x.GetType().Name, y.GetType().Name );
 		}
 	}
 }

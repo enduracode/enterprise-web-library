@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
@@ -56,6 +58,37 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 
 			command.CommandText += columnValue.ColumnName + " " + operatorString + " " + columnValue.Parameter.GetNameForCommandText( databaseInfo );
 			command.Parameters.Add( columnValue.Parameter.GetAdoDotNetParameter( databaseInfo ) );
+		}
+
+		public override bool Equals( object obj ) {
+			return Equals( obj as InlineDbCommandCondition );
+		}
+
+		public bool Equals( InlineDbCommandCondition other ) {
+			var otherInequalityCondition = other as InequalityCondition;
+			return other != null && op == otherInequalityCondition.op && StandardLibraryMethods.AreEqual( columnValue, otherInequalityCondition.columnValue );
+		}
+
+		public override int GetHashCode() {
+			return new { op, columnValue }.GetHashCode();
+		}
+
+		int IComparable.CompareTo( object obj ) {
+			var otherCondition = obj as InlineDbCommandCondition;
+			if( otherCondition == null && obj != null )
+				throw new ArgumentException();
+			return CompareTo( otherCondition );
+		}
+
+		public int CompareTo( InlineDbCommandCondition other ) {
+			if( other == null )
+				return 1;
+			var otherInequalityCondition = other as InequalityCondition;
+			if( otherInequalityCondition == null )
+				return DataAccessMethods.CompareCommandConditionTypes( this, other );
+
+			var opResult = Comparer<Operator>.Default.Compare( op, otherInequalityCondition.op );
+			return opResult != 0 ? opResult : Comparer<InlineDbCommandColumnValue>.Default.Compare( columnValue, otherInequalityCondition.columnValue );
 		}
 	}
 }

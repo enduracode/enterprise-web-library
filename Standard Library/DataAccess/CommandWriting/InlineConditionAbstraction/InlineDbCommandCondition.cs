@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 
@@ -5,7 +6,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 	/// <summary>
 	/// Standard Library use only.
 	/// </summary>
-	public interface InlineDbCommandCondition {
+	public interface InlineDbCommandCondition: IEquatable<InlineDbCommandCondition>, IComparable, IComparable<InlineDbCommandCondition> {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>

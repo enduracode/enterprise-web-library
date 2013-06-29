@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using RedStapler.StandardLibrary.DatabaseSpecification;
@@ -58,11 +59,46 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 				                                        new DbParameterValue( token.Truncate( 128 /*This is Google's cap on word length.*/ ) ) );
 				newCommandText = StringTools.ConcatenateWithDelimiter( " AND ",
 				                                                       newCommandText,
-				                                                       ( columnName + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" ).
-				                                                       	FormatWith( concatCharacter ) );
+				                                                       ( columnName + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" )
+					                                                       .FormatWith( concatCharacter ) );
 				command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 			}
 			command.CommandText += newCommandText;
+		}
+
+		public override bool Equals( object obj ) {
+			return Equals( obj as InlineDbCommandCondition );
+		}
+
+		public bool Equals( InlineDbCommandCondition other ) {
+			var otherLikeCondition = other as LikeCondition;
+			return otherLikeCondition != null && behavior == otherLikeCondition.behavior && columnName == otherLikeCondition.columnName &&
+			       searchTerm == otherLikeCondition.searchTerm;
+		}
+
+		public override int GetHashCode() {
+			return new { behavior, columnName, searchTerm }.GetHashCode();
+		}
+
+		int IComparable.CompareTo( object obj ) {
+			var otherCondition = obj as InlineDbCommandCondition;
+			if( otherCondition == null && obj != null )
+				throw new ArgumentException();
+			return CompareTo( otherCondition );
+		}
+
+		public int CompareTo( InlineDbCommandCondition other ) {
+			if( other == null )
+				return 1;
+			var otherLikeCondition = other as LikeCondition;
+			if( otherLikeCondition == null )
+				return DataAccessMethods.CompareCommandConditionTypes( this, other );
+
+			var behaviorResult = Comparer<Behavior>.Default.Compare( behavior, otherLikeCondition.behavior );
+			if( behaviorResult != 0 )
+				return behaviorResult;
+			var columnNameResult = StringComparer.InvariantCulture.Compare( columnName, otherLikeCondition.columnName );
+			return columnNameResult != 0 ? columnNameResult : StringComparer.InvariantCulture.Compare( searchTerm, otherLikeCondition.searchTerm );
 		}
 	}
 }

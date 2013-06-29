@@ -1,8 +1,11 @@
-﻿namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
+﻿using System;
+using System.Collections.Generic;
+
+namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// A value used in a database command parameter.
 	/// </summary>
-	public class DbParameterValue {
+	public class DbParameterValue: IEquatable<DbParameterValue>, IComparable, IComparable<DbParameterValue> {
 		private readonly object value;
 		private readonly string dbTypeString;
 
@@ -25,5 +28,31 @@
 		internal object Value { get { return value; } }
 
 		internal string DbTypeString { get { return dbTypeString; } }
+
+		public override bool Equals( object obj ) {
+			return Equals( obj as DbParameterValue );
+		}
+
+		public bool Equals( DbParameterValue other ) {
+			return other != null && StandardLibraryMethods.AreEqual( value, other.value ) && dbTypeString == other.dbTypeString;
+		}
+
+		public override int GetHashCode() {
+			return value.GetHashCode();
+		}
+
+		int IComparable.CompareTo( object obj ) {
+			var otherCondition = obj as DbParameterValue;
+			if( otherCondition == null && obj != null )
+				throw new ArgumentException();
+			return CompareTo( otherCondition );
+		}
+
+		public int CompareTo( DbParameterValue other ) {
+			if( other == null )
+				return 1;
+			var valueResult = Comparer<object>.Default.Compare( value, other.value );
+			return valueResult != 0 ? valueResult : StringComparer.InvariantCulture.Compare( dbTypeString, other.dbTypeString );
+		}
 	}
 }
