@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using RedStapler.StandardLibrary.Collections;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 
 namespace RedStapler.StandardLibrary.DataAccess {
@@ -39,7 +40,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private readonly Action<DBConnection> connectionInitializer;
 
 		private bool cacheEnabled;
-		private object cache;
+		private Cache<string, object> cache;
 
 		/// <summary>
 		/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of AppTools.Init.
@@ -81,15 +82,12 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		}
 
 		/// <summary>
-		/// Gets the cache object.
+		/// Gets the cache value associated with the specified key. If no value exists, adds one by executing the specified creator function.
 		/// </summary>
-		public T GetCache<T>() where T: class, new() {
+		public T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 			if( !cacheEnabled )
-				return new T();
-
-			if( cache == null )
-				cache = new T();
-			return (T)cache;
+				return valueCreator();
+			return (T)cache.GetOrAddValue( key, () => valueCreator() );
 		}
 
 		/// <summary>
@@ -112,7 +110,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		internal void ResetCache() {
 			cacheEnabled = true;
-			cache = null;
+			cache = new Cache<string, object>();
 		}
 
 		internal void DisableCache() {
