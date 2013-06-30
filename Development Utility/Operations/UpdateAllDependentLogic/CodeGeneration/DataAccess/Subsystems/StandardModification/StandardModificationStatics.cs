@@ -106,7 +106,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writeAddColumnModificationsMethod( columns.NonIdentityColumns, cn.DatabaseInfo );
 			if( isRevisionHistoryClass ) {
 				writeCopyLatestRevisionsMethod( cn, tableName, columns.NonIdentityColumns );
-				DataAccessStatics.WriteAddLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
+				DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 			}
 			writeRethrowAsEwfExceptionIfNecessary();
 			writer.WriteLine( "static partial void populateConstraintNamesToViolationErrorMessages( Dictionary<string,string> constraintNamesToViolationErrorMessages );" );
@@ -120,7 +120,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeEqualityConditionClass( DBConnection cn, string tableName, Column column ) {
 			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013. Please use the CommandConditions namespace instead.\" ) ]" );
 			writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam: " +
-			                  getEqualityConditionClassName( cn, tableName, column ) + " {" );
+			                  DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " {" );
 			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013. Please use the CommandConditions namespace instead.\" ) ]" );
 			writer.WriteLine( "public " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam( " + column.DataTypeName +
 			                  " value ): base( value ) {}" );
@@ -264,7 +264,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "conditions.ForEach( condition => delete.AddCondition( condition.CommandCondition ) );" );
 
 			if( isRevisionHistoryClass )
-				writer.WriteLine( "addLatestRevisionsCondition( delete );" );
+				writer.WriteLine( "delete.AddCondition( getLatestRevisionsCondition() );" );
 
 			writer.WriteLine( "try {" );
 			writer.WriteLine( "return delete.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
@@ -339,8 +339,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "foreach( var condition in mod.conditions ) {" );
 			var prefix = "if";
 			foreach( var column in columns.AllColumns ) {
-				writer.WriteLine( prefix + "( condition is " + getEqualityConditionClassName( cn, tableName, column ) + " )" );
-				writer.WriteLine( "mod." + getColumnFieldName( column ) + ".Value = ( condition as " + getEqualityConditionClassName( cn, tableName, column ) + " ).Value;" );
+				writer.WriteLine( prefix + "( condition is " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " )" );
+				writer.WriteLine( "mod." + getColumnFieldName( column ) + ".Value = ( condition as " +
+				                  DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " ).Value;" );
 				prefix = "else if";
 			}
 			writer.WriteLine( "}" );
@@ -514,7 +515,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "modType = ModificationType.Update;" );
 			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
 			foreach( var column in keyColumns )
-				writer.WriteLine( "conditions.Add( new " + getEqualityConditionClassName( cn, tableName, column ) + "( " + column.Name + " ) );" );
+				writer.WriteLine( "conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + column.Name + " ) );" );
 
 			writer.WriteLine( "}" ); // if insert
 
@@ -527,7 +528,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "addColumnModifications( update );" );
 			writer.WriteLine( "conditions.ForEach( condition => update.AddCondition( condition.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
-				writer.WriteLine( "addLatestRevisionsCondition( update );" );
+				writer.WriteLine( "update.AddCondition( getLatestRevisionsCondition() );" );
 			writer.WriteLine( "update.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
 			writer.WriteLine( "}" ); // else
 
@@ -541,11 +542,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // catch
 
 			writer.WriteLine( "}" ); // method
-		}
-
-		private static string getEqualityConditionClassName( DBConnection cn, string tableName, Column column ) {
-			return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( cn, tableName ) + "." +
-			       CommandConditionStatics.GetConditionClassName( column );
 		}
 
 		private static void writeAddColumnModificationsMethod( IEnumerable<Column> nonIdentityColumns, DatabaseInfo databaseInfo ) {
@@ -566,7 +562,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "var command = new InlineSelect( \"SELECT " + columns.PrimaryKeyAndRevisionIdColumn.Name + " FROM " + tableName + "\" );" );
 			writer.WriteLine( "conditions.ForEach( condition => command.AddCondition( condition.CommandCondition ) );" );
-			writer.WriteLine( "addLatestRevisionsCondition( command );" );
+			writer.WriteLine( "command.AddCondition( getLatestRevisionsCondition() );" );
 			writer.WriteLine( "var latestRevisionIds = new List<int>();" );
 			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
 			                  ", r => { while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); } );" );

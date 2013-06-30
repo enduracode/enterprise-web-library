@@ -153,10 +153,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableConditionInterfaceName( cn, table );
 		}
 
-		internal static void WriteAddLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
-			writer.WriteLine( "private static void addLatestRevisionsCondition( InlineDbCommandWithConditions command ) {" );
-			writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
-			writer.WriteLine( "command.AddCondition( new InCondition( \"" + revisionIdColumn + "\", revisionHistorySetup.GetLatestRevisionsQuery() ) );" );
+		internal static string GetEqualityConditionClassName( DBConnection cn, Database database, string tableName, Column column ) {
+			return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( cn, tableName ) + "." +
+			       CommandConditionStatics.GetConditionClassName( column );
+		}
+
+		internal static void WriteGetLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
+			writer.WriteLine( "private static InlineDbCommandCondition getLatestRevisionsCondition() {" );
+			writer.WriteLine( "var provider = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
+			writer.WriteLine( "return new InCondition( \"" + revisionIdColumn + "\", provider.GetLatestRevisionsQuery() );" );
 			writer.WriteLine( "}" );
 		}
 
