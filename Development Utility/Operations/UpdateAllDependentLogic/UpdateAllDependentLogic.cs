@@ -178,6 +178,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.RetrievalCaching;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.RevisionHistory;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.StandardModification;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );

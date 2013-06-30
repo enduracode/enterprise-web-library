@@ -4,7 +4,7 @@ using System.Linq;
 using RedStapler.StandardLibrary.Collections;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 	public class TableRetrievalQueryCache<RowType> {
 		private readonly Cache<InlineDbCommandCondition[], IEnumerable<RowType>> cache;
 

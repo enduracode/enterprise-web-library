@@ -138,9 +138,11 @@
     <Compile Include="DataAccess\DbConnectionFailureException.cs" />
     <Compile Include="DataAccess\Ranking\RankingMethods.cs" />
     <Compile Include="DataAccess\Ranking\RankingProvider.cs" />
+    <Compile Include="DataAccess\RetrievalCaching\ParameterlessQueryCache.cs" />
+    <Compile Include="DataAccess\RetrievalCaching\QueryRetrievalQueryCache.cs" />
+    <Compile Include="DataAccess\RetrievalCaching\TableRetrievalQueryCache.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionHistoryProvider.cs" />
     <Compile Include="DataAccess\SystemDataAccessProvider.cs" />
-    <Compile Include="DataAccess\TableRetrievalQueryCache.cs" />
     <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
     <Compile Include="DataValue.cs" />
     <Compile Include="DataAccess\CommandWriting\DbCommandParameter.cs" />
