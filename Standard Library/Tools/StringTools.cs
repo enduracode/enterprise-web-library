@@ -418,18 +418,17 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Returns a string representing the list of items in the form "one, two, three and four".
 		/// </summary>
-		public static string GetEnglishListPhrase( List<string> items, bool useSerialComma ) {
-			items = items.Where( i => i.Length > 0 ).ToList();
-			switch( items.Count ) {
+		public static string GetEnglishListPhrase( IEnumerable<string> items, bool useSerialComma ) {
+			items = items.Where( i => i.Any() ).ToArray();
+			switch( items.Count() ) {
 				case 0:
 					return "";
 				case 1:
-					return items[ 0 ];
+					return items.First();
 				case 2:
-					return items[ 0 ] + " and " + items[ 1 ];
+					return items.First() + " and " + items.ElementAt( 1 );
 				default:
-					return ConcatenateWithDelimiter( ", ", items.Where( ( item, index ) => index < items.Count - 1 ).ToArray() ) + ( useSerialComma ? ", and " : " and " ) +
-					       items[ items.Count - 1 ];
+					return ConcatenateWithDelimiter( ", ", items.Take( items.Count() - 1 ).ToArray() ) + ( useSerialComma ? ", and " : " and " ) + items.Last();
 			}
 		}
 
