@@ -23,11 +23,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				// Write nested classes.
 				DataAccessStatics.WriteRowClass( writer, columns.AllColumns, cn.DatabaseInfo );
-				writeCacheClass( cn, writer, database, table, columns );
+				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
+				writeCacheClass( cn, writer, database, table, columns, isSmallTable, isRevisionHistoryTable );
 
-				writeGetRowsMethod( cn, writer, database, table, columns, isRevisionHistoryTable, false );
+				if( isSmallTable )
+					writeGetAllRowsMethod( writer, database, table, columns, isRevisionHistoryTable, false );
+				else
+					writeGetRowsMethod( cn, writer, database, table, columns, isRevisionHistoryTable, false );
 				if( isRevisionHistoryTable ) {
-					writeGetRowsMethod( cn, writer, database, table, columns, true, true );
+					if( isSmallTable )
+						writeGetAllRowsMethod( writer, database, table, columns, true, true );
+					else
+						writeGetRowsMethod( cn, writer, database, table, columns, true, true );
 					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 				}
 
@@ -58,17 +65,58 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableRetrieval" );
 		}
 
-		private static void writeCacheClass( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns ) {
+		private static void writeCacheClass( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable,
+		                                     bool isRevisionHistoryTable ) {
 			var cacheKey = database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrieval";
 			var pkTupleTypeArguments = StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
 
 			writer.WriteLine( "private class Cache {" );
 			writer.WriteLine( "internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + cacheKey + "\", () => new Cache() ); } }" );
-			writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
-			writer.WriteLine( "private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+
+			if( isSmallTable ) {
+				writer.WriteLine( "private readonly ParameterlessQueryCache<Row> query = new ParameterlessQueryCache<Row>();" );
+				if( isRevisionHistoryTable )
+					writer.WriteLine( "private readonly ParameterlessQueryCache<Row> queryIncludingPreviousRevisions = new ParameterlessQueryCache<Row>();" );
+			}
+			else {
+				writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
+				writer.WriteLine(
+					"private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+			}
+
 			writer.WriteLine( "private Cache() {}" );
-			writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
-			writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
+
+			if( isSmallTable ) {
+				writer.WriteLine( "internal ParameterlessQueryCache<Row> Query { get { return query; } }" );
+				if( isRevisionHistoryTable )
+					writer.WriteLine( "internal ParameterlessQueryCache<Row> QueryIncludingPreviousRevisions { get { return queryIncludingPreviousRevisions; } }" );
+			}
+			else {
+				writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
+				writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
+			}
+
+			writer.WriteLine( "}" );
+		}
+
+		private static void writeGetAllRowsMethod( TextWriter writer, Database database, string table, TableColumns tableColumns, bool isRevisionHistoryTable,
+		                                           bool excludePreviousRevisions ) {
+			var methodName = isRevisionHistoryTable && !excludePreviousRevisions ? "GetAllRowsIncludingPreviousRevisions" : "GetAllRows";
+			CodeGenerationStatics.AddSummaryDocComment( writer, "Retrieves the rows from the table, ordered in a stable way." );
+			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "() {" );
+
+			writer.WriteLine( "return Cache.Current." + ( isRevisionHistoryTable && !excludePreviousRevisions ? "QueryIncludingPreviousRevisions" : "Query" ) +
+			                  ".GetResultSet( () => {" );
+			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
+			                  StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
+			if( excludePreviousRevisions )
+				writer.WriteLine( "command.AddCondition( getLatestRevisionsCondition() );" );
+			writer.WriteLine( "var results = new List<Row>();" );
+			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
+			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine( "return results;" );
+			writer.WriteLine( "} );" );
+
 			writer.WriteLine( "}" );
 		}
 

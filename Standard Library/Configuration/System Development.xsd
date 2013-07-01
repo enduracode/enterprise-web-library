@@ -84,6 +84,13 @@
 					</sequence>
 				</complexType>
 			</element>
+			<element name="SmallTables" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Table" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 			<element name="revisionHistoryTables" minOccurs="0">
 				<complexType>
 					<sequence>

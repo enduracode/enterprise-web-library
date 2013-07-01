@@ -241,21 +241,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private void generateDataAccessCodeForDatabase( RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Database database,
 		                                                string libraryBasePath, TextWriter writer, string baseNamespace,
 		                                                RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
-			// Ensure that all revision history tables named in the configuration file actually exist.
+			// Ensure that all tables specified in the configuration file actually exist.
 			var tableNames = database.GetTables();
-			if( configuration.revisionHistoryTables != null ) {
-				foreach( var revisionHistoryTable in configuration.revisionHistoryTables ) {
-					var tableExists = false;
-					foreach( var table in tableNames ) {
-						if( table.ToLower() == revisionHistoryTable.ToLower() ) {
-							tableExists = true;
-							break;
-						}
-					}
-					if( !tableExists )
-						throw new UserCorrectableException( "Revision history table '" + revisionHistoryTable + "' does not exist." );
-				}
-			}
+			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
+			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
 			database.ExecuteDbMethod( delegate( DBConnection cn ) {
 				// database logic access - standard
@@ -306,6 +295,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					ProcedureStatics.Generate( cn, writer, baseNamespace, database );
 				}
 			} );
+		}
+
+		private void ensureTablesExist( IEnumerable<string> databaseTables, IEnumerable<string> specifiedTables, string tableAdjective ) {
+			if( specifiedTables == null )
+				return;
+			var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();
+			if( nonexistentTables.Any() ) {
+				throw new UserCorrectableException( tableAdjective.CapitalizeString() + " " + ( nonexistentTables.Count() > 1 ? "tables" : "table" ) + " " +
+				                                    StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " +
+				                                    ( nonexistentTables.Count() > 1 ? "do" : "does" ) + " not exist." );
+			}
 		}
 
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
