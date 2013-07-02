@@ -17,10 +17,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		/// <summary>
 		/// Gets the current data-access state. In EWF web applications, this will throw an exception when called from the worker threads used by parallel
-		/// programming tools such as PLINQ and the Task Parallel Library. While it would be possible for us to create an implementation that returns a separate
-		/// data-access state object for each thread, we've decided against it because we feel it's a leaky abstraction. Each thread would silently have its own
-		/// database transactions and its own cache, and not being aware of this fact could be extremely frustrating. Therefore we require developers to manually
-		/// create data-access state objects in worker threads.
+		/// programming tools such as PLINQ and the Task Parallel Library unless it is executed with a supplemental data-access state object. While it would be
+		/// possible for us to create a main data-access state getter implementation that returns a separate object for each thread, we've decided against this
+		/// because we feel it's a leaky abstraction. Each thread would silently have its own database transactions and its own cache, and not being aware of this
+		/// fact could be extremely frustrating. Therefore we require developers to use supplemental data-access state objects on worker threads.
 		/// </summary>
 		public static DataAccessState Current {
 			get {
