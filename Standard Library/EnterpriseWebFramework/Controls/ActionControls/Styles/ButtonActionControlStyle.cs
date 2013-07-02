@@ -6,9 +6,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A style that renders an action control as a button with rounded corners.
 	/// </summary>
 	public class ButtonActionControlStyle: ActionControlStyle {
-		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public string Text { get; set; }
-
 		/// <summary>
 		/// The type of button to show.
 		/// </summary>
@@ -29,15 +26,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			Large
 		}
 
+		private readonly string text;
 		private readonly ButtonSize buttonSize;
 
 		/// <summary>
 		/// Creates a button action control style. Do not pass null for text.
 		/// </summary>
 		public ButtonActionControlStyle( string text, ButtonSize buttonSize = ButtonSize.Normal ) {
-			Text = text;
+			this.text = text;
 			this.buttonSize = buttonSize;
 		}
+
+		string ActionControlStyle.Text { get { return text; } }
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter ) {
 			widthSetter( width );
@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				cssElement = CssElementCreator.LargeButtonStyleClass;
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + cssElement );
 
-			return control.AddControlsReturnThis( ( Text.Length > 0 ? Text : defaultText ).GetLiteralControl() );
+			return control.AddControlsReturnThis( ( text.Length > 0 ? text : defaultText ).GetLiteralControl() );
 		}
 
 		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
