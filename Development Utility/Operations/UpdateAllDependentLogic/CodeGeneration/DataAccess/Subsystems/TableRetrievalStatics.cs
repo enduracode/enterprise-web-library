@@ -54,8 +54,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			using( var writer = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
 				writer.WriteLine( namespaceDeclaration );
-				writer.WriteLine( "	partial class " + GetClassName( cn, tableName ) );
-				writer.WriteLine( "		// IMPORTANT: Change extension from \".ewlt.cs\" to \".cs\" before including in project and editing." );
+				writer.WriteLine( "	partial class " + GetClassName( cn, tableName ) + " {" );
+				writer.WriteLine(
+					"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
+						DataAccessStatics.CSharpTemplateFileExtension ) );
 				writer.WriteLine( "	}" ); // class
 				writer.WriteLine( "}" ); // namespace
 			}

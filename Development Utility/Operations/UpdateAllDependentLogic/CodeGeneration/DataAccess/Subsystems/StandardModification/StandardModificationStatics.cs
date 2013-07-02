@@ -48,8 +48,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			using( var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
 				templateWriter.WriteLine( namespaceDeclaration );
-				templateWriter.WriteLine( "	partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) );
-				templateWriter.WriteLine( "		// IMPORTANT: Change extension from \".ewlt.cs\" to \".cs\" before including in project and editing." );
+				templateWriter.WriteLine( "	partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + " {" );
+				templateWriter.WriteLine(
+					"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
+						DataAccessStatics.CSharpTemplateFileExtension ) );
 				templateWriter.WriteLine( "	}" ); // class
 				templateWriter.WriteLine( "}" ); // namespace
 			}
