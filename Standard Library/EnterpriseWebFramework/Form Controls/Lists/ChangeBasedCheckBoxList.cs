@@ -28,20 +28,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationList"></param>
 		/// <returns></returns>
-		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items,
-		                                                                                     IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
-		                                                                                     string caption = "", bool includeSelectAndDeselectAllButtons = false,
-		                                                                                     byte numberOfColumns = 1,
-		                                                                                     IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
-		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
-		                                                                                     Func<bool> validationPredicate = null,
-		                                                                                     ValidationList validationList = null ) {
-			var checkBoxList = Create( items,
-			                           selectedItemIds,
-			                           caption: caption,
-			                           includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,
-			                           numberOfColumns: numberOfColumns,
-			                           uiSelectedItemIds: uiSelectedItemIds );
+		public static FormItem GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds,
+		                                                out Action modificationMethod, string caption = "", bool includeSelectAndDeselectAllButtons = false,
+		                                                byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
+		                                                TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null,
+		                                                ValidationList validationList = null ) {
+			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>( items,
+			                                                            selectedItemIds,
+			                                                            caption,
+			                                                            includeSelectAndDeselectAllButtons,
+			                                                            numberOfColumns,
+			                                                            uiSelectedItemIds ?? selectedItemIds );
 			modificationMethod = checkBoxList.ModifyData;
 			return FormItem.Create( label,
 			                        checkBoxList,
@@ -71,15 +68,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationList"></param>
 		/// <returns></returns>
-		public static FormItem<ChangeBasedCheckBoxList<ItemIdType>> GetFormItem<ItemIdType>( string label,
-		                                                                                     IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
-		                                                                                     out Action modificationMethod, string caption = "",
-		                                                                                     bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
-		                                                                                     int? cellSpan = null,
-		                                                                                     TextAlignment textAlignment = TextAlignment.NotSpecified,
-		                                                                                     Func<bool> validationPredicate = null,
-		                                                                                     ValidationList validationList = null ) {
-			var checkBoxList = Create( items, caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns );
+		public static FormItem GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
+		                                                out Action modificationMethod, string caption = "", bool includeSelectAndDeselectAllButtons = false,
+		                                                byte numberOfColumns = 1, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+		                                                Func<bool> validationPredicate = null, ValidationList validationList = null ) {
+			var itemArray = items.ToArray();
+			var selectedItemIds = itemArray.Where( i => i.IsSelected ).Select( i => i.Item.Item.Id );
+			var uiSelectedItemIds = itemArray.Where( i => i.IsSelectedInUi ).Select( i => i.Item.Item.Id );
+			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>( itemArray.Select( i => i.Item ),
+			                                                            selectedItemIds,
+			                                                            caption,
+			                                                            includeSelectAndDeselectAllButtons,
+			                                                            numberOfColumns,
+			                                                            uiSelectedItemIds );
 			modificationMethod = checkBoxList.ModifyData;
 			return FormItem.Create( label,
 			                        checkBoxList,
@@ -92,38 +93,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                        },
 			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
 		}
-
-		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public static ChangeBasedCheckBoxList<ItemIdType> Create<ItemIdType>( IEnumerable<ChangeBasedListItem<ItemIdType>> items,
-		                                                                      IEnumerable<ItemIdType> selectedItemIds, string caption = "",
-		                                                                      bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1,
-		                                                                      IEnumerable<ItemIdType> uiSelectedItemIds = null ) {
-			return new ChangeBasedCheckBoxList<ItemIdType>( items,
-			                                                selectedItemIds,
-			                                                caption,
-			                                                includeSelectAndDeselectAllButtons,
-			                                                numberOfColumns,
-			                                                uiSelectedItemIds ?? selectedItemIds );
-		}
-
-		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public static ChangeBasedCheckBoxList<ItemIdType> Create<ItemIdType>( IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
-		                                                                      string caption = "", bool includeSelectAndDeselectAllButtons = false,
-		                                                                      byte numberOfColumns = 1 ) {
-			var itemArray = items.ToArray();
-			var selectedItemIds = itemArray.Where( i => i.IsSelected ).Select( i => i.Item.Item.Id );
-			var uiSelectedItemIds = itemArray.Where( i => i.IsSelectedInUi ).Select( i => i.Item.Item.Id );
-			return new ChangeBasedCheckBoxList<ItemIdType>( itemArray.Select( i => i.Item ),
-			                                                selectedItemIds,
-			                                                caption,
-			                                                includeSelectAndDeselectAllButtons,
-			                                                numberOfColumns,
-			                                                uiSelectedItemIds );
-		}
 	}
 
-	[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-	public class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
+	internal class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
 		private readonly IEnumerable<ChangeBasedListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
 		private readonly string caption;
@@ -158,13 +130,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			( checkBoxList as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
-		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public void Validate( PostBackValueDictionary postBackValues ) {
+		internal void Validate( PostBackValueDictionary postBackValues ) {
 			selectedItemIdsInPostBack = checkBoxList.GetSelectedItemIdsInPostBack( postBackValues );
 		}
 
-		[ Obsolete( "Guaranteed through 30 June 2013." ) ]
-		public void ModifyData() {
+		internal void ModifyData() {
 			if( selectedItemIdsInPostBack == null )
 				return;
 			var changedItemIds = selectedItemIdsInPostBack.Except( selectedItemIds ).Union( selectedItemIds.Except( selectedItemIdsInPostBack ) ).ToArray();
