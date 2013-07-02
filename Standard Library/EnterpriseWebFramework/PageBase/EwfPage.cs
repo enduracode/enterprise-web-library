@@ -368,24 +368,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
 
+			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, info, null );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
 
-			foreach( var cssInfo in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, cssInfo, null );
+			foreach( var info in EwfApp.Instance.GetStyleSheets() )
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
 
 			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, info, "print" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "print" );
 
 			foreach( var i in styleSheetLinks )
 				Header.Controls.Add( i );
 		}
 
-		private void addStyleSheetLink( List<HtmlLink> styleSheetLinks, CssInfo cssInfo, string mediaType ) {
-			var l = new HtmlLink { Href = this.GetClientUrl( cssInfo.GetUrl() ) };
+		private void addStyleSheetLink( List<HtmlLink> styleSheetLinks, string url, string mediaType ) {
+			var l = new HtmlLink { Href = url };
 			l.Attributes.Add( "rel", "stylesheet" );
 			l.Attributes.Add( "type", "text/css" );
-			if( !mediaType.IsNullOrWhiteSpace() )
+			if( mediaType.Any() )
 				l.Attributes.Add( "media", mediaType );
 			styleSheetLinks.Add( l );
 		}

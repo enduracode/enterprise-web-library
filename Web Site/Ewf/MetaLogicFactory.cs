@@ -38,7 +38,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		IEnumerable<CssInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
 			var infos = new List<CssInfo>();
 			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1103Custom.Css.Custom_theme.Jquery_ui_1103Custommin.Info() );
-			infos.Add( new FontAwesome.Font_awesomemin.Info() );
 			infos.Add( new ThirdParty.Select2.Select2_340.Select2.Info() );
 			infos.Add( new ThirdParty.TimePicker.Styles.Info() );
 			infos.Add( new ThirdParty.Qtip2.Jqueryqtipmin.Info() );

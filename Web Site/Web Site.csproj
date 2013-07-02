@@ -412,8 +412,6 @@
     <Content Include="Ewf\FileUploader\progressbar.gif" />
     <Content Include="Ewf\FileUploader\progressbg_orange.gif" />
     <Content Include="Ewf\FileUploader\Upload.aspx" />
-    <Content Include="Ewf\FontAwesome\font-awesome.min.css" />
-    <Content Include="Ewf\FontAwesome\font\fontawesome-webfont.svg" />
     <Content Include="Ewf\Images\ajax-loader.gif" />
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
@@ -710,10 +708,6 @@
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
-    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.eot" />
-    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.ttf" />
-    <None Include="Ewf\FontAwesome\font\fontawesome-webfont.woff" />
-    <None Include="Ewf\FontAwesome\font\FontAwesome.otf" />
     <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\LICENSE.md" />
     <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\LICENSE.md" />
     <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\README.md" />
