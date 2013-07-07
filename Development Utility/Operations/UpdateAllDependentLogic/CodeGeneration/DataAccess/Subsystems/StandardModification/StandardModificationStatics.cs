@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeClass( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			columns = new TableColumns( cn, tableName, isRevisionHistoryClass );
 
-			writer.WriteLine( "public partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + ": DomainDbCommand {" );
+			writer.WriteLine( "public partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
 
 			// NOTE: Delete this after 31 August 2013.
 			foreach( var column in columns.AllColumns )

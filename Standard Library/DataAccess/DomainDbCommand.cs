@@ -1,11 +1,9 @@
+using System;
+
 namespace RedStapler.StandardLibrary.DataAccess {
-	/// <summary>
-	/// Implemented by wrappers used to update or insert groups of related data.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 September 2013. Please use a generic delegate for the Execute method if you need this functionality." ) ]
 	public interface DomainDbCommand {
-		/// <summary>
-		/// Executes the database command.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2013. Please use a generic delegate for the Execute method if you need this functionality." ) ]
 		void Execute();
 	}
 }
