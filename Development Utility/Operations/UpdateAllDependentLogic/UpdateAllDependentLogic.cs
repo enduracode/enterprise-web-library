@@ -544,15 +544,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "Library/Generated Code/" );
 				writer.WriteLine( "Library/" + InstallationFileStatics.FilesFolderName + "/" + asposeLicenseFileName );
 
-				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
-					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ) {
-						writer.WriteLine();
-						writer.WriteLine( webProject.name + "/bin/" );
-						writer.WriteLine( webProject.name + "/obj/" );
-						writer.WriteLine( webProject.name + "/" + AppStatics.EwfFolderName + "/" );
-						writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
-						writer.WriteLine( webProject.name + "/Generated Code/" );
-					}
+				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
+					writer.WriteLine();
+					writer.WriteLine( webProject.name + "/bin/" );
+					writer.WriteLine( webProject.name + "/obj/" );
+					writer.WriteLine( webProject.name + "/" + AppStatics.EwfFolderName + "/" );
+					writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
+					writer.WriteLine( webProject.name + "/Generated Code/" );
+				}
+
+				foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
+					writer.WriteLine();
+					writer.WriteLine( service.Name + "/bin/" );
+					writer.WriteLine( service.Name + "/obj/" );
+					writer.WriteLine( service.Name + "/Generated Code/" );
+				}
+
+				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] ) {
+					writer.WriteLine();
+					writer.WriteLine( project.Name + "/bin/" );
+					writer.WriteLine( project.Name + "/obj/" );
+					writer.WriteLine( project.Name + "/Generated Code/" );
 				}
 
 				writer.WriteLine();
