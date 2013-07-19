@@ -44,20 +44,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			normalizedTypeName = getNormalizedTypeName( type );
 			normalizedElementTypeName = type.IsGenericType && type.GetGenericTypeDefinition() == typeof( IEnumerable<> )
-			                            	? getNormalizedTypeName( type.GetGenericArguments().Single() )
-			                            	: "";
+				                            ? getNormalizedTypeName( type.GetGenericArguments().Single() )
+				                            : "";
 			this.name = name;
 			this.comment = comment.Trim();
 		}
 
 		private static bool isSupportedEnumerable( Type type ) {
-			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof( IEnumerable<> ) && isSupportedIntegralType( type.GetGenericArguments().Single() );
+			if( !type.IsGenericType || type.GetGenericTypeDefinition() != typeof( IEnumerable<> ) )
+				return false;
+			var elementType = type.GetGenericArguments().Single();
+
+			// Decimal support is helpful in systems that use Oracle.
+			return isSupportedIntegralType( elementType ) || elementType == typeof( decimal );
 		}
 
 		private static bool isSupportedValueType( Type type ) {
 			return isSupportedIntegralType( type ) ||
-			       new[] { typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan ) }.
-			       	Contains( type ) || type.IsEnum;
+			       new[] { typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan ) }
+				       .Contains( type ) || type.IsEnum;
 		}
 
 		private static bool isSupportedIntegralType( Type type ) {
