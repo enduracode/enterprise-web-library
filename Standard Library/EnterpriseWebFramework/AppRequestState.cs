@@ -17,13 +17,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static AppRequestState Instance { get { return EwfApp.Instance.RequestState; } }
 
 		[ Obsolete(
-			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessStatics.Current."
-			) ]
+			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessState.Current." )
+		]
 		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Current.PrimaryDatabaseConnection; } }
 
 		[ Obsolete(
-			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessStatics.Current."
-			) ]
+			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessState.Current." )
+		]
 		public static DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
 			return DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
 		}
