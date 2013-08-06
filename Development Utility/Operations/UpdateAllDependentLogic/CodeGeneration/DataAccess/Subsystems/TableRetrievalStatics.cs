@@ -35,6 +35,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					writeGetRowsMethod( cn, writer, database, table, columns, isSmallTable, true, true );
 					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 				}
+				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) ) {
+					writeGetRowMatchingIdMethod( cn, writer, database, table, columns, isSmallTable, isRevisionHistoryTable );
+					if( !isSmallTable )
+						writeToIdDictionaryMethod( writer, columns );
+				}
 
 				writer.WriteLine( "}" ); // class
 			}
@@ -156,6 +161,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( DBConnection cn, params " +
 			                  DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
 			writer.WriteLine( "return " + methodName + "( conditions );" );
+			writer.WriteLine( "}" );
+		}
+
+		private static void writeGetRowMatchingIdMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
+		                                                 bool isSmallTable, bool isRevisionHistoryTable ) {
+			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id ) {" );
+			if( isSmallTable ) {
+				writer.WriteLine( "GetAllRows();" );
+				writer.WriteLine( "return Cache.Current." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk[ System.Tuple.Create( id ) ];" );
+			}
+			else {
+				writer.WriteLine( "return GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) +
+				                  "( id ) ).Single();" );
+			}
+			writer.WriteLine( "}" );
+		}
+
+		private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
+			writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
+			writer.WriteLine( "return rows.ToDictionary( i => i." +
+			                  StandardLibraryMethods.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}
