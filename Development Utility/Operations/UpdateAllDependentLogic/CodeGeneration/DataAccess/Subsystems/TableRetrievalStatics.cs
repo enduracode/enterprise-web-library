@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// Write nested classes.
 				DataAccessStatics.WriteRowClass( writer, columns.AllColumns, cn.DatabaseInfo );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
-				writeCacheClass( cn, writer, database, table, columns );
+				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
 
 				if( isSmallTable )
 					writeGetAllRowsMethod( writer, isRevisionHistoryTable, false );
@@ -65,7 +65,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableRetrieval" );
 		}
 
-		private static void writeCacheClass( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns ) {
+		private static void writeCacheClass( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
+		                                     bool isRevisionHistoryTable ) {
 			var cacheKey = database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrieval";
 			var pkTupleTypeArguments = StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
 
@@ -73,9 +74,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + cacheKey + "\", () => new Cache() ); } }" );
 			writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
 			writer.WriteLine( "private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+			if( isRevisionHistoryTable ) {
+				writer.WriteLine(
+					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+			}
 			writer.WriteLine( "private Cache() {}" );
 			writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
 			writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
+			if( isRevisionHistoryTable )
+				writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> LatestRevisionRowsByPk { get { return latestRevisionRowsByPk; } }" );
 			writer.WriteLine( "}" );
 		}
 
@@ -112,7 +119,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "if( " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
 			                  " && conditions.Count() == " + tableColumns.KeyColumns.Count() + " ) {" );
 			writer.WriteLine( "Row row;" );
-			writer.WriteLine( "if( Cache.Current.RowsByPk.TryGetValue( System.Tuple.Create( " +
+			writer.WriteLine( "if( Cache.Current." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
 			                  StringTools.ConcatenateWithDelimiter( ", ", pkConditionVariableNames.Select( i => i + ".Value" ).ToArray() ) + " ), out row ) )" );
 			writer.WriteLine( "return row.ToSingleElementArray();" );
 			writer.WriteLine( "}" );
@@ -130,12 +137,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
 
 			// Add all results to RowsByPk.
-			writer.WriteLine( "foreach( var i in results )" );
-			writer.WriteLine( "Cache.Current.RowsByPk[ System.Tuple.Create( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        tableColumns.KeyColumns.Select(
-				                                                        i => "i." + StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) )
-			                                                                    .ToArray() ) + " ) ] = i;" );
+			writer.WriteLine( "foreach( var i in results ) {" );
+			var pkTupleCreationArgs = tableColumns.KeyColumns.Select( i => "i." + StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) );
+			var pkTuple = "System.Tuple.Create( " + StringTools.ConcatenateWithDelimiter( ", ", pkTupleCreationArgs.ToArray() ) + " )";
+			writer.WriteLine( "Cache.Current.RowsByPk[ " + pkTuple + " ] = i;" );
+			if( excludePreviousRevisions )
+				writer.WriteLine( "Cache.Current.LatestRevisionRowsByPk[ " + pkTuple + " ] = i;" );
+			writer.WriteLine( "}" );
 
 			writer.WriteLine( "return results;" );
 			writer.WriteLine( "} );" );
