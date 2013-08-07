@@ -33,13 +33,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					if( isSmallTable )
 						writeGetAllRowsMethod( writer, true, true );
 					writeGetRowsMethod( cn, writer, database, table, columns, isSmallTable, true, true );
-					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 				}
-				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) ) {
+
+				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
 					writeGetRowMatchingIdMethod( cn, writer, database, table, columns, isSmallTable, isRevisionHistoryTable );
-					if( !isSmallTable )
-						writeToIdDictionaryMethod( writer, columns );
-				}
+
+				if( isRevisionHistoryTable )
+					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
+
+				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) && !isSmallTable )
+					writeToIdDictionaryMethod( writer, columns );
 
 				writer.WriteLine( "}" ); // class
 			}
@@ -120,11 +123,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var equalityConditionClassName = DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i );
 				writer.WriteLine( "var {0}Condition = conditions.OfType<{1}>().FirstOrDefault();".FormatWith( i.CamelCasedName, equalityConditionClassName ) );
 			}
+			writer.WriteLine( "var cache = Cache.Current;" );
 			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 			writer.WriteLine( "if( " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
 			                  " && conditions.Count() == " + tableColumns.KeyColumns.Count() + " ) {" );
 			writer.WriteLine( "Row row;" );
-			writer.WriteLine( "if( Cache.Current." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
+			writer.WriteLine( "if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
 			                  StringTools.ConcatenateWithDelimiter( ", ", pkConditionVariableNames.Select( i => i + ".Value" ).ToArray() ) + " ), out row ) )" );
 			writer.WriteLine( "return row.ToSingleElementArray();" );
 			writer.WriteLine( "}" );
@@ -132,25 +136,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var commandConditionsExpression = "conditions.Select( i => i.CommandCondition )";
 			if( excludePreviousRevisions )
 				commandConditionsExpression += ".Concat( getLatestRevisionsCondition().ToSingleElementArray() )";
-			writer.WriteLine( "return Cache.Current.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
-			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
-			                  StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
-			writer.WriteLine( "foreach( var i in commandConditions )" );
-			writer.WriteLine( "command.AddCondition( i );" );
-			writer.WriteLine( "var results = new List<Row>();" );
-			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
-			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
-
-			// Add all results to RowsByPk.
-			writer.WriteLine( "foreach( var i in results ) {" );
-			var pkTupleCreationArgs = tableColumns.KeyColumns.Select( i => "i." + StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) );
-			var pkTuple = "System.Tuple.Create( " + StringTools.ConcatenateWithDelimiter( ", ", pkTupleCreationArgs.ToArray() ) + " )";
-			writer.WriteLine( "Cache.Current.RowsByPk[ " + pkTuple + " ] = i;" );
-			if( excludePreviousRevisions )
-				writer.WriteLine( "Cache.Current.LatestRevisionRowsByPk[ " + pkTuple + " ] = i;" );
-			writer.WriteLine( "}" );
-
-			writer.WriteLine( "return results;" );
+			writer.WriteLine( "return cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
+			writeResultSetCreatorBody( writer, database, table, tableColumns, excludePreviousRevisions );
 			writer.WriteLine( "} );" );
 
 			writer.WriteLine( "}" );
@@ -168,14 +155,39 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		                                                 bool isSmallTable, bool isRevisionHistoryTable ) {
 			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id ) {" );
 			if( isSmallTable ) {
-				writer.WriteLine( "GetAllRows();" );
-				writer.WriteLine( "return Cache.Current." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk[ System.Tuple.Create( id ) ];" );
+				writer.WriteLine( "var cache = Cache.Current;" );
+				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToSingleElementArray()" : "new InlineDbCommandCondition[ 0 ]";
+				writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
+				writeResultSetCreatorBody( writer, database, table, tableColumns, isRevisionHistoryTable );
+				writer.WriteLine( "} );" );
+				writer.WriteLine( "return cache." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk[ System.Tuple.Create( id ) ];" );
 			}
 			else {
 				writer.WriteLine( "return GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) +
 				                  "( id ) ).Single();" );
 			}
 			writer.WriteLine( "}" );
+		}
+
+		private static void writeResultSetCreatorBody( TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludesPreviousRevisions ) {
+			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
+			                  StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
+			writer.WriteLine( "foreach( var i in commandConditions )" );
+			writer.WriteLine( "command.AddCondition( i );" );
+			writer.WriteLine( "var results = new List<Row>();" );
+			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
+			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+
+			// Add all results to RowsByPk.
+			writer.WriteLine( "foreach( var i in results ) {" );
+			var pkTupleCreationArgs = tableColumns.KeyColumns.Select( i => "i." + StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) );
+			var pkTuple = "System.Tuple.Create( " + StringTools.ConcatenateWithDelimiter( ", ", pkTupleCreationArgs.ToArray() ) + " )";
+			writer.WriteLine( "cache.RowsByPk[ " + pkTuple + " ] = i;" );
+			if( excludesPreviousRevisions )
+				writer.WriteLine( "cache.LatestRevisionRowsByPk[ " + pkTuple + " ] = i;" );
+			writer.WriteLine( "}" );
+
+			writer.WriteLine( "return results;" );
 		}
 
 		private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
