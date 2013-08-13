@@ -324,6 +324,7 @@
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\EntitySetupInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\HeaderBlockOverrider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
