@@ -421,13 +421,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {
 			writer.Write( StringTools.ConcatenateWithDelimiter( ", ",
 			                                                    columns.Select(
-				                                                    i => i.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( i.CamelCasedName ) )
+				                                                    i => i.DataTypeName + " @" + StandardLibraryMethods.GetCSharpIdentifierSimple( i.CamelCasedName ) )
 			                                                           .ToArray() ) );
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 			foreach( var column in columns ) {
-				writer.WriteLine( modObjectName + "." + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " = " +
+				writer.WriteLine( modObjectName + "." + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " = @" +
 				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
 			}
 		}
