@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Gets the subject and body of the message that will be sent to the specified user when a password reset is requested.
 		/// <paramref name="htmlBody"/> must be HTML, so if needed call GetTextAsEncodedHtml() on plain text.
 		/// </summary>
-		void GetPasswordResetParams( string email, string password, out string subject, out string body );
+		void GetPasswordResetParams( string email, string password, out string subject, out string htmlBody );
 
 		/// <summary>
 		/// Gets the name of the company responsible for administrating the web site.
