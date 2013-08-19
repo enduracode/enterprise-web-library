@@ -8,10 +8,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// of an EWF table or an item of a column primary table. Column hover behavior is not possible with CSS.
 	/// </summary>
 	public class ClickScript {
-		private PageInfo page;
-		private Action method;
-		private string script = "";
-
 		/// <summary>
 		/// Creates a script that redirects to the specified page. Passing null for pageInfo will result in no script being added.
 		/// </summary>
@@ -33,6 +29,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new ClickScript { script = script };
 		}
 
+		private PageInfo page;
+		private Action method;
+		private string script = "";
+
 		private ClickScript() {}
 
 		internal void SetUpClickableControl( WebControl clickableControl ) {
@@ -51,8 +51,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( page != null )
 				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( page.GetUrl() ) + "'; return false";
 			else if( method != null ) {
-				var externalHandler = new ExternalPostBackEventHandler();
-				externalHandler.PostBackEvent += method;
+				var externalHandler = new ExternalPostBackEventHandler( method );
 
 				// NOTE: Remove this hack when DynamicTable is gone.
 				if( clickableControl is TableRow )

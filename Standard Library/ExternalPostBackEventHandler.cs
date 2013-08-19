@@ -3,11 +3,14 @@ using System.Web.UI;
 
 namespace RedStapler.StandardLibrary {
 	internal class ExternalPostBackEventHandler: Control, IPostBackEventHandler {
-		public event Action PostBackEvent;
+		private readonly Action handler;
+
+		internal ExternalPostBackEventHandler( Action handler ) {
+			this.handler = handler;
+		}
 
 		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			if( PostBackEvent != null )
-				PostBackEvent();
+			handler();
 		}
 	}
 }

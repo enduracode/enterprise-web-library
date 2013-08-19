@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -9,11 +8,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A control that, when clicked, causes a post back and executes code.
 	/// </summary>
 	public class PostBackButton: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
-		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack ) {
+		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack, bool includeReturnFalse = true ) {
 			if( !( targetControl is IPostBackEventHandler ) && isEventPostBack )
 				throw new ApplicationException( "The target must be a post back event handler." );
 			var pbo = new PostBackOptions( targetControl, isEventPostBack ? EwfPage.EventPostBackArgument : "" );
-			return EwfPage.Instance.ClientScript.GetPostBackEventReference( pbo ) + "; return false";
+			return EwfPage.Instance.ClientScript.GetPostBackEventReference( pbo ) + ( includeReturnFalse ? "; return false" : "" );
 		}
 
 		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
@@ -84,12 +83,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
 		/// </summary>
-		public override Unit Width { get { return width; } set { width = value; } }
+		public override Unit Width {
+			get { return width; }
+			set { width = value; }
+		}
 
 		/// <summary>
 		/// Gets or sets the height of this button. Only works with the image action control style.
 		/// </summary>
-		public override Unit Height { get { return height; } set { height = value; } }
+		public override Unit Height {
+			get { return height; }
+			set { height = value; }
+		}
 
 		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button ) {
@@ -128,19 +133,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.EhValidateAndModifyData( topValidator => EwfPage.Instance.ExecuteDataModificationValidations( dataModification, topValidator ),
-			                                          dataModification.ModifyData );
-			if( ClickHandler != null ) {
-				var canRun = false;
-				EwfPage.Instance.EhExecute( () => canRun = true );
-				if( canRun )
-					ClickHandler();
-			}
+			EwfPage.Instance.ExecuteDataModification( dataModification, ClickHandler );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey {
+			get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); }
+		}
 	}
 }
