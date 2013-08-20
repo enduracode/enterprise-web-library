@@ -7,9 +7,9 @@ using Stripe;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// Methods for collecting credit-card information with Stripe.
+	/// Methods for processing payments with Stripe.
 	/// </summary>
-	public static class CreditCardCollectionStatics {
+	public static class PaymentProcessingStatics {
 		/// <summary>
 		/// Returns a JavaScript function call getter that opens a Stripe Checkout modal window. If the window's submit button is clicked, the credit card is
 		/// charged or otherwise used. Do not execute the getter before all controls have IDs.
@@ -21,15 +21,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="amountInCents">See https://stripe.com/docs/checkout </param>
 		/// <param name="testSecretKey">Your test secret API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
-		/// <param name="successMessage">The status message that will appear if the credit-card submission is successful. Do not pass null.</param>
-		/// <param name="successPage">The page to which the user will be redirected if the credit-card submission is successful. Pass null for no redirection.
+		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The parameter is the amount of the charge, in cents.
 		/// </param>
-		public static Func<string> GetCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
-		                                                        int? amountInCents, string testSecretKey, string liveSecretKey, string successMessage,
-		                                                        PageInfo successPage ) {
+		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
+		                                                                  int? amountInCents, string testSecretKey, string liveSecretKey,
+		                                                                  Func<int, StatusMessageAndPage> successHandler ) {
+			// StatusMessageAndPage
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
-			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( CreditCardCollectionStatics ),
+			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
 			                                                           "Stripe Checkout",
 			                                                           "https://checkout.stripe.com/v2/checkout.js" );
 
@@ -40,6 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Func<string> tokenHiddenFieldClientIdGetter;
 			EwfHiddenField.Create( "", postBackValue => token.Value = postBackValue, dm, out tokenHiddenFieldValueGetter, out tokenHiddenFieldClientIdGetter );
 
+			PageInfo successPage = null;
 			var externalHandler =
 				new ExternalPostBackEventHandler( () => EwfPage.Instance.ExecuteDataModification( dm, () => EwfPage.Instance.EhRedirect( successPage ) ) );
 			EwfPage.Instance.Form.Controls.Add( externalHandler );
@@ -60,8 +61,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "Stripe error: " + response );
 				}
 
-				if( successMessage.Any() )
-					EwfPage.AddStatusMessage( StatusMessageType.Info, successMessage );
+				var messageAndPage = successHandler( amountInCents.Value );
+				if( messageAndPage.Message.Any() )
+					EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
+				successPage = messageAndPage.Page;
 			} );
 
 			return () => {

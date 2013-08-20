@@ -179,7 +179,6 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
-    <Compile Include="EnterpriseWebFramework\CreditCardCollectionStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
     <Compile Include="DataAccess\DoNotCommitException.cs" />
@@ -313,6 +312,8 @@
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\PostBackValueDictionary.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />
