@@ -64,7 +64,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 
 				try {
-					var messageAndPage = successHandler( response.id, amountInDollars.Value );
+					var messageAndPage = successHandler( (string)response.id, amountInDollars.Value );
 					if( messageAndPage.Message.Any() )
 						EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
 					successPage = messageAndPage.Page;
