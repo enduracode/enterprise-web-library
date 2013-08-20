@@ -61,5 +61,13 @@ namespace RedStapler.StandardLibrary {
 		public static string ToMoneyString( this decimal d ) {
 			return d.ToString( "c2" );
 		}
+
+		/// <summary>
+		/// Returns true if this dollar value includes fractional cents.
+		/// </summary>
+		public static bool DollarValueHasFractionalCents( this decimal dollarValue ) {
+			var centValue = dollarValue * 100;
+			return centValue != (int)centValue;
+		}
 	}
 }

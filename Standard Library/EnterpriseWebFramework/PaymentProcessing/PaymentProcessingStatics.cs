@@ -18,20 +18,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="livePublishableKey">Your live publishable API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="name">See https://stripe.com/docs/checkout. Do not pass null.</param>
 		/// <param name="description">See https://stripe.com/docs/checkout. Do not pass null.</param>
-		/// <param name="amountInCents">See https://stripe.com/docs/checkout </param>
+		/// <param name="amountInDollars">See https://stripe.com/docs/checkout, but note that this parameter is in dollars, not cents</param>
 		/// <param name="testSecretKey">Your test secret API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
-		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The parameter is the amount of the charge, in cents.
-		/// </param>
+		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
+		/// parameter is the amount of the charge, in dollars.</param>
 		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
-		                                                                  int? amountInCents, string testSecretKey, string liveSecretKey,
-		                                                                  Func<int, StatusMessageAndPage> successHandler ) {
-			// StatusMessageAndPage
+		                                                                  decimal? amountInDollars, string testSecretKey, string liveSecretKey,
+		                                                                  Func<string, decimal, StatusMessageAndPage> successHandler ) {
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
 			                                                           "Stripe Checkout",
 			                                                           "https://checkout.stripe.com/v2/checkout.js" );
+
+			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
+				throw new ApplicationException( "Amount must not include fractional cents." );
 
 			var dm = new DataModification();
 			var token = new DataValue<string>();
@@ -47,11 +49,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			dm.AddModificationMethod( () => {
 				// We can add support later for customer creation, subscriptions, etc. as needs arise.
-				if( !amountInCents.HasValue )
+				if( !amountInDollars.HasValue )
 					throw new ApplicationException( "Only simple charges are supported at this time." );
 
 				var apiKey = AppTools.IsLiveInstallation ? liveSecretKey : testSecretKey;
-				dynamic response = new StripeClient( apiKey ).CreateCharge( amountInCents.Value / 100m,
+				dynamic response = new StripeClient( apiKey ).CreateCharge( amountInDollars.Value,
 				                                                            "usd",
 				                                                            new CreditCardToken( token.Value ),
 				                                                            description: description.Any() ? description : null );
@@ -61,18 +63,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "Stripe error: " + response );
 				}
 
-				var messageAndPage = successHandler( amountInCents.Value );
-				if( messageAndPage.Message.Any() )
-					EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
-				successPage = messageAndPage.Page;
+				try {
+					var messageAndPage = successHandler( response.id, amountInDollars.Value );
+					if( messageAndPage.Message.Any() )
+						EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
+					successPage = messageAndPage.Page;
+				}
+				catch( Exception e ) {
+					throw new ApplicationException( "An exception occurred after a credit card was charged.", e );
+				}
 			} );
 
 			return () => {
 				var jsTokenHandler = "function( res ) { $( '#" + tokenHiddenFieldClientIdGetter() + "' ).val( res.id ); " +
 				                     PostBackButton.GetPostBackScript( externalHandler, true, includeReturnFalse: false ) + "; }";
 				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
-				       "', description: '" + description + "', " + ( amountInCents.HasValue ? "amount: " + amountInCents.Value + ", " : "" ) + "token: " + jsTokenHandler +
-				       " } )";
+				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
+				       jsTokenHandler + " } )";
 			};
 		}
 	}
