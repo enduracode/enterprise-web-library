@@ -1,13 +1,14 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Collections;
 using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class TypedCssClassStatics {
 		internal static void Generate( string rootPath, string nameSpace, TextWriter writer ) {
-			var cssClasses = new Set();
+			var cssClasses = new HashSet<string>();
 			foreach( var fileInfo in new DirectoryInfo( rootPath ).GetFiles( "*.css", SearchOption.AllDirectories ) ) {
 				new FileReader( fileInfo.FullName ).ExecuteInStreamReader( delegate( StreamReader reader ) {
 					// Remove comments and styles.
@@ -19,12 +20,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				} );
 			}
 
-			if( cssClasses.Count > 0 ) {
+			if( cssClasses.Any() ) {
 				writer.WriteLine( "namespace " + nameSpace + " {" );
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This class provides typesafe access to css classes present in *.css files." );
 				writer.WriteLine( "public class CssClasses {" );
-				foreach( string cssClass in cssClasses )
+				foreach( var cssClass in cssClasses )
 					writer.WriteLine( "public const string " + StandardLibraryMethods.GetCSharpIdentifierSimple( cssClass ).CapitalizeString() + " = \"" + cssClass + "\";" );
 
 				writer.WriteLine( "}" ); // class

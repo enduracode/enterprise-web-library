@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using NUnit.Framework;
 using RedStapler.StandardLibrary;
@@ -78,9 +78,9 @@ namespace RedStapler.StandardLibraryTester {
 			Console.WriteLine( "LeftLeg".CamelToEnglish() );
 			Console.WriteLine( "hits you in the Head and the LeftLeg!  That hurts.".CamelToEnglish() );
 
-			var mySet = new Set { "a", "c", "", "b", "fred" };
+			var mySet = new HashSet<string> { "a", "c", "", "b", "fred" };
 
-			var list = new ArrayList( mySet );
+			var list = new List<string>( mySet );
 			foreach( var item in mySet )
 				list.Add( item );
 
