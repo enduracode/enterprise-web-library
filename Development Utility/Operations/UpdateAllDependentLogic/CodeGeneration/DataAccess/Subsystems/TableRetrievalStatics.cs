@@ -2,8 +2,8 @@
 using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableRetrievalStatics {
@@ -41,7 +41,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				if( isRevisionHistoryTable )
 					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 
-				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) && !isSmallTable )
+				// Initially we did not generate this method for small tables, but we found a need for it when the cache is disabled since that will cause
+				// GetRowMatchingId to repeatedly query.
+				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
 					writeToIdDictionaryMethod( writer, columns );
 
 				writer.WriteLine( "}" ); // class
