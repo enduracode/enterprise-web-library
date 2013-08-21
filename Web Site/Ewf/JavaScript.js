@@ -150,7 +150,7 @@ function fadeOutStatusMessageDialog( duration ) {
 function changeCheckBoxColor( checkBox ) {
 	var checkBoxParentDiv = $( checkBox ).parents( '.ewfBlockCheckBox' ).first().parent();
 	var selectedCheckBoxClass = 'checkedChecklistCheckboxDiv';
-	if( $( checkBox ).attr( 'checked' ) )
+	if( $( checkBox ).prop( 'checked' ) )
 		checkBoxParentDiv.addClass( selectedCheckBoxClass );
 	else
 		checkBoxParentDiv.removeClass( selectedCheckBoxClass );
@@ -159,7 +159,7 @@ function changeCheckBoxColor( checkBox ) {
 // Toggles the given checklist boxes based on the text of the link clicked
 
 function toggleCheckBoxes( checklistClientId, setChecked ) {
-	$( '#' + checklistClientId ).find( 'input[type=checkbox]' ).attr( 'checked', setChecked ).each( function( i, checkBox ) {
+	$( '#' + checklistClientId ).find( 'input[type=checkbox]' ).prop( 'checked', setChecked ).each( function( i, checkBox ) {
 		changeCheckBoxColor( checkBox );
 	} );
 }
