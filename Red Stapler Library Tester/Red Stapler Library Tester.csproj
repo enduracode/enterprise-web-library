@@ -120,6 +120,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
+    <Compile Include="DoubleTools\ToMoneyString.cs" />
     <Compile Include="RsLibraryTester.cs">
       <SubType>Code</SubType>
     </Compile>
