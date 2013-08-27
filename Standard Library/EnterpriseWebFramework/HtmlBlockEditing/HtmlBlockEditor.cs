@@ -11,6 +11,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A control for editing an HTML block.
 	/// </summary>
 	public class HtmlBlockEditor: WebControl, ControlTreeDataLoader {
+		private readonly string ckEditorVariableOverrides;
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -25,7 +26,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an HTML block editor.
 		/// </summary>
-		public HtmlBlockEditor( int? htmlBlockId, Action<int> idSetter, out HtmlBlockEditorModification mod ) {
+		public HtmlBlockEditor( int? htmlBlockId, Action<int> idSetter, out HtmlBlockEditorModification mod, string ckEditorVariableOverrides = null ) {
+			this.ckEditorVariableOverrides = ckEditorVariableOverrides;
 			this.mod = mod = new HtmlBlockEditorModification( htmlBlockId, htmlBlockId.HasValue ? HtmlBlockStatics.GetHtml( htmlBlockId.Value ) : "", idSetter );
 		}
 
@@ -36,7 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html ) );
+			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html, ckEditorVariableOverrides ) );
 		}
 
 		/// <summary>

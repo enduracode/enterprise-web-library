@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -12,12 +14,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal const string CkEditorFolderUrl = "Ewf/ThirdParty/CkEditor/ckeditor-4.1.2";
 
 		private readonly FormValue<string> formValue;
-
+		private readonly string ckEditorVariableOverrides;
 		/// <summary>
 		/// Creates a simple HTML editor. Do not pass null for value.
+		/// To customize the underlying CKEditor (changing the toolbar, etc.) you may pass in a comma-separated list of variable overrides ("toolbar: ['Bold', 'Italic'], etc. ). 'contentsCss: ' will be set automatically.
 		/// </summary>
-		public WysiwygHtmlEditor( string value ) {
-			formValue = new FormValue<string>( () => value,
+		public WysiwygHtmlEditor( string value, string ckEditorVariableOverrides = null ) {
+			this.ckEditorVariableOverrides = ckEditorVariableOverrides;
+formValue = new FormValue<string>( () => value,
 			                                   () => this.IsOnPage() ? UniqueID : "",
 			                                   v => v,
 			                                   rawValue => {
@@ -52,8 +56,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			const string toolbar =
 				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Image', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink', 'Styles' ]";
-			var contentsCss = this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( DateTime.MinValue ) + ".css" );
-			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ], contentsCss: '" + contentsCss + "' } );";
+
+			var variableSpecs = ckEditorVariableOverrides ?? "toolbar: [ " + toolbar + " ]";
+			var cssUrl = this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( DateTime.MinValue ) + ".css" );
+			return "CKEDITOR.replace( '" + ClientID + "', { " + variableSpecs + ", contentsCss: '" + cssUrl + "' } );";
 		}
 
 		FormValue FormControl.FormValue { get { return formValue; } }
