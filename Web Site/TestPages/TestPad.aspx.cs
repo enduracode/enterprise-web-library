@@ -5,6 +5,8 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class TestPad: EwfPage {
 		protected override void loadData() {
+			ph.AddControlsReturnThis( EwfLink.CreateForNavigationInPopUpWindow( HtmlEditing.GetInfo(), new TextActionControlStyle( "Popup" ),
+			new RedStapler.StandardLibrary.JavaScriptWriting.PopUpWindowSettings( "Popup", 800, 600, true, true, true, true ) ) );
 			var updatePanel = new UpdatePanel { UpdateMode = UpdatePanelUpdateMode.Always };
 
 			var author = new EwfTextBox( "" ) { AutoPostBack = true };

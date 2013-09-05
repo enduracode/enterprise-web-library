@@ -1,3 +1,4 @@
+using System;
 using System.Web.UI;
 
 namespace RedStapler.StandardLibrary.JavaScriptWriting {
@@ -93,9 +94,17 @@ namespace RedStapler.StandardLibrary.JavaScriptWriting {
 		/// Returns a script that can be used to open a pop up window with the specified url and settings.
 		/// </summary>
 		public static string GetPopUpWindowScript( string url, Control urlResolver, PopUpWindowSettings settings ) {
-			return "var popUpWindow = window.open('" + urlResolver.GetClientUrl( url ) + "','" + settings.Name + "','scrollbars=" +
-			       ( settings.ShowsScrollBarsWhenNecessary ? "yes" : "no" ) + ",resizable=no,status=no,width=" + settings.Width + ",height=" + settings.Height +
-			       "'); popUpWindow.focus();";
+			Func<bool, string> toOptionBool = b => b ? "yes" : "no";
+			return
+				@"var popUpWindow = window.open('{0}','{1}','scrollbars={2},resizable={3},status=no,width={4},height={5},toolbar={6},location={7}'); popUpWindow.focus();".FormatWith(
+					urlResolver.GetClientUrl( url ),
+					settings.Name,
+					toOptionBool( settings.ShowsScrollBarsWhenNecessary ),
+					toOptionBool( settings.Resizable ),
+					settings.Width,
+					settings.Height,
+					toOptionBool( settings.ToolBar ),
+					toOptionBool( settings.Location ) );
 		}
 	}
 }
