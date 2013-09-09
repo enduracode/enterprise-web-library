@@ -4,7 +4,6 @@ using System.Collections.Generic;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Defines how user management operations will be carried out against the database for a particular application. Supports ASP.NET Forms Authentication.
-	/// NOTE: Include sample supporting schema here, especially a varbinary(20) for saltedPassword.
 	/// </summary>
 	public interface FormsAuthCapableUserManagementProvider: SystemUserManagementProvider {
 		/// <summary>

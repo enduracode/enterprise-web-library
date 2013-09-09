@@ -282,46 +282,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		/*
 		private static void setupNewDatabase() {
-			string script = @"
-		 * 
-		 * USE Master
-
-CREATE DATABASE [DatabaseName] ON (
-NAME = Data,
-    FILENAME = 'C:\Red Stapler\SQL Server Databases\[SystemName]Data.mdf',
-    SIZE = 100MB,
-    FILEGROWTH = 15% )
-LOG ON
-( NAME = Log,
-    FILENAME = 'C:\Red Stapler\SQL Server Databases\[SystemName].ldf',
-    SIZE = 10MB,
-    MAXSIZE = 1000MB,
-    FILEGROWTH = 100MB );
-GO
-
-USE [DatabaseName]
-
-ALTER DATABASE [DatabaseName] SET PAGE_VERIFY CHECKSUM
-ALTER DATABASE [DatabaseName] SET AUTO_UPDATE_STATISTICS_ASYNC ON
-ALTER DATABASE [DatabaseName] SET ALLOW_SNAPSHOT_ISOLATION ON
-ALTER DATABASE [DatabaseName] SET READ_COMMITTED_SNAPSHOT ON
-GO
-
-CREATE TABLE GlobalInts(
-	ParameterName varchar( 50 )
-		NOT NULL
-		CONSTRAINT GlobalIntsPk PRIMARY KEY,
-	ParameterValue int
-		NOT NULL
-)
-
-INSERT INTO GlobalInts VALUES( 'LineMarker', 0 )
-GO
-
-CREATE TABLE MainSequence(
-	MainSequenceId int NOT NULL IDENTITY CONSTRAINT MainSequencePk PRIMARY KEY
-)
-";
+			// The script that was here is now in the documentation wiki.
 		}
 		Make sure the data file and the log file as shrunken, then set the log autogrowth to 100MB (not 10%, or 1MB, or anything small). If you know it will
 		 *be large, set it large initially. The fewer times it autogrows, the faster log restores will be.
