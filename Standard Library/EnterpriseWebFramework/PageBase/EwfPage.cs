@@ -30,9 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
 		/// </summary>
-		public static EwfPage Instance {
-			get { return HttpContext.Current.CurrentHandler as EwfPage; }
-		}
+		public static EwfPage Instance { get { return HttpContext.Current.CurrentHandler as EwfPage; } }
 
 		/// <summary>
 		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
@@ -72,9 +70,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the page state for this page.
 		/// </summary>
-		public PageState PageState {
-			get { return AppRequestState.Instance.EwfPageRequestState.PageState; }
-		}
+		public PageState PageState { get { return AppRequestState.Instance.EwfPageRequestState.PageState; } }
 
 		/// <summary>
 		/// Creates a new page. Do not call this yourself.
@@ -144,16 +140,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the FileCreator for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual FileCreator fileCreator {
-			get { return null; }
-		}
+		protected virtual FileCreator fileCreator { get { return null; } }
 
 		/// <summary>
 		/// Gets whether the page sends its file inline or as an attachment. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual bool sendsFileInline {
-			get { return true; }
-		}
+		protected virtual bool sendsFileInline { get { return true; } }
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
@@ -477,16 +469,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// or lookup boxes on the page, any of which could cause the PBDM to execute. Second, the PBDM currently only runs if form controls were modified, which
 		/// would not be the case if a user clicks the button on an add item page before entering any data.
 		/// </summary>
-		public DataModification PostBackDataModification {
-			get { return postBackDataModification; }
-		}
+		public DataModification PostBackDataModification { get { return postBackDataModification; } }
 
 		/// <summary>
 		/// Standard Library use only. Gets whether the page forces post backs when links are clicked.
 		/// </summary>
-		public virtual bool IsAutoDataModifier {
-			get { return false; }
-		}
+		public virtual bool IsAutoDataModifier { get { return false; } }
 
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
 			etherealControls.Enqueue( etherealControl );
@@ -627,16 +615,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The desired scroll position of the browser when this response is received.
 		/// </summary>
-		protected virtual ScrollPosition scrollPositionForThisResponse {
-			get { return ScrollPosition.LastPositionOrStatusBar; }
-		}
+		protected virtual ScrollPosition scrollPositionForThisResponse { get { return ScrollPosition.LastPositionOrStatusBar; } }
 
 		/// <summary>
 		/// Gets the function call that should be executed when the jQuery document ready event is fired.
 		/// </summary>
-		protected virtual string javaScriptDocumentReadyFunctionCall {
-			get { return ""; }
-		}
+		protected virtual string javaScriptDocumentReadyFunctionCall { get { return ""; } }
 
 		private void setFocus() {
 			// A SetFocus call takes precedence over a control specified via the controlWithInitialFocus property.
@@ -664,9 +648,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
-		protected virtual Control controlWithInitialFocus {
-			get { return getImplementersWithinControl<FormControl>( contentContainer ).FirstOrDefault(); }
-		}
+		protected virtual Control controlWithInitialFocus { get { return getImplementersWithinControl<FormControl>( contentContainer ).FirstOrDefault(); } }
 
 		/// <summary>
 		/// Raises the Load event.
