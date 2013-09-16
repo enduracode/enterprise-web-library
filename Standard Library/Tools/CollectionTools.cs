@@ -58,5 +58,12 @@ namespace RedStapler.StandardLibrary {
 		public static IEnumerable<Tuple<A, B>> ToTupleEnumeration<A, B, T>( this IEnumerable<T> enumerable, Func<T, A> item1Selector, Func<T, B> item2Selector ) {
 			return enumerable.Select( e => Tuple.Create( item1Selector( e ), item2Selector( e ) ) );
 		}
+
+		/// <summary>
+		/// Gets the values that appear more than once in this sequence.
+		/// </summary>
+		public static IEnumerable<T> GetDuplicates<T>( this IEnumerable<T> items ) {
+			return items.GroupBy( i => i ).Where( i => i.Count() > 1 ).Select( i => i.Key );
+		}
 	}
 }

@@ -18,9 +18,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 			var assemblies = new[] { Assembly.GetExecutingAssembly() }.Concat( additionalAssemblies );
 			elements.AddRange(
 				assemblies.SelectMany( i => i.CreateInstancesOfImplementations<ControlCssElementCreator>().SelectMany( creator => creator.CreateCssElements() ) ) );
-			var duplicateElementNames = elements.GroupBy( i => i.Name ).Where( i => i.Count() > 1 ).Select( i => i.Key );
+			var duplicateElementNames = elements.Select( i => i.Name ).GetDuplicates().ToArray();
 			if( duplicateElementNames.Any() )
-				throw new ApplicationException( "Duplicate elements exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicateElementNames.ToArray() ) + "." );
+				throw new ApplicationException( "Duplicate elements exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicateElementNames ) + "." );
 		}
 
 		internal static ReadOnlyCollection<CssElement> Elements { get { return elements.AsReadOnly(); } }
