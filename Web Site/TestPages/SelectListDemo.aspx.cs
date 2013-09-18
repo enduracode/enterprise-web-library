@@ -55,7 +55,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			bullets.Add(
 				"Focus a control above the first dropdown and tab to focus the dropdown. Press a letter on the keyboard. The dropdown should expand, and that letter should be in the search area. " +
 				"Sometimes this problem only occurs on the first try." );
-			bullets.Add( "When a dropdown is focused with the options expanded, press enter. This should submit the page." );
+			bullets.Add(
+				"When a dropdown is focused with the options expanded, press enter. This should select the option and not submit the page. NOTE: Currently this isn't consistent. In FF this selects and submits, in Chrome this just selects." );
 			bullets.Add( "When a dropdown is focused with the options collapsed, press enter. This should submit the page." );
 
 			return new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( "What to look for after updating Select2",
