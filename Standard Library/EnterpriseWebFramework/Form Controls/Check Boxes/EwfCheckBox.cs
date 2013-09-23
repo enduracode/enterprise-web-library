@@ -58,9 +58,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			var isNonSelectedRadioButton = radioButtonFormValue != null &&
-			                               radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
-			var postBackScript = autoPostBack && !isNonSelectedRadioButton ? PostBackButton.GetPostBackScript( checkBox, false ) : "";
+			var isSelectedRadioButton = radioButtonFormValue != null &&
+			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
+			var postBackScript = autoPostBack && !isSelectedRadioButton ? PostBackButton.GetPostBackScript( checkBox, false, includeReturnFalse: false ) : "";
 			var customScript = StringTools.ConcatenateWithDelimiter( "; ", onClickJsMethods.ToArray() );
 			checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "; ", postBackScript, customScript ) );
 		}
