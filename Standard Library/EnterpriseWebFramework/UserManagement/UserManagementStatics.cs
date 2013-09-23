@@ -17,7 +17,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	public static class UserManagementStatics {
 		private const string providerName = "UserManagement";
 		private const string testCookieName = "TestCookie";
-		private const string utcOffsetHiddenFieldName = "utcOffset";
 
 		/// <summary>
 		/// The idle time required for a session to be erased.
@@ -142,79 +141,85 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			AppTools.SendEmailWithDefaultFromAddress( m );
 		}
 
-		/// <summary>
-		/// This method supports LogInUser and LogInSpecifiedUser. Do not call if the system does not implement the forms authentication capable user management
-		/// provider.
-		/// </summary>
-		public static void SetUpClientSideLogicForLogInPostBack() {
+		private static void setUpClientSideLogicForLogIn( DataValue<string> utcOffset, ValidationList vl ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
-			EwfPage.Instance.ClientScript.RegisterHiddenField( utcOffsetHiddenFieldName, "" );
-			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( typeof( UserManagementStatics ),
-			                                                         "formSubmitEventHandler",
-			                                                         "getClientUtcOffset( '" + utcOffsetHiddenFieldName + "' );" );
+			Func<PostBackValueDictionary, string> utcOffsetHiddenFieldValueGetter; // unused
+			Func<string> utcOffsetHiddenFieldClientIdGetter;
+			EwfHiddenField.Create( "", postBackValue => utcOffset.Value = postBackValue, vl, out utcOffsetHiddenFieldValueGetter, out utcOffsetHiddenFieldClientIdGetter );
+			EwfPage.Instance.PreRender +=
+				delegate {
+					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( typeof( UserManagementStatics ),
+					                                                         "formSubmitEventHandler",
+					                                                         "getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' );" );
+				};
 		}
 
 		/// <summary>
-		/// Only call this method if LoadData contains a call to SetUpClientSideLogicForLogInPostBack. Do not call if the system does not implement the forms
-		/// authentication capable user management provider.
+		/// Sets up client-side logic for user log-in and returns a modification method that logs in a user. Do not call if the system does not implement the
+		/// forms-authentication-capable user-management provider.
 		/// </summary>
-		public static FormsAuthCapableUser LogInUser( DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage,
-		                                              string passwordErrorMessage ) {
-			var errors = new List<string>();
+		public static Func<FormsAuthCapableUser> GetLogInMethod( DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage,
+		                                                         string passwordErrorMessage, ValidationList vl ) {
+			var utcOffset = new DataValue<string>();
+			setUpClientSideLogicForLogIn( utcOffset, vl );
 
-			var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
-			var user = formsAuthCapableUserManagementProvider.GetUser( emailAddress.Value );
-			if( user != null ) {
-				var authenticationSuccessful = false;
-				if( user.SaltedPassword != null ) {
-					// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
-					var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
-					if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
-						authenticationSuccessful = true;
+			return () => {
+				var errors = new List<string>();
 
-						// This system wants to avoid a forced migration and because of this we're adding an exception here.
-						// NOTE: Remove after 30 September 2013.
-					else {
-						var asciiEncoding = new ASCIIEncoding();
-						if( AppTools.SystemName == "Health Alliance Enterprise System" &&
-						    user.SaltedPassword.SequenceEqual( asciiEncoding.GetBytes( asciiEncoding.GetString( hashedPassword ) ) ) ) {
+				var formsAuthCapableUserManagementProvider = ( SystemProvider as FormsAuthCapableUserManagementProvider );
+				var user = formsAuthCapableUserManagementProvider.GetUser( emailAddress.Value );
+				if( user != null ) {
+					var authenticationSuccessful = false;
+					if( user.SaltedPassword != null ) {
+						// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
+						var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
+						if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
 							authenticationSuccessful = true;
 
-							// Migrate the user's account to use the new hash.
-							formsAuthCapableUserManagementProvider.InsertOrUpdateUser( user.UserId,
-							                                                           user.Email,
-							                                                           user.Salt,
-							                                                           hashedPassword,
-							                                                           user.Role.RoleId,
-							                                                           user.LastRequestDateTime,
-							                                                           user.MustChangePassword );
+							// This system wants to avoid a forced migration and because of this we're adding an exception here.
+							// NOTE: Remove after 30 September 2013.
+						else {
+							var asciiEncoding = new ASCIIEncoding();
+							if( AppTools.SystemName == "Health Alliance Enterprise System" &&
+							    user.SaltedPassword.SequenceEqual( asciiEncoding.GetBytes( asciiEncoding.GetString( hashedPassword ) ) ) ) {
+								authenticationSuccessful = true;
+
+								// Migrate the user's account to use the new hash.
+								formsAuthCapableUserManagementProvider.InsertOrUpdateUser( user.UserId,
+								                                                           user.Email,
+								                                                           user.Salt,
+								                                                           hashedPassword,
+								                                                           user.Role.RoleId,
+								                                                           user.LastRequestDateTime,
+								                                                           user.MustChangePassword );
+							}
 						}
 					}
+
+					var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+					if( strictProvider != null ) {
+						strictProvider.PostAuthenticate( user, authenticationSuccessful );
+
+						// Re-retrieve the user in case PostAuthenticate modified it.
+						user = formsAuthCapableUserManagementProvider.GetUser( user.UserId );
+					}
+
+					if( authenticationSuccessful )
+						setCookieAndUser( user );
+					else
+						errors.Add( passwordErrorMessage );
 				}
-
-				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-				if( strictProvider != null ) {
-					strictProvider.PostAuthenticate( user, authenticationSuccessful );
-
-					// Re-retrieve the user in case PostAuthenticate modified it.
-					user = formsAuthCapableUserManagementProvider.GetUser( user.UserId );
-				}
-
-				if( authenticationSuccessful )
-					setCookieAndUser( user );
 				else
-					errors.Add( passwordErrorMessage );
-			}
-			else
-				errors.Add( emailAddressErrorMessage );
+					errors.Add( emailAddressErrorMessage );
 
-			errors.AddRange( verifyTestCookie() );
-			addStatusMessageIfClockNotSynchronized();
+				errors.AddRange( verifyTestCookie() );
+				addStatusMessageIfClockNotSynchronized( utcOffset );
 
-			if( errors.Any() )
-				throw new EwfException( errors.ToArray() );
-			return user;
+				if( errors.Any() )
+					throw new EwfException( errors.ToArray() );
+				return user;
+			};
 		}
 
 		/// <summary>
@@ -228,18 +233,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Only call this method if LoadData contains a call to SetUpClientSideLogicForLogInPostBack. Do not call if the system does not implement the forms
-		/// authentication capable user management provider.
+		/// Sets up client-side logic for user log-in and returns a modification method that logs in the specified user. Do not call if the system does not
+		/// implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static void LogInSpecifiedUser( int userId ) {
-			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
-			setCookieAndUser( user );
+		public static Action GetSpecifiedUserLogInMethod( int userId, ValidationList vl ) {
+			var utcOffset = new DataValue<string>();
+			setUpClientSideLogicForLogIn( utcOffset, vl );
 
-			var errors = new List<string>();
-			errors.AddRange( verifyTestCookie() );
-			addStatusMessageIfClockNotSynchronized();
-			if( errors.Any() )
-				throw new EwfException( errors.ToArray() );
+			return () => {
+				var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
+				setCookieAndUser( user );
+
+				var errors = new List<string>();
+				errors.AddRange( verifyTestCookie() );
+				addStatusMessageIfClockNotSynchronized( utcOffset );
+				if( errors.Any() )
+					throw new EwfException( errors.ToArray() );
+			};
 		}
 
 		private static void setCookieAndUser( FormsAuthCapableUser user ) {
@@ -266,11 +276,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			return HttpContext.Current.Request.Cookies[ testCookieName ] == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
 		}
 
-		private static void addStatusMessageIfClockNotSynchronized() {
+		private static void addStatusMessageIfClockNotSynchronized( DataValue<string> utcOffset ) {
 			try {
 				// IE uses a "UTC" suffix and Firefox uses a "GMT" suffix.  For our purposes, they are the same thing. Ironically, Microsoft fails to parse the time
 				// generated by its own product, so we convert it to be the same as the time Firefox gives, which parses fine.
-				var clockDifference = DateTime.Parse( HttpContext.Current.Request.Form[ utcOffsetHiddenFieldName ].Replace( "UTC", "GMT" ) ) - DateTime.Now;
+				var clockDifference = DateTime.Parse( utcOffset.Value.Replace( "UTC", "GMT" ) ) - DateTime.Now;
 
 				if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
 					EwfPage.AddStatusMessage( StatusMessageType.Warning,

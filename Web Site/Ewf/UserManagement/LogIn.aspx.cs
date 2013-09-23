@@ -10,7 +10,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 	public partial class LogIn: EwfPage {
 		private FormsAuthCapableUserManagementProvider provider;
 		private DataValue<string> emailAddress;
-		private DataValue<string> password;
 		private FormsAuthCapableUser user;
 
 		protected override void loadData() {
@@ -32,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			logInDm.AddValidations( emailVl );
 			newPasswordDm.AddValidations( emailVl );
 
-			password = new DataValue<string>();
+			var password = new DataValue<string>();
 			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
 			                                           FormItem.Create( "",
 			                                                            new EwfTextBox( "" ) { MasksCharacters = true },
@@ -69,9 +68,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				                                                                                           ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo
 				                                                                                           : new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
 
-			UserManagementStatics.SetUpClientSideLogicForLogInPostBack();
-
-			logInDm.AddModificationMethod( modifyData );
+			var logInMethod = UserManagementStatics.GetLogInMethod( emailAddress,
+			                                                        password,
+			                                                        getUnregisteredEmailMessage(),
+			                                                        "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
+			                                                        logInDm );
+			logInDm.AddModificationMethod( () => user = logInMethod() );
 		}
 
 		private void handleSendNewPasswordClick() {
@@ -81,13 +83,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					throw new EwfException( getUnregisteredEmailMessage() );
 				return ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ).GetUrl();
 			} );
-		}
-
-		private void modifyData() {
-			user = UserManagementStatics.LogInUser( emailAddress,
-			                                        password,
-			                                        getUnregisteredEmailMessage(),
-			                                        "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
 		}
 
 		private string getUnregisteredEmailMessage() {
