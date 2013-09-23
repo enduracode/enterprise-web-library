@@ -47,7 +47,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                                                                              vl ) ) );
 
 			if( includePasswordControls() ) {
-				var group = new RadioButtonGroup( "password", false );
+				var group = new RadioButtonGroup( false );
 
 				var keepPassword = FormItem.Create( "",
 				                                    group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
