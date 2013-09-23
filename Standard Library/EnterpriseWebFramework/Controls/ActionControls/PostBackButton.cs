@@ -83,27 +83,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
 		/// </summary>
-		public override Unit Width {
-			get { return width; }
-			set { width = value; }
-		}
+		public override Unit Width { get { return width; } set { width = value; } }
 
 		/// <summary>
 		/// Gets or sets the height of this button. Only works with the image action control style.
 		/// </summary>
-		public override Unit Height {
-			get { return height; }
-			set { height = value; }
-		}
+		public override Unit Height { get { return height; } set { height = value; } }
 
 		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button ) {
-				// IE7 (or at least IE8 Compatibility View) unconditionally submits a value for all "button" elements with type "button" that are on the page,
-				// regardless of what was clicked. We prevent these bad submissions from raising post back events by mangling the "name" attribute so it does not
-				// correspond to the unique ID of any control. The __EVENTTARGET field will ensure that post back events are still raised for buttons that are actually
-				// clicked.
-				Attributes.Add( "name", UniqueID + ( UsesSubmitBehavior ? "" : "@" ) );
-
+				Attributes.Add( "name", UniqueID );
 				Attributes.Add( "value", "v" );
 				Attributes.Add( "type", UsesSubmitBehavior ? "submit" : "button" );
 			}
@@ -139,8 +128,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey {
-			get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); }
-		}
+		protected override HtmlTextWriterTag TagKey { get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
 	}
 }
