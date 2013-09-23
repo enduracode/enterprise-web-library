@@ -1,49 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
-using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
-	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl<bool>, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
-		private readonly bool isCheckedDurable;
+	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+		private readonly FormValue<bool> checkBoxFormValue;
+		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
+		private readonly string radioButtonListItemId;
 		private readonly string label;
 		private readonly bool highlightWhenChecked;
 		private readonly List<string> onClickJsMethods = new List<string>();
-		private Func<bool, bool> postBackValueSelector;
-		private CheckBox checkBox;
+		private WebControl checkBox;
 
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
 		/// </summary>
 		public BlockCheckBox( bool isChecked, string label = "", bool highlightWhenChecked = false ) {
-			isCheckedDurable = isChecked;
+			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 			this.label = label;
 			this.highlightWhenChecked = highlightWhenChecked;
 			NestedControls = new List<Control>();
-			GroupName = "";
-			postBackValueSelector = isCheckedInPostBack => isCheckedInPostBack;
 		}
 
-		bool FormControl<bool>.DurableValue { get { return isCheckedDurable; } }
-		string FormControl.DurableValueAsString { get { return isCheckedDurable.ToString(); } }
-
 		/// <summary>
-		/// Gets or sets the name of the group that this check box belongs to. If this is not the empty string, this control will render as a radio button rather
-		/// than a check box.
+		/// Creates a radio button.
 		/// </summary>
-		internal string GroupName { private get; set; }
+		internal BlockCheckBox( FormValue<CommonCheckBox> formValue, string label, string listItemId = null ) {
+			radioButtonFormValue = formValue;
+			radioButtonListItemId = listItemId;
+			this.label = label;
+			NestedControls = new List<Control>();
+		}
 
-		string CommonCheckBox.GroupName { get { return GroupName; } }
+		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
 
 		/// <summary>
 		/// Gets or sets whether or not the check box automatically posts the page back to the server when it is checked or unchecked.
@@ -76,35 +73,30 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
 		/// </summary>
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
-			// This method is smart because it will be called both before and after the actual check box or radio button is created.
-			// DisplayLinking calls this after LoadData.
-			if( checkBox != null )
-				checkBox.AddJavaScriptEventScript( JsWritingMethods.onclick, jsMethodInvocation );
-			else
-				onClickJsMethods.Add( jsMethodInvocation );
+			onClickJsMethods.Add( jsMethodInvocation );
 		}
 
-		internal Func<bool, bool> PostBackValueSelector { set { postBackValueSelector = value; } }
-
-		public bool IsRadioButton { get { return GroupName.Any(); } }
+		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
 
 		/// <summary>
 		/// Gets whether the box was created in a checked state.
 		/// </summary>
-		public bool IsChecked { get { return isCheckedDurable; } }
+		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			if( highlightWhenChecked && AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) )
-				CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
+			PreRender += delegate {
+				if( highlightWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+					CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
+			};
 
 			var table = TableOps.CreateUnderlyingTable();
 			table.CssClass = "ewfBlockCheckBox";
 
-			checkBox = GroupName.Length > 0 ? new RadioButton { GroupName = GroupName } : new CheckBox();
-			checkBox.Checked = AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this );
-			checkBox.AutoPostBack = AutoPostBack;
-
-			checkBox.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "", onClickJsMethods.ToArray() ) );
+			checkBox = new WebControl( HtmlTextWriterTag.Input );
+			PreRender +=
+				delegate {
+					EwfCheckBox.AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, AutoPostBack, onClickJsMethods );
+				};
 
 			var checkBoxCell = new TableCell().AddControlsReturnThis( checkBox );
 			checkBoxCell.Style.Add( "width", "13px" );
@@ -137,22 +129,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return highlightWhenChecked ? "$( '#" + checkBox.ClientID + "' ).click( function() { changeCheckBoxColor( this ); } );" : "";
 		}
 
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			postBackValues.Add( this, checkBox.Checked );
-		}
+		FormValue FormControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
 
 		/// <summary>
 		/// Gets whether the box is checked in the post back.
 		/// </summary>
 		public bool IsCheckedInPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValueSelector( postBackValues.GetValue( this ) );
+			return checkBoxFormValue != null ? checkBoxFormValue.GetValue( postBackValues ) : radioButtonFormValue.GetValue( postBackValues ) == this;
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return IsCheckedInPostBack( postBackValues ) != isCheckedDurable;
+			return checkBoxFormValue != null ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues ) : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

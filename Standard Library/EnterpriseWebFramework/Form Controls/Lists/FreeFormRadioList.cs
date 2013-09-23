@@ -14,16 +14,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a free-form radio button list.
 		/// </summary>
-		/// <param name="groupName"></param>
 		/// <param name="allowNoSelection">Pass true to cause a selected item ID of null (or empty string when the item ID type is string) to represent the state in
 		/// which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
 		/// http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
 		/// <param name="selectedItemId"></param>
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
 		/// violates the HTML specification.</param>
+		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( bool allowNoSelection, ItemIdType selectedItemId, bool disableSingleButtonDetection = false ) {
+			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
+		}
+
+		[ Obsolete( "Guaranteed through 30 November 2013. Please use the other Create method." ) ]
 		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( string groupName, bool allowNoSelection, ItemIdType selectedItemId,
 		                                                                bool disableSingleButtonDetection = false ) {
-			return new FreeFormRadioList<ItemIdType>( groupName, allowNoSelection, disableSingleButtonDetection, selectedItemId );
+			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
 		}
 	}
 
@@ -32,17 +36,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// radio button and do not need the concept of a selected item ID for the group, use RadioButtonGroup instead.
 	/// </summary>
 	public class FreeFormRadioList<ItemIdType>: DisplayLink {
-		private readonly string groupName;
 		private readonly bool allowNoSelection;
-		private readonly ItemIdType selectedItemId;
+		private readonly FormValue<CommonCheckBox> formValue;
 		private readonly List<Action<PostBackValueDictionary>> displayLinkingSetInitialDisplayMethods = new List<Action<PostBackValueDictionary>>();
 		private readonly List<Action> displayLinkingAddJavaScriptMethods = new List<Action>();
 		private readonly List<Tuple<ItemIdType, CommonCheckBox>> itemIdsAndCheckBoxes = new List<Tuple<ItemIdType, CommonCheckBox>>();
 
-		internal FreeFormRadioList( string groupName, bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId ) {
-			this.groupName = groupName;
+		internal FreeFormRadioList( bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId ) {
 			this.allowNoSelection = allowNoSelection;
-			this.selectedItemId = selectedItemId;
+			formValue = RadioButtonGroup.GetFormValue( allowNoSelection,
+			                                           () => from i in itemIdsAndCheckBoxes select i.Item2,
+			                                           () =>
+			                                           from i in itemIdsAndCheckBoxes where StandardLibraryMethods.AreEqual( i.Item1, selectedItemId ) select i.Item2,
+			                                           v => getStringId( v != null ? itemIdsAndCheckBoxes.Single( i => i.Item2 == v ).Item1 : getNoSelectionItemId() ),
+			                                           rawValue => from itemIdAndCheckBox in itemIdsAndCheckBoxes
+			                                                       let control = (Control)itemIdAndCheckBox.Item2
+			                                                       where control.IsOnPage() && getStringId( itemIdAndCheckBox.Item1 ) == rawValue
+			                                                       select itemIdAndCheckBox.Item2 );
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() =>
@@ -76,8 +86,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates an in-line radio button that is part of the list.
 		/// </summary>
 		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
-			var checkBox = new EwfCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
-			itemIdsAndCheckBoxes.Add( Tuple.Create( listItemId, checkBox as CommonCheckBox ) );
+			validateListItem( listItemId );
+			var checkBox = new EwfCheckBox( formValue, label, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
 
@@ -85,15 +96,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
 		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
-			var checkBox = new BlockCheckBox( itemIsSelected( listItemId ), label: label ) { GroupName = groupName, AutoPostBack = autoPostBack };
-			itemIdsAndCheckBoxes.Add( Tuple.Create( listItemId, checkBox as CommonCheckBox ) );
+			validateListItem( listItemId );
+			var checkBox = new BlockCheckBox( formValue, label, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
 
-		private bool itemIsSelected( ItemIdType listItemId ) {
+		private void validateListItem( ItemIdType listItemId ) {
 			if( allowNoSelection && StandardLibraryMethods.AreEqual( listItemId, getNoSelectionItemId() ) )
 				throw new ApplicationException( "You cannot create a radio button with the ID that represents no selection." );
-			return StandardLibraryMethods.AreEqual( listItemId, selectedItemId );
+			if( itemIdsAndCheckBoxes.Any( i => getStringId( i.Item1 ) == getStringId( listItemId ) ) )
+				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
+		}
+
+		private string getStringId( ItemIdType id ) {
+			return id.ObjectToString( true );
 		}
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
@@ -110,11 +127,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the selected item ID in the post back.
 		/// </summary>
 		public ItemIdType GetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues ) {
-			var itemIdsAndCheckBoxesOnPage = itemIdsAndCheckBoxes.Where( i => ( i.Item2 as Control ).IsOnPage() ).ToArray();
-			if( !itemIdsAndCheckBoxesOnPage.Any() )
-				return selectedItemId;
-			var selectedPair = itemIdsAndCheckBoxesOnPage.SingleOrDefault( i => i.Item2.IsCheckedInPostBack( postBackValues ) );
-			return selectedPair != null ? selectedPair.Item1 : allowNoSelection ? getNoSelectionItemId() : itemIdsAndCheckBoxesOnPage.First().Item1;
+			var selectedPair = itemIdsAndCheckBoxes.SingleOrDefault( i => i.Item2 == formValue.GetValue( postBackValues ) );
+			return selectedPair != null ? selectedPair.Item1 : getNoSelectionItemId();
 		}
 
 		private ItemIdType getNoSelectionItemId() {
@@ -125,7 +139,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns true if the selection changed on this post back.
 		/// </summary>
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return !StandardLibraryMethods.AreEqual( GetSelectedItemIdInPostBack( postBackValues ), selectedItemId );
+			return formValue.ValueChangedOnPostBack( postBackValues );
 		}
 	}
 }
