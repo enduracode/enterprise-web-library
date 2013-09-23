@@ -109,7 +109,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								                                                                      "Custom script".ToCell() ),
 							                                                                      () =>
 							                                                                      new EwfTableItem(
-								                                                                      new LaunchWindowLink( new ModalWindow( new EwfTextBox( "" ) ) )
+								                                                                      new LaunchWindowLink( new ModalWindow( new Paragraph( "Test!" ) ) )
 									                                                                      {
 										                                                                      ActionControlStyle = new TextActionControlStyle( "Modal" )
 									                                                                      }.ToCell() )
