@@ -43,12 +43,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private Control contentContainer;
 		private readonly DataModification postBackDataModification = new DataModification();
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
+		private readonly List<FormValue> formValues = new List<FormValue>();
+		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<Tuple<WebControl, string, Control>> postBackOnEnterControlsAndPredicatesAndTargets = new List<Tuple<WebControl, string, Control>>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
-		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
-		private string formControlHash;
-		private string formControlHashWithValues;
+		private string formValueHash;
 		private PageInfo redirectInfo;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
@@ -165,8 +165,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				onLoadData();
 
-				if( AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash != null &&
-				    generateFormControlHash( true, false ) != AppRequestState.Instance.EwfPageRequestState.StaticFormControlHash ) {
+				if( AppRequestState.Instance.EwfPageRequestState.StaticFormValueHash != null &&
+				    generateFormValueHash( false ) != AppRequestState.Instance.EwfPageRequestState.StaticFormValueHash ) {
 					var sentences = new[]
 						{
 							"Possible developer mistake.",
@@ -176,8 +176,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 				}
 
-				formControlHash = generateFormControlHash( false, true );
-				formControlHashWithValues = generateFormControlHash( true, true );
+				formValueHash = generateFormValueHash( true );
 			}
 		}
 
@@ -196,9 +195,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
 				                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
 				                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
-				formControlHash = (string)savedState.Item2[ 0 ];
-				formControlHashWithValues = (string)savedState.Item2[ 1 ];
-				standardSavedState = savedState.Item2[ 2 ];
+				formValueHash = (string)savedState.Item2[ 0 ];
+				standardSavedState = savedState.Item2[ 1 ];
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
@@ -213,38 +211,43 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			onLoadData();
 
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			// Compare form control hashes to make sure data didn't change under this page's feet since the last request.
+			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
+			var eventButtonUniqueId = FindControl( Request.Form[ "__EVENTTARGET" ] ) is PostBackButton
+				                          ? Request.Form[ "__EVENTTARGET" ].ToSingleElementArray()
+				                          : new string[ 0 ];
+			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
+			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
+			requestState.PostBackValues = new PostBackValueDictionary( new Dictionary<string, object>() );
+			var extraPostBackValuesExist =
+				requestState.PostBackValues.AddFromRequest( Request.Form.Cast<string>().Except( webFormsHiddenFields.Concat( eventButtonUniqueId ) ),
+				                                            postBackValueKeys.Contains,
+				                                            key => Request.Form[ key ] ) |
+				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
 
-			// NOTE: Eliminate the form control hash [without values] and replace this check with a verification of one-to-one mapping between form controls and
-			// Request.Form items. From Request.Form, we must exclude built in ASP.NET items, e.g. __VIEWSTATE, as well as extraneous items from certain Telerik
-			// controls, such as RadToolTip and RadDatePicker, that don't correspond to form controls in our model. Also, some of our own form controls don't provide
-			// a way to access the UniqueID of the actual form element, which is needed since it is equivalent to the name attribute and therefore is used as the key
-			// in Request.Form.
-			if( generateFormControlHash( false, true ) != formControlHash ) {
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageBad.ToSingleElementArray();
-				resetPage();
-			}
-
-			var newFormControlHashWithValues = generateFormControlHash( true, true );
-			if( newFormControlHashWithValues != formControlHashWithValues ) {
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageGoodHtml.ToSingleElementArray();
+			// Make sure data didn't change under this page's feet since the last request.
+			var invalidPostBackValuesExist = activeFormValues.Any( i => !i.PostBackValueIsValid( requestState.PostBackValues ) );
+			var newFormValueHash = generateFormValueHash( true );
+			if( extraPostBackValuesExist || invalidPostBackValuesExist || newFormValueHash != formValueHash ) {
+				requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageHtml.ToSingleElementArray();
 
 				// Update the hash variable with the value from this request since the user has now been warned that changes have been made under their feet.
-				formControlHashWithValues = newFormControlHashWithValues;
+				formValueHash = newFormValueHash;
 			}
 			else {
 				// This logic can go anywhere between here and the first EH method call, which is in OnLoad. It's convenient to have it here since it should only run on
 				// post backs and so it can be inside the else block.
 				if( isEventPostBack && !( FindControl( Request.Form[ "__EVENTTARGET" ] ) is IPostBackEventHandler ) ) {
-					AppRequestState.Instance.EwfPageRequestState.TopModificationErrors =
-						Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
+					requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
 
 					// There is no need to explicitly cancel the post back event since ASP.NET will not be able to do anything anyway if it can't find an
 					// IPostBackEventHandler that corresponds to the __EVENTTARGET.
 				}
 			}
 
+			if( postBackDataModification.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
+				ExecuteDataModification( postBackDataModification, null );
 
 			return standardSavedState;
 		}
@@ -306,6 +309,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			foreach( var i in controlTreeValidations )
 				i();
 
+			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
+			if( duplicatePostBackValueKeys.Any() )
+				throw new ApplicationException( "Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
+
 			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
 			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
 			// happen after LoadData is called on all controls.
@@ -323,6 +330,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
 			addJavaScriptStartUpLogic( submitButton, etherealControlsForJsStartUpLogic, !AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist );
+
+			// This must happen after LoadData and before modifications are executed.
+			statusMessages.Clear();
 		}
 
 		private void addMetadataAndFaviconLinks() {
@@ -480,6 +490,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			etherealControls.Enqueue( etherealControl );
 		}
 
+		internal void AddFormValue( FormValue formValue ) {
+			formValues.Add( formValue );
+		}
+
 		/// <summary>
 		/// Adds a display mapping to this page.
 		/// </summary>
@@ -511,14 +525,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			else
 				modErrorDisplaysByValidation.Add( validation, key.ToSingleElementArray().ToList() );
 
-			// We want to suppress all of the exceptions that could happen, such as the key not existing in the dictionary. This problem will be shown in a more
-			// helpful way when we compare form control hashes after a transfer.
-			try {
-				return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay[ key ];
-			}
-			catch {
-				return new string[ 0 ];
-			}
+			// We want to ignore all of the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
+			// way when we compare form control hashes after a transfer.
+			//
+			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
+			// each when debugging.
+			IEnumerable<string> value;
+			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out value ) ? value : new string[ 0 ];
 		}
 
 		internal void AddControlTreeValidation( Action validation ) {
@@ -651,25 +664,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected virtual Control controlWithInitialFocus { get { return getImplementersWithinControl<FormControl>( contentContainer ).FirstOrDefault(); } }
 
 		/// <summary>
-		/// Raises the Load event.
-		/// </summary>
-		protected override sealed void OnLoad( EventArgs e ) {
-			base.OnLoad( e );
-
-			if( IsPostBack ) {
-				foreach( var formControl in getChildFormControls( this ) )
-					formControl.AddPostBackValueToDictionary( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-			}
-
-			// This must happen after LoadData and before modifications are executed.
-			statusMessages.Clear();
-
-			if( IsPostBack && postBackDataModification.ContainsAnyValidationsOrModifications() &&
-			    getChildFormControls( this ).Any( fc => fc.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) )
-				ExecuteDataModification( postBackDataModification, null );
-		}
-
-		/// <summary>
 		/// Notifies the server control that caused the postback that it should handle an incoming postback event.
 		/// </summary>
 		protected override void RaisePostBackEvent( IPostBackEventHandler sourceControl, string eventArgument ) {
@@ -793,7 +787,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// used by the Edit Task page in RSIS.
 		/// </summary>
 		public bool ModifiedFormControlsExistWithinContentContainer() {
-			return getChildFormControls( contentContainer ).Any( fc => fc.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
+			return
+				getImplementersWithinControl<FormControl>( contentContainer )
+					.Cast<FormControl>()
+					.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
 		}
 
 		/// <summary>
@@ -824,10 +821,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
 					requestState.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
-					requestState.EwfPageRequestState.PostBackValues = new PostBackValueDictionary( new Dictionary<string, object>() );
+					requestState.EwfPageRequestState.PostBackValues = null;
 				}
 				else
-					requestState.EwfPageRequestState.StaticFormControlHash = generateFormControlHash( true, false );
+					requestState.EwfPageRequestState.StaticFormValueHash = generateFormValueHash( false );
 
 				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
 				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
@@ -889,38 +886,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private string generateFormControlHash( bool includeValues, bool forConcurrencyCheck ) {
-			var formControlString = new StringBuilder();
-			foreach( var formControl in getChildFormControls( this ) ) {
-				formControlString.Append( formControl.GetType().ToString() );
-				formControlString.Append( ( formControl as Control ).UniqueID );
-				if( includeValues )
-					formControlString.Append( formControl.DurableValueAsString );
+		private string generateFormValueHash( bool forConcurrencyCheck ) {
+			var formValueString = new StringBuilder();
+			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
+				formValueString.Append( formValue.GetPostBackValueKey() );
+				formValueString.Append( formValue.GetDurableValueAsString() );
 			}
 
 			if( !forConcurrencyCheck && AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ) {
 				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
 				// errors from being displayed.
 				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
-					formControlString.Append( modErrorDisplayKey + " " );
+					formValueString.Append( modErrorDisplayKey + " " );
 
 				// It's probably bad if a developer puts a PostBackButton or other IPostBackEventHandler on the page because of a modification error. It will be gone on
 				// the post back and cannot be processed.
 				foreach( var postBackEventHandler in getImplementersWithinControl<IPostBackEventHandler>( this ) ) {
-					formControlString.Append( postBackEventHandler.GetType().ToString() );
-					formControlString.Append( postBackEventHandler.UniqueID );
+					formValueString.Append( postBackEventHandler.GetType().ToString() );
+					formValueString.Append( postBackEventHandler.UniqueID );
 				}
 			}
 
-			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formControlString.ToString() ) );
+			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
 			var hashString = "";
 			foreach( var b in hash )
 				hashString += b.ToString( "x2" );
 			return hashString;
-		}
-
-		private IEnumerable<FormControl> getChildFormControls( Control control ) {
-			return getImplementersWithinControl<FormControl>( control ).Cast<FormControl>();
 		}
 
 		private IEnumerable<Control> getImplementersWithinControl<InterfaceType>( Control control ) {
@@ -1020,7 +1011,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Saves hidden field state.
 		/// </summary>
 		protected override sealed void SavePageStateToPersistenceMedium( object state ) {
-			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new[] { formControlHash, formControlHashWithValues, state } ) );
+			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new[] { formValueHash, state } ) );
 		}
 	}
 }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Web.UI;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -12,36 +12,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.dictionary = dictionary;
 		}
 
-		internal void Add<ValType>( FormControl<ValType> key, ValType value ) {
-			dictionary.Add( ( key as Control ).UniqueID, value );
+		/// <summary>
+		/// Returns true if extra post-back values exist.
+		/// </summary>
+		/// <param name="keys"></param>
+		/// <param name="keyPredicate"></param>
+		/// <param name="valueSelector">Do not return null from this method.</param>
+		internal bool AddFromRequest( IEnumerable<string> keys, Func<string, bool> keyPredicate, Func<string, object> valueSelector ) {
+			var extraPostBackValuesExist = false;
+			foreach( var key in keys ) {
+				if( keyPredicate( key ) && !dictionary.ContainsKey( key ) )
+					dictionary.Add( key, valueSelector( key ) );
+				else
+					extraPostBackValuesExist = true;
+			}
+			return extraPostBackValuesExist;
 		}
 
-		internal ValType GetValue<ValType>( FormControl<ValType> key ) {
-			// We want to ignore all of the problems that could happen, such as the key not existing or the value being the wrong type. Any problem that matters
-			// should be caught in a more helpful way by EwfPage when it compares form control hashes.
-			//
-			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
-			// each when debugging.
-
-			var id = ( (Control)key ).UniqueID;
-			if( id == null )
-				return key.DurableValue;
-
+		/// <summary>
+		/// Returns null if there is no value for the specified key.
+		/// </summary>
+		internal object GetValue( string key ) {
 			object value;
-			if( !dictionary.TryGetValue( id, out value ) )
-				return key.DurableValue;
-
-			// It would be nice to figure out a way to do this without using exceptions.
-			try {
-				return (ValType)value;
-			}
-			catch {
-				return key.DurableValue;
-			}
-		}
-
-		internal bool ValueChangedOnPostBack<ValType>( FormControl<ValType> key ) {
-			return !StandardLibraryMethods.AreEqual( GetValue( key ), key.DurableValue );
+			return dictionary.TryGetValue( key, out value ) ? value : null;
 		}
 	}
 }

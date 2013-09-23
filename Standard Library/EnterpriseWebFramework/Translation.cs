@@ -14,7 +14,11 @@
 		/// <summary>
 		/// "Unacceptable file extension. Acceptable file extensions are:".
 		/// </summary>
-		internal static string UnacceptableFileExtension { get { return getCorrectTranslation( "Unacceptable file extension. Acceptable file extensions are:", "Extensión de archivo no válida. La extensión válida es:" ); } }
+		internal static string UnacceptableFileExtension {
+			get {
+				return getCorrectTranslation( "Unacceptable file extension. Acceptable file extensions are:", "Extensión de archivo no válida. La extensión válida es:" );
+			}
+		}
 
 		internal static string ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction {
 			get {
@@ -25,14 +29,7 @@
 			}
 		}
 
-		internal static string AnotherUserHasModifiedPageBad {
-			get {
-				return getCorrectTranslation( "Another user has modified this page since the last time you saw it. The latest version has been loaded.",
-				                              "Otro usuario ha modificado esta página desde la última vez que usted lo vio. La última versión se ha cargado." );
-			}
-		}
-
-		internal static string AnotherUserHasModifiedPageGoodHtml {
+		internal static string AnotherUserHasModifiedPageHtml {
 			get {
 				return
 					getCorrectTranslation( "Another user has modified this page since the last time you saw it.",
@@ -56,7 +53,9 @@
 			}
 		}
 
-		internal static string PleaseCorrectTheErrorsShownBelow { get { return getCorrectTranslation( "Please correct the errors shown below.", "Por favor, corrija los errores que se muestran a continuación." ); } }
+		internal static string PleaseCorrectTheErrorsShownBelow {
+			get { return getCorrectTranslation( "Please correct the errors shown below.", "Por favor, corrija los errores que se muestran a continuación." ); }
+		}
 
 		internal static string YourBrowserHasCookiesDisabled {
 			get {
@@ -77,7 +76,9 @@
 			}
 		}
 
-		internal static string ClickHereToReplaceExistingFile { get { return getCorrectTranslation( "Click here to replace the existing file.", "Chasque aquí para substituir el archivo existente." ); } }
+		internal static string ClickHereToReplaceExistingFile {
+			get { return getCorrectTranslation( "Click here to replace the existing file.", "Chasque aquí para substituir el archivo existente." ); }
+		}
 
 		/// <summary>
 		/// BasicPage.master use only.
@@ -103,12 +104,16 @@
 		/// <summary>
 		/// AccessDenied.aspx use only.
 		/// </summary>
-		public static string ClickHereToGoToHomePage { get { return getCorrectTranslation( "Click here to go to the home page.", "Haga clic aquí para ir a la página principal." ); } }
+		public static string ClickHereToGoToHomePage {
+			get { return getCorrectTranslation( "Click here to go to the home page.", "Haga clic aquí para ir a la página principal." ); }
+		}
 
 		/// <summary>
 		/// PageNotAvailable.aspx use only.
 		/// </summary>
-		public static string ThePageYouRequestedIsNotAvailable { get { return getCorrectTranslation( "The page you requested is no longer available.", "La página solicitada ya no está disponible." ); } }
+		public static string ThePageYouRequestedIsNotAvailable {
+			get { return getCorrectTranslation( "The page you requested is no longer available.", "La página solicitada ya no está disponible." ); }
+		}
 
 		/// <summary>
 		/// PageNotAvailable.aspx use only.
@@ -123,12 +128,16 @@
 		/// <summary>
 		/// UnhandledException.aspx use only.
 		/// </summary>
-		public static string AnErrorHasOccurred { get { return getCorrectTranslation( "An error has occurred in the system.", "Se ha producido un error en el sistema." ); } }
+		public static string AnErrorHasOccurred {
+			get { return getCorrectTranslation( "An error has occurred in the system.", "Se ha producido un error en el sistema." ); }
+		}
 
 		/// <summary>
 		/// PageDisabled.aspx use only.
 		/// </summary>
-		public static string ThePageYouRequestedIsDisabled { get { return getCorrectTranslation( "The page you requested is disabled.", "La página que usted pidió es lisiada." ); } }
+		public static string ThePageYouRequestedIsDisabled {
+			get { return getCorrectTranslation( "The page you requested is disabled.", "La página que usted pidió es lisiada." ); }
+		}
 
 		/// <summary>
 		/// Key must be a string constant defined in this class.

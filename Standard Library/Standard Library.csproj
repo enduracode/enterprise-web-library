@@ -310,8 +310,10 @@
     <Compile Include="EnterpriseWebFramework\CssInfo.cs" />
     <Compile Include="EnterpriseWebFramework\CssHandling\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\PostBackValueDictionary.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />

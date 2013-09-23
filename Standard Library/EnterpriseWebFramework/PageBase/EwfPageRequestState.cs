@@ -16,13 +16,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; private set; }
 
 		// set before transfer
-		internal string StaticFormControlHash { get; set; }
+		internal string StaticFormValueHash { get; set; }
 
 		internal EwfPageRequestState( PageState pageState, string scrollPositionX, string scrollPositionY ) {
 			this.pageState = pageState;
 			this.scrollPositionX = scrollPositionX;
 			this.scrollPositionY = scrollPositionY;
-			PostBackValues = new PostBackValueDictionary( new Dictionary<string, object>() );
 			TopModificationErrors = new string[ 0 ];
 			InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
 		}
