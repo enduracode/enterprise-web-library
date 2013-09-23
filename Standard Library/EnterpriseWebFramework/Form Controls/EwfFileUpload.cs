@@ -1,43 +1,60 @@
-﻿using System.Web.UI;
+﻿using System.IO;
+using System.Web;
+using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A file upload control.
 	/// </summary>
-	public class EwfFileUpload: WebControl, ControlTreeDataLoader, FormControl<RsFile> {
-		private FileUpload fileUpload;
+	public class EwfFileUpload: WebControl, ControlTreeDataLoader, FormControl {
+		private readonly FormValue<HttpPostedFile> formValue;
+		private RsFile postBackValue;
 
-		RsFile FormControl<RsFile>.DurableValue { get { return null; } }
-		string FormControl.DurableValueAsString { get { return ""; } }
+		public EwfFileUpload() {
+			formValue = new FormValue<HttpPostedFile>( () => null,
+			                                           () => this.IsOnPage() ? UniqueID : "",
+			                                           v => "",
+			                                           PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue );
+		}
 
 		void ControlTreeDataLoader.LoadData() {
-			this.AddControlsReturnThis( fileUpload = new FileUpload() );
+			Attributes.Add( "type", "file" );
+			Attributes.Add( "name", UniqueID );
+
+			EwfPage.Instance.Form.Enctype = "multipart/form-data";
 		}
 
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			postBackValues.Add( this, fileUpload.HasFile ? new RsFile( fileUpload.FileBytes, fileUpload.FileName, fileUpload.PostedFile.ContentType ) : null );
-		}
+		FormValue FormControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.
 		/// </summary>
 		public RsFile GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+			if( postBackValue == null ) {
+				var value = formValue.GetValue( postBackValues );
+				if( value == null || value.ContentLength == 0 )
+					return null;
+
+				using( var ms = new MemoryStream() ) {
+					IoMethods.CopyStream( value.InputStream, ms );
+					postBackValue = new RsFile( ms.ToArray(), Path.GetFileName( value.FileName ), contentType: value.ContentType );
+				}
+			}
+			return postBackValue;
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			return formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Span; } }
+		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Input; } }
 	}
 }

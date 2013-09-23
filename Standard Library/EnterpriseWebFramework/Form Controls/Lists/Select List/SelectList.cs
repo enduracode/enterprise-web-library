@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
@@ -99,8 +97,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<ItemIdType>,
-	                                     ControlWithCustomFocusLogic, DisplayLink {
+	public class SelectList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl, ControlWithCustomFocusLogic, DisplayLink {
 		private readonly bool? useHorizontalRadioLayout;
 		private readonly Unit? width;
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
@@ -115,8 +112,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private FreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
+		private FormValue<ItemIdType> formValue;
 		private WebControl selectControl;
-		private string postValue;
 
 		internal SelectList( bool? useHorizontalRadioLayout, Unit? width, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
 		                     IEnumerable<EwfListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, bool autoPostBack,
@@ -130,7 +127,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( items.All( i => !i.IsValid ) )
 				throw new ApplicationException( "There must be at least one valid selection in the list." );
 
-			// This check is only strictly necessary for drop-down lists.
 			try {
 				itemsByStringId = items.ToDictionary( i => i.StringId, i => i.Item );
 			}
@@ -168,15 +164,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			displayLinks.Add( Tuple.Create( itemIds, controlsVisibleOnMatch, controls.ToArray() as IEnumerable<WebControl> ) );
 		}
 
-		ItemIdType FormControl<ItemIdType>.DurableValue { get { return selectedItemId; } }
-		string FormControl.DurableValueAsString { get { return selectedItemId.ObjectToString( true ); } }
-
 		void ControlTreeDataLoader.LoadData() {
 			if( useHorizontalRadioLayout.HasValue ) {
-				radioList = FreeFormRadioList.Create( UniqueID,
-				                                      items.Any( i => !i.IsValid ),
-				                                      AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ),
-				                                      disableSingleButtonDetection: disableSingleRadioButtonDetection.Value );
+				radioList = FreeFormRadioList.Create( items.Any( i => !i.IsValid ), selectedItemId, disableSingleButtonDetection: disableSingleRadioButtonDetection.Value );
 				foreach( var i in displayLinks )
 					radioList.AddDisplayLink( i.Item1, i.Item2, i.Item3 );
 
@@ -194,6 +184,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
+				formValue = new FormValue<ItemIdType>( () => selectedItemId,
+				                                       () => UniqueID,
+				                                       v => v.ObjectToString( true ),
+				                                       rawValue =>
+				                                       rawValue != null && itemsByStringId.ContainsKey( rawValue )
+					                                       ? PostBackValueValidationResult<ItemIdType>.CreateValidWithValue( itemsByStringId[ rawValue ].Id )
+					                                       : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
+
 				EwfPage.Instance.MakeControlPostBackOnEnter( this, defaultSubmitButton );
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
@@ -208,8 +206,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " );
 				}
 
-				foreach( var i in items )
-					selectControl.Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
+				PreRender += delegate {
+					foreach( var i in items )
+						selectControl.Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
+				};
 
 				Controls.Add( selectControl );
 
@@ -222,14 +222,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				{
 					Text =
 						"<option value=\"" + value + "\"" +
-						( StandardLibraryMethods.AreEqual( id, AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) ) ? " selected" : "" ) + ">" +
+						( StandardLibraryMethods.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
 						label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
 				};
 		}
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			foreach( var displayLink in displayLinks ) {
-				var match = displayLink.Item1.Contains( formControlValues.GetValue( this ) );
+				var match = displayLink.Item1.Contains( formValue.GetValue( formControlValues ) );
 				var visible = ( displayLink.Item2 && match ) || ( !displayLink.Item2 && !match );
 				foreach( var control in displayLink.Item3 )
 					DisplayLinkingOps.SetControlDisplay( control, visible );
@@ -273,16 +273,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				Page.SetFocus( this );
 		}
 
-		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
-			if( !useHorizontalRadioLayout.HasValue )
-				postValue = postCollection[ postDataKey ];
-			return false;
-		}
-
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			if( !useHorizontalRadioLayout.HasValue )
-				postBackValues.Add( this, itemsByStringId.ContainsKey( postValue ) ? itemsByStringId[ postValue ].Id : items.First().Item.Id );
-		}
+		FormValue FormControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Validates and returns the selected item ID in the post back. The default value of the item ID type will be considered valid only if it matches a
@@ -290,9 +281,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// valid.
 		/// </summary>
 		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator ) {
-			// Use "radioList != null" for the condition instead of "useHorizontalRadioLayout.HasValue" in case this SelectList is never added to the page and
-			// therefore ControlTreeDataLoader.LoadData is never called.
-			var selectedItemIdInPostBack = radioList != null ? radioList.GetSelectedItemIdInPostBack( postBackValues ) : postBackValues.GetValue( this );
+			// Both radioList and formValue will be null if this SelectList is never added to the page.
+			var selectedItemIdInPostBack = radioList != null
+				                               ? radioList.GetSelectedItemIdInPostBack( postBackValues )
+				                               : formValue != null ? formValue.GetValue( postBackValues ) : selectedItemId;
 
 			if( !items.Single( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
 				validator.NoteErrorAndAddMessage( "Please make a selection." );
@@ -303,13 +295,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns true if the selection changed on this post back.
 		/// </summary>
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			// Use "radioList != null" for the condition instead of "useHorizontalRadioLayout.HasValue" in case this SelectList is never added to the page and
-			// therefore ControlTreeDataLoader.LoadData is never called.
-			return radioList != null ? radioList.SelectionChangedOnPostBack( postBackValues ) : postBackValues.ValueChangedOnPostBack( this );
-		}
-
-		bool FormControl.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return SelectionChangedOnPostBack( postBackValues );
+			// Both radioList and formValue will be null if this SelectList is never added to the page.
+			return radioList != null ? radioList.SelectionChangedOnPostBack( postBackValues ) : formValue != null && formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
@@ -321,7 +308,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return HtmlTextWriterTag.Div;
 			}
 		}
-
-		void IPostBackDataHandler.RaisePostDataChangedEvent() {}
 	}
 }

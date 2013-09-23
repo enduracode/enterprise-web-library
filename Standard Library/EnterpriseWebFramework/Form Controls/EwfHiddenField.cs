@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A hidden field.
 	/// </summary>
-	public class EwfHiddenField: WebControl, IPostBackDataHandler, ControlTreeDataLoader, FormControl<string>, EtherealControl {
+	public class EwfHiddenField: WebControl, ControlTreeDataLoader, FormControl, EtherealControl {
 		/// <summary>
 		/// Creates a hidden field. Do not pass null for value.
 		/// </summary>
@@ -21,21 +19,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			clientIdGetter = () => control.ClientID;
 		}
 
-		private readonly string durableValue;
-		private string postValue;
+		private readonly FormValue<string> formValue;
 
 		private EwfHiddenField( string value ) {
-			durableValue = value;
+			formValue = new FormValue<string>( () => value,
+			                                   () => UniqueID,
+			                                   v => v,
+			                                   rawValue =>
+			                                   rawValue != null
+				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
+				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
 		}
-
-		string FormControl<string>.DurableValue { get { return durableValue; } }
-		string FormControl.DurableValueAsString { get { return durableValue; } }
 
 		WebControl EtherealControl.Control { get { return this; } }
 
 		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "name", UniqueID );
-			Attributes.Add( "value", AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) );
+			PreRender += delegate { Attributes.Add( "value", formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ); };
 			Attributes.Add( "type", "hidden" );
 		}
 
@@ -43,34 +43,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return "";
 		}
 
-		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
-			postValue = postCollection[ postDataKey ];
-			return false;
-		}
-
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			postBackValues.Add( this, postValue );
-		}
+		FormValue FormControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.
 		/// </summary>
 		private string getPostBackValue( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+			return formValue.GetValue( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			return formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Input; } }
-
-		void IPostBackDataHandler.RaisePostDataChangedEvent() {}
 	}
 }

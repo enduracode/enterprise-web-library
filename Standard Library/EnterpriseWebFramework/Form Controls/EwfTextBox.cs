@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using AjaxControlToolkit;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
@@ -33,8 +32,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
-	public class EwfTextBox: WebControl, ControlTreeDataLoader, IPostBackEventHandler, INamingContainer, FormControl<string>, ControlWithJsInitLogic,
-	                         ControlWithCustomFocusLogic {
+	public class EwfTextBox: WebControl, ControlTreeDataLoader, IPostBackEventHandler, INamingContainer, FormControl, ControlWithJsInitLogic,
+		ControlWithCustomFocusLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CompletionListCssClass = "autocomplete_completionListElement";
 			internal const string CompletionListItemSelectedStateClass = "autocomplete_highlightedListItem";
@@ -49,7 +48,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private readonly string durableValue;
+		private readonly FormValue<string> formValue;
 		private readonly TextBox textBox = new TextBox();
 		private bool masksCharacters;
 		private WebMethodDefinition webMethodDefinition;
@@ -90,7 +89,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false, bool? suggestSpellCheck = null ) {
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
-			durableValue = value;
+			formValue = new FormValue<string>( () => value,
+			                                   () => this.IsOnPage() ? textBox.UniqueID : "",
+			                                   v => v,
+			                                   rawValue =>
+			                                   rawValue != null
+				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
+				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
 			textBox.ID = "theTextBox";
 			base.Controls.Add( textBox );
 			Rows = 1;
@@ -98,9 +103,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.preventAutoComplete = preventAutoComplete;
 			this.suggestSpellCheck = suggestSpellCheck;
 		}
-
-		string FormControl<string>.DurableValue { get { return durableValue; } }
-		string FormControl.DurableValueAsString { get { return durableValue; } }
 
 		/// <summary>
 		/// Sets whether an automatic postback occurs when the text box loses focus.
@@ -173,8 +175,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			var value = AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this );
-			textBox.Text = watermarkText.Any() && !value.Any() ? watermarkText : value;
+			PreRender += delegate {
+				var value = formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+				textBox.Text = watermarkText.Any() && !value.Any() ? watermarkText : value;
+			};
 
 			if( watermarkText.Any() ) {
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onfocus, "if( value == '" + watermarkText + "' ) value = ''" );
@@ -229,22 +233,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return "$( '#" + TextBoxClientId + "' ).filter( function() { return this.value == ''; } ).val( '" + watermarkText + "' );";
 		}
 
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			postBackValues.Add( this, textBox.Text );
-		}
+		FormValue FormControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.
 		/// </summary>
 		public string GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+			return formValue.GetValue( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			return formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {

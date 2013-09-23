@@ -1,30 +1,38 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A WYSIWYG HTML editor.
 	/// </summary>
-	public class WysiwygHtmlEditor: WebControl, IPostBackDataHandler, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl<string> {
+	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
 		internal const string CkEditorFolderUrl = "Ewf/ThirdParty/CkEditor/ckeditor-4.1.2";
 
-		private readonly string durableValue;
-		private string postValue;
+		private readonly FormValue<string> formValue;
 
 		/// <summary>
 		/// Creates a simple HTML editor. Do not pass null for value.
 		/// </summary>
 		public WysiwygHtmlEditor( string value ) {
-			durableValue = value;
-		}
+			formValue = new FormValue<string>( () => value,
+			                                   () => this.IsOnPage() ? UniqueID : "",
+			                                   v => v,
+			                                   rawValue => {
+				                                   if( rawValue == null )
+					                                   return PostBackValueValidationResult<string>.CreateInvalid();
 
-		string FormControl<string>.DurableValue { get { return durableValue; } }
-		string FormControl.DurableValueAsString { get { return durableValue; } }
+				                                   // This hack prevents the NewLine that CKEditor seems to always add to the end of the textarea from causing
+				                                   // ValueChangedOnPostBack to always return true.
+				                                   if( rawValue.EndsWith( Environment.NewLine ) &&
+				                                       rawValue.Remove( rawValue.Length - Environment.NewLine.Length ) == formValue.GetDurableValue() )
+					                                   rawValue = formValue.GetDurableValue();
+
+				                                   return PostBackValueValidationResult<string>.CreateValidWithValue( rawValue );
+			                                   } );
+		}
 
 		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "name", UniqueID );
@@ -32,10 +40,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
 			// does in their System.Web.UI.WebControls.TextBox implementation. It probably doesn't matter in this case since CKEditor is gutting the textarea, but we
 			// want to have this somewhere for reference to assist us when we reimplement EwfTextBox to not use System.Web.UI.WebControls.TextBox under the hood.
-			Controls.Add( new Literal
-				{
-					Text = HttpUtility.HtmlEncode( Environment.NewLine + AppRequestState.Instance.EwfPageRequestState.PostBackValues.GetValue( this ) )
-				} );
+			PreRender +=
+				delegate {
+					Controls.Add( new Literal
+						{
+							Text = HttpUtility.HtmlEncode( Environment.NewLine + formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+						} );
+				};
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
@@ -45,38 +56,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ], contentsCss: '" + contentsCss + "' } );";
 		}
 
-		bool IPostBackDataHandler.LoadPostData( string postDataKey, NameValueCollection postCollection ) {
-			postValue = postCollection[ postDataKey ];
-			return false;
-		}
-
-		void FormControl.AddPostBackValueToDictionary( PostBackValueDictionary postBackValues ) {
-			// This hack prevents the NewLine that CKEditor seems to always add to the end of the textarea from causing ValueChangedOnPostBack to always return true.
-			if( postValue.EndsWith( Environment.NewLine ) && postValue.Remove( postValue.Length - Environment.NewLine.Length ) == durableValue )
-				postValue = durableValue;
-
-			postBackValues.Add( this, postValue );
-		}
+		FormValue FormControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.
 		/// </summary>
 		public string GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return postBackValues.GetValue( this );
+			return formValue.GetValue( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return postBackValues.ValueChangedOnPostBack( this );
+			return formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Textarea; } }
-
-		void IPostBackDataHandler.RaisePostDataChangedEvent() {}
 	}
 }
