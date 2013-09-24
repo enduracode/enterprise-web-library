@@ -505,14 +505,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Causes the specified control to submit the form when the enter key is pressed while the control has focus. Specify null for the target to give the event
 		/// to the submit button, which you should do if you want the post back to simulate the user clicking the button. If you specify a non null target, it must
-		/// be a post back event handler. If you specify a post back button, its UsesSubmitBehavior property will be set to false.
+		/// be a post back event handler. If you specify a post back button, it should not be the submit button.
 		/// </summary>
 		internal void MakeControlPostBackOnEnter( WebControl control, Control target, string predicate = "" ) {
 			postBackOnEnterControlsAndPredicatesAndTargets.Add( Tuple.Create( control, predicate, target ) );
-
-			// NOTE: This seems like a hack. Why can't people just tell their buttons not to use submit behavior?
-			if( target is PostBackButton )
-				( target as PostBackButton ).UsesSubmitBehavior = false;
 		}
 
 		/// <summary>
