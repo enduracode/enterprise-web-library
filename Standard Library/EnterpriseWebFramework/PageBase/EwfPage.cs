@@ -185,7 +185,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// changes.
 		/// </summary>
 		protected override sealed object LoadPageStateFromPersistenceMedium() {
-			object standardSavedState = null;
 			try {
 				// Based on our implementation of SavePageStateToPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
 				// with no First object.
@@ -196,7 +195,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
 				                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
 				formValueHash = (string)savedState.Item2[ 0 ];
-				standardSavedState = savedState.Item2[ 1 ];
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
@@ -250,7 +248,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( postBackDataModification.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
 				ExecuteDataModification( postBackDataModification, null );
 
-			return standardSavedState;
+			return null;
 		}
 
 		/// <summary>
@@ -1008,7 +1006,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Saves hidden field state.
 		/// </summary>
 		protected override sealed void SavePageStateToPersistenceMedium( object state ) {
-			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new[] { formValueHash, state } ) );
+			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new object[] { formValueHash } ) );
 		}
 	}
 }
