@@ -81,7 +81,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 			catch( Exception e ) {
 				throw new ApplicationException(
-					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".", e );
+					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".",
+					e );
 			}
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
@@ -114,8 +115,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    ? secondaryDatabasesWithInitializedConnections.Contains( connection.DatabaseInfo.SecondaryDatabaseName )
 				    : primaryDatabaseConnectionInitialized )
 				return;
+
 			connection.Open();
-			connection.BeginTransaction();
+			if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+				connection.BeginTransaction();
+
 			if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
 				secondaryDatabasesWithInitializedConnections.Add( connection.DatabaseInfo.SecondaryDatabaseName );
 			else
@@ -264,6 +268,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void cleanUpDatabaseConnection( DBConnection cn ) {
 			try {
+				if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( cn.DatabaseInfo ) )
+					return;
+
 				try {
 					if( !transactionMarkedForRollback )
 						cn.CommitTransaction();
