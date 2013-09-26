@@ -16,7 +16,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			formValue = new FormValue<HttpPostedFile>( () => null,
 			                                           () => this.IsOnPage() ? UniqueID : "",
 			                                           v => "",
-			                                           PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue );
+			                                           rawValue =>
+			                                           rawValue != null
+				                                           ? PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue( rawValue.ContentLength > 0
+					                                                                                                                 ? rawValue
+					                                                                                                                 : null )
+				                                           : PostBackValueValidationResult<HttpPostedFile>.CreateInvalid() );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -34,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public RsFile GetPostBackValue( PostBackValueDictionary postBackValues ) {
 			if( postBackValue == null ) {
 				var value = formValue.GetValue( postBackValues );
-				if( value == null || value.ContentLength == 0 )
+				if( value == null )
 					return null;
 
 				using( var ms = new MemoryStream() ) {
