@@ -9,14 +9,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 	/// Allows custom elements, constants, and other feature extensions to CSS.
 	/// </summary>
 	internal class CssPreprocessor {
+		private const string reservedCustomElementPrefix = "ewf";
+		private const string customElementPattern = @"(?<!\.|#)" + reservedCustomElementPrefix + @"\w+";
+
 		/// <summary>
 		/// Processes the source text and returns the processed text. Use a different overload if you want the source or output to be a file.
 		/// </summary>
 		internal static string TransformCssFile( string sourceCssText ) {
 			sourceCssText = RegularExpressions.RemoveMultiLineCStyleComments( sourceCssText );
 
-			const string reservedCustomElementPrefix = "ewf";
-			var customElementsDetected = from Match match in Regex.Matches( sourceCssText, @"(?<!\.)" + reservedCustomElementPrefix + @"\w+" ) select match.Value;
+			var customElementsDetected = from Match match in Regex.Matches( sourceCssText, customElementPattern ) select match.Value;
 			customElementsDetected = customElementsDetected.Distinct();
 			var knownCustomElements = CssHandlingStatics.Elements.Select( ce => reservedCustomElementPrefix + ce.Name );
 			var unknownCustomElements = customElementsDetected.Except( knownCustomElements ).ToList();
@@ -61,8 +63,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 		}
 
 		private static IEnumerable<string> getSelectors( string selectorWithCustomElements ) {
-			const string reservedCustomElementPrefix = "ewf";
-			var match = Regex.Match( selectorWithCustomElements, @"(?<!\.)" + reservedCustomElementPrefix + @"\w+" );
+			var match = Regex.Match( selectorWithCustomElements, customElementPattern );
 			if( !match.Success )
 				yield return selectorWithCustomElements;
 			else {
