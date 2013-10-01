@@ -131,10 +131,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
-			if( primaryDatabaseConnectionInitialized )
-				DataAccessState.Current.PrimaryDatabaseConnection.PreExecuteCommitTimeValidationMethods();
-			foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
-				DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName ).PreExecuteCommitTimeValidationMethods();
+			if( primaryDatabaseConnectionInitialized ) {
+				var connection = DataAccessState.Current.PrimaryDatabaseConnection;
+				if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+					connection.PreExecuteCommitTimeValidationMethods();
+			}
+			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
+				var connection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
+				if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+					connection.PreExecuteCommitTimeValidationMethods();
+			}
 		}
 
 		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
