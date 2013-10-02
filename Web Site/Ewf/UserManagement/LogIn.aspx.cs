@@ -48,7 +48,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
 							new PostBackButton( newPasswordDm,
 							                    handleSendNewPasswordClick,
-							                    new TextActionControlStyle( "click here to immediately send yourself a new password" ),
+							                    new TextActionControlStyle( "click here to immediately send yourself a new password." ),
 							                    usesSubmitBehavior: false ) ) ) { FieldSpan = 2 } ) );
 			ph.AddControlsReturnThis( registeredTable );
 

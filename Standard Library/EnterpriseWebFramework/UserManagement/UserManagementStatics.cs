@@ -235,12 +235,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Sets up client-side logic for user log-in and returns a modification method that logs in the specified user. Do not call if the system does not
 		/// implement the forms-authentication-capable user-management provider.
+		/// This method should be called in LoadData. The method returned should be called in an event handler.
 		/// </summary>
-		public static Action GetSpecifiedUserLogInMethod( int userId, ValidationList vl ) {
+		public static Action<int> GetSpecifiedUserLogInMethod( ValidationList vl ) {
 			var utcOffset = new DataValue<string>();
 			setUpClientSideLogicForLogIn( utcOffset, vl );
 
-			return () => {
+			return userId => {
 				var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
 				setCookieAndUser( user );
 
