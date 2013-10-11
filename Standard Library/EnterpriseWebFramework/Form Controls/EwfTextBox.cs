@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private PostBackButton defaultSubmitButton;
 		private string watermarkText = "";
 		private readonly Action<string> postBackHandler;
-		private readonly bool preventAutoComplete;
+		private bool preventAutoComplete;
 		private readonly bool? suggestSpellCheck;
 
 		/// <summary>
@@ -194,7 +194,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( webMethodDefinition != null ) {
 				var autoCompleteExtender = new AutoCompleteExtender();
-				EwfPage.Instance.DisableAutofillOnForm();
+				preventAutoComplete = true;
 				autoCompleteExtender.TargetControlID = textBox.ID;
 				autoCompleteExtender.ServicePath = webMethodDefinition.WebServicePath;
 				autoCompleteExtender.ServiceMethod = webMethodDefinition.WebMethodName;
