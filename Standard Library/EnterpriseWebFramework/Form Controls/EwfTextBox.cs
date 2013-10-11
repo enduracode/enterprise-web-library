@@ -1,18 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using AjaxControlToolkit;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// Options for the AutoFill feature that will modify the behavior of the ewfTextBox to post-back when different events occur.
+	/// Options for the AutoFill feature that will modify the behavior of the EwfTextBox to post-back when different events occur.
 	/// </summary>
 	public enum AutoFillOptions {
 		/// <summary>
-		/// This option allows the text to be changed and an item to be selected causing a post-back.
+		/// This option allows the text to be changed and an item to be selected without causing a post-back.
 		/// </summary>
 		NoPostBack,
 
@@ -35,16 +36,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	public class EwfTextBox: WebControl, ControlTreeDataLoader, IPostBackEventHandler, INamingContainer, FormControl, ControlWithJsInitLogic,
 		ControlWithCustomFocusLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string CompletionListCssClass = "autocomplete_completionListElement";
-			internal const string CompletionListItemSelectedStateClass = "autocomplete_highlightedListItem";
-
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new[]
-					{
-						new CssElement( "TextBoxCompletionList", "ul." + CompletionListCssClass ),
-						new CssElement( "TextBoxCompletionListItemAllStates", "li", "li." + CompletionListItemSelectedStateClass ),
-						new CssElement( "TextBoxCompletionListItemSelectedState", "li." + CompletionListItemSelectedStateClass )
-					};
+				return new CssElement[] { };
 			}
 		}
 
@@ -56,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private PostBackButton defaultSubmitButton;
 		private string watermarkText = "";
 		private readonly Action<string> postBackHandler;
-		private bool preventAutoComplete;
+		private readonly bool preventAutoComplete;
 		private readonly bool? suggestSpellCheck;
 
 		/// <summary>
@@ -192,45 +185,57 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( postBackHandler != null || defaultSubmitButton != null )
 				EwfPage.Instance.MakeControlPostBackOnEnter( this, postBackHandler != null ? this as Control : defaultSubmitButton );
 
+			var disableAutoComplete = preventAutoComplete;
+
 			if( webMethodDefinition != null ) {
-				var autoCompleteExtender = new AutoCompleteExtender();
-				preventAutoComplete = true;
-				autoCompleteExtender.TargetControlID = textBox.ID;
-				autoCompleteExtender.ServicePath = webMethodDefinition.WebServicePath;
-				autoCompleteExtender.ServiceMethod = webMethodDefinition.WebMethodName;
-				autoCompleteExtender.CompletionListCssClass = CssElementCreator.CompletionListCssClass;
-				autoCompleteExtender.CompletionListItemCssClass = "autocomplete_listItem";
-				autoCompleteExtender.CompletionListHighlightedItemCssClass = CssElementCreator.CompletionListItemSelectedStateClass;
-				autoCompleteExtender.CompletionSetCount = 10;
-				autoCompleteExtender.MinimumPrefixLength = 2;
-				autoCompleteExtender.CompletionInterval = 250;
+				disableAutoComplete = true;
 
-				if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect || autoFillOption == AutoFillOptions.PostBackOnItemSelect ) {
-					if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect )
-						textBox.AutoPostBack = true;
-					autoCompleteExtender.OnClientItemSelected = "function() {" + PostBackButton.GetPostBackScript( this, postBackHandler != null ) + "; }";
-				}
-
-				Controls.Add( autoCompleteExtender );
+				if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect )
+					textBox.AutoPostBack = true;
 			}
+
+			if( disableAutoComplete )
+				textBox.Attributes.Add( "autocomplete", "off" );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
-
-			if( preventAutoComplete )
-				textBox.Attributes.Add( "autocomplete", "off" );
 
 			if( suggestSpellCheck.HasValue )
 				textBox.Attributes.Add( "spellcheck", suggestSpellCheck.Value.ToString().ToLower() );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			if( !watermarkText.Any() )
-				return "";
+			var script = new StringBuilder();
 
-			// NOTE: When we remove the ScriptManager, browsers will start using the bfcache for our pages. At this point we should move this logic to the
-			// onpagehide event.
-			return "$( '#" + TextBoxClientId + "' ).filter( function() { return this.value == ''; } ).val( '" + watermarkText + "' );";
+			if( webMethodDefinition != null || watermarkText.Any() ) {
+				script.Append( "$( '#" + TextBoxClientId + "' )" );
+
+				if( watermarkText.Any() )
+					script.Append( @".filter( function() {{ return this.value == ''; }} ).val( '{0}' )".FormatWith( watermarkText ) );
+
+				if( webMethodDefinition != null ) {
+					const int delay = 250; // Default delay is 300 ms
+					const int minCharacters = 3; // NOTE SJR: This should be configurable.
+
+					var autocompleteOptions = new List<Tuple<string, string>>();
+					autocompleteOptions.Add( Tuple.Create( "delay", delay.ToString() ) );
+					autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
+					autocompleteOptions.Add( Tuple.Create( "source", "'" + webMethodDefinition.WebService + "'" ) );
+
+					if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect || autoFillOption == AutoFillOptions.PostBackOnItemSelect ) {
+						autocompleteOptions.Add( Tuple.Create( "select",
+						                                       "function(event, ui) {{ $('#{0}').val(ui.item.value); {1}; }}".FormatWith( TextBoxClientId,
+						                                                                                                                  PostBackButton.GetPostBackScript( this,
+						                                                                                                                                                    postBackHandler !=
+						                                                                                                                                                    null ) ) ) );
+					}
+					script.Append(
+						@".autocomplete({{ {0} }})".FormatWith(
+							autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
+				}
+				script.Append( ";" );
+			}
+			return script.ToString();
 		}
 
 		FormValue FormControl.FormValue { get { return formValue; } }

@@ -1,5 +1,5 @@
 jQuery UI Components
-Widgets: Datepicker, Dialog, Slider
+Widgets: Autocomplete, Datepicker, Dialog, Slider
 Effects: Fade Effect
 
 Theme URL

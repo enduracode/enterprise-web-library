@@ -50,13 +50,6 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AjaxControlToolkit, Version=4.1.7.725, Culture=neutral, PublicKeyToken=28f01b0e84b6d53e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\AjaxControlToolkit.7.0725\lib\40\AjaxControlToolkit.dll</HintPath>
-    </Reference>
-    <Reference Include="AjaxMin">
-      <HintPath>..\packages\AjaxMin.4.97.4951.28483\lib\net40\AjaxMin.dll</HintPath>
-    </Reference>
     <Reference Include="Aspose.Cells, Version=7.5.2.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Aspose.Cells.7.5.2\lib\net40-client\Aspose.Cells.dll</HintPath>
@@ -68,10 +61,6 @@
     <Reference Include="Aspose.Words, Version=13.7.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Aspose.Words.13.7.0\lib\net3.5\Aspose.Words.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.4.6.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net40\HtmlAgilityPack.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -258,6 +247,9 @@
     <Compile Include="EnterpriseWebFramework\Controls\EwfImage.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\EwfLink.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\AutoFillService.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormControl.cs" />
@@ -343,6 +335,7 @@
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\WebMethodDefinition.cs" />
+    <Compile Include="EnterpriseWebFramework\WebService\AutoFillItem.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
