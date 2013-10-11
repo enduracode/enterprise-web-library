@@ -82,6 +82,9 @@ div.textBoxWrapper:hover {
 div.textBoxWrapperFocused {
 	border-color: #515151;
 }
+div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"] {
+	height: 22px;
+}
 div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"], div.textBoxWrapper > textarea {
 	display: block;
 	margin: 0;
