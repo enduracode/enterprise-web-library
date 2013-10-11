@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace RedStapler.StandardLibrary {
-	public class EnumTools {
+	public static class EnumTools {
 		/// <summary>
 		/// Gets the values of the specified enumeration type.
 		/// </summary>
