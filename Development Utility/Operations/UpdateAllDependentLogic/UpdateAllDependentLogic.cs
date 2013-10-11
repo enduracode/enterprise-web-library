@@ -11,10 +11,10 @@ using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// NOTE: Rename this, and the containing folder, to UpdateDependentLogic. Also rename the batch file in Solution Files and the batch file in each person's EWL
@@ -529,7 +529,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".suo" );
-				writer.WriteLine( ".hgignore" );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( "_ReSharper*" );
 				writer.WriteLine( "Error Log.txt" );
