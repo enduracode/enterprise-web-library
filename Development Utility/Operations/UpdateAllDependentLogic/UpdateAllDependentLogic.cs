@@ -11,10 +11,10 @@ using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// NOTE: Rename this, and the containing folder, to UpdateDependentLogic. Also rename the batch file in Solution Files and the batch file in each person's EWL
@@ -52,31 +52,31 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				generateCodeForEwlProject( installation,
-				                           "Standard Library",
-				                           writer => {
-					                           writer.WriteLine( "using System;" );
-					                           writer.WriteLine( "using System.Globalization;" );
-					                           writer.WriteLine( "using System.Reflection;" );
-					                           writer.WriteLine( "using System.Runtime.InteropServices;" );
-					                           writer.WriteLine();
-					                           writeAssemblyInfo( writer, installation, "" );
-					                           writer.WriteLine();
-					                           writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
-					                           writer.WriteLine( "partial class AppTools {" );
-					                           CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
-					                           writer.WriteLine( "public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" +
-					                                             DateTimeOffset.UtcNow.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind );" );
-					                           writer.WriteLine( "}" );
-					                           writer.WriteLine( "}" );
-				                           } );
-				generateCodeForEwlProject( installation,
-				                           "Development Utility",
-				                           writer => {
-					                           writer.WriteLine( "using System.Reflection;" );
-					                           writer.WriteLine( "using System.Runtime.InteropServices;" );
-					                           writeAssemblyInfo( writer, installation, "Development Utility" );
-				                           } );
+				generateCodeForProject( installation,
+				                        "Standard Library",
+				                        writer => {
+					                        writer.WriteLine( "using System;" );
+					                        writer.WriteLine( "using System.Globalization;" );
+					                        writer.WriteLine( "using System.Reflection;" );
+					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
+					                        writer.WriteLine();
+					                        writeAssemblyInfo( writer, installation, "" );
+					                        writer.WriteLine();
+					                        writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
+					                        writer.WriteLine( "partial class AppTools {" );
+					                        CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
+					                        writer.WriteLine( "public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" +
+					                                          DateTimeOffset.UtcNow.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind );" );
+					                        writer.WriteLine( "}" );
+					                        writer.WriteLine( "}" );
+				                        } );
+				generateCodeForProject( installation,
+				                        "Development Utility",
+				                        writer => {
+					                        writer.WriteLine( "using System.Reflection;" );
+					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
+					                        writeAssemblyInfo( writer, installation, "Development Utility" );
+				                        } );
 			}
 			generateLibraryCode( installation );
 			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
@@ -85,6 +85,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateWindowsServiceCode( installation, service );
 			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
 				generateServerSideConsoleProjectCode( installation, project );
+			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
+				generateCodeForProject( installation,
+				                        installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
+				                        writer => {
+					                        writer.WriteLine( "using System.Reflection;" );
+					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
+					                        writeAssemblyInfo( writer,
+					                                           installation,
+					                                           installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
+				                        } );
+			}
 
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
@@ -145,15 +156,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private string customizeNamespace( string text, WebProject webProject ) {
 			return text.Replace( "EnterpriseWebLibrary.WebSite", webProject.NamespaceAndAssemblyName );
-		}
-
-		private void generateCodeForEwlProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
-			var generatedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
-			Directory.CreateDirectory( generatedCodeFolderPath );
-			var isuFilePath = StandardLibraryMethods.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
-			IoMethods.DeleteFile( isuFilePath );
-			using( TextWriter writer = new StreamWriter( isuFilePath ) )
-				codeWriter( writer );
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
@@ -440,6 +442,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
+		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
+			var generatedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
+			Directory.CreateDirectory( generatedCodeFolderPath );
+			var isuFilePath = StandardLibraryMethods.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
+			IoMethods.DeleteFile( isuFilePath );
+			using( TextWriter writer = new StreamWriter( isuFilePath ) )
+				codeWriter( writer );
+		}
+
 		private void writeAssemblyInfo( TextWriter writer, DevelopmentInstallation installation, string projectName ) {
 			writeAssemblyAttribute( writer,
 			                        "AssemblyTitle",
@@ -565,6 +576,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( project.Name + "/bin/" );
 					writer.WriteLine( project.Name + "/obj/" );
 					writer.WriteLine( project.Name + "/Generated Code/" );
+				}
+
+				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
+					writer.WriteLine();
+					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/bin/" );
+					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/obj/" );
+					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Generated Code/" );
 				}
 
 				writer.WriteLine();
