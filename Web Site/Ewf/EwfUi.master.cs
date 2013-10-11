@@ -209,13 +209,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					                                                                new[]
 						                                                                {
 							                                                                "We've detected that you are not using the latest version of your browser.",
-							                                                                "While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the internet."
+							                                                                "While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet."
 						                                                                } ) + "<br/>" +
-					                          NetTools.BuildBasicLink( "Click here to get Internet Explorer 9 (it's free)",
-					                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
-					                                                   true ) + "<br/>" +
 					                          NetTools.BuildBasicLink( "Click here to get Firefox (it's free)",
 					                                                   new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(),
+					                                                   true ) + "<br />" +
+					                          NetTools.BuildBasicLink( "Click here to get Chrome (it's free)",
+					                                                   new ExternalPageInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
+					                                                   true ) + "<br />" +
+					                          NetTools.BuildBasicLink( "Click here to get the latest Internet Explorer (it's free)",
+					                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
 					                                                   true ) );
 				}
 				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
