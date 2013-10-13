@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						               new TestPad.Info( this ),
 						               new TwoWeekCalendarTest.Info( this, DateTime.Now ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
-						new PageGroup( "Layout", new Box.Info( this ) ),
+						new PageGroup( "Layout", new BoxDemo.Info( this ) ),
 						new PageGroup( "Form Controls",
 						               new CheckBox.Info( this ),
 						               new CheckBoxList.Info( this ),

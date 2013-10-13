@@ -141,12 +141,12 @@
     <Compile Include="TestPages\ActionControls.aspx.designer.cs">
       <DependentUpon>ActionControls.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\Box.aspx.cs">
-      <DependentUpon>Box.aspx</DependentUpon>
+    <Compile Include="TestPages\BoxDemo.aspx.cs">
+      <DependentUpon>BoxDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="TestPages\Box.aspx.designer.cs">
-      <DependentUpon>Box.aspx</DependentUpon>
+    <Compile Include="TestPages\BoxDemo.aspx.designer.cs">
+      <DependentUpon>BoxDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\CheckBox.aspx.cs">
       <DependentUpon>CheckBox.aspx</DependentUpon>
@@ -681,7 +681,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
-    <Content Include="TestPages\Box.aspx" />
+    <Content Include="TestPages\BoxDemo.aspx" />
     <Content Include="TestPages\CheckBox.aspx" />
     <Content Include="TestPages\CheckBoxList.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />

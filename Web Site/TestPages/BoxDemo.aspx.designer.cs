@@ -10,7 +10,7 @@
 namespace EnterpriseWebLibrary.WebSite.TestPages {
     
     
-    public partial class Box {
+    public partial class BoxDemo {
         
         /// <summary>
         /// ph control.
