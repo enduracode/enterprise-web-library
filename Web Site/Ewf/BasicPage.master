@@ -6,7 +6,7 @@
 </head>
 <body runat="server" id="basicBody">
 	<form runat="server" id="form">
-		<ajaxToolkit:ToolkitScriptManager runat="server" /><asp:PlaceHolder runat="server" ID="ph" />
+		<asp:PlaceHolder runat="server" ID="ph" />
 		<div runat="server" class="containingDiv"><asp:ContentPlaceHolder ID="main" runat="server" /></div>
 		<asp:PlaceHolder runat="server" ID="ph2" />
 	</form>
