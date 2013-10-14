@@ -540,7 +540,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".suo" );
-				writer.WriteLine( ".hgignore" );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( "_ReSharper*" );
 				writer.WriteLine( "Error Log.txt" );
