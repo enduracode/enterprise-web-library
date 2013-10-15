@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -24,12 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Throws an exception if the parameter values or any non URL elements of the current request make the entity setup invalid.
 		/// </summary>
-		protected virtual void init() {
-			init( DataAccessState.Current.PrimaryDatabaseConnection );
-		}
-
-		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
-		protected virtual void init( DBConnection cn ) {}
+		protected virtual void init() {}
 
 		/// <summary>
 		/// Creates a page info object for the parent page of this entity setup. Returns null if there is no parent page.
@@ -103,6 +97,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the desired security setting for requests to pages that are part of this entity setup.
 		/// </summary>
-		protected internal virtual ConnectionSecurity ConnectionSecurity { get { return ParentPage != null ? ParentPage.ConnectionSecurity : ConnectionSecurity.SecureIfPossible; } }
+		protected internal virtual ConnectionSecurity ConnectionSecurity {
+			get { return ParentPage != null ? ParentPage.ConnectionSecurity : ConnectionSecurity.SecureIfPossible; }
+		}
 	}
 }

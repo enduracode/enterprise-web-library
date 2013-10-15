@@ -16,18 +16,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static AppRequestState Instance { get { return EwfApp.Instance.RequestState; } }
 
-		[ Obsolete(
-			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessState.Current." )
-		]
-		public static DBConnection PrimaryDatabaseConnection { get { return DataAccessState.Current.PrimaryDatabaseConnection; } }
-
-		[ Obsolete(
-			"Guaranteed through 30 September 2013. In most cases you should no longer need access to DBConnection, but if you do, you can use DataAccessState.Current." )
-		]
-		public static DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
-			return DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
-		}
-
 		/// <summary>
 		/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 		/// </summary>

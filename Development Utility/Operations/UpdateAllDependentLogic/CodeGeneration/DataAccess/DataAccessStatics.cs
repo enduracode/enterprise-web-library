@@ -78,11 +78,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 			writer.WriteLine( "}" ); // constructor
 
-			foreach( var column in columns ) {
+			foreach( var column in columns )
 				writeColumnProperty( writer, column, databaseInfo );
-				if( column.HasNullabilityMismatch )
-					writeTypedColumnProperty( writer, column );
-			}
 
 			// NOTE: Being smarter about the hash code could make searches of the collection faster.
 			writer.WriteLine( "public override int GetHashCode() { " );
@@ -119,13 +116,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			CodeGenerationStatics.AddSummaryDocComment( writer, "This object will " + ( column.AllowsNull && !isOracleClob ? "sometimes" : "never" ) + " be null." );
 			writer.WriteLine( "public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) +
 			                  " { get { return " + getMemberVariableName( column ) + ( isOracleClob ? " ?? \"\"" : "" ) + "; } }" );
-		}
-
-		// NOTE: Delete this after 31 August 2013 since we now use nullable types in the main properties.
-		private static void writeTypedColumnProperty( TextWriter writer, Column column ) {
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013.\" ) ]" );
-			writer.WriteLine( "public " + column.DataTypeIfNotNullName + " " + column.PascalCasedNameExceptForOracle + "Typed { get { return (" +
-			                  column.DataTypeIfNotNullName + ")" + getMemberVariableName( column ) + "; } }" );
 		}
 
 		private static string getMemberVariableName( Column column ) {

@@ -460,12 +460,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Loads and displays data on the page. This is a replacement for the Init event that provides access to EWF page state.
 		/// </summary>
-		protected virtual void loadData() {
-			LoadData( DataAccessState.Current.PrimaryDatabaseConnection );
-		}
-
-		[ Obsolete( "Guaranteed through 30 September 2013. Please use loadData (lowercase L) instead." ) ]
-		protected virtual void LoadData( DBConnection cn ) {}
+		protected virtual void loadData() {}
 
 		private void loadDataForControlAndChildren( Control control ) {
 			if( control is ControlTreeDataLoader )

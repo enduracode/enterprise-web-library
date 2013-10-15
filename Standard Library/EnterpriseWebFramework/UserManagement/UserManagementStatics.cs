@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.Security;
 using RedStapler.StandardLibrary.Email;
@@ -176,25 +175,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 						var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
 						if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
 							authenticationSuccessful = true;
-
-							// This system wants to avoid a forced migration and because of this we're adding an exception here.
-							// NOTE: Remove after 30 September 2013.
-						else {
-							var asciiEncoding = new ASCIIEncoding();
-							if( AppTools.SystemName == "Health Alliance Enterprise System" &&
-							    user.SaltedPassword.SequenceEqual( asciiEncoding.GetBytes( asciiEncoding.GetString( hashedPassword ) ) ) ) {
-								authenticationSuccessful = true;
-
-								// Migrate the user's account to use the new hash.
-								formsAuthCapableUserManagementProvider.InsertOrUpdateUser( user.UserId,
-								                                                           user.Email,
-								                                                           user.Salt,
-								                                                           hashedPassword,
-								                                                           user.Role.RoleId,
-								                                                           user.LastRequestDateTime,
-								                                                           user.MustChangePassword );
-							}
-						}
 					}
 
 					var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;

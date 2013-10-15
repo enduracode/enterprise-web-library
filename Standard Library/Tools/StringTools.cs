@@ -630,20 +630,5 @@ namespace RedStapler.StandardLibrary {
 		public static T ToEnum<T>( this string s ) {
 			return (T)Enum.Parse( typeof( T ), s );
 		}
-
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToEnglishFromCamel( this string text ) {
-			return text.CamelToEnglish();
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToCamelCase( this string text ) {
-			return text.EnglishToCamel();
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToPascalCase( this string text ) {
-			return text.EnglishToPascal();
-		}
 	}
 }

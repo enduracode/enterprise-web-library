@@ -49,7 +49,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Attempt to query with every postSelectFromClause to ensure validity.
 			foreach( var postSelectFromClause in query.postSelectFromClauses ) {
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
-					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ), r => { } );
+					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ),
+					r => { } );
 			}
 
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
@@ -107,17 +108,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
-
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
-			                  getOldMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
-			writer.WriteLine( "return GetRows" + postSelectFromClause.name + "( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value )
-			                                                                         .ToArray() ) + " );" );
-			writer.WriteLine( "}" );
 		}
 
 		private static string getQueryCacheName( RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
@@ -125,14 +115,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		                                         bool getFieldName ) {
 			return ( getFieldName ? "rows" : "Rows" ) + postSelectFromClause.name +
 			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any() ? "Queries" : "Query" );
-		}
-
-		// NOTE: Delete this after 30 September 2013.
-		private static string getOldMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
-			var methodParams = "DBConnection cn";
-			foreach( var param in DataAccessStatics.GetNamedParamList( info, commandText ) )
-				methodParams += ", " + "object " + param;
-			return methodParams;
 		}
 	}
 }

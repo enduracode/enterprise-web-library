@@ -4,8 +4,8 @@ using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -62,10 +62,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "public partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
 
-			// NOTE: Delete this after 31 August 2013.
-			foreach( var column in columns.AllColumns )
-				writeEqualityConditionClass( cn, tableName, column );
-
 			var revisionHistorySuffix = isRevisionHistoryClass ? "AsRevision" : "";
 
 			// Write public static methods.
@@ -119,16 +115,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeEqualityConditionClass( DBConnection cn, string tableName, Column column ) {
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013. Please use the CommandConditions namespace instead.\" ) ]" );
-			writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam: " +
-			                  DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " {" );
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 31 August 2013. Please use the CommandConditions namespace instead.\" ) ]" );
-			writer.WriteLine( "public " + StandardLibraryMethods.GetCSharpSafeClassName( column.Name ) + "WhereClauseParam( " + column.DataTypeName +
-			                  " value ): base( value ) {}" );
-			writer.WriteLine( "}" );
-		}
-
 		private static void writeInsertRowMethod( string tableName, string revisionHistorySuffix, string additionalLogicSuffix, IEnumerable<Column> keyColumns ) {
 			Column returnColumn = null;
 			var returnComment = "";
@@ -153,22 +139,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			if( returnColumn != null )
 				writer.WriteLine( "return mod." + returnColumn.Name + ";" );
 			writer.WriteLine( "}" );
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.Write( "public static " );
-			writer.Write( returnColumn != null ? returnColumn.DataTypeName : "void" );
-			writer.Write( " InsertRow" + revisionHistorySuffix + additionalLogicSuffix + "( DBConnection cn" );
-			if( columns.DataColumns.Any() )
-				writer.Write( ", " );
-			writeColumnParameterDeclarations( columns.DataColumns );
-			writer.WriteLine( " ) { " );
-			writer.WriteLine( "var mod = CreateForInsert" + revisionHistorySuffix + "();" );
-			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.Execute" + additionalLogicSuffix + "();" );
-			if( returnColumn != null )
-				writer.WriteLine( "return mod." + returnColumn.Name + ";" );
-			writer.WriteLine( "}" );
 		}
 
 		private static void writeUpdateRowsMethod( DBConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix ) {
@@ -185,18 +155,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "" + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
 
 			// body
-			writer.WriteLine( "var mod = CreateForUpdate" + revisionHistorySuffix + "( requiredCondition, additionalConditions );" );
-			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.Execute" + additionalLogicSuffix + "();" );
-			writer.WriteLine( "}" );
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.Write( "public static void UpdateRows" + revisionHistorySuffix + additionalLogicSuffix + "( DBConnection cn, " );
-			writeColumnParameterDeclarations( columns.DataColumns );
-			if( columns.DataColumns.Any() )
-				writer.Write( ", " );
-			writer.WriteLine( "" + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
 			writer.WriteLine( "var mod = CreateForUpdate" + revisionHistorySuffix + "( requiredCondition, additionalConditions );" );
 			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
 			writer.WriteLine( "mod.Execute" + additionalLogicSuffix + "();" );
@@ -227,26 +185,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "return rowsDeleted;" );
 
-			if( executeAdditionalLogic )
-				writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
-			writer.WriteLine( "}" );
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public static int DeleteRows" + methodNameSuffix + "( DBConnection cn, " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
-			if( executeAdditionalLogic )
-				writer.WriteLine( "return " + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
-			writer.WriteLine( "var conditions = getConditionList( requiredCondition, additionalConditions );" );
-			if( executeAdditionalLogic ) {
-				writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall = null;" );
-				writer.WriteLine( "preDelete( conditions, ref postDeleteCall );" );
-			}
-			writer.WriteLine( "var rowsDeleted = deleteRows( conditions );" );
-			if( executeAdditionalLogic ) {
-				writer.WriteLine( "if( postDeleteCall != null )" );
-				writer.WriteLine( "postDeleteCall.Execute();" );
-			}
-			writer.WriteLine( "return rowsDeleted;" );
 			if( executeAdditionalLogic )
 				writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
 			writer.WriteLine( "}" );
@@ -459,12 +397,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public void Execute( DBConnection cn ) {" );
-			writer.WriteLine( "Execute();" );
-			writer.WriteLine( "}" );
 		}
 
 		private static void writeExecuteWithoutAdditionalLogicMethod( string tableName ) {
@@ -474,12 +406,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic() {" );
 			writer.WriteLine( "executeInsertOrUpdate();" );
 			writer.WriteLine( "markDataColumnValuesUnchanged();" );
-			writer.WriteLine( "}" );
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic( DBConnection cn ) {" );
-			writer.WriteLine( "ExecuteWithoutAdditionalLogic();" );
 			writer.WriteLine( "}" );
 		}
 

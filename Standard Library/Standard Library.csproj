@@ -160,8 +160,6 @@
     <Compile Include="DataAccess\DataAccessMethods.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineDbModificationCommand.cs" />
     <Compile Include="DataAccess\DBConnection.cs" />
-    <Compile Include="DataAccess\DbMethod.cs" />
-    <Compile Include="DataAccess\DomainDbCommand.cs" />
     <Compile Include="DataAccess\StandardModification\ModificationType.cs" />
     <Compile Include="DataAccess\RevisionHistory\Revision.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\InlineDbCommandCondition.cs" />
@@ -449,7 +447,6 @@
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\RedirectingDbMethod.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ScrollPosition.cs" />
     <Compile Include="EnterpriseWebFramework\PageInfo.cs" />
     <Compile Include="Encryption\Password.cs" />

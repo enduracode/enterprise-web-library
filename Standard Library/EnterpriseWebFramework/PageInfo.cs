@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -35,12 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Throws an exception if the parameter values or any non URL elements of the current request make the page invalid.
 		/// </summary>
-		protected virtual void init() {
-			init( DataAccessState.Current.PrimaryDatabaseConnection );
-		}
-
-		[ Obsolete( "Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter." ) ]
-		protected virtual void init( DBConnection cn ) {}
+		protected virtual void init() {}
 
 		/// <summary>
 		/// Executes the specified fragment identifier validator, which takes the page's fragment identifier and should return a non empty string, i.e. an error
@@ -116,7 +110,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the name of the page, including the entity setup name if an entity setup exists.
 		/// </summary>
-		public string PageFullName { get { return CombinePagePathStrings( EntityPageSeparator, EsInfoAsBaseType != null && ParentPage == null ? EsInfoAsBaseType.EntitySetupName : "", PageName ); } }
+		public string PageFullName {
+			get {
+				return CombinePagePathStrings( EntityPageSeparator, EsInfoAsBaseType != null && ParentPage == null ? EsInfoAsBaseType.EntitySetupName : "", PageName );
+			}
+		}
 
 		/// <summary>
 		/// Returns the string representing the parent page's path within the entity.
@@ -241,7 +239,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract string buildUrl();
 
-		internal bool ShouldBeSecureGivenCurrentRequest { get { return ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicPage ); } }
+		internal bool ShouldBeSecureGivenCurrentRequest {
+			get { return ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicPage ); }
+		}
 
 		/// <summary>
 		/// Gets the desired security setting for requests to the page.

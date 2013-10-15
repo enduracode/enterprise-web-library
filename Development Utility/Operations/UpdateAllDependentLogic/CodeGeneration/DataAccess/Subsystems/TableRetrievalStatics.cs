@@ -143,14 +143,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "} );" );
 
 			writer.WriteLine( "}" );
-
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( DBConnection cn, params " +
-			                  DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
-			writer.WriteLine( "return " + methodName + "( conditions );" );
-			writer.WriteLine( "}" );
 		}
 
 		private static void writeGetRowMatchingIdMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
