@@ -403,6 +403,7 @@
     <Compile Include="SystemGeneralProvider.cs" />
     <Compile Include="TestStatics.cs" />
     <Compile Include="Tools\AssemblyTools.cs" />
+    <Compile Include="Tools\AttributeTools.cs" />
     <Compile Include="Tools\DecimalTools.cs" />
     <Compile Include="Tools\DoubleTools.cs" />
     <Compile Include="Tools\EnumTools.cs" />
