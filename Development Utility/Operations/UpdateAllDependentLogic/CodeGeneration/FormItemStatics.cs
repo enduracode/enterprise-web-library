@@ -19,6 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeBoolFormItemGetters( writer, field );
 			writeDateFormItemGetters( writer, field );
 			writeEnumerableFormItemGetters( writer, field );
+			writeGuidFormItemGetters( writer, field );
 
 			writeGenericGetterWithoutValueParams( writer, field, null );
 			writeGenericGetterWithoutValueParams( writer, field, false );
@@ -27,6 +28,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeGenericGetterWithValueParams( writer, field, false );
 			writeGenericGetterWithValueParams( writer, field, true );
 		}
+
 
 		private static void writeStringFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( !field.TypeIs( typeof( string ) ) )
@@ -116,8 +118,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      new[]
 				                      {
 					                      new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-					                      new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" )
-					                      , new CSharpParameter( "bool", "autoPostBack", "false" )
+					                      new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
 				                      },
 			                      new CSharpParameter[ 0 ],
 			                      "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
@@ -510,6 +512,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "[ 0 ], caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns )",
 			                      "control.GetSelectedItemIdsInPostBack( postBackValues )",
 			                      "true" );
+		}
+
+		private static void writeGuidFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( !field.TypeIs( typeof( Guid ) ) )
+				return;
+
+			writeNumberAsSelectListFormItemGetters( writer, field );
 		}
 
 		private static void writeFormItemGetters( TextWriter writer, ModificationField field, string controlType, string controlTypeForName, string valueParamTypeName,
