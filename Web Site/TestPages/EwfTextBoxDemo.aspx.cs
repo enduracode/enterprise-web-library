@@ -14,9 +14,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class EwfTextBoxDemo: EwfPage {
-		public partial class Info {
-			protected override void init() {}
+	partial class EwfTextBoxDemo: EwfPage {
+		partial class Info {
+			public override string PageName { get { return "Text Box"; } }
 		}
 
 		protected override void loadData() {
@@ -52,59 +52,57 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                                                                               } ) ) );
 		}
 
-		private static void addMessageIfNotNull( Control control, string s ) {
+		private void addMessageIfNotNull( Control control, string s ) {
 			if( s != null )
 				control.AddControlsReturnThis( "The value posted from this box was '{0}'".FormatWith( s ).GetLiteralControl() );
 		}
 
-		private static Box test1( DataModification dm, Action<string> setValue ) {
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test1( DataModification dm, Action<string> setValue ) {
 			var box = new EwfTextBox( "" );
-			box.SetupAutoFill( new WebMethodDefinition( TestService.GetInfo() ), AutoFillOptions.NoPostBack );
+			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.NoPostBack );
 
 			var dv = new DataValue<string>();
 			dm.AddTopValidationMethod( ( pbvd, validator ) => dv.Value = box.GetPostBackValue( pbvd ) );
 			dm.AddModificationMethod( () => setValue( dv.Value ) );
 
 			return
-				new Box(
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
 					"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " +
 					"Selecting an item or changing the text will no cause a post-back. This value show appear when submitting the page's submit button.",
 					box.ToSingleElementArray() );
 		}
 
-		private static Box test2( Action<string> setValue ) {
-			// NOTE SJR: Not-clicking on an item causes a post back. Should it? What does 'select' mean?
-			var box = new EwfTextBox( "", setValue );
-			box.SetupAutoFill( new WebMethodDefinition( TestService.GetInfo() ), AutoFillOptions.PostBackOnItemSelect );
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test2( Action<string> setValue ) {
+			var box = new EwfTextBox( "", postBackHandler: setValue );
+			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnItemSelect );
 			return
-				new Box(
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
 					"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " + "Selecting an item will cause a post-back.",
 					box.ToSingleElementArray() );
 		}
 
-		private static Box test3( Action<string> setValue ) {
-			var box = new EwfTextBox( "", setValue );
-			box.SetupAutoFill( new WebMethodDefinition( TestService.GetInfo() ), AutoFillOptions.PostBackOnTextChangeAndItemSelect );
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test3( Action<string> setValue ) {
+			var box = new EwfTextBox( "", postBackHandler: setValue );
+			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
 			return
-				new Box(
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
 					"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " +
 					"Selecting an item  or changing the text will cause a post-back.",
 					box.ToSingleElementArray() );
 		}
 
-		private static Box test4( Action<string> setValue ) {
-			// NOTE SJR: This doesn't work! setValue is not called when AutoPostBack is true.
-			var box = new EwfTextBox( "", setValue ) { AutoPostBack = true };
-			return new Box( "Post-back on change.", box.ToSingleElementArray() );
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test4( Action<string> setValue ) {
+			var box = new EwfTextBox( "", postBackHandler: setValue ) { AutoPostBack = true };
+			return new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( "Post-back on change.", box.ToSingleElementArray() );
 		}
 
-		private static Box test5( Action<string> setValue ) {
-			var box = new EwfTextBox( "", setValue );
-			return new Box( "Post-back on enter.", box.ToSingleElementArray() );
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test5( Action<string> setValue ) {
+			var box = new EwfTextBox( "", postBackHandler: setValue );
+			return new RedStapler.StandardLibrary.EnterpriseWebFramework.Box( "Post-back on enter.", box.ToSingleElementArray() );
 		}
 
-		private static Box test6( Action<string> setValue ) {
-			var box = new EwfTextBox( "", setValue );
+		private RedStapler.StandardLibrary.EnterpriseWebFramework.Box test6( Action<string> setValue ) {
+			var box = new EwfTextBox( "", postBackHandler: setValue );
 			var value = new DataValue<string>();
 			var button =
 				new PostBackButton(
@@ -115,8 +113,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					usesSubmitBehavior: false );
 			box.SetDefaultSubmitButton( button );
 
-			return new Box( "Post-back with non-default submit button. This post-back-value shouldn't show up when the page's submit button is submitted.",
-			                new WebControl[] { box, button } );
+			return
+				new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+					"Post-back with non-default submit button. This post-back-value shouldn't show up when the page's submit button is submitted.",
+					new WebControl[] { box, button } );
 		}
 	}
 }

@@ -247,7 +247,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\EwfImage.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\EwfLink.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\AutoFillService.cs">
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithJsInitLogic.cs" />
@@ -276,7 +276,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTable.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTableCell.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTableColumn.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\EwfTextBox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\EwfTextBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTableField.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTableFieldOrItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Tables\EwfTableItem.cs" />
@@ -334,8 +334,7 @@
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\WebMethodDefinition.cs" />
-    <Compile Include="EnterpriseWebFramework\WebService\AutoFillItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />

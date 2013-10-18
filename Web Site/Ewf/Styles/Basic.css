@@ -91,7 +91,6 @@ div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="passwo
 	font-family: inherit;
 	font-size: inherit;
 }
-
 /* This prevents Chrome and Safari from allowing the user to resize textareas. */
 textarea {
 	resize: none;

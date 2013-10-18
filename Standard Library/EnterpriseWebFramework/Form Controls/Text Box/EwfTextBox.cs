@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Options for the AutoFill feature that will modify the behavior of the EwfTextBox to post-back when different events occur.
 	/// </summary>
-	public enum AutoFillOptions {
+	public enum AutoCompleteOption {
 		/// <summary>
 		/// This option allows the text to be changed and an item to be selected without causing a post-back.
 		/// </summary>
@@ -35,21 +34,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class EwfTextBox: WebControl, ControlTreeDataLoader, IPostBackEventHandler, INamingContainer, FormControl, ControlWithJsInitLogic,
 		ControlWithCustomFocusLogic {
-		internal class CssElementCreator: ControlCssElementCreator {
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new CssElement[] { };
-			}
-		}
-
 		private readonly FormValue<string> formValue;
 		private readonly TextBox textBox = new TextBox();
 		private bool masksCharacters;
-		private WebMethodDefinition webMethodDefinition;
-		private AutoFillOptions autoFillOption;
+		private PageInfo autoCompleteService;
+		private AutoCompleteOption autoCompleteOption;
 		private PostBackButton defaultSubmitButton;
 		private string watermarkText = "";
 		private readonly Action<string> postBackHandler;
-		private readonly bool preventAutoComplete;
+		private readonly bool disableBrowserAutoComplete;
 		private readonly bool? suggestSpellCheck;
 
 		/// <summary>
@@ -75,11 +68,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="value"></param>
 		/// <param name="postBackHandler">The handler that will be executed when the user hits Enter on the text box or selects an autocomplete item. The parameter
 		/// is the post back value.</param>
-		/// <param name="preventAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
+		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
 		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox does spell check multi-line text
 		/// boxes. Setting this parameter to a value will set the spellcheck attribute on the text box to enable/disable spell checking, if the user agent supports
 		/// it.</param>
-		public EwfTextBox( string value, Action<string> postBackHandler = null, bool preventAutoComplete = false, bool? suggestSpellCheck = null ) {
+		public EwfTextBox( string value, Action<string> postBackHandler = null, bool disableBrowserAutoComplete = false, bool? suggestSpellCheck = null ) {
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
 			formValue = new FormValue<string>( () => value,
@@ -93,7 +86,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			base.Controls.Add( textBox );
 			Rows = 1;
 			this.postBackHandler = postBackHandler;
-			this.preventAutoComplete = preventAutoComplete;
+			this.disableBrowserAutoComplete = disableBrowserAutoComplete;
 			this.suggestSpellCheck = suggestSpellCheck;
 		}
 
@@ -131,11 +124,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Sets this text box up for AJAX autofilling.
+		/// Sets this text box up for AJAX auto-complete.
 		/// </summary>
-		public void SetupAutoFill( WebMethodDefinition webMethodDefinition, AutoFillOptions option ) {
-			this.webMethodDefinition = webMethodDefinition;
-			autoFillOption = option;
+		public void SetupAutoComplete( PageInfo service, AutoCompleteOption option ) {
+			autoCompleteService = service;
+			autoCompleteOption = option;
 		}
 
 		/// <summary>
@@ -185,20 +178,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( postBackHandler != null || defaultSubmitButton != null )
 				EwfPage.Instance.MakeControlPostBackOnEnter( this, postBackHandler != null ? this as Control : defaultSubmitButton );
 
-			var disableAutoComplete = preventAutoComplete;
-
-			if( webMethodDefinition != null ) {
-				disableAutoComplete = true;
-
-				if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect )
-					textBox.AutoPostBack = true;
-			}
-
-			if( disableAutoComplete )
-				textBox.Attributes.Add( "autocomplete", "off" );
+			if( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect )
+				textBox.AutoPostBack = true;
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
+
+			if( disableBrowserAutoComplete || autoCompleteService != null )
+				textBox.Attributes.Add( "autocomplete", "off" );
 
 			if( suggestSpellCheck.HasValue )
 				textBox.Attributes.Add( "spellcheck", suggestSpellCheck.Value.ToString().ToLower() );
@@ -207,34 +194,36 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			var script = new StringBuilder();
 
-			if( webMethodDefinition != null || watermarkText.Any() ) {
-				script.Append( "$( '#" + TextBoxClientId + "' )" );
+			if( watermarkText.Any() ) {
+				var restorationStatement = "$( '#" + TextBoxClientId + "' ).filter( function() { return this.value == ''; } ).val( '" + watermarkText + "' );";
 
-				if( watermarkText.Any() )
-					script.Append( @".filter( function() {{ return this.value == ''; }} ).val( '{0}' )".FormatWith( watermarkText ) );
-
-				if( webMethodDefinition != null ) {
-					const int delay = 250; // Default delay is 300 ms
-					const int minCharacters = 3; // NOTE SJR: This should be configurable.
-
-					var autocompleteOptions = new List<Tuple<string, string>>();
-					autocompleteOptions.Add( Tuple.Create( "delay", delay.ToString() ) );
-					autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
-					autocompleteOptions.Add( Tuple.Create( "source", "'" + webMethodDefinition.WebService + "'" ) );
-
-					if( autoFillOption == AutoFillOptions.PostBackOnTextChangeAndItemSelect || autoFillOption == AutoFillOptions.PostBackOnItemSelect ) {
-						autocompleteOptions.Add( Tuple.Create( "select",
-						                                       "function(event, ui) {{ $('#{0}').val(ui.item.value); {1}; }}".FormatWith( TextBoxClientId,
-						                                                                                                                  PostBackButton.GetPostBackScript( this,
-						                                                                                                                                                    postBackHandler !=
-						                                                                                                                                                    null ) ) ) );
-					}
-					script.Append(
-						@".autocomplete({{ {0} }})".FormatWith(
-							autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
-				}
-				script.Append( ";" );
+				// The first line is for bfcache browsers; the second is for all others. See http://stackoverflow.com/q/1195440/35349.
+				script.Append( "$( window ).on( 'pagehide', function() { " + restorationStatement + " } );" );
+				script.Append( restorationStatement );
 			}
+
+			if( autoCompleteService != null ) {
+				const int delay = 250; // Default delay is 300 ms.
+				const int minCharacters = 3;
+
+				var autocompleteOptions = new List<Tuple<string, string>>();
+				autocompleteOptions.Add( Tuple.Create( "delay", delay.ToString() ) );
+				autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
+				autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteService.GetUrl() + "'" ) );
+
+				if( autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect || autoCompleteOption == AutoCompleteOption.PostBackOnItemSelect ) {
+					autocompleteOptions.Add( Tuple.Create( "select",
+					                                       "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( TextBoxClientId,
+					                                                                                                                        PostBackButton.GetPostBackScript(
+						                                                                                                                        this,
+						                                                                                                                        postBackHandler != null ) ) ) );
+				}
+
+				script.Append( @"$( '#" + TextBoxClientId +
+				               "' ).autocomplete( {{ {0} }} );".FormatWith(
+					               autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
+			}
+
 			return script.ToString();
 		}
 

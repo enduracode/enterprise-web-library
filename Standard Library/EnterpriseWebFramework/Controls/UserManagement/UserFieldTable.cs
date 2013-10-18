@@ -39,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var b = FormItemBlock.CreateFormItemTable( heading: "Security Information" );
 
 			b.AddFormItems( FormItem.Create( "Email address",
-			                                 new EwfTextBox( user != null ? user.Email : "", preventAutoComplete: true ),
+			                                 new EwfTextBox( user != null ? user.Email : "" ),
 			                                 validationGetter: control => new Validation( ( pbv, validator ) => {
 				                                 if( validationShouldRun() )
 					                                 Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
@@ -80,7 +80,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", preventAutoComplete: true )
+				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
 					                                                             {
 						                                                             Width = Unit.Pixel( 200 ),
 						                                                             MasksCharacters = true
@@ -92,7 +92,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                                    .ToCell() ) );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", preventAutoComplete: true )
+				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
 					                                                             {
 						                                                             Width = Unit.Pixel( 200 ),
 						                                                             MasksCharacters = true
@@ -102,6 +102,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					                                                             new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) )
 				                                                    .ToControl()
 				                                                    .ToCell() ) );
+
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );
 				var providePassword = FormItem.Create( "",
