@@ -371,16 +371,20 @@ namespace RedStapler.StandardLibrary {
 			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
 			System.Net.Mail.SmtpClient smtpClient = null;
 			try {
-				if( InstallationConfiguration.SmtpServer.Length > 0 )
-					smtpClient = new System.Net.Mail.SmtpClient { Host = InstallationConfiguration.SmtpServer };
+				if( InstallationConfiguration.Smtp != null ) {
+					smtpClient = new System.Net.Mail.SmtpClient { Host = InstallationConfiguration.Smtp.server };
+					if( InstallationConfiguration.Smtp.username != null ) {
+						smtpClient.Credentials = new System.Net.NetworkCredential( InstallationConfiguration.Smtp.username, InstallationConfiguration.Smtp.password );
+
+						// GMS NOTE: The only case where we use this type of authentication, we need this. Maybe other situations are different. Not sure why the other cases never care about this setting.
+						smtpClient.EnableSsl = true;
+					}
+				}
 				else if( InstallationConfiguration.InstallationType == InstallationType.Development ) {
 					var pickupFolderPath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Outgoing Dev Mail" );
 					Directory.CreateDirectory( pickupFolderPath );
 					smtpClient = new System.Net.Mail.SmtpClient
-						{
-							DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory,
-							PickupDirectoryLocation = pickupFolderPath
-						};
+					             	{ DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory, PickupDirectoryLocation = pickupFolderPath };
 				}
 				else if( isClientSideProgram )
 					smtpClient = provider.CreateClientSideAppSmtpClient();
@@ -609,9 +613,10 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return
 					StandardLibraryMethods.CombinePaths(
-						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
-						                                                   InstallationConfiguration.InstallationType == InstallationType.Development ),
-						InstallationFileStatics.FilesFolderName );
+					                                    InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
+					                                                                                       InstallationConfiguration.InstallationType ==
+					                                                                                       InstallationType.Development ),
+					                                    InstallationFileStatics.FilesFolderName );
 			}
 		}
 

@@ -4,7 +4,7 @@
 	<complexType name="InstallationStandardConfiguration">
 		<sequence>
 			<element name="rsisInstallationId" type="int" minOccurs="0" />
-			<element name="smtpServer" type="string" minOccurs="0" />
+			<element name="Smtp" type="rs:Smtp" minOccurs="0" />
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
 			<element name="administrators">
@@ -42,6 +42,13 @@
 					</sequence>
 				</complexType>
 			</element>
+		</sequence>
+	</complexType>
+	<complexType name="Smtp">
+		<sequence>
+			<element name="server" type="string"/>
+			<element name="username" type="string" minOccurs="0"/>
+			<element name="password" type="string" minOccurs="0"/>
 		</sequence>
 	</complexType>
 	<complexType name="InstallationStandardNameAndEmailAddress">

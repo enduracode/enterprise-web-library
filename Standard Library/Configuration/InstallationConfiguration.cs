@@ -213,7 +213,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			}
 		}
 
-		internal string SmtpServer { get { return installationStandardConfiguration.smtpServer ?? ""; } }
+		internal Smtp Smtp { get { return installationStandardConfiguration.Smtp; } }
 
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 
