@@ -378,6 +378,9 @@ namespace RedStapler.StandardLibrary {
 
 						// GMS NOTE: The only case where we use this type of authentication, we need this. Maybe other situations are different. Not sure why the other cases never care about this setting.
 						smtpClient.EnableSsl = true;
+
+						if( InstallationConfiguration.Smtp.portSpecified )
+							smtpClient.Port = InstallationConfiguration.Smtp.port;
 					}
 				}
 				else if( InstallationConfiguration.InstallationType == InstallationType.Development ) {

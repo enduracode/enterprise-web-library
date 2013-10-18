@@ -46,9 +46,10 @@
 	</complexType>
 	<complexType name="Smtp">
 		<sequence>
-			<element name="server" type="string"/>
-			<element name="username" type="string" minOccurs="0"/>
-			<element name="password" type="string" minOccurs="0"/>
+			<element name="server" type="string" />
+			<element name="port" type="int" minOccurs="0" />
+			<element name="username" type="string" minOccurs="0" />
+			<element name="password" type="string" minOccurs="0" />
 		</sequence>
 	</complexType>
 	<complexType name="InstallationStandardNameAndEmailAddress">
