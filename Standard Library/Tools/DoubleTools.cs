@@ -23,6 +23,8 @@ namespace RedStapler.StandardLibrary {
 
 		/// <summary>
 		/// Returns the dollar amount to two decimal places prefixed with $. e.g. $8.99
+		/// Does the same thing as <see cref="DecimalTools.ToMoneyString(decimal)"/>. 
+		/// We strongly encourage you to use decimal instead of double to compute monetary values.
 		/// </summary>
 		public static string ToMoneyString( this double d ) {
 			return d.ToString( "c2" );
