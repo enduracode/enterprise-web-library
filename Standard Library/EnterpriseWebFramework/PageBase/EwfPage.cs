@@ -211,11 +211,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			var webFormsHiddenFields = new[]
-				{
-					"__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "_TSM_HiddenField_",
-					"hiddenInputToUpdateATBuffer_CommonToolkitScripts"
-				};
+			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
 			var eventButtonUniqueId = FindControl( Request.Form[ "__EVENTTARGET" ] ) is PostBackButton
 				                          ? Request.Form[ "__EVENTTARGET" ].ToSingleElementArray()
 				                          : new string[ 0 ];

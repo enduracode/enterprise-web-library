@@ -80,7 +80,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
+				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+					                                                             {
+						                                                             Width = Unit.Pixel( 200 ),
+						                                                             MasksCharacters = true
+					                                                             },
 				                                                             validationGetter:
 					                                                             control =>
 					                                                             new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) )
@@ -88,13 +92,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                                    .ToCell() ) );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "" ) { Width = Unit.Pixel( 200 ), MasksCharacters = true },
+				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+					                                                             {
+						                                                             Width = Unit.Pixel( 200 ),
+						                                                             MasksCharacters = true
+					                                                             },
 				                                                             validationGetter:
 					                                                             control =>
 					                                                             new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) )
 				                                                    .ToControl()
 				                                                    .ToCell() ) );
-				EwfPage.Instance.DisableAutofillOnForm();
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );

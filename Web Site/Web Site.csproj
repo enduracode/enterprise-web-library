@@ -169,6 +169,13 @@
     <Compile Include="TestPages\DateAndTimePickers.aspx.designer.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\EwfTextBoxDemo.aspx.cs">
+      <DependentUpon>EwfTextBoxDemo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\EwfTextBoxDemo.aspx.designer.cs">
+      <DependentUpon>EwfTextBoxDemo.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\Html5FileUpload.aspx.cs">
       <DependentUpon>Html5FileUpload.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -391,6 +398,13 @@
     </Compile>
     <Compile Include="TestPages\TestPad.aspx.designer.cs">
       <DependentUpon>TestPad.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TestPages\TestService.aspx.cs">
+      <DependentUpon>TestService.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\TestService.aspx.designer.cs">
+      <DependentUpon>TestService.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\TwoWeekCalendarTest.aspx.cs">
       <DependentUpon>TwoWeekCalendarTest.aspx</DependentUpon>
@@ -690,6 +704,7 @@
     <Content Include="TestPages\EntitySetup.ascx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestPages\EwfTextBoxDemo.aspx" />
     <Content Include="TestPages\Html5FileUpload.aspx" />
     <Content Include="TestPages\HtmlEditing.aspx" />
     <Content Include="TestPages\CalendarDemo.aspx" />
@@ -729,6 +744,7 @@
     <Content Include="TestPages\SubFolder\General.aspx" />
     <Content Include="TestPages\SubFolder\New.aspx" />
     <Content Include="TestPages\TestPad.aspx" />
+    <Content Include="TestPages\TestService.aspx" />
     <Content Include="Web.config" />
     <Content Include="Ewf\ContactUs\Page.aspx" />
     <Content Include="Ewf\ContactUs\EntitySetup.ascx" />

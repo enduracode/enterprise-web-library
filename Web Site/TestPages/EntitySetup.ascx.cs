@@ -34,6 +34,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new Box.Info( this ) ),
 						new PageGroup( "Form Controls",
+						               new EwfTextBoxDemo.Info( this ),
 						               new CheckBox.Info( this ),
 						               new CheckBoxList.Info( this ),
 						               new SelectListDemo.Info( this ),

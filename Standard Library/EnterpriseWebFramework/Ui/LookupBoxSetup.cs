@@ -10,7 +10,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		private readonly int pixelWidth;
 		private readonly string defaultText;
 		private readonly Func<string, string> handler;
-		private readonly WebMethodDefinition webMethodDefinition;
+		private readonly PageInfo autoCompleteService;
 
 		/// <summary>
 		/// Creates a lookup box.
@@ -29,11 +29,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// </summary>
 		/// <param name="pixelWidth"></param>
 		/// <param name="defaultText">Text displayed when the LookupBox does not have focus.</param>
-		/// <param name="webMethodDefinition">The method in this WebMethodDefinition must accept (string textPassedFromUser, int count) and return an array of strings.</param>
 		/// <param name="handler">Supplies the string entered into the LookupBox from the user. Returns the URL the user will be redirected to.</param>
-		public LookupBoxSetup( int pixelWidth, string defaultText, Func<string, string> handler, WebMethodDefinition webMethodDefinition )
+		/// <param name="autoCompleteService"></param>
+		public LookupBoxSetup( int pixelWidth, string defaultText, Func<string, string> handler, PageInfo autoCompleteService )
 			: this( pixelWidth, defaultText, handler ) {
-			this.webMethodDefinition = webMethodDefinition;
+			this.autoCompleteService = autoCompleteService;
 		}
 
 		/// <summary>
@@ -45,8 +45,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 					Width = new Unit( pixelWidth )
 				};
 			textBox.SetWatermarkText( defaultText );
-			if( webMethodDefinition != null )
-				textBox.SetupAutoFill( webMethodDefinition, AutoFillOptions.PostBackOnItemSelect );
+			if( autoCompleteService != null )
+				textBox.SetupAutoComplete( autoCompleteService, AutoCompleteOption.PostBackOnItemSelect );
 			return new Block( textBox ) { CssClass = "ewfLookupBox" };
 		}
 	}

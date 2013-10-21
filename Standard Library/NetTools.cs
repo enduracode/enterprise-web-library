@@ -74,7 +74,9 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Returns the full url of the page that redirected to the current location.
 		/// </summary>
-		public static string ReferringUrl { get { return ( HttpContext.Current.Request.UrlReferrer != null ? HttpContext.Current.Request.UrlReferrer.AbsoluteUri : "" ); } }
+		public static string ReferringUrl {
+			get { return ( HttpContext.Current.Request.UrlReferrer != null ? HttpContext.Current.Request.UrlReferrer.AbsoluteUri : "" ); }
+		}
 
 		/// <summary>
 		/// Redirects to the given URL. Throws a ThreadAbortedException. NOTE: Make this internal.
@@ -158,15 +160,6 @@ namespace RedStapler.StandardLibrary {
 					throw;
 				return (HttpWebResponse)e.Response;
 			}
-		}
-
-		/// <summary>
-		/// Disable the browser's auto-filling behavior on all controls (really, TextBoxes) on the specified page.
-		/// </summary>
-		public static void DisableAutofillOnForm( this Page page ) {
-			// This is used because AutoCompleteBehavior.Disable/None don't seem to work as well in all browsers.
-			// If we try, we might be able to disable autocomplete on just certain controls, but we haven't had the need for that yet.
-			page.Form.Attributes.Add( "autocomplete", "off" );
 		}
 
 		/// <summary>
