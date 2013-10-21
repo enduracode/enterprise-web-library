@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					                                                                                         columns.AllColumns.Select(
 						                                                                                         i =>
 						                                                                                         StandardLibraryMethods.GetCSharpIdentifierSimple(
-							                                                                                         i.PascalCasedNameExceptForOracle ) ).ToArray() ) + ");" );
+							                                                                                         i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 					                                 writer.WriteLine( "}" );
 				                                 },
 				                                 cn.DatabaseInfo );
