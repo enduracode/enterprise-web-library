@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -22,7 +23,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var columns = new TableColumns( cn, table, isRevisionHistoryTable );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClass( writer, columns.AllColumns, cn.DatabaseInfo );
+				DataAccessStatics.WriteRowClass( writer,
+				                                 columns.AllColumns,
+				                                 localWriter => {
+					                                 if( !columns.DataColumns.Any() )
+						                                 return;
+
+					                                 var modClass = StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
+					                                 var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
+					                                 writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
+					                                 writer.WriteLine( "return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
+					                                                   StringTools.ConcatenateWithDelimiter( ", ",
+					                                                                                         columns.AllColumns.Select(
+						                                                                                         i =>
+						                                                                                         StandardLibraryMethods.GetCSharpIdentifierSimple(
+							                                                                                         i.PascalCasedNameExceptForOracle ) ).ToArray() ) + ");" );
+					                                 writer.WriteLine( "}" );
+				                                 },
+				                                 cn.DatabaseInfo );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
 				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
 

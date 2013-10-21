@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return cmd;
 		}
 
-		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, DatabaseInfo databaseInfo ) {
+		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter, DatabaseInfo databaseInfo ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Holds data for a row of this result." );
 			writer.WriteLine( "public partial class Row: System.IEquatable<Row> {" );
 
@@ -107,6 +108,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				condition = StringTools.ConcatenateWithDelimiter( " && ", condition, getMemberVariableName( column ) + " == other." + getMemberVariableName( column ) );
 			writer.WriteLine( "return " + condition + ";" );
 			writer.WriteLine( "}" ); // Equals method
+
+			toModificationMethodWriter( writer );
 
 			writer.WriteLine( "}" ); // class
 		}

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.IO;
 
@@ -38,17 +37,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// We do not create templates for direct modification classes.
 			var folderPath = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
 			var templateFilePath = StandardLibraryMethods.CombinePaths( folderPath,
-			                                                            getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) +
+			                                                            GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) +
 			                                                            DataAccessStatics.CSharpTemplateFileExtension );
 			IoMethods.DeleteFile( templateFilePath );
 
 			// If a real file exists, don't create a template.
-			if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
+			if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
 				return;
 
 			using( var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
 				templateWriter.WriteLine( namespaceDeclaration );
-				templateWriter.WriteLine( "	partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + " {" );
+				templateWriter.WriteLine( "	partial class " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + " {" );
 				templateWriter.WriteLine(
 					"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
 						DataAccessStatics.CSharpTemplateFileExtension ) );
@@ -60,9 +59,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeClass( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			columns = new TableColumns( cn, tableName, isRevisionHistoryClass );
 
-			writer.WriteLine( "public partial class " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
+			writer.WriteLine( "public partial class " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
 
-			var revisionHistorySuffix = isRevisionHistoryClass ? "AsRevision" : "";
+			var revisionHistorySuffix = GetRevisionHistorySuffix( isRevisionHistoryClass );
 
 			// Write public static methods.
 			writeInsertRowMethod( tableName, revisionHistorySuffix, "", columns.KeyColumns );
@@ -88,9 +87,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writeCreateForInsertMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			writeCreateForUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			if( columns.DataColumns.Any() )
-				writeCreateForUpdateWithInitialDataMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
+				writeCreateForSingleRowUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			writeGetConditionListMethod( cn, tableName );
-			writer.WriteLine( "private " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
+			writer.WriteLine( "private " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
 
 			if( columns.DataColumns.Any() )
 				writeSetAllDataMethod();
@@ -101,7 +100,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "partial void preUpdate();" );
 			writeExecuteWithoutAdditionalLogicMethod( tableName );
 			writeExecuteInsertOrUpdateMethod( cn, tableName, isRevisionHistoryClass, columns.KeyColumns, columns.IdentityColumn );
-			writeAddColumnModificationsMethod( columns.NonIdentityColumns, cn.DatabaseInfo );
+			writeAddColumnModificationsMethod( columns.NonIdentityColumns );
 			if( isRevisionHistoryClass ) {
 				writeCopyLatestRevisionsMethod( cn, tableName, columns.NonIdentityColumns );
 				DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
@@ -110,9 +109,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "static partial void populateConstraintNamesToViolationErrorMessages( Dictionary<string,string> constraintNamesToViolationErrorMessages );" );
 			writer.WriteLine( "partial void postInsert();" );
 			writer.WriteLine( "partial void postUpdate();" );
-			writeMarkDataColumnValuesUnchangedMethod();
+			writeMarkColumnValuesUnchangedMethod();
 
 			writer.WriteLine( "}" );
+		}
+
+		internal static string GetRevisionHistorySuffix( bool isRevisionHistoryClass ) {
+			return isRevisionHistoryClass ? "AsRevision" : "";
 		}
 
 		private static void writeInsertRowMethod( string tableName, string revisionHistorySuffix, string additionalLogicSuffix, IEnumerable<Column> keyColumns ) {
@@ -252,10 +255,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Creates a modification object in insert mode, which can be used to do a piecemeal insert of a new row in the " +
 			                                            tableName + " table." );
-			writer.WriteLine( "public static " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForInsert" + methodNameSuffix +
+			writer.WriteLine( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForInsert" + methodNameSuffix +
 			                  "() {" );
-			writer.WriteLine( "return new " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) +
-			                  " { modType = ModificationType.Insert };" );
+			writer.WriteLine( "return new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " { modType = ModificationType.Insert };" );
 			writer.WriteLine( "}" );
 		}
 
@@ -265,13 +267,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			CodeGenerationStatics.AddSummaryDocComment( writer,
 			                                            "Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " +
 			                                            tableName + " table." );
-			writer.WriteLine( "public static " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForUpdate" + methodNameSuffix +
+			writer.WriteLine( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForUpdate" + methodNameSuffix +
 			                  "( " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
 
 
 			// body
 
-			writer.WriteLine( "var mod = new " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) +
+			writer.WriteLine( "var mod = new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) +
 			                  " { modType = ModificationType.Update, conditions = getConditionList( requiredCondition, additionalConditions ) };" );
 
 			// Set column values that correspond to modification conditions to the values of those conditions. One reason this is important is so the primary
@@ -285,27 +287,38 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				prefix = "else if";
 			}
 			writer.WriteLine( "}" );
-			writer.WriteLine( writer.NewLine + "mod.markDataColumnValuesUnchanged();" );
+			writer.WriteLine( writer.NewLine + "mod.markColumnValuesUnchanged();" );
 
 			writer.WriteLine( "return mod;" );
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeCreateForUpdateWithInitialDataMethod( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass,
-		                                                               string methodNameSuffix ) {
+		private static void writeCreateForSingleRowUpdateMethod( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass,
+		                                                         string methodNameSuffix ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a modification object in update mode with the specified conditions and initial data. All column values in this object will have HasChanged = false, despite being initialized. This object can then be used to do a piecemeal update of the " +
+			                                            "Creates a modification object in single-row update mode with the specified current data. All column values in this object will have HasChanged = false, despite being initialized. This object can then be used to do a piecemeal update of the " +
 			                                            tableName + " table." );
-			writer.Write( "public static " + getModClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForUpdate" + methodNameSuffix +
-			              "WithInitialData( " );
-			writeColumnParameterDeclarations( columns.DataColumns );
-			writer.WriteLine( ", " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
+			writer.Write( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForSingleRowUpdate" +
+			              methodNameSuffix + "( " );
+			writeColumnParameterDeclarations( columns.AllColumns );
+			writer.WriteLine( " ) {" );
+
 
 			// body
-			writer.WriteLine( "var mod = CreateForUpdate" + methodNameSuffix + "( requiredCondition, additionalConditions );" );
-			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.markDataColumnValuesUnchanged();" );
+
+			writer.WriteLine( "var mod = new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) +
+			                  " { modType = ModificationType.Update };" );
+
+			// Use the values of key columns as conditions.
+			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
+			foreach( var column in columns.KeyColumns ) {
+				writer.WriteLine( "conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + "@" +
+				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + " ) );" );
+			}
+
+			writeColumnValueAssignmentsFromParameters( columns.AllColumns, "mod" );
+			writer.WriteLine( "mod.markColumnValuesUnchanged();" );
 			writer.WriteLine( "return mod;" );
 			writer.WriteLine( "}" );
 		}
@@ -326,11 +339,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			       DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "[] additionalConditions";
 		}
 
-		private static string getModClassName( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
+		internal static string GetClassName( DBConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			return
 				StandardLibraryMethods.GetCSharpSafeClassName( isRevisionHistoryTable && !isRevisionHistoryClass
-					                                               ? "Direct" + tableName.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"
-					                                               : tableName.TableNameToPascal( cn ) + "Modification" );
+					                                               ? "Direct" + table.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"
+					                                               : table.TableNameToPascal( cn ) + "Modification" );
 		}
 
 		private static void writeSetAllDataMethod() {
@@ -365,7 +378,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 			foreach( var column in columns ) {
-				writer.WriteLine( modObjectName + "." + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " = @" +
+				writer.WriteLine( modObjectName + "." + getColumnFieldName( column ) + ".Value = @" +
 				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
 			}
 		}
@@ -393,7 +406,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "postUpdate();" );
 
 			// This must be after the calls to postInsert and postUpdate in case their implementations need to know which column values changed.
-			writer.WriteLine( "markDataColumnValuesUnchanged();" );
+			writer.WriteLine( "markColumnValuesUnchanged();" );
 
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
@@ -405,7 +418,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                                            " modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic() {" );
 			writer.WriteLine( "executeInsertOrUpdate();" );
-			writer.WriteLine( "markDataColumnValuesUnchanged();" );
+			writer.WriteLine( "markColumnValuesUnchanged();" );
 			writer.WriteLine( "}" );
 		}
 
@@ -442,8 +455,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Future calls to Execute should perform updates, not inserts. Use the values of key columns as conditions.
 			writer.WriteLine( "modType = ModificationType.Update;" );
 			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
-			foreach( var column in keyColumns )
-				writer.WriteLine( "conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + column.Name + " ) );" );
+			foreach( var column in keyColumns ) {
+				writer.WriteLine( "conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
+				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " ) );" );
+			}
 
 			writer.WriteLine( "}" ); // if insert
 
@@ -472,7 +487,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // method
 		}
 
-		private static void writeAddColumnModificationsMethod( IEnumerable<Column> nonIdentityColumns, DatabaseInfo databaseInfo ) {
+		private static void writeAddColumnModificationsMethod( IEnumerable<Column> nonIdentityColumns ) {
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
@@ -546,9 +561,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // method
 		}
 
-		private static void writeMarkDataColumnValuesUnchangedMethod() {
-			writer.WriteLine( "private void markDataColumnValuesUnchanged() {" );
-			foreach( var column in columns.DataColumns )
+		private static void writeMarkColumnValuesUnchangedMethod() {
+			writer.WriteLine( "private void markColumnValuesUnchanged() {" );
+			foreach( var column in columns.AllColumns )
 				writer.WriteLine( getColumnFieldName( column ) + ".ClearChanged();" );
 			writer.WriteLine( "}" );
 		}
