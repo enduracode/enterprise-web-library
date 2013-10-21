@@ -311,9 +311,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			                  " { modType = ModificationType.Update };" );
 
 			// Use the values of key columns as conditions.
-			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
+			writer.WriteLine( "mod.conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
 			foreach( var column in columns.KeyColumns ) {
-				writer.WriteLine( "conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + "@" +
+				writer.WriteLine( "mod.conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + "@" +
 				                  StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + " ) );" );
 			}
 

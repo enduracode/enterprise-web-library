@@ -29,7 +29,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					                                 if( !columns.DataColumns.Any() )
 						                                 return;
 
-					                                 var modClass = StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
+					                                 var modClass = database.SecondaryDatabaseName + "Modification." +
+					                                                StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
 					                                 var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 					                                 writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
 					                                 writer.WriteLine( "return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
