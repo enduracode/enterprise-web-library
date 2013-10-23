@@ -3,9 +3,9 @@ using System.Linq;
 using System.Reflection;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {
@@ -14,6 +14,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 			AppTools.Init( "Development Utility", true, new GlobalLogic() );
 			return AppTools.ExecuteAppWithStandardExceptionHandling( () => {
 				try {
+					if( args.Count() < 2 )
+						throw new UserCorrectableException( "You must specify the installation path as the first argument and the operation name as the second." );
+
 					// Get installation.
 					var installationPath = args[ 0 ];
 					DevelopmentInstallation installation;
