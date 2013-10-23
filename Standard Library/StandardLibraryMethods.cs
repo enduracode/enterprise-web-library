@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading;
 using Microsoft.Web.Administration;
 using RedStapler.StandardLibrary.Email;
+using RedStapler.StandardLibrary.InstallationSupportUtility;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -358,17 +359,25 @@ namespace RedStapler.StandardLibrary {
 			AppTools.ExecuteAsCriticalRegion( "{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
 			                                  false,
 			                                  delegate {
-				                                  using( var serverManager = new ServerManager() ) {
-					                                  var config = serverManager.GetApplicationHostConfiguration();
+				                                  try {
+					                                  using( var serverManager = new ServerManager() ) {
+						                                  var config = serverManager.GetApplicationHostConfiguration();
 
-					                                  var modulesSection = config.GetSection( "system.webServer/modules", "" );
-					                                  foreach( var element in modulesSection.GetCollection() )
-						                                  element.SetMetadata( "lockItem", null );
+						                                  var modulesSection = config.GetSection( "system.webServer/modules", "" );
+						                                  foreach( var element in modulesSection.GetCollection() )
+							                                  element.SetMetadata( "lockItem", null );
 
-					                                  var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-					                                  serverRuntimeSection.OverrideMode = OverrideMode.Allow;
+						                                  var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+						                                  serverRuntimeSection.OverrideMode = OverrideMode.Allow;
 
-					                                  serverManager.CommitChanges();
+						                                  serverManager.CommitChanges();
+					                                  }
+				                                  }
+				                                  catch( Exception e ) {
+					                                  const string message = "Failed to configure IIS.";
+					                                  if( e is UnauthorizedAccessException )
+						                                  throw new UserCorrectableException( message, e );
+					                                  throw new ApplicationException( message, e );
 				                                  }
 			                                  } );
 		}
