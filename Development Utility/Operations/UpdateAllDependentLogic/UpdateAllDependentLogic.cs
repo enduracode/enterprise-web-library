@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
-			StandardLibraryMethods.ConfigureIis();
+			IsuStatics.ConfigureIis();
 
 			var installation = genericInstallation as DevelopmentInstallation;
 
