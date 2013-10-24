@@ -1,4 +1,5 @@
 using System.Web.UI;
+using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
@@ -10,7 +11,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var author = new EwfTextBox( "" ) { AutoPostBack = true };
 			ScriptManager.GetCurrent( this ).RegisterAsyncPostBackControl( author );
 
-			var outputArea = new Box();
+			var outputArea = new Box( "".GetLiteralControl().ToSingleElementArray() );
 
 			updatePanel.ContentTemplateContainer.AddControlsReturnThis( outputArea );
 
