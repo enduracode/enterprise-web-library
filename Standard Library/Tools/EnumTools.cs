@@ -13,11 +13,11 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Looks for <see cref="EnumToEnglishAttribute"/> and if available, return its value.
-		/// Otherwise, returns the name of the enum value applied-with <see cref="StringTools.CamelToEnglish(string)"/>.
+		/// Looks for <see cref="EnglishAttribute"/> and if available, returns its value.
+		/// Otherwise, returns the name of the enum value after applying <see cref="StringTools.CamelToEnglish(string)"/>.
 		/// </summary>
 		public static string ToEnglish( this Enum e ) {
-			var name = e.GetAttribute<EnumToEnglishAttribute>();
+			var name = e.GetAttribute<EnglishAttribute>();
 			return name != null ? name.English : Enum.GetName( e.GetType(), e ).CamelToEnglish();
 		}
 	}

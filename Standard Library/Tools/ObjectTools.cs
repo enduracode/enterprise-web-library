@@ -2,7 +2,16 @@
 using System.Linq;
 
 namespace RedStapler.StandardLibrary {
-	public static class AttributeTools {
+	public static class ObjectTools {
+		/// <summary>
+		/// Returns o.ToString() unless o is null. In this case, returns either null (if nullToEmptyString is false) or the empty string (if nullToEmptyString is true).
+		/// </summary>
+		public static string ObjectToString( this object o, bool nullToEmptyString ) {
+			if( o != null )
+				return o.ToString();
+			return nullToEmptyString ? String.Empty : null;
+		}
+
 		/// <summary>
 		/// Returns the attribute for the given object if it's available. Otherwise, returns null.
 		/// </summary>

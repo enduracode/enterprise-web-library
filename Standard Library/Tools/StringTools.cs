@@ -279,15 +279,6 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Returns o.ToString() unless o is null. In this case, returns either null (if nullToEmptyString is false) or the empty string (if nullToEmptyString is true).
-		/// </summary>
-		public static string ObjectToString( this object o, bool nullToEmptyString ) {
-			if( o != null )
-				return o.ToString();
-			return nullToEmptyString ? String.Empty : null;
-		}
-
-		/// <summary>
 		/// Concatenates two strings together with a space between them. If either string is empty or if both strings are empty, there will be no space added.
 		/// Null strings are treated as empty strings.
 		/// Whitespace is trimmed from the given strings before concatenation.
