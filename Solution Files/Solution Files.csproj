@@ -46,6 +46,7 @@
   </Target>
   -->
   <ItemGroup>
+    <Content Include="nuget.exe" />
     <Content Include="Referenced Files\NDepend.API.dll" />
     <Content Include="Referenced Files\NDepend.API.xml" />
     <Content Include="Selenium Support\selenium-server.jar" />
