@@ -406,7 +406,7 @@
     <Compile Include="Tools\ObjectTools.cs" />
     <Compile Include="Tools\DecimalTools.cs" />
     <Compile Include="Tools\DoubleTools.cs" />
-    <Compile Include="Tools\EnumToEnglishAttribute.cs" />
+    <Compile Include="Tools\EnglishAttribute.cs" />
     <Compile Include="Tools\EnumTools.cs" />
     <Compile Include="Tools\ExceptionTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
