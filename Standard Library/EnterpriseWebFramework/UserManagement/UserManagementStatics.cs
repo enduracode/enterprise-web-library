@@ -134,9 +134,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 		internal static void SendPassword( string emailAddress, string password ) {
 			string subject;
-			string htmlBody;
-			( SystemProvider as FormsAuthCapableUserManagementProvider ).GetPasswordResetParams( emailAddress, password, out subject, out htmlBody );
-			var m = new EmailMessage { Subject = subject, BodyHtml = htmlBody };
+			string bodyHtml;
+			( SystemProvider as FormsAuthCapableUserManagementProvider ).GetPasswordResetParams( emailAddress, password, out subject, out bodyHtml );
+			var m = new EmailMessage { Subject = subject, BodyHtml = bodyHtml };
 			m.ToAddresses.Add( new EmailAddress( emailAddress ) );
 			AppTools.SendEmailWithDefaultFromAddress( m );
 		}
