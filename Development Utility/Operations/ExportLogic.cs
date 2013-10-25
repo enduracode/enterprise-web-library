@@ -6,10 +6,10 @@ using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
 using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
 					writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
 
-				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @".nuget\NuGet" ),
+				StatusStatics.SetStatus( StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
 				                                                            "pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 				                                                            "",
 				                                                            true ) );
@@ -184,7 +184,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
 					var installationConfigurationFile =
 						XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
-							StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ), false );
+							StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+							false );
 
 					buildMessageInstallation.Id = installationConfigurationFile.rsisInstallationId;
 					buildMessageInstallation.Name = installationConfigurationFile.installedInstallation.name;
