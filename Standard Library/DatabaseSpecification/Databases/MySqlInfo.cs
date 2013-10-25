@@ -57,8 +57,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
-			var oracleDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" );
-			oracleDbTypeProperty.SetValue( parameter, Enum.Parse( factory.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), dbTypeString ), null );
+			var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" );
+			mySqlDbTypeProperty.SetValue( parameter, Enum.Parse( factory.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), dbTypeString ), null );
 		}
 	}
 }
