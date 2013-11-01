@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class FormItemStatics {
 		private const string validationListParamDocComment =
-			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's Post-Back Data Modification.";
+			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's data update.";
 
 		internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {
 			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters, instead of
