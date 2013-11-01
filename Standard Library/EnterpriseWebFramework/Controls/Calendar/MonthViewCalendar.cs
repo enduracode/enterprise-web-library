@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -148,9 +147,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					autoPostBack: true );
 			jumpList.Width = JumpListWidth;
 			var numIntervals = 0;
-			EwfPage.Instance.PostBackDataModification.AddTopValidationMethod(
-				( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
-			EwfPage.Instance.PostBackDataModification.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
+			EwfPage.Instance.DataUpdate.AddTopValidationMethod( ( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
+			EwfPage.Instance.DataUpdate.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
 			var previousLink = new PostBackButton( new DataModification(),

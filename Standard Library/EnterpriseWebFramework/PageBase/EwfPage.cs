@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private Control contentContainer;
-		private readonly DataModification postBackDataModification = new DataModification();
+		private readonly DataModification dataUpdate = new DataModification();
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
@@ -234,8 +234,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				formValueHash = newFormValueHash;
 			}
 			else {
-				// This logic can go anywhere between here and the first EH method call, which is in OnLoad. It's convenient to have it here since it should only run on
-				// post backs and so it can be inside the else block.
 				if( isEventPostBack && !( FindControl( Request.Form[ "__EVENTTARGET" ] ) is IPostBackEventHandler ) ) {
 					requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
 
@@ -244,8 +242,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 			}
 
-			if( postBackDataModification.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
-				ExecuteDataModification( postBackDataModification, null );
+			if( dataUpdate.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
+				ExecuteDataModification( dataUpdate, null );
 
 			return null;
 		}
@@ -466,17 +464,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the page's Post-Back Data Modification (PBDM), which executes on every post back. The PBDM executes prior to the post back event's data
-		/// modification and handler if they exist. WARNING: Do *not* use the PBDM for modifications that should happen as a result of the post back event, e.g.
-		/// adding a new item to the database when a button is clicked. There are two reasons for this. First, there may be other post back controls such as buttons
-		/// or lookup boxes on the page, any of which could cause the PBDM to execute. Second, the PBDM currently only runs if form controls were modified, which
-		/// would not be the case if a user clicks the button on an add item page before entering any data.
+		/// Gets the page's data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
+		/// modifications that should happen because of a specific post-back action, e.g. adding a new item to the database when a button is clicked. There are two
+		/// reasons for this. First, there may be other post-back controls such as buttons or lookup boxes on the page, any of which could also cause the update to
+		/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item
+		/// page before entering any data.
 		/// </summary>
-		public DataModification PostBackDataModification { get { return postBackDataModification; } }
+		public DataModification DataUpdate { get { return dataUpdate; } }
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use DataUpdate instead." ) ]
+		public DataModification PostBackDataModification { get { return DataUpdate; } }
 
 		/// <summary>
-		/// Standard Library use only. Gets whether the page forces post backs when links are clicked.
+		/// Gets whether the page forces a post-back when a link is clicked.
 		/// </summary>
+		public virtual bool IsAutoDataUpdater { get { return IsAutoDataModifier; } }
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use IsAutoDataUpdater instead." ) ]
 		public virtual bool IsAutoDataModifier { get { return false; } }
 
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
@@ -842,8 +846,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					resetPage();
 				}
 
-				// If the redirect destination is the current page, but with different query parameters, save page state and scroll position in session state until the
-				// next request.
+				// If the redirect destination is the current page, but with different query parameters, save request state in session state until the next request.
 				if( redirectInfo.GetType() == InfoAsBaseType.GetType() )
 					StandardLibrarySessionState.Instance.EwfPageRequestState = requestState.EwfPageRequestState;
 

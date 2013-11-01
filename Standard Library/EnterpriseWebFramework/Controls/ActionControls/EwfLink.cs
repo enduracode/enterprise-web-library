@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
@@ -170,6 +169,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
 
-		private bool isPostBackButton { get { return EwfPage.Instance.IsAutoDataModifier && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; } }
+		private bool isPostBackButton {
+			get { return EwfPage.Instance.IsAutoDataUpdater && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; }
+		}
 	}
 }

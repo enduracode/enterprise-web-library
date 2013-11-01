@@ -70,6 +70,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				                                 } ) );
 		}
 
-		public override bool IsAutoDataModifier { get { return true; } }
+		public override bool IsAutoDataUpdater { get { return true; } }
 	}
 }

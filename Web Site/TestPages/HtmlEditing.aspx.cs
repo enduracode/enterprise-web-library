@@ -16,8 +16,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				FormItem.Create( "",
 				                 new HtmlBlockEditor( null, id => { }, out mod ),
-				                 validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), PostBackDataModification ) )
-				        .ToControl() );
+				                 validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
 		}
 	}
 }

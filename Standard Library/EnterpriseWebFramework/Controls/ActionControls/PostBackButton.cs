@@ -54,8 +54,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a post back button. You may pass null for the clickHandler.
 		/// </summary>
 		public PostBackButton( DataModification dataModification, Action clickHandler, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true ) {
-			if( dataModification == EwfPage.Instance.PostBackDataModification )
-				throw new ApplicationException( "The post back data modification should only be executed by the framework." );
+			if( dataModification == EwfPage.Instance.DataUpdate )
+				throw new ApplicationException( "The page's data update should only be executed by the framework." );
 			this.dataModification = dataModification;
 
 			ClickHandler = clickHandler;
