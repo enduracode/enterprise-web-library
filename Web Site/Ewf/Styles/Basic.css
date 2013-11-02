@@ -133,7 +133,7 @@ ewfDatePicker, ewfTimePicker {
 ewfDateAndTimePicker {
 	max-width: 15em;
 }
-.fa-calendar {
+.fa-calendar, .fa-clock-o {
 	font-size: 1.4em;
 }
 
