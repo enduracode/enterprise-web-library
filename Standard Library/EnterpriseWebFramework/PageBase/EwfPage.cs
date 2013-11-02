@@ -376,7 +376,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
 
-			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css", "" );
+			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
 
