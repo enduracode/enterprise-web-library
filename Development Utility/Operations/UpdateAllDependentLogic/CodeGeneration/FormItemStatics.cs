@@ -41,10 +41,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
-			                      new[] { new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool?", "suggestSpellCheck", "null" ) },
+			                      new[]
+				                      {
+					                      new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool", "readOnly", "false" ),
+					                      new CSharpParameter( "bool?", "suggestSpellCheck", "null" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+				                      },
 			                      new CSharpParameter[ 0 ],
-			                      "new EwfTextBox( v, suggestSpellCheck: suggestSpellCheck ) { " +
-			                      ( field.Size.HasValue ? "MaxCharacters = " + field.Size.Value + ", " : "" ) + "Rows = textBoxRows }",
+			                      "new EwfTextBox( v, rows: textBoxRows, " + ( field.Size.HasValue ? "maxLength: " + field.Size.Value + ", " : "" ) +
+			                      "readOnly: readOnly, suggestSpellCheck: suggestSpellCheck, postBack: postBack, autoPostBack: autoPostBack )",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
 			                      "true" );
@@ -56,9 +61,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
+			                      new[]
+				                      {
+					                      new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+				                      },
 			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter[ 0 ],
-			                      "new EwfTextBox( v )" + ( field.Size.HasValue ? " { MaxCharacters = " + field.Size.Value + " }" : "" ),
+			                      "new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
+			                      ", readOnly: readOnly, postBack: postBack, autoPostBack: autoPostBack )",
 			                      "validator.GetEmailAddress( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) + " )",
 			                      "true" );
@@ -70,9 +80,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
-			                      new CSharpParameter[ 0 ],
+			                      new[]
+				                      {
+					                      new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+				                      },
 			                      new[] { new CSharpParameter( "bool", "allowExtension", "true" ), new CSharpParameter( "bool", "allowSurroundingGarbage", "false" ) },
-			                      "new EwfTextBox( v )" + ( field.Size.HasValue ? " { MaxCharacters = " + field.Size.Value + " }" : "" ),
+			                      "new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
+			                      ", readOnly: readOnly, postBack: postBack, autoPostBack: autoPostBack )",
 			                      "validator.GetPhoneNumber( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowExtension, allowEmpty, allowSurroundingGarbage )",
 			                      "true" );
 			writeFormItemGetters( writer,
@@ -83,9 +98,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "\"\"",
 			                      new CSharpParameter[ 0 ],
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
+			                      new[]
+				                      {
+					                      new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+				                      },
 			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter[ 0 ],
-			                      "new EwfTextBox( v )" + ( field.Size.HasValue ? " { MaxCharacters = " + field.Size.Value + " }" : "" ),
+			                      "new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
+			                      ", readOnly: readOnly, postBack: postBack, autoPostBack: autoPostBack )",
 			                      "validator.GetUrl( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
 			                      "true" );
@@ -249,9 +269,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      "null",
 			                      new CSharpParameter[ 0 ],
 			                      new CSharpParameter[ 0 ],
-			                      new CSharpParameter[ 0 ],
+			                      new[]
+				                      {
+					                      new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+				                      },
 			                      optionalValidationParams,
-			                      "new EwfTextBox( v.ObjectToString( true ) )",
+			                      "new EwfTextBox( v.ObjectToString( true ), readOnly: readOnly, postBack: postBack, autoPostBack: autoPostBack )",
 			                      validationMethodExpressionOrBlock,
 			                      "true" );
 		}
