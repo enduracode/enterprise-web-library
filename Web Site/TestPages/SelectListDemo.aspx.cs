@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private DataModification dm;
 
 		protected override void loadData() {
-			dm = new DataModification();
+			dm = PostBack.CreateFull();
 			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
 			                          FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
 			                          getSelect2UpgradeTestingInfo(),

@@ -392,13 +392,6 @@
     <Compile Include="TestPages\SubFolder\New.aspx.designer.cs">
       <DependentUpon>New.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\TestPad.aspx.cs">
-      <DependentUpon>TestPad.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\TestPad.aspx.designer.cs">
-      <DependentUpon>TestPad.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\TestService.aspx.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -752,7 +745,6 @@
     <Content Include="TestPages\SubFolder\EntitySetup.ascx" />
     <Content Include="TestPages\SubFolder\General.aspx" />
     <Content Include="TestPages\SubFolder\New.aspx" />
-    <Content Include="TestPages\TestPad.aspx" />
     <Content Include="TestPages\TestService.aspx" />
     <Content Include="Web.config" />
     <Content Include="Ewf\ContactUs\Page.aspx" />

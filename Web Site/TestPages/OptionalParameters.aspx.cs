@@ -20,8 +20,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			fib.AddFormItems( parametersModification.GetField1TextFormItem( true ), parametersModification.GetField2TextFormItem( true ) );
 			ph.AddControlsReturnThis( fib );
 
-			ph.AddControlsReturnThis( new PostBackButton( new DataModification(),
-			                                              () => EhRedirect( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) )
+			ph.AddControlsReturnThis( new PostBackButton( PostBack.CreateFull(), () => EhRedirect( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) )
 				{
 					UsesSubmitBehavior = false,
 					ActionControlStyle = new ButtonActionControlStyle( "Navigate and change Field 2" )
