@@ -14,16 +14,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var dm = PostBack.CreateFull();
 			var fib = FormItemBlock.CreateFormItemTable();
 
 			newPassword = new DataValue<string>();
 			fib.AddFormItems( FormItem.Create( "New password",
-			                                   new EwfTextBox( "" ) { MasksCharacters = true },
+			                                   new EwfTextBox( "", masksCharacters: true ),
 			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), dm ) ) );
 			var newPasswordConfirm = new DataValue<string>();
 			fib.AddFormItems( FormItem.Create( "Re-type new password",
-			                                   new EwfTextBox( "" ) { MasksCharacters = true },
+			                                   new EwfTextBox( "", masksCharacters: true ),
 			                                   validationGetter:
 				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );
 			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );

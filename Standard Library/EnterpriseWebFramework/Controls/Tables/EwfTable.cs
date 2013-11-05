@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -171,6 +170,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="hideIfEmpty">Set to true if you want this table to hide itself if it has no content rows.</param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -184,13 +184,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
-		public static EwfTable Create( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "",
-		                               string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null,
-		                               IEnumerable<EwfTableField> fields = null, IEnumerable<EwfTableItem> headItems = null,
-		                               DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false ) {
+		public static EwfTable Create( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
+		                               string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
+		                               IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
+		                               IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
+		                               bool disableEmptyFieldDetection = false ) {
 			return new EwfTable( hideIfEmpty,
 			                     style,
 			                     classes,
+			                     postBackIdBase,
 			                     caption,
 			                     subCaption,
 			                     allowExportToExcel,
@@ -210,6 +212,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="hideIfEmpty">Set to true if you want this table to hide itself if it has no content rows.</param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -225,13 +228,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="items">The items.</param>
 		public static EwfTable CreateWithItems( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
-		                                        string caption = "", string subCaption = "", bool allowExportToExcel = false,
+		                                        string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
 		                                        IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
 		                                        IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
 		                                        bool disableEmptyFieldDetection = false, IEnumerable<Func<EwfTableItem>> items = null ) {
 			return new EwfTable( hideIfEmpty,
 			                     style,
 			                     classes,
+			                     postBackIdBase,
 			                     caption,
 			                     subCaption,
 			                     allowExportToExcel,
@@ -249,6 +253,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="hideIfEmpty">Set to true if you want this table to hide itself if it has no content rows.</param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -264,13 +269,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="itemGroups">The item groups.</param>
 		public static EwfTable CreateWithItemGroups( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
-		                                             string caption = "", string subCaption = "", bool allowExportToExcel = false,
+		                                             string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
 		                                             IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
 		                                             IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
 		                                             bool disableEmptyFieldDetection = false, IEnumerable<EwfTableItemGroup> itemGroups = null ) {
 			return new EwfTable( hideIfEmpty,
 			                     style,
 			                     classes,
+			                     postBackIdBase,
 			                     caption,
 			                     subCaption,
 			                     allowExportToExcel,
@@ -285,6 +291,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly bool hideIfEmpty;
 		private readonly EwfTableStyle style;
 		private readonly ReadOnlyCollection<string> classes;
+		private readonly string postBackIdBase;
 		private readonly string caption;
 		private readonly string subCaption;
 		private readonly bool allowExportToExcel;
@@ -296,12 +303,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<EwfTableItemGroup> itemGroups;
 
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
-		private EwfTable( bool hideIfEmpty, EwfTableStyle style, IEnumerable<string> classes, string caption, string subCaption, bool allowExportToExcel,
-		                  IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields, IEnumerable<EwfTableItem> headItems,
-		                  DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IEnumerable<EwfTableItemGroup> itemGroups ) {
+		private EwfTable( bool hideIfEmpty, EwfTableStyle style, IEnumerable<string> classes, string postBackIdBase, string caption, string subCaption,
+		                  bool allowExportToExcel, IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields,
+		                  IEnumerable<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection,
+		                  IEnumerable<EwfTableItemGroup> itemGroups ) {
 			this.hideIfEmpty = hideIfEmpty;
 			this.style = style;
 			this.classes = ( classes ?? new string[ 0 ] ).ToList().AsReadOnly();
+			this.postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
 			this.caption = caption;
 			this.subCaption = subCaption;
 			this.allowExportToExcel = allowExportToExcel;
@@ -406,11 +415,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( CurrentItemLimit < itemCount ) {
 				var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
 				var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
-				var button = new PostBackButton( new DataModification(),
-				                                 () =>
-				                                 EwfPage.Instance.EhExecute( () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
-				                                 new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-				                                 false );
+				var button =
+					new PostBackButton(
+						PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+						                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
+						new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+						usesSubmitBehavior: false );
 				var item = new EwfTableItem( new EwfTableCell( button ) { FieldSpan = fields.Length } );
 				var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
 				Controls.Add(
@@ -453,10 +463,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 			if( itemLimit == (DataRowLimit)CurrentItemLimit )
 				return text.GetLiteralControl();
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhExecute( () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
-			                           new TextActionControlStyle( text ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
+					                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
+					new TextActionControlStyle( text ),
+					false );
 		}
 
 		private EwfTableItem[] getItemActionsItem( int fieldCount ) {

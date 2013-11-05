@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.JavaScriptWriting;
@@ -32,18 +33,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
-	public class EwfTextBox: WebControl, ControlTreeDataLoader, IPostBackEventHandler, INamingContainer, FormControl, ControlWithJsInitLogic,
-		ControlWithCustomFocusLogic {
-		private readonly FormValue<string> formValue;
-		private readonly TextBox textBox = new TextBox();
-		private bool masksCharacters;
-		private PageInfo autoCompleteService;
-		private AutoCompleteOption autoCompleteOption;
-		private PostBackButton defaultSubmitButton;
-		private string watermarkText = "";
-		private readonly Action<string> postBackHandler;
+	public class EwfTextBox: WebControl, ControlTreeDataLoader, INamingContainer, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+		internal static void AddTextareaValue( Control textarea, string value ) {
+			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
+			// does in their System.Web.UI.WebControls.TextBox implementation.
+			textarea.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( Environment.NewLine + value ) } );
+		}
+
+		private int rows;
+		private readonly bool masksCharacters;
+		private int? maxLength;
+		private readonly bool readOnly;
 		private readonly bool disableBrowserAutoComplete;
 		private readonly bool? suggestSpellCheck;
+		private readonly FormValue<string> formValue;
+		private PostBack postBack;
+		private readonly bool autoPostBack;
+		private PageInfo autoCompleteService;
+		private AutoCompleteOption autoCompleteOption;
+		private string watermarkText = "";
+
+		private WebControl textBox;
 
 		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
@@ -57,71 +67,49 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		internal string TextBoxClientId { get { return textBox.ClientID; } }
 
-		/// <summary>
-		/// Gets or sets the maximum number of characters that can be entered in this text box.
-		/// </summary>
-		public int MaxCharacters { get { return textBox.MaxLength; } set { textBox.MaxLength = value; } }
+		[ Obsolete( "Guaranteed through 31 January 2014. Please specify via constructor." ) ]
+		public int MaxCharacters { get { return maxLength ?? 0; } set { maxLength = value; } }
 
 		/// <summary>
-		/// Creates a text box. Do not pass null for value.
+		/// Creates a text box.
 		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="postBackHandler">The handler that will be executed when the user hits Enter on the text box or selects an autocomplete item. The parameter
-		/// is the post back value.</param>
+		/// <param name="value">Do not pass null.</param>
+		/// <param name="rows">The number of rows in the text box.</param>
+		/// <param name="masksCharacters">Pass true to mask characters entered in the text box. Has no effect when there is more than one row in the text box.
+		/// </param>
+		/// <param name="maxLength">The maximum number of characters that can be entered in this text box.</param>
+		/// <param name="readOnly">Pass true to prevent the contents of the text box from being changed.</param>
 		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
 		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox does spell check multi-line text
 		/// boxes. Setting this parameter to a value will set the spellcheck attribute on the text box to enable/disable spell checking, if the user agent supports
 		/// it.</param>
-		public EwfTextBox( string value, Action<string> postBackHandler = null, bool disableBrowserAutoComplete = false, bool? suggestSpellCheck = null ) {
+		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the text box or selects an auto-complete item.</param>
+		/// <param name="autoPostBack">Pass true to cause an automatic post-back when the text box loses focus.</param>
+		public EwfTextBox( string value, int rows = 1, bool masksCharacters = false, int? maxLength = null, bool readOnly = false,
+		                   bool disableBrowserAutoComplete = false, bool? suggestSpellCheck = null, PostBack postBack = null, bool autoPostBack = false ) {
+			this.rows = rows;
+			this.masksCharacters = masksCharacters;
+			this.maxLength = maxLength;
+			this.readOnly = readOnly;
+			this.disableBrowserAutoComplete = disableBrowserAutoComplete;
+			this.suggestSpellCheck = suggestSpellCheck;
+
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
 			formValue = new FormValue<string>( () => value,
-			                                   () => this.IsOnPage() ? textBox.UniqueID : "",
+			                                   () => this.IsOnPage() ? UniqueID : "",
 			                                   v => v,
 			                                   rawValue =>
 			                                   rawValue != null
 				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
 				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
-			textBox.ID = "theTextBox";
-			base.Controls.Add( textBox );
-			Rows = 1;
-			this.postBackHandler = postBackHandler;
-			this.disableBrowserAutoComplete = disableBrowserAutoComplete;
-			this.suggestSpellCheck = suggestSpellCheck;
+
+			this.postBack = postBack;
+			this.autoPostBack = autoPostBack;
 		}
 
-		/// <summary>
-		/// Sets whether an automatic postback occurs when the text box loses focus.
-		/// </summary>
-		public bool AutoPostBack { set { textBox.AutoPostBack = value; } }
-
-		/// <summary>
-		/// Sets whether the contents of the text box can be changed.
-		/// </summary>
-		public bool ReadOnly { set { textBox.ReadOnly = value; } }
-
-		/// <summary>
-		/// Gets or sets the number of rows in the text box.
-		/// </summary>
-		public int Rows {
-			get { return textBox.Rows; }
-			set {
-				textBox.Rows = value;
-				textBox.TextMode = value > 1 ? TextBoxMode.MultiLine : ( masksCharacters ? TextBoxMode.Password : TextBoxMode.SingleLine );
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets whether characters entered in the text box are masked. Has no effect when there is more than one row in the text box.
-		/// </summary>
-		public bool MasksCharacters {
-			get { return masksCharacters; }
-			set {
-				masksCharacters = value;
-				if( Rows == 1 )
-					textBox.TextMode = masksCharacters ? TextBoxMode.Password : TextBoxMode.SingleLine;
-			}
-		}
+		[ Obsolete( "Guaranteed through 31 January 2014. Please specify via constructor." ) ]
+		public int Rows { get { return rows; } set { rows = value; } }
 
 		/// <summary>
 		/// Sets this text box up for AJAX auto-complete.
@@ -135,21 +123,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Allows for adding custom JavaScript event scripts to the text box.
 		/// </summary>
 		public void AddJavaScriptEventScript( string jsEventConstant, string script ) {
-			textBox.AddJavaScriptEventScript( jsEventConstant, script );
-		}
-
-		/// <summary>
-		/// Assigns this EwfTextBox to submit the given PostBackButton. This will disable the button's submit behavior. Do not pass null. This method will have no
-		/// effect if there is a post back handler for this text box.
-		/// NOTE: This should probably eventually work with other controls as an extension method.
-		/// </summary>
-		public void SetDefaultSubmitButton( PostBackButton pbb ) {
-			defaultSubmitButton = pbb;
-			// NOTE: Would it make sense to have support for ControlTreeDataLoader.AddLoadDataAction( theCodeThatJustGotMoved) so that the code appears in the method
-			// it supports instead of getting moved to a big switch statement in LoadData?
-			// Yes it would. I think we should make ControlTreeDataLoader an abstract class with an AddLoadDataAction method, a member containing all of the actions, and then have
-			// the place currently calling load data call all of the load data methods (or have ControlTreeDataLoader somehow handle it for it).
-			// This will eliminate a lot of member variables in controls and a lot of switch statements in LoadData methods.
+			PreRender += delegate { textBox.AddJavaScriptEventScript( jsEventConstant, script ); };
 		}
 
 		/// <summary>
@@ -161,41 +135,68 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
+			var isTextarea = rows > 1;
+			textBox = new WebControl( isTextarea ? HtmlTextWriterTag.Textarea : HtmlTextWriterTag.Input );
 			PreRender += delegate {
+				if( !isTextarea )
+					textBox.Attributes.Add( "type", masksCharacters ? "password" : "text" );
+				textBox.Attributes.Add( "name", UniqueID );
+				if( isTextarea )
+					textBox.Attributes.Add( "rows", rows.ToString() );
+				if( maxLength.HasValue )
+					textBox.Attributes.Add( "maxlength", maxLength.Value.ToString() );
+				if( readOnly )
+					textBox.Attributes.Add( "readonly", "readonly" );
+				if( disableBrowserAutoComplete || autoCompleteService != null )
+					textBox.Attributes.Add( "autocomplete", "off" );
+				if( suggestSpellCheck.HasValue )
+					textBox.Attributes.Add( "spellcheck", suggestSpellCheck.Value.ToString().ToLower() );
+
 				var value = formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-				textBox.Text = watermarkText.Any() && !value.Any() ? watermarkText : value;
+				var valueOrWatermark = watermarkText.Any() && !value.Any() ? watermarkText : value;
+				if( isTextarea )
+					AddTextareaValue( textBox, valueOrWatermark );
+				else if( !masksCharacters )
+					textBox.Attributes.Add( "value", valueOrWatermark );
 			};
+			Controls.Add( textBox );
 
 			if( watermarkText.Any() ) {
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onfocus, "if( value == '" + watermarkText + "' ) value = ''" );
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onblur, "if( value == '' ) value = '" + watermarkText + "'" );
 				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(),
 				                                                         UniqueID + "watermark",
-				                                                         "$( '#" + TextBoxClientId + "' ).filter( function() { return this.value == '" + watermarkText +
+				                                                         "$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText +
 				                                                         "'; } ).val( '' )" );
 			}
 
-			if( postBackHandler != null || defaultSubmitButton != null )
-				EwfPage.Instance.MakeControlPostBackOnEnter( this, postBackHandler != null ? this as Control : defaultSubmitButton );
+			var postBackOnEnter = postBack != null || autoPostBack ||
+			                      ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
+			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
+				postBack = EwfPage.Instance.DataUpdatePostBack;
 
-			if( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect )
-				textBox.AutoPostBack = true;
+			if( postBack != null ) {
+				EwfPage.Instance.AddPostBack( postBack );
+				PreRender += delegate {
+					if( postBackOnEnter )
+						PostBackButton.MakeControlPostBackOnEnter( this, postBack );
+					if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
+						// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
+						textBox.AddJavaScriptEventScript( JsWritingMethods.onchange,
+						                                  "setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
+					}
+				};
+			}
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
-
-			if( disableBrowserAutoComplete || autoCompleteService != null )
-				textBox.Attributes.Add( "autocomplete", "off" );
-
-			if( suggestSpellCheck.HasValue )
-				textBox.Attributes.Add( "spellcheck", suggestSpellCheck.Value.ToString().ToLower() );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			var script = new StringBuilder();
 
 			if( watermarkText.Any() ) {
-				var restorationStatement = "$( '#" + TextBoxClientId + "' ).filter( function() { return this.value == ''; } ).val( '" + watermarkText + "' );";
+				var restorationStatement = "$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == ''; } ).val( '" + watermarkText + "' );";
 
 				// The first line is for bfcache browsers; the second is for all others. See http://stackoverflow.com/q/1195440/35349.
 				script.Append( "$( window ).on( 'pagehide', function() { " + restorationStatement + " } );" );
@@ -211,15 +212,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
 				autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteService.GetUrl() + "'" ) );
 
-				if( autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect || autoCompleteOption == AutoCompleteOption.PostBackOnItemSelect ) {
-					autocompleteOptions.Add( Tuple.Create( "select",
-					                                       "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( TextBoxClientId,
-					                                                                                                                        PostBackButton.GetPostBackScript(
-						                                                                                                                        this,
-						                                                                                                                        postBackHandler != null ) ) ) );
+				if( autoCompleteOption != AutoCompleteOption.NoPostBack ) {
+					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( textBox.ClientID,
+					                                                                                               PostBackButton.GetPostBackScript( postBack ) );
+					autocompleteOptions.Add( Tuple.Create( "select", handler ) );
 				}
 
-				script.Append( @"$( '#" + TextBoxClientId +
+				script.Append( @"$( '#" + textBox.ClientID +
 				               "' ).autocomplete( {{ {0} }} );".FormatWith(
 					               autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
 			}
@@ -241,11 +240,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return formValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			if( postBackHandler != null )
-				postBackHandler( GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

@@ -6,12 +6,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		protected override void loadData() {
 			ph.AddControlsReturnThis( ControlStack.CreateWithControls( true,
 			                                                           new PostBackButton(
-				                                                           new DataModification( firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
+				                                                           PostBack.CreateFull( id: "sendHealthCheck",
+				                                                                                firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
 				                                                           new ButtonActionControlStyle( "Send Health Check" ),
 				                                                           usesSubmitBehavior: false ),
-			                                                           new PostBackButton( new DataModification( firstModificationMethod: throwException ),
-			                                                                               new ButtonActionControlStyle( "Throw Unhandled Exception" ),
-			                                                                               usesSubmitBehavior: false ) ) );
+			                                                           new PostBackButton(
+				                                                           PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ),
+				                                                           new ButtonActionControlStyle( "Throw Unhandled Exception" ),
+				                                                           usesSubmitBehavior: false ) ) );
 		}
 
 		private void throwException() {

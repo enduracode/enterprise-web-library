@@ -8,4 +8,8 @@
 		/// </summary>
 		void AddValidations( BasicValidationList validationList );
 	}
+
+	internal interface ValidationListInternal {
+		void AddValidation( Validation validation );
+	}
 }

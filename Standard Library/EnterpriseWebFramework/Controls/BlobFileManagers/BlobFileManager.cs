@@ -1,7 +1,6 @@
 using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
 
@@ -48,10 +47,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var controlStack = ControlStack.Create( true );
 			if( file != null ) {
-				var download = new PostBackButton( new DataModification(),
-				                                   () =>
-				                                   EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( // Refresh the file here in case a new one was uploaded on the same post back
-					                                                                             () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId ) ),
+				var download = new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+				                                                        actionGetter: () => {
+					                                                        // Refresh the file here in case a new one was uploaded on the same post-back.
+					                                                        return
+						                                                        new PostBackAction(
+							                                                        new FileCreator( () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId ) );
+				                                                        } ),
 				                                   new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
 				                                   false );
 				controlStack.AddControls( download );

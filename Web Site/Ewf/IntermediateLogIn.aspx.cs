@@ -18,13 +18,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var dm = PostBack.CreateFull();
 
 			ph.AddControlsReturnThis(
 				FormItemBlock.CreateFormItemTable(
 					formItems:
 						FormItem.Create( "Enter your password for this non-live installation",
-						                 new EwfTextBox( "" ) { MasksCharacters = true },
+						                 new EwfTextBox( "", masksCharacters: true ),
 						                 validationGetter: control => new Validation( ( pbv, validator ) => {
 							                 // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
 							                 var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;

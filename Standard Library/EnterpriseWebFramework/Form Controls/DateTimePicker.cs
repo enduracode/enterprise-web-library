@@ -71,7 +71,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "",
-			                          disableBrowserAutoComplete: true ) { AutoPostBack = autoPostBack };
+			                          disableBrowserAutoComplete: true,
+			                          autoPostBack: autoPostBack );
 			Controls.Add( textBox );
 
 			min = DateTime.MinValue;

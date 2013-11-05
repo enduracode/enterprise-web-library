@@ -120,10 +120,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var file = GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhModifyDataAndSendFile( FileCreator.CreateFromFileCollection( fileCollectionId ) ),
-			                           new TextActionControlStyle( labelOverride ?? file.FileName ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+					                     actionGetter: () => new PostBackAction( FileCreator.CreateFromFileCollection( fileCollectionId ) ) ),
+					new TextActionControlStyle( labelOverride ?? file.FileName ),
+					false );
 		}
 
 		/// <summary>
@@ -136,10 +138,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var file = SystemProvider.GetFile( fileId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( fileId ) ),
-			                           new TextActionControlStyle( labelOverride ?? file.FileName ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ), actionGetter: () => new PostBackAction( new FileCreator( fileId ) ) ),
+					new TextActionControlStyle( labelOverride ?? file.FileName ),
+					false );
 		}
 
 		/// <summary>

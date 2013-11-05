@@ -8,7 +8,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>
-	public class EwfLink: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
+	public class EwfLink: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
+		internal static PostBack GetLinkPostBack( PageInfo destination ) {
+			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
+			return EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) );
+		}
+
 		/// <summary>
 		/// Creates a link.
 		/// </summary>
@@ -128,8 +133,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Attributes.Add( "href", this.GetClientUrl( url ) );
 			}
 
-			if( isPostBackButton && url.Any() )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( this, true ) );
+			if( isPostBackButton && url.Any() ) {
+				var postBack = GetLinkPostBack( destinationPageInfo );
+				EwfPage.Instance.AddPostBack( postBack );
+				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) );
+			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );
 			if( popUpWindowSettings != null && url.Any() )
@@ -158,10 +166,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return ActionControlStyle.GetJsInitStatements( this );
-		}
-
-		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.EhRedirect( destinationPageInfo );
 		}
 
 		/// <summary>

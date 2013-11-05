@@ -12,7 +12,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var dm = PostBack.CreateFull();
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password",
 			                                                           new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( es.info.DestinationUrl ) ) ) ) );
 

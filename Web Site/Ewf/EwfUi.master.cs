@@ -431,7 +431,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
 				else if( EwfPage.Instance.IsAutoDataUpdater )
-					controls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ) ) );
+					controls.Add( new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( "Update Now" ) ) );
 			}
 			else {
 				if( EwfPage.Instance.IsAutoDataUpdater )

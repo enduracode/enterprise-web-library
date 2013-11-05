@@ -14,8 +14,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		protected override void loadData() {
 			provider = (FormsAuthCapableUserManagementProvider)UserManagementStatics.SystemProvider;
-			var logInDm = new DataModification();
-			var newPasswordDm = new DataModification();
+			var logInDm = PostBack.CreateFull();
+			var newPasswordDm = PostBack.CreateFull( id: "newPw" );
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var password = new DataValue<string>();
 			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
 			                                           FormItem.Create( "",
-			                                                            new EwfTextBox( "" ) { MasksCharacters = true },
+			                                                            new EwfTextBox( "", masksCharacters: true ),
 			                                                            validationGetter:
 				                                                            control =>
 				                                                            new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInDm ) )

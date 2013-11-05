@@ -16,10 +16,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Creates a script that posts the page back and executes the specified method. Do not pass null for method.
+		/// Creates a script that performs a post-back.
 		/// </summary>
-		public static ClickScript CreatePostBackScript( Action method ) {
-			return new ClickScript { method = method };
+		/// <param name="postBack">Do not pass null.</param>
+		public static ClickScript CreatePostBackScript( PostBack postBack ) {
+			return new ClickScript { postBack = postBack };
 		}
 
 		/// <summary>
@@ -30,36 +31,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private PageInfo page;
-		private Action method;
+		private PostBack postBack;
 		private string script = "";
 
 		private ClickScript() {}
 
 		internal void SetUpClickableControl( WebControl clickableControl ) {
-			if( page == null && method == null && script == "" )
+			if( page == null && postBack == null && script == "" )
 				return;
 
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
 			if( page != null && EwfPage.Instance.IsAutoDataUpdater ) {
-				var pageCopy = page;
+				postBack = EwfLink.GetLinkPostBack( page );
 				page = null;
-				method = () => EwfPage.Instance.EhRedirect( pageCopy );
 			}
 
 			Func<string> scriptGetter;
 			if( page != null )
 				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( page.GetUrl() ) + "'; return false";
-			else if( method != null ) {
-				var externalHandler = new ExternalPostBackEventHandler( method );
-
-				// NOTE: Remove this hack when DynamicTable is gone.
-				if( clickableControl is TableRow )
-					clickableControl.Parent.Parent.Controls.Add( externalHandler );
-				else
-					clickableControl.Controls.Add( externalHandler );
-
-				scriptGetter = () => PostBackButton.GetPostBackScript( externalHandler, true );
+			else if( postBack != null ) {
+				EwfPage.Instance.AddPostBack( postBack );
+				scriptGetter = () => PostBackButton.GetPostBackScript( postBack );
 			}
 			else
 				scriptGetter = () => script;

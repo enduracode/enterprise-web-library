@@ -16,7 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private string emailText;
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var dm = PostBack.CreateFull();
 
 			ph.AddControlsReturnThis(
 				FormItem.Create( "You may report any problems, make suggestions, or ask for help here.",
@@ -24,8 +24,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				                 validationGetter:
 					                 control =>
 					                 new Validation(
-						                 ( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ), dm ) )
-				        .ToControl() );
+						                 ( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ),
+						                 dm ) ).ToControl() );
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Send", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
 

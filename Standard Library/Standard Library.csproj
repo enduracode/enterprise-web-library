@@ -167,6 +167,7 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
     <Compile Include="DataAccess\DoNotCommitException.cs" />
@@ -220,7 +221,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\Styles\TextActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\ToggleButton.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControls\ToolTipButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\AJaxLabel.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFile.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\SystemBlobFileManagementProvider.cs" />
@@ -304,7 +304,10 @@
     <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\PostBackValueDictionary.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\PostBack.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
@@ -452,7 +455,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\User.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
-    <Compile Include="ExternalPostBackEventHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\FreeFormRadioList.cs" />
     <Compile Include="Tools\CollectionTools.cs" />
     <Compile Include="Collections\ListSet.cs" />

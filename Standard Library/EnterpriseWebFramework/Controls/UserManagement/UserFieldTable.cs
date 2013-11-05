@@ -80,10 +80,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+				                                                             new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true )
 					                                                             {
-						                                                             Width = Unit.Pixel( 200 ),
-						                                                             MasksCharacters = true
+						                                                             Width = Unit.Pixel( 200 )
 					                                                             },
 				                                                             validationGetter:
 					                                                             control =>
@@ -92,10 +91,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                                    .ToCell() ) );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+				                                                             new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true )
 					                                                             {
-						                                                             Width = Unit.Pixel( 200 ),
-						                                                             MasksCharacters = true
+						                                                             Width = Unit.Pixel( 200 )
 					                                                             },
 				                                                             validationGetter:
 					                                                             control =>

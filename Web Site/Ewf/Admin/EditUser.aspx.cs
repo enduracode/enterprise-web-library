@@ -26,11 +26,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		protected override void loadData() {
 			if( info.UserId.HasValue ) {
 				EwfUiStatics.SetPageActions( new ActionButtonSetup( "Delete User",
-				                                                    new PostBackButton( new DataModification( firstModificationMethod: deleteUser ),
+				                                                    new PostBackButton( PostBack.CreateFull( id: "delete", firstModificationMethod: deleteUser ),
 				                                                                        () => EhRedirect( new SystemUsers.Info( es.info ) ) ) ) );
 			}
 
-			var dm = new DataModification();
+			var dm = PostBack.CreateFull();
 
 			userFieldTable = new UserFieldTable();
 			userFieldTable.LoadData( info.UserId, dm );

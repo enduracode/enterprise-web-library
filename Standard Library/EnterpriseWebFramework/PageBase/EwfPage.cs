@@ -10,11 +10,9 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.JavaScriptWriting;
 using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
@@ -25,7 +23,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A System.Web.UI.Page that contains special Red Stapler Enterprise Web Framework logic. Requires that view state and session state be enabled.
 	/// </summary>
 	public abstract class EwfPage: Page {
-		internal const string EventPostBackArgument = "event";
+		// This string is duplicated in the JavaScript file.
+		private const string postBackHiddenFieldName = "ewfPostBack";
+
+		internal const string ButtonElementName = "ewfButton";
 
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
@@ -41,13 +42,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private Control contentContainer;
-		private readonly DataModification dataUpdate = new DataModification();
+		private readonly BasicDataModification dataUpdate = new BasicDataModification();
+		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
+		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
-		private readonly List<Tuple<WebControl, string, Control>> postBackOnEnterControlsAndPredicatesAndTargets = new List<Tuple<WebControl, string, Control>>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
+		internal PostBack SubmitButtonPostBack;
 		private string formValueHash;
 		private PageInfo redirectInfo;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
@@ -212,16 +215,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
-			var eventButtonUniqueId = FindControl( Request.Form[ "__EVENTTARGET" ] ) is PostBackButton
-				                          ? Request.Form[ "__EVENTTARGET" ].ToSingleElementArray()
-				                          : new string[ 0 ];
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary( new Dictionary<string, object>() );
 			var extraPostBackValuesExist =
-				requestState.PostBackValues.AddFromRequest( Request.Form.Cast<string>().Except( webFormsHiddenFields.Concat( eventButtonUniqueId ) ),
-				                                            postBackValueKeys.Contains,
-				                                            key => Request.Form[ key ] ) |
+				requestState.PostBackValues.AddFromRequest(
+					Request.Form.Cast<string>().Except( new[] { postBackHiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
+					postBackValueKeys.Contains,
+					key => Request.Form[ key ] ) |
 				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
@@ -232,18 +233,46 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				// Update the hash variable with the value from this request since the user has now been warned that changes have been made under their feet.
 				formValueHash = newFormValueHash;
-			}
-			else {
-				if( isEventPostBack && !( FindControl( Request.Form[ "__EVENTTARGET" ] ) is IPostBackEventHandler ) ) {
-					requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
 
-					// There is no need to explicitly cancel the post back event since ASP.NET will not be able to do anything anyway if it can't find an
-					// IPostBackEventHandler that corresponds to the __EVENTTARGET.
-				}
+				return null;
 			}
 
-			if( dataUpdate.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
-				ExecuteDataModification( dataUpdate, null );
+			var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
+			var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
+			if( postBack == null ) {
+				requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
+				return null;
+			}
+
+			// Execute the page's data update.
+			if( postBack.ForcePageDataUpdate.HasValue ) {
+				executeWithDataModificationExceptionHandling(
+					() =>
+					dataUpdate.Execute( !postBack.ForcePageDataUpdate.Value,
+					                    formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+					                    handleValidationErrors ) );
+			}
+
+			var actionPostBack = postBack as ActionPostBack;
+			if( actionPostBack == null )
+				return null;
+
+			// Execute the post-back.
+			var formValuesChanged =
+				getImplementersWithinControl<FormControl>( contentContainer )
+					.Cast<FormControl>()
+					.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+			executeWithDataModificationExceptionHandling( () => actionPostBack.Execute( formValuesChanged,
+			                                                                            handleValidationErrors,
+			                                                                            postBackAction => {
+				                                                                            if( postBackAction == null )
+					                                                                            return;
+				                                                                            redirectInfo = postBackAction.Page;
+				                                                                            if( postBackAction.File != null ) {
+					                                                                            StandardLibrarySessionState.Instance.FileToBeDownloaded =
+						                                                                            postBackAction.File.CreateFile();
+				                                                                            }
+			                                                                            } ) );
 
 			return null;
 		}
@@ -292,22 +321,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				etherealControlsForJsStartUpLogic.Add( etherealControl );
 			}
 
-			var submitButtons = getSubmitButtons( this );
-			if( submitButtons.Count > 1 ) {
-				var helpfulMessage = "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
-				                     StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + ".";
-				if( AppTools.IsDevelopmentInstallation )
-					throw new ApplicationException( helpfulMessage );
-				AppTools.EmailAndLogError( helpfulMessage, null );
-			}
-			var submitButton = submitButtons.FirstOrDefault();
-
 			foreach( var i in controlTreeValidations )
 				i();
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
 				throw new ApplicationException( "Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
+
+			// Using this approach of initializing the hidden field to the submit button's post-back gives the enter key good behavior with Internet Explorer when
+			// there is one text box on the page.
+			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
 
 			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
 			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
@@ -316,16 +339,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 
 			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
-			foreach( var controlAndTarget in postBackOnEnterControlsAndPredicatesAndTargets.Where( i => i.Item3 != null || submitButton != null ) ) {
-				controlAndTarget.Item1.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
-				                                                 "if( event.which == 13 " + controlAndTarget.Item2.PrependDelimiter( " && " ) + " ) { " +
-				                                                 PostBackButton.GetPostBackScript( controlAndTarget.Item3 ?? submitButton, true ) + "; }" );
-			}
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
 
 			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
-			addJavaScriptStartUpLogic( submitButton, etherealControlsForJsStartUpLogic, !AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist );
+			addJavaScriptStartUpLogic( etherealControlsForJsStartUpLogic, !AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist );
 
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
@@ -476,6 +494,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public DataModification PostBackDataModification { get { return DataUpdate; } }
 
 		/// <summary>
+		/// Gets a post-back that updates the page's data without performing any other actions.
+		/// </summary>
+		public PostBack DataUpdatePostBack { get { return dataUpdatePostBack; } }
+
+		/// <summary>
 		/// Gets whether the page forces a post-back when a link is clicked.
 		/// </summary>
 		public virtual bool IsAutoDataUpdater { get { return IsAutoDataModifier; } }
@@ -487,6 +510,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			etherealControls.Enqueue( etherealControl );
 		}
 
+		internal void AddPostBack( PostBack postBack ) {
+			PostBack existingPostBack;
+			if( !postBacksById.TryGetValue( postBack.Id, out existingPostBack ) )
+				postBacksById.Add( postBack.Id, postBack );
+			else if( existingPostBack != postBack )
+				throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
+		}
+
+		internal PostBack GetPostBack( string id ) {
+			PostBack value;
+			return postBacksById.TryGetValue( id, out value ) ? value : null;
+		}
+
 		internal void AddFormValue( FormValue formValue ) {
 			formValues.Add( formValue );
 		}
@@ -496,15 +532,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		internal void AddDisplayLink( DisplayLink displayLink ) {
 			displayLinks.Add( displayLink );
-		}
-
-		/// <summary>
-		/// Causes the specified control to submit the form when the enter key is pressed while the control has focus. Specify null for the target to give the event
-		/// to the submit button, which you should do if you want the post back to simulate the user clicking the button. If you specify a non null target, it must
-		/// be a post back event handler. If you specify a post back button, it should not be the submit button.
-		/// </summary>
-		internal void MakeControlPostBackOnEnter( WebControl control, Control target, string predicate = "" ) {
-			postBackOnEnterControlsAndPredicatesAndTargets.Add( Tuple.Create( control, predicate, target ) );
 		}
 
 		/// <summary>
@@ -545,27 +572,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); }
 		}
 
-		private List<Control> getSubmitButtons( Control control ) {
-			var submitButtons = new List<Control>();
-			if( control.Visible &&
-			    ( ( control is PostBackButton && ( control as PostBackButton ).UsesSubmitBehavior ) || ( control is Button && ( control as Button ).UseSubmitBehavior ) ) )
-				submitButtons.Add( control );
-			foreach( Control childControl in control.Controls )
-				submitButtons.AddRange( getSubmitButtons( childControl ) );
-			return submitButtons;
-		}
-
-		private void addJavaScriptStartUpLogic( Control submitButton, IEnumerable<EtherealControl> etherealControls, bool noErrorMessagesExist ) {
-			// This gives the enter key good behavior with Internet Explorer when there is one text box on the page.
-			var eventTargetAndEventArgumentStatements = "";
-			if( submitButton != null ) {
-				// Force ASP.NET to create __EVENTTARGET and __EVENTARGUMENT hidden fields if it hasn't already.
-				PostBackButton.GetPostBackScript( submitButton, true );
-
-				eventTargetAndEventArgumentStatements = "$( 'input#__EVENTTARGET' ).val( '" + submitButton.UniqueID + "' ); $( 'input#__EVENTARGUMENT' ).val( '" +
-				                                        EventPostBackArgument + "' );";
-			}
-
+		private void addJavaScriptStartUpLogic( IEnumerable<EtherealControl> etherealControls, bool noErrorMessagesExist ) {
 			var controlInitStatements =
 				getImplementersWithinControl<ControlWithJsInitLogic>( this )
 					.Cast<ControlWithJsInitLogic>()
@@ -602,7 +609,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			                                        "jQueryDocumentReadyBlock",
 			                                        "$( document ).ready( function() { " +
 			                                        StringTools.ConcatenateWithDelimiter( " ",
-			                                                                              eventTargetAndEventArgumentStatements,
 			                                                                              "OnDocumentReady();",
 			                                                                              controlInitStatements,
 			                                                                              statusMessageDialogFadeOutStatement,
@@ -656,59 +662,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual Control controlWithInitialFocus { get { return getImplementersWithinControl<FormControl>( contentContainer ).FirstOrDefault(); } }
 
-		/// <summary>
-		/// Notifies the server control that caused the postback that it should handle an incoming postback event.
-		/// </summary>
-		protected override void RaisePostBackEvent( IPostBackEventHandler sourceControl, string eventArgument ) {
-			if( isEventPostBack )
-				base.RaisePostBackEvent( sourceControl, eventArgument );
-		}
-
-		// Filtering post backs with __EVENTARGUMENT is a hack, but is necessary because not all post backs are associated with a server side event. For example, a
-		// drop down list may trigger a post back when the selected item changes, but the server side control is not a post back event handler and therefore does
-		// not want to receive an event specifically because of a post back. It may be interested in a "selected item changed" event, but that type of event has
-		// nothing to do with post backs.
-		//
-		// We would have preferred to represent *non event* post backs with an empty __EVENTTARGET instead of representing *event* post backs with a special
-		// __EVENTARGUMENT. The former solution would have eliminated the need for this property as well as the override of RaisePostBackEvent, but wasn't practical
-		// since the GetPostBackEventReference method requires a control to be passed.
-		private bool isEventPostBack { get { return Request.Form[ "__EVENTARGUMENT" ] == EventPostBackArgument; } }
-
-		internal void ExecuteDataModification( DataModification dataModification, Action eventHandler ) {
-			var errorHandler = new Action<Validation, IEnumerable<string>>( ( validation, errorMessages ) => {
-				if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
-					return;
-				foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-					var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
-					errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
-				}
-			} );
-			EhValidateAndModifyData( topValidator => dataModification.ValidateFormValues( topValidator, errorHandler ), dataModification.ModifyData );
-
-			if( eventHandler == null )
-				return;
-
-			var canRun = false;
-			EhExecute( () => canRun = true );
-			if( canRun )
-				eventHandler();
-		}
-
-		/// <summary>
-		/// Executes a method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhExecute( Action method ) {
-			if( AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist )
-				return;
-
+		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
-				DataAccessState.Current.DisableCache();
-				try {
-					method();
-				}
-				finally {
-					DataAccessState.Current.ResetCache();
-				}
+				method();
 			}
 			catch( Exception e ) {
 				var ewfException = e.GetChain().OfType<EwfException>().FirstOrDefault();
@@ -719,71 +675,60 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		/// <summary>
-		/// Performs a secondary modification unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
+
+		private void handleValidationErrors( Validation validation, IEnumerable<string> errorMessages ) {
+			if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
+				return;
+			foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
+				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
+				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
+			}
+		}
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
+		public void EhExecute( Action method ) {
+			PostBack.CreateFull( firstModificationMethod: method ).Execute( true, null, pba => { } );
+		}
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhModifyData( Action<DBConnection> modificationMethod ) {
-			EhValidateAndModifyData( delegate { }, modificationMethod );
+			PostBack.CreateFull( firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
+			        .Execute( true, null, pba => { } );
 		}
 
-		/// <summary>
-		/// Performs a secondary validation/modification unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			EhExecute( delegate { executeModification( validationMethod, () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ); } );
+			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
+			                     firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
+			        .Execute( true, null, pba => { } );
 		}
 
-		/// <summary>
-		/// Performs a secondary modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
-			EhValidateAndModifyDataAndRedirect( delegate { }, method );
+			PostBack.CreateFull( firstModificationMethod: () => {
+				var url = method( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
+				redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+			} ).Execute( true, null, pba => { } );
 		}
 
-		/// <summary>
-		/// Performs a secondary validation/modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
-			EhExecute( () => executeModification( validationMethod,
-			                                      () => {
-				                                      var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-				                                      redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-			                                      } ) );
+			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
+			                     firstModificationMethod: () => {
+				                     var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
+				                     redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+			                     } ).Execute( true, null, pba => { } );
 		}
 
-		private void executeModification( Action<Validator> validationMethod, Action modificationMethod ) {
-			var validator = new Validator();
-			validationMethod( validator );
-			if( validator.ErrorsOccurred )
-				throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( validator.ErrorMessages ).ToArray() );
-			modificationMethod();
-		}
-
-		/// <summary>
-		/// Redirects to the specified page unless a modification fails during the post back.
-		/// Passing null for pageInfo will result in no redirection.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhRedirect( PageInfo pageInfo ) {
-			EhExecute( () => redirectInfo = pageInfo );
+			PostBack.CreateFull( firstModificationMethod: () => redirectInfo = pageInfo ).Execute( true, null, pba => { } );
 		}
 
-		/// <summary>
-		/// Sets up a client side redirect to the file created by the specified file creator.
-		/// NOTE: Rename to EhSendFile?
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhModifyDataAndSendFile( FileCreator fileCreator ) {
-			EhExecute( delegate { StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile(); } );
-		}
-
-		/// <summary>
-		/// Returns a list of all form controls in the page that were modified during this post back. This method will probably be removed; don't use it. It is only
-		/// used by the Edit Task page in RSIS.
-		/// </summary>
-		public bool ModifiedFormControlsExistWithinContentContainer() {
-			return
-				getImplementersWithinControl<FormControl>( contentContainer )
-					.Cast<FormControl>()
-					.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
+			PostBack.CreateFull( firstModificationMethod: () => StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile() )
+			        .Execute( true, null, pba => { } );
 		}
 
 		/// <summary>
@@ -891,12 +836,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
 					formValueString.Append( modErrorDisplayKey + " " );
 
-				// It's probably bad if a developer puts a PostBackButton or other IPostBackEventHandler on the page because of a modification error. It will be gone on
-				// the post back and cannot be processed.
-				foreach( var postBackEventHandler in getImplementersWithinControl<IPostBackEventHandler>( this ) ) {
-					formValueString.Append( postBackEventHandler.GetType().ToString() );
-					formValueString.Append( postBackEventHandler.UniqueID );
-				}
+				// It's probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
+				// processed.
+				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
+					formValueString.Append( postBack.Id );
 			}
 
 			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
