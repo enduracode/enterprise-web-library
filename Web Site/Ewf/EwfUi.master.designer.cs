@@ -22,6 +22,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
         protected global::System.Web.UI.WebControls.PlaceHolder globalPlace;
         
         /// <summary>
+        /// statusPlace control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl statusPlace;
+        
+        /// <summary>
         /// entityAndTopTabPlace control.
         /// </summary>
         /// <remarks>

@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
@@ -472,5 +471,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
+
+		public void AddStatusStatusMessages( Control statusControls ) {
+			statusPlace.AddControlsReturnThis( statusControls );
+		}
 	}
 }

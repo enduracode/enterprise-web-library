@@ -88,7 +88,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
-			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog().ToArray() ) );
+
+			var statusControls = new NamingPlaceholder();
+			addStatusMessageControls( statusControls, ph2 );
+
+			if( EwfPage.Instance.Master is EwfUi )
+				( (EwfUi)EwfPage.Instance.Master ).AddStatusStatusMessages( statusControls );
+			else
+				ph.AddControlsReturnThis( statusControls );
+
 
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );
@@ -130,30 +138,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						} ) { CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
 		}
 
-		private static IEnumerable<Control> getStatusMessageDialog() {
+		private static void addStatusMessageControls( Control staticControlsContainer, Control dialogControlContainer ) {
 			var messages = EwfPage.Instance.StatusMessages;
 
 			if( !messages.Any() )
-				yield break;
+				return;
 
 			var controls = new List<Control>();
+			var staticControls = new List<Control>();
 
 			var infoMessagesExist = messages.Any( i => i.Item1 == StatusMessageType.Info );
 			var warningMessagesExist = messages.Any( i => i.Item1 == StatusMessageType.Warning );
 
 			if( infoMessagesExist ) {
-				var infoStack = ControlStack.CreateWithControls( true,
-				                                                 ( from message in messages
-				                                                   where message.Item1 == StatusMessageType.Info
-				                                                   select
-					                                                   new Label
-						                                                   {
-							                                                   CssClass = CssElementCreator.StatusMessageDialogControlListInfoItemCssClass,
-							                                                   Text = message.Item2
-						                                                   } ).ToArray() );
+				Func<Control> getInfoControlLine =
+					() =>
+					new ControlLine( new Literal { Text = @"<i class='fa fa-info-circle fa-2x' style='color: rgb(120, 160, 195);'></i>" },
+					                 getStackFromStatuses( messages.Where( message => message.Item1 == StatusMessageType.Info ),
+					                                       CssElementCreator.StatusMessageDialogControlListInfoItemCssClass ) );
 
-
-				controls.Add( new ControlLine( new Literal { Text = @"<i class='fa fa-info-circle fa-2x' style='color: rgb(120, 160, 195);'></i>" }, infoStack ) );
+				controls.Add( getInfoControlLine() );
+				staticControls.Add( getInfoControlLine() );
 			}
 
 
@@ -161,16 +166,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				controls.Add( new Literal { Text = "<hr />" } );
 
 			if( warningMessagesExist ) {
-				var warningStack = ControlStack.CreateWithControls( true,
-				                                                    ( from message in messages
-				                                                      where message.Item1 == StatusMessageType.Warning
-				                                                      select
-					                                                      new Label
-						                                                      {
-							                                                      CssClass = CssElementCreator.StatusMessageDialogControlListWarningItemCssClass,
-							                                                      Text = message.Item2
-						                                                      } ).ToArray() );
-				controls.Add( new ControlLine( new Literal { Text = @"<i class='fa fa-exclamation-triangle fa-2x' style='color: #E69017;'></i>" }, warningStack ) );
+				Func<Control> getWarningControlLine =
+					() =>
+					new ControlLine( new Literal { Text = @"<i class='fa fa-exclamation-triangle fa-2x' style='color: #E69017;'></i>" },
+					                 getStackFromStatuses( messages.Where( message => message.Item1 == StatusMessageType.Warning ),
+					                                       CssElementCreator.StatusMessageDialogControlListWarningItemCssClass ) );
+
+				controls.Add( getWarningControlLine() );
+				staticControls.Add( getWarningControlLine() );
 
 				var alignRight = new HtmlGenericControl( "div" );
 				alignRight.Style[ "text-align" ] = "right";
@@ -181,7 +184,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				controls.Add( alignRight );
 			}
 
-			yield return new Block( controls.ToArray() ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass };
+			dialogControlContainer.AddControlsReturnThis( new Block( controls.ToArray() ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass } );
+			staticControlsContainer.AddControlsReturnThis( ControlStack.CreateWithControls( true, staticControls.ToArray() ) );
+		}
+
+		private static ControlStack getStackFromStatuses( IEnumerable<Tuple<StatusMessageType, string>> iEnumerable, string itemCssClass ) {
+			return ControlStack.CreateWithControls( true, ( iEnumerable.Select( message => new Label { CssClass = itemCssClass, Text = message.Item2 } ) ).ToArray() );
 		}
 	}
 }
