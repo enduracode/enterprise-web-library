@@ -357,6 +357,13 @@
     <Compile Include="TestPages\SelectListDemo.aspx.designer.cs">
       <DependentUpon>SelectListDemo.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\StatusMessages.aspx.cs">
+      <DependentUpon>StatusMessages.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\StatusMessages.aspx.designer.cs">
+      <DependentUpon>StatusMessages.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\SubFolder\Details.aspx.cs">
       <DependentUpon>Details.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -747,6 +754,7 @@
     <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
+    <Content Include="TestPages\StatusMessages.aspx" />
     <Content Include="TestPages\SubFolder\Details.aspx" />
     <Content Include="TestPages\SubFolder\Disabled.aspx" />
     <Content Include="TestPages\SubFolder\EntitySetup.ascx" />
