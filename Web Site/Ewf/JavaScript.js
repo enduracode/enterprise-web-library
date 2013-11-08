@@ -65,7 +65,7 @@ function NumericalOnly( evt, field ) {
 	case 0:
 		return true;
 	default:
-			// Max of maxValueLength digits, numbers only.
+		// Max of maxValueLength digits, numbers only.
 			// If some of the field is selected, let them replace the contents even if it's full
 		return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
 	}
@@ -182,12 +182,50 @@ function HookUpModalWindowMoveEventHandlers( radWindowClientId ) {
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
  * (c) 2006 Alex Brem <alex@0xab.cd> - http://blog.0xab.cd
  */
-(function() {	var fieldSelection = {getSelection: function() {var e = this.jquery ? this[0] : this;return (('selectionStart' in e && function() {var l = e.selectionEnd - e.selectionStart;return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };}) ||(document.selection && function() {e.focus();var r = document.selection.createRange();if (r == null) {return { start: 0, end: e.value.length, length: 0 }}var re = e.createTextRange();var rc = re.duplicate();re.moveToBookmark(r.getBookmark());rc.setEndPoint('EndToStart', re);return { start: rc.text.length, end: rc.text.length + r.text.length, length: r.text.length, text: r.text };}) ||function() {return { start: 0, end: e.value.length, length: 0 };})();},replaceSelection: function() {var e = this.jquery ? this[0] : this;var text = arguments[0] || '';return (('selectionStart' in e && function() {e.value = e.value.substr(0, e.selectionStart) + text + e.value.substr(e.selectionEnd, e.value.length);return this;}) ||(document.selection && function() {e.focus();document.selection.createRange().text = text;return this;}) ||function() {e.value += text;return this;})();}	};	jQuery.each(fieldSelection, function(i) { jQuery.fn[i] = this; });})();
+( function() {
+	var fieldSelection = {
+		getSelection: function() {
+			var e = this.jquery ? this[0] : this;
+			return ( ( 'selectionStart' in e && function() {
+				var l = e.selectionEnd - e.selectionStart;
+				return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr( e.selectionStart, l ) };
+			} ) || ( document.selection && function() {
+				e.focus();
+				var r = document.selection.createRange();
+				if( r == null ) {
+					return { start: 0, end: e.value.length, length: 0 };
+				}
+				var re = e.createTextRange();
+				var rc = re.duplicate();
+				re.moveToBookmark( r.getBookmark() );
+				rc.setEndPoint( 'EndToStart', re );
+				return { start: rc.text.length, end: rc.text.length + r.text.length, length: r.text.length, text: r.text };
+			} ) || function() { return { start: 0, end: e.value.length, length: 0 }; } )();
+		},
+		replaceSelection: function() {
+			var e = this.jquery ? this[0] : this;
+			var text = arguments[0] || '';
+			return ( ( 'selectionStart' in e && function() {
+				e.value = e.value.substr( 0, e.selectionStart ) + text + e.value.substr( e.selectionEnd, e.value.length );
+				return this;
+			} ) || ( document.selection && function() {
+				e.focus();
+				document.selection.createRange().text = text;
+				return this;
+			} ) || function() {
+				e.value += text;
+				return this;
+			} )();
+		}
+	};
+	jQuery.each( fieldSelection, function( i ) { jQuery.fn[i] = this; } );
+} )();
 
 // This function is called when the items in the SelectList are displayed, even when results are not being filtered.
-function select2ResultSort(results, container, query) {
+
+function select2ResultSort( results, container, query ) {
 	// If there's no search term, don't modify order.
-	if (query.term) {
+	if( query.term ) {
 		// The goal here is to bring items that begin with the query to the top. Items that simply contain the query
 		// should be listed after. Another goal is to maintain the order of the list, which is the order in which the 
 		// list is provided to this method.
@@ -195,13 +233,13 @@ function select2ResultSort(results, container, query) {
 		var startWithTerm = new Array();
 		var doesNotStartWithTerm = new Array();
 
-		results.forEach(function (e) {
-			if (e.text.toLowerCase().indexOf(termLower) == 0)
-				startWithTerm.push(e);
+		results.forEach( function( e ) {
+			if( e.text.toLowerCase().indexOf( termLower ) == 0 )
+				startWithTerm.push( e );
 			else
-				doesNotStartWithTerm.push(e);
-		});
-		return startWithTerm.concat(doesNotStartWithTerm);
+				doesNotStartWithTerm.push( e );
+		} );
+		return startWithTerm.concat( doesNotStartWithTerm );
 	}
 	return results;
 }
