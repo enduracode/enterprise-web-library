@@ -15,14 +15,18 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
-				EwfTable.CreateWithItems(
-					items:
-						getStatusTests()
-						.Select(
-							tests =>
-							new EwfTableItem( tests.Item1.ToCell(),
-							                  new PostBackButton( tests.Item2, null, new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false ).ToCell() ) )
-						.ToFunctions() ) );
+				GetTests() );
+		}
+
+		internal static EwfTable GetTests() {
+			return EwfTable.CreateWithItems(
+				items:
+					getStatusTests()
+					.Select(
+						tests =>
+						new EwfTableItem( tests.Item1.ToCell(),
+						                  new PostBackButton( tests.Item2, null, new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false ).ToCell() ) )
+					.ToFunctions() );
 		}
 
 		private static IEnumerable<Tuple<string, DataModification>> getStatusTests() {

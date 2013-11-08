@@ -364,6 +364,13 @@
     <Compile Include="TestPages\StatusMessages.aspx.designer.cs">
       <DependentUpon>StatusMessages.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\StatusMessagesBasicPage.aspx.cs">
+      <DependentUpon>StatusMessagesBasicPage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\StatusMessagesBasicPage.aspx.designer.cs">
+      <DependentUpon>StatusMessagesBasicPage.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\SubFolder\Details.aspx.cs">
       <DependentUpon>Details.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -755,6 +762,7 @@
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
     <Content Include="TestPages\StatusMessages.aspx" />
+    <Content Include="TestPages\StatusMessagesBasicPage.aspx" />
     <Content Include="TestPages\SubFolder\Details.aspx" />
     <Content Include="TestPages\SubFolder\Disabled.aspx" />
     <Content Include="TestPages\SubFolder\EntitySetup.ascx" />
