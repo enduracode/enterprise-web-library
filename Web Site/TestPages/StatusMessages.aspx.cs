@@ -64,6 +64,18 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				                           AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
 			                           } ) );
 
+			yield return Tuple.Create( "Several info messages, Several warning messages",
+			                           new DataModification( firstModificationMethod: () => {
+				                           AddStatusMessage( StatusMessageType.Info, "This is the info message." );
+				                           AddStatusMessage( StatusMessageType.Info, "This is the second info message." );
+				                           AddStatusMessage( StatusMessageType.Info, "This is the third info message." );
+
+				                           AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
+				                           AddStatusMessage( StatusMessageType.Warning, "This is second warning message" );
+				                           AddStatusMessage( StatusMessageType.Warning, "This is third warning message" );
+			                           } ) );
+
+
 			yield return
 				Tuple.Create( "Very long info message",
 				              new DataModification( firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Info, longMessage() ); } ) );

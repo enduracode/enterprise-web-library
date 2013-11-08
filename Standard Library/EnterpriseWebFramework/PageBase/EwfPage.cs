@@ -432,6 +432,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "spin", this.GetClientUrl( "~/Ewf/ThirdParty/Spin/spin.min.js" ) );
 
 			// From http://stackoverflow.com/a/2548133/35349.
 			ClientScript.RegisterClientScriptBlock( GetType(),
@@ -570,8 +571,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					.Aggregate( ( a, b ) => a + b );
 
 			var statusMessageDialogFadeOutStatement = "";
-			if( StatusMessages.Any() && !StatusMessages.Any( i => i.Item1 == StatusMessageType.Warning ) )
-				statusMessageDialogFadeOutStatement = "setTimeout( 'fadeOutStatusMessageDialog( 400 );', " + StatusMessages.Count() * 1000 + " );";
+			if( StatusMessages.Any() ) {
+				statusMessageDialogFadeOutStatement = "showClickBlocker(true);";
+				if( StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
+					statusMessageDialogFadeOutStatement += "setTimeout( 'fadeOutStatusMessageDialog( 400 ); hideClickBlocker();', " + StatusMessages.Count() * 1000 + " );";
+			}
+
 
 			MaintainScrollPositionOnPostBack = true;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && noErrorMessagesExist;

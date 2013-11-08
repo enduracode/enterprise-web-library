@@ -704,6 +704,7 @@
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_vi.js" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-CN.js" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-TW.js" />
+    <Content Include="Ewf\ThirdParty\Spin\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
     <Content Include="GetSchema.aspx" />
@@ -734,7 +735,6 @@
     <Content Include="Ewf\Images\Calendar\button_currentmonth.gif" />
     <Content Include="Ewf\Images\Calendar\button_next.gif" />
     <Content Include="Ewf\Images\Calendar\button_previous.gif" />
-    <Content Include="Ewf\Images\Progress.gif" />
     <Content Include="Ewf\ErrorPages\ErrorPage.master" />
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />

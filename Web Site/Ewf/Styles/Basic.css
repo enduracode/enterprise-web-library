@@ -137,7 +137,7 @@ ewfDateAndTimePicker {
 	font-size: 1.4em;
 }
 .datetimepickerIcon {
-	font-size: .8em
+	font-size: .8em;
 }
 
 /* action controls */
@@ -272,33 +272,84 @@ ewfProcessingDialogBlock {
 	left: 50%;
 	margin-top: -5em;
 	margin-left: -13em;
-	border: 1px solid black;
-	background-color: #cccccc;
+	background-color: white;
 	padding: 1em;
-	height: 8em;
+	height: 4em;
 	width: 26em;
 	color: black;
+	border-radius: 15px;
+	box-shadow: 0 0 15px black;
 }
+.ewfProcessingDialogProgress {
+	font-size: 2em;
+	cursor: default;
+}
+
+#ellipsis1, #ellipsis2, #ellipsis3 {
+	/* http://prefixmycss.com/ */
+	opacity: 0; /*animation*/
+	-webkit-animation: dot 2.0s infinite;
+	-moz-animation: dot 2.0s infinite;
+	-ms-animation: dot 2.0s infinite;
+	-o-animation: dot 2.0s infinite;
+	animation: dot 2.0s infinite;
+}
+
+#ellipsis1 {
+	-webkit-animation-delay: 1.0s;
+	-moz-animation-delay: 1.0s;
+	-ms-animation-delay: 1.0s;
+	-o-animation-delay: 1.0s;
+	animation-delay: 1.0s;
+}
+
+#ellipsis2 {
+	-webkit-animation-delay: 1.2s;
+	-moz-animation-delay: 1.2s;
+	-ms-animation-delay: 1.2s;
+	-o-animation-delay: 1.2s;
+	animation-delay: 1.2s;
+}
+
+#ellipsis3 {
+	-webkit-animation-delay: 1.3s;
+	-moz-animation-delay: 1.3s;
+	-ms-animation-delay: 1.3s;
+	-o-animation-delay: 1.3s;
+	animation-delay: 1.3s;
+}
+
+@keyframes dot {
+      0% { opacity: 0; }
+     50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@-webkit-keyframes dot {
+      0% { opacity: 0; }
+     50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 ewfProcessingDialogParagraph {
 	text-align: center;
 }
 ewfStatusMessageDialogBlock {
 	position: fixed;
-	top: 30%;
+	top: 40%;
 	left: 50%;
 	font-size: 1.5em;
 	margin-left: -15.1em;
-	border: .1em solid black;
 	background-color: white;
 	padding: 1em;
 	width: 28em;
+	border-radius: 15px;
+	box-shadow: 0 0 15px black;
 }
 ewfStatusMessageDialogControlListInfoItem {
 	color: black;
 }
 ewfStatusMessageDialogControlListWarningItem {
 	font-weight: bold;
-	color: orange;
 }
 .profiler-results {
 	opacity: .4;
