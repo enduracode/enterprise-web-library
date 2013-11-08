@@ -164,19 +164,6 @@ function toggleCheckBoxes( checklistClientId, setChecked ) {
 	} );
 }
 
-
-// Supports ModalWindow
-// Adds a function to center the calling window when the user resizes or scrolls the page
-
-function HookUpModalWindowMoveEventHandlers( radWindowClientId ) {
-	var fixWindowPosition = function() {
-		var window = $find( radWindowClientId );
-		if( window.isVisible() )
-			window.center();
-	};
-	$( window ).scroll( fixWindowPosition ).resize( fixWindowPosition );
-}
-
 // Supports DurationPicker.
 /*
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
