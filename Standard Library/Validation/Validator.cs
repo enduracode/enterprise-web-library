@@ -235,13 +235,13 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// <summary>
 		/// Returns the validated int type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
+		/// <paramref name="min"/> and <paramref name="max"/> are inclusive.
 		/// </summary>
 		public int GetInt( ValidationErrorHandler errorHandler, string intAsString, int min, int max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>( errorHandler,
-			                                                                            intAsString,
-			                                                                            false,
-			                                                                            delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, min, max );
-			                                                                            } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( errorHandler,
+			                                                                       intAsString,
+			                                                                       false,
+			                                                                       () => validateGenericIntegerType<int>( errorHandler, intAsString, min, max ) );
 		}
 
 		/// <summary>
@@ -350,7 +350,9 @@ namespace RedStapler.StandardLibrary.Validation {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal>( errorHandler,
 			                                                                                decimalAsString,
 			                                                                                false,
-			                                                                                delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
+			                                                                                delegate {
+				                                                                                return validateDecimal( decimalAsString, errorHandler, min, max );
+			                                                                                } );
 		}
 
 		/// <summary>
@@ -369,7 +371,9 @@ namespace RedStapler.StandardLibrary.Validation {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal?>( errorHandler,
 			                                                                                 decimalAsString,
 			                                                                                 allowEmpty,
-			                                                                                 delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
+			                                                                                 delegate {
+				                                                                                 return validateDecimal( decimalAsString, errorHandler, min, max );
+			                                                                                 } );
 		}
 
 		private static decimal validateDecimal( string decimalAsString, ValidationErrorHandler errorHandler, decimal min, decimal max ) {
@@ -578,9 +582,10 @@ namespace RedStapler.StandardLibrary.Validation {
 						                                                                                                                  firstFive.Substring( 3 ) + input,
 						                                                                                                                  "" );
 					                                                                       }
-					                                                                       else
+					                                                                       else {
 						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
 						                                                                                                                                  "The five digit phone number you entered isn't recognized." ) );
+					                                                                       }
 				                                                                       }
 					                                                                       // International phone numbers
 					                                                                       // We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
@@ -609,9 +614,10 @@ namespace RedStapler.StandardLibrary.Validation {
 								                                                                       " Extensions are not permitted in this field. Use the separate extension field." ) );
 						                                                                       }
 					                                                                       }
-					                                                                       else
+					                                                                       else {
 						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
 						                                                                                                                                  invalidMessage ) );
+					                                                                       }
 				                                                                       }
 				                                                                       return phoneNumber;
 			                                                                       },
