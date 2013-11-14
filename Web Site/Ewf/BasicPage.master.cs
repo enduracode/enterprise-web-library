@@ -124,10 +124,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			Func<int, Control> getEllipsis = n => new LiteralControl { Text = "<span id='ellipsis{0}'>.</span>".FormatWith( n ) };
 			return
 				new Block(
-					new Paragraph( image, " ".GetLiteralControl(), Translation.Processing.GetLiteralControl(), getEllipsis( 1 ), getEllipsis( 2 ), getEllipsis( 3 ) )
-						{
-							CssClass = "ewfProcessingDialogProgress"
-						},
+					new Paragraph( image,
+					               " ".GetLiteralControl(),
+					               new Literal { Text = @"<span id=""ewfProcessing"">{0}</span>".FormatWith( Translation.Processing ) },
+					               getEllipsis( 1 ),
+					               getEllipsis( 2 ),
+					               getEllipsis( 3 ) ) { CssClass = "ewfProcessingDialogProgress" },
 					new Paragraph( new CustomButton( () => "stopPostBackRequest()" )
 						{
 							ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile )

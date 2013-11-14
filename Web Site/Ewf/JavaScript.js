@@ -132,7 +132,7 @@ function postBackRequestStarted() {
 	$( ".ewfTimeOut" ).hide();
 	showClickBlocker();
 	showProcessingDialog();
-	setTimeout("$('.ewfProcessingDialog').animate({height: '14ex'}, 200, function() { $('.ewfTimeOut').fadeIn(100);});", 10000);
+	setTimeout("$('.ewfProcessingDialog').animate({height: '16ex'}, 200, function() { $('.ewfTimeOut').fadeIn(100);});", 10000);
 }
 
 function stopPostBackRequest() {
