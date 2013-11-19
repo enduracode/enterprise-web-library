@@ -121,7 +121,7 @@ function RemoveClickScriptBinding() {
 function postBack( postBackId ) {
 	var theForm = document.getElementById( "aspnetForm" );
 	if( !theForm.onsubmit || ( theForm.onsubmit() != false ) ) {
-		$( "input#ewfPostBack" ).val( postBackId );
+		$( "#ewfPostBack" ).val( postBackId );
 		theForm.submit();
 	}
 }
