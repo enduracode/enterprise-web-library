@@ -14,26 +14,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var dm = PostBack.CreateFull();
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( es.info.ReturnAndDestinationUrl ) ) );
 			var fib = FormItemBlock.CreateFormItemTable();
 
 			newPassword = new DataValue<string>();
 			fib.AddFormItems( FormItem.Create( "New password",
 			                                   new EwfTextBox( "", masksCharacters: true ),
-			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), dm ) ) );
+			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			var newPasswordConfirm = new DataValue<string>();
 			fib.AddFormItems( FormItem.Create( "Re-type new password",
 			                                   new EwfTextBox( "", masksCharacters: true ),
 			                                   validationGetter:
-				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );
-			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
+				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
+			pb.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password",
-			                                                           new PostBackButton( dm,
-			                                                                               () => EhRedirect( new ExternalPageInfo( es.info.ReturnAndDestinationUrl ) ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {

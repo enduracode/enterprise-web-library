@@ -9,7 +9,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				new Box(
 					new PostBackButton( PostBack.CreateFull( id: "tiny" ),
-					                    () => { },
 					                    new ButtonActionControlStyle( "Tiny Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 					                    false ).ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(
@@ -23,7 +22,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Box(
-					new PostBackButton( PostBack.CreateFull( id: "normal" ), () => { }, new ButtonActionControlStyle( "Post Back Button" ), usesSubmitBehavior: false )
+					new PostBackButton( PostBack.CreateFull( id: "normal" ), new ButtonActionControlStyle( "Post Back Button" ), usesSubmitBehavior: false )
 						{
 							Width = Unit.Pixel( 200 )
 						}.ToSingleElementArray() ) );
@@ -33,7 +32,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				new Box(
 					new PostBackButton( PostBack.CreateFull( id: "large" ),
-					                    () => { },
 					                    new ButtonActionControlStyle( "Large Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.Large ),
 					                    usesSubmitBehavior: false ).ToSingleElementArray() ) );
 			ph.AddControlsReturnThis(

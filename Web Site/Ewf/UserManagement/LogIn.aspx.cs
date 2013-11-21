@@ -14,8 +14,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		protected override void loadData() {
 			provider = (FormsAuthCapableUserManagementProvider)UserManagementStatics.SystemProvider;
-			var logInDm = PostBack.CreateFull();
-			var newPasswordDm = PostBack.CreateFull( id: "newPw" );
+			var logInPb =
+				PostBack.CreateFull(
+					actionGetter:
+						() => new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo : new ExternalPageInfo( info.ReturnUrl ) ) );
+			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
@@ -28,8 +31,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var emailVl = new BasicValidationList();
 			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(),
 			                                           emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
-			logInDm.AddValidations( emailVl );
-			newPasswordDm.AddValidations( emailVl );
+			logInPb.AddValidations( emailVl );
+			newPasswordPb.AddValidations( emailVl );
 
 			var password = new DataValue<string>();
 			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
@@ -37,7 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			                                                            new EwfTextBox( "", masksCharacters: true ),
 			                                                            validationGetter:
 				                                                            control =>
-				                                                            new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInDm ) )
+				                                                            new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) )
 			                                                   .ToControl()
 			                                                   .ToCell() ) );
 
@@ -46,10 +49,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					new EwfTableCell(
 						new PlaceHolder().AddControlsReturnThis(
 							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-							new PostBackButton( newPasswordDm,
-							                    handleSendNewPasswordClick,
-							                    new TextActionControlStyle( "click here to immediately send yourself a new password." ),
-							                    usesSubmitBehavior: false ) ) ) { FieldSpan = 2 } ) );
+							new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) ) )
+						{
+							FieldSpan = 2
+						} ) );
 			ph.AddControlsReturnThis( registeredTable );
 
 			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
@@ -61,28 +64,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				ph.AddControlsReturnThis( unregisteredTable );
 			}
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In",
-			                                                           new PostBackButton( logInDm,
-			                                                                               () =>
-			                                                                               EhRedirect( user.MustChangePassword
-				                                                                                           ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo
-				                                                                                           : new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
 
 			var logInMethod = UserManagementStatics.GetLogInMethod( emailAddress,
 			                                                        password,
 			                                                        getUnregisteredEmailMessage(),
 			                                                        "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
-			                                                        logInDm );
-			logInDm.AddModificationMethod( () => user = logInMethod() );
+			                                                        logInPb );
+			logInPb.AddModificationMethod( () => user = logInMethod() );
 		}
 
-		private void handleSendNewPasswordClick() {
-			EhModifyDataAndRedirect( delegate {
-				var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
-				if( userLocal == null )
-					throw new EwfException( getUnregisteredEmailMessage() );
-				return ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ).GetUrl();
-			} );
+		private PostBackAction getSendNewPasswordAction() {
+			var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
+			if( userLocal == null )
+				throw new EwfException( getUnregisteredEmailMessage() );
+			return new PostBackAction( ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ) );
 		}
 
 		private string getUnregisteredEmailMessage() {

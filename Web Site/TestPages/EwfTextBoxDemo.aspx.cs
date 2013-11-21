@@ -20,9 +20,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			var dm = PostBack.CreateFull();
+			var pb = PostBack.CreateFull();
 			addMessageIfNotNull( ph, getTest1( null ) );
-			ph.AddControlsReturnThis( test1( dm, setTest1 ) );
+			ph.AddControlsReturnThis( test1( pb, setTest1 ) );
 
 			addMessageIfNotNull( ph, getTest2( null ) );
 			ph.AddControlsReturnThis( test2( setTest2 ) );
@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			                    FormItem.Create( "Masked Input", new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
 			ph.AddControlsReturnThis( table );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( dm, null ) ),
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( pb ) ),
 			                                    new ActionButtonSetup( "Reset Values",
 			                                                           new PostBackButton( PostBack.CreateFull( id: "reset",
 			                                                                                                    firstModificationMethod: () => {

@@ -127,19 +127,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		public List<ActionButtonSetup> CreateActionButtonSetups() {
 			var actionButtonSetups = new List<ActionButtonSetup>();
 			actionButtonSetups.Add( new ActionButtonSetup( "Delegate action",
-			                                               new PostBackButton( PostBack.CreateFull( id: "delegate" ),
-			                                                                   () =>
-			                                                                   EwfPage.Instance.EhExecute(
-				                                                                   delegate { EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ); } ) )
-				                                               {
-					                                               UsesSubmitBehavior = false
-				                                               } ) );
+			                                               new PostBackButton( PostBack.CreateFull( id: "delegate",
+			                                                                                        firstModificationMethod:
+				                                                                                        () =>
+				                                                                                        EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ) );
 			actionButtonSetups.Add( new ActionButtonSetup( "Go to Google", new EwfLink( new ExternalPageInfo( "http://www.google.com" ) ) ) );
 			actionButtonSetups.Add( new ActionButtonSetup( "Generate error",
-			                                               new PostBackButton( PostBack.CreateFull( id: "error" ), () => { throw new ApplicationException(); } )
-				                                               {
-					                                               UsesSubmitBehavior = false
-				                                               } ) );
+			                                               new PostBackButton( PostBack.CreateFull( id: "error",
+			                                                                                        firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) );
 			return actionButtonSetups;
 		}
 	}

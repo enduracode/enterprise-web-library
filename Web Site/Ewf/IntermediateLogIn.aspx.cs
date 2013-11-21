@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var dm = PostBack.CreateFull();
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( info.ReturnUrl ) ) );
 
 			ph.AddControlsReturnThis(
 				FormItemBlock.CreateFormItemTable(
@@ -31,11 +31,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							                 if( !passwordMatch )
 								                 validator.NoteErrorAndAddMessage( "Incorrect password." );
 						                 },
-						                                                              dm ) ).ToSingleElementArray() ) );
+						                                                              pb ) ).ToSingleElementArray() ) );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( () => {
+			pb.AddModificationMethod( () => {
 				IntermediateAuthenticationMethods.SetCookie();
 				AppRequestState.Instance.IntermediateUserExists = true;
 			} );

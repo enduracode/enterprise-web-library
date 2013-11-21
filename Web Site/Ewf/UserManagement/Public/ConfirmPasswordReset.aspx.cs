@@ -12,11 +12,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var dm = PostBack.CreateFull();
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password",
-			                                                           new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( es.info.DestinationUrl ) ) ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( es.info.DestinationUrl ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {

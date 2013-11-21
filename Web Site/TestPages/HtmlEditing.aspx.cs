@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class HtmlEditing: EwfPage {
 		protected override void loadData() {
 			addHtmlEditor();
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post back", new PostBackButton( PostBack.CreateFull(), delegate { } ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post back", new PostBackButton( PostBack.CreateFull() ) ) );
 		}
 
 		private void addHtmlEditor() {
