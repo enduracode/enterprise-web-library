@@ -27,13 +27,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			emailAddress = new DataValue<string>();
 			var emailVl = new BasicValidationList();
 			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(),
-			                                           emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
+			                                           emailAddress.GetEmailAddressFormItem( null, "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
 			logInDm.AddValidations( emailVl );
 			newPasswordDm.AddValidations( emailVl );
 
 			var password = new DataValue<string>();
 			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
-			                                           FormItem.Create( "",
+			                                           FormItem.Create( null,
 			                                                            new EwfTextBox( "" ) { MasksCharacters = true },
 			                                                            validationGetter:
 				                                                            control =>

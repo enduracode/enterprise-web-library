@@ -644,6 +644,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			parameters.AddRange( optionalControlParams );
 			parameters.Add( new CSharpParameter( "int?", "cellSpan", "null" ) );
 			parameters.Add( new CSharpParameter( "TextAlignment", "textAlignment", "TextAlignment.NotSpecified" ) );
+			parameters.Add( new CSharpParameter( "Control", "labelOverride", "null" ) );
 			if( includeValidationParams )
 				parameters.Add( new CSharpParameter( "System.Func<bool>", "validationPredicate", "null" ) );
 			parameters.AddRange( optionalValidationParams );
@@ -678,7 +679,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		private static void writeGenericGetterWithValueParams( TextWriter writer, ModificationField field, bool? includeValidationMethodReturnValue ) {
 			var control = "useValueParameter ? controlGetter( value, labelAndSubject ) : controlGetter( " +
 			              StandardLibraryMethods.GetCSharpIdentifierSimple( field.PropertyName ) + ", labelAndSubject )";
-			var body = "return FormItem.Create( putLabelOnFormItem ? labelAndSubject : \"\", " + control + ", cellSpan: cellSpan, textAlignment: textAlignment" +
+			var body = "return FormItem.Create( putLabelOnFormItem ? ( labelOverride ?? labelAndSubject.GetLiteralControl() ) : null, " + control + ", cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
 				             ? ", validationGetter: " + getValidationGetter( field, includeValidationMethodReturnValue.Value )
 				             : "" ) + " );";
@@ -720,6 +721,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( field.NullableTypeName, "value", field.TypeIs( typeof( string ) ) ? "\"\"" : "null" ) );
 			parameters.Add( new CSharpParameter( "int?", "cellSpan", "null" ) );
 			parameters.Add( new CSharpParameter( "TextAlignment", "textAlignment", "TextAlignment.NotSpecified" ) );
+			parameters.Add( new CSharpParameter( "Control", "labelOverride", "null" ) );
 			if( includeValidationMethodReturnValue.HasValue ) {
 				parameters.Add( new CSharpParameter( "System.Func<bool>", "validationPredicate", "null" ) );
 				parameters.Add( new CSharpParameter( "System.Action", "validationErrorNotifier", "null" ) );

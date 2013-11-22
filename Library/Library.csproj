@@ -78,7 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\Aspose.Total.lic" />
-    <None Include="Configuration\Update All Dependent Logic.bat" />
+    <None Include="Configuration\Update All Dependent Logic.bat">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Files\Template.config" />
   </ItemGroup>
   <ItemGroup>

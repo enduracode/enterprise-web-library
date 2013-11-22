@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
@@ -19,24 +18,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return new[] { new CssElement( "FormItemBlock", "div." + CssClass ) };
 			}
 		}
-
-		private readonly bool hideIfEmpty;
-		private readonly string heading;
-		private readonly bool useFormItemListMode;
-		private readonly int? numberOfColumns;
-		private readonly int defaultFormItemCellSpan;
-		private readonly Unit? firstColumnWidth;
-		private readonly Unit? secondColumnWidth;
-		private readonly TableCellVerticalAlignment verticalAlignment;
-		private readonly List<FormItem> formItems;
-
-		/// <summary>
-		/// Set this value in order to have a button added as the last form item and formatted automatically. The button will have the specified text.
-		/// The button will use submit behavior.
-		/// NOTE: We have to decide if we are going to take a PostBackButton here, and if we do, if we will overwrite certain properties on it once we get it. Or, we may need to make
-		/// a special ButtonInfo object that has just the things we want (UseSubmitBehavior, Text, etc.).
-		/// </summary>
-		public string IncludeButtonWithThisText { get; set; }
 
 		/// <summary>
 		/// Creates a block with the given number of columns where each form item control's label is placed directly on top of it. NumberOfColumns defaults to the
@@ -58,6 +39,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                 IEnumerable<FormItem> formItems = null ) {
 			return new FormItemBlock( hideIfEmpty, heading, false, null, 1, firstColumnWidth, secondColumnWidth, TableCellVerticalAlignment.NotSpecified, formItems );
 		}
+
+		private readonly bool hideIfEmpty;
+		private readonly string heading;
+		private readonly bool useFormItemListMode;
+		private readonly int? numberOfColumns;
+		private readonly int defaultFormItemCellSpan;
+		private readonly Unit? firstColumnWidth;
+		private readonly Unit? secondColumnWidth;
+		private readonly TableCellVerticalAlignment verticalAlignment;
+		private readonly List<FormItem> formItems;
+
+		/// <summary>
+		/// Set this value in order to have a button added as the last form item and formatted automatically. The button will have the specified text.
+		/// The button will use submit behavior.
+		/// NOTE: We have to decide if we are going to take a PostBackButton here, and if we do, if we will overwrite certain properties on it once we get it. Or, we may need to make
+		/// a special ButtonInfo object that has just the things we want (UseSubmitBehavior, Text, etc.).
+		/// </summary>
+		public string IncludeButtonWithThisText { get; set; }
 
 		private FormItemBlock( bool hideIfEmpty, string heading, bool useFormItemListMode, int? numberOfColumns, int defaultFormItemCellSpan, Unit? firstColumnWidth,
 		                       Unit? secondColumnWidth, TableCellVerticalAlignment verticalAlignment, IEnumerable<FormItem> formItems ) {
@@ -98,7 +97,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 					numberOfPlaceholdersRequired.Times( () => formItems.Add( getPlaceholderFormItem() ) );
 				}
-				formItems.Add( FormItem.Create( "",
+				formItems.Add( FormItem.Create( null,
 				                                new PostBackButton( new DataModification(), new ButtonActionControlStyle( IncludeButtonWithThisText ) )
 					                                {
 						                                Width = Unit.Percentage( 50 )
@@ -151,7 +150,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private FormItem<Literal> getPlaceholderFormItem() {
-			return FormItem.Create( "", "".GetLiteralControl(), cellSpan: 1 );
+			return FormItem.Create( null, "".GetLiteralControl(), cellSpan: 1 );
 		}
 
 		private int getCellSpan( FormItem formItem ) {
@@ -163,9 +162,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			table.AddData( formItems,
 			               i => {
 				               var stack = ControlStack.Create( true );
-				               if( i.Validation != null )
+				               if( i.Validation != null ) {
 					               stack.AddModificationErrorItem( i.Validation,
 					                                               errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+				               }
 				               stack.AddControls( i.Control );
 				               return new EwfTableItem( i.Label.ToCell(), new EwfTableCell( stack ) { TextAlignment = i.TextAlignment } );
 			               } );

@@ -148,7 +148,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var delete = false;
 			var deleteCheckBox =
-				FormItem.Create( "",
+				FormItem.Create( null,
 				                 new EwfCheckBox( false ),
 				                 validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deleteDm ) ).ToControl();
 			cells.Add( new EwfTableCell( ReadOnly ? null : deleteCheckBox ) );
@@ -166,7 +166,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var dm = new DataModification();
 
 			RsFile file = null;
-			var fi = FormItem.Create( "",
+			var fi = FormItem.Create( null,
 			                          new EwfFileUpload(),
 			                          validationGetter: control => new Validation( ( pbv, validator ) => {
 				                          BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );

@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var dataModification = new DataModification( firstTopValidationMethod: ( pbv, v ) => v.NoteErrorAndAddMessage( "error" ) );
 			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "woo",
 			                                                             formItems:
-				                                                             new FormItem[] { FormItem.Create( "Files", new FancyFileManager( "second one!", "" ) ) } ) );
+				                                                             new FormItem[] { FormItem.Create( "Files".GetLiteralControl(), new FancyFileManager( "second one!", "" ) ) } ) );
 
 			ph.AddControlsReturnThis( new PostBackButton( dataModification, () => { } ) );
 		}

@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.Validation;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public static class EmailSendingFormItems {
 		public static FormItem<EwfTextBox> GetSubjectFormItem( this EmailMessage emailMessage, ValidationList vl, string value = "" ) {
-			return FormItem.Create( "Subject",
+			return FormItem.Create( "Subject".GetLiteralControl(),
 			                        new EwfTextBox( value ),
 			                        validationGetter: control => new Validation( ( pbv, validator ) => {
 				                        emailMessage.Subject = validator.GetString( new ValidationErrorHandler( "subject" ), control.GetPostBackValue( pbv ), false );
@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		public static FormItem<WysiwygHtmlEditor> GetBodyHtmlFormItem( this EmailMessage emailMessage, ValidationList vl, string value = "" ) {
-			return FormItem.Create( "Body",
+			return FormItem.Create( "Body".GetLiteralControl(),
 			                        new WysiwygHtmlEditor( value ),
 			                        validationGetter: control => new Validation( ( pbv, validator ) => emailMessage.BodyHtml = control.GetPostBackValue( pbv ), vl ) );
 		}

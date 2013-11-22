@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationList"></param>
 		/// <returns></returns>
-		public static FormItem GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds,
+		public static FormItem GetFormItem<ItemIdType>( Control label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds,
 		                                                out Action modificationMethod, string caption = "", bool includeSelectAndDeselectAllButtons = false,
 		                                                byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null, int? cellSpan = null,
 		                                                TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null,
@@ -68,7 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationList"></param>
 		/// <returns></returns>
-		public static FormItem GetFormItem<ItemIdType>( string label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
+		public static FormItem GetFormItem<ItemIdType>( Control label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items,
 		                                                out Action modificationMethod, string caption = "", bool includeSelectAndDeselectAllButtons = false,
 		                                                byte numberOfColumns = 1, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 		                                                Func<bool> validationPredicate = null, ValidationList validationList = null ) {

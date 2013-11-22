@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var dm = new DataModification();
 
 			ph.AddControlsReturnThis(
-				FormItem.Create( "You may report any problems, make suggestions, or ask for help here.",
+				FormItem.Create( "You may report any problems, make suggestions, or ask for help here.".GetLiteralControl(),
 				                 new EwfTextBox( "" ) { Rows = 20 },
 				                 validationGetter:
 					                 control =>

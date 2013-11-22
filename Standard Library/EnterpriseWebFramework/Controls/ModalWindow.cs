@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// An element that hovers over the page in the center of the browser window and prevents interaction with the page. There can only be one modal window
+	/// This control is intended to be used with LaunchWindowLink. An element that hovers over the page in the center of the browser window and prevents interaction with the page. There can only be one modal window
 	/// visible at a time.
 	/// </summary>
 	// NOTE: Prohibit form controls from existing in a modal window.

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -24,18 +23,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private readonly List<Control> wrappedControls = new List<Control>();
-		private readonly string label;
+		private readonly Control label;
 		private readonly Validation validation;
 
 		/// <summary>
-		/// Creates a new instance of a LabeledControl with the specified control and label. Do not pass null for label.
+		/// Creates a new instance of a LabeledControl with the specified control and label. You may pass null for the label.
 		/// </summary>
-		public LabeledControl( Control wrappedControl, string label ): this( label, wrappedControl, null ) {
+		public LabeledControl( Control wrappedControl, Control label ): this( label, wrappedControl, null ) {
 			wrappedControls.Add( wrappedControl );
 			this.label = label;
 		}
 
-		internal LabeledControl( string label, Control control, Validation validation ) {
+		internal LabeledControl( Control label, Control control, Validation validation ) {
 			this.label = label;
 			wrappedControls.Add( control );
 			this.validation = validation;
@@ -44,11 +43,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var controlStack = ControlStack.Create( false );
-			if( label.Length > 0 )
-				controlStack.AddText( label );
-			if( validation != null )
+			if( label != null )
+				controlStack.AddControls( label );
+			if( validation != null ) {
 				controlStack.AddModificationErrorItem( validation,
 				                                       errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+			}
 			controlStack.AddControls( new PlaceHolder().AddControlsReturnThis( wrappedControls ) );
 			Controls.Add( controlStack );
 		}

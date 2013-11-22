@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Export EWL to Local Feed.bat" />
-    <None Include="Update All Dependent Logic.bat" />
+    <None Include="Update All Dependent Logic.bat">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 </Project>

@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ph.AddControlsReturnThis(
 				FormItemBlock.CreateFormItemTable(
 					formItems:
-						FormItem.Create( "Enter your password for this non-live installation",
+						FormItem.Create( "Enter your password for this non-live installation".GetLiteralControl(),
 						                 new EwfTextBox( "" ) { MasksCharacters = true },
 						                 validationGetter: control => new Validation( ( pbv, validator ) => {
 							                 // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.

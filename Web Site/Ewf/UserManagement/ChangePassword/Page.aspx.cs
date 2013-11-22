@@ -18,11 +18,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var fib = FormItemBlock.CreateFormItemTable();
 
 			newPassword = new DataValue<string>();
-			fib.AddFormItems( FormItem.Create( "New password",
+			fib.AddFormItems( FormItem.Create( "New password".GetLiteralControl(),
 			                                   new EwfTextBox( "" ) { MasksCharacters = true },
 			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), dm ) ) );
 			var newPasswordConfirm = new DataValue<string>();
-			fib.AddFormItems( FormItem.Create( "Re-type new password",
+			fib.AddFormItems( FormItem.Create( "Re-type new password".GetLiteralControl(),
 			                                   new EwfTextBox( "" ) { MasksCharacters = true },
 			                                   validationGetter:
 				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );

@@ -10,10 +10,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var table = FormItemBlock.CreateFormItemTable();
-			table.AddFormItems( FormItem.Create( "Date Picker", new DatePicker( null ) ),
-			                    FormItem.Create( "Time Picker", new TimePicker( null ) ),
-			                    FormItem.Create( "Date/Time Picker", new DateTimePicker( null ) ),
-			                    FormItem.Create( "Duration Picker", new DurationPicker( TimeSpan.Zero ) ) );
+			table.AddFormItems( FormItem.Create( "Date Picker".GetLiteralControl(), new DatePicker( null ) ),
+													FormItem.Create( "Time Picker".GetLiteralControl(), new TimePicker( null ) ),
+													FormItem.Create( "Date/Time Picker".GetLiteralControl(), new DateTimePicker( null ) ),
+													FormItem.Create( "Duration Picker".GetLiteralControl(), new DurationPicker( TimeSpan.Zero ) ) );
 			ph.AddControlsReturnThis( table );
 		}
 	}

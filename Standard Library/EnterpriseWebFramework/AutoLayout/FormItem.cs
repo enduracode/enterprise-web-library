@@ -10,13 +10,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item with the given label and control. Cell span only applies to adjacent layouts.
 		/// </summary>
-		public static FormItem<ControlType> Create<ControlType>( string label, ControlType control, int? cellSpan = null,
+		public static FormItem<ControlType> Create<ControlType>( Control label, ControlType control, int? cellSpan = null,
 		                                                         TextAlignment textAlignment = TextAlignment.NotSpecified,
 		                                                         Func<ControlType, Validation> validationGetter = null ) where ControlType: Control {
 			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter != null ? validationGetter( control ) : null );
 		}
 
-		private readonly string label;
+		private readonly Control label;
 		private readonly Control control;
 
 		// NOTE: We may want to bundle all display stuff into one class. How would we make that easy to use, though?
@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item.
 		/// </summary>
-		protected FormItem( string label, Control control, int? cellSpan, TextAlignment textAlignment, Validation validation ) {
+		protected FormItem( Control label, Control control, int? cellSpan, TextAlignment textAlignment, Validation validation ) {
 			this.label = label;
 			this.control = control;
 			this.cellSpan = cellSpan;
@@ -39,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual string Label { get { return label; } }
+		public virtual Control Label { get { return label; } }
 
 		/// <summary>
 		/// Gets the control.
@@ -59,7 +59,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// This can be used to insert controls to a page without a <see cref="FormItemBlock"/> and display inline error messages.
 		/// </summary>
 		public LabeledControl ToControl( bool omitLabel = false ) {
-			return new LabeledControl( omitLabel ? "" : label, control, validation );
+			return new LabeledControl( omitLabel ? null : label, control, validation );
 		}
 	}
 
@@ -69,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class FormItem<ControlType>: FormItem where ControlType: Control {
 		private readonly ControlType control;
 
-		internal FormItem( string label, ControlType control, int? cellSpan, TextAlignment textAlignment, Validation validation )
+		internal FormItem( Control label, ControlType control, int? cellSpan, TextAlignment textAlignment, Validation validation )
 			: base( label, control, cellSpan, textAlignment, validation ) {
 			this.control = control;
 		}
