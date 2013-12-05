@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -165,21 +166,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					continue;
 
 				// Redirect to the same shortcut URL to normalize the casing, fix the connection security, or both.
-				// NOTE: Remove "www." if possible. We can do this by getting the IP address of the web site and running a reverse PTR lookup on it (we can cache this
-				// at app startup time). This can give us the "preferred" name for the site if the reverse PTR records have been configured this way. We may want to do
-				// a forward lookup on the name returned by the reverse PTR if there is any chance it may not point to the site. We don't need to do any of this if the
-				// web site is using a host header; in this case we can simply get the first host header and assume that is the preferred name for the site.
-				// NOTE: Instead of using a reverse lookup, we should store the preferred domain name in the web site configuration for any installation that uses its
-				// own IIS web site bound to an IP address. Relying on reverse lookup could be dangerous since we don't have direct control over the records.
-				// Remember to address the NOTE in AppRequestState.GetBaseUrlWithSpecificSecurity and the NOTE in EwfPage.initEntitySetupAndCreateInfoObjects.
 				var canonicalAbsoluteUrl =
 					NetTools.CombineUrls( RequestState.GetBaseUrlWithSpecificSecurity( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ),
 					                      resolver.ShortcutUrl );
 				if( HttpRuntime.AppDomainAppVirtualPath == "/" && resolver.ShortcutUrl.Length == 0 )
 					canonicalAbsoluteUrl += "/";
-				if( canonicalAbsoluteUrl != RequestState.Url )
-					NetTools.Redirect( canonicalAbsoluteUrl );
 
+				Action redirect = () => NetTools.Redirect( canonicalAbsoluteUrl );
+
+				var canonicalUri = new Uri( canonicalAbsoluteUrl, UriKind.Absolute );
+				var requestUri = new Uri( RequestState.Url, UriKind.Absolute );
+
+				if( canonicalUri.Scheme != requestUri.Scheme )
+					redirect();
+
+				if( !AppTools.InstallationConfiguration.DisableNonPreferredDomainChecking &&
+				    canonicalAbsoluteUrl.Substring( ( canonicalUri.Scheme + "://" ).Length ) != RequestState.Url.Substring( ( requestUri.Scheme + "://" ).Length ) )
+					redirect();
+				
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 

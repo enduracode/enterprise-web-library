@@ -83,12 +83,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Browser = HttpContext.Current.Request.Browser;
 		}
 
+		/// <summary>
+		/// This is the absolute URL of the request. Absolute means the entire URL, including scheme, host, query strings and fragments.
+		/// </summary>
 		internal string Url { get { return url.AbsoluteUri; } }
 
 		internal string GetBaseUrlWithSpecificSecurity( bool secure ) {
-			// NOTE: Make this method decisive about a domain to use instead of just using the current one.
-			return NetTools.CombineUrls( ( secure ? "https" : "http" ) + "://" + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ),
-			                             HttpRuntime.AppDomainAppVirtualPath );
+			var scheme = ( secure ? "https" : "http" ) + "://";
+			if( !AppTools.InstallationConfiguration.BaseUrlOverride.IsWhitespace() )
+				return scheme + AppTools.InstallationConfiguration.BaseUrlOverride;
+
+			return NetTools.CombineUrls( scheme + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ), HttpRuntime.AppDomainAppVirtualPath );
 		}
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }

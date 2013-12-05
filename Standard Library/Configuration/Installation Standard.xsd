@@ -7,6 +7,8 @@
 			<element name="smtpServer" type="string" minOccurs="0" />
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
+			<element name="BaseUrlOverride" type="string" minOccurs="0" />
+			<element name="DisableNonPreferredDomainChecking" type="boolean" minOccurs="0" />
 			<element name="administrators">
 				<complexType>
 					<sequence>

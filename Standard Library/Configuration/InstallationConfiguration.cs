@@ -215,6 +215,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 
 		internal string SmtpServer { get { return installationStandardConfiguration.smtpServer ?? ""; } }
 
+		internal string BaseUrlOverride { get { return installationStandardConfiguration.BaseUrlOverride ?? ""; } }
+
+		internal bool DisableNonPreferredDomainChecking { get { return installationStandardConfiguration.DisableNonPreferredDomainChecking; } }
+
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 
 		/// <summary>
