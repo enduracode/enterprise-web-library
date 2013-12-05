@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Web;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 using Stripe;
@@ -26,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
 		                                                                  decimal? amountInDollars, string testSecretKey, string liveSecretKey,
 		                                                                  Func<string, decimal, StatusMessageAndPage> successHandler ) {
-			if( !HttpContext.Current.Request.IsSecureConnection )
+			if( !EwfApp.Instance.IsSecureRequest )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
 			                                                           "Stripe Checkout",

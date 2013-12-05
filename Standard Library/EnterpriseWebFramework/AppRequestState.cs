@@ -175,7 +175,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
+		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.IsSecureRequest; } }
 
 		private void loadUser() {
 			var identity = HttpContext.Current.User.Identity;

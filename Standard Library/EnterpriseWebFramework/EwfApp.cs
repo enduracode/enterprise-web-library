@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -177,13 +176,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var canonicalUri = new Uri( canonicalAbsoluteUrl, UriKind.Absolute );
 				var requestUri = new Uri( RequestState.Url, UriKind.Absolute );
 
-				if( canonicalUri.Scheme != requestUri.Scheme )
+				if( !IsSecureRequest && canonicalUri.Scheme == "https" )
 					redirect();
 
 				if( !AppTools.InstallationConfiguration.DisableNonPreferredDomainChecking &&
 				    canonicalAbsoluteUrl.Substring( ( canonicalUri.Scheme + "://" ).Length ) != RequestState.Url.Substring( ( requestUri.Scheme + "://" ).Length ) )
 					redirect();
-				
+
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 
@@ -245,6 +244,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.
 		/// </summary>
 		protected internal virtual string JavaScriptDocumentReadyFunctionCall { get { return ""; } }
+
+		/// <summary>
+		/// Returns true if this application is accessed via https.
+		/// A situation where this isn't as obvious as <see cref="HttpContext.Current.Request.IsSecureConnection"/> is when a reverse proxy is in place.
+		/// </summary>
+		public virtual bool IsSecureRequest { get { return Request.IsSecureConnection; } }
 
 		/// <summary>
 		/// Standard library use only.
@@ -445,7 +450,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private string getTransferPath( PageInfo page ) {
 			var url = page.GetUrl( true, true, false );
-			if( page.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
+			if( page.ShouldBeSecureGivenCurrentRequest != IsSecureRequest )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
 			return url;
 		}
