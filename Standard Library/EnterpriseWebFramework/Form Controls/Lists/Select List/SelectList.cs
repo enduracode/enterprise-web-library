@@ -197,8 +197,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				selectControl = new WebControl( HtmlTextWriterTag.Select ) { Width = width ?? Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
 				if( autoPostBack ) {
-					selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange,
-					                                        PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
+					PreRender +=
+						delegate {
+							selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange,
+							                                        PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
+						};
 				}
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );

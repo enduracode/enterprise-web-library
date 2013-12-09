@@ -31,37 +31,45 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.modificationMethods.AddRange( modificationMethods );
 		}
 
-		internal void Execute( bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler,
-		                       Action additionalMethod = null ) {
-			if( additionalMethod == null && ( ( !validations.Any() && !modificationMethods.Any() ) || ( skipIfNoChanges && !formValuesChanged ) ) )
-				return;
+		internal bool Execute( bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler,
+		                       bool performValidationOnly = false, Action additionalMethod = null ) {
+			var skipModification = ( !validations.Any() && ( performValidationOnly || !modificationMethods.Any() ) ) || ( skipIfNoChanges && !formValuesChanged );
+			var skipAdditionalMethod = performValidationOnly || additionalMethod == null;
+			if( skipModification && skipAdditionalMethod )
+				return false;
+
+			var topValidator = new Validator();
+			foreach( var validation in validations ) {
+				if( topValidations.Contains( validation ) )
+					validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, topValidator );
+				else {
+					var validator = new Validator();
+					validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator );
+					if( validator.ErrorsOccurred )
+						topValidator.NoteError();
+					validationErrorHandler( validation, validator.ErrorMessages );
+				}
+			}
+			if( topValidator.ErrorsOccurred )
+				throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
 
 			DataAccessState.Current.DisableCache();
 			try {
-				var topValidator = new Validator();
-				foreach( var validation in validations ) {
-					if( topValidations.Contains( validation ) )
-						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, topValidator );
-					else {
-						var validator = new Validator();
-						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator );
-						if( validator.ErrorsOccurred )
-							topValidator.NoteError();
-						validationErrorHandler( validation, validator.ErrorMessages );
-					}
-				}
-				if( topValidator.ErrorsOccurred )
-					throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
-
 				foreach( var method in modificationMethods )
 					method();
-
 				if( additionalMethod != null )
 					additionalMethod();
+			}
+			catch( Exception e ) {
+				if( e.GetChain().OfType<EwfException>().FirstOrDefault() != null )
+					AppRequestState.Instance.RollbackDatabaseTransactions();
+				throw;
 			}
 			finally {
 				DataAccessState.Current.ResetCache();
 			}
+
+			return true;
 		}
 	}
 }

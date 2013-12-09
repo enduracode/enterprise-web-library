@@ -307,6 +307,8 @@
     <Compile Include="EnterpriseWebFramework\PageBase\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\SecondaryPostBackOperation.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />

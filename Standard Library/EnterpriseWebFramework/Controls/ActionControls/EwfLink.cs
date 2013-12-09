@@ -136,7 +136,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( isPostBackButton && url.Any() ) {
 				var postBack = GetLinkPostBack( destinationPageInfo );
 				EwfPage.Instance.AddPostBack( postBack );
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) );
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) ); };
 			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );

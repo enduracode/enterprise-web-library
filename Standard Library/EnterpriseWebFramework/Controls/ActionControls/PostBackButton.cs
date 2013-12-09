@@ -13,6 +13,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		internal static string GetPostBackScript( PostBack postBack, bool includeReturnFalse = true ) {
 			if( EwfPage.Instance.GetPostBack( postBack.Id ) != postBack )
 				throw new ApplicationException( "The post-back must have been added to the page." );
+			var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
+			if( validationPostBack != null && EwfPage.Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+				throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
 			return "postBack( '{0}' )".FormatWith( postBack.Id ) + ( includeReturnFalse ? "; return false" : "" );
 		}
 
@@ -143,7 +146,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				confirmationWindow = new ModalWindow( ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
 			}
 			else if( !usesSubmitBehavior )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) );
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
