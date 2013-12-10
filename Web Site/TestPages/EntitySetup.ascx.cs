@@ -33,7 +33,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						               new CheckBox.Info( this ),
 						               new CheckBoxList.Info( this ),
 						               new SelectListDemo.Info( this ),
-						               new DateAndTimePickers.Info( this ) )
+						               new DateAndTimePickers.Info( this ) ),
+						new PageGroup( "Other", new IntermediatePostBacks.Info( this ) )
 					};
 			}
 
