@@ -85,7 +85,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
-			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog().ToArray() ) );
+			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog() ) );
 
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );
