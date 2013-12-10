@@ -789,6 +789,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
+		// When deleting this, remove the hack in DataAccessState.PrimaryDatabaseConnection.
 		public void EhModifyData( Action<DBConnection> modificationMethod ) {
 			PostBack.CreateFull( firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
 			        .Execute( true, null, pba => { } );
