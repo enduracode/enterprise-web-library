@@ -233,8 +233,8 @@
     <Compile Include="EnterpriseWebFramework\Controls\Calendar\MonthViewCalendar.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\CommonCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlLine.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlList.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\ControlListItems\ControlListSpacerCellSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlList.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListSpacerCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ControlStack.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\DatePicker.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\DateTimePicker.cs" />
