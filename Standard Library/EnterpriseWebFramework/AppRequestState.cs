@@ -205,7 +205,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal void CleanUp() {
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
+			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
+			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
 			if( errorException != null ) {
 				AppTools.EmailAndLogError( errorPrefix, errorException );
@@ -222,26 +223,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods() {
+		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( bool skipNonTransactionalModificationMethods = false ) {
 			var methods = new List<Action>();
-			if( primaryDatabaseConnectionInitialized ) {
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.PrimaryDatabaseConnection;
-					primaryDatabaseConnectionInitialized = false;
-					cleanUpDatabaseConnection( tempConnection );
-				} );
-			}
+			if( primaryDatabaseConnectionInitialized )
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.PrimaryDatabaseConnection ) );
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
 				var databaseNameCopy = databaseName;
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy );
-					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
-					cleanUpDatabaseConnection( tempConnection );
-				} );
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
 			}
 			methods.Add( () => {
 				try {
-					if( !transactionMarkedForRollback ) {
+					if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
 						DataAccessState.Current.DisableCache();
 						try {
 							foreach( var i in nonTransactionalModificationMethods )
@@ -260,31 +252,40 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			transactionMarkedForRollback = false;
 		}
 
-		private void cleanUpDatabaseConnection( DBConnection cn ) {
+		private void cleanUpDatabaseConnection( DBConnection connection ) {
+			// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
 			try {
-				if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( cn.DatabaseInfo ) )
-					return;
-
 				try {
-					if( !transactionMarkedForRollback )
-						cn.CommitTransaction();
-				}
-				catch {
-					// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
-					// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
-					// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
-					// until we implement a true distributed transaction model with two-phase commit.
-					transactionMarkedForRollback = true;
+					if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+						return;
 
-					throw;
+					try {
+						if( !transactionMarkedForRollback )
+							connection.CommitTransaction();
+					}
+					catch {
+						// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
+						// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
+						// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
+						// until we implement a true distributed transaction model with two-phase commit.
+						transactionMarkedForRollback = true;
+
+						throw;
+					}
+					finally {
+						if( transactionMarkedForRollback )
+							connection.RollbackTransaction();
+					}
 				}
 				finally {
-					if( transactionMarkedForRollback )
-						cn.RollbackTransaction();
+					connection.Close();
 				}
 			}
 			finally {
-				cn.Close();
+				if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
+					secondaryDatabasesWithInitializedConnections.Remove( connection.DatabaseInfo.SecondaryDatabaseName );
+				else
+					primaryDatabaseConnectionInitialized = false;
 			}
 		}
 	}
