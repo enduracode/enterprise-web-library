@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -75,6 +76,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Converts a string to an EwfTableCell.
 		/// </summary>
+		[ Obsolete( "Strings are implicitly converted to EwfTableCell" ) ]
 		public static EwfTableCell ToCell( this string text ) {
 			return new EwfTableCell( text );
 		}
@@ -82,6 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Converts a control to an EwfTableCell.
 		/// </summary>
+		[ Obsolete( "Controls are implicitly converted to EwfTableCell" ) ]
 		public static EwfTableCell ToCell( this Control control ) {
 			return new EwfTableCell( control );
 		}

@@ -99,5 +99,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private static Literal getLiteral( string text ) {
 			return new Literal { Text = text.GetTextAsEncodedHtml() };
 		}
+
+		public static implicit operator EwfTableCell( string text ) {
+			return new EwfTableCell( text );
+		}
+
+		public static implicit operator EwfTableCell( Control control ) {
+			return new EwfTableCell( control );
+		}
 	}
 }
