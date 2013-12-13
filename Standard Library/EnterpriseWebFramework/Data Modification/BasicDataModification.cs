@@ -51,7 +51,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 			}
 			if( topValidator.ErrorsOccurred )
-				throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
+				throw new DataModificationException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
 
 			DataAccessState.Current.DisableCache();
 			try {
@@ -61,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					additionalMethod();
 			}
 			catch( Exception e ) {
-				if( e.GetChain().OfType<EwfException>().FirstOrDefault() != null )
+				if( e.GetChain().OfType<DataModificationException>().FirstOrDefault() != null )
 					AppRequestState.Instance.RollbackDatabaseTransactions();
 				throw;
 			}

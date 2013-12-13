@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		public List<LookupBoxSetup> CreateLookupBoxSetups() {
 			var lookupBoxSetups = new List<LookupBoxSetup>();
-			lookupBoxSetups.Add( new LookupBoxSetup( 100, "Lookup!", "lookup", text => { throw new EwfException( "Lookup '" + text + "' failed." ); } ) );
+			lookupBoxSetups.Add( new LookupBoxSetup( 100, "Lookup!", "lookup", text => { throw new DataModificationException( "Lookup '" + text + "' failed." ); } ) );
 			return lookupBoxSetups;
 		}
 

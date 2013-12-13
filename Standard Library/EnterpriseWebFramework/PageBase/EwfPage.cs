@@ -267,12 +267,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
 				var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
 				if( postBack == null )
-					throw new EwfException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
+					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 				var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
 					                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
 					                            : null;
 				if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
-					throw new EwfException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
+					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
 				// Execute the page's data update.
 				var dmExecuted = false;
@@ -317,7 +317,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					try {
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}
-					catch( EwfException ) {
+					catch( DataModificationException ) {
 						DataAccessState.Current.ResetCache();
 						throw;
 					}
@@ -754,7 +754,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				method();
 			}
 			catch( Exception e ) {
-				var ewfException = e.GetChain().OfType<EwfException>().FirstOrDefault();
+				var ewfException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
 				if( ewfException == null )
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
@@ -781,7 +781,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var invalidPostBackValuesExist = activeFormValues.Any( i => !i.PostBackValueIsValid( requestState.PostBackValues ) );
 			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
 			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree )
-				throw new EwfException( Translation.AnotherUserHasModifiedPageHtml );
+				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml );
 		}
 
 		private void handleValidationErrors( Validation validation, IEnumerable<string> errorMessages ) {

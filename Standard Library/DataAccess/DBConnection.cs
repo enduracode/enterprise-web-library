@@ -324,7 +324,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					errors.Add( result );
 			}
 			if( errors.Any() )
-				throw new EwfException( errors.ToArray() );
+				throw new DataModificationException( errors.ToArray() );
 		}
 
 		private void resetTransactionFields() {

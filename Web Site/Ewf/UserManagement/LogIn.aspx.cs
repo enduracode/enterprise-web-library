@@ -77,7 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private PostBackAction getSendNewPasswordAction() {
 			var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
 			if( userLocal == null )
-				throw new EwfException( getUnregisteredEmailMessage() );
+				throw new DataModificationException( getUnregisteredEmailMessage() );
 			return new PostBackAction( ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ) );
 		}
 

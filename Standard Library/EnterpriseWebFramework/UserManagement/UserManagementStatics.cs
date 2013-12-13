@@ -111,7 +111,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public static void ResetAndSendPassword( string validatedEmailAddress, string emailAddressErrorMessage ) {
 			var user = GetUser( validatedEmailAddress );
 			if( user == null )
-				throw new EwfException( emailAddressErrorMessage );
+				throw new DataModificationException( emailAddressErrorMessage );
 			ResetAndSendPassword( user.UserId );
 		}
 
@@ -197,7 +197,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				addStatusMessageIfClockNotSynchronized( utcOffset );
 
 				if( errors.Any() )
-					throw new EwfException( errors.ToArray() );
+					throw new DataModificationException( errors.ToArray() );
 				return user;
 			};
 		}
@@ -229,7 +229,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				errors.AddRange( verifyTestCookie() );
 				addStatusMessageIfClockNotSynchronized( utcOffset );
 				if( errors.Any() )
-					throw new EwfException( errors.ToArray() );
+					throw new DataModificationException( errors.ToArray() );
 			};
 		}
 

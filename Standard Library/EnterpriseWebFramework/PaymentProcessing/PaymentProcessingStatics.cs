@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                                                            description: description.Any() ? description : null );
 				if( response.IsError ) {
 					if( response.error.type == "card_error" )
-						throw new EwfException( response.error.message );
+						throw new DataModificationException( response.error.message );
 					throw new ApplicationException( "Stripe error: " + response );
 				}
 
