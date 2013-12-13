@@ -39,7 +39,9 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Gets the path of the Red Stapler folder on the machine.
 		/// </summary>
-		public static string RedStaplerFolderPath { get { return StandardLibraryMethods.CombinePaths( "C:", "Red Stapler" ); } }
+		public static string RedStaplerFolderPath {
+			get { return Environment.GetEnvironmentVariable( "RedStaplerData" ) ?? StandardLibraryMethods.CombinePaths( "C:", "Red Stapler" ); }
+		}
 
 		/// <summary>
 		/// Initializes the class. This includes loading application settings from the configuration file. The application name should be scoped within the system.
