@@ -204,6 +204,9 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />
@@ -307,8 +310,9 @@
     <Compile Include="EnterpriseWebFramework\PageBase\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\SecondaryPostBackOperation.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />

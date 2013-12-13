@@ -22,8 +22,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis( childControls );
-			if( updateRegionSet != null )
-				EwfPage.Instance.AddUpdateRegion( new UpdateRegion( updateRegionSet, this.ToSingleElementArray, this, "", () => "", arg => this.ToSingleElementArray() ) );
+
+			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
+			                                                                "",
+			                                                                updateRegionSet != null
+				                                                                ? new PreModificationUpdateRegion( updateRegionSet, this.ToSingleElementArray, () => "" )
+					                                                                  .ToSingleElementArray()
+				                                                                : new PreModificationUpdateRegion[ 0 ],
+			                                                                arg => this.ToSingleElementArray() ) );
 		}
 	}
 }

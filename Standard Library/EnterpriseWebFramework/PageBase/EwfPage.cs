@@ -48,7 +48,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
-		private readonly List<UpdateRegion> updateRegions = new List<UpdateRegion>();
+		private readonly List<UpdateRegionLinker> updateRegionLinkers = new List<UpdateRegionLinker>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
@@ -172,20 +172,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			if( requestState.StaticRegionContents != null ) {
-				var updateRegionsByKey = updateRegions.ToDictionary( i => i.Key );
+				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
 				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany( keyAndArg => {
-					UpdateRegion region;
-					if( !updateRegionsByKey.TryGetValue( keyAndArg.Item1, out region ) )
-						throw getPossibleDeveloperMistakeException( "An update region with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
-					return region.PostModificationControlGetter( keyAndArg.Item2 );
+					UpdateRegionLinker linker;
+					if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
+						throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
+					return linker.PostModificationRegionGetter( keyAndArg.Item2 );
 				} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
 				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
-				    staticRegionContents.Item2.Any( i => !i.PostBackValueIsValid( requestState.PostBackValues ) ) ) {
+				    formValues.Any(
+					    i =>
+					    i.GetPostBackValueKey().Any() && requestState.PostBackValues.GetValue( i.GetPostBackValueKey() ) != null &&
+					    !i.PostBackValueIsValid( requestState.PostBackValues ) ) ) {
 					throw getPossibleDeveloperMistakeException( requestState.ModificationErrorsExist
 						                                            ? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
-						                                            : requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate
+						                                            : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+							                                            requestState.DmIdAndSecondaryOp.Item2 )
 							                                              ? "Form controls outside of update regions may not change on an intermediate post-back."
 							                                              : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 				}
@@ -321,15 +325,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				if( postBack.IsIntermediate ) {
 					var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
-					var regions = updateRegions.Where( i => regionSets.Contains( i.Set ) ).ToArray();
-					var staticRegionContents = getStaticRegionContents( regions.SelectMany( i => i.PreModificationControlGetter() ) );
+					var preModRegions =
+						updateRegionLinkers.SelectMany( i => i.PreModificationRegions,
+						                                ( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } )
+						                   .Where( i => regionSets.Contains( i.Set ) )
+						                   .ToArray();
+					var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
 					requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
 					requestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
 					                                                actionPostBack.ValidationDm == lastPostBackFailingDm
 						                                                ? SecondaryPostBackOperation.Validate
 						                                                : SecondaryPostBackOperation.ValidateChangesOnly );
-					requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, regions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
+					requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 				}
 				else
 					requestState.PostBackValues = null;
@@ -596,8 +604,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			displayLinks.Add( displayLink );
 		}
 
-		internal void AddUpdateRegion( UpdateRegion region ) {
-			updateRegions.Add( region );
+		internal void AddUpdateRegionLinker( UpdateRegionLinker linker ) {
+			updateRegionLinkers.Add( linker );
 		}
 
 		/// <summary>
@@ -654,7 +662,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
 			             ( !requestState.ModificationErrorsExist ||
-			               ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) );
+			               ( requestState.DmIdAndSecondaryOp != null &&
+			                 new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+				                 requestState.DmIdAndSecondaryOp.Item2 ) ) );
 
 			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
 			var scrollStatement = "";

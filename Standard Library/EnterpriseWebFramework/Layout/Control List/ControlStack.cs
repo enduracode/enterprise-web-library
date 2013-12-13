@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -21,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// <summary>
 			/// Standard Library use only.
 			/// </summary>
-			public static readonly string[] Selectors = new[] { "div." + CssClass, "div." + CssClass + ".ewfStandard" };
+			public static readonly string[] Selectors = { "div." + CssClass, "div." + CssClass + ".ewfStandard" };
 
 			/// <summary>
 			/// Standard Library use only.
@@ -42,8 +41,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a blank vertical stack of controls.
 		/// </summary>
 		/// <param name="isStandard">Sets whether or not this control stack will have standard styling.</param>
-		public static ControlStack Create( bool isStandard ) {
-			return new ControlStack( isStandard );
+		/// <param name="tailUpdateRegions"></param>
+		/// <param name="itemInsertionUpdateRegions"></param>
+		public static ControlStack Create( bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions = null,
+		                                   IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
+			return new ControlStack( isStandard, tailUpdateRegions, itemInsertionUpdateRegions );
 		}
 
 		/// <summary>
@@ -64,12 +66,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return cs;
 		}
 
-		private readonly List<Tuple<Func<IEnumerable<Control>>, bool>> items = new List<Tuple<Func<IEnumerable<Control>>, bool>>();
-		private readonly bool? isStandard;
+		private readonly bool isStandard;
+		private readonly List<Tuple<Func<ControlListItem>, bool>> items = new List<Tuple<Func<ControlListItem>, bool>>();
+		private readonly IEnumerable<TailUpdateRegion> tailUpdateRegions;
+		private readonly IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions;
+
 		private int modErrorDisplayKeySuffix;
 
-		private ControlStack( bool isStandard ) {
+		private ControlStack( bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions ) {
 			this.isStandard = isStandard;
+			this.tailUpdateRegions = tailUpdateRegions ?? new TailUpdateRegion[ 0 ];
+			this.itemInsertionUpdateRegions = itemInsertionUpdateRegions ?? new ItemInsertionUpdateRegion[ 0 ];
+		}
+
+		/// <summary>
+		/// Adds an item to the control stack.
+		/// </summary>
+		public void AddItem( ControlListItem item ) {
+			items.Add( Tuple.Create( new Func<ControlListItem>( () => item ), false ) );
 		}
 
 		/// <summary>
@@ -84,7 +98,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Adds the specified controls to the stack.
 		/// </summary>
 		public void AddControls( params Control[] controls ) {
-			items.AddRange( controls.Select( i => Tuple.Create( new Func<IEnumerable<Control>>( i.ToSingleElementArray ), false ) ) );
+			foreach( var i in controls )
+				AddItem( new ControlListItem( i.ToSingleElementArray() ) );
 		}
 
 		/// <summary>
@@ -92,41 +107,83 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// added.
 		/// </summary>
 		public void AddModificationErrorItem( Validation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
-			items.Add( Tuple.Create( new Func<IEnumerable<Control>>( () => {
+			items.Add( Tuple.Create( new Func<ControlListItem>( () => {
 				var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
-				return errors.Any() ? controlGetter( errors ) : new Control[ 0 ];
+				return new ControlListItem( errors.Any() ? controlGetter( errors ) : new Control[ 0 ] );
 			} ),
 			                         true ) );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			this.AddControlsReturnThis(
-				items.SelectMany( i => i.Item2 ? new NamingPlaceholder( getItemControl( i.Item1() ).ToArray() ).ToSingleElementArray() : getItemControl( i.Item1() ) ) );
-		}
-
-		private IEnumerable<Control> getItemControl( IEnumerable<Control> controls ) {
-			if( !controls.Any() )
-				yield break;
-			yield return new Block( controls.ToArray() ) { CssClass = CssElementCreator.ItemCssClass };
-		}
-
-		/// <summary>
-		/// Returns the div tag, which represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
-
-		/// <summary>
-		/// Renders this control after applying the appropriate CSS classes.
-		/// </summary>
-		protected override void Render( HtmlTextWriter writer ) {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-
-			if( !isStandard.HasValue )
-				throw new ApplicationException( "Please explicitly specify either true or false for the IsStandard attribute." );
-			if( isStandard.Value )
+			if( isStandard )
 				CssClass = CssClass.ConcatenateWithSpace( "ewfStandard" );
 
-			base.Render( writer );
+			var visibleItems = items.Select( i => Tuple.Create( i.Item1(), i.Item2 ) );
+			visibleItems = visibleItems.ToArray();
+
+			var itemControls = visibleItems.Select( i => {
+				var np = new NamingPlaceholder( getItemControl( i ), updateRegionSet: i.Item1.UpdateRegionSet );
+				if( i.Item1.Id != null )
+					np.ID = i.Item1.Id;
+				return np;
+			} );
+			itemControls = itemControls.ToArray();
+
+			Controls.Add( new NamingPlaceholder( itemControls ) );
+
+			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
+			                                                                "tail",
+			                                                                from region in tailUpdateRegions
+			                                                                let staticItemCount = items.Count() - region.UpdatingItemCount
+			                                                                select
+				                                                                new PreModificationUpdateRegion( region.Set,
+				                                                                                                 () => itemControls.Skip( staticItemCount ),
+				                                                                                                 staticItemCount.ToString ),
+			                                                                arg => itemControls.Skip( int.Parse( arg ) ) ) );
+
+			var itemControlsById =
+				itemControls.Select( ( control, index ) => new { visibleItems.ElementAt( index ).Item1.Id, control } )
+				            .Where( i => i.Id != null )
+				            .ToDictionary( i => i.Id, i => i.control );
+			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
+			                                                                "add",
+			                                                                from region in itemInsertionUpdateRegions
+			                                                                select
+				                                                                new PreModificationUpdateRegion( region.Set,
+				                                                                                                 () => new Control[ 0 ],
+				                                                                                                 () =>
+				                                                                                                 StringTools.ConcatenateWithDelimiter( ",",
+				                                                                                                                                       region
+					                                                                                                                                       .NewItemIdGetter()
+					                                                                                                                                       .ToArray() ) ),
+			                                                                arg =>
+			                                                                arg.Separate( ",", false )
+			                                                                   .Where( itemControlsById.ContainsKey )
+			                                                                   .Select( i => itemControlsById[ i ] as Control ) ) );
+
+			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
+			                                                                "remove",
+			                                                                visibleItems.Select(
+				                                                                ( item, index ) =>
+				                                                                item.Item1.RemovalUpdateRegionSet != null
+					                                                                ? new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSet,
+					                                                                                                   () =>
+					                                                                                                   itemControls.ElementAt( index ).ToSingleElementArray(),
+					                                                                                                   () => "" )
+					                                                                : null ).Where( i => i != null ),
+			                                                                arg => new Control[ 0 ] ) );
 		}
+
+		private IEnumerable<Control> getItemControl( Tuple<ControlListItem, bool> item ) {
+			if( item.Item2 && !item.Item1.ChildControls.Any() )
+				yield break;
+			yield return new Block( item.Item1.ChildControls.ToArray() ) { CssClass = CssElementCreator.ItemCssClass };
+		}
+
+		/// <summary>
+		/// Returns the tag that represents this control in HTML.
+		/// </summary>
+		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}
 }
