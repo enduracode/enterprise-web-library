@@ -90,7 +90,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
 
 			var statusControls = new NamingPlaceholder();
-			addStatusMessageControls( statusControls, ph2 );
+			var dialogStatusControls = new NamingPlaceholder();
+			addStatusMessageControls( statusControls, dialogStatusControls );
+			ph2.AddControlsReturnThis( dialogStatusControls );
 
 			if( EwfPage.Instance.Master is EwfUi )
 				( (EwfUi)EwfPage.Instance.Master ).AddStatusStatusMessages( statusControls );
