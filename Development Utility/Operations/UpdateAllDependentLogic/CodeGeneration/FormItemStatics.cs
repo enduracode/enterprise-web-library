@@ -43,12 +43,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                      getAllowEmptyParameter( false ).ToSingleElementArray(),
 			                      new[]
 				                      {
-					                      new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool", "readOnly", "false" ),
-					                      new CSharpParameter( "bool?", "suggestSpellCheck", "null" ), new CSharpParameter( "PostBack", "postBack", "null" ),
-					                      new CSharpParameter( "bool", "autoPostBack", "false" )
+					                      new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool", "masksCharacters", "false" ),
+					                      new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "bool?", "suggestSpellCheck", "null" ),
+					                      new CSharpParameter( "PostBack", "postBack", "null" ), new CSharpParameter( "bool", "autoPostBack", "false" )
 				                      },
 			                      new CSharpParameter[ 0 ],
-			                      "new EwfTextBox( v, rows: textBoxRows, " + ( field.Size.HasValue ? "maxLength: " + field.Size.Value + ", " : "" ) +
+			                      "new EwfTextBox( v, rows: textBoxRows, masksCharacters: masksCharacters, " +
+			                      ( field.Size.HasValue ? "maxLength: " + field.Size.Value + ", " : "" ) +
 			                      "readOnly: readOnly, suggestSpellCheck: suggestSpellCheck, postBack: postBack, autoPostBack: autoPostBack )",
 			                      "validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
 			                      ( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
