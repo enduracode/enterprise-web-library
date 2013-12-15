@@ -213,7 +213,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "return delete.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
 			writer.WriteLine( "}" ); // try
 			writer.WriteLine( "catch( System.Exception e ) {" );
-			writer.WriteLine( "rethrowAsEwfExceptionIfNecessary( e );" );
+			writer.WriteLine( "rethrowAsDataModificationExceptionIfNecessary( e );" );
 			writer.WriteLine( "throw;" );
 			writer.WriteLine( "}" ); // catch
 
@@ -480,7 +480,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // try
 
 			writer.WriteLine( "catch( System.Exception e ) {" );
-			writer.WriteLine( "rethrowAsEwfExceptionIfNecessary( e );" );
+			writer.WriteLine( "rethrowAsDataModificationExceptionIfNecessary( e );" );
 			writer.WriteLine( "throw;" );
 			writer.WriteLine( "}" ); // catch
 
@@ -553,11 +553,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeRethrowAsEwfExceptionIfNecessary() {
-			writer.WriteLine( "private static void rethrowAsEwfExceptionIfNecessary( System.Exception e ) {" );
+			writer.WriteLine( "private static void rethrowAsDataModificationExceptionIfNecessary( System.Exception e ) {" );
 			writer.WriteLine( "var constraintNamesToViolationErrorMessages = new Dictionary<string,string>();" );
 			writer.WriteLine( "populateConstraintNamesToViolationErrorMessages( constraintNamesToViolationErrorMessages );" );
 			writer.WriteLine( "foreach( var pair in constraintNamesToViolationErrorMessages )" );
-			writer.WriteLine( "if( e.GetBaseException().Message.ToLower().Contains( pair.Key.ToLower() ) ) throw new EwfException( pair.Value );" );
+			writer.WriteLine( "if( e.GetBaseException().Message.ToLower().Contains( pair.Key.ToLower() ) ) throw new DataModificationException( pair.Value );" );
 			writer.WriteLine( "}" ); // method
 		}
 

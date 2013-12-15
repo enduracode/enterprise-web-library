@@ -329,7 +329,7 @@
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLinkingOps.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\EwfApp.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\EwfException.cs" />
+    <Compile Include="EnterpriseWebFramework\Data Modification\DataModificationException.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPageRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\ExternalPageInfo.cs" />
