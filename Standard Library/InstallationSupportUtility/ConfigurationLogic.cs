@@ -182,7 +182,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			var generalMessage = "Failed during " + action + ".";
 			if( innerException is EndpointNotFoundException ) {
 				throw new UserCorrectableException(
-					generalMessage + " The web service could not be reached - this could be due to a network error or a configuration error.", innerException );
+					generalMessage + " The web service could not be reached - this could be due to a network error or a configuration error.",
+					innerException );
 			}
 			if( innerException is FaultException ) {
 				// We do not pass the fault exception as an inner exception because its message includes a big ugly stack trace.
@@ -195,7 +196,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 				throw new UserCorrectableException( generalMessage + " There was a network problem.", innerException );
 
 			throw new UserCorrectableException(
-				generalMessage + " This may have been caused by a network problem. The exception type is " + innerException.GetType().Name + ".", innerException );
+				generalMessage + " This may have been caused by a network problem. The exception type is " + innerException.GetType().Name + ".",
+				innerException );
 		}
 
 		public static string AuthenticationKey {
@@ -207,13 +209,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		}
 
 		/// <summary>
-		/// The path to installed installations on this machine.  For example, C:\Inetpub.
+		/// The path to installed installations on this machine.
 		/// </summary>
 		public static string InstallationsFolderPath {
 			get {
 				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.InstallationsFolderPath != null )
 					return AppTools.MachineConfiguration.InstallationsFolderPath;
-				return @"C:\Inetpub";
+				return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Installations" );
 			}
 		}
 
@@ -221,7 +223,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			get {
 				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.VaultWorkingFolderPath != null )
 					return AppTools.MachineConfiguration.VaultWorkingFolderPath;
-				return @"C:\Red Stapler\Revision Control";
+				return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Revision Control" );
 			}
 		}
 
