@@ -33,30 +33,34 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal bool Execute( bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler,
 		                       bool performValidationOnly = false, Action additionalMethod = null ) {
-			var skipModification = ( !validations.Any() && ( performValidationOnly || !modificationMethods.Any() ) ) || ( skipIfNoChanges && !formValuesChanged );
-			var skipAdditionalMethod = performValidationOnly || additionalMethod == null;
-			if( skipModification && skipAdditionalMethod )
-				return false;
-
-			var topValidator = new Validator();
-			foreach( var validation in validations ) {
-				if( topValidations.Contains( validation ) )
-					validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, topValidator );
-				else {
-					var validator = new Validator();
-					validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator );
-					if( validator.ErrorsOccurred )
-						topValidator.NoteError();
-					validationErrorHandler( validation, validator.ErrorMessages );
+			var validationNeeded = validations.Any() && ( !skipIfNoChanges || formValuesChanged );
+			if( validationNeeded ) {
+				var topValidator = new Validator();
+				foreach( var validation in validations ) {
+					if( topValidations.Contains( validation ) )
+						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, topValidator );
+					else {
+						var validator = new Validator();
+						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator );
+						if( validator.ErrorsOccurred )
+							topValidator.NoteError();
+						validationErrorHandler( validation, validator.ErrorMessages );
+					}
 				}
+				if( topValidator.ErrorsOccurred )
+					throw new DataModificationException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
 			}
-			if( topValidator.ErrorsOccurred )
-				throw new DataModificationException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( topValidator.ErrorMessages ).ToArray() );
+
+			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !formValuesChanged );
+			if( performValidationOnly || ( skipModification && additionalMethod == null ) )
+				return validationNeeded;
 
 			DataAccessState.Current.DisableCache();
 			try {
-				foreach( var method in modificationMethods )
-					method();
+				if( !skipModification ) {
+					foreach( var method in modificationMethods )
+						method();
+				}
 				if( additionalMethod != null )
 					additionalMethod();
 			}
