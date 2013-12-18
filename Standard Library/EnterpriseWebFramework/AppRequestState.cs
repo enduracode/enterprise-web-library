@@ -164,27 +164,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( !userLoaded )
-					loadUser();
+				if( !userLoaded ) {
+					user = UserManagementStatics.UserManagementEnabled ? UserManagementStatics.GetUserFromRequest() : null;
+					userLoaded = true;
+				}
 				return user;
 			}
 		}
 
 		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
-
-		private void loadUser() {
-			var identity = HttpContext.Current.User.Identity;
-
-			// Try to associate a user with the current identity, if it is authenticated. Expose this user via the AuthenticatedUser property.
-			if( identity.IsAuthenticated && UserManagementStatics.UserManagementEnabled ) {
-				if( identity.AuthenticationType == "Forms" )
-					user = UserManagementStatics.GetUser( int.Parse( identity.Name ) );
-				else if( identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
-					user = UserManagementStatics.GetUser( identity.Name );
-			}
-
-			userLoaded = true;
-		}
 
 		internal void ClearUser() {
 			user = null;

@@ -186,7 +186,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					}
 
 					if( authenticationSuccessful )
-						setCookieAndUser( user );
+						setFormsAuthCookieAndUser( user );
 					else
 						errors.Add( passwordErrorMessage );
 				}
@@ -223,7 +223,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			return userId => {
 				var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
-				setCookieAndUser( user );
+				setFormsAuthCookieAndUser( user );
 
 				var errors = new List<string>();
 				errors.AddRange( verifyTestCookie() );
@@ -233,24 +233,33 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			};
 		}
 
-		private static void setCookieAndUser( FormsAuthCapableUser user ) {
-			AppRequestState.AddNonTransactionalModificationMethod( () => {
-				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+		private static void setFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
+			var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
 
-				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
-					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
-					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+			// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
+			var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+				                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
+				                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
-				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), true /*persistent*/, (int)authenticationDuration.TotalMinutes );
-				setCookie( FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt( ticket ) );
-			} );
+			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
+			setFormsAuthCookie( ticket );
 
 			AppRequestState.Instance.SetUser( user );
 		}
 
+		private static void setFormsAuthCookie( FormsAuthenticationTicket ticket ) {
+			setCookie( formsAuthCookieName, FormsAuthentication.Encrypt( ticket ) );
+		}
+
 		private static void setCookie( string name, string value ) {
-			HttpContext.Current.Response.Cookies.Add( new HttpCookie( name, value ) { Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } );
+			AppRequestState.AddNonTransactionalModificationMethod(
+				() =>
+				HttpContext.Current.Response.Cookies.Add( new HttpCookie( name, value )
+					{
+						Path = NetTools.GetAppCookiePath(),
+						Secure = EwfApp.SupportsSecureConnections,
+						HttpOnly = true
+					} ) );
 		}
 
 		private static string[] verifyTestCookie() {
@@ -278,8 +287,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Do not call if the system does not implement the forms authentication capable user management provider.
 		/// </summary>
 		public static void LogOutUser() {
-			FormsAuthentication.SignOut();
+			clearFormsAuthCookie();
 			AppRequestState.Instance.SetUser( null );
+		}
+
+		private static void clearFormsAuthCookie() {
+			AppRequestState.AddNonTransactionalModificationMethod(
+				() =>
+				HttpContext.Current.Response.Cookies.Add( new HttpCookie( formsAuthCookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
 		}
 
 		/// <summary>
@@ -296,5 +311,46 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
 			}
 		}
+
+		internal static User GetUserFromRequest() {
+			var cookie = HttpContext.Current.Request.Cookies[ formsAuthCookieName ];
+			if( cookie != null ) {
+				var ticket = getFormsAuthTicket( cookie );
+				if( ticket != null )
+					return GetUser( int.Parse( ticket.Name ) );
+			}
+
+			var identity = HttpContext.Current.User.Identity;
+			if( identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
+				return GetUser( identity.Name );
+
+			return null;
+		}
+
+		internal static void UpdateFormsAuthCookieIfNecessary() {
+			var cookie = HttpContext.Current.Request.Cookies[ formsAuthCookieName ];
+			if( cookie == null )
+				return;
+
+			var ticket = getFormsAuthTicket( cookie );
+			if( ticket != null ) {
+				var newTicket = FormsAuthentication.RenewTicketIfOld( ticket );
+				if( newTicket != ticket )
+					setFormsAuthCookie( newTicket );
+			}
+			else
+				clearFormsAuthCookie();
+		}
+
+		private static FormsAuthenticationTicket getFormsAuthTicket( HttpCookie cookie ) {
+			FormsAuthenticationTicket ticket = null;
+			try {
+				ticket = FormsAuthentication.Decrypt( cookie.Value );
+			}
+			catch {}
+			return ticket != null && !ticket.Expired ? ticket : null;
+		}
+
+		private static string formsAuthCookieName { get { return "User"; } }
 	}
 }

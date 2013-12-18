@@ -317,7 +317,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					try {
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}
-					catch( DataModificationException ) {
+					catch {
 						DataAccessState.Current.ResetCache();
 						throw;
 					}
@@ -943,18 +943,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
 			DataAccessState.Current.DisableCache();
 			try {
-				if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
-					updateLastPageRequestTimeForUser();
+				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
 					EwfApp.Instance.ExecuteInitialRequestDataModifications();
+					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
+						updateLastPageRequestTimeForUser();
 					executeInitialRequestDataModifications();
 				}
+				UserManagementStatics.UpdateFormsAuthCookieIfNecessary();
+
+				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 			}
 			finally {
 				DataAccessState.Current.ResetCache();
 			}
-
-			// This catches errors caused by initial request data modifications.
-			AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
 		}
 
 		/// <summary>
@@ -993,26 +994,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
 
-			try {
-				if( formsAuthProvider != null ) {
-					var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
-					formsAuthProvider.InsertOrUpdateUser( AppTools.User.UserId,
-					                                      AppTools.User.Email,
-					                                      formsAuthCapableUser.Salt,
-					                                      formsAuthCapableUser.SaltedPassword,
-					                                      AppTools.User.Role.RoleId,
-					                                      DateTime.Now,
-					                                      formsAuthCapableUser.MustChangePassword );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => {
+				try {
+					if( formsAuthProvider != null ) {
+						var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+						formsAuthProvider.InsertOrUpdateUser( AppTools.User.UserId,
+						                                      AppTools.User.Email,
+						                                      formsAuthCapableUser.Salt,
+						                                      formsAuthCapableUser.SaltedPassword,
+						                                      AppTools.User.Role.RoleId,
+						                                      DateTime.Now,
+						                                      formsAuthCapableUser.MustChangePassword );
+					}
+					else if( externalAuthProvider != null )
+						externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
 				}
-				else if( externalAuthProvider != null )
-					externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
-			}
-			catch( DbConcurrencyException ) {
-				// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-				// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to get
-				// an error email if the update fails.
-				AppRequestState.Instance.RollbackDatabaseTransactions();
-			}
+				catch( DbConcurrencyException ) {
+					// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
+					// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
+					// get an error email if the update fails.
+					throw new DoNotCommitException();
+				}
+			} );
 		}
 
 		/// <summary>
