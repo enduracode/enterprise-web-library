@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
@@ -9,7 +8,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>
-	public class EwfLink: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
+	public class EwfLink: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
+		internal static PostBack GetLinkPostBack( PageInfo destination ) {
+			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
+			return EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) );
+		}
+
 		/// <summary>
 		/// Creates a link.
 		/// </summary>
@@ -129,8 +133,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Attributes.Add( "href", this.GetClientUrl( url ) );
 			}
 
-			if( isPostBackButton && url.Any() )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( this, true ) );
+			if( isPostBackButton && url.Any() ) {
+				var postBack = GetLinkPostBack( destinationPageInfo );
+				EwfPage.Instance.AddPostBack( postBack );
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) ); };
+			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );
 			if( popUpWindowSettings != null && url.Any() )
@@ -161,15 +168,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
 
-		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.EhRedirect( destinationPageInfo );
-		}
-
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
 
-		private bool isPostBackButton { get { return EwfPage.Instance.IsAutoDataModifier && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; } }
+		private bool isPostBackButton {
+			get { return EwfPage.Instance.IsAutoDataUpdater && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; }
+		}
 	}
 }

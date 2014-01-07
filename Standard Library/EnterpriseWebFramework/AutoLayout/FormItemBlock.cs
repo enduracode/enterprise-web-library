@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
@@ -99,7 +98,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					numberOfPlaceholdersRequired.Times( () => formItems.Add( getPlaceholderFormItem() ) );
 				}
 				formItems.Add( FormItem.Create( "",
-				                                new PostBackButton( new DataModification(), new ButtonActionControlStyle( IncludeButtonWithThisText ) )
+				                                new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( IncludeButtonWithThisText ) )
 					                                {
 						                                Width = Unit.Percentage( 50 )
 					                                },
@@ -163,9 +162,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			table.AddData( formItems,
 			               i => {
 				               var stack = ControlStack.Create( true );
-				               if( i.Validation != null )
+				               if( i.Validation != null ) {
 					               stack.AddModificationErrorItem( i.Validation,
 					                                               errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+				               }
 				               stack.AddControls( i.Control );
 				               return new EwfTableItem( i.Label.ToCell(), new EwfTableCell( stack ) { TextAlignment = i.TextAlignment } );
 			               } );

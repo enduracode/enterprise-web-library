@@ -88,8 +88,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an in-line radio button that is part of the group.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
-			var checkBox = new EwfCheckBox( formValue, label ) { AutoPostBack = autoPostBack };
+		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
+			var checkBox = new EwfCheckBox( formValue, label, postBack ) { AutoPostBack = autoPostBack };
 			checkBoxesAndSelectionStates.Add( Tuple.Create<CommonCheckBox, bool>( checkBox, isSelected ) );
 			return checkBox;
 		}
@@ -97,8 +97,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "", bool autoPostBack = false ) {
-			var checkBox = new BlockCheckBox( formValue, label ) { AutoPostBack = autoPostBack };
+		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
+			var checkBox = new BlockCheckBox( formValue, label, postBack ) { AutoPostBack = autoPostBack };
 			checkBoxesAndSelectionStates.Add( Tuple.Create<CommonCheckBox, bool>( checkBox, isSelected ) );
 			return checkBox;
 		}

@@ -232,6 +232,13 @@
     <Compile Include="TestPages\EntitySetup.ascx.designer.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\IntermediatePostBacks.aspx.cs">
+      <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\IntermediatePostBacks.aspx.designer.cs">
+      <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\OmniDemo.aspx.cs">
       <DependentUpon>OmniDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -391,13 +398,6 @@
     </Compile>
     <Compile Include="TestPages\SubFolder\New.aspx.designer.cs">
       <DependentUpon>New.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\TestPad.aspx.cs">
-      <DependentUpon>TestPad.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\TestPad.aspx.designer.cs">
-      <DependentUpon>TestPad.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\TestService.aspx.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
@@ -718,6 +718,7 @@
     <Content Include="TestPages\HtmlEditing.aspx" />
     <Content Include="TestPages\CalendarDemo.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
+    <Content Include="TestPages\IntermediatePostBacks.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
@@ -752,7 +753,6 @@
     <Content Include="TestPages\SubFolder\EntitySetup.ascx" />
     <Content Include="TestPages\SubFolder\General.aspx" />
     <Content Include="TestPages\SubFolder\New.aspx" />
-    <Content Include="TestPages\TestPad.aspx" />
     <Content Include="TestPages\TestService.aspx" />
     <Content Include="Web.config" />
     <Content Include="Ewf\ContactUs\Page.aspx" />

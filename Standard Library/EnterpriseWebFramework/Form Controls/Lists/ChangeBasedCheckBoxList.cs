@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					                        return;
 				                        control.Validate( pbv );
 			                        },
-			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
+			                                                                     validationList ?? EwfPage.Instance.DataUpdate ) );
 		}
 
 		/// <summary>
@@ -91,7 +91,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					                        return;
 				                        control.Validate( pbv );
 			                        },
-			                                                                     validationList ?? EwfPage.Instance.PostBackDataModification ) );
+			                                                                     validationList ?? EwfPage.Instance.DataUpdate ) );
 		}
 	}
 

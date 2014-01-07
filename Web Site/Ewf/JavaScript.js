@@ -118,6 +118,14 @@ function RemoveClickScriptBinding() {
 	);
 }
 
+function postBack( postBackId ) {
+	var theForm = document.getElementById( "aspnetForm" );
+	if( !theForm.onsubmit || ( theForm.onsubmit() != false ) ) {
+		$( "#ewfPostBack" ).val( postBackId );
+		theForm.submit();
+	}
+}
+
 function postBackRequestStarted() {
 	// see http://stackoverflow.com/a/9924844/35349
 	for( var i in CKEDITOR.instances )

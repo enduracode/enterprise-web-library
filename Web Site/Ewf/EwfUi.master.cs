@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
@@ -431,12 +430,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					                select i.BuildButton( text => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large ), false );
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
-				else if( EwfPage.Instance.IsAutoDataModifier )
-					controls.Add( new PostBackButton( new DataModification(), null, new ButtonActionControlStyle( "Update Now" ) ) );
+				else if( EwfPage.Instance.IsAutoDataUpdater )
+					controls.Add( new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( "Update Now" ) ) );
 			}
 			else {
-				if( EwfPage.Instance.IsAutoDataModifier )
-					throw new ApplicationException( "AutoDataModifier is not currently compatible with custom content foot controls." );
+				if( EwfPage.Instance.IsAutoDataUpdater )
+					throw new ApplicationException( "AutoDataUpdater is not currently compatible with custom content foot controls." );
 				controls.AddRange( contentFootControls.ToList() );
 			}
 

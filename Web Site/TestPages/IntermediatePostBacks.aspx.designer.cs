@@ -10,7 +10,7 @@
 namespace EnterpriseWebLibrary.WebSite.TestPages {
     
     
-    public partial class TestPad {
+    public partial class IntermediatePostBacks {
         
         /// <summary>
         /// ph control.

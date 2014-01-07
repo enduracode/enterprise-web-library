@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string subCaption = "";
 		private DataRowLimit defaultDataRowLimit = DataRowLimit.Unlimited;
 		private readonly List<ActionButtonSetup> actionLinks = new List<ActionButtonSetup>();
-		private readonly Dictionary<PostBackButton, RowMethod> selectedRowActionButtonsToMethods = new Dictionary<PostBackButton, RowMethod>();
+		private readonly Dictionary<DataModification, RowMethod> selectedRowDataModificationsToMethods = new Dictionary<DataModification, RowMethod>();
 		private readonly List<PostBackButton> selectedRowActionButtonsToAdd = new List<PostBackButton>();
 		private bool allowExportToExcel;
 		private bool isStandard = true;
@@ -43,6 +43,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Set to true if you want this table to hide itself if it has no content rows.
 		/// </summary>
 		public bool HideIfEmpty { get; set; }
+
+		public string PostBackIdBase { private get; set; }
 
 		/// <summary>
 		/// Creates a table.
@@ -161,9 +163,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// The action method automatically executes in an EhModifyData method, so your implementation does not need to do this.
 		/// </summary>
 		public void AddSelectedRowsAction( string label, RowMethod action ) {
-			var button = new PostBackButton( new DataModification(), () => { }, new TextActionControlStyle( label ), false );
-			selectedRowActionButtonsToMethods.Add( button, action );
-			selectedRowActionButtonsToAdd.Add( button );
+			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, label ) );
+			selectedRowDataModificationsToMethods.Add( postBack, action );
+			selectedRowActionButtonsToAdd.Add( new PostBackButton( postBack, new TextActionControlStyle( label ), false ) );
 		}
 
 		/// <summary>
@@ -174,8 +176,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// The checkbox column consumes 5% of the table width.
 		/// The action method automatically executes in an EhModifyData method, so your implementation does not need to do this.
 		/// </summary>
-		public void AddSelectedRowsAction( PostBackButton existingButton, RowMethod action ) {
-			selectedRowActionButtonsToMethods.Add( existingButton, action );
+		public void AddSelectedRowsAction( DataModification dataModification, RowMethod action ) {
+			selectedRowDataModificationsToMethods.Add( dataModification, action );
 		}
 
 		/// <summary>
@@ -335,8 +337,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			// Excel export
-			if( allowExportToExcel )
-				actionLinks.Add( new ActionButtonSetup( "Export to Excel", new PostBackButton( new DataModification(), ExportToExcel ) ) );
+			if( allowExportToExcel ) {
+				actionLinks.Add( new ActionButtonSetup( "Export to Excel",
+				                                        new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ),
+				                                                                                 firstModificationMethod: ExportToExcel ) ) ) );
+			}
 
 			// Action links
 			foreach( var actionLink in actionLinks ) {
@@ -350,22 +355,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				actionLinkStack.AddControls( button );
 			}
 
-			foreach( var buttonToMethod in selectedRowActionButtonsToMethods ) {
-				var button = buttonToMethod.Key;
+			foreach( var buttonToMethod in selectedRowDataModificationsToMethods ) {
+				var dataModification = buttonToMethod.Key;
 				var method = buttonToMethod.Value;
-				button.ClickHandler = delegate {
-					EwfPage.Instance.EhModifyData( cn1 => {
-						foreach( var rowSetup in rowSetups ) {
-							if( rowSetup.UniqueIdentifier != null &&
-							    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
-								    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
-								method( cn1, rowSetup.UniqueIdentifier );
-						}
-					} );
-				};
+				dataModification.AddModificationMethod( () => {
+					foreach( var rowSetup in rowSetups ) {
+						if( rowSetup.UniqueIdentifier != null &&
+						    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+							method( DataAccessState.Current.PrimaryDatabaseConnection, rowSetup.UniqueIdentifier );
+					}
+				} );
 			}
 
-			if( selectedRowActionButtonsToMethods.Count > 0 ) {
+			if( selectedRowDataModificationsToMethods.Any() ) {
 				foreach( var rowSetup in rowSetups ) {
 					var cell = new TableCell
 						{
@@ -385,22 +387,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var rowSetup = filteredRowSetups[ i ];
 				var nextRowSetup = ( ( i == filteredRowSetups.Count - 1 ) ? null : filteredRowSetups[ i + 1 ] );
 
-				var upButton = new PostBackButton( new DataModification(),
-				                                   () => { },
-				                                   new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-				                                   false );
-				var downButton = new PostBackButton( new DataModification(),
-				                                     () => { },
-				                                     new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-				                                     false );
 				var controlLine = new ControlLine( new Control[ 0 ] );
-
 				if( previousRowSetup != null ) {
-					upButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) );
+					var upButton =
+						new PostBackButton(
+							PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
+							                     firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ),
+							new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							usesSubmitBehavior: false );
 					controlLine.AddControls( upButton );
 				}
 				if( nextRowSetup != null ) {
-					downButton.ClickHandler = () => EwfPage.Instance.EhModifyData( cn1 => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) );
+					var downButton =
+						new PostBackButton(
+							PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
+							                     firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ),
+							new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							usesSubmitBehavior: false );
 					controlLine.AddControls( downButton );
 				}
 
@@ -436,10 +439,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
 			if( dataRowLimit == (DataRowLimit)CurrentDataRowLimit )
 				return new Literal { Text = getDataRowLimitText( dataRowLimit ) };
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhExecute( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ),
-			                           new TextActionControlStyle( getDataRowLimitText( dataRowLimit ) ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
+					                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ),
+					new TextActionControlStyle( getDataRowLimitText( dataRowLimit ) ),
+					usesSubmitBehavior: false );
 		}
 
 		private string getDataRowLimitText( DataRowLimit dataRowLimit ) {

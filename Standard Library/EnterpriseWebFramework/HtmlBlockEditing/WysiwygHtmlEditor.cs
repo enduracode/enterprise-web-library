@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -36,17 +36,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			Attributes.Add( "name", UniqueID );
-
-			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
-			// does in their System.Web.UI.WebControls.TextBox implementation. It probably doesn't matter in this case since CKEditor is gutting the textarea, but we
-			// want to have this somewhere for reference to assist us when we reimplement EwfTextBox to not use System.Web.UI.WebControls.TextBox under the hood.
-			PreRender +=
-				delegate {
-					Controls.Add( new Literal
-						{
-							Text = HttpUtility.HtmlEncode( Environment.NewLine + formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
-						} );
-				};
+			PreRender += delegate { EwfTextBox.AddTextareaValue( this, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ); };
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {

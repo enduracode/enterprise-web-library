@@ -33,12 +33,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				               new EwfTableCell( "Four with TipControl" ) { ToolTipControl = new DatePicker( null ) } );
 			}
 			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+
 			//Clickable Rows
 			for( var i = 0; i < 7; i++ ) {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript =
+						ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "table3" + i,
+						                                                       firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -61,7 +64,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript =
+						ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "table4" + i,
+						                                                       firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -98,7 +103,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table6.AddTextRow(
 					new RowSetup
 						{
-							ClickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Info, "Postback!" ); } ),
+							ClickScript =
+								ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "table6" + i,
+								                                                       firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) ),
 							UniqueIdentifier = 3
 						},
 					"Post" );
@@ -109,7 +116,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript =
+						ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "table7" + i,
+						                                                       firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -129,7 +138,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript( delegate { AddStatusMessage( StatusMessageType.Warning, "Postback!" ); } );
+					clickScript =
+						ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "table8" + i,
+						                                                       firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {

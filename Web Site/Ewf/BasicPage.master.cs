@@ -4,7 +4,6 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.Configuration.Machine;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.WebSessionState;
@@ -65,13 +64,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				var children = new List<Control>();
 				children.Add( "This is not the live installation of the system. All changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
-					children.Add( new PostBackButton( new DataModification(),
-					                                  () => EwfPage.Instance.EhModifyDataAndRedirect( delegate {
-						                                  IntermediateAuthenticationMethods.ClearCookie();
-						                                  return NetTools.HomeUrl;
-					                                  } ),
-					                                  new ButtonActionControlStyle( "Log Out" ),
-					                                  false ) );
+					children.Add(
+						new PostBackButton(
+							PostBack.CreateFull( id: "ewfIntermediateLogOut",
+							                     firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
+							                     actionGetter: () => new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) ) ),
+							new ButtonActionControlStyle( "Log Out" ),
+							false ) );
 				}
 
 				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
@@ -86,7 +85,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
-			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog().ToArray() ) );
+			ph2.AddControlsReturnThis( new NamingPlaceholder( getStatusMessageDialog() ) );
 
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );

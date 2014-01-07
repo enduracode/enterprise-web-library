@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A dictionary of form control values from a post back.
 	/// </summary>
 	public class PostBackValueDictionary {
-		private readonly Dictionary<string, object> dictionary;
+		private readonly Dictionary<string, object> dictionary = new Dictionary<string, object>();
 
-		internal PostBackValueDictionary( Dictionary<string, object> dictionary ) {
-			this.dictionary = dictionary;
-		}
+		internal PostBackValueDictionary() {}
 
 		/// <summary>
 		/// Returns true if extra post-back values exist.
@@ -35,6 +34,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal object GetValue( string key ) {
 			object value;
 			return dictionary.TryGetValue( key, out value ) ? value : null;
+		}
+
+		internal void RemoveExcept( IEnumerable<string> keys ) {
+			var hashSet = new HashSet<string>( keys );
+			foreach( var key in dictionary.Keys.Except( hashSet ).ToArray() )
+				dictionary.Remove( key );
 		}
 	}
 }

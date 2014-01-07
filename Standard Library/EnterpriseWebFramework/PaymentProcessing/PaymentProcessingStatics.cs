@@ -35,19 +35,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
 
-			var dm = new DataModification();
+			PageInfo successPage = null;
+			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
+			                                    actionGetter: () => new PostBackAction( successPage ) );
 			var token = new DataValue<string>();
 
 			Func<PostBackValueDictionary, string> tokenHiddenFieldValueGetter; // unused
 			Func<string> tokenHiddenFieldClientIdGetter;
-			EwfHiddenField.Create( "", postBackValue => token.Value = postBackValue, dm, out tokenHiddenFieldValueGetter, out tokenHiddenFieldClientIdGetter );
+			EwfHiddenField.Create( "", postBackValue => token.Value = postBackValue, postBack, out tokenHiddenFieldValueGetter, out tokenHiddenFieldClientIdGetter );
 
-			PageInfo successPage = null;
-			var externalHandler =
-				new ExternalPostBackEventHandler( () => EwfPage.Instance.ExecuteDataModification( dm, () => EwfPage.Instance.EhRedirect( successPage ) ) );
-			EwfPage.Instance.Form.Controls.Add( externalHandler );
-
-			dm.AddModificationMethod( () => {
+			postBack.AddModificationMethod( () => {
 				// We can add support later for customer creation, subscriptions, etc. as needs arise.
 				if( !amountInDollars.HasValue )
 					throw new ApplicationException( "Only simple charges are supported at this time." );
@@ -59,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                                                            description: description.Any() ? description : null );
 				if( response.IsError ) {
 					if( response.error.type == "card_error" )
-						throw new EwfException( response.error.message );
+						throw new DataModificationException( response.error.message );
 					throw new ApplicationException( "Stripe error: " + response );
 				}
 
@@ -74,9 +71,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 			} );
 
+			EwfPage.Instance.AddPostBack( postBack );
 			return () => {
 				var jsTokenHandler = "function( res ) { $( '#" + tokenHiddenFieldClientIdGetter() + "' ).val( res.id ); " +
-				                     PostBackButton.GetPostBackScript( externalHandler, true, includeReturnFalse: false ) + "; }";
+				                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
 				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
 				       jsTokenHandler + " } )";

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.JavaScriptWriting;
@@ -7,12 +9,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that, when clicked, causes a post back and executes code.
 	/// </summary>
-	public class PostBackButton: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
-		internal static string GetPostBackScript( Control targetControl, bool isEventPostBack, bool includeReturnFalse = true ) {
-			if( !( targetControl is IPostBackEventHandler ) && isEventPostBack )
-				throw new ApplicationException( "The target must be a post back event handler." );
-			var pbo = new PostBackOptions( targetControl, isEventPostBack ? EwfPage.EventPostBackArgument : "" );
-			return EwfPage.Instance.ClientScript.GetPostBackEventReference( pbo ) + ( includeReturnFalse ? "; return false" : "" );
+	public class PostBackButton: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
+		internal static string GetPostBackScript( PostBack postBack, bool includeReturnFalse = true ) {
+			if( EwfPage.Instance.GetPostBack( postBack.Id ) != postBack )
+				throw new ApplicationException( "The post-back must have been added to the page." );
+			var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
+			if( validationPostBack != null && EwfPage.Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+				throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
+			return "postBack( '{0}' )".FormatWith( postBack.Id ) + ( includeReturnFalse ? "; return false" : "" );
 		}
 
 		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
@@ -22,12 +26,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		internal static void AddButtonAttributes( WebControl control ) {
-			control.Attributes.Add( "name", control.UniqueID );
+			control.Attributes.Add( "name", EwfPage.ButtonElementName );
 			control.Attributes.Add( "value", "v" );
 			control.Attributes.Add( "type", "button" );
 		}
 
-		private readonly DataModification dataModification;
+		/// <summary>
+		/// Causes the specified control to submit the form when the enter key is pressed while the control has focus. Specify null for the post-back to use the
+		/// submit button's post-back, which you should do if you want to simulate the user clicking the button.
+		/// </summary>
+		internal static void MakeControlPostBackOnEnter( WebControl control, PostBack postBack, string predicate = "" ) {
+			if( postBack != null || EwfPage.Instance.SubmitButtonPostBack != null ) {
+				control.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
+				                                  "if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " +
+				                                  GetPostBackScript( postBack ?? EwfPage.Instance.SubmitButtonPostBack ) + "; }" );
+			}
+		}
+
+		private readonly PostBack postBack;
+		private bool usesSubmitBehavior;
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
 		private ModalWindow confirmationWindow;
@@ -38,10 +55,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public ActionControlStyle ActionControlStyle { get; set; }
 
-		/// <summary>
-		/// True if this button should act like a submit button (respond to the enter key). Doesn't work with the text or custom action control styles.
-		/// </summary>
-		public bool UsesSubmitBehavior { get; set; }
+		[ Obsolete( "Guaranteed through 31 January 2014. Please specify via constructor." ) ]
+		public bool UsesSubmitBehavior { get { return usesSubmitBehavior; } set { usesSubmitBehavior = value; } }
 
 		/// <summary>
 		/// Setting the content control will cause clicking the button to display a confirmation window with the given control as content displayed to the user.
@@ -51,33 +66,55 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public Control ConfirmationWindowContentControl { get; set; }
 
 		/// <summary>
-		/// Creates a post back button. You may pass null for the clickHandler.
+		/// Creates a post-back button.
 		/// </summary>
-		public PostBackButton( DataModification dataModification, Action clickHandler, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true ) {
-			if( dataModification == EwfPage.Instance.PostBackDataModification )
-				throw new ApplicationException( "The post back data modification should only be executed by the framework." );
-			this.dataModification = dataModification;
-
-			ClickHandler = clickHandler;
+		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="actionControlStyle"></param>
+		/// <param name="usesSubmitBehavior">True if this button should act like a submit button (respond to the enter key). Doesn't work with the text or custom
+		/// action control styles.</param>
+		public PostBackButton( PostBack postBack, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true ) {
+			this.postBack = postBack;
 			ActionControlStyle = actionControlStyle;
-			UsesSubmitBehavior = usesSubmitBehavior;
+			this.usesSubmitBehavior = usesSubmitBehavior;
+
+			EwfPage.Instance.AddControlTreeValidation( () => {
+				if( !this.usesSubmitBehavior )
+					return;
+				var submitButtons = getSubmitButtons( EwfPage.Instance );
+				if( submitButtons.Count() > 1 ) {
+					throw new ApplicationException( "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
+					                                StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
+				}
+				EwfPage.Instance.SubmitButtonPostBack = this.postBack;
+			} );
+		}
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
+		public PostBackButton( DataModification dataModification, Action clickHandler, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true )
+			: this( (PostBack)dataModification, actionControlStyle, usesSubmitBehavior ) {
+			ClickHandler = clickHandler;
 		}
 
 		/// <summary>
-		/// Creates a post back button.
+		/// Creates a post-back button.
 		/// </summary>
-		public PostBackButton( DataModification dataModification, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true )
-			: this( dataModification, null, actionControlStyle, usesSubmitBehavior ) {}
-
-		/// <summary>
-		/// Creates a post back button. Do not pass null for the data modification.
-		/// </summary>
+		/// <param name="postBack">Do not pass null.</param>
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
+		public PostBackButton( PostBack postBack ): this( postBack, new ButtonActionControlStyle( "" ) ) {}
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
 		public PostBackButton( DataModification dataModification, Action clickHandler ): this( dataModification, clickHandler, new ButtonActionControlStyle( "" ) ) {}
 
-		/// <summary>
-		/// Sets the method to be invoked when this button is clicked.
-		/// </summary>
+		private List<Control> getSubmitButtons( Control control ) {
+			var submitButtons = new List<Control>();
+			if( control is PostBackButton && ( control as PostBackButton ).usesSubmitBehavior )
+				submitButtons.Add( control );
+			foreach( Control childControl in control.Controls )
+				submitButtons.AddRange( getSubmitButtons( childControl ) );
+			return submitButtons;
+		}
+
+		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
 		public Action ClickHandler { private get; set; }
 
 		/// <summary>
@@ -92,18 +129,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button ) {
-				Attributes.Add( "name", UniqueID );
+				Attributes.Add( "name", EwfPage.ButtonElementName );
 				Attributes.Add( "value", "v" );
-				Attributes.Add( "type", UsesSubmitBehavior ? "submit" : "button" );
+				Attributes.Add( "type", usesSubmitBehavior ? "submit" : "button" );
 			}
 
+			// This is a huge hack, but we can remove it after 31 January 2014.
+			if( ClickHandler != null )
+				EwfPage.Instance.AddControlTreeValidation( () => ( (ActionPostBack)postBack ).AddModificationMethod( ClickHandler ) );
+
+			EwfPage.Instance.AddPostBack( postBack );
+
 			if( ConfirmationWindowContentControl != null ) {
-				if( UsesSubmitBehavior )
+				if( usesSubmitBehavior )
 					throw new ApplicationException( "PostBackButton cannot be the submit button and also have a confirmation message." );
-				confirmationWindow = new ModalWindow( ConfirmationWindowContentControl, title: "Confirmation", postBackButton: this );
+				confirmationWindow = new ModalWindow( ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
 			}
-			else if( !UsesSubmitBehavior )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( this, true ) );
+			else if( !usesSubmitBehavior )
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
@@ -121,13 +164,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
 
-		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.ExecuteDataModification( dataModification, ClickHandler );
-		}
-
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return UsesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey { get { return usesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
 	}
 }
