@@ -63,10 +63,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				if( additionalMethod != null )
 					additionalMethod();
+				AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
 			}
-			catch( Exception e ) {
-				if( e.GetChain().OfType<DataModificationException>().FirstOrDefault() != null )
-					AppRequestState.Instance.RollbackDatabaseTransactions();
+			catch {
+				AppRequestState.Instance.RollbackDatabaseTransactions();
 				throw;
 			}
 			finally {

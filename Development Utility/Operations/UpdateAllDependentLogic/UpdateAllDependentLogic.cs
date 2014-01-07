@@ -314,7 +314,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
-			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath, installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName );
+			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath );
 
 			var webProjectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, "Generated Code" );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
