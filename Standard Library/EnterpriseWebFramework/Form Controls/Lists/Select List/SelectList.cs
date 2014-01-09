@@ -264,10 +264,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                       "' ).attr( 'data-placeholder' ) );"
 				                     : "";
 
-			// Windows 8 always identifies as "touch" even if it's desktop. To allow Select2 for Windows 8, but fall-back if it's touch-based, check for
-			// "Windows NT 6.2", without "Touch" in the user agent string. http://msdn.microsoft.com/en-us/library/ie/hh920767%28v=vs.85%29.aspx
-			return "if( !Modernizr.touch || ( window.navigator.userAgent.contains( 'Windows NT 6.2' ) && !window.navigator.userAgent.contains( 'Touch' ) ) ) " +
-			       select2Statement + touchStatement.PrependDelimiter( " else " );
+			// We previously used "!Modernizr.touch" as the condition. One reason this didn't work: Windows 8 always identifies as "touch" even if it's desktop.
+			return "if( true ) " + select2Statement + touchStatement.PrependDelimiter( " else " );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
