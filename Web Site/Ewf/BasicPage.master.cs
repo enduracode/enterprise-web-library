@@ -89,8 +89,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
 
-			var statusControls = new NamingPlaceholder();
-			var dialogStatusControls = new NamingPlaceholder();
+			var statusControls = new NamingPlaceholder( new Control[ 0 ] );
+			var dialogStatusControls = new NamingPlaceholder( new Control[ 0 ] );
 			addStatusMessageControls( statusControls, dialogStatusControls );
 			ph2.AddControlsReturnThis( dialogStatusControls );
 
