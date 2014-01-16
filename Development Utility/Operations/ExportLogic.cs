@@ -6,10 +6,10 @@ using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
 using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages;
+using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
@@ -184,12 +184,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
 					var installationConfigurationFile =
 						XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
-							StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ), false );
+							StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+							false );
 
 					buildMessageInstallation.Id = installationConfigurationFile.rsisInstallationId;
 					buildMessageInstallation.Name = installationConfigurationFile.installedInstallation.name;
 					buildMessageInstallation.ShortName = installationConfigurationFile.installedInstallation.shortName;
-					buildMessageInstallation.IsLiveInstallation = installationConfigurationFile.installedInstallation.IsLiveInstallation;
+					buildMessageInstallation.IsLiveInstallation = installationConfigurationFile.installedInstallation.InstallationTypeConfiguration != null
+						                                              ? installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is
+						                                                LiveInstallationConfiguration
+						                                              : installationConfigurationFile.installedInstallation.IsLiveInstallation;
 					buildMessageInstallation.ConfigurationPackage = ZipOps.ZipFolderAsByteArray( installationConfigurationFolderPath );
 					build.Installations.Add( buildMessageInstallation );
 					operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;
