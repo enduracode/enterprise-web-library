@@ -176,6 +176,7 @@
     <Compile Include="DatabaseSpecification\Databases\OracleInfo.cs" />
     <Compile Include="DatabaseSpecification\Databases\SqlServerInfo.cs" />
     <Compile Include="DoNotEmailOrLogException.cs" />
+    <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />

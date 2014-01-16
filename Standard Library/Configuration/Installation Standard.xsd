@@ -4,8 +4,11 @@
 	<complexType name="InstallationStandardConfiguration">
 		<sequence>
 			<element name="rsisInstallationId" type="int" minOccurs="0" />
+
+			<!-- Delete when all systems have a release after 15 Mar 2014. -->
 			<element name="Smtp" type="rs:Smtp" minOccurs="0" />
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
+
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
 			<element name="administrators">
 				<complexType>
@@ -27,10 +30,9 @@
 					<sequence>
 						<element name="name" type="string" />
 						<element name="shortName" type="string" />
-						<element name="IsLiveInstallation" type="boolean" />
 
-						<!-- Delete when all systems have a release after 15 Jan 2009. -->
-						<element name="typeId" type="int" minOccurs="0" />
+						<!-- Delete when all systems have a release after 15 Mar 2014. -->
+						<element name="IsLiveInstallation" type="boolean" minOccurs="0" />
 
 						<element name="webSiteNames" minOccurs="0">
 							<complexType>
@@ -39,6 +41,9 @@
 								</sequence>
 							</complexType>
 						</element>
+
+						<!-- Make required when all systems have a release after 15 Mar 2014. -->
+						<element name="InstallationTypeConfiguration" type="rs:InstallationTypeConfiguration" minOccurs="0" />
 					</sequence>
 				</complexType>
 			</element>
@@ -104,5 +109,54 @@
 				</sequence>
 			</extension>
 		</complexContent>
+	</complexType>
+	<complexType name="InstallationTypeConfiguration" abstract="true" />
+	<complexType name="LiveInstallationConfiguration">
+		<complexContent>
+			<extension base="rs:InstallationTypeConfiguration">
+				<sequence>
+					<element name="EmailSendingService" type="rs:EmailSendingService" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="IntermediateInstallationConfiguration">
+		<complexContent>
+			<extension base="rs:InstallationTypeConfiguration">
+				<sequence>
+					<element name="EmailFromName" type="string" />
+					<element name="EmailFromAddress" type="string" />
+					<element name="EmailSendingService" type="rs:EmailSendingService" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="EmailSendingService" abstract="true" />
+	<complexType name="SendGrid">
+		<complexContent>
+			<extension base="rs:EmailSendingService">
+				<sequence>
+					<element name="UserName" type="string" />
+					<element name="Password" type="string" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="SmtpServer">
+		<complexContent>
+			<extension base="rs:EmailSendingService">
+				<sequence>
+					<element name="Server" type="string" />
+					<element name="Port" type="int" minOccurs="0" />
+					<element name="Credentials" type="rs:SmtpServerCredentials" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="SmtpServerCredentials">
+		<sequence>
+			<element name="UserName" type="string" />
+			<element name="Password" type="string" />
+		</sequence>
 	</complexType>
 </schema>

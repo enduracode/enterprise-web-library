@@ -135,31 +135,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public string FullShortName { get { return GetFullShortNameFromSystemAndInstallationNames( SystemShortName, InstallationShortName ); } }
 
 		/// <summary>
-		/// Gets the email default from name.
-		/// </summary>
-		public string EmailDefaultFromName {
-			get {
-				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
-					       ? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.Name
-					       : AppTools.SystemProvider.EmailDefaultFromName;
-			}
-		}
-
-		/// <summary>
-		/// Gets the email default from address.
-		/// </summary>
-		public string EmailDefaultFromAddress {
-			get {
-				return installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride != null
-					       ? installationStandardConfiguration.EmailDefaultFromNameAndAddressOverride.EmailAddress
-					       : AppTools.SystemProvider.EmailDefaultFromAddress;
-			}
-		}
-
-		/// <summary>
 		/// Gets a list of the web applications in the system.
 		/// </summary>
-		public SystemGeneralConfigurationApplication[] WebApplications { get { return systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ]; } }
+		public SystemGeneralConfigurationApplication[] WebApplications {
+			get { return systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ]; }
+		}
 
 		/// <summary>
 		/// Gets a list of the services in the system.
@@ -180,12 +160,16 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// Gets a list of SQL commands to be run against the database after an UpdateData operation on a non-live installation.
 		/// </summary>
-		public string[] PrimaryDatabaseLiveToIntermediateConversionCommands { get { return systemGeneralConfiguration.PrimaryDatabaseLiveToIntermediateConversionCommands ?? new string[ 0 ]; } }
+		public string[] PrimaryDatabaseLiveToIntermediateConversionCommands {
+			get { return systemGeneralConfiguration.PrimaryDatabaseLiveToIntermediateConversionCommands ?? new string[ 0 ]; }
+		}
 
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
 		/// </summary>
-		public int? RsisInstallationId { get { return installationStandardConfiguration.rsisInstallationIdSpecified ? installationStandardConfiguration.rsisInstallationId as int? : null; } }
+		public int? RsisInstallationId {
+			get { return installationStandardConfiguration.rsisInstallationIdSpecified ? installationStandardConfiguration.rsisInstallationId as int? : null; }
+		}
 
 		/// <summary>
 		/// Gets the name of the installation.
@@ -197,35 +181,21 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// </summary>
 		public string InstallationShortName { get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; } }
 
-		/// <summary>
-		/// Gets the type of the installation.
-		/// </summary>
-		public InstallationType InstallationType {
-			get {
-				if( isDevelopmentInstallation )
-					return InstallationType.Development;
-				bool isLive;
-				if( installationStandardConfiguration.installedInstallation.typeIdSpecified )
-					isLive = installationStandardConfiguration.installedInstallation.typeId == 0;
-				else
-					isLive = installationStandardConfiguration.installedInstallation.IsLiveInstallation;
-				return isLive ? InstallationType.Live : InstallationType.Intermediate;
-			}
-		}
-
-		internal Smtp Smtp { get { return installationStandardConfiguration.Smtp; } }
-
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 
 		/// <summary>
 		/// Gets a list of the administrators for the installation.
 		/// </summary>
-		public List<InstallationStandardNameAndEmailAddress> Administrators { get { return new List<InstallationStandardNameAndEmailAddress>( installationStandardConfiguration.administrators ); } }
+		public List<InstallationStandardNameAndEmailAddress> Administrators {
+			get { return new List<InstallationStandardNameAndEmailAddress>( installationStandardConfiguration.administrators ); }
+		}
 
 		/// <summary>
 		/// Gets a database information object corresponding to the primary database for this configuration. Returns null if there is no database configured.
 		/// </summary>
-		public DatabaseInfo PrimaryDatabaseInfo { get { return installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null; } }
+		public DatabaseInfo PrimaryDatabaseInfo {
+			get { return installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null; }
+		}
 
 		/// <summary>
 		/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
@@ -275,6 +245,30 @@ namespace RedStapler.StandardLibrary.Configuration {
 					       ? new string[ 0 ]
 					       : installationStandardConfiguration.installedInstallation.webSiteNames;
 			}
+		}
+
+		/// <summary>
+		/// Gets the type of the installation.
+		/// </summary>
+		public InstallationType InstallationType {
+			get {
+				if( isDevelopmentInstallation )
+					return InstallationType.Development;
+				bool isLive;
+				if( installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration != null )
+					isLive = installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
+				else
+					isLive = installationStandardConfiguration.installedInstallation.IsLiveInstallation;
+				return isLive ? InstallationType.Live : InstallationType.Intermediate;
+			}
+		}
+
+		internal LiveInstallationConfiguration LiveInstallationConfiguration {
+			get { return (LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }
+		}
+
+		internal IntermediateInstallationConfiguration IntermediateInstallationConfiguration {
+			get { return (IntermediateInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }
 		}
 
 		internal string InstallationPath { get { return installationPath; } }
