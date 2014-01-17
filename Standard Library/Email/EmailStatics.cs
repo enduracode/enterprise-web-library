@@ -62,7 +62,9 @@ namespace RedStapler.StandardLibrary.Email {
 			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
 			var smtpClient = new System.Net.Mail.SmtpClient( "smtp.sendgrid.net" );
 			try {
+				smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
 				smtpClient.Credentials = new System.Net.NetworkCredential( sendGrid.UserName, sendGrid.Password );
+
 				using( var m = new System.Net.Mail.MailMessage() ) {
 					message.ConfigureMailMessage( m );
 					try {
@@ -83,6 +85,7 @@ namespace RedStapler.StandardLibrary.Email {
 			var smtpClient = new System.Net.Mail.SmtpClient();
 			try {
 				if( smtpServer != null ) {
+					smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
 					smtpClient.Host = smtpServer.Server;
 					if( smtpServer.PortSpecified )
 						smtpClient.Port = smtpServer.Port;
@@ -92,9 +95,10 @@ namespace RedStapler.StandardLibrary.Email {
 					}
 				}
 				else {
+					smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory;
+
 					var pickupFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Outgoing Dev Mail" );
 					Directory.CreateDirectory( pickupFolderPath );
-					smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory;
 					smtpClient.PickupDirectoryLocation = pickupFolderPath;
 				}
 
