@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		/// <summary>
 		/// Creates an EWF table cell containing the specified text, HTML encoded. If the empty string is passed for text, the cell will contain a non-breaking
-		/// space.
+		/// space. Note that Controls and strings are implicitly converted to <see cref="EwfTableCell"/>.
 		/// </summary>
 		public EwfTableCell( string text ) {
 			this.text = text;
@@ -89,6 +89,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		// NOTE: Change this constructor to take a parameter array of controls. There are many times when we want to have more than one control in a table cell.
 		/// <summary>
 		/// Creates an EWF table cell containing the specified control. If null is passed for control, the cell will contain a non-breaking space.
+    /// Note that Controls and strings are implicitly converted to <see cref="EwfTableCell"/>.
 		/// </summary>
 		public EwfTableCell( Control control ) {
 			Control = control;

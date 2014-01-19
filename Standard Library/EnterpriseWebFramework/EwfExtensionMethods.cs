@@ -76,7 +76,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Converts a string to an EwfTableCell.
 		/// </summary>
-		[ Obsolete( "Strings are implicitly converted to EwfTableCell" ) ]
+		[ Obsolete( "This will be removed by April 13, 2014. Strings are implicitly converted to EwfTableCell" ) ]
 		public static EwfTableCell ToCell( this string text ) {
 			return new EwfTableCell( text );
 		}
@@ -84,7 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Converts a control to an EwfTableCell.
 		/// </summary>
-		[ Obsolete( "Controls are implicitly converted to EwfTableCell" ) ]
+		[Obsolete( "This will be removed by April 13, 2014. Controls are implicitly converted to EwfTableCell" )]
 		public static EwfTableCell ToCell( this Control control ) {
 			return new EwfTableCell( control );
 		}
