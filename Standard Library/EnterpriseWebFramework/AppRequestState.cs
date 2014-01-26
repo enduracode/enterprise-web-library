@@ -24,7 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly DateTime beginTime;
-		private readonly Uri url;
+	  internal readonly Uri Uri;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
 		private readonly DataAccessState dataAccessState;
@@ -65,7 +65,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// instead of http://mydomain.com?something=1. See
 			// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
 			try {
-				url = new Uri( HttpContext.Current.Request.Url.Scheme + "://" + hostHeader + HttpContext.Current.Request.Url.PathAndQuery );
+				Uri = new Uri( HttpContext.Current.Request.Url.Scheme + "://" + hostHeader + HttpContext.Current.Request.Url.PathAndQuery );
 			}
 			catch( Exception e ) {
 				throw new ApplicationException(
@@ -86,15 +86,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// This is the absolute URL of the request. Absolute means the entire URL, including scheme, host, query strings and fragments.
 		/// </summary>
-		internal string Url { get { return url.AbsoluteUri; } }
-
-		internal string GetBaseUrlWithSpecificSecurity( bool secure ) {
-			var scheme = ( secure ? "https" : "http" ) + "://";
-			if( !AppTools.InstallationConfiguration.BaseUrlOverride.IsWhitespace() )
-				return scheme + AppTools.InstallationConfiguration.BaseUrlOverride;
-
-			return NetTools.CombineUrls( scheme + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ), HttpRuntime.AppDomainAppVirtualPath );
-		}
+		internal string Url { get { return Uri.AbsoluteUri; } }
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 
