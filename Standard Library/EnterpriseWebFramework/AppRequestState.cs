@@ -87,8 +87,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal string GetBaseUrlWithSpecificSecurity( bool secure ) {
 			// NOTE: Make this method decisive about a domain to use instead of just using the current one.
-			return NetTools.CombineUrls( ( secure ? "https" : "http" ) + "://" + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ),
-			                             HttpRuntime.AppDomainAppVirtualPath );
+			return
+				NetTools.CombineUrls(
+					( secure ? "https" : "http" ) + "://" + url.Host +
+					( url.IsDefaultPort
+						  ? ""
+						  : ( ":" +
+						      ( AppTools.IsDevelopmentInstallation && url.Port == getIisExpressPort( HttpContext.Current.Request.IsSecureConnection )
+							        ? getIisExpressPort( secure )
+							        : url.Port ) ) ),
+					HttpRuntime.AppDomainAppVirtualPath );
+		}
+
+		private int getIisExpressPort( bool secure ) {
+			return secure ? 44300 : 8080;
 		}
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
