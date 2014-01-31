@@ -260,7 +260,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
 
 				var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
-				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
+				File.WriteAllText( webConfigPath,
+				                   File.ReadAllText( webConfigPath )
+				                       .Replace( "debug=\"true\"", "debug=\"false\"" )
+				                       .Replace( "<!--<add name=\"HttpCacheModule\" />-->", "<add name=\"HttpCacheModule\" />" ) );
 			}
 		}
 
