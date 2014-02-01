@@ -83,7 +83,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.ExportToFile( string filePath ) {
-			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + filePath + "'" ) );
+			try {
+				ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + backupFilePath + "'" ) );
+				IoMethods.CopyFile( backupFilePath, filePath );
+			}
+			finally {
+				IoMethods.DeleteFile( backupFilePath );
+			}
 		}
 
 		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
@@ -106,21 +112,30 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			Directory.CreateDirectory( sqlServerFilesFolderPath );
 
 			try {
-				// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
-				// without their physical files colliding.
-				var restoreCommand = "RESTORE DATABASE " + info.Database + " FROM DISK = '" + filePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
-				                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
-				                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
+				IoMethods.CopyFile( filePath, backupFilePath );
+				try {
+					// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
+					// without their physical files colliding.
+					var restoreCommand = "RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
+					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
+					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
 
-				if( keepDbInStandbyMode )
-					restoreCommand += ", STANDBY = '" + getStandbyFilePath() + "'";
+					if( keepDbInStandbyMode )
+						restoreCommand += ", STANDBY = '" + getStandbyFilePath() + "'";
 
-				executeLongRunningCommand( cn, restoreCommand );
+					executeLongRunningCommand( cn, restoreCommand );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+				}
 			}
-			catch( Exception e ) {
-				throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+			finally {
+				IoMethods.DeleteFile( backupFilePath );
 			}
 		}
+
+		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
+		private string backupFilePath { get { return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, info.Database + ".bak" ); } }
 
 		void Database.BackupTransactionLog( string folderPath ) {
 			Directory.CreateDirectory( folderPath );
