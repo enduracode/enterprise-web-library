@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 				                                                               "Standard Library",
 				                                                               StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
-				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net40-full" );
+				var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net451-full" );
 				foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 					IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
 
@@ -122,7 +122,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			            where trimmedLine.StartsWith( "<package " )
 			            select trimmedLine;
 			foreach( var line in lines )
-				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net40\"", "" ) );
+				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net451\"", "" ) );
 
 			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
