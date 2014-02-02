@@ -72,7 +72,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		DbCommand DatabaseInfo.CreateCommand() {
-			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 8 }, null, MiniProfiler.Current );
+			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 15 }, null, MiniProfiler.Current );
 		}
 
 		DbParameter DatabaseInfo.CreateParameter() {
