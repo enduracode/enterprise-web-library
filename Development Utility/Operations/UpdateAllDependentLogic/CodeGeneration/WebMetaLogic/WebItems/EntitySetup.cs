@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
 			writer.WriteLine( "internal Info info { get; private set; }" );
 			if( requiredParameters.Any() || optionalParameters.Any() )
-				writer.WriteLine( "private ParametersModification parametersModification;" );
+				writer.WriteLine( "internal ParametersModification parametersModification;" );
 			writer.WriteLine( "EntitySetupInfo EntitySetupBase.InfoAsBaseType { get { return info; } }" );
 			writer.WriteLine( "ParametersModificationBase EntitySetupBase.ParametersModificationAsBaseType { get { return " +
 			                  ( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
