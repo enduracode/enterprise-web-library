@@ -81,10 +81,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                  disableSingleButtonDetection ) );
 		}
 
-		[ Obsolete( "Guaranteed through 30 November 2013. Please use the other constructor." ) ]
-		public RadioButtonGroup( string groupName, bool allowNoSelection, bool disableSingleButtonDetection = false )
-			: this( allowNoSelection, disableSingleButtonDetection: disableSingleButtonDetection ) {}
-
 		/// <summary>
 		/// Creates an in-line radio button that is part of the group.
 		/// </summary>
