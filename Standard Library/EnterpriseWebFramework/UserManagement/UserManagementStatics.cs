@@ -29,6 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 		internal static void Init( Type systemLogicType ) {
 			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemUserManagementProvider;
+			FormsAuthStatics.Init( () => SystemProvider );
 		}
 
 		/// <summary>
@@ -47,34 +48,34 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			}
 		}
 
-		// NOTE: Why are some things using these methods and other things calling GetUser directly? The things not using them want to assume that the provider is
-		// FormsAuthCapable, but calling the provider directly is a crappy solution, so fix it somehow.
 		// NOTE: It seems like we could cache a collection of Roles and have users just take a roleId, and look up the object ourselves. This would save the apps
 		// creating the role object, and all save the extra database query.  But where would we do this?
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public static List<User> GetUsers() {
+		public static IEnumerable<User> GetUsers() {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
-				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUsers().ConvertAll( input => input as User );
+				return FormsAuthStatics.GetUsers();
 			if( SystemProvider is ExternalAuthUserManagementProvider )
-				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUsers().ConvertAll( input => input as User );
+				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUsers();
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
-		// NOTE: Give this method a boolean parameter that determines whether to blow up if there is no user. Audit all providers and make sure they are not using .Single().
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public static User GetUser( int userId ) {
+		public static User GetUser( int userId, bool ensureUserExists ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
-				return ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userId );
-			if( SystemProvider is ExternalAuthUserManagementProvider )
-				return ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( userId );
+				return FormsAuthStatics.GetUser( userId, ensureUserExists );
+			if( SystemProvider is ExternalAuthUserManagementProvider ) {
+				var user = ( SystemProvider as ExternalAuthUserManagementProvider ).GetUser( userId );
+				if( user == null && ensureUserExists )
+					throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );
+				return user;
+			}
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
-		// NOTE: Audit all providers and make sure they are not using .Single() to implement these methods.
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
@@ -317,7 +318,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			if( cookie != null ) {
 				var ticket = getFormsAuthTicket( cookie );
 				if( ticket != null )
-					return GetUser( int.Parse( ticket.Name ) );
+					return GetUser( int.Parse( ticket.Name ), false );
 			}
 
 			var identity = HttpContext.Current.User.Identity;

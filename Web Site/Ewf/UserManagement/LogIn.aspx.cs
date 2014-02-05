@@ -8,12 +8,10 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	public partial class LogIn: EwfPage {
-		private FormsAuthCapableUserManagementProvider provider;
 		private DataValue<string> emailAddress;
 		private FormsAuthCapableUser user;
 
 		protected override void loadData() {
-			provider = (FormsAuthCapableUserManagementProvider)UserManagementStatics.SystemProvider;
 			var logInPb =
 				PostBack.CreateFull(
 					actionGetter:
@@ -22,10 +20,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
-				new EwfTableItem( new EwfTableCell( "You may log in to this system if you have registered your email address with " + provider.AdministratingCompanyName )
-					{
-						FieldSpan = 2
-					} ) );
+				new EwfTableItem(
+					new EwfTableCell( "You may log in to this system if you have registered your email address with " +
+					                  FormsAuthStatics.SystemProvider.AdministratingCompanyName ) { FieldSpan = 2 } ) );
 
 			emailAddress = new DataValue<string>();
 			var emailVl = new BasicValidationList();
@@ -60,7 +57,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				ph.AddControlsReturnThis( specialInstructions );
 			else {
 				var unregisteredTable = EwfTable.Create( caption: "Unregistered users" );
-				unregisteredTable.AddItem( new EwfTableItem( ( "If you have difficulty logging in, please " + provider.LogInHelpInstructions ).ToCell() ) );
+				unregisteredTable.AddItem(
+					new EwfTableItem( ( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToCell() ) );
 				ph.AddControlsReturnThis( unregisteredTable );
 			}
 
@@ -82,8 +80,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private string getUnregisteredEmailMessage() {
-			return "The email address you entered is not registered.  You must register the email address with " + provider.AdministratingCompanyName +
-			       " before using it to log in.  To do this, " + provider.LogInHelpInstructions;
+			return "The email address you entered is not registered.  You must register the email address with " +
+			       FormsAuthStatics.SystemProvider.AdministratingCompanyName + " before using it to log in.  To do this, " +
+			       FormsAuthStatics.SystemProvider.LogInHelpInstructions;
 		}
 	}
 }

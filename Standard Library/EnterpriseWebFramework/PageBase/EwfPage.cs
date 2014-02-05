@@ -969,42 +969,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( ( DateTime.Now - AppTools.User.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
 				return;
 
-			var formsAuthProvider = UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider;
-			var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
 			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
 			// in another browser window while the first one is still running.
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser = new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => {
-				try {
-					// NOTE: Why do I not know that it's going to be one provider or the other?
-					// NOTE: We could make a GetUserAsBaseType method in the base interface
-					if( formsAuthProvider != null )
-						return (User)formsAuthProvider.GetUser( AppTools.User.UserId );
-					if( externalAuthProvider != null )
-						return (User)externalAuthProvider.GetUser( AppTools.User.UserId );
-				}
-				catch {
-					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
-				}
-				return null;
-			} ) );
+			var newlyQueriedUser =
+				new DataAccessState().ExecuteWithThis(
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( AppTools.User.UserId, false ) ) );
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
 
 			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => {
 				try {
-					if( formsAuthProvider != null ) {
+					var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+					if( FormsAuthStatics.FormsAuthEnabled ) {
 						var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
-						formsAuthProvider.InsertOrUpdateUser( AppTools.User.UserId,
-						                                      AppTools.User.Email,
-						                                      formsAuthCapableUser.Salt,
-						                                      formsAuthCapableUser.SaltedPassword,
-						                                      AppTools.User.Role.RoleId,
-						                                      DateTime.Now,
-						                                      formsAuthCapableUser.MustChangePassword );
+						FormsAuthStatics.SystemProvider.InsertOrUpdateUser( AppTools.User.UserId,
+						                                                    AppTools.User.Email,
+						                                                    formsAuthCapableUser.Salt,
+						                                                    formsAuthCapableUser.SaltedPassword,
+						                                                    AppTools.User.Role.RoleId,
+						                                                    DateTime.Now,
+						                                                    formsAuthCapableUser.MustChangePassword );
 					}
 					else if( externalAuthProvider != null )
 						externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );

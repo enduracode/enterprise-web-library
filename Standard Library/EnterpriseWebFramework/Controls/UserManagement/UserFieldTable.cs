@@ -27,12 +27,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// in the System Provider are used.</param>
 		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
 		public void LoadData( int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
-			availableRoles =
-				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
+			availableRoles = ( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
-			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value ) : null;
+			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 			if( includePasswordControls() && user != null )
-				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( user.UserId );
+				facUser = FormsAuthStatics.GetUser( user.UserId, true );
 
 			Func<bool> validationShouldRun = () => validationPredicate == null || validationPredicate();
 
@@ -133,7 +132,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private bool includePasswordControls() {
-			return UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider;
+			return FormsAuthStatics.FormsAuthEnabled;
 		}
 
 		private void genPassword( bool emailPassword ) {

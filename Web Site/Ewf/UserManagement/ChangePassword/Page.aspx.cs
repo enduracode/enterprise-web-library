@@ -36,13 +36,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private void modifyData() {
 			var password = new Password( newPassword.Value );
-			( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).InsertOrUpdateUser( AppTools.User.UserId,
-			                                                                                                       AppTools.User.Email,
-			                                                                                                       password.Salt,
-			                                                                                                       password.ComputeSaltedHash(),
-			                                                                                                       AppTools.User.Role.RoleId,
-			                                                                                                       AppTools.User.LastRequestDateTime,
-			                                                                                                       false );
+			FormsAuthStatics.SystemProvider.InsertOrUpdateUser( AppTools.User.UserId,
+			                                                    AppTools.User.Email,
+			                                                    password.Salt,
+			                                                    password.ComputeSaltedHash(),
+			                                                    AppTools.User.Role.RoleId,
+			                                                    AppTools.User.LastRequestDateTime,
+			                                                    false );
 			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}
 	}
