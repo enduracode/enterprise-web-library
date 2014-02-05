@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			                            new LiteralControl( "&nbsp;&bull;&nbsp;" ),
 			                            new PostBackButton(
 				                            PostBack.CreateFull( id: "ewfLogOut",
-				                                                 firstModificationMethod: UserManagementStatics.LogOutUser,
+				                                                 firstModificationMethod: FormsAuthStatics.LogOutUser,
 				                                                 actionGetter: () => {
 					                                                 // NOTE: Is this the correct behavior if we are already on a public page?
 					                                                 return new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) );

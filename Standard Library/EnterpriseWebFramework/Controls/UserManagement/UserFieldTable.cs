@@ -107,7 +107,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
 					                                       if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
-					                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
+					                                       FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
 					                                       var p = new Password( newPassword.Value );
 					                                       Salt = p.Salt;
 					                                       SaltedPassword = p.ComputeSaltedHash();
@@ -177,7 +177,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public void SendEmailIfNecessary() {
 			if( passwordToEmail == null )
 				return;
-			UserManagementStatics.SendPassword( Email, passwordToEmail );
+			FormsAuthStatics.SendPassword( Email, passwordToEmail );
 			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 

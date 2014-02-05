@@ -949,7 +949,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						updateLastPageRequestTimeForUser();
 					executeInitialRequestDataModifications();
 				}
-				UserManagementStatics.UpdateFormsAuthCookieIfNecessary();
+				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 
 				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 			}

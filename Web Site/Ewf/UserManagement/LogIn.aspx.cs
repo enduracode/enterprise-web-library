@@ -64,11 +64,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
 
-			var logInMethod = UserManagementStatics.GetLogInMethod( emailAddress,
-			                                                        password,
-			                                                        getUnregisteredEmailMessage(),
-			                                                        "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
-			                                                        logInPb );
+			var logInMethod = FormsAuthStatics.GetLogInMethod( emailAddress,
+			                                                   password,
+			                                                   getUnregisteredEmailMessage(),
+			                                                   "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
+			                                                   logInPb );
 			logInPb.AddModificationMethod( () => user = logInMethod() );
 		}
 
