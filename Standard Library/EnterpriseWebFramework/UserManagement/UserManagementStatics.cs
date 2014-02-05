@@ -208,7 +208,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns true if the given credentials correspond to a user and are correct.
 		/// </summary>
 		public static bool UserCredentialsAreCorrect( string userEmailAddress, string providedPassword ) {
-			// NOTE: Could share this with line 160 above. Not sure about the password trimming, though.
+			// NOTE: With the exception of the password trimming, this is similar to the logic in GetLogInMethod.
 			var user = ( SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( userEmailAddress );
 			return user != null && user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
 		}
