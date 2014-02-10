@@ -182,10 +182,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
 				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
-				    formValues.Any(
-					    i =>
-					    i.GetPostBackValueKey().Any() && requestState.PostBackValues.GetValue( i.GetPostBackValueKey() ) != null &&
-					    !i.PostBackValueIsValid( requestState.PostBackValues ) ) ) {
+				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
 					throw getPossibleDeveloperMistakeException( requestState.ModificationErrorsExist
 						                                            ? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
 						                                            : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
@@ -778,7 +775,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
-			var invalidPostBackValuesExist = activeFormValues.Any( i => !i.PostBackValueIsValid( requestState.PostBackValues ) );
+			var invalidPostBackValuesExist = activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
 			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
 			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree )
 				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml );
