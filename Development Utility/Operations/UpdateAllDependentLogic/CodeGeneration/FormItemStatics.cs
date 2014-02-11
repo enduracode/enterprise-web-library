@@ -390,9 +390,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
                                   valueParamDefaultValue,
                                   new CSharpParameter[ 0 ],
                                   new CSharpParameter[ 0 ],
-                                  new[] { new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ) },
+                                  new[]
+                                      {
+                                          new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+                                          new CSharpParameter( "bool", "autoPostBack", "false" )
+                                      },
                                   new CSharpParameter[ 0 ],
-                                  "new EwfCheckBox( v.Value" + toBoolSuffix + ", label: putLabelOnCheckBox ? ls : \"\" ) { AutoPostBack = autoPostBack }",
+                                  "new EwfCheckBox( v.Value" + toBoolSuffix +
+                                  ", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack ) { AutoPostBack = autoPostBack }",
                                   "control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
                                   "!putLabelOnCheckBox" );
             writeFormItemGetters( writer,
@@ -405,14 +410,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
                                   new CSharpParameter[ 0 ],
                                   new[]
                                       {
-                                          new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "bool", "autoPostBack", "false" ),
+                                          new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+                                          new CSharpParameter( "bool", "autoPostBack", "false" ),
                                           new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
                                       },
                                   new CSharpParameter[ 0 ],
                                   "{ " +
                                   StringTools.ConcatenateWithDelimiter( " ",
                                                                         "var c = new BlockCheckBox( v.Value" + toBoolSuffix +
-                                                                        ", label: putLabelOnCheckBox ? ls : \"\" ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible };",
+                                                                        ", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible };",
                                                                         "c.NestedControls.AddRange( nestedControls );",
                                                                         "return c;" ) + " }",
                                   "control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
@@ -524,12 +530,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
                                                                                                        new CSharpParameter( "bool",
                                                                                                                             "disableSingleButtonDetection",
                                                                                                                             "false" ),
+                                                                                                       new CSharpParameter( "PostBack", "postBack", "null" ),
                                                                                                        new CSharpParameter( "bool", "autoPostBack", "false" )
                                                                                                    } ),
                                   new CSharpParameter[ 0 ],
                                   "SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: " +
                                   ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
-                                  ", disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
+                                  ", disableSingleButtonDetection: disableSingleButtonDetection, postBack: postBack, autoPostBack: autoPostBack )",
                                   "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
                                   ( nonNullableField
                                         ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
@@ -559,12 +566,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
                                                                                  .Concat( new[]
                                                                                      {
                                                                                          new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
+                                                                                         new CSharpParameter( "PostBack", "postBack", "null" ),
                                                                                          new CSharpParameter( "bool", "autoPostBack", "false" )
                                                                                      } ),
                                   new CSharpParameter[ 0 ],
                                   "SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: " +
                                   ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) + ", placeholderIsValid: " +
-                                  ( nonNullableField ? "false" : "placeholderIsValid" ) + ", placeholderText: placeholderText, autoPostBack: autoPostBack )",
+                                  ( nonNullableField ? "false" : "placeholderIsValid" ) +
+                                  ", placeholderText: placeholderText, postBack: postBack, autoPostBack: autoPostBack )",
                                   "{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
                                   ( nonNullableField
                                         ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
