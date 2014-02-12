@@ -10,6 +10,7 @@
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
 
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
+			<element name="SaveCookiesAtRoot" type="boolean" minOccurs="0" />			
 			<element name="administrators">
 				<complexType>
 					<sequence>
