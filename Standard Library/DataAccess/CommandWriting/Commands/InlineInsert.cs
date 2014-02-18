@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using System.Linq;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
@@ -51,10 +51,9 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 			cn.ExecuteNonQueryCommand( cmd );
 
 			object identity = null;
-			if( cn.DatabaseInfo is SqlServerInfo ) {
-				// Oracle doesn't have identities.
+			if( cn.DatabaseInfo.LastAutoIncrementValueExpression.Any() ) {
 				var identityRetriever = cn.DatabaseInfo.CreateCommand();
-				identityRetriever.CommandText = "SELECT @@IDENTITY";
+				identityRetriever.CommandText = "SELECT {0}".FormatWith( cn.DatabaseInfo.LastAutoIncrementValueExpression );
 				identity = cn.ExecuteScalarCommand( identityRetriever );
 			}
 

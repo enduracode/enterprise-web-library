@@ -35,6 +35,13 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 
 		string DatabaseInfo.ParameterPrefix { get { return ":"; } }
 
+		string DatabaseInfo.LastAutoIncrementValueExpression {
+			get {
+				// Oracle doesn't have identities.
+				return "";
+			}
+		}
+
 		/// <summary>
 		/// Gets the data source.
 		/// </summary>

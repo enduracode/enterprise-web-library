@@ -27,6 +27,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
 
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
+		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "LAST_INSERT_ID()"; } }
 
 		/// <summary>
 		/// Gets the database.
