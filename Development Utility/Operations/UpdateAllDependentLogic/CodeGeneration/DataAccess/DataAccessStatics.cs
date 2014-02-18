@@ -17,32 +17,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class DataAccessStatics {
 		internal const string CSharpTemplateFileExtension = ".ewlt.cs";
 
-		// Matches spaced followed by @abc. The space prevents @@identity, etc. from getting matched.
-		private const string sqlServerParamRegex = @"(?<!@)@\w*\w";
-
-		private const string oracleParamRegex = @"(?<!:):\w*\w";
-
 		/// <summary>
-		/// Given a string, returns all instances of @abc in an ordered set
-		/// containing abc (the token without the @ sign).  If a token is
-		/// used more than once, it only appears in the list once.
-		/// Does the same thing with :.
+		/// Given a string, returns all instances of @abc in an ordered set containing abc (the token without the @ sign). If a token is used more than once, it
+		/// only appears in the list once. A different prefix may be used for certain databases.
 		/// </summary>
 		internal static ListSet<string> GetNamedParamList( DatabaseInfo info, string statement ) {
 			// We don't want to find parameters in quoted text.
 			statement = statement.RemoveTextBetweenStrings( "'", "'" ).RemoveTextBetweenStrings( "\"", "\"" );
 
-			MatchCollection matches;
-			if( info is SqlServerInfo )
-				matches = Regex.Matches( statement, sqlServerParamRegex );
-			else
-				matches = Regex.Matches( statement, oracleParamRegex );
-
 			var parameters = new ListSet<string>();
-			foreach( Match match in matches )
+			foreach( Match match in Regex.Matches( statement, getParamRegex( info ) ) )
 				parameters.Add( match.Value.Substring( 1 ) );
 
 			return parameters;
+		}
+
+		private static string getParamRegex( DatabaseInfo info ) {
+			// Matches spaced followed by @abc. The space prevents @@identity, etc. from getting matched.
+			return @"(?<!{0}){0}\w*\w".FormatWith( info.ParameterPrefix );
 		}
 
 		/// <summary>
