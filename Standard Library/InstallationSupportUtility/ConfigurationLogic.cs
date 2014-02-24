@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
@@ -33,7 +34,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		internal static void Init( Type systemLogicType ) {
 			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemIsuProvider;
 
-			if( provider != null && provider.NDependFolderPathInUserProfileFolder.Any() ) {
+			if( NDependIsPresent ) {
 				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
 					var assemblyName = new AssemblyName( args.Name ).Name;
 					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
@@ -66,7 +67,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// Standard Library and Development Utility use only.
 		/// </summary>
-		public static bool NDependIsPresent { get { return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any(); } }
+		public static bool NDependIsPresent {
+			get {
+				return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
+				       Directory.Exists( StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+				                                                              provider.NDependFolderPathInUserProfileFolder ) );
+			}
+		}
 
 		public static void Init() {
 			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
