@@ -23,12 +23,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( bool allowNoSelection, ItemIdType selectedItemId, bool disableSingleButtonDetection = false ) {
 			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
 		}
-
-		[ Obsolete( "Guaranteed through 30 November 2013. Please use the other Create method." ) ]
-		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( string groupName, bool allowNoSelection, ItemIdType selectedItemId,
-		                                                                bool disableSingleButtonDetection = false ) {
-			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
-		}
 	}
 
 	/// <summary>

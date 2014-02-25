@@ -467,7 +467,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\FreeFormRadioList.cs" />
     <Compile Include="Tools\CollectionTools.cs" />
     <Compile Include="Collections\ListSet.cs" />
-    <Compile Include="Collections\Set.cs" />
     <Compile Include="FormattingMethods.cs" />
     <Compile Include="InstallationFileStatics.cs" />
     <Compile Include="IO\CsvFileWriter.cs" />
