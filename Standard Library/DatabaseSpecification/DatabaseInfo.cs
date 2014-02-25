@@ -16,6 +16,11 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification {
 		string ParameterPrefix { get; }
 
 		/// <summary>
+		/// Returns the empty string if the database does not support auto-increment columns.
+		/// </summary>
+		string LastAutoIncrementValueExpression { get; }
+
+		/// <summary>
 		/// Creates an ADO.NET database connection to the database.
 		/// </summary>
 		DbConnection CreateConnection( string connectionString );

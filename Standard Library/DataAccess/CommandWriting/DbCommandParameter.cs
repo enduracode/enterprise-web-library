@@ -33,9 +33,6 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		/// </summary>
 		internal bool ValueIsNull { get { return value.Value == null; } }
 
-		/// <summary>
-		/// Returns @abc for sql server and :abc for oracle.
-		/// </summary>
 		public string GetNameForCommandText( DatabaseInfo databaseInfo ) {
 			return databaseInfo.ParameterPrefix + name;
 		}

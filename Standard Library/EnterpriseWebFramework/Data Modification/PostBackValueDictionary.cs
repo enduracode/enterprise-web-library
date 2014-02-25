@@ -8,6 +8,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class PostBackValueDictionary {
 		private readonly Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		private HashSet<string> nonRemovedKeys;
 
 		internal PostBackValueDictionary() {}
 
@@ -28,6 +29,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return extraPostBackValuesExist;
 		}
 
+		// This method and the nonRemovedKeys field are ultimately necessary because, for a group of radio buttons, we need to know the difference between
+		// "no selection" and "removed from dictionary".
+		internal bool KeyRemoved( string key ) {
+			return nonRemovedKeys != null && !nonRemovedKeys.Contains( key );
+		}
+
 		/// <summary>
 		/// Returns null if there is no value for the specified key.
 		/// </summary>
@@ -40,6 +47,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var hashSet = new HashSet<string>( keys );
 			foreach( var key in dictionary.Keys.Except( hashSet ).ToArray() )
 				dictionary.Remove( key );
+
+			nonRemovedKeys = hashSet;
 		}
 	}
 }
