@@ -147,6 +147,11 @@ div.ewfStandardDynamicTable > ewfTableStandardAndStandardExceptLayoutStyles {
 	margin-top: 0;
 }
 
+ewfThAndTd {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* images */
 img {
 	display: block;
