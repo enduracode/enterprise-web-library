@@ -24,20 +24,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
 		/// parameter is the amount of the charge, in dollars.</param>
 		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
-		                                                                  decimal? amountInDollars, string testSecretKey, string liveSecretKey,
-		                                                                  Func<string, decimal, StatusMessageAndPage> successHandler ) {
+			decimal? amountInDollars, string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndPage> successHandler ) {
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
-			                                                           "Stripe Checkout",
-			                                                           "https://checkout.stripe.com/v2/checkout.js" );
+				"Stripe Checkout",
+				"https://checkout.stripe.com/v2/checkout.js" );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
 
 			PageInfo successPage = null;
 			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
-			                                    actionGetter: () => new PostBackAction( successPage ) );
+				actionGetter: () => new PostBackAction( successPage ) );
 			var token = new DataValue<string>();
 
 			Func<PostBackValueDictionary, string> tokenHiddenFieldValueGetter; // unused
@@ -51,9 +50,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				var apiKey = AppTools.IsLiveInstallation ? liveSecretKey : testSecretKey;
 				dynamic response = new StripeClient( apiKey ).CreateCharge( amountInDollars.Value,
-				                                                            "usd",
-				                                                            new CreditCardToken( token.Value ),
-				                                                            description: description.Any() ? description : null );
+					"usd",
+					new CreditCardToken( token.Value ),
+					description: description.Any() ? description : null );
 				if( response.IsError ) {
 					if( response.error.type == "card_error" )
 						throw new DataModificationException( response.error.message );
@@ -77,7 +76,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
 				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
-				       jsTokenHandler + " } )";
+				       jsTokenHandler + ", email: '" + ( AppTools.User == null ? "" : AppTools.User.Email ) + "' } )";
 			};
 		}
 	}
