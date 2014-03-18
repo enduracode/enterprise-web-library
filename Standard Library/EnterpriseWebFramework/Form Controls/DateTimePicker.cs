@@ -72,8 +72,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "",
-			                          disableBrowserAutoComplete: true,
-			                          autoPostBack: autoPostBack );
+				disableBrowserAutoComplete: true,
+				autoPostBack: autoPostBack );
 			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
 			min = DateTime.MinValue;
@@ -124,11 +124,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public DateTime? ValidateAndGetNullablePostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
 		                                                     bool allowEmpty ) {
 			return validator.GetNullableDateTime( errorHandler,
-			                                      textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                      DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
-			                                      allowEmpty,
-			                                      min,
-			                                      max );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
+				allowEmpty,
+				min,
+				max );
 		}
 
 		/// <summary>
@@ -136,10 +136,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public DateTime ValidateAndGetPostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
 			return validator.GetDateTime( errorHandler,
-			                              textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                              DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
-			                              min,
-			                              max );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
+				min,
+				max );
 		}
 
 		/// <summary>

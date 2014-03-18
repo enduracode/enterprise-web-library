@@ -56,18 +56,18 @@ function NumericalOnly( evt, field ) {
 
 	var charCode = ( evt.which || evt.which == 0 ) ? evt.which : evt.keyCode;
 	switch( charCode ) {
-	//Enter
-	case 13:
-		ApplyTimeSpanFormat( field );
-	//Backspace
-	case 8:
-	// Keys that don't produce a character
-	case 0:
-		return true;
-	default:
-		// Max of maxValueLength digits, numbers only.
+		//Enter
+		case 13:
+			ApplyTimeSpanFormat( field );
+		//Backspace
+		case 8:
+		// Keys that don't produce a character
+		case 0:
+			return true;
+		default:
+			// Max of maxValueLength digits, numbers only.
 			// If some of the field is selected, let them replace the contents even if it's full
-		return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
+			return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
 	}
 }
 

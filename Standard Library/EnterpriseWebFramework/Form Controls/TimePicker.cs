@@ -77,9 +77,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public TimeSpan? ValidateAndGetNullableTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
 		                                                 bool allowEmpty ) {
 			return validator.GetNullableTimeOfDayTimeSpan( errorHandler,
-			                                               textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                               DateTimeTools.HourAndMinuteFormat.ToSingleElementArray(),
-			                                               allowEmpty );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.HourAndMinuteFormat.ToSingleElementArray(),
+				allowEmpty );
 		}
 
 		/// <summary>
@@ -87,8 +87,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public TimeSpan ValidateAndGetTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
 			return validator.GetTimeOfDayTimeSpan( errorHandler,
-			                                       textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                       DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
 		}
 
 		/// <summary>

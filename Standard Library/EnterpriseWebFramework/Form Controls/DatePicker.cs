@@ -72,9 +72,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() : "",
-			                          disableBrowserAutoComplete: true,
-			                          postBack: postBack,
-			                          autoPostBack: autoPostBack );
+				disableBrowserAutoComplete: true,
+				postBack: postBack,
+				autoPostBack: autoPostBack );
 
 			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
