@@ -25,7 +25,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						               new OptionalParameters.Info( this ),
 						               new Html5FileUpload.Info( this ),
 						               new OmniDemo.Info( this ) ),
-						new PageGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new TwoWeekCalendarTest.Info( this, DateTime.Now ) ),
+						new PageGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new TwoWeekCalendarTest.Info( this, DateTime.Now ),
+						               new StatusMessages.Info( this ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new BoxDemo.Info( this ) ),
 						new PageGroup( "Form Controls",
@@ -46,29 +47,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private ModalWindow three;
 		private ModalWindow four;
 
-		void EntitySetupBase.LoadData() {
-			one = new ModalWindow( new EwfImage( "http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" ) );
-			two = new ModalWindow( new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) );
-			three =
-				new ModalWindow( ControlStack.CreateWithControls( true,
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ),
-				                                                  new EwfImage( "http://l.yimg.com/a/i/ww/met/yahoo_logo_us_061509.png" ) ) );
-			var gibberish =
-				@"Kolo has refactored the abstraction of blog-based systems.  What do we embrace? Anything and everything, regardless of obscurity! We have proven we know that if you brand proactively then you may also synthesize strategically. What does the commonly-accepted term 'obfuscation' really mean? We realize that it is better to envisioneer virally than to iterate virtually. Without adequate angel investors, e-tailers are forced to become wireless. Our 60/60/24/7/365 feature set is second to none, but our revolutionary convergence and newbie-proof configuration is invariably considered an amazing achievement. We will scale up our ability to recontextualize without decreasing our ability to visualize. Your budget for meshing should be at least one-tenth of your budget for unleashing. We will augment our ability to visualize without reducing our capability to upgrade. Quick: do you have a magnetic, value-added plan of action for managing new communities? We often orchestrate C2B2B revolutionary C2C. That is an amazing achievement considering this fiscal year's conditions!";
-			four = new ModalWindow( ( gibberish + gibberish + gibberish ).GetLiteralControl() );
-			var ln = new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
-			var ln1 = new LaunchWindowLink( two ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
-			var ln2 = new LaunchWindowLink( three ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
-			var ln3 = new LaunchWindowLink( four ) { ActionControlStyle = new TextActionControlStyle( "yup" ) };
-			ph.AddControlsReturnThis( ln, ln1, ln2, ln3 );
-			var t = new EwfTextBox( "" );
-			//parameterFormControls.SomeTextControl = t;
-			ph.AddControlsReturnThis( t );
-		}
+		void EntitySetupBase.LoadData() {}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			var navButtonSetups = new List<ActionButtonSetup>();

@@ -51,10 +51,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "", disableBrowserAutoComplete: true, autoPostBack: autoPostBack );
-			Controls.Add( textBox );
+			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+		}
+
+		private WebControl getIconButton() {
+			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-clock-o timepickerIcon" ) };
+			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
+			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
