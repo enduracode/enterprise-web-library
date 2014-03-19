@@ -13,6 +13,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Retrieves all roles.
 		/// </summary>
-		List<Role> GetRoles();
+		IEnumerable<Role> GetRoles();
 	}
 }

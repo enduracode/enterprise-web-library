@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private void modifyData() {
-			UserManagementStatics.ResetAndSendPassword( info.UserId );
+			FormsAuthStatics.ResetAndSendPassword( info.UserId );
 			AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 		}
 	}
