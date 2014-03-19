@@ -202,15 +202,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				executeWithDataModificationExceptionHandling( () => {
 					if( secondaryDm == dataUpdate ) {
 						navigationNeeded = dataUpdate.Execute( true,
-						                                       formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-						                                       handleValidationErrors,
-						                                       performValidationOnly: true );
+							formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+							handleValidationErrors,
+							performValidationOnly: true );
 					}
 					else {
 						var formValuesChanged =
 							contentContainer.GetDescendants()
-							                .OfType<FormControl>()
-							                .Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+								.OfType<FormControl>()
+								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
 					}
 
@@ -238,8 +238,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				var savedState = PageState.CreateFromViewState( (object[])pair.Second );
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
-				                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
-				                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
+					Request.Form[ "__SCROLLPOSITIONX" ],
+					Request.Form[ "__SCROLLPOSITIONY" ] );
 				formValueHash = (string)savedState.Item2[ 0 ];
 				lastPostBackFailingDmId = (string)savedState.Item2[ 1 ];
 			}
@@ -276,8 +276,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( !postBack.IsIntermediate ) {
 					try {
 						dmExecuted |= dataUpdate.Execute( !postBack.ForcePageDataUpdate,
-						                                  formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-						                                  handleValidationErrors );
+							formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+							handleValidationErrors );
 					}
 					catch {
 						AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
@@ -290,18 +290,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( actionPostBack != null ) {
 					var formValuesChanged =
 						contentContainer.GetDescendants()
-						                .OfType<FormControl>()
-						                .Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							.OfType<FormControl>()
+							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 					try {
 						dmExecuted |= actionPostBack.Execute( formValuesChanged,
-						                                      handleValidationErrors,
-						                                      postBackAction => {
-							                                      if( postBackAction == null )
-								                                      return;
-							                                      redirectInfo = postBackAction.Page;
-							                                      if( postBackAction.File != null )
-								                                      StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
-						                                      } );
+							handleValidationErrors,
+							postBackAction => {
+								if( postBackAction == null )
+									return;
+								redirectInfo = postBackAction.Page;
+								if( postBackAction.File != null )
+									StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
+							} );
 					}
 					catch {
 						AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
@@ -324,16 +324,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
 					var preModRegions =
 						updateRegionLinkers.SelectMany( i => i.PreModificationRegions,
-						                                ( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } )
-						                   .Where( i => regionSets.Contains( i.Set ) )
-						                   .ToArray();
+							( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } ).Where( i => regionSets.Contains( i.Set ) ).ToArray();
 					var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
 					requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
 					requestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
-					                                                actionPostBack.ValidationDm == lastPostBackFailingDm
-						                                                ? SecondaryPostBackOperation.Validate
-						                                                : SecondaryPostBackOperation.ValidateChangesOnly );
+						actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
 					requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 				}
 				else
@@ -365,10 +361,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
 			Title = StringTools.ConcatenateWithDelimiter( " - ",
-			                                              EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
-			                                              PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator,
-			                                                                               InfoAsBaseType.ParentPageEntityPathString,
-			                                                                               InfoAsBaseType.PageFullName ) );
+				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
+				PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator, InfoAsBaseType.ParentPageEntityPathString, InfoAsBaseType.PageFullName ) );
 
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData();
@@ -510,24 +504,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
 
 			ClientScript.RegisterClientScriptInclude( GetType(),
-			                                          "jQuery UI",
-			                                          this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
+				"jQuery UI",
+				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
 
 			// From http://stackoverflow.com/a/2548133/35349.
 			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "endsWith",
-			                                        "function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
-			                                        true );
+				"endsWith",
+				"function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
+				true );
 
 			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
 			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "CKEditor GetUrl",
-			                                        "function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-				                                        .FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
-			                                        true );
+				"CKEditor GetUrl",
+				"function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
+					.FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
+				true );
 
 			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
@@ -646,10 +640,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addJavaScriptStartUpLogic( IEnumerable<EtherealControl> etherealControls ) {
 			var controlInitStatements =
 				this.GetDescendants()
-				    .OfType<ControlWithJsInitLogic>()
-				    .Select( i => i.GetJsInitStatements() )
-				    .Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
-				    .Aggregate( ( a, b ) => a + b );
+					.OfType<ControlWithJsInitLogic>()
+					.Select( i => i.GetJsInitStatements() )
+					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
+					.Aggregate( ( a, b ) => a + b );
 
 			var statusMessageDialogFadeOutStatement = "";
 			if( StatusMessages.Any() && StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
@@ -681,20 +675,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "jQueryDocumentReadyBlock",
-			                                        "$( document ).ready( function() { " +
-			                                        StringTools.ConcatenateWithDelimiter( " ",
-			                                                                              "OnDocumentReady();",
-			                                                                              controlInitStatements,
-			                                                                              statusMessageDialogFadeOutStatement,
-			                                                                              EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-			                                                                              javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-			                                                                              StringTools.ConcatenateWithDelimiter( " ",
-			                                                                                                                    scrollStatement,
-			                                                                                                                    locationReplaceStatement )
-			                                                                                         .PrependDelimiter( "window.onload = function() { " )
-			                                                                                         .AppendDelimiter( " };" ) ) + " } );",
-			                                        true );
+				"jQueryDocumentReadyBlock",
+				"$( document ).ready( function() { " +
+				StringTools.ConcatenateWithDelimiter( " ",
+					"OnDocumentReady();",
+					controlInitStatements,
+					statusMessageDialogFadeOutStatement,
+					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, locationReplaceStatement )
+					.PrependDelimiter( "window.onload = function() { " )
+					.AppendDelimiter( " };" ) ) + " } );",
+				true );
 
 			setFocus();
 		}
@@ -756,7 +748,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1,
-				                                                                            new Tuple<string, string>[ 0 ] );
+					new Tuple<string, string>[ 0 ] );
 			}
 		}
 
@@ -799,14 +791,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		// When deleting this, remove the hack in DataAccessState.PrimaryDatabaseConnection.
 		public void EhModifyData( Action<DBConnection> modificationMethod ) {
 			PostBack.CreateFull( firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
-			        .Execute( true, null, pba => { } );
+				.Execute( true, null, pba => { } );
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
 			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-			                     firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
-			        .Execute( true, null, pba => { } );
+				firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ).Execute( true, null, pba => { } );
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
@@ -820,10 +811,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
 			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-			                     firstModificationMethod: () => {
-				                     var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-				                     redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-			                     } ).Execute( true, null, pba => { } );
+				firstModificationMethod: () => {
+					var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
+					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+				} ).Execute( true, null, pba => { } );
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
@@ -835,7 +826,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhModifyDataAndSendFile( FileCreator fileCreator ) {
 			PostBack.CreateFull( firstModificationMethod: () => StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile() )
-			        .Execute( true, null, pba => { } );
+				.Execute( true, null, pba => { } );
 		}
 
 		/// <summary>
@@ -853,12 +844,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
 			var staticFormValues =
 				this.GetDescendants( i => !updateRegionControls.Contains( i ) )
-				    .OfType<FormControl>()
-				    .Select( i => i.FormValue )
-				    .Where( i => i != null )
-				    .Distinct()
-				    .OrderBy( i => i.GetPostBackValueKey() )
-				    .ToArray();
+					.OfType<FormControl>()
+					.Select( i => i.FormValue )
+					.Where( i => i != null )
+					.Distinct()
+					.OrderBy( i => i.GetPostBackValueKey() )
+					.ToArray();
 			foreach( var formValue in staticFormValues ) {
 				contents.Append( formValue.GetPostBackValueKey() );
 				contents.Append( formValue.GetDurableValueAsString() );
@@ -983,12 +974,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					if( FormsAuthStatics.FormsAuthEnabled ) {
 						var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
 						FormsAuthStatics.SystemProvider.InsertOrUpdateUser( AppTools.User.UserId,
-						                                                    AppTools.User.Email,
-						                                                    formsAuthCapableUser.Salt,
-						                                                    formsAuthCapableUser.SaltedPassword,
-						                                                    AppTools.User.Role.RoleId,
-						                                                    DateTime.Now,
-						                                                    formsAuthCapableUser.MustChangePassword );
+							AppTools.User.Email,
+							formsAuthCapableUser.Salt,
+							formsAuthCapableUser.SaltedPassword,
+							AppTools.User.Role.RoleId,
+							DateTime.Now,
+							formsAuthCapableUser.MustChangePassword );
 					}
 					else if( externalAuthProvider != null )
 						externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
