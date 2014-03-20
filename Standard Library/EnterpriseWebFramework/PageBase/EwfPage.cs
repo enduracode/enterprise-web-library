@@ -769,8 +769,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist = activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
 			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
-			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree )
+			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree ) {
+				// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
+				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid( requestState.PostBackValues ) select i.GetPostBackValueKey();
+				requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
+
 				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml );
+			}
 		}
 
 		private void handleValidationErrors( Validation validation, IEnumerable<string> errorMessages ) {
