@@ -23,8 +23,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
 		/// parameter is the amount of the charge, in dollars.</param>
+		/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the email address).</param>
 		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
-			decimal? amountInDollars, string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndPage> successHandler ) {
+			decimal? amountInDollars, string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndPage> successHandler,
+			string prefilledEmailAddressOverride = null ) {
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
@@ -76,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
 				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
-				       jsTokenHandler + ", email: '" + ( AppTools.User == null ? "" : AppTools.User.Email ) + "' } )";
+				       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
 			};
 		}
 	}
