@@ -271,7 +271,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 				copyServerSideProject( installation, serverSideLogicFolderPath, project.Name );
 
 			// Always copy special projects.

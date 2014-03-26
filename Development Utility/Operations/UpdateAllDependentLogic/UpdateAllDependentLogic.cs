@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateWebConfigAndCodeForWebProject( installation, webProject );
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				generateWindowsServiceCode( installation, service );
-			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 				generateServerSideConsoleProjectCode( installation, project );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
 				generateCodeForProject( installation,
@@ -176,6 +176,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
 				writer.WriteLine( "using System.Data.Common;" );
+				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -205,6 +206,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				TypedCssClassStatics.Generate( installation.GeneralLogic.Path,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 					writer );
+				writer.WriteLine();
+				generateServerSideConsoleAppStatics( writer, installation );
 			}
 		}
 
@@ -315,6 +318,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                                    StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " +
 				                                    ( nonexistentTables.Count() > 1 ? "do" : "does" ) + " not exist." );
 			}
+		}
+
+		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
+			writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+			writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
+				writer.WriteLine( "public static void Start" + project.Name.EnglishToPascal() +
+				                  "( string arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
+				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
+				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
+
+				var programPath = "StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
+				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
+				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
+
+				writer.WriteLine( "if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null )" );
+				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
+				writer.WriteLine( "else" );
+				writer.WriteLine( runProgramExpression + ";" );
+
+				writer.WriteLine( "}" );
+			}
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
 		}
 
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
@@ -576,7 +603,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( service.Name + "/Generated Code/" );
 				}
 
-				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] ) {
+				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
 					writer.WriteLine();
 					writer.WriteLine( project.Name + "/bin/" );
 					writer.WriteLine( project.Name + "/obj/" );

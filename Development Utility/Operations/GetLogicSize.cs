@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				         select
 					         StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ),
 						         i.NamespaceAndAssemblyName + ".exe" ) )
-				.Concat( from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ]
+				.Concat( from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable
 				         select
 					         StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
 						         i.Name,
