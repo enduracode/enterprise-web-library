@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var projectManager = servicesProvider.ProjectManager;
 			var project =
 				projectManager.CreateTemporaryProject( getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
-				                                       TemporaryProjectMode.Temporary );
+					TemporaryProjectMode.Temporary );
 
 			StatusStatics.SetStatus( "Performing NDepend analysis." );
 			var analysisResult = project.RunAnalysis();
@@ -43,37 +43,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private static IEnumerable<string> getAssemblyPaths( DevelopmentInstallation installation, bool debug ) {
 			return StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath,
-			                                            StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
-			                                            installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
-			                             .ToSingleElementArray()
-			                             .Concat( from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ]
-			                                      select
-				                                      StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
-				                                                                           i.name,
-				                                                                           "bin",
-				                                                                           i.NamespaceAndAssemblyName + ".dll" ) )
-			                             .Concat( from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
-			                                      select
-				                                      StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ),
-				                                                                           i.NamespaceAndAssemblyName + ".exe" ) )
-			                             .Concat(
-				                             from i in
-					                             installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ??
-					                             new ServerSideConsoleProject[ 0 ]
-				                             select
-					                             StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
-					                                                                  i.Name,
-					                                                                  StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
-					                                                                  i.NamespaceAndAssemblyName + ".exe" ) )
-			                             .Concat( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
-				                                      ? StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
-				                                                                             installation.DevelopmentInstallationLogic.DevelopmentConfiguration
-				                                                                                         .clientSideAppProject.name,
-				                                                                             StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
-				                                                                             installation.DevelopmentInstallationLogic.DevelopmentConfiguration
-				                                                                                         .clientSideAppProject.assemblyName + ".exe" )
-				                                                              .ToSingleElementArray()
-				                                      : new string[ 0 ] );
+				StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
+				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
+				.ToSingleElementArray()
+				.Concat( from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ]
+				         select StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, i.name, "bin", i.NamespaceAndAssemblyName + ".dll" ) )
+				.Concat( from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
+				         select
+					         StandardLibraryMethods.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ),
+						         i.NamespaceAndAssemblyName + ".exe" ) )
+				.Concat( from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ]
+				         select
+					         StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+						         i.Name,
+						         StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
+						         i.NamespaceAndAssemblyName + ".exe" ) )
+				.Concat( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
+					         ? StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path,
+						         installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
+						         StandardLibraryMethods.GetProjectOutputFolderPath( debug ),
+						         installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" ).ToSingleElementArray()
+					         : new string[ 0 ] );
 		}
 
 		public static Operation Instance { get { return instance; } }
