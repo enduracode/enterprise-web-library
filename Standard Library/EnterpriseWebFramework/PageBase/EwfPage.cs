@@ -391,6 +391,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Using this approach of initializing the hidden field to the submit button's post-back gives the enter key good behavior with Internet Explorer when
 			// there is one text box on the page.
+			// The empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted.
 			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
 
 			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
