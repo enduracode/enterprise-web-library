@@ -333,7 +333,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
 				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
 
-				writer.WriteLine( "if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null )" );
+				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
 				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
 				writer.WriteLine( "else" );
 				writer.WriteLine( runProgramExpression + ";" );
