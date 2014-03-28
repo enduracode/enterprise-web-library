@@ -30,12 +30,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private readonly string name;
 		private readonly string pascalCasedName;
-		private readonly int size;
-		private readonly bool? isKey;
 		private readonly Type dataType;
 		private readonly string dbTypeString;
+		private readonly int size;
 		private readonly bool allowsNull;
 		private readonly bool isIdentity;
+		private readonly bool? isKey;
 
 		// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
 		private readonly string pascalCasedNameExceptForOracle;
@@ -44,22 +44,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			name = (string)schemaTableRow[ "ColumnName" ];
 			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : Name;
 			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
-			size = (int)schemaTableRow[ "ColumnSize" ];
-			if( includeKeyInfo )
-				isKey = (bool)schemaTableRow[ "IsKey" ];
 			dataType = (Type)schemaTableRow[ "DataType" ];
 			dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
+			size = (int)schemaTableRow[ "ColumnSize" ];
 			allowsNull = (bool)schemaTableRow[ "AllowDBNull" ];
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
+			if( includeKeyInfo )
+				isKey = (bool)schemaTableRow[ "IsKey" ];
 		}
 
 		internal string Name { get { return name; } }
 		internal string PascalCasedName { get { return pascalCasedName; } }
 		internal string PascalCasedNameExceptForOracle { get { return pascalCasedNameExceptForOracle; } }
 		internal string CamelCasedName { get { return pascalCasedName.LowercaseString(); } }
-		internal int Size { get { return size; } }
-		internal bool IsKey { get { return isKey.Value; } }
 
 		/// <summary>
 		/// If this column has a nullability mismatch, returns the name of a nullable version of the data type for this column.
@@ -90,8 +88,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal string DataTypeIfNotNullName { get { return dataType.ToString(); } }
 
 		internal string DbTypeString { get { return dbTypeString; } }
+		internal int Size { get { return size; } }
 		internal bool AllowsNull { get { return allowsNull; } }
 		internal bool IsIdentity { get { return isIdentity; } }
+		internal bool IsKey { get { return isKey.Value; } }
 
 		// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
 		//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to System.Decimal.*/; } }
