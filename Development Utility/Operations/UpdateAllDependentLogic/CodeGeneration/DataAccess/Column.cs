@@ -82,11 +82,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		/// </summary>
 		internal bool HasNullabilityMismatch { get { return dataType.IsValueType && allowsNull; } }
 
-		/// <summary>
-		/// Returns the name of the data type for this column, regardless of whether this column has a nullability mismatch.
-		/// </summary>
-		internal string DataTypeIfNotNullName { get { return dataType.ToString(); } }
-
 		internal string DbTypeString { get { return dbTypeString; } }
 		internal int Size { get { return size; } }
 		internal bool AllowsNull { get { return allowsNull; } }
