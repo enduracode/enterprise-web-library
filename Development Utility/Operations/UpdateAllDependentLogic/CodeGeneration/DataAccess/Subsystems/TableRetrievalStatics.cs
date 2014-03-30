@@ -38,8 +38,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							                  columns.AllColumns.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) +
 						                  " );" );
 						writer.WriteLine( "}" );
-					},
-					cn.DatabaseInfo );
+					} );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
 				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
 

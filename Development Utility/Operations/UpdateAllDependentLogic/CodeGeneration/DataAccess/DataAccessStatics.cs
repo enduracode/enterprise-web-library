@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return cmd;
 		}
 
-		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter, DatabaseInfo databaseInfo ) {
+		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Holds data for a row of this result." );
 			writer.WriteLine( "public partial class Row: System.IEquatable<Row> {" );
 
@@ -63,7 +63,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var cnt = 0;
 			foreach( var column in columns ) {
 				if( column.AllowsNull ) {
-					writer.WriteLine( "if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) + " = null;" );
+					writer.WriteLine( "if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) +
+					                  " = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
 					writer.WriteLine( "else" );
 				}
 				writer.WriteLine( "" + getMemberVariableName( column ) + " = " + ( "(" + column.DataTypeName + ")" ) + "reader.GetValue( " + cnt + " );" );
@@ -72,7 +73,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // constructor
 
 			foreach( var column in columns )
-				writeColumnProperty( writer, column, databaseInfo );
+				writeColumnProperty( writer, column );
 
 			// NOTE: Being smarter about the hash code could make searches of the collection faster.
 			writer.WriteLine( "public override int GetHashCode() { " );
@@ -106,11 +107,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // class
 		}
 
-		private static void writeColumnProperty( TextWriter writer, Column column, DatabaseInfo databaseInfo ) {
-			var isOracleClob = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( column.DbTypeString );
-			CodeGenerationStatics.AddSummaryDocComment( writer, "This object will " + ( column.AllowsNull && !isOracleClob ? "sometimes" : "never" ) + " be null." );
+		private static void writeColumnProperty( TextWriter writer, Column column ) {
+			CodeGenerationStatics.AddSummaryDocComment( writer,
+				"This object will " + ( column.AllowsNull && !column.NullValueExpression.Any() ? "sometimes" : "never" ) + " be null." );
 			writer.WriteLine( "public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) +
-			                  " { get { return " + getMemberVariableName( column ) + ( isOracleClob ? " ?? \"\"" : "" ) + "; } }" );
+			                  " { get { return " + getMemberVariableName( column ) + "; } }" );
 		}
 
 		private static string getMemberVariableName( Column column ) {

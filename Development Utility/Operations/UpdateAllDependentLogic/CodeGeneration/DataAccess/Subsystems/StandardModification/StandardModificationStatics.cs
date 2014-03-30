@@ -362,7 +362,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getComment( Column column ) {
-			return column.AllowsNull ? "Column allows null." : "Column does not allow null.";
+			return column.AllowsNull && !column.NullValueExpression.Any() ? "Object allows null." : "Object does not allow null.";
 		}
 
 		private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {

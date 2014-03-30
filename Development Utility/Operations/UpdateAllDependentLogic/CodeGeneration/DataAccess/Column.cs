@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification;
@@ -32,6 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private readonly string pascalCasedName;
 		private readonly Type dataType;
 		private readonly string dbTypeString;
+		private readonly string nullValueExpression;
 		private readonly int size;
 		private readonly bool allowsNull;
 		private readonly bool isIdentity;
@@ -46,6 +48,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
 			dataType = (Type)schemaTableRow[ "DataType" ];
 			dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
+			nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
 			size = (int)schemaTableRow[ "ColumnSize" ];
 			allowsNull = (bool)schemaTableRow[ "AllowDBNull" ];
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
@@ -66,11 +69,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal string DataTypeName { get { return hasNullabilityMismatch ? NullableDataTypeName : dataType.ToString(); } }
 
 		/// <summary>
-		/// Returns the string representing the nullable data type for this column, regardless of whether the column allows null in the database.
-		/// This will be equivalent to DataTypeName if the column allows null in the database.
+		/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. Equivalent to DataTypeName if the data type is a
+		/// reference type, or the column allows null, or the null value is represented with a different expression.
 		/// </summary>
 		internal string NullableDataTypeName { get { return dataType.IsValueType ? dataType + "?" : dataType.ToString(); } }
 
+		internal string NullValueExpression { get { return nullValueExpression; } }
 		internal string DbTypeString { get { return dbTypeString; } }
 		internal int Size { get { return size; } }
 		internal bool AllowsNull { get { return allowsNull; } }
