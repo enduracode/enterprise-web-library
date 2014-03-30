@@ -37,8 +37,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// We do not create templates for direct modification classes.
 			var folderPath = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
 			var templateFilePath = StandardLibraryMethods.CombinePaths( folderPath,
-			                                                            GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) +
-			                                                            DataAccessStatics.CSharpTemplateFileExtension );
+				GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + DataAccessStatics.CSharpTemplateFileExtension );
 			IoMethods.DeleteFile( templateFilePath );
 
 			// If a real file exists, don't create a template.
@@ -147,7 +146,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeUpdateRowsMethod( DBConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Updates rows in the " + tableName + " table that match the specified conditions with the specified data." );
+				"Updates rows in the " + tableName + " table that match the specified conditions with the specified data." );
 			writeDocCommentsForColumnParams( columns.DataColumns );
 			CodeGenerationStatics.AddParamDocComment( writer, "requiredCondition", "A condition." ); // This prevents Resharper warnings.
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalConditions", "Additional conditions." ); // This prevents Resharper warnings.
@@ -166,8 +165,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeDeleteRowsMethod( DBConnection cn, string tableName, string methodNameSuffix, bool executeAdditionalLogic ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para>" +
-			                                            "<para>WARNING: After calling this method, delete referenced rows in other tables that are no longer needed.</para>" );
+				"<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para>" +
+				"<para>WARNING: After calling this method, delete referenced rows in other tables that are no longer needed.</para>" );
 			writer.WriteLine( "public static int DeleteRows" + methodNameSuffix + "( " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
 			if( executeAdditionalLogic )
 				writer.WriteLine( "return " + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
@@ -232,8 +231,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private readonly DataValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + " = new DataValue<" + column.DataTypeName +
 			                  ">();" );
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
-			                                            " column. Throws an exception if the value has not been initialized. " + getComment( column ) );
+				"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
+				" column. Throws an exception if the value has not been initialized. " + getComment( column ) );
 			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " +
 			                                   StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " { get { return " +
 			                                   getColumnFieldName( column ) + ".Value; } ";
@@ -243,8 +242,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( propertyDeclarationBeginning + "set { " + getColumnFieldName( column ) + ".Value = value; } }" );
 
 				CodeGenerationStatics.AddSummaryDocComment( writer,
-				                                            "Indicates whether or not the value for the " + column.Name +
-				                                            " has been set since object creation or the last call to Execute, whichever was latest." );
+					"Indicates whether or not the value for the " + column.Name + " has been set since object creation or the last call to Execute, whichever was latest." );
 				writer.WriteLine( "public bool " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + "HasChanged { get { return " +
 				                  getColumnFieldName( column ) + ".Changed; } }" );
 			}
@@ -253,8 +251,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeCreateForInsertMethod( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass,
 		                                                string methodNameSuffix ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a modification object in insert mode, which can be used to do a piecemeal insert of a new row in the " +
-			                                            tableName + " table." );
+				"Creates a modification object in insert mode, which can be used to do a piecemeal insert of a new row in the " + tableName + " table." );
 			writer.WriteLine( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForInsert" + methodNameSuffix +
 			                  "() {" );
 			writer.WriteLine( "return new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " { modType = ModificationType.Insert };" );
@@ -265,8 +262,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		                                                string methodNameSuffix ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " +
-			                                            tableName + " table." );
+				"Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " + tableName + " table." );
 			writer.WriteLine( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForUpdate" + methodNameSuffix +
 			                  "( " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
 
@@ -297,8 +293,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		                                                         string methodNameSuffix ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates a modification object in single-row update mode with the specified current data. All column values in this object will have HasChanged = false, despite being initialized. This object can then be used to do a piecemeal update of the " +
-			                                            tableName + " table." );
+				"Creates a modification object in single-row update mode with the specified current data. All column values in this object will have HasChanged = false, despite being initialized. This object can then be used to do a piecemeal update of the " +
+				tableName + " table." );
 			writer.Write( "public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForSingleRowUpdate" +
 			              methodNameSuffix + "( " );
 			writeColumnParameterDeclarations( columns.AllColumns );
@@ -349,7 +345,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeSetAllDataMethod() {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Sets all column values. This is useful for enforcing the number of arguments when deferred execution is needed." );
+				"Sets all column values. This is useful for enforcing the number of arguments when deferred execution is needed." );
 			writeDocCommentsForColumnParams( columns.DataColumns );
 			writer.Write( "public void SetAllData( " );
 			writeColumnParameterDeclarations( columns.DataColumns );
@@ -371,9 +367,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {
 			writer.Write( StringTools.ConcatenateWithDelimiter( ", ",
-			                                                    columns.Select(
-				                                                    i => i.DataTypeName + " @" + StandardLibraryMethods.GetCSharpIdentifierSimple( i.CamelCasedName ) )
-			                                                           .ToArray() ) );
+				columns.Select( i => i.DataTypeName + " @" + StandardLibraryMethods.GetCSharpIdentifierSimple( i.CamelCasedName ) ).ToArray() ) );
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
@@ -385,8 +379,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeExecuteMethod( string tableName ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Executes this " + tableName +
-			                                            " modification, persisting all changes. Executes any pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
+				"Executes this " + tableName +
+				" modification, persisting all changes. Executes any pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void Execute() {" );
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
 
@@ -414,8 +408,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeExecuteWithoutAdditionalLogicMethod( string tableName ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Executes this " + tableName +
-			                                            " modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
+				"Executes this " + tableName +
+				" modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
 			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic() {" );
 			writer.WriteLine( "executeInsertOrUpdate();" );
 			writer.WriteLine( "markColumnValuesUnchanged();" );
