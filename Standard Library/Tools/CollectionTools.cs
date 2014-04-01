@@ -65,5 +65,12 @@ namespace RedStapler.StandardLibrary {
 		public static IEnumerable<T> GetDuplicates<T>( this IEnumerable<T> items ) {
 			return items.GroupBy( i => i ).Where( i => i.Count() > 1 ).Select( i => i.Key );
 		}
+
+		/// <summary>
+		/// Returns the last <paramref name="n"/> elements.
+		/// </summary>
+		public static IEnumerable<T> TakeLast<T>( this IEnumerable<T> c, int n ) {
+			return c.Reverse().Take( n ).Reverse();
+		}
 	}
 }
