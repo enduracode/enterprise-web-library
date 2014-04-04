@@ -45,6 +45,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : Name;
 			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
 			size = (int)schemaTableRow[ "ColumnSize" ];
+			// MySQL longtext returns -1
+			if( size < 0 )
+				size = int.MaxValue;
 			if( includeKeyInfo )
 				isKey = (bool)schemaTableRow[ "IsKey" ];
 			dataType = (Type)schemaTableRow[ "DataType" ];
