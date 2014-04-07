@@ -107,20 +107,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
-			var deleteDm = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "delete" ) );
+			var deletePb = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "delete" ) );
 			var deleteModMethods = new List<Func<bool>>();
 			foreach( var file in files )
-				addFileRow( table, file, deleteDm, deleteModMethods );
+				addFileRow( table, file, deletePb, deleteModMethods );
 			if( !ReadOnly ) {
 				table.AddRow(
 					new EwfTableCell( getUploadControlList() ) { FieldSpan = ThumbnailPageInfoCreator != null ? 3 : 2 },
-					new EwfTableCell( files.Any() ? new PostBackButton( deleteDm, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null )
+					new EwfTableCell( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null )
 						{
 							FieldSpan = 2,
 							CssClass = "ewfRightAlignCell"
 						} );
 			}
-			deleteDm.AddModificationMethod(
+			deletePb.AddModificationMethod(
 				() => {
 					if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
 						EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
@@ -132,7 +132,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Visible = false;
 		}
 
-		private void addFileRow( DynamicTable table, BlobFile file, DataModification deleteDm, List<Func<bool>> deleteModMethods ) {
+		private void addFileRow( DynamicTable table, BlobFile file, ActionPostBack deletePb, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
 			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
@@ -161,8 +161,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var deleteCheckBox =
 				FormItem.Create(
 					"",
-					new EwfCheckBox( false ),
-					validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deleteDm ) ).ToControl();
+					new EwfCheckBox( false, postBack: deletePb ),
+					validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deletePb ) ).ToControl();
 			cells.Add( new EwfTableCell( ReadOnly ? null : deleteCheckBox ) );
 			deleteModMethods.Add(
 				() => {
