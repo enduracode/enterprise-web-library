@@ -328,7 +328,7 @@ namespace RedStapler.StandardLibrary {
 			var m = new EmailMessage();
 			foreach( var developer in InstallationConfiguration.Developers )
 				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + InstallationConfiguration.FullName;
+			m.Subject = "Error in " + InstallationConfiguration.SystemName;
 			if( isClientSideProgram )
 				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
 			m.BodyHtml = body.GetTextAsEncodedHtml();
@@ -558,7 +558,7 @@ namespace RedStapler.StandardLibrary {
 				return
 					StandardLibraryMethods.CombinePaths(
 						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
-						                                                   InstallationConfiguration.InstallationType == InstallationType.Development ),
+							InstallationConfiguration.InstallationType == InstallationType.Development ),
 						InstallationFileStatics.FilesFolderName );
 			}
 		}
@@ -581,6 +581,13 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return InstallationConfiguration.ConfigurationFolderPath;
 			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? StandardLibraryMethods.GetProjectOutputFolderPath( true ) : ""; }
 		}
 
 		private static void assertClassInitialized() {

@@ -50,6 +50,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
 			nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
 			size = (int)schemaTableRow[ "ColumnSize" ];
+
+			// MySQL longtext returns -1
+			if( size < 0 )
+				size = int.MaxValue;
+
 			allowsNull = (bool)schemaTableRow[ "AllowDBNull" ];
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );

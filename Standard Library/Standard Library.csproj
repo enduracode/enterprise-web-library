@@ -125,6 +125,7 @@
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
+    <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />

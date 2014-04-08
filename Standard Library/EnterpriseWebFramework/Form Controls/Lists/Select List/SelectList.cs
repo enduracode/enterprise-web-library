@@ -50,15 +50,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                  bool disableSingleButtonDetection = false, PostBack postBack = null,
 		                                                                  bool autoPostBack = false ) {
 			return new SelectList<ItemIdType>( useHorizontalLayout,
-			                                   null,
-			                                   defaultValueItemLabel,
-			                                   null,
-			                                   null,
-			                                   items,
-			                                   disableSingleButtonDetection,
-			                                   selectedItemId,
-			                                   postBack,
-			                                   autoPostBack );
+				null,
+				defaultValueItemLabel,
+				null,
+				null,
+				items,
+				disableSingleButtonDetection,
+				selectedItemId,
+				postBack,
+				autoPostBack );
 		}
 
 		/// <summary>
@@ -81,15 +81,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
 		                                                                 string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false ) {
 			return new SelectList<ItemIdType>( null,
-			                                   width,
-			                                   defaultValueItemLabel,
-			                                   placeholderIsValid,
-			                                   placeholderText,
-			                                   items,
-			                                   null,
-			                                   selectedItemId,
-			                                   postBack,
-			                                   autoPostBack );
+				width,
+				defaultValueItemLabel,
+				placeholderIsValid,
+				placeholderText,
+				items,
+				null,
+				selectedItemId,
+				postBack,
+				autoPostBack );
 		}
 	}
 
@@ -155,8 +155,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var isPlaceholder = !useHorizontalRadioLayout.HasValue && !defaultValueItemLabel.Any();
 			yield return
 				new SelectListItem<ItemIdType>( EwfListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
-				                                includeDefaultValueItemOrValidPlaceholder,
-				                                isPlaceholder );
+					includeDefaultValueItemOrValidPlaceholder,
+					isPlaceholder );
 		}
 
 		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<WebControl> controls ) {
@@ -171,8 +171,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				var radioButtons =
 					items.Where( i => i.IsValid )
-					     .Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, postBack: postBack, autoPostBack: autoPostBack ) )
-					     .ToArray();
+						.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, postBack: postBack, autoPostBack: autoPostBack ) )
+						.ToArray();
 				firstRadioButton = radioButtons.First();
 
 				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
@@ -182,16 +182,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 			else {
 				formValue = new FormValue<ItemIdType>( () => selectedItemId,
-				                                       () => UniqueID,
-				                                       v => v.ObjectToString( true ),
-				                                       rawValue =>
-				                                       rawValue != null && itemsByStringId.ContainsKey( rawValue )
-					                                       ? PostBackValueValidationResult<ItemIdType>.CreateValidWithValue( itemsByStringId[ rawValue ].Id )
-					                                       : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
+					() => UniqueID,
+					v => v.ObjectToString( true ),
+					rawValue =>
+					rawValue != null && itemsByStringId.ContainsKey( rawValue )
+						? PostBackValueValidationResult<ItemIdType>.CreateValidWithValue( itemsByStringId[ rawValue ].Id )
+						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
 				if( postBack != null || autoPostBack )
 					EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
 
-				PreRender += delegate { PostBackButton.MakeControlPostBackOnEnter( this, postBack ); };
+				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, postBack ?? EwfPage.Instance.SubmitButtonPostBack ); };
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new WebControl( HtmlTextWriterTag.Select ) { Width = width ?? Unit.Empty };
@@ -200,7 +200,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					PreRender +=
 						delegate {
 							selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange,
-							                                        PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
+								PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
 						};
 				}
 
