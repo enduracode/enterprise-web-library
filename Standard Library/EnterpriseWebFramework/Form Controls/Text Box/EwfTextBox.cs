@@ -97,12 +97,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
 			formValue = new FormValue<string>( () => value,
-			                                   () => this.IsOnPage() ? UniqueID : "",
-			                                   v => v,
-			                                   rawValue =>
-			                                   rawValue != null
-				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
-				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
+				() => this.IsOnPage() ? UniqueID : "",
+				v => v,
+				rawValue =>
+				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.postBack = postBack;
 			this.autoPostBack = autoPostBack;
@@ -165,26 +163,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onfocus, "if( value == '" + watermarkText + "' ) value = ''" );
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onblur, "if( value == '' ) value = '" + watermarkText + "'" );
 				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(),
-				                                                         UniqueID + "watermark",
-				                                                         "$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText +
-				                                                         "'; } ).val( '' )" );
+					UniqueID + "watermark",
+					"$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText + "'; } ).val( '' )" );
 			}
 
-			var postBackOnEnter = postBack != null || autoPostBack ||
-			                      ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
+			var jsNeededForImplicitSubmission = postBack != null || autoPostBack ||
+			                                    ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
 			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
 				postBack = EwfPage.Instance.DataUpdatePostBack;
 
-			if( postBack != null ) {
+			if( postBack != null )
 				EwfPage.Instance.AddPostBack( postBack );
+			PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
+
+			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
 				PreRender += delegate {
-					if( postBackOnEnter )
-						PostBackButton.MakeControlPostBackOnEnter( this, postBack );
-					if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
-						// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
-						textBox.AddJavaScriptEventScript( JsWritingMethods.onchange,
-						                                  "setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
-					}
+					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
+					textBox.AddJavaScriptEventScript( JsWritingMethods.onchange,
+						"setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
 				};
 			}
 
@@ -214,7 +210,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 				if( autoCompleteOption != AutoCompleteOption.NoPostBack ) {
 					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( textBox.ClientID,
-					                                                                                               PostBackButton.GetPostBackScript( postBack ) );
+						PostBackButton.GetPostBackScript( postBack ) );
 					autocompleteOptions.Add( Tuple.Create( "select", handler ) );
 				}
 

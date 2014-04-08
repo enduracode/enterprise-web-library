@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -32,15 +31,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Causes the specified control to submit the form when the enter key is pressed while the control has focus. Specify null for the post-back to use the
-		/// submit button's post-back, which you should do if you want to simulate the user clicking the button.
+		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. Specify null for the post-back to
+		/// rely on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
 		/// </summary>
-		internal static void MakeControlPostBackOnEnter( WebControl control, PostBack postBack, string predicate = "" ) {
-			if( postBack != null || EwfPage.Instance.SubmitButtonPostBack != null ) {
+		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, string predicate = "" ) {
+			if( postBack != null ) {
 				control.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
-				                                  "if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " +
-				                                  GetPostBackScript( postBack ?? EwfPage.Instance.SubmitButtonPostBack ) + "; }" );
+					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
+				return;
 			}
+			if( EwfPage.Instance.SubmitButtonPostBack != null )
+				return;
+
+			var sentences = new[]
+				{
+					"EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button.", "There are two reasons for this.",
+					"First, the behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission.",
+					"Second, we don't want the implicit submission behavior of form controls to unpredictably change if a submit button is added or removed."
+				};
+			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 		}
 
 		private readonly PostBack postBack;
@@ -78,9 +87,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.usesSubmitBehavior = usesSubmitBehavior;
 
 			EwfPage.Instance.AddControlTreeValidation( () => {
-				if( !this.usesSubmitBehavior )
+				if( !this.IsOnPage() || !this.usesSubmitBehavior )
 					return;
-				var submitButtons = getSubmitButtons( EwfPage.Instance );
+				var submitButtons = EwfPage.Instance.GetDescendants( i => i is PostBackButton && ( i as PostBackButton ).usesSubmitBehavior );
 				if( submitButtons.Count() > 1 ) {
 					throw new ApplicationException( "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
 					                                StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
@@ -104,15 +113,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
 		public PostBackButton( DataModification dataModification, Action clickHandler ): this( dataModification, clickHandler, new ButtonActionControlStyle( "" ) ) {}
-
-		private List<Control> getSubmitButtons( Control control ) {
-			var submitButtons = new List<Control>();
-			if( control is PostBackButton && ( control as PostBackButton ).usesSubmitBehavior )
-				submitButtons.Add( control );
-			foreach( Control childControl in control.Controls )
-				submitButtons.AddRange( getSubmitButtons( childControl ) );
-			return submitButtons;
-		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
 		public Action ClickHandler { private get; set; }
@@ -159,7 +159,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			if( ConfirmationWindowContentControl != null ) {
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick,
-				                               "$( '#" + ( confirmationWindow as EtherealControl ).Control.ClientID + "' ).dialog( 'open' ); return false" );
+					"$( '#" + ( confirmationWindow as EtherealControl ).Control.ClientID + "' ).dialog( 'open' ); return false" );
 			}
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
