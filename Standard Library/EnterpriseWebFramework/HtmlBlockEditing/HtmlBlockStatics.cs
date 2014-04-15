@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
 		public static string GetHtml( int htmlBlockId, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
-			var html = SystemProvider.GetHtml( htmlBlockId ) ?? ""; // NOTE: Why does GetHtml ever return null?
+			var html = SystemProvider.GetHtml( htmlBlockId );
 			return GetDecodedHtml( html, nonSecureBaseUrl: nonSecureBaseUrl, secureBaseUrl: secureBaseUrl );
 		}
 
@@ -90,11 +90,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private static string decodeIntraSiteUris( string html, string nonSecureBaseUrl, string secureBaseUrl ) {
 			foreach( var secure in new[] { true, false } ) {
 				// Any kind of relative URL could be a problem in an email message since there is no context. This is one reason we decode to absolute URLs.
-				html = Regex.Replace( html,
-				                      secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
-				                      secure
-					                      ? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
-					                      : nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
+				html = Regex.Replace(
+					html,
+					secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
+					secure
+						? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
+						: nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
 			}
 			return html;
 		}
