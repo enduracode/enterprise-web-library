@@ -237,12 +237,12 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Returns the validated int type from the given string and validation package.
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
-		public int? GetNullableInt( ValidationErrorHandler errorHandler, string intAsString, bool allowEmpty ) {
+		public int? GetNullableInt( ValidationErrorHandler errorHandler, string intAsString, bool allowEmpty, int min = int.MinValue, int max = int.MaxValue ) {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int?>(
 				errorHandler,
 				intAsString,
 				allowEmpty,
-				delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, int.MinValue, int.MaxValue ); } );
+				() => validateGenericIntegerType<int>( errorHandler, intAsString, min, max ) );
 		}
 
 		private static T validateGenericIntegerType<T>( ValidationErrorHandler errorHandler, string valueAsString, long minValue, long maxValue ) {
