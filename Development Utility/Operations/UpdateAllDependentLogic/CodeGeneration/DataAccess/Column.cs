@@ -68,16 +68,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal string CamelCasedName { get { return pascalCasedName.LowercaseString(); } }
 
 		/// <summary>
-		/// If this column has a nullability mismatch, returns the name of a nullable version of the data type for this column. Otherwise, returns the name of the
-		/// data type for this column.
+		/// Gets the name of the data type for this column, or the nullable data type if the column allows null.
 		/// </summary>
-		internal string DataTypeName { get { return hasNullabilityMismatch ? NullableDataTypeName : dataType.ToString(); } }
+		internal string DataTypeName { get { return allowsNull ? NullableDataTypeName : dataType.ToString(); } }
 
 		/// <summary>
-		/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. Equivalent to DataTypeName if the data type is a
-		/// reference type, or the column allows null, or the null value is represented with a different expression.
+		/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. The nullable data type is equivalent to the data
+		/// type if the latter is a reference type or if the null value is represented with an expression other than "null".
 		/// </summary>
-		internal string NullableDataTypeName { get { return dataType.IsValueType ? dataType + "?" : dataType.ToString(); } }
+		internal string NullableDataTypeName { get { return dataType.IsValueType && !nullValueExpression.Any() ? dataType + "?" : dataType.ToString(); } }
 
 		internal string NullValueExpression { get { return nullValueExpression; } }
 		internal string DbTypeString { get { return dbTypeString; } }
@@ -94,13 +93,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal bool UseToUniquelyIdentifyRow { get { return !dataType.IsArray; } }
 
 		internal ModificationField GetModificationField() {
-			var type = hasNullabilityMismatch ? typeof( Nullable<> ).MakeGenericType( dataType ) : dataType;
+			var type = NullableDataTypeName != DataTypeName ? typeof( Nullable<> ).MakeGenericType( dataType ) : dataType;
 			return new ModificationField( type, DataTypeName, NullableDataTypeName, "", name, pascalCasedName, size );
 		}
-
-		/// <summary>
-		/// Returns true if the column allows null in the database, but the corresponding C# datatype is a value type.
-		/// </summary>
-		private bool hasNullabilityMismatch { get { return dataType.IsValueType && allowsNull; } }
 	}
 }
