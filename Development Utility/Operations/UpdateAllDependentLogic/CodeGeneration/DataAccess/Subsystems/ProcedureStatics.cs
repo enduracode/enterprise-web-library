@@ -27,8 +27,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						writer.WriteLine( "cmd.AddParameter( " + getDbCommandParameterCreationExpression( parameter ) + " );" );
 					else {
 						writer.WriteLine( "var " + parameter.Name + "Parameter = " + getDbCommandParameterCreationExpression( parameter ) + ";" );
-						writer.WriteLine( parameter.Name + "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
-						                  ".DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
+						writer.WriteLine(
+							parameter.Name + "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
+							".DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
 						writer.WriteLine( "cmd.AddParameter( " + parameter.Name + "Parameter );" );
 					}
 				}
@@ -38,9 +39,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) ) {
 					// NOTE: This is a hack. We would like to use a simple cast to convert the value of the database parameter to the method parameter's type, but we
 					// can't because the types in Oracle.DataAccess.Types, like OracleDecimal, do not support any kind of conversion to .NET types when they are boxed.
-					writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")StandardLibraryMethods.ChangeType( " + parameter.Name +
-					                  "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
-					                  ".DatabaseInfo ).Value.ToString(), typeof( " + parameter.DataTypeName + " ) );" );
+					writer.WriteLine(
+						parameter.Name + "Local = (" + parameter.DataTypeName + ")StandardLibraryMethods.ChangeType( " + parameter.Name + "Parameter.GetAdoDotNetParameter( " +
+						DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo ).Value.ToString(), typeof( " + parameter.DataTypeName + " ) );" );
 					//writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")" + parameter.Name + "Parameter.GetAdoDotNetParameter( " +
 					//                  DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo ).Value;" );
 				}

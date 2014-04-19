@@ -12,8 +12,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class RowConstantStatics {
 		private const string dictionaryName = "valuesAndNames";
 
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-		                               RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static void Generate(
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.rowConstantTables == null )
 				return;
 
@@ -28,19 +29,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					valueColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
 					var nameColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
-					var cmd = new InlineSelect( "SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName,
-					                            orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
-					cmd.Execute( cn,
-					             reader => {
-						             while( reader.Read() ) {
-							             var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
-							             if( valueColumn.DataTypeName == typeof( string ).ToString() )
-								             values.Add( "\"" + valueString + "\"" );
-							             else
-								             values.Add( valueString );
-							             names.Add( reader[ nameColumn.Name ].ToString() );
-						             }
-					             } );
+					var cmd = new InlineSelect(
+						"SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName,
+						orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
+					cmd.Execute(
+						cn,
+						reader => {
+							while( reader.Read() ) {
+								var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
+								if( valueColumn.DataTypeName == typeof( string ).ToString() )
+									values.Add( "\"" + valueString + "\"" );
+								else
+									values.Add( valueString );
+								names.Add( reader[ nameColumn.Name ].ToString() );
+							}
+						} );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException(
@@ -103,8 +106,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeGetValuesToNamesMethod( TextWriter writer, string valueTypeName ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Returns a list of key value pairs where the key is the value of the row constant and the value is the name of the row constant." );
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Returns a list of key value pairs where the key is the value of the row constant and the value is the name of the row constant." );
 			writer.WriteLine( "public static ICollection<KeyValuePair<" + valueTypeName + ", string>> GetValuesToNames() {" );
 			writer.WriteLine( "return valuesAndNames.GetAllPairs();" );
 			writer.WriteLine( "}" ); // method

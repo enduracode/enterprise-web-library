@@ -32,8 +32,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal " + column.DataTypeName + " Value { get { return value; } }" );
-				writer.WriteLine( "InlineDbCommandCondition TableCondition.CommandCondition { get { return new EqualityCondition( new InlineDbCommandColumnValue( \"" +
-				                  column.Name + "\", new DbParameterValue( value, \"" + column.DbTypeString + "\" ) ) ); } }" );
+				writer.WriteLine(
+					"InlineDbCommandCondition TableCondition.CommandCondition { get { return new EqualityCondition( new InlineDbCommandColumnValue( \"" + column.Name +
+					"\", new DbParameterValue( value, \"" + column.DbTypeString + "\" ) ) ); } }" );
 				writer.WriteLine( "}" );
 			}
 			writer.WriteLine( "}" ); // class
@@ -52,8 +53,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "private readonly InequalityCondition.Operator op; " );
 				writer.WriteLine( "private readonly " + column.DataTypeName + " value;" );
 
-				CodeGenerationStatics.AddSummaryDocComment( writer,
-				                                            "Creates a condition to narrow the scope of a command. Expression will read 'valueInDatabase op yourValue'. So new InequalityCondition( Operator.GreaterThan, value ) will turn into 'columnName > @value'." );
+				CodeGenerationStatics.AddSummaryDocComment(
+					writer,
+					"Creates a condition to narrow the scope of a command. Expression will read 'valueInDatabase op yourValue'. So new InequalityCondition( Operator.GreaterThan, value ) will turn into 'columnName > @value'." );
 				writer.WriteLine( "public " + GetConditionClassName( column ) + "( InequalityCondition.Operator op, " + column.DataTypeName + " value ) {" );
 				writer.WriteLine( "this.op = op;" );
 				writer.WriteLine( "this.value = value;" );
@@ -100,8 +102,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "this.value = value;" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "InlineDbCommandCondition TableCondition.CommandCondition { get { return new LikeCondition( behavior, \"" + column.Name +
-				                  "\", value ); } }" );
+				writer.WriteLine(
+					"InlineDbCommandCondition TableCondition.CommandCondition { get { return new LikeCondition( behavior, \"" + column.Name + "\", value ); } }" );
 
 				writer.WriteLine( "}" ); // class
 			}

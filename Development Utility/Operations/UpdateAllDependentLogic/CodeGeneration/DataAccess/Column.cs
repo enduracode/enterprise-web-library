@@ -17,10 +17,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 			var columns = new List<Column>();
 
-			var readerMethod = new Action<DbDataReader>( r => {
-				foreach( DataRow row in r.GetSchemaTable().Rows )
-					columns.Add( new Column( row, includeKeyInfo, cn.DatabaseInfo ) );
-			} );
+			var readerMethod = new Action<DbDataReader>(
+				r => {
+					foreach( DataRow row in r.GetSchemaTable().Rows )
+						columns.Add( new Column( row, includeKeyInfo, cn.DatabaseInfo ) );
+				} );
 			if( includeKeyInfo )
 				cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 			else
