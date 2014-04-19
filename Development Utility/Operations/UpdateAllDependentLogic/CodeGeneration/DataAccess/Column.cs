@@ -91,8 +91,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal ModificationField GetModificationField() {
-			var type = NullableDataTypeName != DataTypeName ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType ) : valueContainer.DataType;
-			return new ModificationField( type, DataTypeName, NullableDataTypeName, "", valueContainer.Name, valueContainer.PascalCasedName, valueContainer.Size );
+			var type = valueContainer.DataTypeName != valueContainer.DataType.ToString()
+				           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
+				           : valueContainer.DataType;
+			return new ModificationField(
+				type,
+				valueContainer.DataTypeName,
+				valueContainer.NullableDataTypeName,
+				"",
+				valueContainer.Name,
+				valueContainer.PascalCasedName,
+				valueContainer.Size );
 		}
 	}
 }
