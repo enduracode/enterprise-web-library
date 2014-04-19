@@ -36,12 +36,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						cn,
 						reader => {
 							while( reader.Read() ) {
-								var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
-								if( valueColumn.DataTypeName == typeof( string ).ToString() )
-									values.Add( "\"" + valueString + "\"" );
-								else
-									values.Add( valueString );
-								names.Add( reader[ nameColumn.Name ].ToString() );
+								if( reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) )
+									values.Add( valueColumn.NullValueExpression.Any() ? valueColumn.NullValueExpression : "null" );
+								else {
+									var valueColumnIsString = valueColumn.DataTypeName == typeof( string ).ToString();
+									var valueString = "\"{0}\"".FormatWith( valueColumn.ConvertIncomingValue( reader[ valueColumn.Name ] ).ToString() );
+									values.Add( valueColumnIsString ? valueString : "{0}.Parse( {1} )".FormatWith( valueColumn.DataTypeName, valueString ) );
+								}
+								names.Add( nameColumn.ConvertIncomingValue( reader[ nameColumn.Name ] ).ToString() );
 							}
 						} );
 				}
@@ -58,7 +60,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// constants
 				for( var i = 0; i < values.Count; i++ ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
-					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
+					writer.WriteLine(
+						"public static readonly " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
 				}
 
 				// one to one map

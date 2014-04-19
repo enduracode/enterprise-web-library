@@ -465,8 +465,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "addColumnModifications( insert );" );
 			if( identityColumn != null ) {
 				writer.WriteLine(
-					getColumnFieldName( identityColumn ) + ".Value = (" + identityColumn.DataTypeName + ")insert.Execute( " +
-					DataAccessStatics.GetConnectionExpression( database ) + " );" );
+					"{0}.Value = {1};".FormatWith(
+						getColumnFieldName( identityColumn ),
+						identityColumn.GetIncomingValueConversionExpression( "insert.Execute( {0} )".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) ) ) );
 			}
 			else
 				writer.WriteLine( "insert.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
@@ -511,9 +512,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
-				writer.WriteLine(
-					"cmd.AddColumnModification( new InlineDbCommandColumnValue( \"" + column.Name + "\", new DbParameterValue( " +
-					StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + ", \"" + column.DbTypeString + "\" ) ) );" );
+				var columnValueExpression =
+					column.GetCommandColumnValueExpression( StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) );
+				writer.WriteLine( "cmd.AddColumnModification( " + columnValueExpression + " );" );
 			}
 			writer.WriteLine( "}" );
 		}

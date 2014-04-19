@@ -32,9 +32,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal " + column.DataTypeName + " Value { get { return value; } }" );
-				writer.WriteLine(
-					"InlineDbCommandCondition TableCondition.CommandCondition { get { return new EqualityCondition( new InlineDbCommandColumnValue( \"" + column.Name +
-					"\", new DbParameterValue( value, \"" + column.DbTypeString + "\" ) ) ); } }" );
+				var colVal = column.GetCommandColumnValueExpression( "value" );
+				writer.WriteLine( "InlineDbCommandCondition TableCondition.CommandCondition { get { return new EqualityCondition( " + colVal + " ); } }" );
 				writer.WriteLine( "}" );
 			}
 			writer.WriteLine( "}" ); // class
@@ -61,9 +60,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "this.value = value;" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine(
-					"InlineDbCommandCondition TableCondition.CommandCondition { get { return new InequalityCondition( op, new InlineDbCommandColumnValue( \"" + column.Name +
-					"\", new DbParameterValue( value, \"" + column.DbTypeString + "\" ) ) ); } }" );
+				var colVal = column.GetCommandColumnValueExpression( "value" );
+				writer.WriteLine( "InlineDbCommandCondition TableCondition.CommandCondition { get { return new InequalityCondition( op, " + colVal + " ); } }" );
 				writer.WriteLine( "}" );
 			}
 			writer.WriteLine( "}" ); // class

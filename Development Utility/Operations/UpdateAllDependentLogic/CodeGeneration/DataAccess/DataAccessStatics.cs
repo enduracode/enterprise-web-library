@@ -68,7 +68,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						" = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
 					writer.WriteLine( "else" );
 				}
-				writer.WriteLine( "" + getMemberVariableName( column ) + " = " + ( "(" + column.DataTypeName + ")" ) + "reader.GetValue( " + cnt + " );" );
+				var conversionExpression = column.GetIncomingValueConversionExpression( "reader.GetValue( {0} )".FormatWith( cnt ) );
+				writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), conversionExpression ) );
 				cnt++;
 			}
 			writer.WriteLine( "}" ); // constructor

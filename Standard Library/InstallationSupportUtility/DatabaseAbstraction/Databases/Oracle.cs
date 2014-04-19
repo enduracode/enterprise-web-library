@@ -306,7 +306,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 						// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don't need to be
 						// treated as ordinary command parameters. That's why we don't include them here.
 						if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output )
-							parameters.Add( new ProcedureParameter( cn, (string)row[ "ARGUMENT_NAME" ], dataType, parameterDirection ) );
+							parameters.Add( new ProcedureParameter( cn, (string)row[ "ARGUMENT_NAME" ], dataType, (int)row[ "DATA_LENGTH" ], parameterDirection ) );
 					}
 				} );
 			return parameters;
