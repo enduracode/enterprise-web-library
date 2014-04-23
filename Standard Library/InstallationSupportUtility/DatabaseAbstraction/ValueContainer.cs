@@ -77,7 +77,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		public string NullValueExpression { get { return nullValueExpression; } }
 
-		internal string UnconvertedDataTypeName { get { return unconvertedDataType.ToString(); } }
+		public string UnconvertedDataTypeName { get { return unconvertedDataType.ToString(); } }
 
 		public string GetIncomingValueConversionExpression( string valueExpression ) {
 			return incomingValueConversionExpressionGetter( valueExpression );

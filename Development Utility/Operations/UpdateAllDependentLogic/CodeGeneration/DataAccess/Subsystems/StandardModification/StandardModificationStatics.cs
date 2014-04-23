@@ -464,10 +464,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "var insert = new InlineInsert( \"" + tableName + "\" );" );
 			writer.WriteLine( "addColumnModifications( insert );" );
 			if( identityColumn != null ) {
+				// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can't cast a boxed decimal to an int.
 				writer.WriteLine(
 					"{0}.Value = {1};".FormatWith(
 						getColumnFieldName( identityColumn ),
-						identityColumn.GetIncomingValueConversionExpression( "insert.Execute( {0} )".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) ) ) );
+						identityColumn.GetIncomingValueConversionExpression(
+							"StandardLibraryMethods.ChangeType( insert.Execute( {0} ), typeof( {1} ) )".FormatWith(
+								DataAccessStatics.GetConnectionExpression( database ),
+								identityColumn.UnconvertedDataTypeName ) ) ) );
 			}
 			else
 				writer.WriteLine( "insert.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );

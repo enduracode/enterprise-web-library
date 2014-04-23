@@ -65,6 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal string NullableDataTypeName { get { return valueContainer.NullableDataTypeName; } }
 
 		internal string NullValueExpression { get { return valueContainer.NullValueExpression; } }
+		internal string UnconvertedDataTypeName { get { return valueContainer.UnconvertedDataTypeName; } }
 
 		internal string GetIncomingValueConversionExpression( string valueExpression ) {
 			return valueContainer.GetIncomingValueConversionExpression( valueExpression );
