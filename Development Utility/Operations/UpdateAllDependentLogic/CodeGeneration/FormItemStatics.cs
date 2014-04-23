@@ -125,10 +125,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new[]
 					{
 						new CSharpParameter( "bool", "useHorizontalLayout", "false" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-						new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "bool", "autoPostBack", "false" )
+						new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+						new CSharpParameter( "bool", "autoPostBack", "false" )
 					},
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, disableSingleButtonDetection: disableSingleButtonDetection, autoPostBack: autoPostBack )",
+				"SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, disableSingleButtonDetection: disableSingleButtonDetection, postBack: postBack, autoPostBack: autoPostBack )",
 				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 				"true" );
 			writeFormItemGetters(
@@ -144,10 +145,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					{
 						new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
 						new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
+						new CSharpParameter( "PostBack", "postBack", "null" ), new CSharpParameter( "bool", "autoPostBack", "false" )
 					},
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, autoPostBack: autoPostBack )",
+				"SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, postBack: postBack, autoPostBack: autoPostBack )",
 				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 				"true" );
 			writeFormItemGetters(
