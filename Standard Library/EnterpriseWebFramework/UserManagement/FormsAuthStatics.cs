@@ -303,7 +303,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			// reset the password
 			var newPassword = new Password();
-			SystemProvider.InsertOrUpdateUser( userId, user.Email, newPassword.Salt, newPassword.ComputeSaltedHash(), user.Role.RoleId, user.LastRequestDateTime, true );
+			SystemProvider.InsertOrUpdateUser( userId, user.Email, user.Role.RoleId, user.LastRequestDateTime, newPassword.Salt, newPassword.ComputeSaltedHash(), true );
 
 			// send the email
 			SendPassword( user.Email, newPassword.PasswordText );

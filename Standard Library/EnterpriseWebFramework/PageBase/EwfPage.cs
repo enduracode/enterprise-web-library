@@ -1000,10 +1000,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 								AppTools.User.UserId,
 								AppTools.User.Email,
-								formsAuthCapableUser.Salt,
-								formsAuthCapableUser.SaltedPassword,
 								AppTools.User.Role.RoleId,
 								DateTime.Now,
+								formsAuthCapableUser.Salt,
+								formsAuthCapableUser.SaltedPassword,
 								formsAuthCapableUser.MustChangePassword );
 						}
 						else if( externalAuthProvider != null )
