@@ -173,22 +173,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			if( requestState.StaticRegionContents != null ) {
 				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
-				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany( keyAndArg => {
-					UpdateRegionLinker linker;
-					if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
-						throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
-					return linker.PostModificationRegionGetter( keyAndArg.Item2 );
-				} );
+				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
+					keyAndArg => {
+						UpdateRegionLinker linker;
+						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
+							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
+						return linker.PostModificationRegionGetter( keyAndArg.Item2 );
+					} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
 				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
-					throw getPossibleDeveloperMistakeException( requestState.ModificationErrorsExist
-						                                            ? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
-						                                            : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-							                                            requestState.DmIdAndSecondaryOp.Item2 )
-							                                              ? "Form controls outside of update regions may not change on an intermediate post-back."
-							                                              : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
+					throw getPossibleDeveloperMistakeException(
+						requestState.ModificationErrorsExist
+							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
+							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
+								  ? "Form controls outside of update regions may not change on an intermediate post-back."
+								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 				}
 			}
 
@@ -199,26 +200,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
 
 				var navigationNeeded = true;
-				executeWithDataModificationExceptionHandling( () => {
-					if( secondaryDm == dataUpdate ) {
-						navigationNeeded = dataUpdate.Execute( true,
-							formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-							handleValidationErrors,
-							performValidationOnly: true );
-					}
-					else {
-						var formValuesChanged =
-							contentContainer.GetDescendants()
-								.OfType<FormControl>()
-								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
-						navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
-					}
+				executeWithDataModificationExceptionHandling(
+					() => {
+						if( secondaryDm == dataUpdate ) {
+							navigationNeeded = dataUpdate.Execute(
+								true,
+								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+								handleValidationErrors,
+								performValidationOnly: true );
+						}
+						else {
+							var formValuesChanged =
+								contentContainer.GetDescendants()
+									.OfType<FormControl>()
+									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
+						}
 
-					if( navigationNeeded ) {
-						requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-						requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1, new Tuple<string, string>[ 0 ] );
-					}
-				} );
+						if( navigationNeeded ) {
+							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
+							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1, new Tuple<string, string>[ 0 ] );
+						}
+					} );
 				if( navigationNeeded )
 					navigate( null );
 			}
@@ -237,7 +240,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
 
 				var savedState = PageState.CreateFromViewState( (object[])pair.Second );
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
+					savedState.Item1,
 					Request.Form[ "__SCROLLPOSITIONX" ],
 					Request.Form[ "__SCROLLPOSITIONY" ] );
 				formValueHash = (string)savedState.Item2[ 0 ];
@@ -257,84 +261,89 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			executeWithDataModificationExceptionHandling( () => {
-				validateFormSubmission( formValueHash );
+			executeWithDataModificationExceptionHandling(
+				() => {
+					validateFormSubmission( formValueHash );
 
-				// Get the post-back object and, if necessary, the last post-back's failing data modification.
-				var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
-				var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
-				if( postBack == null )
-					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-				var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
-					                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
-					                            : null;
-				if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
-					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
+					// Get the post-back object and, if necessary, the last post-back's failing data modification.
+					var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
+					var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
+					if( postBack == null )
+						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
+					var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
+						                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
+						                            : null;
+					if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
+						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
-				// Execute the page's data update.
-				var dmExecuted = false;
-				if( !postBack.IsIntermediate ) {
-					try {
-						dmExecuted |= dataUpdate.Execute( !postBack.ForcePageDataUpdate,
-							formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-							handleValidationErrors );
+					// Execute the page's data update.
+					var dmExecuted = false;
+					if( !postBack.IsIntermediate ) {
+						try {
+							dmExecuted |= dataUpdate.Execute(
+								!postBack.ForcePageDataUpdate,
+								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+								handleValidationErrors );
+						}
+						catch {
+							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
+							throw;
+						}
 					}
-					catch {
-						AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
-						throw;
-					}
-				}
 
-				// Execute the post-back.
-				var actionPostBack = postBack as ActionPostBack;
-				if( actionPostBack != null ) {
-					var formValuesChanged =
-						contentContainer.GetDescendants()
-							.OfType<FormControl>()
-							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
-					try {
-						dmExecuted |= actionPostBack.Execute( formValuesChanged,
-							handleValidationErrors,
-							postBackAction => {
-								if( postBackAction == null )
-									return;
-								redirectInfo = postBackAction.Page;
-								if( postBackAction.File != null )
-									StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
-							} );
+					// Execute the post-back.
+					var actionPostBack = postBack as ActionPostBack;
+					if( actionPostBack != null ) {
+						var formValuesChanged =
+							contentContainer.GetDescendants()
+								.OfType<FormControl>()
+								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+						try {
+							dmExecuted |= actionPostBack.Execute(
+								formValuesChanged,
+								handleValidationErrors,
+								postBackAction => {
+									if( postBackAction == null )
+										return;
+									redirectInfo = postBackAction.Page;
+									if( postBackAction.File != null )
+										StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
+								} );
+						}
+						catch {
+							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
+							throw;
+						}
 					}
-					catch {
-						AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
-						throw;
-					}
-				}
 
-				if( dmExecuted ) {
-					AppRequestState.AddNonTransactionalModificationMethod( () => StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages ) );
-					try {
-						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+					if( dmExecuted ) {
+						AppRequestState.AddNonTransactionalModificationMethod( () => StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages ) );
+						try {
+							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+						}
+						catch {
+							DataAccessState.Current.ResetCache();
+							throw;
+						}
 					}
-					catch {
-						DataAccessState.Current.ResetCache();
-						throw;
+
+					if( postBack.IsIntermediate ) {
+						var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
+						var preModRegions =
+							updateRegionLinkers.SelectMany(
+								i => i.PreModificationRegions,
+								( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } ).Where( i => regionSets.Contains( i.Set ) ).ToArray();
+						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
+
+						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
+						requestState.DmIdAndSecondaryOp = Tuple.Create(
+							actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
+							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
+						requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 					}
-				}
-
-				if( postBack.IsIntermediate ) {
-					var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
-					var preModRegions =
-						updateRegionLinkers.SelectMany( i => i.PreModificationRegions,
-							( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } ).Where( i => regionSets.Contains( i.Set ) ).ToArray();
-					var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
-
-					requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
-					requestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
-						actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
-					requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
-				}
-				else
-					requestState.PostBackValues = null;
-			} );
+					else
+						requestState.PostBackValues = null;
+				} );
 
 			navigate( redirectInfo );
 			return null;
@@ -360,7 +369,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 
 			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
-			Title = StringTools.ConcatenateWithDelimiter( " - ",
+			Title = StringTools.ConcatenateWithDelimiter(
+				" - ",
 				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
 				PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator, InfoAsBaseType.ParentPageEntityPathString, InfoAsBaseType.PageFullName ) );
 
@@ -412,11 +422,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addMetadataAndFaviconLinks() {
-			Header.Controls.Add( new HtmlMeta
-				{
-					Name = "application-name",
-					Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName
-				} );
+			Header.Controls.Add(
+				new HtmlMeta { Name = "application-name", Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName } );
 
 			// Chrome start URL
 			Header.Controls.Add( new HtmlMeta { Name = "application-url", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
@@ -441,12 +448,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addTypekitLogicIfNecessary() {
 			if( EwfApp.Instance.TypekitId.Length > 0 ) {
-				Header.Controls.Add( new Literal
-					{
-						Text =
-							"<script type=\"text/javascript\" src=\"http" + ( Request.IsSecureConnection ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
-							".js\"></script>"
-					} );
+				Header.Controls.Add(
+					new Literal
+						{
+							Text =
+								"<script type=\"text/javascript\" src=\"http" + ( Request.IsSecureConnection ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
+								".js\"></script>"
+						} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
 		}
@@ -504,7 +512,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// versions.
 			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
 
-			ClientScript.RegisterClientScriptInclude( GetType(),
+			ClientScript.RegisterClientScriptInclude(
+				GetType(),
 				"jQuery UI",
 				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
@@ -512,13 +521,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
 
 			// From http://stackoverflow.com/a/2548133/35349.
-			ClientScript.RegisterClientScriptBlock( GetType(),
+			ClientScript.RegisterClientScriptBlock(
+				GetType(),
 				"endsWith",
 				"function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
 				true );
 
 			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
-			ClientScript.RegisterClientScriptBlock( GetType(),
+			ClientScript.RegisterClientScriptBlock(
+				GetType(),
 				"CKEditor GetUrl",
 				"function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
 					.FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
@@ -675,10 +686,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					locationReplaceStatement = "setTimeout( \"" + locationReplaceStatement + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
 			}
 
-			ClientScript.RegisterClientScriptBlock( GetType(),
+			ClientScript.RegisterClientScriptBlock(
+				GetType(),
 				"jQueryDocumentReadyBlock",
 				"$( document ).ready( function() { " +
-				StringTools.ConcatenateWithDelimiter( " ",
+				StringTools.ConcatenateWithDelimiter(
+					" ",
 					"OnDocumentReady();",
 					controlInitStatements,
 					statusMessageDialogFadeOutStatement,
@@ -748,7 +761,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( ewfException == null )
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
-				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1,
+				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
+					getStaticRegionContents( new Control[ 0 ] ).Item1,
 					new Tuple<string, string>[ 0 ] );
 			}
 		}
@@ -802,21 +816,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
+			PostBack.CreateFull(
+				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
 				firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ).Execute( true, null, pba => { } );
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
-			PostBack.CreateFull( firstModificationMethod: () => {
-				var url = method( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-				redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-			} ).Execute( true, null, pba => { } );
+			PostBack.CreateFull(
+				firstModificationMethod: () => {
+					var url = method( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
+					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
+				} ).Execute( true, null, pba => { } );
 		}
 
 		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
 		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
-			PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
+			PostBack.CreateFull(
+				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
 				firstModificationMethod: () => {
 					var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
 					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
@@ -974,29 +991,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
 
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => {
-				try {
-					var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-					if( FormsAuthStatics.FormsAuthEnabled ) {
-						var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
-						FormsAuthStatics.SystemProvider.InsertOrUpdateUser( AppTools.User.UserId,
-							AppTools.User.Email,
-							formsAuthCapableUser.Salt,
-							formsAuthCapableUser.SaltedPassword,
-							AppTools.User.Role.RoleId,
-							DateTime.Now,
-							formsAuthCapableUser.MustChangePassword );
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+				() => {
+					try {
+						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+						if( FormsAuthStatics.FormsAuthEnabled ) {
+							var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+								AppTools.User.UserId,
+								AppTools.User.Email,
+								formsAuthCapableUser.Salt,
+								formsAuthCapableUser.SaltedPassword,
+								AppTools.User.Role.RoleId,
+								DateTime.Now,
+								formsAuthCapableUser.MustChangePassword );
+						}
+						else if( externalAuthProvider != null )
+							externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
 					}
-					else if( externalAuthProvider != null )
-						externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
-				}
-				catch( DbConcurrencyException ) {
-					// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-					// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
-					// get an error email if the update fails.
-					throw new DoNotCommitException();
-				}
-			} );
+					catch( DbConcurrencyException ) {
+						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
+						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
+						// get an error email if the update fails.
+						throw new DoNotCommitException();
+					}
+				} );
 		}
 
 		/// <summary>
