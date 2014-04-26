@@ -18,13 +18,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string GetHtml( int htmlBlockId );
 
 		/// <summary>
-		/// Updates the HTML in a specified HTML block.
-		/// </summary>
-		void UpdateHtml( int htmlBlockId, string html );
-
-		/// <summary>
 		/// Inserts a new row into the database with the given html.
 		/// </summary>
 		int InsertHtmlBlock( string html );
+
+		/// <summary>
+		/// Updates the HTML in a specified HTML block.
+		/// </summary>
+		void UpdateHtml( int htmlBlockId, string html );
 	}
 }
