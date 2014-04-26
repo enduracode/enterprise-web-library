@@ -42,10 +42,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 				AppTools.User.UserId,
 				AppTools.User.Email,
-				password.Salt,
-				password.ComputeSaltedHash(),
 				AppTools.User.Role.RoleId,
 				AppTools.User.LastRequestDateTime,
+				password.Salt,
+				password.ComputeSaltedHash(),
 				false );
 			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}

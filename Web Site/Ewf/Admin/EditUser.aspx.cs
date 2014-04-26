@@ -52,20 +52,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						info.User.UserId,
 						userFieldTable.Email,
-						userFieldTable.Salt,
-						userFieldTable.SaltedPassword,
 						userFieldTable.RoleId,
 						info.User.LastRequestDateTime,
+						userFieldTable.Salt,
+						userFieldTable.SaltedPassword,
 						userFieldTable.MustChangePassword );
 				}
 				else {
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						null,
 						userFieldTable.Email,
-						userFieldTable.Salt,
-						userFieldTable.SaltedPassword,
 						userFieldTable.RoleId,
 						null,
+						userFieldTable.Salt,
+						userFieldTable.SaltedPassword,
 						userFieldTable.MustChangePassword );
 				}
 			}
