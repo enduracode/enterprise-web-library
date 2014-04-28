@@ -442,6 +442,8 @@
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
+    <Compile Include="UnhandledEnumException.cs" />
+    <Compile Include="UnhandledSwitchCaseException.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="WebFileSending\FileInfoToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />
