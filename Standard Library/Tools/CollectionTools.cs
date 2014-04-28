@@ -70,7 +70,8 @@ namespace RedStapler.StandardLibrary {
 		/// Returns the last <paramref name="n"/> elements.
 		/// </summary>
 		public static IEnumerable<T> TakeLast<T>( this IEnumerable<T> c, int n ) {
-			return c.Reverse().Take( n ).Reverse();
+			var count = c.Count();
+			return c.Skip( count - n );
 		}
 	}
 }
