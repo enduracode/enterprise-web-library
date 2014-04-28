@@ -160,6 +160,13 @@
     <Compile Include="TestPages\BoxDemo.aspx.designer.cs">
       <DependentUpon>BoxDemo.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\Charts.aspx.cs">
+      <DependentUpon>Charts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\Charts.aspx.designer.cs">
+      <DependentUpon>Charts.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\CheckBox.aspx.cs">
       <DependentUpon>CheckBox.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -454,6 +461,8 @@
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
     <Content Include="Ewf\Styles\ToDeleteOrMove.css" />
+    <Content Include="Ewf\ThirdParty\ChartJs\Chart.min.js" />
+    <Content Include="Ewf\ThirdParty\ChartJs\ReadMe.txt" />
     <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\build-config.js" />
     <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\ckeditor.js" />
     <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\config.js" />
@@ -724,6 +733,7 @@
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
     <Content Include="TestPages\BoxDemo.aspx" />
+    <Content Include="TestPages\Charts.aspx" />
     <Content Include="TestPages\CheckBox.aspx" />
     <Content Include="TestPages\CheckBoxList.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
