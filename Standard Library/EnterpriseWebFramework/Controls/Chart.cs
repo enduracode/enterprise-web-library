@@ -61,6 +61,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				public DataValues( string title, IEnumerable<int> values ): this( title, values.Select( i => (double)i ) ) {}
 			}
 
+			public readonly int MaxXValues;
+
 			[ NotNull ]
 			public readonly string LabelsTitle;
 
@@ -81,11 +83,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in each of the elements of <paramref name="values"/></param>.
 			/// <param name="values">Y values.</param>
 			/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataValues"/></param>.
-			public ReportData( string labelsTitle, IEnumerable<string> labels, IEnumerable<DataValues> values, Func<Color> nextColorSelector = null ) {
+			/// /// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
+			public ReportData(
+				string labelsTitle, IEnumerable<string> labels, IEnumerable<DataValues> values, Func<Color> nextColorSelector = null, int maxXValues = 16 ) {
 				LabelsTitle = labelsTitle;
 				Labels = labels;
 				Values = values;
 				NextColorSelector = nextColorSelector;
+				MaxXValues = maxXValues;
 			}
 
 			/// <summary>
@@ -95,8 +100,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in <paramref name="values"/></param>.
 			/// <param name="values">Y values.</param>
 			/// <param name="color">The color to use to represent this data.</param>
-			public ReportData( string labelsTitle, IEnumerable<string> labels, DataValues values, Color? color = null )
-				: this( labelsTitle, labels, values.ToSingleElementArray(), color != null ? () => color.Value : (Func<Color>)null ) {}
+			/// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
+			public ReportData( string labelsTitle, IEnumerable<string> labels, DataValues values, Color? color = null, int maxXValues = 16 )
+				: this( labelsTitle, labels, values.ToSingleElementArray(), color != null ? () => color.Value : (Func<Color>)null, maxXValues: maxXValues ) {}
 		}
 
 		// ReSharper disable InconsistentNaming
@@ -234,7 +240,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="chartType"></param>
 		/// <param name="reportData">The data to display</param>
 		/// <param name="exportName">Used to create a meaningful file name when exporting the data.</param>
-		public Chart( ChartType chartType, ReportData reportData, string exportName ) {
+		public Chart( ChartType chartType, ReportData reportData, string exportName, int maxXValues = 16 ) {
 			this.chartType = chartType;
 			this.reportData = reportData;
 			this.exportName = exportName;
@@ -245,16 +251,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var getNextColor = reportData.NextColorSelector ?? getDefaultNextColorSelectors();
 
-			const int maxXValues = 16;
 			Func<ReportData.DataValues, BaseDataset> selector;
 			OptionsBase options;
 			switch( chartType ) {
 				case ChartType.Line:
-					selector = v => new Dataset( getNextColor(), v.Values.TakeLast( maxXValues ) );
+					selector = v => new Dataset( getNextColor(), v.Values.TakeLast( reportData.MaxXValues ) );
 					options = new LineOptions { bezierCurve = false };
 					break;
 				case ChartType.Bar:
-					selector = v => new BaseDataset( getNextColor(), v.Values.TakeLast( maxXValues ) );
+					selector = v => new BaseDataset( getNextColor(), v.Values.TakeLast( reportData.MaxXValues ) );
 					options = new BarOptions { };
 					break;
 				default:
@@ -268,7 +273,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				tableData.Add( reportData.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( reportData.Values.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
 			}
 
-			var chartData = new ChartData( reportData.Labels.TakeLast( maxXValues ), reportData.Values.Select( selector ).ToArray() );
+			var chartData = new ChartData( reportData.Labels.TakeLast( reportData.MaxXValues ), reportData.Values.Select( selector ).ToArray() );
 
 			Controls.Add( getExportButton( headers, tableData ) );
 
