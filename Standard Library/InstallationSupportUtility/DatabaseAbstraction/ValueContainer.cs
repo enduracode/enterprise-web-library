@@ -34,11 +34,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
 			this.size = size;
 
-			// MySQL longtext returns -1
-			if( size < 0 )
-				size = int.MaxValue;
+			// MySQL LONGTEXT returns zero for size.
+			if( databaseInfo is MySqlInfo && dbTypeString == "Text" && size == 0 )
+				this.size = int.MaxValue;
 
-			if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && size == 1 ) {
+			if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && this.size == 1 ) {
 				if( unconvertedDataType != typeof( ulong ) )
 					throw new ApplicationException( "The unconverted data type was not ulong." );
 
