@@ -36,7 +36,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, string predicate = "" ) {
 			if( postBack != null ) {
-				control.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
+				control.AddJavaScriptEventScript(
+					JsWritingMethods.onkeypress,
 					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
 				return;
 			}
@@ -86,22 +87,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			ActionControlStyle = actionControlStyle;
 			this.usesSubmitBehavior = usesSubmitBehavior;
 
-			EwfPage.Instance.AddControlTreeValidation( () => {
-				if( !this.IsOnPage() || !this.usesSubmitBehavior )
-					return;
-				var submitButtons = EwfPage.Instance.GetDescendants( i => i is PostBackButton && ( i as PostBackButton ).usesSubmitBehavior );
-				if( submitButtons.Count() > 1 ) {
-					throw new ApplicationException( "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
-					                                StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
-				}
-				EwfPage.Instance.SubmitButtonPostBack = this.postBack;
-			} );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
-		public PostBackButton( DataModification dataModification, Action clickHandler, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true )
-			: this( (PostBack)dataModification, actionControlStyle, usesSubmitBehavior ) {
-			ClickHandler = clickHandler;
+			EwfPage.Instance.AddControlTreeValidation(
+				() => {
+					if( !this.IsOnPage() || !this.usesSubmitBehavior )
+						return;
+					var submitButtons = EwfPage.Instance.GetDescendants( i => i is PostBackButton && ( i as PostBackButton ).usesSubmitBehavior );
+					if( submitButtons.Count() > 1 ) {
+						throw new ApplicationException(
+							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
+							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
+					}
+					EwfPage.Instance.SubmitButtonPostBack = this.postBack;
+				} );
 		}
 
 		/// <summary>
@@ -110,12 +107,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="postBack">Do not pass null.</param>
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
 		public PostBackButton( PostBack postBack ): this( postBack, new ButtonActionControlStyle( "" ) ) {}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
-		public PostBackButton( DataModification dataModification, Action clickHandler ): this( dataModification, clickHandler, new ButtonActionControlStyle( "" ) ) {}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a constructor that takes a post-back." ) ]
-		public Action ClickHandler { private get; set; }
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
@@ -133,10 +124,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Attributes.Add( "value", "v" );
 				Attributes.Add( "type", usesSubmitBehavior ? "submit" : "button" );
 			}
-
-			// This is a huge hack, but we can remove it after 31 January 2014.
-			if( ClickHandler != null )
-				EwfPage.Instance.AddControlTreeValidation( () => ( (ActionPostBack)postBack ).AddModificationMethod( ClickHandler ) );
 
 			EwfPage.Instance.AddPostBack( postBack );
 
@@ -158,7 +145,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			if( ConfirmationWindowContentControl != null ) {
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick,
+				this.AddJavaScriptEventScript(
+					JsWritingMethods.onclick,
 					"$( '#" + ( confirmationWindow as EtherealControl ).Control.ClientID + "' ).dialog( 'open' ); return false" );
 			}
 			return ActionControlStyle.GetJsInitStatements( this );
