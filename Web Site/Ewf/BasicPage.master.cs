@@ -96,7 +96,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ajaxLoadingImage.Style.Add( "display", "none" );
 			ph2.AddControlsReturnThis( ajaxLoadingImage );
 
-			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted();" );
+			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
 		private Control getProcessingDialog() {
