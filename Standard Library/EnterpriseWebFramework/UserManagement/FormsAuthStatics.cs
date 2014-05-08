@@ -78,25 +78,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// the specified error message to the form item.
 		/// </summary>
 		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, string label, string errorMessage, ValidationList vl ) {
-			return FormItem.Create( label,
-			                        new EwfTextBox( "" ),
-			                        validationGetter:
-				                        control =>
-				                        new Validation(
-					                        ( pbv, validator ) =>
-					                        emailAddress.Value =
-					                        validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ),
-					                                                   control.GetPostBackValue( pbv ),
-					                                                   false ),
-					                        vl ) );
+			return FormItem.Create(
+				label,
+				new EwfTextBox( "" ),
+				validationGetter:
+					control =>
+					new Validation(
+						( pbv, validator ) =>
+						emailAddress.Value =
+						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ),
+						vl ) );
 		}
 
 		/// <summary>
 		/// Sets up client-side logic for user log-in and returns a modification method that logs in a user. Do not call if the system does not implement the
 		/// forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Func<FormsAuthCapableUser> GetLogInMethod( DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage,
-		                                                         string passwordErrorMessage, ValidationList vl ) {
+		public static Func<FormsAuthCapableUser> GetLogInMethod(
+			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage, ValidationList vl ) {
 			var utcOffset = new DataValue<string>();
 			setUpClientSideLogicForLogIn( utcOffset, vl );
 
@@ -174,12 +173,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			Func<PostBackValueDictionary, string> utcOffsetHiddenFieldValueGetter; // unused
 			Func<string> utcOffsetHiddenFieldClientIdGetter;
-			EwfHiddenField.Create( "", postBackValue => utcOffset.Value = postBackValue, vl, out utcOffsetHiddenFieldValueGetter, out utcOffsetHiddenFieldClientIdGetter );
+			EwfHiddenField.Create(
+				"",
+				postBackValue => utcOffset.Value = postBackValue,
+				vl,
+				out utcOffsetHiddenFieldValueGetter,
+				out utcOffsetHiddenFieldClientIdGetter );
 			EwfPage.Instance.PreRender +=
 				delegate {
-					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( typeof( UserManagementStatics ),
-					                                                         "formSubmitEventHandler",
-					                                                         "getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' );" );
+					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
+						typeof( UserManagementStatics ),
+						"formSubmitEventHandler",
+						"getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' );" );
 				};
 		}
 
@@ -204,12 +209,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		private static void setCookie( string name, string value ) {
 			AppRequestState.AddNonTransactionalModificationMethod(
 				() =>
-				HttpContext.Current.Response.Cookies.Add( new HttpCookie( name, value )
-					{
-						Path = NetTools.GetAppCookiePath(),
-						Secure = EwfApp.SupportsSecureConnections,
-						HttpOnly = true
-					} ) );
+				HttpContext.Current.Response.Cookies.Add(
+					new HttpCookie( name, value ) { Path = NetTools.GetAppCookiePath(), Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } ) );
 		}
 
 		private static string[] verifyTestCookie() {
@@ -223,11 +224,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				var clockDifference = DateTime.Parse( utcOffset.Value.Replace( "UTC", "GMT" ) ) - DateTime.Now;
 
 				if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
-					EwfPage.AddStatusMessage( StatusMessageType.Warning,
-					                          Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
-					                          ( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now )
-						                            ? TimeZone.CurrentTimeZone.DaylightName
-						                            : TimeZone.CurrentTimeZone.StandardName ) + "." );
+					EwfPage.AddStatusMessage(
+						StatusMessageType.Warning,
+						Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
+						( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now ) ? TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName ) + "." );
 				}
 			}
 			catch {} // NOTE: Figure out why the date time field passed from javascript might be empty, and get rid of this catch
@@ -274,7 +274,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		private static void clearFormsAuthCookie() {
 			AppRequestState.AddNonTransactionalModificationMethod(
 				() =>
-				HttpContext.Current.Response.Cookies.Add( new HttpCookie( FormsAuthCookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
+				HttpContext.Current.Response.Cookies.Add(
+					new HttpCookie( FormsAuthCookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
 		}
 
 		internal static string FormsAuthCookieName { get { return "User"; } }
@@ -302,7 +303,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 			// reset the password
 			var newPassword = new Password();
-			SystemProvider.InsertOrUpdateUser( userId, user.Email, newPassword.Salt, newPassword.ComputeSaltedHash(), user.Role.RoleId, user.LastRequestDateTime, true );
+			SystemProvider.InsertOrUpdateUser( userId, user.Email, user.Role.RoleId, user.LastRequestDateTime, newPassword.Salt, newPassword.ComputeSaltedHash(), true );
 
 			// send the email
 			SendPassword( user.Email, newPassword.PasswordText );
