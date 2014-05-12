@@ -39,9 +39,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 								if( reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) )
 									values.Add( valueColumn.NullValueExpression.Any() ? valueColumn.NullValueExpression : "null" );
 								else {
-									var valueColumnIsString = valueColumn.DataTypeName == typeof( string ).ToString();
-									var valueString = "\"{0}\"".FormatWith( valueColumn.ConvertIncomingValue( reader[ valueColumn.Name ] ).ToString() );
-									values.Add( valueColumnIsString ? valueString : "{0}.Parse( {1} )".FormatWith( valueColumn.DataTypeName, valueString ) );
+									var valueString = valueColumn.ConvertIncomingValue( reader[ valueColumn.Name ] ).ToString();
+									values.Add( valueColumn.DataTypeName == typeof( string ).ToString() ? "\"{0}\"".FormatWith( valueString ) : valueString );
 								}
 								names.Add( nameColumn.ConvertIncomingValue( reader[ nameColumn.Name ] ).ToString() );
 							}
@@ -60,8 +59,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// constants
 				for( var i = 0; i < values.Count; i++ ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
-					writer.WriteLine(
-						"public static readonly " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
+					// It's important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
+					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
 				}
 
 				// one to one map
