@@ -240,7 +240,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="chartType"></param>
 		/// <param name="reportData">The data to display</param>
 		/// <param name="exportName">Used to create a meaningful file name when exporting the data.</param>
-		public Chart( ChartType chartType, ReportData reportData, string exportName, int maxXValues = 16 ) {
+		public Chart( ChartType chartType, ReportData reportData, string exportName ) {
 			this.chartType = chartType;
 			this.reportData = reportData;
 			this.exportName = exportName;
