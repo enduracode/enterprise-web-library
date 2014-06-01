@@ -126,6 +126,7 @@
     <Compile Include="RsLibraryTester.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="StringTools\RemoveCommonNonAlphaNumericCharacters.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
