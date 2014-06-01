@@ -129,7 +129,9 @@ namespace RedStapler.StandardLibrary {
 		/// Returns the given string with all of its common non-alphaNumeric characters stripped. Whitespace remains.
 		/// </summary>
 		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
-			return RemoveCharacters( line, nonAlphaNumericCharacters );
+			if (line == null)
+				return null;
+			return Regex.Replace( line,"[^a-z0-9 ]","", RegexOptions.IgnoreCase );
 		}
 
 		/// <summary>
