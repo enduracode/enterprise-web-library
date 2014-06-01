@@ -131,7 +131,7 @@ namespace RedStapler.StandardLibrary {
 		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
 			if (line == null)
 				return null;
-			return Regex.Replace( line,"[^a-z0-9 ]","", RegexOptions.IgnoreCase );
+			return Regex.Replace( line,"[^a-z0-9\\s]","", RegexOptions.IgnoreCase );
 		}
 
 		/// <summary>

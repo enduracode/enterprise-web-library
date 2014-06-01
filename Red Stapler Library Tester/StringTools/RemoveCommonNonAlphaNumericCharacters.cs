@@ -15,6 +15,7 @@ namespace RedStapler.StandardLibraryTester.StringTools {
 			Assert.AreEqual( "   ", "   ".RemoveCommonNonAlphaNumericCharacters() );
 			Assert.AreEqual( null, ( (string)null ).RemoveCommonNonAlphaNumericCharacters() );
 			Assert.AreEqual( "  abcdefghijklmnopqrstuvxyz 123415647890  ", "  abcdefghijklmnopqrstuvxyz 123415647890  ".RemoveCommonNonAlphaNumericCharacters() );
+			Assert.AreEqual( "  abcdefghijklmnopqrstuvxyz 123415647890  \r\r\n", "  abcdefghijklmnopqrstuvxyz 123415647890  \r\r\n".RemoveCommonNonAlphaNumericCharacters() );
 		}
 	}
 }
