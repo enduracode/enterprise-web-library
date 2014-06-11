@@ -393,7 +393,6 @@ namespace RedStapler.StandardLibraryTester.IO {
 
 			runTest(
 				writer => {
-					writer.UseLegacyExcelFormat = true;
 					foreach( var rowSetup in rowSetups ) {
 						if( rowSetup.IsHeader )
 							writer.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
