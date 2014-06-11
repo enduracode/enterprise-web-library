@@ -123,7 +123,7 @@
     </Compile>
     <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
     <Compile Include="DoubleTools\ToMoneyString.cs" />
-    <Compile Include="IO\ExcelFileWriter.cs" />
+    <Compile Include="IO\ExcelFileWriterTester.cs" />
     <Compile Include="RsLibraryTester.cs">
       <SubType>Code</SubType>
     </Compile>
