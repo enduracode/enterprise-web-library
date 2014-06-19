@@ -140,7 +140,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 				// Aspose throws InvalidOperationException when there are problems with the template, such as a badly-formed region.
 				throw new MailMergingException( e.Message );
 			}
-			doc.Save( destinationStream, saveAsMsWordDoc ? Aspose.Words.SaveFormat.Doc : Aspose.Words.SaveFormat.Pdf );
+			doc.Save( destinationStream, saveAsMsWordDoc ? Aspose.Words.SaveFormat.Docx : Aspose.Words.SaveFormat.Pdf );
 		}
 
 		/// <summary>
