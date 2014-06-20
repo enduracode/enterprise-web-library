@@ -43,7 +43,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return decodeIntraSiteUris( encodedHtml, nonSecureBaseUrl, secureBaseUrl );
 		}
 
-		internal static string EncodeIntraSiteUris( string html ) {
+		/// <summary>
+		/// Creates a new HTML block and returns its ID.
+		/// </summary>
+		public static int CreateHtmlBlock( string html ) {
+			return SystemProvider.InsertHtmlBlock( encodeIntraSiteUris( html ) );
+		}
+
+		/// <summary>
+		/// Updates the HTML in the specified HTML block.
+		/// </summary>
+		public static void UpdateHtmlBlock( int htmlBlockId, string html ) {
+			SystemProvider.UpdateHtml( htmlBlockId, encodeIntraSiteUris( html ) );
+		}
+
+		// Do this after all validation so that validation doesn't get confused by our app-relative URL prefix "merge fields". We have seen a system run into
+		// problems while doing additional validation to verify that all words preceded by @@ were valid system-specific merge fields; it was mistakenly picking up
+		// our app-relative prefixes, thinking that they were merge fields, and complaining that they were not valid.
+		private static string encodeIntraSiteUris( string html ) {
 			// It's safe to assume that in HTML, <> are used for elements most of the time.
 			// The rest of the time, this pattern may match Javascript. However, Javascript will fail
 			// the tests following this, so we will still not end up changing something we shouldn't be.
