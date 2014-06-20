@@ -15,11 +15,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Saves the given Excel work book to the response stream. It is not necessary to save the workbook before calling this method.
 		/// Automatically executes inside an EhModifyDataAndSendFile method. Automatically converts the given file name to a safe file name.
 		/// </summary>
-		public static void SendExcelFile( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( stream => {
-				workbook.SaveToStream( stream );
-				return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
-			} ) );
+		public static FileCreator GetExcelFileCreator( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
+			return new FileCreator(
+				stream => {
+					workbook.SaveToStream( stream );
+					return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
+				} );
 		}
 
 		/// <summary>

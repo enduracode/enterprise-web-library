@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
 
 namespace RedStapler.StandardLibrary.DataAccess {
 	public class DataAccessState {
@@ -56,13 +55,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// Gets the connection to the primary database.
 		/// </summary>
 		public DBConnection PrimaryDatabaseConnection {
-			get {
-				// This can be removed after EWF [web] applications stop unconditionally grabbing the primary database connection.
-				if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && !AppTools.DatabaseExists )
-					return null;
-
-				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
-			}
+			get { return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ) ); }
 		}
 
 		/// <summary>

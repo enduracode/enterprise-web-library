@@ -151,18 +151,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			EwfPage.Instance.DataUpdate.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
-			var previousLink = new PostBackButton( PostBack.CreateFull( id: "prev" ),
-			                                       () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ),
-			                                       PreviousButton,
-			                                       false );
-			var todayLink = new PostBackButton( PostBack.CreateFull( id: "today" ),
-			                                    () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( DateTime.Today ) ),
-			                                    CurrentDateButton,
-			                                    false );
-			var nextLink = new PostBackButton( PostBack.CreateFull( id: "next" ),
-			                                   () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ),
-			                                   NextButton,
-			                                   false );
+			var previousLink =
+				new PostBackButton(
+					PostBack.CreateFull( id: "prev", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ),
+					PreviousButton,
+					usesSubmitBehavior: false );
+			var todayLink = new PostBackButton(
+				PostBack.CreateFull( id: "today", firstModificationMethod: () => dateModificationMethod( DateTime.Today ) ),
+				CurrentDateButton,
+				usesSubmitBehavior: false );
+			var nextLink =
+				new PostBackButton(
+					PostBack.CreateFull( id: "next", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ),
+					NextButton,
+					usesSubmitBehavior: false );
 
 			var table = new DynamicTable { CssClass = "calendarViewHeader ewfNavigationBoxHeader", IsStandard = false };
 			var navControls = new Panel();

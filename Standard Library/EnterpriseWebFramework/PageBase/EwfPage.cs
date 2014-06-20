@@ -13,7 +13,6 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
@@ -52,7 +51,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
-		private PageInfo redirectInfo;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
 		/// <summary>
@@ -261,6 +259,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			PageInfo redirectInfo = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
 					validateFormSubmission( formValueHash );
@@ -563,9 +562,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public DataModification DataUpdate { get { return dataUpdate; } }
 
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use DataUpdate instead." ) ]
-		public DataModification PostBackDataModification { get { return DataUpdate; } }
-
 		/// <summary>
 		/// Gets a post-back that updates the page's data without performing any other actions.
 		/// </summary>
@@ -574,10 +570,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets whether the page forces a post-back when a link is clicked.
 		/// </summary>
-		public virtual bool IsAutoDataUpdater { get { return IsAutoDataModifier; } }
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use IsAutoDataUpdater instead." ) ]
-		public virtual bool IsAutoDataModifier { get { return false; } }
+		public virtual bool IsAutoDataUpdater { get { return false; } }
 
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
 			etherealControls.Enqueue( etherealControl );
@@ -800,56 +793,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
 				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
 			}
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhExecute( Action method ) {
-			PostBack.CreateFull( firstModificationMethod: method ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		// When deleting this, remove the hack in DataAccessState.PrimaryDatabaseConnection.
-		public void EhModifyData( Action<DBConnection> modificationMethod ) {
-			PostBack.CreateFull( firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
-				.Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			PostBack.CreateFull(
-				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-				firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
-			PostBack.CreateFull(
-				firstModificationMethod: () => {
-					var url = method( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-				} ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
-			PostBack.CreateFull(
-				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-				firstModificationMethod: () => {
-					var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-				} ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		// When deleting this, also remove the redirectInfo field.
-		public void EhRedirect( PageInfo pageInfo ) {
-			PostBack.CreateFull( firstModificationMethod: () => redirectInfo = pageInfo ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhModifyDataAndSendFile( FileCreator fileCreator ) {
-			PostBack.CreateFull( firstModificationMethod: () => StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile() )
-				.Execute( true, null, pba => { } );
 		}
 
 		/// <summary>
