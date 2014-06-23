@@ -95,6 +95,36 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
+		/// Removes all of the non-alphanumeric characters, including white space, from this string.
+		/// </summary>
+		public static string RemoveNonAlphanumericCharacters( this string text ) {
+			// See http://stackoverflow.com/a/8779277/35349.
+			return Regex.Replace( text, @"[^A-Za-z0-9]+", "" );
+		}
+
+		/// <summary>
+		/// Removes all of the non-alpha characters, including white space, from this string.
+		/// </summary>
+		public static string RemoveNonAlphaCharacters( this string text ) {
+			// See http://stackoverflow.com/a/8779277/35349.
+			return Regex.Replace( text, @"[^A-Za-z]+", "" );
+		}
+
+		/// <summary>
+		/// Replaces each of the non-alphanumeric characters in this string with a space.
+		/// </summary>
+		public static string ReplaceNonAlphanumericCharactersWithWhiteSpace( this string text ) {
+			return Regex.Replace( text, @"[^A-Za-z0-9]", " " );
+		}
+
+		/// <summary>
+		/// Replaces each of the non-alpha characters in this string with a space.
+		/// </summary>
+		public static string ReplaceNonAlphaCharactersWithWhiteSpace( this string text ) {
+			return Regex.Replace( text, @"[^A-Za-z]", " " );
+		}
+
+		/// <summary>
 		/// Removes all instances of all given characters from the
 		/// given string, and returns this new string.
 		/// </summary>
@@ -118,38 +148,27 @@ namespace RedStapler.StandardLibrary {
 			return text;
 		}
 
-		/// <summary>
-		/// Returns the given string with all of its common non-alpha characters stripped. Whitespace remains.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphaCharacters instead." ) ]
 		public static string RemoveCommonNonAlphaCharacters( this string line ) {
 			return RemoveCharacters( line, nonAlphaCharacters );
 		}
 
-		/// <summary>
-		/// Returns the given string with all of its common non-alphaNumeric characters stripped. Whitespace remains.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
 		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
 			return RemoveCharacters( line, nonAlphaNumericCharacters );
 		}
 
-		/// <summary>
-		/// Returns the given string with all of its non-alpha characters replaced with whitespace.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphaCharactersWithWhiteSpace instead." ) ]
 		public static string ReplaceCommonNonAlphaCharactersWithWhitespace( this string text ) {
 			return ReplaceCharactersWithWhitespace( text, nonAlphaCharacters );
 		}
 
-		/// <summary>
-		/// Returns the given string with all of its non-alphaNumeric characters replaced with whitespace.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphanumericCharactersWithWhiteSpace instead." ) ]
 		public static string ReplaceCommonNonAlphaNumericCharactersWithWhitespace( this string text ) {
 			return ReplaceCharactersWithWhitespace( text, nonAlphaNumericCharacters );
 		}
 
-		/// <summary>
-		/// Returns a string with only the alpha and numeric characters of the
-		/// given string.  Returns null if there are no alpha or numeric characters.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
 		public static string ReturnAlphaNumericOnlyString( this string line ) {
 			line = RemoveCommonNonAlphaNumericCharacters( line );
 			if( line == "" )
@@ -157,10 +176,7 @@ namespace RedStapler.StandardLibrary {
 			return line;
 		}
 
-		/// <summary>
-		/// Returns a string with only the alpha characters of the
-		/// given string.  Returns null if there are no alpha characters.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphaCharacters instead." ) ]
 		public static string ReturnAlphaOnlyString( this string line ) {
 			line = RemoveCommonNonAlphaCharacters( line );
 			if( line == "" )
@@ -350,7 +366,11 @@ namespace RedStapler.StandardLibrary {
 		/// For example, "This 'quoted text'.".RemoveTextBetweenStrings( "'", "'" ) returns "This ''.";
 		/// </summary>
 		public static string RemoveTextBetweenStrings( this string s, string beginString, string endString ) {
-			return Regex.Replace( s, getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ), beginString + endString, RegexOptions.Multiline );
+			return Regex.Replace(
+				s,
+				getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ),
+				beginString + endString,
+				RegexOptions.Multiline );
 		}
 
 		private static string getRegexSafeString( string s ) {
