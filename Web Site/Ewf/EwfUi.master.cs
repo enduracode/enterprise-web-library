@@ -247,12 +247,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
 
 			ControlStack userInfoList = null;
-			var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
-			if( changePasswordPage.UserCanAccessPageAndAllControls && AppTools.User != null ) {
-				var userInfo = new UserInfo();
-				userInfo.LoadData( changePasswordPage );
-				userInfoList = ControlStack.CreateWithControls( true, userInfo );
-				userInfoList.CssClass = CssElementCreator.UserInfoListCssClass;
+			if( AppRequestState.Instance.UserAccessible ) {
+				var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+				if( changePasswordPage.UserCanAccessPageAndAllControls && AppTools.User != null ) {
+					var userInfo = new UserInfo();
+					userInfo.LoadData( changePasswordPage );
+					userInfoList = ControlStack.CreateWithControls( true, userInfo );
+					userInfoList.CssClass = CssElementCreator.UserInfoListCssClass;
+				}
 			}
 
 			table.AddItem( () => new EwfTableItem( new EwfTableCell( appLogoBlock ), new EwfTableCell( userInfoList ) ) );

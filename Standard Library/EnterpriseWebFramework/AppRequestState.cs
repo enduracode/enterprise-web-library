@@ -184,7 +184,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
 
 		internal void ClearUser() {
 			user = null;
