@@ -2,15 +2,12 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A WYSIWYG HTML editor.
 	/// </summary>
 	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
-		internal const string CkEditorFolderUrl = "Ewf/ThirdParty/CkEditor/ckeditor-4.1.2";
-
 		private readonly FormValue<string> formValue;
 
 		/// <summary>
@@ -42,8 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			const string toolbar =
 				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Image', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink', 'Styles' ]";
-			var contentsCss = this.GetClientUrl( "~/" + CkEditorFolderUrl + "/contents" + CssHandler.GetFileVersionString( DateTime.MinValue ) + ".css" );
-			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ], contentsCss: '" + contentsCss + "' } );";
+			return "CKEDITOR.replace( '" + ClientID + "', { toolbar: [ " + toolbar + " ] } );";
 		}
 
 		FormValue FormControl.FormValue { get { return formValue; } }
