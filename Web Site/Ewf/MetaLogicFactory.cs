@@ -40,7 +40,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1103Custom.Css.Custom_theme.Jquery_ui_1103Custommin.Info() );
 			infos.Add( new ThirdParty.Select2.Select2_343.Select2.Info() );
 			infos.Add( new ThirdParty.TimePicker.Styles.Info() );
-			infos.Add( new ThirdParty.Qtip2.Jqueryqtipmin.Info() );
 			infos.Add( new Styles.Basic.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
 				infos.Add( new Styles.EwfUi.Colors.Info() );
