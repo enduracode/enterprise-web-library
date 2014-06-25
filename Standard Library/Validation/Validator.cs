@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
+using RestSharp.Extensions;
 
 namespace RedStapler.StandardLibrary.Validation {
 	/// <summary>
@@ -320,7 +321,6 @@ namespace RedStapler.StandardLibrary.Validation {
 			return floatValue;
 		}
 
-
 		/// <summary>
 		/// Returns a validated decimal type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
@@ -446,7 +446,7 @@ namespace RedStapler.StandardLibrary.Validation {
 						const string domain = "(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters + "+";
 						// The first two conditions are for performance only.
 						if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
-						    !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
+							!Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
 							errorHandler.SetValidationResult( ValidationResult.Invalid() );
 						// Max length is already checked by the string validation
 						// NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
@@ -462,7 +462,6 @@ namespace RedStapler.StandardLibrary.Validation {
 			return GetUrl( errorHandler, url, allowEmpty, MaxUrlLength );
 		}
 
-
 		private static readonly string[] validSchemes = new[] { "http", "https", "ftp" };
 
 		/// <summary>
@@ -474,16 +473,31 @@ namespace RedStapler.StandardLibrary.Validation {
 				url,
 				allowEmpty,
 				delegate {
+					/* If the string is just a number, reject it right out. */
+					int numberTesting;
+					double doubleTesting;
+					if( int.TryParse( url, out numberTesting ) || double.TryParse( url, out doubleTesting ) ) {
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it doesn't start with one of our whitelisted schemes, add in the best guess. */
 					url = GetString( errorHandler, validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url, true, maxUrlLength );
+
+					/* If the getstring didn't fail, keep on keepin keepin on. */
 					if( errorHandler.LastResult == ErrorCondition.NoError ) {
 						try {
+							if( !Uri.IsWellFormedUriString( url, UriKind.Absolute ) )
+								throw new UriFormatException();
+
 							// Don't allow relative URLs
 							var uri = new Uri( url, UriKind.Absolute );
+
 							// Must be a valid DNS-style hostname or IP address
 							// Must contain at least one '.', to prevent just host names
 							// Must be one of the common web browser-accessible schemes
 							if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 && uri.HostNameType != UriHostNameType.IPv6 ||
-							    !uri.Host.Any( c => c == '.' ) || !validSchemes.Any( s => s == uri.Scheme ) )
+								!uri.Host.Any( c => c == '.' ) || !validSchemes.Any( s => s == uri.Scheme ) )
 								throw new UriFormatException();
 						}
 						catch( UriFormatException ) {
@@ -548,7 +562,7 @@ namespace RedStapler.StandardLibrary.Validation {
 					input = input.RemoveCharacters( new[] { '-', '(', ')', '.' } ).Trim();
 
 					var invalidMessage = invalidPrefix +
-					                     " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
+										 " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
 					var phoneNumber = PhoneNumber.CreateFromParts( "", "", "" );
 
 					// NOTE: AllowSurroundingGarbage does not apply to first five or international numbers.
@@ -563,13 +577,13 @@ namespace RedStapler.StandardLibrary.Validation {
 						else
 							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, "The five digit phone number you entered isn't recognized." ) );
 					}
-						// International phone numbers
-						// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
-						// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
-						// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
+					// International phone numbers
+					// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
+					// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
+					// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
 					else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
 						phoneNumber = PhoneNumber.CreateInternational( input );
-						// Validated it as a North American Numbering Plan phone number
+					// Validated it as a North American Numbering Plan phone number
 					else {
 						var regex = @"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
 						if( !allowSurroundingGarbage )
@@ -651,7 +665,6 @@ namespace RedStapler.StandardLibrary.Validation {
 				delegate { return ZipCode.CreateUsZipCode( errorHandler, zipCode ); },
 				new ZipCode() );
 		}
-
 
 		/// <summary>
 		/// Gets a validated US or Canadian zip code.
