@@ -10,7 +10,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebFileSending;
@@ -462,6 +461,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var styleSheetLinks = new List<HtmlLink>();
 
 			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
+			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
 
@@ -509,32 +509,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addJavaScriptIncludes() {
 			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
 			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
 
 			ClientScript.RegisterClientScriptInclude(
 				GetType(),
 				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
+				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
-
-			// From http://stackoverflow.com/a/2548133/35349.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"endsWith",
-				"function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
-				true );
-
-			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"CKEditor GetUrl",
-				"function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-					.FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
-				true );
-
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
 			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
