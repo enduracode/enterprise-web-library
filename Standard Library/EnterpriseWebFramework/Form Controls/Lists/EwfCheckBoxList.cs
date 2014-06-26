@@ -26,6 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly string caption;
 		private readonly bool includeSelectAndDeselectAllButtons;
 		private readonly byte numberOfColumns;
+		private readonly PostBack postBack;
 
 		private readonly Dictionary<EwfListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<EwfListItem<ItemIdType>, BlockCheckBox>();
 
@@ -34,12 +35,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBoxList(
 			IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
-			byte numberOfColumns = 1 ) {
+			byte numberOfColumns = 1, PostBack postBack = null ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();
 			this.caption = caption;
 			this.includeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
 			this.numberOfColumns = numberOfColumns;
+			this.postBack = postBack;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -58,7 +60,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var place = new PlaceHolder();
 				for( var j = i * itemsPerColumn; j < maxIndex; j += 1 ) {
 					var item = items.ElementAt( j );
-					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true );
+					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true, postBack: postBack );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}

@@ -490,11 +490,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new[]
 					{
 						new CSharpParameter( "string", "caption", "\"\"" ), new CSharpParameter( "bool", "includeSelectAndDeselectAllButtons", "false" ),
-						new CSharpParameter( "byte", "numberOfColumns", "1" )
+						new CSharpParameter( "byte", "numberOfColumns", "1" ), new CSharpParameter( "PostBack", "postBack", "null" )
 					},
 				new CSharpParameter[ 0 ],
 				"new EwfCheckBoxList<" + field.EnumerableElementTypeName + ">( items, v ?? new " + field.EnumerableElementTypeName +
-				"[ 0 ], caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns )",
+				"[ 0 ], caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns, postBack: postBack )",
 				"control.GetSelectedItemIdsInPostBack( postBackValues )",
 				"true" );
 		}
