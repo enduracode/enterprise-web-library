@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
@@ -33,8 +32,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a check box list.
 		/// </summary>
-		public EwfCheckBoxList( IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "",
-		                        bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1 ) {
+		public EwfCheckBoxList(
+			IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
+			byte numberOfColumns = 1 ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();
 			this.caption = caption;
