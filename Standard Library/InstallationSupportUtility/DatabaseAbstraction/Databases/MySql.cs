@@ -70,7 +70,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					try {
 						StandardLibraryMethods.RunProgram(
 							StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
-							getHostAndAuthenticationArguments() + " --single-transaction --result-file=\"{0}\"".FormatWith( filePath ) + info.Database,
+							getHostAndAuthenticationArguments() + " --single-transaction --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
 							"",
 							true );
 					}
