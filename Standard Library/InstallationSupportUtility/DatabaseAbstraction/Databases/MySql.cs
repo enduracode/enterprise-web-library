@@ -68,9 +68,10 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			executeMethodWithDbExceptionHandling(
 				delegate {
 					try {
+						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
 						StandardLibraryMethods.RunProgram(
 							StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
-							getHostAndAuthenticationArguments() + " --single-transaction --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
+							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
 							"",
 							true );
 					}
