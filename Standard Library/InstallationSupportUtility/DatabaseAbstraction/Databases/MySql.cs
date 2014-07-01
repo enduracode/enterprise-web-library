@@ -68,13 +68,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			executeMethodWithDbExceptionHandling(
 				delegate {
 					try {
-						File.WriteAllText(
-							filePath,
-							StandardLibraryMethods.RunProgram(
-								StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
-								getHostAndAuthenticationArguments() + " --single-transaction " + info.Database,
-								"",
-								true ) );
+						StandardLibraryMethods.RunProgram(
+							StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
+							getHostAndAuthenticationArguments() + " --single-transaction --result-file=\"{0}\"".FormatWith( filePath ) + info.Database,
+							"",
+							true );
 					}
 					catch( Exception e ) {
 						throw DataAccessMethods.CreateDbConnectionException( info, "exporting (to file)", e );
