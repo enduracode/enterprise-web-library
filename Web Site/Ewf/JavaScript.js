@@ -14,9 +14,8 @@ function toggleElementDisplay( id ) {
 }
 
 function getClientUtcOffset( id ) {
-	var utcOffset = $get( id );
 	var timeString = new Date().toUTCString();
-	utcOffset.value = timeString;
+	$( "#" + id ).val( timeString );
 }
 
 // Supports DurationPicker

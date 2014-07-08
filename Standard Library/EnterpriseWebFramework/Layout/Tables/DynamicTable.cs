@@ -165,7 +165,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public void AddSelectedRowsAction( string label, RowMethod action ) {
 			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, label ) );
 			selectedRowDataModificationsToMethods.Add( postBack, action );
-			selectedRowActionButtonsToAdd.Add( new PostBackButton( postBack, new TextActionControlStyle( label ), false ) );
+			selectedRowActionButtonsToAdd.Add( new PostBackButton( postBack, new TextActionControlStyle( label ), usesSubmitBehavior: false ) );
 		}
 
 		/// <summary>
@@ -289,10 +289,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			previousRowColumnSpans =
 				( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 )
-				                        .Concat(
-					                        cells.Where( c => c.ItemSpan != 1 )
-					                             .Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.ItemSpan - 1, ColumnSpan = rowSpanCell.FieldSpan } ) ) )
-					.ToList();
+					.Concat(
+						cells.Where( c => c.ItemSpan != 1 )
+							.Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.ItemSpan - 1, ColumnSpan = rowSpanCell.FieldSpan } ) ) ).ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
 			TableOps.DrawRow( table, rowSetup, cellPlaceHolders, columnSetups, false );
@@ -330,17 +329,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			// Row limiting
 			if( defaultDataRowLimit != DataRowLimit.Unlimited ) {
-				captionStack.AddControls( new ControlLine( new LiteralControl( "Show:" ),
-				                                           getDataRowLimitControl( DataRowLimit.Fifty ),
-				                                           getDataRowLimitControl( DataRowLimit.FiveHundred ),
-				                                           getDataRowLimitControl( DataRowLimit.Unlimited ) ) );
+				captionStack.AddControls(
+					new ControlLine(
+						new LiteralControl( "Show:" ),
+						getDataRowLimitControl( DataRowLimit.Fifty ),
+						getDataRowLimitControl( DataRowLimit.FiveHundred ),
+						getDataRowLimitControl( DataRowLimit.Unlimited ) ) );
 			}
 
 			// Excel export
 			if( allowExportToExcel ) {
-				actionLinks.Add( new ActionButtonSetup( "Export to Excel",
-				                                        new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ),
-				                                                                                 firstModificationMethod: ExportToExcel ) ) ) );
+				actionLinks.Add(
+					new ActionButtonSetup(
+						"Export to Excel",
+						new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ), actionGetter: ExportToExcel ) ) ) );
 			}
 
 			// Action links
@@ -358,13 +360,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			foreach( var buttonToMethod in selectedRowDataModificationsToMethods ) {
 				var dataModification = buttonToMethod.Key;
 				var method = buttonToMethod.Value;
-				dataModification.AddModificationMethod( () => {
-					foreach( var rowSetup in rowSetups ) {
-						if( rowSetup.UniqueIdentifier != null &&
-						    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
-							method( DataAccessState.Current.PrimaryDatabaseConnection, rowSetup.UniqueIdentifier );
-					}
-				} );
+				dataModification.AddModificationMethod(
+					() => {
+						foreach( var rowSetup in rowSetups ) {
+							if( rowSetup.UniqueIdentifier != null &&
+							    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
+								    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+								method( DataAccessState.Current.PrimaryDatabaseConnection, rowSetup.UniqueIdentifier );
+						}
+					} );
 			}
 
 			if( selectedRowDataModificationsToMethods.Any() ) {
@@ -374,8 +378,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							Width = Unit.Percentage( 5 ),
 							CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
 						};
-					if( rowSetup.UniqueIdentifier != null )
-						cell.Controls.Add( new EwfCheckBox( false ) );
+					if( rowSetup.UniqueIdentifier != null ) {
+						var firstDm = selectedRowDataModificationsToMethods.First().Key;
+						var pb = firstDm as PostBack;
+						cell.Controls.Add( new EwfCheckBox( false, postBack: pb ?? EwfPage.Instance.DataUpdatePostBack ) );
+					}
 					rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
 				}
 			}
@@ -391,8 +398,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				if( previousRowSetup != null ) {
 					var upButton =
 						new PostBackButton(
-							PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
-							                     firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ),
+							PostBack.CreateFull(
+								id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
+								firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ),
 							new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 							usesSubmitBehavior: false );
 					controlLine.AddControls( upButton );
@@ -400,8 +408,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				if( nextRowSetup != null ) {
 					var downButton =
 						new PostBackButton(
-							PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
-							                     firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ),
+							PostBack.CreateFull(
+								id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
+								firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ),
 							new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 							usesSubmitBehavior: false );
 					controlLine.AddControls( downButton );
@@ -425,7 +434,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Performs an EhModifyDataAndSendFile operation. This is convenient if you want to get the built-in export functionality, but from
 		/// an external button rather than an action on this table.
 		/// </summary>
-		public void ExportToExcel() {
+		public PostBackAction ExportToExcel() {
 			var workbook = new ExcelFileWriter { UseLegacyExcelFormat = true };
 			foreach( var rowSetup in rowSetups ) {
 				if( rowSetup.IsHeader )
@@ -433,7 +442,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				else
 					workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
 			}
-			workbook.SendExcelFile( caption.Length > 0 ? caption : "Excel export" );
+			return new PostBackAction( workbook.GetExcelFileCreator( caption.Length > 0 ? caption : "Excel export" ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
@@ -441,8 +450,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				return new Literal { Text = getDataRowLimitText( dataRowLimit ) };
 			return
 				new PostBackButton(
-					PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
-					                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ),
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
+						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ),
 					new TextActionControlStyle( getDataRowLimitText( dataRowLimit ) ),
 					usesSubmitBehavior: false );
 		}

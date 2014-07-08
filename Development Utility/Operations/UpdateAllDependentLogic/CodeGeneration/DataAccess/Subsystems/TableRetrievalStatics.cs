@@ -24,24 +24,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				// Write nested classes.
 				DataAccessStatics.WriteRowClass( writer,
-				                                 columns.AllColumns,
-				                                 localWriter => {
-					                                 if( !columns.DataColumns.Any() )
-						                                 return;
+					columns.AllColumns,
+					localWriter => {
+						if( !columns.DataColumns.Any() )
+							return;
 
-					                                 var modClass = database.SecondaryDatabaseName + "Modification." +
-					                                                StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
-					                                 var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
-					                                 writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
-					                                 writer.WriteLine( "return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
-					                                                   StringTools.ConcatenateWithDelimiter( ", ",
-					                                                                                         columns.AllColumns.Select(
-						                                                                                         i =>
-						                                                                                         StandardLibraryMethods.GetCSharpIdentifierSimple(
-							                                                                                         i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
-					                                 writer.WriteLine( "}" );
-				                                 },
-				                                 cn.DatabaseInfo );
+						var modClass = database.SecondaryDatabaseName + "Modification." +
+						               StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
+						var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
+						writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
+						writer.WriteLine( "return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
+						                  StringTools.ConcatenateWithDelimiter( ", ",
+							                  columns.AllColumns.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) +
+						                  " );" );
+						writer.WriteLine( "}" );
+					} );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
 				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
 
@@ -129,10 +126,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var methodName = "GetRows" + ( isSmallTable ? "MatchingConditions" : "" ) +
 			                 ( isRevisionHistoryTable && !excludePreviousRevisions ? "IncludingPreviousRevisions" : "" );
 			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Retrieves the rows from the table that match the specified conditions, ordered in a stable way." +
-			                                            ( isSmallTable
-				                                              ? " Since the table is specified as small, you should only use this method if you cannot filter the rows in code."
-				                                              : "" ) );
+				"Retrieves the rows from the table that match the specified conditions, ordered in a stable way." +
+				( isSmallTable ? " Since the table is specified as small, you should only use this method if you cannot filter the rows in code." : "" ) );
 			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
 			                  "[] conditions ) {" );
 

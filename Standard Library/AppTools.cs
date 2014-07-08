@@ -583,6 +583,13 @@ namespace RedStapler.StandardLibrary {
 			}
 		}
 
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? StandardLibraryMethods.GetProjectOutputFolderPath( true ) : ""; }
+		}
+
 		private static void assertClassInitialized() {
 			if( !initialized )
 				throw new ApplicationException( "Initialize the class before calling this method." );
