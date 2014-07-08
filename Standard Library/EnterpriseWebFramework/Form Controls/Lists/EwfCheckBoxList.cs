@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
@@ -27,19 +26,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly string caption;
 		private readonly bool includeSelectAndDeselectAllButtons;
 		private readonly byte numberOfColumns;
+		private readonly PostBack postBack;
 
 		private readonly Dictionary<EwfListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<EwfListItem<ItemIdType>, BlockCheckBox>();
 
 		/// <summary>
 		/// Creates a check box list.
 		/// </summary>
-		public EwfCheckBoxList( IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "",
-		                        bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1 ) {
+		public EwfCheckBoxList(
+			IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
+			byte numberOfColumns = 1, PostBack postBack = null ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();
 			this.caption = caption;
 			this.includeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
 			this.numberOfColumns = numberOfColumns;
+			this.postBack = postBack;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -58,7 +60,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var place = new PlaceHolder();
 				for( var j = i * itemsPerColumn; j < maxIndex; j += 1 ) {
 					var item = items.ElementAt( j );
-					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true );
+					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true, postBack: postBack );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}
