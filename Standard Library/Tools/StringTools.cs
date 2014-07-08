@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web.Script.Serialization;
 using JetBrains.Annotations;
 
 namespace RedStapler.StandardLibrary {
@@ -620,6 +621,20 @@ namespace RedStapler.StandardLibrary {
 		/// C# doesn't allow constraining the value to an Enum
 		public static T ToEnum<T>( this string s ) {
 			return (T)Enum.Parse( typeof( T ), s );
+		}
+
+		/// <summary>
+		/// Serializes the given object into json.
+		/// </summary>
+		public static string ToJson( this object o ) {
+			return new JavaScriptSerializer().Serialize( o );
+		}
+
+		/// <summary>
+		/// Converts the given json into the given type.
+		/// </summary>
+		public static T FromJson<T>( this string json ) {
+			return new JavaScriptSerializer().Deserialize<T>( json );
 		}
 	}
 }
