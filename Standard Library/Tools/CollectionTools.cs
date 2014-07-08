@@ -70,6 +70,8 @@ namespace RedStapler.StandardLibrary {
 		/// Returns the last <paramref name="n"/> elements.
 		/// </summary>
 		public static IEnumerable<T> TakeLast<T>( this IEnumerable<T> c, int n ) {
+			if( n < 0 )
+				throw new ApplicationException( "'n' was {0} which is less than zero.".FormatWith( n ) );
 			var count = c.Count();
 			return c.Skip( count - n );
 		}
