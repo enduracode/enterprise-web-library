@@ -19,27 +19,29 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			protected override List<PageGroup> createPageInfos() {
 				return new List<PageGroup>
 					{
-						new PageGroup( "Working Stuff",
+						new PageGroup(
+							"Working Stuff",
 							new ActionControls.Info( this ),
 							new CalendarDemo.Info( this ),
 							new OptionalParameters.Info( this ),
 							new Html5FileUpload.Info( this ),
 							new OmniDemo.Info( this ) ),
-						new PageGroup( "First category",
+						new PageGroup(
+							"First category",
 							new HtmlEditing.Info( this ),
 							new RegexHelper.Info( this ),
 							new TwoWeekCalendarTest.Info( this, DateTime.Now ),
 							new StatusMessages.Info( this ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new BoxDemo.Info( this ) ),
-						new PageGroup( "Form Controls",
+						new PageGroup(
+							"Form Controls",
 							new EwfTextBoxDemo.Info( this ),
 							new CheckBox.Info( this ),
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
-							new DateAndTimePickers.Info( this ),
-							new Charts.Info( this ) ),
-						new PageGroup( "Other", new IntermediatePostBacks.Info( this ) )
+							new DateAndTimePickers.Info( this ) ),
+						new PageGroup( "Other", new IntermediatePostBacks.Info( this ), new Charts.Info( this ) )
 					};
 			}
 
