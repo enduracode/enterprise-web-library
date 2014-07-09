@@ -15,20 +15,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A control capable of displaying chart data.
 	/// </summary>
 	public class Chart: WebControl, ControlTreeDataLoader {
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		public class CssElementCreator: ControlCssElementCreator {
+		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfChart";
 
-			/// <summary>
-			/// Standard Library use only.
-			/// </summary>
-			public static readonly string[] Selectors = { "div." + CssClass };
-
-
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "Chart", Selectors ) };
+				return new[] { new CssElement( "Chart", "div." + CssClass ) };
 			}
 		}
 
@@ -348,7 +339,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Returns the img tag, which represents this control in HTML.
+		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}

@@ -158,10 +158,10 @@ ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
 }
 
 /* block element vertical spacing */
-p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfBoxBothStates, ewfFormItemBlock, ewfLabeledControl, ewfUiGlobalFootBlock, ewfChart {
+p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfBoxBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiGlobalFootBlock {
 	margin-top: 1.5em;
 }
-p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfBoxBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child {
+p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfBoxBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child {
 	margin-top: 0;
 }
 p, ul {
