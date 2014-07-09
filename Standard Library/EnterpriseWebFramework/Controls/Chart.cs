@@ -263,7 +263,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					options = new BarOptions { };
 					break;
 				default:
-					throw new UnhandledEnumException( chartType );
+					throw new UnexpectedValueException( chartType );
 			}
 
 			var headers = reportData.LabelsTitle.ToSingleElementArray().Concat( reportData.Values.Select( v => v.Title ) );
@@ -284,7 +284,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					Controls.Add( new Literal { Text = "<canvas id='{0}' height='400'></canvas>".FormatWith( chartClientId ) } );
 					break;
 				default:
-					throw new UnhandledEnumException( chartType );
+					throw new UnexpectedValueException( chartType );
 			}
 
 			if( chartData.datasets.Count() > 1 ) {
