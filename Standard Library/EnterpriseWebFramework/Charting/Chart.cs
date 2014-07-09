@@ -6,11 +6,12 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using JetBrains.Annotations;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.WebFileSending;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control capable of displaying chart data.
 	/// </summary>
