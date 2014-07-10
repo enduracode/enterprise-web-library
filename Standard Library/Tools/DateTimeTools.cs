@@ -125,6 +125,33 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
+		/// Returns true if the specified date/time range overlaps the specified date range. Passing null for any date means infinity in that direction.
+		/// Throws an exception if the date range contains time information. Use .Date if you have to.
+		/// See documentation for IsBetweenDates for more information on the date range.
+		/// </summary>
+		public static bool DateTimeRangeOverlapsDateRange(
+			DateTime? dateTimeRangeBegin, DateTime? dateTimeRangeEnd, DateTime? dateRangeBegin, DateTime? dateRangeEnd ) {
+			assertDateTimeHasNoTime( dateRangeBegin, "date range begin" );
+			assertDateTimeHasNoTime( dateRangeEnd, "date range end" );
+
+			// It is important to call IsBetweenDateTimes on the ending here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			if( dateTimeRangeEnd.HasValue && !dateTimeRangeEnd.Value.IsBetweenDates( dateTimeRangeBegin, null ) )
+				throw new ApplicationException( "Date/time range ends before it begins." );
+
+			if( dateRangeBegin.HasValue && !dateRangeBegin.Value.IsBetweenDates( null, dateRangeEnd ) )
+				throw new ApplicationException( "Date range ends before it begins." );
+
+			var dateTimeRangeBeginsBeforeDateRangeEnds = !dateTimeRangeBegin.HasValue || dateTimeRangeBegin.Value.IsBetweenDates( null, dateRangeEnd );
+
+			// It is important to call IsBetweenDateTimes on the beginning here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			var dateRangeBeginsBeforeDateTimeRangeEnds = !dateRangeBegin.HasValue || dateRangeBegin.Value.IsBetweenDateTimes( null, dateTimeRangeEnd );
+
+			return dateTimeRangeBeginsBeforeDateRangeEnds && dateRangeBeginsBeforeDateTimeRangeEnds;
+		}
+
+		/// <summary>
 		/// Returns true if the two given date ranges overlap. Passing null for any date means infinity in that direction.
 		/// Throws an exception if any of the given dates contains time information. Use .Date if you have to.
 		/// See documentation for IsBetweenDates for more information on the date ranges.
