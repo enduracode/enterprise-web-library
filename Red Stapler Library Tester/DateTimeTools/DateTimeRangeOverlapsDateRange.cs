@@ -75,6 +75,8 @@ namespace RedStapler.StandardLibraryTester.DateTimeTools {
 
 			Assert.AreEqual( StandardLibrary.DateTimeTools.DateTimeRangeOverlapsDateRange( today, fiveOClock, today, tomorrow ), true );
 			Assert.Catch( typeof( ApplicationException ), () => StandardLibrary.DateTimeTools.DateTimeRangeOverlapsDateRange( today, tomorrow, today, fiveOClock ) );
+
+			Assert.AreEqual( StandardLibrary.DateTimeTools.DateTimeRangeOverlapsDateRange( fiveOClock.AddHours( -1 ), fiveOClock, today, tomorrow ), true );
 		}
 	}
 }

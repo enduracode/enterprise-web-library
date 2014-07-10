@@ -155,7 +155,7 @@ namespace RedStapler.StandardLibrary {
 
 			// It is important to call IsBetweenDateTimes on the ending here because of the way IsBetweenDateTimes handles the beginning and end of the range
 			// differently.
-			if( dateTimeRangeEnd.HasValue && !dateTimeRangeEnd.Value.IsBetweenDates( dateTimeRangeBegin, null ) )
+			if( dateTimeRangeEnd.HasValue && !dateTimeRangeEnd.Value.IsBetweenDateTimes( dateTimeRangeBegin, null ) )
 				throw new ApplicationException( "Date/time range ends before it begins." );
 
 			if( dateRangeBegin.HasValue && !dateRangeBegin.Value.IsBetweenDates( null, dateRangeEnd ) )
