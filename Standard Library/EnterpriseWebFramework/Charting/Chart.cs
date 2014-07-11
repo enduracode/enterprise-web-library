@@ -97,19 +97,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				: this( labelsTitle, labels, values.ToSingleElementArray(), color != null ? () => color.Value : (Func<Color>)null, maxXValues: maxXValues ) {}
 		}
 
-		// ReSharper disable InconsistentNaming
-		// ReSharper disable MemberCanBePrivate.Global
-		// ReSharper disable UnusedField.Compiler
-		// ReSharper disable NotAccessedField.Global
-		// ReSharper disable UnusedMember.Global
+		#region Chart.js configuration
+
+		// ReSharper disable All
 
 		/// <summary>
 		/// Used for Line graphs.
 		/// JSON object used to configure Chart.js.
 		/// </summary>
-		protected class Dataset: BaseDataset {
+		private class Dataset: BaseDataset {
 			public readonly string pointStrokeColor = "#fff";
-			public string pointColor { get; set; }
+			public readonly string pointColor;
 
 			public Dataset( Color color, IEnumerable<double> data ): base( color, data ) {
 				pointColor = strokeColor;
@@ -120,14 +118,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Used for Bar graphs.
 		/// JSON object used to configure Chart.js.
 		/// </summary>
-		protected class BaseDataset {
+		private class BaseDataset {
 			private static string toRgbaString( Color color, string opacity ) {
 				return string.Format( "rgba({0},{1},{2},{3})", color.R, color.G, color.B, opacity );
 			}
 
-			public string fillColor { get; set; }
-			public string strokeColor { get; set; }
-			public IEnumerable<double> data { get; set; }
+			public readonly string fillColor;
+			public readonly string strokeColor;
+			public readonly IEnumerable<double> data;
 
 			public BaseDataset( Color color, IEnumerable<double> data ) {
 				fillColor = toRgbaString( color, "0.5" );
@@ -139,7 +137,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// JSON object used to configure Chart.js.
 		/// </summary>
-		protected class ChartData {
+		private class ChartData {
 			public readonly IEnumerable<string> labels;
 			public readonly IEnumerable<BaseDataset> datasets;
 
@@ -149,15 +147,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-
-		public class BarOptions: OptionsBase {
+		private class BarOptions: OptionsBase {
 			public bool barShowStroke = true;
 			public int barStrokeWidth = 1;
 			public int barValueSpacing = 5;
 			public int barDatasetSpacing = 1;
 		}
 
-		public class LineOptions: OptionsBase {
+		private class LineOptions: OptionsBase {
 			public bool bezierCurve = true;
 			public bool pointDot = true;
 			public int pointDotRadius = 3;
@@ -167,7 +164,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			public bool datasetFill = true;
 		}
 
-		public class OptionsBase {
+		private class OptionsBase {
 			public bool scaleOverlay = false;
 			public bool scaleOverride = false;
 			public int? scaleSteps = null;
@@ -196,12 +193,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Bar
 		}
 
-		// ReSharper restore MemberCanBePrivate.Global
-		// ReSharper restore InconsistentNaming
-		// ReSharper restore UnusedField.Compiler
-		// ReSharper restore NotAccessedField.Global
-		// ReSharper restore UnusedMember.Global
+		// ReSharper restore All
 
+		#endregion
 
 		private static Func<Color> getDefaultNextColorSelectors() {
 			var c = nextColor().GetEnumerator();
