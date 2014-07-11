@@ -221,7 +221,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UnexpectedValueException( chartType );
 			}
 
-			var headers = reportData.LabelsTitle.ToSingleElementArray().Concat( reportData.Values.Select( v => v.Title ) );
+			var headers = reportData.LabelsTitle.ToSingleElementArray().Concat( reportData.Values.Select( v => v.Name ) );
 			var tableData = new List<IEnumerable<string>>( reportData.Values.First().Values.Count() );
 			for( var i = 0; i < tableData.Capacity; i++ ) {
 				var i1 = i;
@@ -253,7 +253,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									{
 										Text =
 											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-									.FormatWith( dataset.fillColor, dataset.strokeColor, reportData.Values.ElementAt( i ).Title )
+									.FormatWith( dataset.fillColor, dataset.strokeColor, reportData.Values.ElementAt( i ).Name )
 									} ).ToArray() ).ToSingleElementArray() ) );
 			}
 

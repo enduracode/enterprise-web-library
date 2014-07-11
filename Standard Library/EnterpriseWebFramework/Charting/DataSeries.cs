@@ -6,24 +6,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A data series for a chart.
 	/// </summary>
 	public class DataSeries {
-		public readonly string Title;
-		public readonly IEnumerable<double> Values;
+		internal readonly string Name;
+		internal readonly IEnumerable<double> Values;
 
 		/// <summary>
 		/// Constructor for double values.
 		/// </summary>
-		/// <param name="title">The label for the Y values.</param>
+		/// <param name="name">The series name. Do not pass null.</param>
 		/// <param name="values">The Y values.</param>
-		public DataSeries( string title, IEnumerable<double> values ) {
-			Title = title;
+		public DataSeries( string name, IEnumerable<double> values ) {
+			Name = name;
 			Values = values;
 		}
 
 		/// <summary>
 		/// Constructor for int values.
 		/// </summary>
-		/// <param name="title">The label for the Y values.</param>
+		/// <param name="name">The series name. Do not pass null.</param>
 		/// <param name="values">The Y values.</param>
-		public DataSeries( string title, IEnumerable<int> values ): this( title, values.Select( i => (double)i ) ) {}
+		public DataSeries( string name, IEnumerable<int> values ): this( name, values.Select( i => (double)i ) ) {}
 	}
 }
