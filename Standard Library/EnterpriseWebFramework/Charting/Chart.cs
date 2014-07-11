@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using JetBrains.Annotations;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -13,9 +14,9 @@ using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A control capable of displaying chart data.
+	/// A control capable of displaying chart data. Currently implemented with Chart.js.
 	/// </summary>
-	public class Chart: WebControl, ControlTreeDataLoader {
+	public class Chart: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfChart";
 
@@ -118,31 +119,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		#endregion
 
-		private static Func<Color> getDefaultNextColorSelectors() {
-			var c = nextColor().GetEnumerator();
-			return () => {
-				c.MoveNext();
-				return c.Current;
-			};
-		}
-
-		private static IEnumerable<Color> nextColor() {
-			yield return Color.FromArgb( 120, 160, 195 );
-			yield return Color.FromArgb( 255, 182, 149 );
-			yield return Color.FromArgb( 170, 225, 748 );
-			yield return Color.FromArgb( 255, 230, 149 );
-			var rand = new Random();
-			while( true )
-				yield return Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) );
-		}
-
 		private readonly ChartSetup setup;
 
 		[ NotNull ]
 		private readonly IEnumerable<DataSeries> seriesCollection;
 
 		[ CanBeNull ]
-		private readonly Func<Color> nextColorSelector;
+		private readonly IEnumerable<Color> colors;
+
+		private string jsInitStatements;
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -151,7 +136,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="series">The data series.</param>
 		/// <param name="color">The color to use for the data series.</param>
 		public Chart( ChartSetup setup, DataSeries series, Color? color = null )
-			: this( setup, series.ToSingleElementArray(), nextColorSelector: color != null ? () => color.Value : (Func<Color>)null ) {}
+			: this( setup, series.ToSingleElementArray(), colors: color != null ? color.Value.ToSingleElementArray() : null ) {}
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -159,55 +144,54 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="setup">The setup object for the chart.</param>
 		/// <param name="seriesCollection">The data series collection.</param>
-		/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataSeries"/>.</param>
-		public Chart( ChartSetup setup, IEnumerable<DataSeries> seriesCollection, Func<Color> nextColorSelector = null ) {
+		/// <param name="colors">The colors to use for the data series collection. Pass null for default colors. If you specify your own colors, the number of
+		/// colors does not need to match the number of series. If you pass fewer colors than series, the chart will use random colors for the remaining series.
+		/// </param>
+		public Chart( ChartSetup setup, IEnumerable<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
 			this.setup = setup;
 			this.seriesCollection = seriesCollection.ToArray();
-			this.nextColorSelector = nextColorSelector;
+			this.colors = colors;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			var getNextColor = nextColorSelector ?? getDefaultNextColorSelectors();
+			var rand = new Random();
+			var actualColors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count() )
+				.Pad( seriesCollection.Count(), () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
 
-			Func<DataSeries, BaseDataset> selector;
+			Func<DataSeries, Color, BaseDataset> datasetSelector;
 			OptionsBase options;
 			switch( setup.ChartType ) {
 				case ChartType.Line:
-					selector = v => new Dataset( getNextColor(), v.Values.TakeLast( setup.MaxXValues ) );
+					datasetSelector = ( series, color ) => new Dataset( color, series.Values.TakeLast( setup.MaxXValues ) );
 					options = new LineOptions { bezierCurve = false };
 					break;
 				case ChartType.Bar:
-					selector = v => new BaseDataset( getNextColor(), v.Values.TakeLast( setup.MaxXValues ) );
+					datasetSelector = ( series, color ) => new BaseDataset( color, series.Values.TakeLast( setup.MaxXValues ) );
+					// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
 					options = new BarOptions { };
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
 			}
 
-			var headers = setup.XAxisTitle.ToSingleElementArray().Concat( seriesCollection.Select( v => v.Name ) );
-			var tableData = new List<IEnumerable<string>>( seriesCollection.First().Values.Count() );
-			for( var i = 0; i < tableData.Capacity; i++ ) {
-				var i1 = i;
-				tableData.Add( setup.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
-			}
+			var chartData = new ChartData(
+				setup.Labels.TakeLast( setup.MaxXValues ),
+				seriesCollection.Zip( actualColors, ( series, color ) => datasetSelector( series, color ) ).ToArray() );
 
-			var chartData = new ChartData( setup.Labels.TakeLast( setup.MaxXValues ), seriesCollection.Select( selector ).ToArray() );
-
-			Controls.Add( getExportButton( headers, tableData ) );
-
-			var chartClientId = ClientID + "Chart";
+			var canvas = new HtmlGenericControl( "canvas" );
 			switch( setup.ChartType ) {
-				case ChartType.Bar:
 				case ChartType.Line:
-					Controls.Add( new Literal { Text = "<canvas id='{0}' height='400'></canvas>".FormatWith( chartClientId ) } );
+				case ChartType.Bar:
+					canvas.Attributes.Add( "height", "400" );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
 			}
+			Controls.Add( canvas );
 
-			if( chartData.datasets.Count() > 1 ) {
+			if( seriesCollection.Count() > 1 ) {
 				Controls.Add(
 					new Box(
 						"Key",
@@ -219,52 +203,71 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 										Text =
 											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
 									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
-									} ).ToArray() ).ToSingleElementArray() ) );
+									} as Control ).ToArray() ).ToSingleElementArray() ) );
 			}
 
+			// Remove this when ColumnPrimaryTable supports Excel export.
+			var headers = setup.XAxisTitle.ToSingleElementArray().Concat( seriesCollection.Select( v => v.Name ) );
+			var tableData = new List<IEnumerable<object>>( seriesCollection.First().Values.Count() );
+			for( var i = 0; i < tableData.Capacity; i++ ) {
+				var i1 = i;
+				tableData.Add( setup.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
+			}
+			Controls.Add( getExportButton( headers, tableData ) );
 
-			var table = EwfTable.CreateWithItems(
-				defaultItemLimit: DataRowLimit.Unlimited,
-				headItems: new[] { new EwfTableItem( headers.Select( c => new EwfTableCell( c ) ) ) } );
-			table.AddData( tableData, cs => new EwfTableItem( cs.Select( c => new EwfTableCell( c ) ) ) );
+			var table = new ColumnPrimaryTable(
+				firstDataFieldIndex: 1,
+				items:
+					new EwfTableItem( from i in setup.XAxisTitle.ToSingleElementArray().Concat( setup.Labels ) select i.ToCell() ).ToSingleElementArray()
+						.Concat(
+							from series in seriesCollection
+							select new EwfTableItem( series.Name.ToCell().ToSingleElementArray().Concat( from i in series.Values select i.ToString().ToCell() ) ) ) );
 			Controls.Add( table );
 
-			Controls.Add( new Literal { Text = @"
-<script type=""text/javascript"">
-    var chart = document.getElementById( ""{3}"" );
-	chart.width = $( chart ).parent().width();
-    var ctx = chart.getContext( ""2d"" );
-    var data = {0};
-    var options = {1};
-    new Chart( ctx ).{2}( data, options );
-</script>
-".FormatWith( chartData.ToJson(), options.ToJson(), setup.ChartType, chartClientId ) } );
+			using( var writer = new StringWriter() ) {
+				writer.WriteLine( "var canvas = document.getElementById( '{0}' );".FormatWith( canvas.ClientID ) );
+				writer.WriteLine( "canvas.width = $( canvas ).parent().width();" );
+				writer.WriteLine( "new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith( setup.ChartType, chartData.ToJson(), options.ToJson() ) );
+				jsInitStatements = writer.ToString();
+			}
 		}
 
-		private Block getExportButton( IEnumerable<string> headers, List<IEnumerable<string>> tableData ) {
-			var block = new Block(
-				new PostBackButton(
-					PostBack.CreateFull(
-						id: ClientID + "Export",
-						actionGetter: () => new PostBackAction(
-							                    new FileCreator(
-							                    output => {
-								                    var csv = new CsvFileWriter();
-								                    var writer = new StreamWriter( output );
+		private IEnumerable<Color> getDefaultColors() {
+			yield return Color.FromArgb( 120, 160, 195 );
+			yield return Color.FromArgb( 255, 182, 149 );
+			yield return Color.FromArgb( 170, 225, 748 );
+			yield return Color.FromArgb( 255, 230, 149 );
+		}
 
-								                    csv.AddValuesToLine( headers.ToArray() );
-								                    csv.WriteCurrentLineToFile( writer );
-								                    foreach( var td in tableData ) {
-									                    csv.AddValuesToLine( td.ToArray() );
+		private Block getExportButton( IEnumerable<object> headers, List<IEnumerable<object>> tableData ) {
+			var block =
+				new Block(
+					new PostBackButton(
+						PostBack.CreateFull(
+							id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
+							actionGetter: () => new PostBackAction(
+								                    new FileCreator(
+								                    output => {
+									                    var csv = new CsvFileWriter();
+									                    var writer = new StreamWriter( output );
+
+									                    csv.AddValuesToLine( headers.ToArray() );
 									                    csv.WriteCurrentLineToFile( writer );
-								                    }
+									                    foreach( var td in tableData ) {
+										                    csv.AddValuesToLine( td.ToArray() );
+										                    csv.WriteCurrentLineToFile( writer );
+									                    }
 
-								                    return new FileInfoToBeSent( "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ), "text/csv" );
-							                    } ) ) ),
-					new TextActionControlStyle( "Export" ),
-					usesSubmitBehavior: false ) );
+									                    return new FileInfoToBeSent( "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ), "text/csv" );
+								                    } ) ) ),
+						new TextActionControlStyle( "Export" ),
+						usesSubmitBehavior: false ) );
 			block.Style.Add( "text-align", "right" );
 			return block;
+		}
+
+		string ControlWithJsInitLogic.GetJsInitStatements() {
+			return jsInitStatements;
 		}
 
 		/// <summary>
