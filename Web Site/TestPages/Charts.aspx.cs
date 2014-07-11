@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class Charts: EwfPage {
@@ -12,7 +11,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				new Chart(
-					Chart.ChartType.Line,
+					ChartType.Line,
 					new Chart.ReportData(
 						"This is the labels title",
 						new[] { "Three", "One", "Two", "Four", "Five" },
@@ -24,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Chart(
-					Chart.ChartType.Line,
+					ChartType.Line,
 					new Chart.ReportData( "Floating point numbers", floatData.Select( ( f, i ) => "" + i ), new Chart.ReportData.DataValues( "The value", floatData ) ),
 					"The export name" ) );
 
@@ -33,7 +32,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Chart(
-					Chart.ChartType.Line,
+					ChartType.Line,
 					new Chart.ReportData(
 						"Two lines of Floating point numbers",
 						floatData1.Select( ( f, i ) => "" + i ),
@@ -44,7 +43,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Chart(
-					Chart.ChartType.Bar,
+					ChartType.Bar,
 					new Chart.ReportData( "Bar graph", floatData1.Select( ( f, i ) => "" + i ), new Chart.ReportData.DataValues( "Values", floatData3 ) ),
 					"The export name" ) );
 
@@ -54,7 +53,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Chart(
-					Chart.ChartType.Bar,
+					ChartType.Bar,
 					new Chart.ReportData(
 						"Two bars of Floating point numbers",
 						floatData4.Select( ( f, i ) => "" + i ),
