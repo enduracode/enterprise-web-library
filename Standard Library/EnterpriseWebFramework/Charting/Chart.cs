@@ -28,31 +28,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// All data in the chart to display.
 		/// </summary>
 		public class ReportData {
-			/// <summary>
-			/// Data values with label.
-			/// </summary>
-			public class DataValues {
-				public readonly string Title;
-				public readonly IEnumerable<double> Values;
-
-				/// <summary>
-				/// Constructor for double values.
-				/// </summary>
-				/// <param name="title">The label for the Y values.</param>
-				/// <param name="values">The Y values.</param>
-				public DataValues( string title, IEnumerable<double> values ) {
-					Title = title;
-					Values = values;
-				}
-
-				/// <summary>
-				/// Constructor for int values.
-				/// </summary>
-				/// <param name="title">The label for the Y values.</param>
-				/// <param name="values">The Y values.</param>
-				public DataValues( string title, IEnumerable<int> values ): this( title, values.Select( i => (double)i ) ) {}
-			}
-
 			public readonly int MaxXValues;
 
 			[ NotNull ]
@@ -62,7 +37,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			public readonly IEnumerable<string> Labels;
 
 			[ NotNull ]
-			public readonly IEnumerable<DataValues> Values;
+			public readonly IEnumerable<DataSeries> Values;
 
 			[ CanBeNull ]
 			public readonly Func<Color> NextColorSelector;
@@ -74,10 +49,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			/// <param name="labelsTitle">The label for the X values.</param>
 			/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in each of the elements of <paramref name="values"/></param>.
 			/// <param name="values">Y values.</param>
-			/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataValues"/></param>.
+			/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataSeries"/></param>.
 			/// /// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
 			public ReportData(
-				string labelsTitle, IEnumerable<string> labels, IEnumerable<DataValues> values, Func<Color> nextColorSelector = null, int maxXValues = 16 ) {
+				string labelsTitle, IEnumerable<string> labels, IEnumerable<DataSeries> values, Func<Color> nextColorSelector = null, int maxXValues = 16 ) {
 				LabelsTitle = labelsTitle;
 				Labels = labels;
 				Values = values;
@@ -93,7 +68,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			/// <param name="values">Y values.</param>
 			/// <param name="color">The color to use to represent this data.</param>
 			/// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
-			public ReportData( string labelsTitle, IEnumerable<string> labels, DataValues values, Color? color = null, int maxXValues = 16 )
+			public ReportData( string labelsTitle, IEnumerable<string> labels, DataSeries values, Color? color = null, int maxXValues = 16 )
 				: this( labelsTitle, labels, values.ToSingleElementArray(), color != null ? () => color.Value : (Func<Color>)null, maxXValues: maxXValues ) {}
 		}
 
@@ -231,7 +206,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var getNextColor = reportData.NextColorSelector ?? getDefaultNextColorSelectors();
 
-			Func<ReportData.DataValues, BaseDataset> selector;
+			Func<DataSeries, BaseDataset> selector;
 			OptionsBase options;
 			switch( chartType ) {
 				case ChartType.Line:

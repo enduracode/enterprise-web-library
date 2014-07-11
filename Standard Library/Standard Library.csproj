@@ -172,6 +172,7 @@
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\Chart.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
