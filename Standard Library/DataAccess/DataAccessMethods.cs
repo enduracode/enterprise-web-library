@@ -75,6 +75,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 						customMessage =
 							"The connection with the server has probably been severed. This likely happened because we did not disable connection pooling and a connection was taken from the pool that was no longer valid.";
 					}
+
+					if( !customMessage.Any() )
+						generalMessage += " Error number: {0}.".FormatWith( errorNumber.Value );
 				}
 			}
 
