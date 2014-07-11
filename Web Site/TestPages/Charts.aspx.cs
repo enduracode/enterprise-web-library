@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new Chart(
-					new ChartSetup( ChartType.Bar, "Bar graph", floatData1.Select( ( f, i ) => "" + i ), "The export name" ),
+					new ChartSetup( ChartType.Bar, "Bar graph", floatData3.Select( ( f, i ) => "" + i ), "The export name" ),
 					new DataSeries( "Values", floatData3 ) ) );
 
 
