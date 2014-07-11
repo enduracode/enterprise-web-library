@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using JetBrains.Annotations;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.IO;
@@ -135,62 +136,75 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				yield return Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) );
 		}
 
-		private readonly ChartType chartType;
-		private readonly ChartSetup reportData;
-		private readonly string exportName;
+		private readonly ChartSetup setup;
+
+		[ NotNull ]
+		private readonly IEnumerable<DataSeries> seriesCollection;
+
+		[ CanBeNull ]
+		private readonly Func<Color> nextColorSelector;
 
 		/// <summary>
-		/// Creates a Chart displaying a supported <see cref="ChartType"/> with the given data,
-		/// including as a chart, with a table, that allows exporting the data to CSV.
+		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
 		/// </summary>
-		/// <param name="chartType"></param>
-		/// <param name="reportData">The data to display</param>
-		/// <param name="exportName">Used to create a meaningful file name when exporting the data.</param>
-		public Chart( ChartType chartType, ChartSetup reportData, string exportName ) {
-			this.chartType = chartType;
-			this.reportData = reportData;
-			this.exportName = exportName;
+		/// <param name="setup">The setup object for the chart.</param>
+		/// <param name="series">The data series.</param>
+		/// <param name="color">The color to use for the data series.</param>
+		public Chart( ChartSetup setup, DataSeries series, Color? color = null )
+			: this( setup, series.ToSingleElementArray(), nextColorSelector: color != null ? () => color.Value : (Func<Color>)null ) {}
+
+		/// <summary>
+		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
+		/// Assuming <paramref name="seriesCollection"/> has multiple elements, draws multiple sets of Y values on the same chart.
+		/// </summary>
+		/// <param name="setup">The setup object for the chart.</param>
+		/// <param name="seriesCollection">The data series collection.</param>
+		/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataSeries"/>.</param>
+		public Chart( ChartSetup setup, IEnumerable<DataSeries> seriesCollection, Func<Color> nextColorSelector = null ) {
+			this.setup = setup;
+			this.seriesCollection = seriesCollection.ToArray();
+			this.nextColorSelector = nextColorSelector;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			var getNextColor = reportData.NextColorSelector ?? getDefaultNextColorSelectors();
+			var getNextColor = nextColorSelector ?? getDefaultNextColorSelectors();
 
 			Func<DataSeries, BaseDataset> selector;
 			OptionsBase options;
-			switch( chartType ) {
+			switch( setup.ChartType ) {
 				case ChartType.Line:
-					selector = v => new Dataset( getNextColor(), v.Values.TakeLast( reportData.MaxXValues ) );
+					selector = v => new Dataset( getNextColor(), v.Values.TakeLast( setup.MaxXValues ) );
 					options = new LineOptions { bezierCurve = false };
 					break;
 				case ChartType.Bar:
-					selector = v => new BaseDataset( getNextColor(), v.Values.TakeLast( reportData.MaxXValues ) );
+					selector = v => new BaseDataset( getNextColor(), v.Values.TakeLast( setup.MaxXValues ) );
 					options = new BarOptions { };
 					break;
 				default:
-					throw new UnexpectedValueException( chartType );
+					throw new UnexpectedValueException( setup.ChartType );
 			}
 
-			var headers = reportData.LabelsTitle.ToSingleElementArray().Concat( reportData.Values.Select( v => v.Name ) );
-			var tableData = new List<IEnumerable<string>>( reportData.Values.First().Values.Count() );
+			var headers = setup.XAxisTitle.ToSingleElementArray().Concat( seriesCollection.Select( v => v.Name ) );
+			var tableData = new List<IEnumerable<string>>( seriesCollection.First().Values.Count() );
 			for( var i = 0; i < tableData.Capacity; i++ ) {
 				var i1 = i;
-				tableData.Add( reportData.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( reportData.Values.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
+				tableData.Add( setup.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
 			}
 
-			var chartData = new ChartData( reportData.Labels.TakeLast( reportData.MaxXValues ), reportData.Values.Select( selector ).ToArray() );
+			var chartData = new ChartData( setup.Labels.TakeLast( setup.MaxXValues ), seriesCollection.Select( selector ).ToArray() );
 
 			Controls.Add( getExportButton( headers, tableData ) );
 
 			var chartClientId = ClientID + "Chart";
-			switch( chartType ) {
+			switch( setup.ChartType ) {
 				case ChartType.Bar:
 				case ChartType.Line:
 					Controls.Add( new Literal { Text = "<canvas id='{0}' height='400'></canvas>".FormatWith( chartClientId ) } );
 					break;
 				default:
-					throw new UnexpectedValueException( chartType );
+					throw new UnexpectedValueException( setup.ChartType );
 			}
 
 			if( chartData.datasets.Count() > 1 ) {
@@ -204,7 +218,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									{
 										Text =
 											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-									.FormatWith( dataset.fillColor, dataset.strokeColor, reportData.Values.ElementAt( i ).Name )
+									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
 									} ).ToArray() ).ToSingleElementArray() ) );
 			}
 
@@ -224,7 +238,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
     var options = {1};
     new Chart( ctx ).{2}( data, options );
 </script>
-".FormatWith( chartData.ToJson(), options.ToJson(), chartType, chartClientId ) } );
+".FormatWith( chartData.ToJson(), options.ToJson(), setup.ChartType, chartClientId ) } );
 		}
 
 		private Block getExportButton( IEnumerable<string> headers, List<IEnumerable<string>> tableData ) {
@@ -245,7 +259,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									                    csv.WriteCurrentLineToFile( writer );
 								                    }
 
-								                    return new FileInfoToBeSent( "{0} {1}.csv".FormatWith( exportName, DateTime.Now ), "text/csv" );
+								                    return new FileInfoToBeSent( "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ), "text/csv" );
 							                    } ) ) ),
 					new TextActionControlStyle( "Export" ),
 					usesSubmitBehavior: false ) );

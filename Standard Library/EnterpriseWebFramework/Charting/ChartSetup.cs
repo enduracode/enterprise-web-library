@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -8,46 +6,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// The configuration for a chart.
 	/// </summary>
 	public class ChartSetup {
-		public readonly int MaxXValues;
+		internal readonly ChartType ChartType;
 
 		[ NotNull ]
-		public readonly string LabelsTitle;
+		internal readonly string XAxisTitle;
 
 		[ NotNull ]
-		public readonly IEnumerable<string> Labels;
+		internal readonly IEnumerable<string> Labels;
 
-		[ NotNull ]
-		public readonly IEnumerable<DataSeries> Values;
-
-		[ CanBeNull ]
-		public readonly Func<Color> NextColorSelector;
+		internal readonly int MaxXValues;
+		internal readonly string ExportFileName;
 
 		/// <summary>
-		/// The sum of all of the data for the chart.
-		/// Assuming <paramref name="values"/> has multiple elements, draws multiple sets of Y values on the same chart.
+		/// Creates a chart setup object.
 		/// </summary>
-		/// <param name="labelsTitle">The label for the X values.</param>
-		/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in each of the elements of <paramref name="values"/></param>.
-		/// <param name="values">Y values.</param>
-		/// <param name="nextColorSelector">When set, returns the next color used to be used for the current <see cref="DataSeries"/></param>.
-		/// /// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
-		public ChartSetup( string labelsTitle, IEnumerable<string> labels, IEnumerable<DataSeries> values, Func<Color> nextColorSelector = null, int maxXValues = 16 ) {
-			LabelsTitle = labelsTitle;
+		/// <param name="chartType"></param>
+		/// <param name="xAxisTitle">The title of the X axis. Do not pass null.</param>
+		/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in each series.</param>
+		/// <param name="exportFileName">Used to create a meaningful file name when exporting the data.</param>
+		/// <param name="maxXValues">The number of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.
+		/// </param>
+		public ChartSetup( ChartType chartType, string xAxisTitle, IEnumerable<string> labels, string exportFileName, int maxXValues = 16 ) {
+			ChartType = chartType;
+			XAxisTitle = xAxisTitle;
 			Labels = labels;
-			Values = values;
-			NextColorSelector = nextColorSelector;
 			MaxXValues = maxXValues;
+			ExportFileName = exportFileName;
 		}
-
-		/// <summary>
-		/// The sum of all of the data for the chart.
-		/// </summary>
-		/// <param name="labelsTitle">The label for the X values.</param>
-		/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in <paramref name="values"/></param>.
-		/// <param name="values">Y values.</param>
-		/// <param name="color">The color to use to represent this data.</param>
-		/// <param name="maxXValues">The amount of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.</param>
-		public ChartSetup( string labelsTitle, IEnumerable<string> labels, DataSeries values, Color? color = null, int maxXValues = 16 )
-			: this( labelsTitle, labels, values.ToSingleElementArray(), color != null ? () => color.Value : (Func<Color>)null, maxXValues: maxXValues ) {}
 	}
 }
