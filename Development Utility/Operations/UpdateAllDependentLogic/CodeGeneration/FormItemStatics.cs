@@ -97,6 +97,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writer,
 				field,
 				"EwfTextBox",
+				"ZipCode",
+				"string",
+				"\"\"",
+				new CSharpParameter[ 0 ],
+				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				new[]
+					{
+						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
+						new CSharpParameter( "bool", "autoPostBack", "false" )
+					},
+				new CSharpParameter[ 0 ],
+				"new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
+				", readOnly: readOnly, postBack: postBack, autoPostBack: autoPostBack )",
+				"validator.GetZipCode( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty ).FullZipCode",
+				"true" );
+			writeFormItemGetters(
+				writer,
+				field,
+				"EwfTextBox",
 				"Uri",
 				"string",
 				"\"\"",
