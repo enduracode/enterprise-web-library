@@ -23,53 +23,60 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
 		/// parameter is the amount of the charge, in dollars.</param>
-		public static Func<string> GetCreditCardCollectionJsFunctionCall( string testPublishableKey, string livePublishableKey, string name, string description,
-		                                                                  decimal? amountInDollars, string testSecretKey, string liveSecretKey,
-		                                                                  Func<string, decimal, StatusMessageAndPage> successHandler ) {
+		/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can
+		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
+		/// email address).</param>
+		public static Func<string> GetCreditCardCollectionJsFunctionCall(
+			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
+			Func<string, decimal, StatusMessageAndPage> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
-			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ),
-			                                                           "Stripe Checkout",
-			                                                           "https://checkout.stripe.com/v2/checkout.js" );
+			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
+				typeof( PaymentProcessingStatics ),
+				"Stripe Checkout",
+				"https://checkout.stripe.com/v2/checkout.js" );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
 
 			PageInfo successPage = null;
-			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
-			                                    actionGetter: () => new PostBackAction( successPage ) );
+			var postBack = PostBack.CreateFull(
+				id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
+				actionGetter: () => new PostBackAction( successPage ) );
 			var token = new DataValue<string>();
 
 			Func<PostBackValueDictionary, string> tokenHiddenFieldValueGetter; // unused
 			Func<string> tokenHiddenFieldClientIdGetter;
 			EwfHiddenField.Create( "", postBackValue => token.Value = postBackValue, postBack, out tokenHiddenFieldValueGetter, out tokenHiddenFieldClientIdGetter );
 
-			postBack.AddModificationMethod( () => {
-				// We can add support later for customer creation, subscriptions, etc. as needs arise.
-				if( !amountInDollars.HasValue )
-					throw new ApplicationException( "Only simple charges are supported at this time." );
+			postBack.AddModificationMethod(
+				() => {
+					// We can add support later for customer creation, subscriptions, etc. as needs arise.
+					if( !amountInDollars.HasValue )
+						throw new ApplicationException( "Only simple charges are supported at this time." );
 
-				var apiKey = AppTools.IsLiveInstallation ? liveSecretKey : testSecretKey;
-				dynamic response = new StripeClient( apiKey ).CreateCharge( amountInDollars.Value,
-				                                                            "usd",
-				                                                            new CreditCardToken( token.Value ),
-				                                                            description: description.Any() ? description : null );
-				if( response.IsError ) {
-					if( response.error.type == "card_error" )
-						throw new DataModificationException( response.error.message );
-					throw new ApplicationException( "Stripe error: " + response );
-				}
+					var apiKey = AppTools.IsLiveInstallation ? liveSecretKey : testSecretKey;
+					dynamic response = new StripeClient( apiKey ).CreateCharge(
+						amountInDollars.Value,
+						"usd",
+						new CreditCardToken( token.Value ),
+						description: description.Any() ? description : null );
+					if( response.IsError ) {
+						if( response.error.type == "card_error" )
+							throw new DataModificationException( response.error.message );
+						throw new ApplicationException( "Stripe error: " + response );
+					}
 
-				try {
-					var messageAndPage = successHandler( (string)response.id, amountInDollars.Value );
-					if( messageAndPage.Message.Any() )
-						EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
-					successPage = messageAndPage.Page;
-				}
-				catch( Exception e ) {
-					throw new ApplicationException( "An exception occurred after a credit card was charged.", e );
-				}
-			} );
+					try {
+						var messageAndPage = successHandler( (string)response.id, amountInDollars.Value );
+						if( messageAndPage.Message.Any() )
+							EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
+						successPage = messageAndPage.Page;
+					}
+					catch( Exception e ) {
+						throw new ApplicationException( "An exception occurred after a credit card was charged.", e );
+					}
+				} );
 
 			EwfPage.Instance.AddPostBack( postBack );
 			return () => {
@@ -77,7 +84,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
 				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
-				       jsTokenHandler + " } )";
+				       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
 			};
 		}
 	}
