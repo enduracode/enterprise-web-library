@@ -30,10 +30,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					{
 						new[]
 							{
-								EwfListItem.Create( null as int?, "NULL" ), EwfListItem.Create( 1 as int?, "One" ), EwfListItem.Create( 2 as int?, "Two" ),
-								EwfListItem.Create( 3 as int?, "Three" )
+								SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ),
+								SelectListItem.Create( 3 as int?, "Three" )
 							},
-						new[] { EwfListItem.Create( 1 as int?, "One" ), EwfListItem.Create( 2 as int?, "Two" ), EwfListItem.Create( 3 as int?, "Three" ) }
+						new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
 					} ) {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {
 					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
@@ -71,13 +71,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					{
 						new[]
 							{
-								EwfListItem.Create( null as int?, "NULL" ), EwfListItem.Create( 1 as int?, "This is item One" ), EwfListItem.Create( 2 as int?, "This is item Two" ),
-								EwfListItem.Create( 3 as int?, "This is item Three" )
+								SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
+								SelectListItem.Create( 3 as int?, "This is item Three" )
 							},
 						new[]
 							{
-								EwfListItem.Create( 1 as int?, "This is item One" ), EwfListItem.Create( 2 as int?, "This is item Two" ),
-								EwfListItem.Create( 3 as int?, "This is item Three" )
+								SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
+								SelectListItem.Create( 3 as int?, "This is item Three" )
 							}
 					} ) {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {

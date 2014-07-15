@@ -120,7 +120,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems(
 				FormItem.Create(
 					"Role",
-					SelectList.CreateDropDown( from i in availableRoles select EwfListItem.Create( i.RoleId as int?, i.Name ), user != null ? user.Role.RoleId as int? : null ),
+					SelectList.CreateDropDown(
+						from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ),
+						user != null ? user.Role.RoleId as int? : null ),
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )

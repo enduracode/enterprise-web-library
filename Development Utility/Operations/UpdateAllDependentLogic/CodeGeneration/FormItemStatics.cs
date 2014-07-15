@@ -139,7 +139,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"RadioList",
 				"string",
 				"\"\"",
-				new[] { new CSharpParameter( "IEnumerable<EwfListItem<string>>", "items" ) },
+				new[] { new CSharpParameter( "IEnumerable<SelectListItem<string>>", "items" ) },
 				new CSharpParameter[ 0 ],
 				new[]
 					{
@@ -158,7 +158,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"DropDown",
 				"string",
 				"\"\"",
-				new[] { new CSharpParameter( "IEnumerable<EwfListItem<string>>", "items" ) },
+				new[] { new CSharpParameter( "IEnumerable<SelectListItem<string>>", "items" ) },
 				new CSharpParameter[ 0 ],
 				new[]
 					{
@@ -504,7 +504,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"CheckBoxList",
 				field.TypeName,
 				"null",
-				new CSharpParameter( "IEnumerable<EwfListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToSingleElementArray(),
+				new CSharpParameter( "IEnumerable<SelectListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToSingleElementArray(),
 				new CSharpParameter[ 0 ],
 				new[]
 					{
@@ -533,7 +533,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"RadioList",
 				field.NullableTypeName,
 				"null",
-				new[] { new CSharpParameter( "IEnumerable<EwfListItem<" + field.NullableTypeName + ">>", "items" ) },
+				new[] { new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ) },
 				new CSharpParameter[ 0 ],
 				new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToSingleElementArray()
 					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToSingleElementArray() )
@@ -558,7 +558,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"DropDown",
 				field.NullableTypeName,
 				"null",
-				new CSharpParameter( "IEnumerable<EwfListItem<" + field.NullableTypeName + ">>", "items" ).ToSingleElementArray()
+				new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ).ToSingleElementArray()
 					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToSingleElementArray() ),
 				new CSharpParameter[ 0 ],
 				new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray()
