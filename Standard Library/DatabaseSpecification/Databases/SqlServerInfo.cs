@@ -36,6 +36,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
 
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
+		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "@@IDENTITY"; } }
 
 		/// <summary>
 		/// Gets the server. Returns null to represent the local machine.
@@ -72,7 +73,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		DbCommand DatabaseInfo.CreateCommand() {
-			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 8 }, null, MiniProfiler.Current );
+			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 15 }, null, MiniProfiler.Current );
 		}
 
 		DbParameter DatabaseInfo.CreateParameter() {

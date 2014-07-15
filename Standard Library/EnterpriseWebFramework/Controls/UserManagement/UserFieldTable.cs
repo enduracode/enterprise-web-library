@@ -27,12 +27,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// in the System Provider are used.</param>
 		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
 		public void LoadData( int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
-			availableRoles =
-				( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) as IEnumerable<Role> : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
+			availableRoles = ( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
-			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value ) : null;
+			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 			if( includePasswordControls() && user != null )
-				facUser = ( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).GetUser( user.UserId );
+				facUser = FormsAuthStatics.GetUser( user.UserId, true );
 
 			Func<bool> validationShouldRun = () => validationPredicate == null || validationPredicate();
 
@@ -80,10 +79,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+				                                                             new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true )
 					                                                             {
-						                                                             Width = Unit.Pixel( 200 ),
-						                                                             MasksCharacters = true
+						                                                             Width = Unit.Pixel( 200 )
 					                                                             },
 				                                                             validationGetter:
 					                                                             control =>
@@ -92,10 +90,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                                    .ToCell() ) );
 				newPasswordTable.AddItem( new EwfTableItem( new EwfTableCell( "Password again" ),
 				                                            FormItem.Create( "",
-				                                                             new EwfTextBox( "", disableBrowserAutoComplete: true )
+				                                                             new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true )
 					                                                             {
-						                                                             Width = Unit.Pixel( 200 ),
-						                                                             MasksCharacters = true
+						                                                             Width = Unit.Pixel( 200 )
 					                                                             },
 				                                                             validationGetter:
 					                                                             control =>
@@ -110,7 +107,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				                                       validationGetter: control => new Validation( ( pbv, validator ) => {
 					                                       if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 						                                       return;
-					                                       UserManagementStatics.ValidatePassword( validator, newPassword, confirmPassword );
+					                                       FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
 					                                       var p = new Password( newPassword.Value );
 					                                       Salt = p.Salt;
 					                                       SaltedPassword = p.ComputeSaltedHash();
@@ -135,7 +132,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private bool includePasswordControls() {
-			return UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider;
+			return FormsAuthStatics.FormsAuthEnabled;
 		}
 
 		private void genPassword( bool emailPassword ) {
@@ -180,7 +177,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public void SendEmailIfNecessary() {
 			if( passwordToEmail == null )
 				return;
-			UserManagementStatics.SendPassword( Email, passwordToEmail );
+			FormsAuthStatics.SendPassword( Email, passwordToEmail );
 			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 

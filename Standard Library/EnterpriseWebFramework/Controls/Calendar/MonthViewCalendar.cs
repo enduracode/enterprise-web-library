@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -148,23 +147,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					autoPostBack: true );
 			jumpList.Width = JumpListWidth;
 			var numIntervals = 0;
-			EwfPage.Instance.PostBackDataModification.AddTopValidationMethod(
-				( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
-			EwfPage.Instance.PostBackDataModification.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
+			EwfPage.Instance.DataUpdate.AddTopValidationMethod( ( pbv, validator ) => numIntervals = jumpList.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) );
+			EwfPage.Instance.DataUpdate.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
-			var previousLink = new PostBackButton( new DataModification(),
-			                                       () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ),
-			                                       PreviousButton,
-			                                       false );
-			var todayLink = new PostBackButton( new DataModification(),
-			                                    () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( DateTime.Today ) ),
-			                                    CurrentDateButton,
-			                                    false );
-			var nextLink = new PostBackButton( new DataModification(),
-			                                   () => EwfPage.Instance.EhModifyData( cn => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ),
-			                                   NextButton,
-			                                   false );
+			var previousLink =
+				new PostBackButton(
+					PostBack.CreateFull( id: "prev", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ),
+					PreviousButton,
+					usesSubmitBehavior: false );
+			var todayLink = new PostBackButton(
+				PostBack.CreateFull( id: "today", firstModificationMethod: () => dateModificationMethod( DateTime.Today ) ),
+				CurrentDateButton,
+				usesSubmitBehavior: false );
+			var nextLink =
+				new PostBackButton(
+					PostBack.CreateFull( id: "next", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ),
+					NextButton,
+					usesSubmitBehavior: false );
 
 			var table = new DynamicTable { CssClass = "calendarViewHeader ewfNavigationBoxHeader", IsStandard = false };
 			var navControls = new Panel();

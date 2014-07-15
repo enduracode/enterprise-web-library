@@ -128,7 +128,7 @@ namespace RedStapler.StandardLibrary.IO {
 		// scattered files and folders -> ZIP stream
 
 		/// <summary>
-		/// Zips all specified files into a memory stream. All files are put in the root of the zip file. The caller is responsible for disposing the stream.
+		/// Zips all specified files into a stream. All files are put in the root of the zip file. The caller is responsible for disposing the stream.
 		/// </summary>
 		public static void ZipFilesAsStream( IEnumerable<string> filePaths, Stream outputStream ) {
 			using( var zipOutputStream = createZipOutputStream( outputStream ) ) {

@@ -18,12 +18,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ph.AddControlsReturnThis( new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ) ),
 			                          new Paragraph(
 				                          new PostBackButton(
-					                          new DataModification(
-						                          firstModificationMethod:
-							                          () =>
-							                          AppRequestState.AddNonTransactionalModificationMethod(
-								                          () =>
-								                          AppMemoryCache.SetRequestProfilingForUser( AppTools.User.UserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),
+					                          PostBack.CreateFull( id: "toggle",
+					                                               firstModificationMethod:
+						                                               () =>
+						                                               AppRequestState.AddNonTransactionalModificationMethod(
+							                                               () =>
+							                                               AppMemoryCache.SetRequestProfilingForUser( AppTools.User.UserId,
+							                                                                                          userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),
 					                          new ButtonActionControlStyle( userIsProfiling ? "Turn Profiling OFF" : "Turn Profiling ON" ),
 					                          usesSubmitBehavior: false ) ) );
 		}

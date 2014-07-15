@@ -14,37 +14,39 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( es.info.ReturnAndDestinationUrl ) ) );
 			var fib = FormItemBlock.CreateFormItemTable();
 
 			newPassword = new DataValue<string>();
-			fib.AddFormItems( FormItem.Create( "New password",
-			                                   new EwfTextBox( "" ) { MasksCharacters = true },
-			                                   validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), dm ) ) );
+			fib.AddFormItems(
+				FormItem.Create(
+					"New password",
+					new EwfTextBox( "", masksCharacters: true ),
+					validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			var newPasswordConfirm = new DataValue<string>();
-			fib.AddFormItems( FormItem.Create( "Re-type new password",
-			                                   new EwfTextBox( "" ) { MasksCharacters = true },
-			                                   validationGetter:
-				                                   control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), dm ) ) );
-			dm.AddTopValidationMethod( ( pbv, validator ) => UserManagementStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
+			fib.AddFormItems(
+				FormItem.Create(
+					"Re-type new password",
+					new EwfTextBox( "", masksCharacters: true ),
+					validationGetter: control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
+			pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password",
-			                                                           new PostBackButton( dm,
-			                                                                               () => EhRedirect( new ExternalPageInfo( es.info.ReturnAndDestinationUrl ) ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {
 			var password = new Password( newPassword.Value );
-			( UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider ).InsertOrUpdateUser( AppTools.User.UserId,
-			                                                                                                       AppTools.User.Email,
-			                                                                                                       password.Salt,
-			                                                                                                       password.ComputeSaltedHash(),
-			                                                                                                       AppTools.User.Role.RoleId,
-			                                                                                                       AppTools.User.LastRequestDateTime,
-			                                                                                                       false );
+			FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+				AppTools.User.UserId,
+				AppTools.User.Email,
+				AppTools.User.Role.RoleId,
+				AppTools.User.LastRequestDateTime,
+				password.Salt,
+				password.ComputeSaltedHash(),
+				false );
 			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}
 	}

@@ -333,8 +333,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						if( accessDeniedException.CausedByIntermediateUser )
 							transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
 						else {
-							if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled &&
-							    UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
+							if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
 								if( accessDeniedException.LogInPage != null ) {
 									// We pass false here to avoid complicating things with ThreadAbortExceptions.
 									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );

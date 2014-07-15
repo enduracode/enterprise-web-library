@@ -32,13 +32,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
-			IsuStatics.ConfigureIis();
+			IsuStatics.ConfigureIis( true );
+			Console.WriteLine( "Configured IIS Express." );
+
+			// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
+			try {
+				IsuStatics.ConfigureIis( false );
+				Console.WriteLine( "Configured full IIS." );
+			}
+			catch {
+				Console.WriteLine( "Did not configure full IIS." );
+			}
 
 			var installation = genericInstallation as DevelopmentInstallation;
 
 			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists( installation.DevelopmentInstallationLogic.Database,
-			                                                   installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
-			                                                   true );
+				installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
+				true );
 
 			try {
 				copyInEwlFiles( installation );
@@ -53,48 +63,46 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				generateCodeForProject( installation,
-				                        "Standard Library",
-				                        writer => {
-					                        writer.WriteLine( "using System;" );
-					                        writer.WriteLine( "using System.Globalization;" );
-					                        writer.WriteLine( "using System.Reflection;" );
-					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
-					                        writer.WriteLine();
-					                        writeAssemblyInfo( writer, installation, "" );
-					                        writer.WriteLine();
-					                        writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
-					                        writer.WriteLine( "partial class AppTools {" );
-					                        CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
-					                        writer.WriteLine( "public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" +
-					                                          DateTimeOffset.UtcNow.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind );" );
-					                        writer.WriteLine( "}" );
-					                        writer.WriteLine( "}" );
-				                        } );
+					"Standard Library",
+					writer => {
+						writer.WriteLine( "using System;" );
+						writer.WriteLine( "using System.Globalization;" );
+						writer.WriteLine( "using System.Reflection;" );
+						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writer.WriteLine();
+						writeAssemblyInfo( writer, installation, "" );
+						writer.WriteLine();
+						writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
+						writer.WriteLine( "partial class AppTools {" );
+						CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
+						writer.WriteLine( "public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" + DateTimeOffset.UtcNow.ToString( "o" ) +
+						                  "\", null, DateTimeStyles.RoundtripKind );" );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+					} );
 				generateCodeForProject( installation,
-				                        "Development Utility",
-				                        writer => {
-					                        writer.WriteLine( "using System.Reflection;" );
-					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
-					                        writeAssemblyInfo( writer, installation, "Development Utility" );
-				                        } );
+					"Development Utility",
+					writer => {
+						writer.WriteLine( "using System.Reflection;" );
+						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writeAssemblyInfo( writer, installation, "Development Utility" );
+					} );
 			}
 			generateLibraryCode( installation );
 			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
 				generateWebConfigAndCodeForWebProject( installation, webProject );
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				generateWindowsServiceCode( installation, service );
-			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] )
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 				generateServerSideConsoleProjectCode( installation, project );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
 				generateCodeForProject( installation,
-				                        installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-				                        writer => {
-					                        writer.WriteLine( "using System.Reflection;" );
-					                        writer.WriteLine( "using System.Runtime.InteropServices;" );
-					                        writeAssemblyInfo( writer,
-					                                           installation,
-					                                           installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
-				                        } );
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
+					writer => {
+						writer.WriteLine( "using System.Reflection;" );
+						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writeAssemblyInfo( writer, installation, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
+					} );
 			}
 
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
@@ -111,17 +119,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					IoMethods.CopyFile(
 						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", "Configuration", fileName + FileExtensions.Xsd ),
 						StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-						                                     InstallationFileStatics.FilesFolderName,
-						                                     fileName + FileExtensions.Xsd ) );
+							InstallationFileStatics.FilesFolderName,
+							fileName + FileExtensions.Xsd ) );
 				}
 			}
 			else {
 				var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
 				if( File.Exists( asposeLicenseFilePath ) ) {
 					IoMethods.CopyFile( asposeLicenseFilePath,
-					                    StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-					                                                         InstallationFileStatics.FilesFolderName,
-					                                                         asposeLicenseFileName ) );
+						StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+							InstallationFileStatics.FilesFolderName,
+							asposeLicenseFileName ) );
 				}
 
 				// If web projects exist for this installation, copy appropriate files into them.
@@ -150,7 +158,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				File.WriteAllText( filePath, customizeNamespace( File.ReadAllText( filePath ), webProject ) );
 
 			IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ),
-			                    StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
+				StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
 		}
 
@@ -168,6 +176,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
 				writer.WriteLine( "using System.Data.Common;" );
+				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -195,8 +204,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateDataAccessCode( writer, installation );
 				writer.WriteLine();
 				TypedCssClassStatics.Generate( installation.GeneralLogic.Path,
-				                               installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
-				                               writer );
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+					writer );
+				writer.WriteLine();
+				generateServerSideConsoleAppStatics( writer, installation );
 			}
 		}
 
@@ -214,13 +225,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration ) {
 				try {
 					generateDataAccessCodeForDatabase( database,
-					                                   installation.DevelopmentInstallationLogic.LibraryPath,
-					                                   writer,
-					                                   baseNamespace,
-					                                   database.SecondaryDatabaseName.Length == 0
-						                                   ? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
-						                                   : installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single(
-							                                   sd => sd.name == database.SecondaryDatabaseName ) );
+						installation.DevelopmentInstallationLogic.LibraryPath,
+						writer,
+						baseNamespace,
+						database.SecondaryDatabaseName.Length == 0
+							? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
+							: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ) );
 				}
 				catch( Exception e ) {
 					throw UserCorrectableException.CreateSecondaryException(
@@ -275,11 +285,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					foreach( var tableName in database.GetTables() ) {
 						TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
 						StandardModificationStatics.WritePartialClass( cn,
-						                                               libraryBasePath,
-						                                               modNamespaceDeclaration,
-						                                               database,
-						                                               tableName,
-						                                               CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
+							libraryBasePath,
+							modNamespaceDeclaration,
+							database,
+							tableName,
+							CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
 					}
 				}
 
@@ -310,11 +320,35 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
+		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
+			writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+			writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
+				writer.WriteLine( "public static void Start" + project.Name.EnglishToPascal() +
+				                  "( string arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
+				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
+				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
+
+				var programPath = "StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
+				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
+				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
+
+				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
+				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
+				writer.WriteLine( "else" );
+				writer.WriteLine( runProgramExpression + ";" );
+
+				writer.WriteLine( "}" );
+			}
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
 			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
-			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath, installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName );
+			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath );
 
 			var webProjectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, "Generated Code" );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
@@ -453,8 +487,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void writeAssemblyInfo( TextWriter writer, DevelopmentInstallation installation, string projectName ) {
 			writeAssemblyAttribute( writer,
-			                        "AssemblyTitle",
-			                        "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "\"" );
+				"AssemblyTitle",
+				"\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "\"" );
 			writeAssemblyAttribute( writer, "AssemblyProduct", "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "\"" );
 			writeAssemblyAttribute( writer, "ComVisible", "false" );
 			writeAssemblyAttribute( writer, "AssemblyVersion", "\"" + installation.CurrentMajorVersion + ".0." + installation.NextBuildNumber + ".0\"" );
@@ -468,10 +502,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
 			if( File.Exists( StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) ) {
 				generateXmlSchemaLogic( installation.DevelopmentInstallationLogic.LibraryPath,
-				                        customInstallationConfigSchemaPathInProject,
-				                        installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Installation",
-				                        "Installation Custom Configuration.cs",
-				                        true );
+					customInstallationConfigSchemaPathInProject,
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Installation",
+					"Installation Custom Configuration.cs",
+					true );
 			}
 		}
 
@@ -479,10 +513,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null ) {
 				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
 					generateXmlSchemaLogic( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),
-					                        xmlSchema.pathInProject,
-					                        xmlSchema.@namespace,
-					                        xmlSchema.codeFileName,
-					                        xmlSchema.useSvcUtil );
+						xmlSchema.pathInProject,
+						xmlSchema.@namespace,
+						xmlSchema.codeFileName,
+						xmlSchema.useSvcUtil );
 				}
 			}
 		}
@@ -492,11 +526,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( useSvcUtil ) {
 				try {
 					StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
-					                                   "/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" +
-					                                   StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" + codeFileName + "\" /dconly /n:*," +
-					                                   nameSpace + " /ser:DataContractSerializer",
-					                                   "",
-					                                   true );
+						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
+						codeFileName + "\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
+						"",
+						true );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to generate XML schema logic using SvcUtil.", e );
@@ -506,16 +539,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 				try {
 					StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
-					                                   "/nologo \"" + StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace +
-					                                   " /o:\"" + projectGeneratedCodeFolderPath + "\"",
-					                                   "",
-					                                   true );
+						"/nologo \"" + StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" +
+						projectGeneratedCodeFolderPath + "\"",
+						"",
+						true );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to generate XML schema logic using xsd.", e );
 				}
 				var outputCodeFilePath = StandardLibraryMethods.CombinePaths( projectGeneratedCodeFolderPath,
-				                                                              Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
+					Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
 				var desiredCodeFilePath = StandardLibraryMethods.CombinePaths( projectGeneratedCodeFolderPath, codeFileName );
 				if( outputCodeFilePath != desiredCodeFilePath ) {
 					try {
@@ -539,9 +572,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( regionBegin );
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
-				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".suo" );
+				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".v12.suo" );
 				writer.WriteLine( "packages/" );
-				writer.WriteLine( "_ReSharper*" );
+				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 				writer.WriteLine( "Error Log.txt" );
 				writer.WriteLine( "*.csproj.user" );
 				writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
@@ -570,7 +603,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( service.Name + "/Generated Code/" );
 				}
 
-				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ] ) {
+				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
 					writer.WriteLine();
 					writer.WriteLine( project.Name + "/bin/" );
 					writer.WriteLine( project.Name + "/obj/" );

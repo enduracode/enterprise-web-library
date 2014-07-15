@@ -11,20 +11,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public void LoadData( PageInfo changePasswordPage ) {
 			this.AddControlsReturnThis( ( "Logged in as " + AppTools.User.Email ).GetLiteralControl() );
-			if( !( UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) )
+			if( !FormsAuthStatics.FormsAuthEnabled )
 				return;
 			this.AddControlsReturnThis( new LiteralControl( "&nbsp;&nbsp;" ),
 			                            EwfLink.Create( changePasswordPage, new TextActionControlStyle( "Change password" ) ),
 			                            new LiteralControl( "&nbsp;&bull;&nbsp;" ),
-			                            new PostBackButton( new DataModification(),
-			                                                () => EwfPage.Instance.EhModifyDataAndRedirect( cn => {
-				                                                UserManagementStatics.LogOutUser();
-
-				                                                // NOTE: Is this the correct behavior if we are already on a public page?
-				                                                return NetTools.HomeUrl;
-			                                                } ),
-			                                                new TextActionControlStyle( "Log out" ),
-			                                                false ) );
+			                            new PostBackButton(
+				                            PostBack.CreateFull( id: "ewfLogOut",
+				                                                 firstModificationMethod: FormsAuthStatics.LogOutUser,
+				                                                 actionGetter: () => {
+					                                                 // NOTE: Is this the correct behavior if we are already on a public page?
+					                                                 return new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) );
+				                                                 } ),
+				                            new TextActionControlStyle( "Log out" ),
+				                            false ) );
 		}
 	}
 }

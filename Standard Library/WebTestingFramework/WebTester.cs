@@ -76,29 +76,29 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			if( AppTools.IsIntermediateInstallation ) {
 				executeSeleniumBlock( "Intermediate log on",
 				                      delegate {
-				                      	// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
-				                      	selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
-				                      	// NOTE: Does not work for MIT Calendar, etc.
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", AppTools.SystemProvider.IntermediateLogInPassword );
-				                      	// NOTE: Move g8Summit to machine configuration file.
-				                      	SubmitForm( selenium );
-				                      	selenium.WaitForPageToLoad( "30000" );
+					                      // NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
+					                      selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
+					                      // NOTE: Does not work for MIT Calendar, etc.
+					                      selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", AppTools.SystemProvider.IntermediateLogInPassword );
+					                      // NOTE: Move g8Summit to machine configuration file.
+					                      SubmitForm( selenium );
+					                      selenium.WaitForPageToLoad( "30000" );
 				                      } );
 			}
-			if( UserManagementStatics.UserManagementEnabled && UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
+			if( UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
 				executeSeleniumBlock( "Forms log on",
 				                      delegate {
-				                      	// NOTE: System-name approach suffers from same problem as above.
-				                      	selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=" );
+					                      // NOTE: System-name approach suffers from same problem as above.
+					                      selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=" );
 
-				                      	// NOTE: I don't think we need waits after opens.
-				                      	selenium.WaitForPageToLoad( "30000" );
-				                      	Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
-				                      	// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", AppTools.SystemProvider.FormsLogInEmail );
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", AppTools.SystemProvider.FormsLogInPassword );
-				                      	SubmitForm( selenium );
-				                      	selenium.WaitForPageToLoad( "30000" );
+					                      // NOTE: I don't think we need waits after opens.
+					                      selenium.WaitForPageToLoad( "30000" );
+					                      Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
+					                      // NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
+					                      selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", AppTools.SystemProvider.FormsLogInEmail );
+					                      selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", AppTools.SystemProvider.FormsLogInPassword );
+					                      SubmitForm( selenium );
+					                      selenium.WaitForPageToLoad( "30000" );
 				                      } );
 			}
 		}
@@ -116,14 +116,15 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 		private void executeTest( Type testClass ) {
 			executeSeleniumBlock( testClass.Name,
 			                      delegate {
-			                      	try {
-			                      		testClass.GetMethods().Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 ).Single().Invoke( null,
-			                      		                                                                                                                        new object[]
-			                      		                                                                                                                        	{ selenium } );
-			                      	}
-			                      	catch( TargetInvocationException e ) {
-			                      		throw e.InnerException;
-			                      	}
+				                      try {
+					                      testClass.GetMethods()
+					                               .Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 )
+					                               .Single()
+					                               .Invoke( null, new object[] { selenium } );
+				                      }
+				                      catch( TargetInvocationException e ) {
+					                      throw e.InnerException;
+				                      }
 			                      } );
 		}
 

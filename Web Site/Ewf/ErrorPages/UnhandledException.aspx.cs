@@ -1,4 +1,4 @@
- // Parameter: string dummy
+// Parameter: string dummy
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	public partial class UnhandledException: EwfPage {

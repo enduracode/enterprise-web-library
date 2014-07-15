@@ -27,22 +27,32 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						writer.WriteLine( "cmd.AddParameter( " + getDbCommandParameterCreationExpression( parameter ) + " );" );
 					else {
 						writer.WriteLine( "var " + parameter.Name + "Parameter = " + getDbCommandParameterCreationExpression( parameter ) + ";" );
-						writer.WriteLine( parameter.Name + "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
-						                  ".DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
+						writer.WriteLine(
+							parameter.Name + "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
+							".DatabaseInfo ).Direction = ParameterDirection." + parameter.Direction + ";" );
 						writer.WriteLine( "cmd.AddParameter( " + parameter.Name + "Parameter );" );
 					}
 				}
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) )
-					writer.WriteLine( parameter.DataTypeName + " " + parameter.Name + "Local = " + parameter.DataTypeDefaultValueExpression + ";" );
+					writer.WriteLine( parameter.DataTypeName + " " + parameter.Name + "Local = default( " + parameter.DataTypeName + " );" );
 				writer.WriteLine( "cmd.ExecuteReader( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => {" );
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) ) {
+					var adoDotNetParameterValueExpression = "{0}Parameter.GetAdoDotNetParameter( {1}.DatabaseInfo ).Value".FormatWith(
+						parameter.Name,
+						DataAccessStatics.GetConnectionExpression( database ) );
+
+
+					// We are not sure if this is handling null correctly. When a null comes back via an "out" parameter, we're not sure whether it is represented with
+					// DBNull.Value or in another way. This issue can be resolved as soon as we have a system with stored procedures that we can use for testing.
+
 					// NOTE: This is a hack. We would like to use a simple cast to convert the value of the database parameter to the method parameter's type, but we
 					// can't because the types in Oracle.DataAccess.Types, like OracleDecimal, do not support any kind of conversion to .NET types when they are boxed.
-					writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")StandardLibraryMethods.ChangeType( " + parameter.Name +
-					                  "Parameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
-					                  ".DatabaseInfo ).Value.ToString(), typeof( " + parameter.DataTypeName + " ) );" );
-					//writer.WriteLine( parameter.Name + "Local = (" + parameter.DataTypeName + ")" + parameter.Name + "Parameter.GetAdoDotNetParameter( " +
-					//                  DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo ).Value;" );
+					writer.WriteLine(
+						"{0}Local = {1};".FormatWith(
+							parameter.Name,
+							parameter.GetIncomingValueConversionExpression(
+								"StandardLibraryMethods.ChangeType( {0}.ToString(), typeof( {1} ) )".FormatWith( adoDotNetParameterValueExpression, parameter.UnconvertedDataTypeName ) ) ) );
+					//writer.WriteLine( "{0}Local = {1};".FormatWith( parameter.Name, parameter.GetIncomingValueConversionExpression( adoDotNetParameterValueExpression ) ) );
 				}
 				writer.WriteLine( "} );" );
 				foreach( var parameter in parameters.Where( parameter => parameter.Direction != ParameterDirection.Input ) )
@@ -54,8 +64,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getDbCommandParameterCreationExpression( ProcedureParameter parameter ) {
-			return "new DbCommandParameter( \"" + parameter.Name + "\", new DbParameterValue( " +
-			       ( parameter.Direction != ParameterDirection.Output ? parameter.Name : "null" ) + ", \"" + parameter.DbTypeString + "\" ) )";
+			var parameterValueExpression = parameter.GetParameterValueExpression( parameter.Direction != ParameterDirection.Output ? parameter.Name : "null" );
+			return "new DbCommandParameter( \"{0}\", {1} )".FormatWith( parameter.Name, parameterValueExpression );
 		}
 	}
 }

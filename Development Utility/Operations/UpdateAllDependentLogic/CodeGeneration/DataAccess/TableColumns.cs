@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
 					var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
 
-					if( cn.DatabaseInfo is SqlServerInfo && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull && !isAspNetApplicationServicesTable )
+					if( !( cn.DatabaseInfo is OracleInfo ) && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull && !isAspNetApplicationServicesTable )
 						throw new UserCorrectableException( "String column " + col.Name + " allows null, which is not allowed." );
 				}
 

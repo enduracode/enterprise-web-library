@@ -39,7 +39,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Gets the path of the Red Stapler folder on the machine.
 		/// </summary>
-		public static string RedStaplerFolderPath { get { return StandardLibraryMethods.CombinePaths( "C:", "Red Stapler" ); } }
+		public static string RedStaplerFolderPath { get { return Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler"; } }
 
 		/// <summary>
 		/// Initializes the class. This includes loading application settings from the configuration file. The application name should be scoped within the system.
@@ -328,7 +328,7 @@ namespace RedStapler.StandardLibrary {
 			var m = new EmailMessage();
 			foreach( var developer in InstallationConfiguration.Developers )
 				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + InstallationConfiguration.FullName;
+			m.Subject = "Error in " + InstallationConfiguration.SystemName;
 			if( isClientSideProgram )
 				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
 			m.BodyHtml = body.GetTextAsEncodedHtml();
@@ -356,7 +356,7 @@ namespace RedStapler.StandardLibrary {
 		public static void SendEmailWithDefaultFromAddress( EmailMessage m ) {
 			assertClassInitialized();
 
-			m.From = new EmailAddress( InstallationConfiguration.EmailDefaultFromAddress, InstallationConfiguration.EmailDefaultFromName );
+			m.From = new EmailAddress( provider.EmailDefaultFromAddress, provider.EmailDefaultFromName );
 			SendEmail( m );
 		}
 
@@ -365,59 +365,7 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static void SendEmail( EmailMessage message ) {
 			assertClassInitialized();
-
-			alterMessageForTestingIfNecessary( message );
-
-			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
-			System.Net.Mail.SmtpClient smtpClient = null;
-			try {
-				if( InstallationConfiguration.SmtpServer.Length > 0 )
-					smtpClient = new System.Net.Mail.SmtpClient { Host = InstallationConfiguration.SmtpServer };
-				else if( InstallationConfiguration.InstallationType == InstallationType.Development ) {
-					var pickupFolderPath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Outgoing Dev Mail" );
-					Directory.CreateDirectory( pickupFolderPath );
-					smtpClient = new System.Net.Mail.SmtpClient
-						{
-							DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory,
-							PickupDirectoryLocation = pickupFolderPath
-						};
-				}
-				else if( isClientSideProgram )
-					smtpClient = provider.CreateClientSideAppSmtpClient();
-				else
-					smtpClient = new System.Net.Mail.SmtpClient { DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.PickupDirectoryFromIis };
-
-				using( var m = new System.Net.Mail.MailMessage() ) {
-					message.ConfigureMailMessage( m );
-					try {
-						smtpClient.Send( m );
-					}
-					catch( System.Net.Mail.SmtpException e ) {
-						throw new EmailSendingException( "Failed to send an email message.", e );
-					}
-				}
-			}
-			finally {
-				// Microsoft's own dispose method fails to work if Host is not specified, even though Host doesn't need to be specified for operation.
-				if( smtpClient != null && !string.IsNullOrEmpty( smtpClient.Host ) )
-					smtpClient.Dispose();
-			}
-		}
-
-		private static void alterMessageForTestingIfNecessary( EmailMessage m ) {
-			// For testing installations, don't actually send email to recipients (they may be real people). Instead, send to the developers.
-			if( IsIntermediateInstallation ) {
-				var wouldHaveBeenEmailedTo = m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection();
-				m.Subject = "Testing installation: " + m.Subject;
-				m.BodyHtml =
-					( "Because this is a testing installation, this message was not actually sent.  Had this been a live installation, the message would have been sent to the following recipients: " +
-					  wouldHaveBeenEmailedTo + Environment.NewLine + Environment.NewLine ).GetTextAsEncodedHtml() + m.BodyHtml;
-
-				m.ToAddresses.Clear();
-				m.CcAddresses.Clear();
-				m.BccAddresses.Clear();
-				m.ToAddresses.AddRange( DeveloperEmailAddresses );
-			}
+			EmailStatics.SendEmail( InstallationConfiguration, message );
 		}
 
 		private static bool isWebApp() {
@@ -563,7 +511,7 @@ namespace RedStapler.StandardLibrary {
 		public static List<EmailAddress> DeveloperEmailAddresses {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.Developers.Select( developer => new EmailAddress( developer.EmailAddress, developer.Name ) ).ToList();
+				return EmailStatics.GetDeveloperEmailAddresses( InstallationConfiguration ).ToList();
 			}
 		}
 
@@ -610,7 +558,7 @@ namespace RedStapler.StandardLibrary {
 				return
 					StandardLibraryMethods.CombinePaths(
 						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
-						                                                   InstallationConfiguration.InstallationType == InstallationType.Development ),
+							InstallationConfiguration.InstallationType == InstallationType.Development ),
 						InstallationFileStatics.FilesFolderName );
 			}
 		}
@@ -633,6 +581,13 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return InstallationConfiguration.ConfigurationFolderPath;
 			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? StandardLibraryMethods.GetProjectOutputFolderPath( true ) : ""; }
 		}
 
 		private static void assertClassInitialized() {

@@ -6,6 +6,7 @@ using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal class Column {
@@ -16,10 +17,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 			var columns = new List<Column>();
 
-			var readerMethod = new Action<DbDataReader>( r => {
-				foreach( DataRow row in r.GetSchemaTable().Rows )
-					columns.Add( new Column( row, includeKeyInfo, cn.DatabaseInfo ) );
-			} );
+			var readerMethod = new Action<DbDataReader>(
+				r => {
+					foreach( DataRow row in r.GetSchemaTable().Rows )
+						columns.Add( new Column( row, includeKeyInfo, cn.DatabaseInfo ) );
+				} );
 			if( includeKeyInfo )
 				cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 			else
@@ -28,81 +30,79 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return columns;
 		}
 
-		private readonly string name;
-		private readonly string pascalCasedName;
-		private readonly int size;
-		private readonly bool? isKey;
-		private readonly Type dataType;
-		private readonly string dbTypeString;
-		private readonly bool allowsNull;
+		private readonly ValueContainer valueContainer;
 		private readonly bool isIdentity;
-
-		// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
-		private readonly string pascalCasedNameExceptForOracle;
+		private readonly bool? isKey;
 
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
-			name = (string)schemaTableRow[ "ColumnName" ];
-			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : Name;
-			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
-			size = (int)schemaTableRow[ "ColumnSize" ];
-			if( includeKeyInfo )
-				isKey = (bool)schemaTableRow[ "IsKey" ];
-			dataType = (Type)schemaTableRow[ "DataType" ];
-			dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
-			allowsNull = (bool)schemaTableRow[ "AllowDBNull" ];
+			valueContainer = new ValueContainer(
+				(string)schemaTableRow[ "ColumnName" ],
+				(Type)schemaTableRow[ "DataType" ],
+				databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] ),
+				(int)schemaTableRow[ "ColumnSize" ],
+				(bool)schemaTableRow[ "AllowDBNull" ],
+				databaseInfo );
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
+			if( includeKeyInfo )
+				isKey = (bool)schemaTableRow[ "IsKey" ];
 		}
 
-		internal string Name { get { return name; } }
-		internal string PascalCasedName { get { return pascalCasedName; } }
-		internal string PascalCasedNameExceptForOracle { get { return pascalCasedNameExceptForOracle; } }
-		internal string CamelCasedName { get { return pascalCasedName.LowercaseString(); } }
-		internal int Size { get { return size; } }
-		internal bool IsKey { get { return isKey.Value; } }
+		internal string Name { get { return valueContainer.Name; } }
+		internal string PascalCasedName { get { return valueContainer.PascalCasedName; } }
+		internal string PascalCasedNameExceptForOracle { get { return valueContainer.PascalCasedNameExceptForOracle; } }
+		internal string CamelCasedName { get { return valueContainer.CamelCasedName; } }
 
 		/// <summary>
-		/// If this column has a nullability mismatch, returns the name of a nullable version of the data type for this column.
-		/// Otherwise, returns the name of the data type for this column (the same as DataTypeIfNotNullName).
+		/// Gets the name of the data type for this column, or the nullable data type if the column allows null.
 		/// </summary>
-		internal string DataTypeName {
-			get {
-				if( HasNullabilityMismatch )
-					return NullableDataTypeName;
-				return dataType.ToString();
-			}
+		internal string DataTypeName { get { return valueContainer.DataTypeName; } }
+
+		/// <summary>
+		/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. The nullable data type is equivalent to the data
+		/// type if the latter is a reference type or if the null value is represented with an expression other than "null".
+		/// </summary>
+		internal string NullableDataTypeName { get { return valueContainer.NullableDataTypeName; } }
+
+		internal string NullValueExpression { get { return valueContainer.NullValueExpression; } }
+		internal string UnconvertedDataTypeName { get { return valueContainer.UnconvertedDataTypeName; } }
+
+		internal string GetIncomingValueConversionExpression( string valueExpression ) {
+			return valueContainer.GetIncomingValueConversionExpression( valueExpression );
 		}
 
-		/// <summary>
-		/// Returns the string representing the nullable data type for this column, regardless of whether the column allows null in the database.
-		/// This will be equivalent to DataTypeName if the column allows null in the database.
-		/// </summary>
-		internal string NullableDataTypeName { get { return dataType.IsValueType ? dataType + "?" : dataType.ToString(); } }
+		internal object ConvertIncomingValue( object value ) {
+			return valueContainer.ConvertIncomingValue( value );
+		}
 
-		/// <summary>
-		/// Returns true if the column allows null in the database, but the corresponding C# datatype is a value type.
-		/// </summary>
-		internal bool HasNullabilityMismatch { get { return dataType.IsValueType && allowsNull; } }
-
-		/// <summary>
-		/// Returns the name of the data type for this column, regardless of whether this column has a nullability mismatch.
-		/// </summary>
-		internal string DataTypeIfNotNullName { get { return dataType.ToString(); } }
-
-		internal string DbTypeString { get { return dbTypeString; } }
-		internal bool AllowsNull { get { return allowsNull; } }
+		internal int Size { get { return valueContainer.Size; } }
+		internal bool AllowsNull { get { return valueContainer.AllowsNull; } }
 		internal bool IsIdentity { get { return isIdentity; } }
+		internal bool IsKey { get { return isKey.Value; } }
 
 		// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
 		//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to System.Decimal.*/; } }
 		// Right now we assume that at least one column in table (or query) returns true for UseToUniquelyIdentifyRow. This might not always be the case, for example if you have a query
 		// that selects file contents only. If we re-implement this in a way that makes our assumption false, we'll need to modify DataAccessStatics to detect the case where no
 		// columns return true for this and provide a useful exception.
-		internal bool UseToUniquelyIdentifyRow { get { return !dataType.IsArray; } }
+		internal bool UseToUniquelyIdentifyRow { get { return !valueContainer.DataType.IsArray; } }
+
+		internal string GetCommandColumnValueExpression( string valueExpression ) {
+			return "new InlineDbCommandColumnValue( \"{0}\", {1} )".FormatWith( valueContainer.Name, valueContainer.GetParameterValueExpression( valueExpression ) );
+		}
 
 		internal ModificationField GetModificationField() {
-			var type = HasNullabilityMismatch ? typeof( Nullable<> ).MakeGenericType( dataType ) : dataType;
-			return new ModificationField( type, DataTypeName, NullableDataTypeName, "", name, pascalCasedName, size );
+			var type = valueContainer.DataTypeName != valueContainer.DataType.ToString()
+				           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
+				           : valueContainer.DataType;
+			return new ModificationField(
+				type,
+				valueContainer.DataTypeName,
+				valueContainer.NullableDataTypeName,
+				"",
+				valueContainer.Name,
+				valueContainer.PascalCasedName,
+				valueContainer.Size );
 		}
 	}
 }

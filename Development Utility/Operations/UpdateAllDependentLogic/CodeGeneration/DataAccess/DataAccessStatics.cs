@@ -17,32 +17,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class DataAccessStatics {
 		internal const string CSharpTemplateFileExtension = ".ewlt.cs";
 
-		// Matches spaced followed by @abc. The space prevents @@identity, etc. from getting matched.
-		private const string sqlServerParamRegex = @"(?<!@)@\w*\w";
-
-		private const string oracleParamRegex = @"(?<!:):\w*\w";
-
 		/// <summary>
-		/// Given a string, returns all instances of @abc in an ordered set
-		/// containing abc (the token without the @ sign).  If a token is
-		/// used more than once, it only appears in the list once.
-		/// Does the same thing with :.
+		/// Given a string, returns all instances of @abc in an ordered set containing abc (the token without the @ sign). If a token is used more than once, it
+		/// only appears in the list once. A different prefix may be used for certain databases.
 		/// </summary>
 		internal static ListSet<string> GetNamedParamList( DatabaseInfo info, string statement ) {
 			// We don't want to find parameters in quoted text.
 			statement = statement.RemoveTextBetweenStrings( "'", "'" ).RemoveTextBetweenStrings( "\"", "\"" );
 
-			MatchCollection matches;
-			if( info is SqlServerInfo )
-				matches = Regex.Matches( statement, sqlServerParamRegex );
-			else
-				matches = Regex.Matches( statement, oracleParamRegex );
-
 			var parameters = new ListSet<string>();
-			foreach( Match match in matches )
+			foreach( Match match in Regex.Matches( statement, getParamRegex( info ) ) )
 				parameters.Add( match.Value.Substring( 1 ) );
 
 			return parameters;
+		}
+
+		private static string getParamRegex( DatabaseInfo info ) {
+			// Matches spaced followed by @abc. The space prevents @@identity, etc. from getting matched.
+			return @"(?<!{0}){0}\w*\w".FormatWith( info.ParameterPrefix );
 		}
 
 		/// <summary>
@@ -60,7 +52,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return cmd;
 		}
 
-		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter, DatabaseInfo databaseInfo ) {
+		internal static void WriteRowClass( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Holds data for a row of this result." );
 			writer.WriteLine( "public partial class Row: System.IEquatable<Row> {" );
 
@@ -71,16 +63,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var cnt = 0;
 			foreach( var column in columns ) {
 				if( column.AllowsNull ) {
-					writer.WriteLine( "if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) + " = null;" );
+					writer.WriteLine(
+						"if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) +
+						" = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
 					writer.WriteLine( "else" );
 				}
-				writer.WriteLine( "" + getMemberVariableName( column ) + " = " + ( "(" + column.DataTypeName + ")" ) + "reader.GetValue( " + cnt + " );" );
+				var conversionExpression = column.GetIncomingValueConversionExpression( "reader.GetValue( {0} )".FormatWith( cnt ) );
+				writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), conversionExpression ) );
 				cnt++;
 			}
 			writer.WriteLine( "}" ); // constructor
 
 			foreach( var column in columns )
-				writeColumnProperty( writer, column, databaseInfo );
+				writeColumnProperty( writer, column );
 
 			// NOTE: Being smarter about the hash code could make searches of the collection faster.
 			writer.WriteLine( "public override int GetHashCode() { " );
@@ -114,11 +109,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // class
 		}
 
-		private static void writeColumnProperty( TextWriter writer, Column column, DatabaseInfo databaseInfo ) {
-			var isOracleClob = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( column.DbTypeString );
-			CodeGenerationStatics.AddSummaryDocComment( writer, "This object will " + ( column.AllowsNull && !isOracleClob ? "sometimes" : "never" ) + " be null." );
-			writer.WriteLine( "public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) +
-			                  " { get { return " + getMemberVariableName( column ) + ( isOracleClob ? " ?? \"\"" : "" ) + "; } }" );
+		private static void writeColumnProperty( TextWriter writer, Column column ) {
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"This object will " + ( column.AllowsNull && !column.NullValueExpression.Any() ? "sometimes" : "never" ) + " be null." );
+			writer.WriteLine(
+				"public " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " { get { return " +
+				getMemberVariableName( column ) + "; } }" );
 		}
 
 		private static string getMemberVariableName( Column column ) {
@@ -132,8 +129,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void WriteAddParamBlockFromCommandText( TextWriter writer, string commandVariable, DatabaseInfo info, string commandText, Database database ) {
 			foreach( var param in GetNamedParamList( info, commandText ) ) {
-				writer.WriteLine( commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param +
-				                  " ) ).GetAdoDotNetParameter( " + GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
+				writer.WriteLine(
+					commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param + " ) ).GetAdoDotNetParameter( " +
+					GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
 			}
 		}
 
@@ -164,9 +162,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static string GetConnectionExpression( Database database ) {
 			return
-				"DataAccessState.Current.{0}".FormatWith( database.SecondaryDatabaseName.Any()
-					                                          ? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
-					                                          : "PrimaryDatabaseConnection" );
+				"DataAccessState.Current.{0}".FormatWith(
+					database.SecondaryDatabaseName.Any()
+						? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
+						: "PrimaryDatabaseConnection" );
 		}
 	}
 }
