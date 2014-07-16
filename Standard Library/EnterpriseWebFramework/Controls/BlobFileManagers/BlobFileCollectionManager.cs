@@ -113,12 +113,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				addFileRow( table, file, deletePb, deleteModMethods );
 			if( !ReadOnly ) {
 				table.AddRow(
-					new EwfTableCell( getUploadControlList() ) { FieldSpan = ThumbnailPageInfoCreator != null ? 3 : 2 },
-					new EwfTableCell( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null )
-						{
-							FieldSpan = 2,
-							CssClass = "ewfRightAlignCell"
-						} );
+					getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailPageInfoCreator != null ? 3 : 2 ) ),
+					( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
+						new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 			}
 			deletePb.AddModificationMethod(
 				() => {
@@ -137,25 +134,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
 			if( thumbnailControl != null )
-				cells.Add( new EwfTableCell( thumbnailControl ) );
+				cells.Add( thumbnailControl );
 
 			var fileIsUnread = fileIdsMarkedAsRead != null && !fileIdsMarkedAsRead.Contains( file.FileId );
 
 			cells.Add(
-				new EwfTableCell(
-					new PostBackButton(
-						PostBack.CreateFull(
-							id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
-							firstModificationMethod: () => {
-								if( fileIsUnread && markFileAsReadMethod != null )
-									markFileAsReadMethod( file.FileId );
-							},
-							actionGetter: () => new PostBackAction( new FileCreator( () => file.FileId ) ) ),
-						new TextActionControlStyle( file.FileName ),
-						false ) { ToolTip = file.FileName } ) );
+				new PostBackButton(
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
+						firstModificationMethod: () => {
+							if( fileIsUnread && markFileAsReadMethod != null )
+								markFileAsReadMethod( file.FileId );
+						},
+						actionGetter: () => new PostBackAction( new FileCreator( () => file.FileId ) ) ),
+					new TextActionControlStyle( file.FileName ),
+					false ) { ToolTip = file.FileName } );
 
-			cells.Add( new EwfTableCell( file.UploadedDate.ToDayMonthYearString( false ) ) );
-			cells.Add( new EwfTableCell( fileIsUnread ? "New!" : "" ) { CssClass = "ewfNewness" } );
+			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
+			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToSingleElementArray() ) ) );
 
 			var delete = false;
 			var deleteCheckBox =
@@ -163,7 +159,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					"",
 					new EwfCheckBox( false, postBack: deletePb ),
 					validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deletePb ) ).ToControl();
-			cells.Add( new EwfTableCell( ReadOnly ? null : deleteCheckBox ) );
+			cells.Add( ReadOnly ? null : deleteCheckBox );
 			deleteModMethods.Add(
 				() => {
 					if( !delete )
@@ -210,9 +206,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			return ControlList.CreateWithControls(
 				true,
-				new EwfTableCell( "Select and upload a new file:".GetLiteralControl() ),
-				new EwfTableCell( fi.ToControl() ),
-				new EwfTableCell( new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) ) );
+				"Select and upload a new file:",
+				fi.ToControl(),
+				new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) );
 		}
 
 		/// <summary>

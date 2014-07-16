@@ -125,7 +125,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				table.AddItem(
 					new EwfTableItem(
 						new EwfTableItemSetup( verticalAlignment: verticalAlignment ),
-						items.Select( i => new EwfTableCell( i.ToControl() ) { FieldSpan = getCellSpan( i ), TextAlignment = i.TextAlignment } ).ToArray() ) );
+						items.Select( i => i.ToControl().ToCell( new TableCellSetup( fieldSpan: getCellSpan( i ), textAlignment: i.TextAlignment ) ) ).ToArray() ) );
 			}
 			return table;
 		}
@@ -175,7 +175,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					if( i.Validation != null )
 						stack.AddModificationErrorItem( i.Validation, errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
 					stack.AddControls( i.Control );
-					return new EwfTableItem( i.Label.ToCell(), new EwfTableCell( stack ) { TextAlignment = i.TextAlignment } );
+					return new EwfTableItem( i.Label, stack.ToCell( new TableCellSetup( textAlignment: i.TextAlignment ) ) );
 				} );
 			return table;
 		}

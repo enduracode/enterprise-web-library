@@ -83,18 +83,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
 				newPasswordTable.AddItem(
 					new EwfTableItem(
-						new EwfTableCell( "Password" ),
+						"Password",
 						FormItem.Create(
 							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl().ToCell() ) );
+							validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 				newPasswordTable.AddItem(
 					new EwfTableItem(
-						new EwfTableCell( "Password again" ),
+						"Password again",
 						FormItem.Create(
 							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl().ToCell() ) );
+							validationGetter: control => new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );

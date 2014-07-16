@@ -240,14 +240,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Adds a text-only row to this table.
 		/// </summary>
 		public void AddTextRow( RowSetup rowSetup, params string[] cellText ) {
-			AddRow( rowSetup, cellText.Select( ct => new EwfTableCell( ct ) ).ToArray() );
+			AddRow( rowSetup, cellText.Select( ct => (EwfTableCell)ct ).ToArray() );
 		}
 
 		/// <summary>
 		/// Adds a row of controls to this table.
 		/// </summary>
 		public void AddRow( RowSetup rowSetup, params Control[] controls ) {
-			AddRow( rowSetup, controls.Select( c => new EwfTableCell( c ) ).ToArray() );
+			AddRow( rowSetup, controls.Select( c => (EwfTableCell)c ).ToArray() );
 		}
 
 		/// <summary>

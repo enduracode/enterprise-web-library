@@ -64,7 +64,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}
-				cells.Add( new EwfTableCell( place ) );
+				cells.Add( place );
 			}
 			table.AddRow( cells.ToArray() );
 			Controls.Add( table );

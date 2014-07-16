@@ -19,21 +19,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates an EWF table column with the specified header cell text.
 		/// </summary>
 		public EwfTableColumn( string headerCellText ) {
-			init( new EwfTableCell( headerCellText ), Unit.Empty, "" );
+			init( headerCellText, Unit.Empty, "" );
 		}
 
 		/// <summary>
 		/// Creates an EWF table column with the specified header cell text and the specified width.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, Unit width ) {
-			init( new EwfTableCell( headerCellText ), width, "" );
+			init( headerCellText, width, "" );
 		}
 
 		/// <summary>
 		/// Creates an EWF table column with the specified header cell text and the specified CSS class.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, string cssClass ) {
-			init( new EwfTableCell( headerCellText ), Unit.Empty, cssClass );
+			init( headerCellText, Unit.Empty, cssClass );
 		}
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates an EWF table column with the specified header cell text and the specified width and CSS class.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, Unit width, string cssClass ) {
-			init( new EwfTableCell( headerCellText ), width, cssClass );
+			init( headerCellText, width, cssClass );
 		}
 
 		private void init( EwfTableCell headerCell, Unit width, string cssClass ) {

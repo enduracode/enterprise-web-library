@@ -426,7 +426,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
 						new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 						usesSubmitBehavior: false );
-				var item = new EwfTableItem( new EwfTableCell( button ) { FieldSpan = fields.Length } );
+				var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
 				var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
 				Controls.Add(
 					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
@@ -463,7 +463,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			cl.AddControls( getItemLimitButton( DataRowLimit.Fifty ) );
 			cl.AddControls( getItemLimitButton( DataRowLimit.FiveHundred ) );
 			cl.AddControls( getItemLimitButton( DataRowLimit.Unlimited ) );
-			return new EwfTableItem( new EwfTableCell( cl ) { FieldSpan = fieldCount } ).ToSingleElementArray();
+			return new EwfTableItem( cl.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToSingleElementArray();
 		}
 
 		private Control getItemLimitButton( DataRowLimit itemLimit ) {
