@@ -24,26 +24,32 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var staticTable = FormItemBlock.CreateFormItemTable();
-			staticTable.AddFormItems( FormItem.Create( "Static Field", new EwfTextBox( "Values here will be retained across post-backs" ) ),
-			                          FormItem.Create( "Static Field", new EwfTextBox( "" ) ),
-			                          FormItem.Create( "Static Field",
-			                                           new EwfTextBox( "Edit this one to get a validation error" ),
-			                                           validationGetter: control => new Validation( ( pbv, validator ) => {
-				                                           if( control.ValueChangedOnPostBack( pbv ) )
-					                                           validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
-			                                           },
-			                                                                                        DataUpdate ) ) );
+			staticTable.AddFormItems(
+				FormItem.Create( "Static Field", new EwfTextBox( "Values here will be retained across post-backs" ) ),
+				FormItem.Create( "Static Field", new EwfTextBox( "" ) ),
+				FormItem.Create(
+					"Static Field",
+					new EwfTextBox( "Edit this one to get a validation error" ),
+					validationGetter: control => new Validation(
+						                             ( pbv, validator ) => {
+							                             if( control.ValueChangedOnPostBack( pbv ) )
+								                             validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
+						                             },
+						                             DataUpdate ) ) );
 			staticTable.IncludeButtonWithThisText = "Submit";
 			ph.AddControlsReturnThis( staticTable );
 
 			ph.AddControlsReturnThis( getBasicRegionBlocks() );
 
-			var listTable = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly,
-			                                 fields: from i in new[] { 10, 1, 10 } select new EwfTableField( size: Unit.Percentage( i ) ) );
-			listTable.AddItem( new EwfTableItem( new EwfTableItemSetup( verticalAlignment: TableCellVerticalAlignment.Top ),
-			                                     new PlaceHolder().AddControlsReturnThis( getNonIdListRegionBlocks() ).ToCell(),
-			                                     "".ToCell(),
-			                                     new PlaceHolder().AddControlsReturnThis( getIdListRegionBlocks() ).ToCell() ) );
+			var listTable = EwfTable.Create(
+				style: EwfTableStyle.StandardLayoutOnly,
+				fields: from i in new[] { 10, 1, 10 } select new EwfTableField( size: Unit.Percentage( i ) ) );
+			listTable.AddItem(
+				new EwfTableItem(
+					new EwfTableItemSetup( verticalAlignment: TableCellVerticalAlignment.Top ),
+					getNonIdListRegionBlocks().ToCell(),
+					"",
+					getIdListRegionBlocks().ToCell() ) );
 			ph.AddControlsReturnThis( listTable );
 		}
 
@@ -56,10 +62,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var dynamicFieldValue = new DataValue<string>();
 			if( info.Toggled ) {
 				regionControls.Add(
-					FormItem.Create( "Dynamic Field",
-					                 new EwfTextBox( "This was just added!" ),
-					                 validationGetter: control => new Validation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) )
-					        .ToControl() );
+					FormItem.Create(
+						"Dynamic Field",
+						new EwfTextBox( "This was just added!" ),
+						validationGetter: control => new Validation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
 			}
 			else
 				regionControls.Add( new Paragraph( "Nothing here yet." ) );
@@ -77,21 +83,20 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			yield return
 				new ControlLine(
 					new PostBackButton(
-						PostBack.CreateIntermediate( addRs.ToSingleElementArray(),
-						                             DataUpdate,
-						                             id: "nonIdAdd",
-						                             firstModificationMethod:
-							                             () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ),
+						PostBack.CreateIntermediate(
+							addRs.ToSingleElementArray(),
+							DataUpdate,
+							id: "nonIdAdd",
+							firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ),
 						new ButtonActionControlStyle( "Add Two Items" ),
 						usesSubmitBehavior: false ),
 					new PostBackButton(
-						PostBack.CreateIntermediate( removeRs.ToSingleElementArray(),
-						                             DataUpdate,
-						                             id: "nonIdRemove",
-						                             firstModificationMethod:
-							                             () =>
-							                             parametersModification.NonIdItemStates =
-							                             parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ),
+						PostBack.CreateIntermediate(
+							removeRs.ToSingleElementArray(),
+							DataUpdate,
+							id: "nonIdRemove",
+							firstModificationMethod:
+								() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ),
 						new ButtonActionControlStyle( "Remove Two Items" ),
 						usesSubmitBehavior: false ) );
 
@@ -111,9 +116,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				itemStack.AddControls( new EwfTextBox( "Item {0}".FormatWith( i ) ) );
 			else
 				itemStack.AddText( "Item {0}".FormatWith( i ) );
-			itemStack.AddControls( new PostBackButton( pb,
-			                                           new ButtonActionControlStyle( "Toggle", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-			                                           usesSubmitBehavior: false ) );
+			itemStack.AddControls(
+				new PostBackButton( pb, new ButtonActionControlStyle( "Toggle", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ), usesSubmitBehavior: false ) );
 
 			pb.AddModificationMethod(
 				() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
@@ -126,22 +130,21 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			yield return
 				new ControlLine(
 					new PostBackButton(
-						PostBack.CreateIntermediate( rs.ToSingleElementArray(),
-						                             DataUpdate,
-						                             id: "idAdd",
-						                             firstModificationMethod:
-							                             () =>
-							                             parametersModification.ItemIds =
-							                             ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToSingleElementArray()
-							                                                                                                                    .Concat(
-								                                                                                                                    parametersModification.ItemIds ) ),
+						PostBack.CreateIntermediate(
+							rs.ToSingleElementArray(),
+							DataUpdate,
+							id: "idAdd",
+							firstModificationMethod:
+								() =>
+								parametersModification.ItemIds =
+								( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToSingleElementArray().Concat( parametersModification.ItemIds ) ),
 						new ButtonActionControlStyle( "Add Item" ),
 						usesSubmitBehavior: false ) );
 
-			var stack = ControlStack.Create( true,
-			                                 itemInsertionUpdateRegions:
-				                                 new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToSingleElementArray() )
-				                                 .ToSingleElementArray() );
+			var stack = ControlStack.Create(
+				true,
+				itemInsertionUpdateRegions:
+					new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToSingleElementArray() ).ToSingleElementArray() );
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
@@ -154,9 +157,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var itemStack = ControlStack.Create( true );
 			itemStack.AddControls( new EwfTextBox( "ID {0}".FormatWith( id ) ) );
-			itemStack.AddControls( new PostBackButton( pb,
-			                                           new ButtonActionControlStyle( "Remove", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-			                                           usesSubmitBehavior: false ) );
+			itemStack.AddControls(
+				new PostBackButton( pb, new ButtonActionControlStyle( "Remove", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ), usesSubmitBehavior: false ) );
 
 			pb.AddModificationMethod( () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() );
 

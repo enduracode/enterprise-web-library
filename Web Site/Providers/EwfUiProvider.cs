@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 					clickScript:
 					ClickScript.CreatePostBackScript(
 						PostBack.CreateFull( id: "testMethod", firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ),
-					"Test method".ToCell() ) );
+					"Test method" ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipButton( menu ) ) );
 
 			navButtonSetups.Add(

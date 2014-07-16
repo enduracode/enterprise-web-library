@@ -14,21 +14,21 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var dataRows = Enumerable.Range( 0, 550 );
 
-			var table = EwfTable.Create( defaultItemLimit: DataRowLimit.Fifty,
-			                             caption: "Caption",
-			                             subCaption: "Sub caption",
-			                             fields:
-				                             new[]
-					                             {
-						                             new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ),
-						                             new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" )
-					                             },
-			                             headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToSingleElementArray() );
-			table.AddData( dataRows,
-			               i =>
-			               new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( ActionControls.GetInfo() ) ),
-			                                 new EwfTableCell( i.ToString() ),
-			                                 new EwfTableCell( ( i * 2 ) + Environment.NewLine + "extra stuff" ) ) );
+			var table = EwfTable.Create(
+				defaultItemLimit: DataRowLimit.Fifty,
+				caption: "Caption",
+				subCaption: "Sub caption",
+				fields:
+					new[]
+						{ new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ), new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" ) },
+				headItems: new EwfTableItem( "First Column", "Second Column" ).ToSingleElementArray() );
+			table.AddData(
+				dataRows,
+				i =>
+				new EwfTableItem(
+					new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( ActionControls.GetInfo() ) ),
+					i.ToString(),
+					( i * 2 ) + Environment.NewLine + "extra stuff" ) );
 			place.Controls.Add( table );
 		}
 	}
