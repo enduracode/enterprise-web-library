@@ -67,7 +67,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				const string trActionHoverContrast = tr + actionSelector + hoverSelector + contrastSelector;
 
 				// all rows
-				elements.Add( new CssElement( "TrAllStates", trNoAction, trNoActionContrast, trActionNoHover, trActionNoHoverContrast, trActionHover, trActionHoverContrast ) );
+				elements.Add(
+					new CssElement( "TrAllStates", trNoAction, trNoActionContrast, trActionNoHover, trActionNoHoverContrast, trActionHover, trActionHoverContrast ) );
 				elements.Add( new CssElement( "TrStatesWithContrast", trNoActionContrast, trActionNoHoverContrast, trActionHoverContrast ) );
 
 				// all rows except the one being hovered, if it's an action row
@@ -184,24 +185,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
-		public static EwfTable Create( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
-		                               string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
-		                               IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-		                               IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
-		                               bool disableEmptyFieldDetection = false ) {
-			return new EwfTable( hideIfEmpty,
-			                     style,
-			                     classes,
-			                     postBackIdBase,
-			                     caption,
-			                     subCaption,
-			                     allowExportToExcel,
-			                     tableActions,
-			                     fields,
-			                     headItems,
-			                     defaultItemLimit,
-			                     disableEmptyFieldDetection,
-			                     null );
+		public static EwfTable Create(
+			bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "", string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
+			IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false ) {
+			return new EwfTable(
+				hideIfEmpty,
+				style,
+				classes,
+				postBackIdBase,
+				caption,
+				subCaption,
+				allowExportToExcel,
+				tableActions,
+				fields,
+				headItems,
+				defaultItemLimit,
+				disableEmptyFieldDetection,
+				null );
 		}
 
 		// NOTE: Why is the items field for CreateWithItems not required? It lets you do stupid things. Make items required (and do similar thing to all constructors).
@@ -227,24 +228,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="items">The items.</param>
-		public static EwfTable CreateWithItems( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
-		                                        string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
-		                                        IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-		                                        IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
-		                                        bool disableEmptyFieldDetection = false, IEnumerable<Func<EwfTableItem>> items = null ) {
-			return new EwfTable( hideIfEmpty,
-			                     style,
-			                     classes,
-			                     postBackIdBase,
-			                     caption,
-			                     subCaption,
-			                     allowExportToExcel,
-			                     tableActions,
-			                     fields,
-			                     headItems,
-			                     defaultItemLimit,
-			                     disableEmptyFieldDetection,
-			                     items != null ? new[] { new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null ), items ) } : null );
+		public static EwfTable CreateWithItems(
+			bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "", string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
+			IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IEnumerable<Func<EwfTableItem>> items = null ) {
+			return new EwfTable(
+				hideIfEmpty,
+				style,
+				classes,
+				postBackIdBase,
+				caption,
+				subCaption,
+				allowExportToExcel,
+				tableActions,
+				fields,
+				headItems,
+				defaultItemLimit,
+				disableEmptyFieldDetection,
+				items != null ? new[] { new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null ), items ) } : null );
 		}
 
 		/// <summary>
@@ -268,24 +270,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="itemGroups">The item groups.</param>
-		public static EwfTable CreateWithItemGroups( bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null,
-		                                             string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
-		                                             IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-		                                             IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
-		                                             bool disableEmptyFieldDetection = false, IEnumerable<EwfTableItemGroup> itemGroups = null ) {
-			return new EwfTable( hideIfEmpty,
-			                     style,
-			                     classes,
-			                     postBackIdBase,
-			                     caption,
-			                     subCaption,
-			                     allowExportToExcel,
-			                     tableActions,
-			                     fields,
-			                     headItems,
-			                     defaultItemLimit,
-			                     disableEmptyFieldDetection,
-			                     itemGroups );
+		public static EwfTable CreateWithItemGroups(
+			bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "", string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
+			IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IEnumerable<EwfTableItemGroup> itemGroups = null ) {
+			return new EwfTable(
+				hideIfEmpty,
+				style,
+				classes,
+				postBackIdBase,
+				caption,
+				subCaption,
+				allowExportToExcel,
+				tableActions,
+				fields,
+				headItems,
+				defaultItemLimit,
+				disableEmptyFieldDetection,
+				itemGroups );
 		}
 
 		private readonly bool hideIfEmpty;
@@ -303,10 +306,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<EwfTableItemGroup> itemGroups;
 
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
-		private EwfTable( bool hideIfEmpty, EwfTableStyle style, IEnumerable<string> classes, string postBackIdBase, string caption, string subCaption,
-		                  bool allowExportToExcel, IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields,
-		                  IEnumerable<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection,
-		                  IEnumerable<EwfTableItemGroup> itemGroups ) {
+		private EwfTable(
+			bool hideIfEmpty, EwfTableStyle style, IEnumerable<string> classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
+			IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields, IEnumerable<EwfTableItem> headItems, DataRowLimit defaultItemLimit,
+			bool disableEmptyFieldDetection, IEnumerable<EwfTableItemGroup> itemGroups ) {
 			this.hideIfEmpty = hideIfEmpty;
 			this.style = style;
 			this.classes = ( classes ?? new string[ 0 ] ).ToList().AsReadOnly();
@@ -385,13 +388,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var allVisibleItems = new List<EwfTableItem>();
 
 			var headRows =
-				buildRows( getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
-				           Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-				           null,
-				           false,
-				           null,
-				           null,
-				           allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
+				buildRows(
+					getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
+					Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+					null,
+					false,
+					null,
+					null,
+					allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
 			if( headRows.Any() )
 				Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
 
@@ -417,20 +421,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
 				var button =
 					new PostBackButton(
-						PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-						                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
+						PostBack.CreateFull(
+							id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+							firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
 						new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 						usesSubmitBehavior: false );
 				var item = new EwfTableItem( new EwfTableCell( button ) { FieldSpan = fields.Length } );
 				var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
 				Controls.Add(
-					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis( buildRows( item.ToSingleElementArray().ToList(),
-					                                                                            Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-					                                                                            useContrast,
-					                                                                            false,
-					                                                                            null,
-					                                                                            null,
-					                                                                            allVisibleItems ) ) );
+					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+						buildRows(
+							item.ToSingleElementArray().ToList(),
+							Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+							useContrast,
+							false,
+							null,
+							null,
+							allVisibleItems ) ) );
 			}
 
 			// Assert that every visible item in the table has the same number of cells and store a data structure for below.
@@ -465,8 +472,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				return text.GetLiteralControl();
 			return
 				new PostBackButton(
-					PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-					                     firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
+						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
 					new TextActionControlStyle( text ),
 					false );
 		}
@@ -479,19 +487,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new EwfTableItem[ 0 ];
 		}
 
-		private IEnumerable<Control> buildRows( List<EwfTableItem> items, EwfTableField[] fields, bool? useContrastForFirstRow, bool useHeadCells,
-		                                        Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter,
-		                                        List<EwfTableItem> allVisibleItems ) {
+		private IEnumerable<Control> buildRows(
+			List<EwfTableItem> items, EwfTableField[] fields, bool? useContrastForFirstRow, bool useHeadCells, Func<EwfTableCell> itemActionCheckBoxCellGetter,
+			Func<EwfTableCell> itemReorderingCellGetter, List<EwfTableItem> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
 			var cellPlaceholderListsForRows = TableOps.BuildCellPlaceholderListsForItems( items, fields.Length );
 
 			// NOTE: Be sure to take check box and reordering columns into account.
-			var rows = TableOps.BuildRows( cellPlaceholderListsForRows,
-			                               items.Select( i => i.Setup.FieldOrItemSetup ).ToList().AsReadOnly(),
-			                               useContrastForFirstRow,
-			                               fields.Select( i => i.FieldOrItemSetup ).ToList().AsReadOnly(),
-			                               useHeadCells ? fields.Length : 0,
-			                               false );
+			var rows = TableOps.BuildRows(
+				cellPlaceholderListsForRows,
+				items.Select( i => i.Setup.FieldOrItemSetup ).ToList().AsReadOnly(),
+				useContrastForFirstRow,
+				fields.Select( i => i.FieldOrItemSetup ).ToList().AsReadOnly(),
+				useHeadCells ? fields.Length : 0,
+				false );
 
 			allVisibleItems.AddRange( items );
 			return rows;
