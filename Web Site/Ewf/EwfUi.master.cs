@@ -257,7 +257,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				}
 			}
 
-			table.AddItem( () => new EwfTableItem( new EwfTableCell( appLogoBlock ), new EwfTableCell( userInfoList ) ) );
+			table.AddItem( () => new EwfTableItem( appLogoBlock, userInfoList ) );
 			return table;
 		}
 
@@ -335,12 +335,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					.ToArray();
 			return !controls.Any()
 				       ? null
-				       : new EwfTableCell(
-					         new ControlLine( controls )
-						         {
-							         CssClass = CssElementCreator.EntityNavListCssClass,
-							         ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-						         } );
+				       : new ControlLine( controls )
+					       {
+						       CssClass = CssElementCreator.EntityNavListCssClass,
+						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					       };
 		}
 
 		private EwfTableCell getEntityActionCell() {
@@ -349,12 +348,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			return !actionControls.Any()
 				       ? null
-				       : new EwfTableCell(
-					         new ControlLine( actionControls )
-						         {
-							         CssClass = CssElementCreator.EntityActionListCssClass,
-							         ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-						         } ) { TextAlignment = TextAlignment.Right };
+				       : new ControlLine( actionControls )
+					       {
+						       CssClass = CssElementCreator.EntityActionListCssClass,
+						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					       }.ToCell(
+						       new TableCellSetup( textAlignment: TextAlignment.Right ) );
 		}
 
 		private Control getEntitySummaryBlock() {
@@ -451,10 +450,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray() );
 			table.AddItem(
 				new EwfTableItem(
-					new EwfTableCell( new PlaceHolder().AddControlsReturnThis( controls ) )
-						{
-							TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center
-						} ) );
+					controls.ToCell( new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );
 			return table;
 		}
 

@@ -21,39 +21,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
 				new EwfTableItem(
-					new EwfTableCell(
-						"You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName )
-						{
-							FieldSpan = 2
-						} ) );
+					( "You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName ).ToCell(
+						new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 			emailAddress = new DataValue<string>();
 			var emailVl = new BasicValidationList();
 			registeredTable.AddItem(
-				new EwfTableItem(
-					"Email address".ToCell(),
-					emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
+				new EwfTableItem( "Email address", emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl() ) );
 			logInPb.AddValidations( emailVl );
 			newPasswordPb.AddValidations( emailVl );
 
 			var password = new DataValue<string>();
 			registeredTable.AddItem(
 				new EwfTableItem(
-					"Password".ToCell(),
+					"Password",
 					FormItem.Create(
 						"",
 						new EwfTextBox( "", masksCharacters: true ),
-						validationGetter: control => new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl().ToCell() ) );
+						validationGetter: control => new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
 
 			registeredTable.AddItem(
 				new EwfTableItem(
-					new EwfTableCell(
-						new PlaceHolder().AddControlsReturnThis(
-							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-							new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) ) )
-						{
-							FieldSpan = 2
-						} ) );
+					new PlaceHolder().AddControlsReturnThis(
+						"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
+						new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) )
+						.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 			ph.AddControlsReturnThis( registeredTable );
 
 			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
@@ -61,8 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				ph.AddControlsReturnThis( specialInstructions );
 			else {
 				var unregisteredTable = EwfTable.Create( caption: "Unregistered users" );
-				unregisteredTable.AddItem(
-					new EwfTableItem( ( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToCell() ) );
+				unregisteredTable.AddItem( new EwfTableItem( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ) );
 				ph.AddControlsReturnThis( unregisteredTable );
 			}
 
