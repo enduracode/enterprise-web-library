@@ -93,8 +93,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a table cell containing these controls. If no controls exist, the cell will contain a non-breaking space.
 		/// </summary>
-		public static EwfTableCell ToCell( this IEnumerable<Control> controls, TableCellSetup setup ) {
-			return new EwfTableCell( setup, controls );
+		public static EwfTableCell ToCell( this IEnumerable<Control> controls, TableCellSetup setup = null ) {
+			return new EwfTableCell( setup ?? new TableCellSetup(), controls );
 		}
 
 		/// <summary>
