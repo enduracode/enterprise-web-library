@@ -35,7 +35,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var rowSpan = tableIsColumnPrimary ? ewfCell.FieldSpan : ewfCell.ItemSpan;
 
 			var underlyingCell = ( rowSetup.IsHeader || columnSetup.IsHeader ) ? new TableHeaderCell() : new TableCell();
-			underlyingCell.Controls.Add( ewfCell.Control );
+			underlyingCell.AddControlsReturnThis( ewfCell.Controls );
 			if( colSpan == 1 )
 				underlyingCell.Width = columnSetup.Width;
 			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter(
@@ -192,7 +192,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 										if( cellAndIndex.Cell.ToolTipControl != null || cellAndIndex.Cell.ToolTip.Length > 0 )
 											new ToolTip( cellAndIndex.Cell.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.ToolTip ), cellControl );
 
-										return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Control ) as Control;
+										return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
 									} ) );
 				} );
 		}
