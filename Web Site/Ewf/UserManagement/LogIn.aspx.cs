@@ -21,25 +21,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
 			registeredTable.AddItem(
 				new EwfTableItem(
-					new EwfTableCell( "You may log in to this system if you have registered your email address with " +
-					                  FormsAuthStatics.SystemProvider.AdministratingCompanyName ) { FieldSpan = 2 } ) );
+					new EwfTableCell(
+						"You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName )
+						{
+							FieldSpan = 2
+						} ) );
 
 			emailAddress = new DataValue<string>();
 			var emailVl = new BasicValidationList();
-			registeredTable.AddItem( new EwfTableItem( "Email address".ToCell(),
-			                                           emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
+			registeredTable.AddItem(
+				new EwfTableItem(
+					"Email address".ToCell(),
+					emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl().ToCell() ) );
 			logInPb.AddValidations( emailVl );
 			newPasswordPb.AddValidations( emailVl );
 
 			var password = new DataValue<string>();
-			registeredTable.AddItem( new EwfTableItem( "Password".ToCell(),
-			                                           FormItem.Create( "",
-			                                                            new EwfTextBox( "", masksCharacters: true ),
-			                                                            validationGetter:
-				                                                            control =>
-				                                                            new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) )
-			                                                   .ToControl()
-			                                                   .ToCell() ) );
+			registeredTable.AddItem(
+				new EwfTableItem(
+					"Password".ToCell(),
+					FormItem.Create(
+						"",
+						new EwfTextBox( "", masksCharacters: true ),
+						validationGetter: control => new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl().ToCell() ) );
 
 			registeredTable.AddItem(
 				new EwfTableItem(
@@ -64,11 +68,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
 
-			var logInMethod = FormsAuthStatics.GetLogInMethod( emailAddress,
-			                                                   password,
-			                                                   getUnregisteredEmailMessage(),
-			                                                   "Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
-			                                                   logInPb );
+			var logInMethod = FormsAuthStatics.GetLogInMethod(
+				emailAddress,
+				password,
+				getUnregisteredEmailMessage(),
+				"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
+				logInPb );
 			logInPb.AddModificationMethod( () => user = logInMethod() );
 		}
 
