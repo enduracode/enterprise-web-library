@@ -27,52 +27,58 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				sw.WriteLine( "COMMIT;" );
 				sw.WriteLine( "quit" );
 
-				executeMethodWithDbExceptionHandling( delegate {
-					try {
-						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
-						                                   getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
-						                                   sw.ToString(),
-						                                   true );
-					}
-					catch( Exception e ) {
-						throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
-					}
-				} );
+				executeMethodWithDbExceptionHandling(
+					delegate {
+						try {
+							StandardLibraryMethods.RunProgram(
+								StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
+								getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
+								sw.ToString(),
+								true );
+						}
+						catch( Exception e ) {
+							throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
+						}
+					} );
 			}
 		}
 
 		int Database.GetLineMarker() {
 			var value = 0;
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var command = cn.DatabaseInfo.CreateCommand();
-				command.CommandText = "SELECT ParameterValue FROM global_ints WHERE ParameterName = 'LineMarker'";
-				value = (int)cn.ExecuteScalarCommand( command );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var command = cn.DatabaseInfo.CreateCommand();
+					command.CommandText = "SELECT ParameterValue FROM global_ints WHERE ParameterName = 'LineMarker'";
+					value = (int)cn.ExecuteScalarCommand( command );
+				} );
 			return value;
 		}
 
 		void Database.UpdateLineMarker( int value ) {
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var command = new InlineUpdate( "global_ints" );
-				command.AddColumnModification( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ) );
-				command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
-				command.Execute( cn );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var command = new InlineUpdate( "global_ints" );
+					command.AddColumnModification( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ) );
+					command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
+					command.Execute( cn );
+				} );
 		}
 
 		void Database.ExportToFile( string filePath ) {
-			executeMethodWithDbExceptionHandling( delegate {
-				try {
-					File.WriteAllText( filePath,
-					                   StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
-					                                                      getHostAndAuthenticationArguments() + " --single-transaction " + info.Database,
-					                                                      "",
-					                                                      true ) );
-				}
-				catch( Exception e ) {
-					throw DataAccessMethods.CreateDbConnectionException( info, "exporting (to file)", e );
-				}
-			} );
+			executeMethodWithDbExceptionHandling(
+				delegate {
+					try {
+						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
+						StandardLibraryMethods.RunProgram(
+							StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
+							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
+							"",
+							true );
+					}
+					catch( Exception e ) {
+						throw DataAccessMethods.CreateDbConnectionException( info, "exporting (to file)", e );
+					}
+				} );
 		}
 
 		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
@@ -83,17 +89,19 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				sw.Write( File.ReadAllText( filePath ) );
 				sw.WriteLine( "quit" );
 
-				executeMethodWithDbExceptionHandling( delegate {
-					try {
-						StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
-						                                   getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
-						                                   sw.ToString(),
-						                                   true );
-					}
-					catch( Exception e ) {
-						throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
-					}
-				} );
+				executeMethodWithDbExceptionHandling(
+					delegate {
+						try {
+							StandardLibraryMethods.RunProgram(
+								StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
+								getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
+								sw.ToString(),
+								true );
+						}
+						catch( Exception e ) {
+							throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
+						}
+					} );
 			}
 		}
 
@@ -115,15 +123,18 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		List<string> Database.GetTables() {
 			var tables = new List<string>();
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var command = cn.DatabaseInfo.CreateCommand();
-				command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{0}' AND TABLE_TYPE = 'BASE TABLE'".FormatWith( info.Database );
-				cn.ExecuteReaderCommand( command,
-				                         reader => {
-					                         while( reader.Read() )
-						                         tables.Add( reader.GetString( 0 ) );
-				                         } );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var command = cn.DatabaseInfo.CreateCommand();
+					command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{0}' AND TABLE_TYPE = 'BASE TABLE'".FormatWith(
+						info.Database );
+					cn.ExecuteReaderCommand(
+						command,
+						reader => {
+							while( reader.Read() )
+								tables.Add( reader.GetString( 0 ) );
+						} );
+				} );
 			return tables;
 		}
 
@@ -161,10 +172,11 @@ CREATE TABLE main_sequence(
 */
 
 		public void ExecuteDbMethod( Action<DBConnection> method ) {
-			executeMethodWithDbExceptionHandling( () => {
-				var connection = new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
-				connection.ExecuteWithConnectionOpen( () => method( connection ) );
-			} );
+			executeMethodWithDbExceptionHandling(
+				() => {
+					var connection = new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
+					connection.ExecuteWithConnectionOpen( () => method( connection ) );
+				} );
 		}
 
 		private void executeMethodWithDbExceptionHandling( Action method ) {
