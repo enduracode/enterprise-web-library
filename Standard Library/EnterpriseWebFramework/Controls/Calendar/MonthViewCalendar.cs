@@ -171,7 +171,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			foreach( var postBackButton in new List<PostBackButton> { previousLink, todayLink, nextLink } )
 				navControls.Controls.Add( postBackButton );
 
-			table.AddRow( new EwfTableCell( jumpList ), new EwfTableCell( navControls ) { CssClass = "calendarViewNavButtons" } );
+			table.AddRow( jumpList, navControls.ToCell( new TableCellSetup( classes: "calendarViewNavButtons".ToSingleElementArray() ) ) );
 			Controls.Add( table );
 		}
 

@@ -213,6 +213,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />

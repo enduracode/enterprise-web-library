@@ -19,20 +19,23 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			protected override List<PageGroup> createPageInfos() {
 				return new List<PageGroup>
 					{
-						new PageGroup( "Working Stuff",
+						new PageGroup(
+							"Working Stuff",
 							new ActionControls.Info( this ),
 							new CalendarDemo.Info( this ),
 							new OptionalParameters.Info( this ),
 							new Html5FileUpload.Info( this ),
 							new OmniDemo.Info( this ) ),
-						new PageGroup( "First category",
+						new PageGroup(
+							"First category",
 							new HtmlEditing.Info( this ),
 							new RegexHelper.Info( this ),
 							new TwoWeekCalendarTest.Info( this, DateTime.Now ),
 							new StatusMessages.Info( this ) ),
 						new PageGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new PageGroup( "Layout", new BoxDemo.Info( this ) ),
-						new PageGroup( "Form Controls",
+						new PageGroup(
+							"Form Controls",
 							new EwfTextBoxDemo.Info( this ),
 							new CheckBox.Info( this ),
 							new CheckBoxList.Info( this ),
@@ -57,28 +60,33 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			navButtonSetups.Add( new ActionButtonSetup( "Calendar", new EwfLink( new CalendarDemo.Info( info ) ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Go to Microsoft", new EwfLink( new ExternalPageInfo( "http://www.microsoft.com" ) ) ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Custom script", new CustomButton( () => "alert('test')" ) ) );
-			navButtonSetups.Add( new ActionButtonSetup( "Menu",
-				new ToolTipButton(
-					EwfTable.CreateWithItems( items:
-						new Func<EwfTableItem>[]
-							{
-								() =>
-								new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.apple.com" ) ) ),
-									"Apple".ToCell() ),
-								() =>
-								new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.microsoft.com" ) ) ),
-									"Microsoft".ToCell() ),
-								() =>
-								new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.google.com" ) ) ),
-									"Google".ToCell() ),
-								() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script".ToCell() ),
-								() =>
-								new EwfTableItem(
-									new LaunchWindowLink( new ModalWindow( new Paragraph( "Test!" ) ) ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) }.ToCell() )
-							} ) ) ) );
+			navButtonSetups.Add(
+				new ActionButtonSetup(
+					"Menu",
+					new ToolTipButton(
+						EwfTable.CreateWithItems(
+							items:
+								new Func<EwfTableItem>[]
+									{
+										() =>
+										new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.apple.com" ) ) ), "Apple" ),
+										() =>
+										new EwfTableItem(
+											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.microsoft.com" ) ) ),
+											"Microsoft" ),
+										() =>
+										new EwfTableItem(
+											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://www.google.com" ) ) ),
+											"Google" ),
+										() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script" ),
+										() =>
+										new EwfTableItem( new LaunchWindowLink( new ModalWindow( new Paragraph( "Test!" ) ) ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
+									} ) ) ) );
 
-			navButtonSetups.Add( new ActionButtonSetup( "Modal Window",
-				new LaunchWindowLink( new ModalWindow( new EwfImage( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) ) ) );
+			navButtonSetups.Add(
+				new ActionButtonSetup(
+					"Modal Window",
+					new LaunchWindowLink( new ModalWindow( new EwfImage( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) ) ) );
 			return navButtonSetups;
 		}
 
@@ -90,11 +98,16 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		public List<ActionButtonSetup> CreateActionButtonSetups() {
 			var actionButtonSetups = new List<ActionButtonSetup>();
-			actionButtonSetups.Add( new ActionButtonSetup( "Delegate action",
-				new PostBackButton( PostBack.CreateFull( id: "delegate", firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ) );
+			actionButtonSetups.Add(
+				new ActionButtonSetup(
+					"Delegate action",
+					new PostBackButton(
+						PostBack.CreateFull( id: "delegate", firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ) );
 			actionButtonSetups.Add( new ActionButtonSetup( "Go to Google", new EwfLink( new ExternalPageInfo( "http://www.google.com" ) ) ) );
-			actionButtonSetups.Add( new ActionButtonSetup( "Generate error",
-				new PostBackButton( PostBack.CreateFull( id: "error", firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) );
+			actionButtonSetups.Add(
+				new ActionButtonSetup(
+					"Generate error",
+					new PostBackButton( PostBack.CreateFull( id: "error", firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) );
 			return actionButtonSetups;
 		}
 	}
