@@ -99,6 +99,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 								true );
 						}
 						catch( Exception e ) {
+							if( e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
+								throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
 							throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
 						}
 					} );
