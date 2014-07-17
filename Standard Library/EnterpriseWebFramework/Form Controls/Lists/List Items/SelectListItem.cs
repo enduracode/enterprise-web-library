@@ -4,23 +4,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An item for the list form controls.
 	/// </summary>
-	public class EwfListItem {
+	public class SelectListItem {
 		/// <summary>
 		/// Creates a list item.
 		/// </summary>
-		public static EwfListItem<IdType> Create<IdType>( IdType id, string label ) {
-			return new EwfListItem<IdType>( id, label );
+		public static SelectListItem<IdType> Create<IdType>( IdType id, string label ) {
+			return new SelectListItem<IdType>( id, label );
 		}
 	}
 
 	/// <summary>
 	/// An item for the list form controls.
 	/// </summary>
-	public class EwfListItem<IdType> {
+	public class SelectListItem<IdType> {
 		private readonly IdType id;
 		private readonly string label;
 
-		internal EwfListItem( IdType id, string label ) {
+		internal SelectListItem( IdType id, string label ) {
 			if( typeof( IdType ) == typeof( string ) && (string)(object)id == null ) {
 				throw new ApplicationException(
 					"You cannot specify null for the value of a string; this could cause problems with drop-down lists since null and the empty string must be represented the same way in the HTML option element." );

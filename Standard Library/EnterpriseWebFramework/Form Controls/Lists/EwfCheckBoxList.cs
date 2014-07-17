@@ -21,20 +21,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// NOTE: Consider using something like the multi select feature of http://harvesthq.github.com/chosen/ to provide a space-saving mode for this control.
 	/// </summary>
 	public class EwfCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
-		private readonly IEnumerable<EwfListItem<ItemIdType>> items;
+		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
 		private readonly string caption;
 		private readonly bool includeSelectAndDeselectAllButtons;
 		private readonly byte numberOfColumns;
 		private readonly PostBack postBack;
 
-		private readonly Dictionary<EwfListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<EwfListItem<ItemIdType>, BlockCheckBox>();
+		private readonly Dictionary<SelectListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<SelectListItem<ItemIdType>, BlockCheckBox>();
 
 		/// <summary>
 		/// Creates a check box list.
 		/// </summary>
 		public EwfCheckBoxList(
-			IEnumerable<EwfListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
+			IEnumerable<SelectListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
 			byte numberOfColumns = 1, PostBack postBack = null ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
@@ -24,12 +23,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		public static IEnumerable<EwfListItem<bool?>> GetYesNoItems() {
+		public static IEnumerable<SelectListItem<bool?>> GetYesNoItems() {
 			return GetTrueFalseItems( "Yes", "No" );
 		}
 
-		public static IEnumerable<EwfListItem<bool?>> GetTrueFalseItems( string trueLabel, string falseLabel ) {
-			return new[] { EwfListItem.Create<bool?>( true, trueLabel ), EwfListItem.Create<bool?>( false, falseLabel ) };
+		public static IEnumerable<SelectListItem<bool?>> GetTrueFalseItems( string trueLabel, string falseLabel ) {
+			return new[] { SelectListItem.Create<bool?>( true, trueLabel ), SelectListItem.Create<bool?>( false, falseLabel ) };
 		}
 
 		/// <summary>
@@ -45,11 +44,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// violates the HTML specification.</param>
 		/// <param name="postBack">The post-back that will occur when the user hits Enter on a radio button.</param>
 		/// <param name="autoPostBack">Pass true if you want a post-back to occur when the selection changes.</param>
-		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId,
-		                                                                  bool useHorizontalLayout = false, string defaultValueItemLabel = "",
-		                                                                  bool disableSingleButtonDetection = false, PostBack postBack = null,
-		                                                                  bool autoPostBack = false ) {
-			return new SelectList<ItemIdType>( useHorizontalLayout,
+		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
+			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, bool useHorizontalLayout = false, string defaultValueItemLabel = "",
+			bool disableSingleButtonDetection = false, PostBack postBack = null, bool autoPostBack = false ) {
+			return new SelectList<ItemIdType>(
+				useHorizontalLayout,
 				null,
 				defaultValueItemLabel,
 				null,
@@ -77,10 +76,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
 		/// <param name="postBack">The post-back that will occur when the user hits Enter on the drop-down list.</param>
 		/// <param name="autoPostBack">Pass true if you want a post-back to occur when the selection changes.</param>
-		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>( IEnumerable<EwfListItem<ItemIdType>> items, ItemIdType selectedItemId, Unit? width = null,
-		                                                                 string defaultValueItemLabel = "", bool placeholderIsValid = false,
-		                                                                 string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false ) {
-			return new SelectList<ItemIdType>( null,
+		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
+			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, System.Web.UI.WebControls.Unit? width = null, string defaultValueItemLabel = "",
+			bool placeholderIsValid = false, string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false ) {
+			return new SelectList<ItemIdType>(
+				null,
 				width,
 				defaultValueItemLabel,
 				placeholderIsValid,
@@ -96,31 +96,49 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl, ControlWithCustomFocusLogic, DisplayLink {
+	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl,
+		ControlWithCustomFocusLogic, DisplayLink {
+		private class ListItem {
+			private readonly SelectListItem<ItemIdType> item;
+			private readonly bool isValid;
+			private readonly bool isPlaceholder;
+
+			internal ListItem( SelectListItem<ItemIdType> item, bool isValid, bool isPlaceholder ) {
+				this.item = item;
+				this.isValid = isValid;
+				this.isPlaceholder = isPlaceholder;
+			}
+
+			internal SelectListItem<ItemIdType> Item { get { return item; } }
+			internal string StringId { get { return item.Id.ObjectToString( true ); } }
+			internal bool IsValid { get { return isValid; } }
+			internal bool IsPlaceholder { get { return isPlaceholder; } }
+		}
+
 		private readonly bool? useHorizontalRadioLayout;
-		private readonly Unit? width;
-		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
-		private readonly Dictionary<string, EwfListItem<ItemIdType>> itemsByStringId;
+		private readonly System.Web.UI.WebControls.Unit? width;
+		private readonly IEnumerable<ListItem> items;
+		private readonly Dictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
 		private readonly bool? disableSingleRadioButtonDetection;
 		private readonly ItemIdType selectedItemId;
 		private readonly PostBack postBack;
 		private readonly bool autoPostBack;
 
-		private readonly List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<WebControl>>> displayLinks =
-			new List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<WebControl>>>();
+		private readonly List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>> displayLinks =
+			new List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>>();
 
 		private FreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
 		private FormValue<ItemIdType> formValue;
-		private WebControl selectControl;
+		private System.Web.UI.WebControls.WebControl selectControl;
 
-		internal SelectList( bool? useHorizontalRadioLayout, Unit? width, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
-		                     IEnumerable<EwfListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, PostBack postBack,
-		                     bool autoPostBack ) {
+		internal SelectList(
+			bool? useHorizontalRadioLayout, System.Web.UI.WebControls.Unit? width, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+			IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, PostBack postBack, bool autoPostBack ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
 
-			items = listItems.Select( i => new SelectListItem<ItemIdType>( i, true, false ) ).ToArray();
+			items = listItems.Select( i => new ListItem( i, true, false ) ).ToArray();
 			this.selectedItemId = selectedItemId;
 			items = getInitialItem( defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToArray();
 			if( items.All( i => !i.IsValid ) )
@@ -142,7 +160,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.autoPostBack = autoPostBack;
 		}
 
-		private IEnumerable<SelectListItem<ItemIdType>> getInitialItem( string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
+		private IEnumerable<ListItem> getInitialItem( string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
 			var itemIdDefaultValue = StandardLibraryMethods.GetDefaultValue<ItemIdType>( true );
 			if( items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
 				yield break;
@@ -154,13 +172,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var isPlaceholder = !useHorizontalRadioLayout.HasValue && !defaultValueItemLabel.Any();
 			yield return
-				new SelectListItem<ItemIdType>( EwfListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
+				new ListItem(
+					SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
 					includeDefaultValueItemOrValidPlaceholder,
 					isPlaceholder );
 		}
 
-		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<WebControl> controls ) {
-			displayLinks.Add( Tuple.Create( itemIds, controlsVisibleOnMatch, controls.ToArray() as IEnumerable<WebControl> ) );
+		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<System.Web.UI.WebControls.WebControl> controls ) {
+			displayLinks.Add( Tuple.Create( itemIds, controlsVisibleOnMatch, controls.ToArray() as IEnumerable<System.Web.UI.WebControls.WebControl> ) );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -176,12 +195,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				firstRadioButton = radioButtons.First();
 
 				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
-				Controls.Add( useHorizontalRadioLayout.Value
-					              ? new ControlLine( radioButtonsAsControls ) as Control
-					              : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
+				Controls.Add(
+					useHorizontalRadioLayout.Value ? new ControlLine( radioButtonsAsControls ) as Control : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
-				formValue = new FormValue<ItemIdType>( () => selectedItemId,
+				formValue = new FormValue<ItemIdType>(
+					() => selectedItemId,
 					() => UniqueID,
 					v => v.ObjectToString( true ),
 					rawValue =>
@@ -194,12 +213,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, postBack ?? EwfPage.Instance.SubmitButtonPostBack ); };
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
-				selectControl = new WebControl( HtmlTextWriterTag.Select ) { Width = width ?? Unit.Empty };
+				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
 				if( autoPostBack ) {
 					PreRender +=
 						delegate {
-							selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange,
+							selectControl.AddJavaScriptEventScript(
+								JavaScriptWriting.JsWritingMethods.onchange,
 								PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
 						};
 				}
@@ -222,7 +242,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private Control getOption( string value, ItemIdType id, string label ) {
-			return new Literal
+			return new System.Web.UI.WebControls.Literal
 				{
 					Text =
 						"<option value=\"" + value + "\"" +
