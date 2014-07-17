@@ -123,6 +123,7 @@
     </Compile>
     <Compile Include="CollectionTools\TakeLast.cs" />
     <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
+    <Compile Include="DateTimeTools\DateTimeRangeOverlapsDateRange.cs" />
     <Compile Include="DoubleTools\ToMoneyString.cs" />
     <Compile Include="RsLibraryTester.cs">
       <SubType>Code</SubType>
