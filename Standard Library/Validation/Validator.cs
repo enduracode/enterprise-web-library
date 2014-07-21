@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
-using RestSharp.Extensions;
 
 namespace RedStapler.StandardLibrary.Validation {
 	/// <summary>
@@ -462,7 +461,7 @@ namespace RedStapler.StandardLibrary.Validation {
 			return GetUrl( errorHandler, url, allowEmpty, MaxUrlLength );
 		}
 
-		private static readonly string[] validSchemes = new[] { "http", "https", "ftp" };
+		private static readonly string[] validSchemes = { "http", "https", "ftp" };
 
 		/// <summary>
 		/// Returns a validated URL. Note that you may run into problems with certain browsers if you pass a length longer than 2048.
@@ -478,6 +477,14 @@ namespace RedStapler.StandardLibrary.Validation {
 					double doubleTesting;
 					if( int.TryParse( url, out numberTesting ) || double.TryParse( url, out doubleTesting ) ) {
 						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it's an email, it's not an URL. */
+					var testingValidator = new Validator();
+					testingValidator.GetEmailAddress( new ValidationErrorHandler(""), url, allowEmpty );
+					if( !testingValidator.ErrorsOccurred ) {
+						errorHandler.SetValidationResult(ValidationResult.Invalid());
 						return url;
 					}
 
@@ -497,7 +504,7 @@ namespace RedStapler.StandardLibrary.Validation {
 							// Must contain at least one '.', to prevent just host names
 							// Must be one of the common web browser-accessible schemes
 							if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 && uri.HostNameType != UriHostNameType.IPv6 ||
-								!uri.Host.Any( c => c == '.' ) || !validSchemes.Any( s => s == uri.Scheme ) )
+								uri.Host.All( c => c != '.' ) || validSchemes.All( s => s != uri.Scheme ) )
 								throw new UriFormatException();
 						}
 						catch( UriFormatException ) {

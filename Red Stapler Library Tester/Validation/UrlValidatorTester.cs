@@ -19,6 +19,12 @@ namespace RedStapler.StandardLibraryTester.Validation {
 		}
 
 		[Test]
+		public void TestEmail() {
+			var result = getValidationResult( "brendan@brendan.com" );
+			Assert.True( validator.ErrorsOccurred );
+		}
+
+		[Test]
 		public void TestObviouslyValidSecureUrl() {
 			var result = getValidationResult( "https://www.google.com" );
 			Assert.False( validator.ErrorsOccurred );
