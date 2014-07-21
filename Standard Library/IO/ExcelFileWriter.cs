@@ -38,11 +38,6 @@ namespace RedStapler.StandardLibrary.IO {
 				namesToWorksheets.Add( newWorkSheet.Name, newWorkSheet );
 				DefaultWorksheet = newWorkSheet;
 			}
-			else {
-				var positions = workbook.Worksheets.Select( worksheet => worksheet.Position );
-				foreach( var position in positions )
-					workbook.Worksheets.Delete( position );
-			}
 		}
 
 		/// <summary>
