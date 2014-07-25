@@ -30,7 +30,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					var nameColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
 					var cmd = new InlineSelect(
-						"SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName,
+						new[] { valueColumn.Name, nameColumn.Name },
+						"FROM " + table.tableName,
+						false,
 						orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
 					cmd.Execute(
 						cn,

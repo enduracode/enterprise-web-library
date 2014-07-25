@@ -38,6 +38,13 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
 		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "@@IDENTITY"; } }
 
+		string DatabaseInfo.QueryCacheHint {
+			get {
+				// SQL Server doesn't have a query cache.
+				return "";
+			}
+		}
+
 		/// <summary>
 		/// Gets the server. Returns null to represent the local machine.
 		/// </summary>

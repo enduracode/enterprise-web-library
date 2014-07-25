@@ -148,8 +148,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "var cache = Cache.Current;" );
 			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 			writer.WriteLine(
-				"if( " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) + " && conditions.Count() == " +
-				tableColumns.KeyColumns.Count() + " ) {" );
+				"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
+				" && conditions.Count() == " + tableColumns.KeyColumns.Count() + ";" );
+			writer.WriteLine( "if( isPkQuery ) {" );
 			writer.WriteLine( "Row row;" );
 			writer.WriteLine(
 				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
@@ -161,7 +162,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			if( excludePreviousRevisions )
 				commandConditionsExpression += ".Concat( getLatestRevisionsCondition().ToSingleElementArray() )";
 			writer.WriteLine( "return cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
-			writeResultSetCreatorBody( writer, database, table, tableColumns, excludePreviousRevisions );
+			writeResultSetCreatorBody( writer, database, table, tableColumns, excludePreviousRevisions, "!isPkQuery" );
 			writer.WriteLine( "} );" );
 
 			writer.WriteLine( "}" );
@@ -174,7 +175,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "var cache = Cache.Current;" );
 				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToSingleElementArray()" : "new InlineDbCommandCondition[ 0 ]";
 				writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
-				writeResultSetCreatorBody( writer, database, table, tableColumns, isRevisionHistoryTable );
+				writeResultSetCreatorBody( writer, database, table, tableColumns, isRevisionHistoryTable, "true" );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "return cache." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk[ System.Tuple.Create( id ) ];" );
 			}
@@ -185,10 +186,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeResultSetCreatorBody( TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludesPreviousRevisions ) {
+		private static void writeResultSetCreatorBody(
+			TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludesPreviousRevisions, string cacheQueryInDbExpression ) {
 			writer.WriteLine(
-				"var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
-				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
+				"var command = new InlineSelect( \"*\".ToSingleElementArray(), \"FROM {0}\", {1}, orderByClause: \"ORDER BY {2}\" );".FormatWith(
+					table,
+					cacheQueryInDbExpression,
+					StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) ) );
 			writer.WriteLine( "foreach( var i in commandConditions )" );
 			writer.WriteLine( "command.AddCondition( i );" );
 			writer.WriteLine( "var results = new List<Row>();" );

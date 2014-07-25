@@ -42,6 +42,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 			}
 		}
 
+		string DatabaseInfo.QueryCacheHint { get { return "/*+ RESULT_CACHE */"; } }
+
 		/// <summary>
 		/// Gets the data source.
 		/// </summary>

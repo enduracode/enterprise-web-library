@@ -168,7 +168,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			var lastRestoredTransactionLogFileName = "";
 			ExecuteDbMethod(
 				cn => {
-					var command = new InlineSelect( "select TransactionLogFileName from RsisLogBackups", orderByClause: "order by RsisLogBackupId desc" );
+					var command = new InlineSelect(
+						"TransactionLogFileName".ToSingleElementArray(),
+						"from RsisLogBackups",
+						false,
+						orderByClause: "order by RsisLogBackupId desc" );
 					command.Execute(
 						cn,
 						r => {
@@ -236,7 +240,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				cn => {
 					var cutOffDateTime = DateTime.Now.AddHours( -24 );
 
-					var command = new InlineSelect( "select count( * ) from RsisLogBackups" );
+					var command = new InlineSelect( "count( * )".ToSingleElementArray(), "from RsisLogBackups", false );
 					command.AddCondition(
 						new InequalityCondition(
 							InequalityCondition.Operator.GreaterThan,
