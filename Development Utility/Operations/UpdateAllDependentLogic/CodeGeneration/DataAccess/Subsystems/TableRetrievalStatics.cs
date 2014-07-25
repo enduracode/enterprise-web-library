@@ -12,8 +12,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableRetrieval {";
 		}
 
-		internal static void Generate( DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-		                               RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static void Generate(
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in database.GetTables() ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
@@ -23,7 +24,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var columns = new TableColumns( cn, table, isRevisionHistoryTable );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClass( writer,
+				DataAccessStatics.WriteRowClass(
+					writer,
 					columns.AllColumns,
 					localWriter => {
 						if( !columns.DataColumns.Any() )
@@ -33,10 +35,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						               StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
 						var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 						writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
-						writer.WriteLine( "return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
-						                  StringTools.ConcatenateWithDelimiter( ", ",
-							                  columns.AllColumns.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) +
-						                  " );" );
+						writer.WriteLine(
+							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
+							StringTools.ConcatenateWithDelimiter(
+								", ",
+								columns.AllColumns.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 						writer.WriteLine( "}" );
 					} );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
@@ -91,15 +94,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableRetrieval" );
 		}
 
-		private static void writeCacheClass( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
-		                                     bool isRevisionHistoryTable ) {
+		private static void writeCacheClass(
+			DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isRevisionHistoryTable ) {
 			var cacheKey = database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrieval";
 			var pkTupleTypeArguments = StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
 
 			writer.WriteLine( "private class Cache {" );
 			writer.WriteLine( "internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + cacheKey + "\", () => new Cache() ); } }" );
 			writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
-			writer.WriteLine( "private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+			writer.WriteLine(
+				"private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
 			if( isRevisionHistoryTable ) {
 				writer.WriteLine(
 					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
@@ -120,16 +124,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeGetRowsMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable,
-		                                        bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
+		private static void writeGetRowsMethod(
+			DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool isRevisionHistoryTable,
+			bool excludePreviousRevisions ) {
 			// header
 			var methodName = "GetRows" + ( isSmallTable ? "MatchingConditions" : "" ) +
 			                 ( isRevisionHistoryTable && !excludePreviousRevisions ? "IncludingPreviousRevisions" : "" );
-			CodeGenerationStatics.AddSummaryDocComment( writer,
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
 				"Retrieves the rows from the table that match the specified conditions, ordered in a stable way." +
 				( isSmallTable ? " Since the table is specified as small, you should only use this method if you cannot filter the rows in code." : "" ) );
-			writer.WriteLine( "public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
-			                  "[] conditions ) {" );
+			writer.WriteLine(
+				"public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
 
 
 			// body
@@ -141,11 +147,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 			writer.WriteLine( "var cache = Cache.Current;" );
 			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
-			writer.WriteLine( "if( " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
-			                  " && conditions.Count() == " + tableColumns.KeyColumns.Count() + " ) {" );
+			writer.WriteLine(
+				"if( " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) + " && conditions.Count() == " +
+				tableColumns.KeyColumns.Count() + " ) {" );
 			writer.WriteLine( "Row row;" );
-			writer.WriteLine( "if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ", pkConditionVariableNames.Select( i => i + ".Value" ).ToArray() ) + " ), out row ) )" );
+			writer.WriteLine(
+				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
+				StringTools.ConcatenateWithDelimiter( ", ", pkConditionVariableNames.Select( i => i + ".Value" ).ToArray() ) + " ), out row ) )" );
 			writer.WriteLine( "return row.ToSingleElementArray();" );
 			writer.WriteLine( "}" );
 
@@ -159,8 +167,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeGetRowMatchingIdMethod( DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns,
-		                                                 bool isSmallTable, bool isRevisionHistoryTable ) {
+		private static void writeGetRowMatchingIdMethod(
+			DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool isRevisionHistoryTable ) {
 			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id ) {" );
 			if( isSmallTable ) {
 				writer.WriteLine( "var cache = Cache.Current;" );
@@ -171,20 +179,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "return cache." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk[ System.Tuple.Create( id ) ];" );
 			}
 			else {
-				writer.WriteLine( "return GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) +
-				                  "( id ) ).Single();" );
+				writer.WriteLine(
+					"return GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) + "( id ) ).Single();" );
 			}
 			writer.WriteLine( "}" );
 		}
 
 		private static void writeResultSetCreatorBody( TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludesPreviousRevisions ) {
-			writer.WriteLine( "var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
-			                  StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
+			writer.WriteLine(
+				"var command = new InlineSelect( \"SELECT * FROM " + table + "\", \"ORDER BY " +
+				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( c => c.Name ).ToArray() ) + "\" );" );
 			writer.WriteLine( "foreach( var i in commandConditions )" );
 			writer.WriteLine( "command.AddCondition( i );" );
 			writer.WriteLine( "var results = new List<Row>();" );
-			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
-			                  ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine(
+				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
 
 			// Add all results to RowsByPk.
 			writer.WriteLine( "foreach( var i in results ) {" );
@@ -200,8 +209,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 			writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
-			writer.WriteLine( "return rows.ToDictionary( i => i." +
-			                  StandardLibraryMethods.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
+			writer.WriteLine(
+				"return rows.ToDictionary( i => i." + StandardLibraryMethods.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) +
+				" );" );
 			writer.WriteLine( "}" );
 		}
 	}

@@ -21,8 +21,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		/// <summary>
 		/// Creates a new Oracle database information object. Specify the empty string for the secondary database name if this represents the primary database.
 		/// </summary>
-		public OracleInfo( string secondaryDatabaseName, string dataSource, string userAndSchema, string password, bool supportsConnectionPooling,
-		                   bool supportsLinguisticIndexes ) {
+		public OracleInfo(
+			string secondaryDatabaseName, string dataSource, string userAndSchema, string password, bool supportsConnectionPooling, bool supportsLinguisticIndexes ) {
 			this.secondaryDatabaseName = secondaryDatabaseName;
 			this.dataSource = dataSource;
 			this.userAndSchema = userAndSchema;

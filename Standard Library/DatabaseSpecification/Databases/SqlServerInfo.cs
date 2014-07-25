@@ -22,8 +22,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		/// for the server to represent the local machine. Specify null for the login name and password if SQL Server Authentication is not being used. Pass null
 		/// for fullTextCatalog to represent no full text catalog.
 		/// </summary>
-		public SqlServerInfo( string secondaryDatabaseName, string server, string loginName, string password, string database, bool supportsConnectionPooling,
-		                      string fullTextCatalog ) {
+		public SqlServerInfo(
+			string secondaryDatabaseName, string server, string loginName, string password, string database, bool supportsConnectionPooling, string fullTextCatalog ) {
 			this.secondaryDatabaseName = secondaryDatabaseName;
 			this.server = server;
 			this.loginName = loginName;
