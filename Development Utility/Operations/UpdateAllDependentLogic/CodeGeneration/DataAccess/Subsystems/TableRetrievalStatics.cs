@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var columns = new TableColumns( cn, table, isRevisionHistoryTable );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClass(
+				DataAccessStatics.WriteRowClasses(
 					writer,
 					columns.AllColumns,
 					localWriter => {
@@ -197,7 +197,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "command.AddCondition( i );" );
 			writer.WriteLine( "var results = new List<Row>();" );
 			writer.WriteLine(
-				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => { while( r.Read() ) results.Add( new Row( new BasicRow( r ) ) ); } );" );
 
 			// Add all results to RowsByPk.
 			writer.WriteLine( "foreach( var i in results ) {" );

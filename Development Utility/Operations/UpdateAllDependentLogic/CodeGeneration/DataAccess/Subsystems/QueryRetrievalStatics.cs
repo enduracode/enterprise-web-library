@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "public static partial class " + query.name + "Retrieval {" );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClass( writer, columns, localWriter => { } );
+				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => { } );
 				writeCacheClass( writer, database, query );
 
 				writer.WriteLine( "private const string selectFromClause = @\"" + query.selectFromClause + " \";" );
@@ -103,7 +103,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
 			writer.WriteLine( "var results = new List<Row>();" );
 			writer.WriteLine(
-				DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+				DataAccessStatics.GetConnectionExpression( database ) +
+				".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( new BasicRow( r ) ) ); } );" );
 
 			// Update single-row caches.
 			writer.WriteLine( "foreach( var i in results )" );
