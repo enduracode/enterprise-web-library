@@ -39,7 +39,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
 							StringTools.ConcatenateWithDelimiter(
 								", ",
-								columns.AllColumns.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
+								columns.AllColumnsExceptRowVersion.Select( i => StandardLibraryMethods.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) +
+							" );" );
 						writer.WriteLine( "}" );
 					} );
 				var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );

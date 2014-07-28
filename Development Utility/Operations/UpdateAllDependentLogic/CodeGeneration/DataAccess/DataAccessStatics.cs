@@ -56,25 +56,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// BasicRow
 
 			writer.WriteLine( "internal class BasicRow {" );
-			foreach( var column in columns )
+			foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 				writer.WriteLine( "private readonly " + column.DataTypeName + " " + getMemberVariableName( column ) + ";" );
 
 			writer.WriteLine( "internal BasicRow( DbDataReader reader ) {" );
 			var cnt = 0;
 			foreach( var column in columns ) {
-				if( column.AllowsNull ) {
-					writer.WriteLine(
-						"if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) +
-						" = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
-					writer.WriteLine( "else" );
+				if( !column.IsRowVersion ) {
+					if( column.AllowsNull ) {
+						writer.WriteLine(
+							"if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) +
+							" = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
+						writer.WriteLine( "else" );
+					}
+					var conversionExpression = column.GetIncomingValueConversionExpression( "reader.GetValue( {0} )".FormatWith( cnt ) );
+					writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), conversionExpression ) );
 				}
-				var conversionExpression = column.GetIncomingValueConversionExpression( "reader.GetValue( {0} )".FormatWith( cnt ) );
-				writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), conversionExpression ) );
 				cnt++;
 			}
 			writer.WriteLine( "}" ); // constructor
 
-			foreach( var column in columns ) {
+			foreach( var column in columns.Where( i => !i.IsRowVersion ) ) {
 				writer.WriteLine(
 					"internal " + column.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedName ) + " { get { return " +
 					getMemberVariableName( column ) + "; } }" );
@@ -93,7 +95,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "__basicRow = basicRow;" );
 			writer.WriteLine( "}" );
 
-			foreach( var column in columns )
+			foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 				writeColumnProperty( writer, column );
 
 			// NOTE: Being smarter about the hash code could make searches of the collection faster.
@@ -120,7 +122,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "if( other == null ) return false;" );
 
 			var condition = "";
-			foreach( var column in columns.Where( ( c, index ) => c.UseToUniquelyIdentifyRow ) ) {
+			foreach( var column in columns.Where( c => c.UseToUniquelyIdentifyRow ) ) {
 				condition = StringTools.ConcatenateWithDelimiter(
 					" && ",
 					condition,

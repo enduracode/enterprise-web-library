@@ -32,6 +32,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private readonly ValueContainer valueContainer;
 		private readonly bool isIdentity;
+		private readonly bool isRowVersion;
 		private readonly bool? isKey;
 
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
@@ -44,6 +45,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				databaseInfo );
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
+			isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
 			if( includeKeyInfo )
 				isKey = (bool)schemaTableRow[ "IsKey" ];
 		}
@@ -78,6 +80,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal int Size { get { return valueContainer.Size; } }
 		internal bool AllowsNull { get { return valueContainer.AllowsNull; } }
 		internal bool IsIdentity { get { return isIdentity; } }
+		internal bool IsRowVersion { get { return isRowVersion; } }
 		internal bool IsKey { get { return isKey.Value; } }
 
 		// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
@@ -85,7 +88,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		// Right now we assume that at least one column in table (or query) returns true for UseToUniquelyIdentifyRow. This might not always be the case, for example if you have a query
 		// that selects file contents only. If we re-implement this in a way that makes our assumption false, we'll need to modify DataAccessStatics to detect the case where no
 		// columns return true for this and provide a useful exception.
-		internal bool UseToUniquelyIdentifyRow { get { return !valueContainer.DataType.IsArray; } }
+		internal bool UseToUniquelyIdentifyRow { get { return !valueContainer.DataType.IsArray && !isRowVersion; } }
 
 		internal string GetCommandColumnValueExpression( string valueExpression ) {
 			return "new InlineDbCommandColumnValue( \"{0}\", {1} )".FormatWith( valueContainer.Name, valueContainer.GetParameterValueExpression( valueExpression ) );

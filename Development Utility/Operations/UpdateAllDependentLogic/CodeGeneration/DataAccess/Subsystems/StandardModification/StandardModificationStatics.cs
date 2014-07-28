@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private ModificationType modType;" );
 			writer.WriteLine( "private List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions;" );
 
-			foreach( var column in columns.AllColumns )
+			foreach( var column in columns.AllColumnsExceptRowVersion )
 				writeFieldsAndPropertiesForColumn( column );
 
 			foreach( var column in columns.DataColumns.Where( i => !columns.KeyColumns.Contains( i ) ) )
@@ -102,9 +102,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "partial void preUpdate();" );
 			writeExecuteWithoutAdditionalLogicMethod( tableName );
 			writeExecuteInsertOrUpdateMethod( cn, tableName, isRevisionHistoryClass, columns.KeyColumns, columns.IdentityColumn );
-			writeAddColumnModificationsMethod( columns.NonIdentityColumns );
+			writeAddColumnModificationsMethod( columns.AllNonIdentityColumnsExceptRowVersion );
 			if( isRevisionHistoryClass ) {
-				writeCopyLatestRevisionsMethod( cn, tableName, columns.NonIdentityColumns );
+				writeCopyLatestRevisionsMethod( cn, tableName, columns.AllNonIdentityColumnsExceptRowVersion );
 				DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
 			}
 			writeRethrowAsEwfExceptionIfNecessary();
@@ -289,7 +289,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// key can be retrieved in a consistent way regardless of whether the modification object is an insert or an update.
 			writer.WriteLine( "foreach( var condition in mod.conditions ) {" );
 			var prefix = "if";
-			foreach( var column in columns.AllColumns ) {
+			foreach( var column in columns.AllColumnsExceptRowVersion ) {
 				writer.WriteLine( prefix + "( condition is " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " )" );
 				writer.WriteLine(
 					"mod." + getColumnFieldName( column ) + ".Value = ( condition as " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) +
@@ -312,7 +312,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				tableName + " table." );
 			writer.Write(
 				"public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForSingleRowUpdate" + methodNameSuffix + "( " );
-			writeColumnParameterDeclarations( columns.AllColumns );
+			writeColumnParameterDeclarations( columns.AllColumnsExceptRowVersion );
 			writer.WriteLine( " ) {" );
 
 
@@ -329,7 +329,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + " ) );" );
 			}
 
-			writeColumnValueAssignmentsFromParameters( columns.AllColumns, "mod" );
+			writeColumnValueAssignmentsFromParameters( columns.AllColumnsExceptRowVersion, "mod" );
 			writer.WriteLine( "mod.markColumnValuesUnchanged();" );
 			writer.WriteLine( "return mod;" );
 			writer.WriteLine( "}" );
@@ -594,7 +594,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeMarkColumnValuesUnchangedMethod() {
 			writer.WriteLine( "private void markColumnValuesUnchanged() {" );
-			foreach( var column in columns.AllColumns )
+			foreach( var column in columns.AllColumnsExceptRowVersion )
 				writer.WriteLine( getColumnFieldName( column ) + ".ClearChanged();" );
 			writer.WriteLine( "}" );
 		}

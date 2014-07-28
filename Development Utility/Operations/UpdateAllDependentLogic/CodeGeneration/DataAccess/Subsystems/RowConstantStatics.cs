@@ -26,8 +26,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var names = new List<string>();
 				try {
 					var columns = new TableColumns( cn, table.tableName, false );
-					valueColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
-					var nameColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
+					valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
+					var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
 					var cmd = new InlineSelect(
 						new[] { valueColumn.Name, nameColumn.Name },
