@@ -80,7 +80,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 			if( !cacheEnabled )
 				return valueCreator();
-			return (T)cache.GetOrAddValue( key, () => valueCreator() );
+			return (T)cache.GetOrAdd( key, () => valueCreator() );
 		}
 
 		/// <summary>
@@ -103,7 +103,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		internal void ResetCache() {
 			cacheEnabled = true;
-			cache = new Cache<string, object>();
+			cache = new Cache<string, object>( false );
 		}
 
 		internal void DisableCache() {
