@@ -19,6 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private readonly Column identityColumn;
 		internal Column IdentityColumn { get { return identityColumn; } }
 
+		internal readonly Column RowVersionColumn;
 		internal readonly IEnumerable<Column> AllColumnsExceptRowVersion;
 		internal readonly IEnumerable<Column> AllNonIdentityColumnsExceptRowVersion;
 
@@ -67,6 +68,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					keyColumns.Add( identityColumn );
 				}
 
+				RowVersionColumn = AllColumns.SingleOrDefault( i => i.IsRowVersion );
 				AllColumnsExceptRowVersion = AllColumns.Where( i => !i.IsRowVersion ).ToArray();
 				AllNonIdentityColumnsExceptRowVersion = nonIdentityColumns.Where( i => !i.IsRowVersion ).ToArray();
 

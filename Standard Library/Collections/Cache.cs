@@ -13,9 +13,18 @@ namespace RedStapler.StandardLibrary.Collections {
 
 		public Cache( bool isThreadSafe, IEqualityComparer<KeyType> comparer = null ) {
 			dictionary = isThreadSafe
-				             ? (IDictionary<KeyType, ValType>)new ConcurrentDictionary<KeyType, ValType>( comparer )
+				             ? comparer != null
+					               ? (IDictionary<KeyType, ValType>)new ConcurrentDictionary<KeyType, ValType>( comparer )
+					               : new ConcurrentDictionary<KeyType, ValType>()
 				             : new Dictionary<KeyType, ValType>( comparer );
 			this.comparer = comparer;
+		}
+
+		/// <summary>
+		/// Returns true if the key was found.
+		/// </summary>
+		public bool ContainsKey( KeyType key ) {
+			return dictionary.ContainsKey( key );
 		}
 
 		/// <summary>
@@ -59,8 +68,11 @@ namespace RedStapler.StandardLibrary.Collections {
 		[ Obsolete( "Guaranteed through 31 October 2014. Contact the EWL team if you are using this method." ) ]
 		// After removing this, make the dictionary field readonly.
 		public void PreFill( IEnumerable<ValType> values, Func<ValType, KeyType> keyCreator ) {
-			if( dictionary is ConcurrentDictionary<KeyType, ValType> )
-				dictionary = new ConcurrentDictionary<KeyType, ValType>( from i in values select new KeyValuePair<KeyType, ValType>( keyCreator( i ), i ), comparer );
+			if( dictionary is ConcurrentDictionary<KeyType, ValType> ) {
+				dictionary = comparer != null
+					             ? new ConcurrentDictionary<KeyType, ValType>( from i in values select new KeyValuePair<KeyType, ValType>( keyCreator( i ), i ), comparer )
+					             : new ConcurrentDictionary<KeyType, ValType>( from i in values select new KeyValuePair<KeyType, ValType>( keyCreator( i ), i ) );
+			}
 			else
 				dictionary = values.ToDictionary( keyCreator, comparer );
 		}

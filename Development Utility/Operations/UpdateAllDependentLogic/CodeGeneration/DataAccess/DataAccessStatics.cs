@@ -60,21 +60,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "private readonly " + column.DataTypeName + " " + getMemberVariableName( column ) + ";" );
 
 			writer.WriteLine( "internal BasicRow( DbDataReader reader ) {" );
-			var cnt = 0;
-			foreach( var column in columns ) {
-				if( !column.IsRowVersion ) {
-					if( column.AllowsNull ) {
-						writer.WriteLine(
-							"if( reader.IsDBNull( " + cnt + " ) ) " + getMemberVariableName( column ) +
-							" = {0};".FormatWith( column.NullValueExpression.Any() ? column.NullValueExpression : "null" ) );
-						writer.WriteLine( "else" );
-					}
-					var conversionExpression = column.GetIncomingValueConversionExpression( "reader.GetValue( {0} )".FormatWith( cnt ) );
-					writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), conversionExpression ) );
-				}
-				cnt++;
-			}
-			writer.WriteLine( "}" ); // constructor
+			foreach( var column in columns.Where( i => !i.IsRowVersion ) )
+				writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), column.GetDataReaderValueExpression( "reader" ) ) );
+			writer.WriteLine( "}" );
 
 			foreach( var column in columns.Where( i => !i.IsRowVersion ) ) {
 				writer.WriteLine(

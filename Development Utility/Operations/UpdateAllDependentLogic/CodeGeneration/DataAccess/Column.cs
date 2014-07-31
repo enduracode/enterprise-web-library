@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification;
@@ -30,12 +31,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return columns;
 		}
 
+		private readonly int ordinal;
 		private readonly ValueContainer valueContainer;
 		private readonly bool isIdentity;
 		private readonly bool isRowVersion;
 		private readonly bool? isKey;
 
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
+			ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
 			valueContainer = new ValueContainer(
 				(string)schemaTableRow[ "ColumnName" ],
 				(Type)schemaTableRow[ "DataType" ],
@@ -92,6 +95,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal string GetCommandColumnValueExpression( string valueExpression ) {
 			return "new InlineDbCommandColumnValue( \"{0}\", {1} )".FormatWith( valueContainer.Name, valueContainer.GetParameterValueExpression( valueExpression ) );
+		}
+
+		internal string GetDataReaderValueExpression( string readerName, int? ordinalOverride = null ) {
+			var getValueExpression = valueContainer.GetIncomingValueConversionExpression( "{0}.GetValue( {1} )".FormatWith( readerName, ordinalOverride ?? ordinal ) );
+			return valueContainer.AllowsNull
+				       ? "{0}.IsDBNull( {1} ) ? {2} : {3}".FormatWith(
+					       readerName,
+					       ordinalOverride ?? ordinal,
+					       valueContainer.NullValueExpression.Any() ? valueContainer.NullValueExpression : "null",
+					       getValueExpression )
+				       : getValueExpression;
 		}
 
 		internal ModificationField GetModificationField() {

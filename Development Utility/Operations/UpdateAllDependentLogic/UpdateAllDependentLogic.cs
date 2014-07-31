@@ -256,6 +256,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// Ensure that all tables specified in the configuration file actually exist.
 			var tableNames = database.GetTables();
 			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
+			ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
 			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
 			database.ExecuteDbMethod( delegate( DBConnection cn ) {
