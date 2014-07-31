@@ -8,7 +8,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 	/// A parameter for a database command.
 	/// </summary>
 	public class DbCommandParameter {
-		private string name;
+		private readonly string name;
 		private readonly DbParameterValue value;
 		private DbParameter parameter;
 
@@ -18,14 +18,6 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		public DbCommandParameter( string name, DbParameterValue value ) {
 			this.name = name;
 			this.value = value;
-		}
-
-		internal string Name {
-			set {
-				if( parameter != null )
-					throw new ApplicationException( "Name cannot be set after the ADO.NET parameter object has been created." );
-				name = value;
-			}
 		}
 
 		/// <summary>

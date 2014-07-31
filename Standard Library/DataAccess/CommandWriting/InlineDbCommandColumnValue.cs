@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 	/// <summary>
@@ -8,7 +9,6 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 	public class InlineDbCommandColumnValue: IEquatable<InlineDbCommandColumnValue>, IComparable, IComparable<InlineDbCommandColumnValue> {
 		private readonly string columnName;
 		private readonly DbParameterValue value;
-		private readonly DbCommandParameter parameter;
 
 		/// <summary>
 		/// Creates an inline database command column value.
@@ -16,12 +16,13 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		public InlineDbCommandColumnValue( string columnName, DbParameterValue value ) {
 			this.columnName = columnName;
 			this.value = value;
-			parameter = new DbCommandParameter( columnName, value );
 		}
 
 		internal string ColumnName { get { return columnName; } }
 
-		internal DbCommandParameter Parameter { get { return parameter; } }
+		internal DbCommandParameter GetParameter( string name = "" ) {
+			return new DbCommandParameter( name.Any() ? name : columnName, value );
+		}
 
 		public override bool Equals( object obj ) {
 			return Equals( obj as InlineDbCommandColumnValue );

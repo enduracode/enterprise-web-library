@@ -39,14 +39,13 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 					cmd.CommandText += columnMod.ColumnName + ", ";
 				cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 				cmd.CommandText += " ) VALUES( ";
-				foreach( var columnMod in columnModifications )
-					cmd.CommandText += columnMod.Parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+				foreach( var columnMod in columnModifications ) {
+					var parameter = columnMod.GetParameter();
+					cmd.CommandText += parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+					cmd.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
+				}
 				cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 				cmd.CommandText += " )";
-
-				// setup parameters
-				foreach( var columnMod in columnModifications )
-					cmd.Parameters.Add( columnMod.Parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
 			}
 			cn.ExecuteNonQueryCommand( cmd );
 
