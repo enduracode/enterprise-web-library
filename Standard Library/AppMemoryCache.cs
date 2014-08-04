@@ -8,6 +8,9 @@ namespace RedStapler.StandardLibrary {
 	public static class AppMemoryCache {
 		private const string keyPrefix = "ewl-";
 
+		internal static void Init() {}
+		internal static void CleanUp() {}
+
 
 		/// <summary>
 		/// Gets the cache value associated with the specified key. If no value exists, adds one by executing the specified creator function.

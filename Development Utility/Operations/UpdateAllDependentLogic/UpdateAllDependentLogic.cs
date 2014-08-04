@@ -416,9 +416,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static void Main() {" );
 				writer.WriteLine( "InitAppTools();" );
+				writer.WriteLine( "try {" );
 				writer.WriteLine(
 					"AppTools.ExecuteAppWithStandardExceptionHandling( delegate { ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
 					"() ) ); } );" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "finally {" );
+				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal static void InitAppTools() {" );
@@ -482,7 +487,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine( "AppTools.Init( \"" + project.Name + "\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+				writer.WriteLine( "try {" );
 				writer.WriteLine( "return AppTools.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "finally {" );
+				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );

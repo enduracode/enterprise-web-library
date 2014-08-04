@@ -16,6 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
+		private static bool ewlInitialized;
 		private static bool initialized;
 		private static SystemGeneralConfigurationApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
@@ -53,16 +54,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Initialize system.
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
-			AppTools.Init(
-				Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
-				false,
-				systemLogic,
-				mainDataAccessStateGetter: () => {
-					// We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
-					return Instance != null
-						       ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
-						       : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
-				} );
+			try {
+				AppTools.Init(
+					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
+					false,
+					systemLogic,
+					mainDataAccessStateGetter: () => {
+						// We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
+						return Instance != null
+							       ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
+							       : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
+					} );
+			}
+			catch {
+				// Suppress all exceptions since there is no way to report them.
+				return;
+			}
+			ewlInitialized = true;
 			if( AppTools.SecondaryInitFailed )
 				return;
 
@@ -111,7 +119,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !initialized ) {
 				// We can't redirect to a normal page to communicate this information because since initialization failed, the request for that page will trigger
 				// another BeginRequest event that puts us in an infinite loop. We can't rely on anything except an HTTP return code. Suppress exceptions; there is no
-				// way to report them since even our basic exception handling won't work if the application isn't initialized.
+				// way to report them since even our basic exception handling may not work if the application isn't initialized.
 				try {
 					set500StatusCode( "Initialization Failure" );
 				}
@@ -371,7 +379,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				handler();
 			}
 			catch( Exception e ) {
-				// Suppress all exceptions since there is no way to report them.
+				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
 				try {
 					StandardLibraryMethods.CallEveryMethod(
 						delegate {
@@ -465,6 +473,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.
 		/// </summary>
-		protected void ewfApplicationEnd() {}
+		protected void ewfApplicationEnd() {
+			if( ewlInitialized )
+				AppTools.CleanUp();
+		}
 	}
 }
