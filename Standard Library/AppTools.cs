@@ -557,7 +557,8 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return
 					StandardLibraryMethods.CombinePaths(
-						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
+						InstallationFileStatics.GetGeneralFilesFolderPath(
+							InstallationConfiguration.InstallationPath,
 							InstallationConfiguration.InstallationType == InstallationType.Development ),
 						InstallationFileStatics.FilesFolderName );
 			}
