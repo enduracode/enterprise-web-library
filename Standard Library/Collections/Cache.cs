@@ -21,6 +21,11 @@ namespace RedStapler.StandardLibrary.Collections {
 		}
 
 		/// <summary>
+		/// Gets a collection containing the keys in the cache.
+		/// </summary>
+		public ICollection<KeyType> Keys { get { return dictionary.Keys; } }
+
+		/// <summary>
 		/// Returns true if the key was found.
 		/// </summary>
 		public bool ContainsKey( KeyType key ) {
@@ -63,6 +68,13 @@ namespace RedStapler.StandardLibrary.Collections {
 				dictionary.Add( key, value );
 			}
 			return value;
+		}
+
+		/// <summary>
+		/// Attempts to remove the key/value pair with the specified key. Returns true if the key was found and the key/value pair was removed.
+		/// </summary>
+		public bool Remove( KeyType key ) {
+			return dictionary.Remove( key );
 		}
 
 		[ Obsolete( "Guaranteed through 31 October 2014. Contact the EWL team if you are using this method." ) ]

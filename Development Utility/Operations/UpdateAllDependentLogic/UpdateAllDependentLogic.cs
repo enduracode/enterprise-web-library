@@ -192,6 +192,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Web.UI;" );
 				writer.WriteLine( "using System.Web.UI.WebControls;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary.Caching;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Collections;" ); // Necessary for row constants
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting;" );

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.ServiceModel;
 using System.Threading;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.Machine;
 using RedStapler.StandardLibrary.DataAccess;

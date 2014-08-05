@@ -80,9 +80,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 					writer.WriteLine( "private static " + "Cache<System.Tuple<" + keyTupleTypeArguments + ">, BasicRow>" + " getRowsByPkAndVersion() {" );
 					writer.WriteLine(
-						"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}() ).RowsByPkAndVersion;".FormatWith(
-							"VersionedRowDataCache<System.Tuple<{0}>, BasicRow>".FormatWith( keyTupleTypeArguments ),
-							database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion" ) );
+						"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}( i => System.Tuple.Create( {2} ) ) ).RowsByPkAndVersion;".FormatWith(
+							"VersionedRowDataCache<System.Tuple<{0}>, System.Tuple<{1}>, BasicRow>".FormatWith( getPkTupleTypeArguments( columns ), keyTupleTypeArguments ),
+							database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion",
+							StringTools.ConcatenateWithDelimiter( ", ", Enumerable.Range( 1, columns.KeyColumns.Count() ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
 					writer.WriteLine( "}" );
 				}
 
