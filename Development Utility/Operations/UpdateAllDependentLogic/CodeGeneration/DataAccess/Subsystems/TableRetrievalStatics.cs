@@ -128,18 +128,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "private class Cache {" );
 			writer.WriteLine( "internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + cacheKey + "\", () => new Cache() ); } }" );
-			writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
+			writer.WriteLine( "internal readonly TableRetrievalQueryCache<Row> Queries = new TableRetrievalQueryCache<Row>();" );
 			writer.WriteLine(
-				"private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+				"internal readonly Dictionary<System.Tuple<{0}>, Row> RowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
 			if( isRevisionHistoryTable ) {
 				writer.WriteLine(
-					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+					"internal readonly Dictionary<System.Tuple<{0}>, Row> LatestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith(
+						pkTupleTypeArguments ) );
 			}
 			writer.WriteLine( "private Cache() {}" );
-			writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
-			writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
-			if( isRevisionHistoryTable )
-				writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> LatestRevisionRowsByPk { get { return latestRevisionRowsByPk; } }" );
 			writer.WriteLine( "}" );
 		}
 
