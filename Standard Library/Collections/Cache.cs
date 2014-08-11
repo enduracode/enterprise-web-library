@@ -62,15 +62,18 @@ namespace RedStapler.StandardLibrary.Collections {
 		/// Returns the value associated with the given key. If there is no value cached for the given key yet, the value is created and added to the cache, then
 		/// returned.
 		/// </summary>
-		public ValType GetOrAdd( KeyType key, Func<ValType> newValueCreator ) {
-			var concurrentDictionary = dictionary as ConcurrentDictionary<KeyType, ValType>;
-			if( concurrentDictionary != null )
-				return concurrentDictionary.GetOrAdd( key, k => newValueCreator() );
+		public ValType GetOrAdd( KeyType key, Func<ValType> newValueCreator, bool disableNewCaching = false ) {
+			if( !disableNewCaching ) {
+				var concurrentDictionary = dictionary as ConcurrentDictionary<KeyType, ValType>;
+				if( concurrentDictionary != null )
+					return concurrentDictionary.GetOrAdd( key, k => newValueCreator() );
+			}
 
 			ValType value;
 			if( !dictionary.TryGetValue( key, out value ) ) {
 				value = newValueCreator();
-				dictionary.Add( key, value );
+				if( !disableNewCaching )
+					dictionary.Add( key, value );
 			}
 			return value;
 		}
