@@ -33,6 +33,11 @@ namespace RedStapler.StandardLibrary.Collections {
 		}
 
 		/// <summary>
+		/// Gets the value associated with the specified key.
+		/// </summary>
+		public ValType this[ KeyType key ] { get { return dictionary[ key ]; } }
+
+		/// <summary>
 		/// Attempts to get the value associated with the specified key. Returns true if the key was found.
 		/// </summary>
 		public bool TryGetValue( KeyType key, out ValType value ) {
