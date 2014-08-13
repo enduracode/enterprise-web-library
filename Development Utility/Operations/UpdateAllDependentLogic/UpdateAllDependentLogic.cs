@@ -444,6 +444,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "public Installer() {" );
 				writer.WriteLine( "Program.InitAppTools();" );
+				writer.WriteLine( "try {" );
 				writer.WriteLine( "var code = AppTools.ExecuteAppWithStandardExceptionHandling( delegate {" );
 				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceProcessInstaller() );" );
 				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceInstaller( new " + service.Name.EnglishToPascal() + "() ) );" );
@@ -451,6 +452,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "if( code != 0 )" );
 				writer.WriteLine(
 					"throw new ApplicationException( \"Service installer objects could not be created. More information should be available in a separate error email from the service executable.\" );" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "finally {" );
+				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "}" );
