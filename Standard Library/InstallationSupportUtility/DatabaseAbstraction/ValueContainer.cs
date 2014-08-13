@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			}
 			else {
 				this.dataType = unconvertedDataType;
-				incomingValueConversionExpressionGetter = valueExpression => "({0}){1}".FormatWith( DataTypeName, valueExpression );
+				incomingValueConversionExpressionGetter = valueExpression => "({0}){1}".FormatWith( dataType.ToString(), valueExpression );
 				incomingValueConverter = value => value;
 				outgoingValueConversionExpressionGetter = valueExpression => valueExpression;
 			}
