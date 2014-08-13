@@ -103,7 +103,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				       ? "{0}.IsDBNull( {1} ) ? {2} : {3}".FormatWith(
 					       readerName,
 					       ordinalOverride ?? ordinal,
-					       valueContainer.NullValueExpression.Any() ? valueContainer.NullValueExpression : "null",
+					       valueContainer.NullValueExpression.Any() ? valueContainer.NullValueExpression : "({0})null".FormatWith( valueContainer.NullableDataTypeName ),
 					       getValueExpression )
 				       : getValueExpression;
 		}
