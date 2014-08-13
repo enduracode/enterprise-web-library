@@ -39,6 +39,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
 			ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
+
+			// MySQL incorrectly uses one-based ordinals; see http://bugs.mysql.com/bug.php?id=61477.
+			if( databaseInfo is MySqlInfo )
+				ordinal -= 1;
+
 			valueContainer = new ValueContainer(
 				(string)schemaTableRow[ "ColumnName" ],
 				(Type)schemaTableRow[ "DataType" ],
