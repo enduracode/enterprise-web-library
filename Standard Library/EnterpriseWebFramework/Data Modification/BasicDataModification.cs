@@ -31,8 +31,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.modificationMethods.AddRange( modificationMethods );
 		}
 
-		internal bool Execute( bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler,
-		                       bool performValidationOnly = false, Action additionalMethod = null ) {
+		internal bool Execute(
+			bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
+			Action additionalMethod = null ) {
 			var validationNeeded = validations.Any() && ( !skipIfNoChanges || formValuesChanged );
 			if( validationNeeded ) {
 				var topValidator = new Validator();
@@ -63,14 +64,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				if( additionalMethod != null )
 					additionalMethod();
+				DataAccessState.Current.ResetCache();
 				AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
 			}
 			catch {
 				AppRequestState.Instance.RollbackDatabaseTransactions();
-				throw;
-			}
-			finally {
 				DataAccessState.Current.ResetCache();
+				throw;
 			}
 
 			return true;
