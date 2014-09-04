@@ -235,7 +235,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private IEnumerable<Color> getDefaultColors() {
 			yield return Color.FromArgb( 120, 160, 195 );
 			yield return Color.FromArgb( 255, 182, 149 );
-			yield return Color.FromArgb( 170, 225, 748 );
+			yield return Color.FromArgb( 170, 225, 149 );
 			yield return Color.FromArgb( 255, 230, 149 );
 		}
 
