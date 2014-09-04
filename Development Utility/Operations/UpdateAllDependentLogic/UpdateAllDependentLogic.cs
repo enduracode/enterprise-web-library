@@ -130,14 +130,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 			}
 			else {
-				var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
-				if( File.Exists( asposeLicenseFilePath ) ) {
-					IoMethods.CopyFile(
-						asposeLicenseFilePath,
-						StandardLibraryMethods.CombinePaths(
-							InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-							InstallationFileStatics.FilesFolderName,
-							asposeLicenseFileName ) );
+				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
+				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) {
+					var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
+					if( File.Exists( asposeLicenseFilePath ) ) {
+						IoMethods.CopyFile(
+							asposeLicenseFilePath,
+							StandardLibraryMethods.CombinePaths(
+								InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+								InstallationFileStatics.FilesFolderName,
+								asposeLicenseFileName ) );
+					}
 				}
 
 				// If web projects exist for this installation, copy appropriate files into them.
@@ -209,7 +212,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
 				writer.WriteLine();
-				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl )
+				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
+				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl &&
+				    ( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) )
 					generateGeneralProvider( writer, installation );
 				generateDataAccessCode( writer, installation );
 				writer.WriteLine();
