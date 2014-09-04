@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			StandardModificationStatics.database = database;
 
 			writer.WriteLine( namespaceDeclaration );
-			foreach( var tableName in database.GetTables() ) {
+			foreach( var tableName in DatabaseOps.GetDatabaseTables( database ) ) {
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( tableName, configuration );
 
 				writeClass( cn, tableName, isRevisionHistoryTable, false );

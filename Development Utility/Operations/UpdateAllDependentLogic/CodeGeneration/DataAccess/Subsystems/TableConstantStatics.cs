@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class TableConstantStatics {
 		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
-			foreach( var table in database.GetTables() ) {
+			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );
 				writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "Table {" );
 

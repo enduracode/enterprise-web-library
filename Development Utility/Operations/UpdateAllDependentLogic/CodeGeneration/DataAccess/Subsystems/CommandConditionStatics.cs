@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class CommandConditionStatics {
 		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "CommandConditions {" );
-			foreach( var table in database.GetTables() ) {
+			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				// Write the interface for all of the table's conditions.
 				writer.WriteLine( "public interface " + GetTableConditionInterfaceName( cn, table ) + ": TableCondition {}" );
 

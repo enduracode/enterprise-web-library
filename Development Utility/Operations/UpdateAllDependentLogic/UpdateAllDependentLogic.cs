@@ -266,7 +266,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
 			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			// Ensure that all tables specified in the configuration file actually exist.
-			var tableNames = database.GetTables();
+			var tableNames = DatabaseOps.GetDatabaseTables( database );
 			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
 			ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
 			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
@@ -296,7 +296,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
 						StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, configuration );
 
-						foreach( var tableName in database.GetTables() ) {
+						foreach( var tableName in DatabaseOps.GetDatabaseTables( database ) ) {
 							TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
 							StandardModificationStatics.WritePartialClass(
 								cn,

@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
 			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
-			foreach( var table in database.GetTables() ) {
+			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
 				writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
 

@@ -290,7 +290,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		void Database.PerformMaintenance() {
 			ExecuteDbMethod(
 				delegate( DBConnection cn ) {
-					foreach( var tableName in GetTables() ) {
+					foreach( var tableName in DatabaseOps.GetDatabaseTables( this ) ) {
 						executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + tableName + " REBUILD" );
 						executeLongRunningCommand( cn, "UPDATE STATISTICS " + tableName );
 					}
