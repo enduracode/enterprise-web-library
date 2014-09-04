@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 							// We pass an enter keystroke as input in an attempt to kill the program if it gets stuck on a username prompt because of a bad logon string.
 							StandardLibraryMethods.RunProgram(
 								"expdp",
-								getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y VERSION=10.2",
+								getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y VERSION=12.1",
 								Environment.NewLine,
 								true );
 						}
