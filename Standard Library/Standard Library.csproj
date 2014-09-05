@@ -176,6 +176,7 @@
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\Controls\Chart.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
@@ -449,6 +450,8 @@
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
+    <Compile Include="UnhandledEnumException.cs" />
+    <Compile Include="UnhandledSwitchCaseException.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="WebFileSending\FileInfoToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />

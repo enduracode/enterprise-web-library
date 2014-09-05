@@ -519,6 +519,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
 			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "ChartJs", this.GetClientUrl( "~/Ewf/ThirdParty/ChartJs/Chart.min.js?v=1" ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
 			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
