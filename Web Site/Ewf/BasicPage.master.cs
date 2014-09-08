@@ -30,16 +30,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 				const string statusMessageDialogBlockSelector = "div." + StatusMessageDialogBlockCssClass;
 				elements.Add( new CssElement( "StatusMessageDialogBlock", statusMessageDialogBlockSelector ) );
-				elements.Add( new CssElement( "StatusMessageDialogControlListInfoItem",
-				                              ControlStack.CssElementCreator.Selectors.Select(
-					                              i =>
-					                              statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-					                              StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
-				elements.Add( new CssElement( "StatusMessageDialogControlListWarningItem",
-				                              ControlStack.CssElementCreator.Selectors.Select(
-					                              i =>
-					                              statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-					                              StatusMessageDialogControlListWarningItemCssClass ).ToArray() ) );
+				elements.Add(
+					new CssElement(
+						"StatusMessageDialogControlListInfoItem",
+						ControlStack.CssElementCreator.Selectors.Select(
+							i =>
+							statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
+							StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
+				elements.Add(
+					new CssElement(
+						"StatusMessageDialogControlListWarningItem",
+						ControlStack.CssElementCreator.Selectors.Select(
+							i =>
+							statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
+							StatusMessageDialogControlListWarningItemCssClass ).ToArray() ) );
 
 				return elements.ToArray();
 			}
@@ -66,9 +70,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
-							PostBack.CreateFull( id: "ewfIntermediateLogOut",
-							                     firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-							                     actionGetter: () => new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) ) ),
+							PostBack.CreateFull(
+								id: "ewfIntermediateLogOut",
+								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
+								actionGetter: () => new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) ) ),
 							new ButtonActionControlStyle( "Log Out" ),
 							false ) );
 				}
@@ -91,21 +96,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ajaxLoadingImage.Style.Add( "display", "none" );
 			ph2.AddControlsReturnThis( ajaxLoadingImage );
 
-			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted();" );
+			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
 		private Control getProcessingDialog() {
 			var image = new EwfImage( "Images/Progress.gif" );
 			image.Style.Add( "display", "inline" );
-			return new Block( new Paragraph( image, " ".GetLiteralControl(), Translation.Processing.GetLiteralControl() ),
-			                  new Paragraph( new CustomButton( () => "stopPostBackRequest()" )
-				                  {
-					                  ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile )
-				                  } )
-				                  {
-					                  CssClass = "ewfTimeOut"
-					                  /* This is used by the Standard Library JavaScript file. */
-				                  } ) { CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
+			return new Block(
+				new Paragraph( image, " ".GetLiteralControl(), Translation.Processing.GetLiteralControl() ),
+				new Paragraph(
+					new CustomButton( () => "stopPostBackRequest()" ) { ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile ) } )
+					{
+						CssClass = "ewfTimeOut"
+						/* This is used by the Standard Library JavaScript file. */
+					} ) { CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
 		}
 
 		private IEnumerable<Control> getStatusMessageDialog() {

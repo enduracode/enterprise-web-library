@@ -11,12 +11,15 @@ using RedStapler.StandardLibrary.IO;
 namespace RedStapler.StandardLibraryTester.IO {
 	[ TestFixture ]
 	internal class ExcelFileWriterTester {
-		public string TimestampPrefix;
+		private string timestampPrefix;
+		private string outputFolderPath;
 
 		[ TestFixtureSetUp ]
 		public void InitializeFixture() {
 			// Make sure all the tests run have the same prefix
-			TimestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss" ) + "_";
+			timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
+			outputFolderPath =
+				Directory.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) ).FullName;
 		}
 
 		[ Test ]
@@ -408,10 +411,7 @@ namespace RedStapler.StandardLibraryTester.IO {
 			var start = DateTime.Now;
 			var writer = includeDefaultWorksheet ? new ExcelFileWriter() : new ExcelFileWriter( false );
 			var fileName = code( writer );
-			var filePath =
-				Path.Combine(
-					Directory.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) ).FullName,
-					writer.GetSafeFileName( TimestampPrefix + fileName ) );
+			var filePath = Path.Combine( outputFolderPath, writer.GetSafeFileName( timestampPrefix + fileName ) );
 			var doneCreating = DateTime.Now;
 			long size;
 			using( var f = File.Create( filePath ) ) {

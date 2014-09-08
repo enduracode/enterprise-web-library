@@ -10,10 +10,8 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
 using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
@@ -52,7 +50,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
-		private PageInfo redirectInfo;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
 		/// <summary>
@@ -261,6 +258,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			PageInfo redirectInfo = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
 					validateFormSubmission( formValueHash );
@@ -463,6 +461,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var styleSheetLinks = new List<HtmlLink>();
 
 			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
+			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
 
@@ -510,32 +509,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addJavaScriptIncludes() {
 			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
 			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
 
 			ClientScript.RegisterClientScriptInclude(
 				GetType(),
 				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
+				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
-
-			// From http://stackoverflow.com/a/2548133/35349.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"endsWith",
-				"function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
-				true );
-
-			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"CKEditor GetUrl",
-				"function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-					.FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
-				true );
-
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
 			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
@@ -563,9 +546,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public DataModification DataUpdate { get { return dataUpdate; } }
 
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use DataUpdate instead." ) ]
-		public DataModification PostBackDataModification { get { return DataUpdate; } }
-
 		/// <summary>
 		/// Gets a post-back that updates the page's data without performing any other actions.
 		/// </summary>
@@ -574,10 +554,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets whether the page forces a post-back when a link is clicked.
 		/// </summary>
-		public virtual bool IsAutoDataUpdater { get { return IsAutoDataModifier; } }
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use IsAutoDataUpdater instead." ) ]
-		public virtual bool IsAutoDataModifier { get { return false; } }
+		public virtual bool IsAutoDataUpdater { get { return false; } }
 
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
 			etherealControls.Enqueue( etherealControl );
@@ -800,56 +777,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
 				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
 			}
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhExecute( Action method ) {
-			PostBack.CreateFull( firstModificationMethod: method ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		// When deleting this, remove the hack in DataAccessState.PrimaryDatabaseConnection.
-		public void EhModifyData( Action<DBConnection> modificationMethod ) {
-			PostBack.CreateFull( firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) )
-				.Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			PostBack.CreateFull(
-				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-				firstModificationMethod: () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
-			PostBack.CreateFull(
-				firstModificationMethod: () => {
-					var url = method( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-				} ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
-			PostBack.CreateFull(
-				firstTopValidationMethod: ( pbv, v ) => validationMethod( v ),
-				firstModificationMethod: () => {
-					var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-					redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-				} ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		// When deleting this, also remove the redirectInfo field.
-		public void EhRedirect( PageInfo pageInfo ) {
-			PostBack.CreateFull( firstModificationMethod: () => redirectInfo = pageInfo ).Execute( true, null, pba => { } );
-		}
-
-		[ Obsolete( "Guaranteed through 31 January 2014. Please use a PostBack object instead." ) ]
-		public void EhModifyDataAndSendFile( FileCreator fileCreator ) {
-			PostBack.CreateFull( firstModificationMethod: () => StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile() )
-				.Execute( true, null, pba => { } );
 		}
 
 		/// <summary>

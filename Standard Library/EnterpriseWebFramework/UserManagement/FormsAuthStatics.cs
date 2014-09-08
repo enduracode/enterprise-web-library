@@ -184,7 +184,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
 						typeof( UserManagementStatics ),
 						"formSubmitEventHandler",
-						"getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' );" );
+						"getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' )" );
 				};
 		}
 
