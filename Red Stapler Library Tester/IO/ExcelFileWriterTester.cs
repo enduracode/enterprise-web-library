@@ -61,6 +61,7 @@ namespace RedStapler.StandardLibraryTester.IO {
 			runTest(
 				writer => {
 					Console.WriteLine( "Making sure having no default worksheet works." );
+					Assert.IsNull( writer.DefaultWorksheet );
 					return "no_default_worksheet_testing";
 				},
 				false );
@@ -76,6 +77,8 @@ namespace RedStapler.StandardLibraryTester.IO {
 					writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
 					writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
 					writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+
+					Assert.IsNotNull( writer.DefaultWorksheet );
 
 					return "default_worksheet_testing";
 				} );
@@ -396,7 +399,6 @@ namespace RedStapler.StandardLibraryTester.IO {
 
 			runTest(
 				writer => {
-					writer.UseLegacyExcelFormat = true;
 					foreach( var rowSetup in rowSetups ) {
 						if( rowSetup.IsHeader )
 							writer.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );

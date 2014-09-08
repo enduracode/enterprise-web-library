@@ -435,7 +435,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// an external button rather than an action on this table.
 		/// </summary>
 		public PostBackAction ExportToExcel() {
-			var workbook = new ExcelFileWriter { UseLegacyExcelFormat = true };
+			var workbook = new ExcelFileWriter();
 			foreach( var rowSetup in rowSetups ) {
 				if( rowSetup.IsHeader )
 					workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
