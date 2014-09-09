@@ -6,8 +6,9 @@
 		private readonly RecognizedInstallationLogic recognizedInstallationLogic;
 		private readonly DevelopmentInstallationLogic developmentInstallationLogic;
 
-		public RecognizedDevelopmentInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
-		                                          KnownSystemLogic knownSystemLogic, RecognizedInstallationLogic recognizedInstallationLogic ) {
+		public RecognizedDevelopmentInstallation(
+			GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic, KnownSystemLogic knownSystemLogic,
+			RecognizedInstallationLogic recognizedInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
@@ -37,5 +38,7 @@
 
 		int DevelopmentInstallation.CurrentMajorVersion { get { return knownSystemLogic.RsisSystem.CurrentMajorVersion; } }
 		int DevelopmentInstallation.NextBuildNumber { get { return knownSystemLogic.RsisSystem.NextBuildNumber; } }
+
+		public bool SystemIsEwlCacheCoordinator { get { return knownSystemLogic.RsisSystem.Id == 56; } }
 	}
 }

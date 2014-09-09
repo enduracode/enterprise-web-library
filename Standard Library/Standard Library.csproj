@@ -52,17 +52,20 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aspose.Cells, Version=7.5.3.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Cells, Version=8.1.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Cells.7.5.3\lib\net40-client\Aspose.Cells.dll</HintPath>
+      <HintPath>..\packages\Aspose.Cells.8.1.0\lib\net40-client\Aspose.Cells.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Pdf, Version=8.5.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Pdf, Version=9.3.0.0, Culture=neutral, PublicKeyToken=6947866647e416ec, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Pdf.8.5.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
+      <HintPath>..\packages\Aspose.Pdf.9.3.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Words, Version=13.9.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Words, Version=14.5.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Words.13.9.0\lib\net3.5\Aspose.Words.dll</HintPath>
+      <HintPath>..\packages\Aspose.Words.14.5.0\lib\net3.5-client\Aspose.Words.dll</HintPath>
+    </Reference>
+    <Reference Include="Humanizer">
+      <HintPath>..\packages\Humanizer.1.28.0\lib\portable-win+net40+sl50+wp8+wpa81\Humanizer.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -73,17 +76,17 @@
       <HintPath>..\packages\JetBrains.Annotations.7.0\lib\net45\JetBrains.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="MiniProfiler, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+    <Reference Include="MiniProfiler, Version=3.0.11.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
+      <HintPath>..\packages\MiniProfiler.3.1\lib\net40\MiniProfiler.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=104.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="RestSharp, Version=104.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\packages\RestSharp.104.4.0\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="Stripe, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -110,14 +113,15 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.35.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.42.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Selenium.RC.2.35.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
+      <HintPath>..\packages\Selenium.RC.2.42.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppMemoryCache.cs" />
+    <Compile Include="Caching\AppMemoryCache.cs" />
     <Compile Include="AppTools.cs" />
+    <Compile Include="Caching\PeriodicEvictionCompositeCacheEntry.cs" />
     <Compile Include="CertificateAuthenticationModule.cs" />
     <Compile Include="Chronometer.cs" />
     <Compile Include="Collections\Cache.cs" />
@@ -125,6 +129,7 @@
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
+    <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
@@ -141,6 +146,7 @@
     <Compile Include="DataAccess\RetrievalCaching\ParameterlessQueryCache.cs" />
     <Compile Include="DataAccess\RetrievalCaching\QueryRetrievalQueryCache.cs" />
     <Compile Include="DataAccess\RetrievalCaching\TableRetrievalQueryCache.cs" />
+    <Compile Include="DataAccess\RetrievalCaching\VersionedRowDataCache.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionHistoryProvider.cs" />
     <Compile Include="DataAccess\SystemDataAccessProvider.cs" />
     <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
@@ -169,6 +175,10 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\Chart.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\ChartSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
@@ -198,8 +208,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\EwfListItem.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
@@ -210,6 +219,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />
@@ -343,6 +353,7 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\UserDisabledByPageException.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
@@ -361,6 +372,7 @@
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\Oracle.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\SqlServer.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ProcedureParameter.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ValueContainer.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\DevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedDevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\ExistingInstallation.cs" />
@@ -441,6 +453,7 @@
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
+    <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="WebFileSending\FileInfoToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />

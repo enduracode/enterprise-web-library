@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -15,11 +16,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Saves the given Excel work book to the response stream. It is not necessary to save the workbook before calling this method.
 		/// Automatically executes inside an EhModifyDataAndSendFile method. Automatically converts the given file name to a safe file name.
 		/// </summary>
-		public static void SendExcelFile( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( stream => {
-				workbook.SaveToStream( stream );
-				return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
-			} ) );
+		public static FileCreator GetExcelFileCreator( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
+			return new FileCreator(
+				stream => {
+					workbook.SaveToStream( stream );
+					return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
+				} );
 		}
 
 		/// <summary>
@@ -73,8 +75,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Creates a table cell containing an HTML-encoded version of this string. If the string is empty, the cell will contain a non-breaking space. If you don't
+		/// need to pass a setup object, don't use this method; strings are implicitly converted to table cells.
+		/// </summary>
+		public static EwfTableCell ToCell( this string text, TableCellSetup setup ) {
+			return new EwfTableCell( setup, text );
+		}
+
+		/// <summary>
+		/// Creates a table cell containing this control. If the control is null, the cell will contain a non-breaking space. If you don't need to pass a setup
+		/// object, don't use this method; controls are implicitly converted to table cells.
+		/// </summary>
+		public static EwfTableCell ToCell( this Control control, TableCellSetup setup ) {
+			return new EwfTableCell( setup, control );
+		}
+
+		/// <summary>
+		/// Creates a table cell containing these controls. If no controls exist, the cell will contain a non-breaking space.
+		/// </summary>
+		public static EwfTableCell ToCell( this IEnumerable<Control> controls, TableCellSetup setup = null ) {
+			return new EwfTableCell( setup ?? new TableCellSetup(), controls );
+		}
+
+		/// <summary>
 		/// Converts a string to an EwfTableCell.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2014. Strings are implicitly converted to EwfTableCell." ) ]
 		public static EwfTableCell ToCell( this string text ) {
 			return new EwfTableCell( text );
 		}
@@ -82,6 +108,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Converts a control to an EwfTableCell.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2014. Controls are implicitly converted to EwfTableCell." ) ]
 		public static EwfTableCell ToCell( this Control control ) {
 			return new EwfTableCell( control );
 		}

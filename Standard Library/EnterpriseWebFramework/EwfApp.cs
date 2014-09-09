@@ -16,6 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
+		private static bool ewlInitialized;
 		private static bool initialized;
 		private static SystemGeneralConfigurationApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
@@ -53,46 +54,55 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Initialize system.
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
-			AppTools.Init( Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
-			               false,
-			               systemLogic,
-			               mainDataAccessStateGetter: () => {
-				               // We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
-				               return Instance != null
-					                      ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
-					                      : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
-			               } );
+			try {
+				AppTools.Init(
+					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
+					false,
+					systemLogic,
+					mainDataAccessStateGetter: () => {
+						// We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
+						return Instance != null
+							       ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
+							       : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
+					} );
+			}
+			catch {
+				// Suppress all exceptions since there is no way to report them.
+				return;
+			}
+			ewlInitialized = true;
 			if( AppTools.SecondaryInitFailed )
 				return;
 
 			// Initialize web application.
-			executeWithBasicExceptionHandling( delegate {
-				webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
+			executeWithBasicExceptionHandling(
+				delegate {
+					webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
 
-				// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
-				MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
+					// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
+					MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
-				GlobalType = GetType().BaseType;
-				MetaLogicFactory =
-					GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
-					AppMetaLogicFactory;
-				if( MetaLogicFactory == null )
-					throw new ApplicationException( "Meta logic factory not found." );
+					GlobalType = GetType().BaseType;
+					MetaLogicFactory =
+						GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
+						AppMetaLogicFactory;
+					if( MetaLogicFactory == null )
+						throw new ApplicationException( "Meta logic factory not found." );
 
-				// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
-				if( systemLogic != null )
-					CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
-				else
-					CssHandlingStatics.Init( GlobalType.Assembly );
-				EwfUiStatics.Init( GlobalType );
+					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
+					if( systemLogic != null )
+						CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+					else
+						CssHandlingStatics.Init( GlobalType.Assembly );
+					EwfUiStatics.Init( GlobalType );
 
-				initializeWebApp();
+					initializeWebApp();
 
-				initTimeDataAccessState = null;
-				initialized = true;
-			},
-			                                   false,
-			                                   false );
+					initTimeDataAccessState = null;
+					initialized = true;
+				},
+				false,
+				false );
 		}
 
 		/// <summary>
@@ -109,7 +119,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !initialized ) {
 				// We can't redirect to a normal page to communicate this information because since initialization failed, the request for that page will trigger
 				// another BeginRequest event that puts us in an infinite loop. We can't rely on anything except an HTTP return code. Suppress exceptions; there is no
-				// way to report them since even our basic exception handling won't work if the application isn't initialized.
+				// way to report them since even our basic exception handling may not work if the application isn't initialized.
 				try {
 					set500StatusCode( "Initialization Failure" );
 				}
@@ -117,26 +127,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 			}
 
-			executeWithBasicExceptionHandling( delegate {
-				if( RequestState != null ) {
-					RequestState = null;
-					throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
-				}
+			executeWithBasicExceptionHandling(
+				delegate {
+					if( RequestState != null ) {
+						RequestState = null;
+						throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
+					}
 
-				var hostHeader = HttpContext.Current.Request.Headers[ "Host" ];
-				if( hostHeader == null ) {
-					setStatusCode( 400 );
-					return;
-				}
+					var hostHeader = HttpContext.Current.Request.Headers[ "Host" ];
+					if( hostHeader == null ) {
+						setStatusCode( 400 );
+						return;
+					}
 
-				// This blocks until the entire request has been received from the client.
-				// This won't compile unless it is assigned to something, which is why it is unused.
-				var stream = Request.InputStream;
+					// This blocks until the entire request has been received from the client.
+					// This won't compile unless it is assigned to something, which is why it is unused.
+					var stream = Request.InputStream;
 
-				RequestState = new AppRequestState( hostHeader );
-			},
-			                                   false,
-			                                   true );
+					RequestState = new AppRequestState( hostHeader );
+				},
+				false,
+				true );
 		}
 
 		private void handleAuthenticateRequest( object sender, EventArgs e ) {
@@ -153,12 +164,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Remove the "~/" since it's part of every URL and is therefore useless when distinguishing between URLs.
 			var url = Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
 
-			var ewfResolver = new ShortcutUrlResolver( "ewf",
-			                                           ConnectionSecurity.SecureIfPossible,
-			                                           () => {
-				                                           var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-				                                           return page.UserCanAccessPageAndAllControls ? page : null;
-			                                           } );
+			var ewfResolver = new ShortcutUrlResolver(
+				"ewf",
+				ConnectionSecurity.SecureIfPossible,
+				() => {
+					var page = MetaLogicFactory.CreateBasicTestsPageInfo();
+					return page.UserCanAccessPageAndAllControls ? page : null;
+				} );
 
 			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
@@ -173,8 +185,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// own IIS web site bound to an IP address. Relying on reverse lookup could be dangerous since we don't have direct control over the records.
 				// Remember to address the NOTE in AppRequestState.GetBaseUrlWithSpecificSecurity and the NOTE in EwfPage.initEntitySetupAndCreateInfoObjects.
 				var canonicalAbsoluteUrl =
-					NetTools.CombineUrls( RequestState.GetBaseUrlWithSpecificSecurity( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ),
-					                      resolver.ShortcutUrl );
+					NetTools.CombineUrls(
+						RequestState.GetBaseUrlWithSpecificSecurity( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ),
+						resolver.ShortcutUrl );
 				if( HttpRuntime.AppDomainAppVirtualPath == "/" && resolver.ShortcutUrl.Length == 0 )
 					canonicalAbsoluteUrl += "/";
 				if( canonicalAbsoluteUrl != RequestState.Url )
@@ -263,27 +276,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !initialized || RequestState == null )
 				return;
 
-			executeWithBasicExceptionHandling( delegate {
-				try {
-					// This 404 condition covers two types of requests:
-					// 1. Requests where we set the status code in handleError
-					// 2. Requests to handlers that set the status code directly instead of throwing exceptions, e.g. the IIS static file handler
-					if( Response.StatusCode == 404 && !handleErrorIfOnErrorPage( "A status code of 404 was produced", null ) )
-						transferRequest( getErrorPage( MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( !RequestState.HomeUrlRequest ) ), false );
+			executeWithBasicExceptionHandling(
+				delegate {
+					try {
+						// This 404 condition covers two types of requests:
+						// 1. Requests where we set the status code in handleError
+						// 2. Requests to handlers that set the status code directly instead of throwing exceptions, e.g. the IIS static file handler
+						if( Response.StatusCode == 404 && !handleErrorIfOnErrorPage( "A status code of 404 was produced", null ) )
+							transferRequest( getErrorPage( MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( !RequestState.HomeUrlRequest ) ), false );
 
-					if( RequestState.TransferRequestPath.Length > 0 )
-						// NOTE: If we transfer to a path with no query string, TransferRequest adds the current query string. Because of this bug we need to make sure all
-						// pages we transfer to have at least one parameter.
-						Server.TransferRequest( RequestState.TransferRequestPath, false, "GET", null );
-				}
-				catch {
-					RequestState.RollbackDatabaseTransactions();
-					DataAccessState.Current.ResetCache();
-					throw;
-				}
-			},
-			                                   true,
-			                                   true );
+						if( RequestState.TransferRequestPath.Length > 0 )
+							// NOTE: If we transfer to a path with no query string, TransferRequest adds the current query string. Because of this bug we need to make sure all
+							// pages we transfer to have at least one parameter.
+							Server.TransferRequest( RequestState.TransferRequestPath, false, "GET", null );
+					}
+					catch {
+						RequestState.RollbackDatabaseTransactions();
+						DataAccessState.Current.ResetCache();
+						throw;
+					}
+				},
+				true,
+				true );
 
 			// Do not set a status code since we may have already set one or set a redirect page.
 			executeWithBasicExceptionHandling( delegate { RequestState.CleanUp(); }, false, false );
@@ -300,64 +314,64 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Redirecting works, but has the drawback of not being able to send proper HTTP error codes in the response since the redirects themselves require a
 			// particular code. TransferRequest seems to be the only method that gives us everything we want.
 
-			executeWithBasicExceptionHandling( delegate {
-				// This code should happen first to prevent errors from going to the Windows event log.
-				var exception = Server.GetLastError();
-				Server.ClearError();
+			executeWithBasicExceptionHandling(
+				delegate {
+					// This code should happen first to prevent errors from going to the Windows event log.
+					var exception = Server.GetLastError();
+					Server.ClearError();
 
-				RequestState.RollbackDatabaseTransactions();
-				DataAccessState.Current.ResetCache();
+					RequestState.RollbackDatabaseTransactions();
+					DataAccessState.Current.ResetCache();
 
-				var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
+					var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 
-				// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
-				var argException = exception as ArgumentException;
-				var errorIsBogusPathException = argException != null && argException.Message == "Illegal characters in path.";
+					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
+					var argException = exception as ArgumentException;
+					var errorIsBogusPathException = argException != null && argException.Message == "Illegal characters in path.";
 
-				// In the first part of this condition we check to make sure the base exception is also an HttpException, because we had a problem with WCF wrapping an
-				// important non-HttpException inside an HttpException that somehow had a code of 404. In the second part of the condition (after the OR) we use
-				// InnerException instead of GetBaseException because the ResourceNotAvailableException always has an inner exception that describes the specific
-				// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
-				// wrapped with another exception.
-				if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
-				    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler || errorIsWcf404 ||
-				    errorIsBogusPathException ) {
-					setStatusCode( 404 );
-					return;
-				}
+					// In the first part of this condition we check to make sure the base exception is also an HttpException, because we had a problem with WCF wrapping an
+					// important non-HttpException inside an HttpException that somehow had a code of 404. In the second part of the condition (after the OR) we use
+					// InnerException instead of GetBaseException because the ResourceNotAvailableException always has an inner exception that describes the specific
+					// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
+					// wrapped with another exception.
+					if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
+					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler || errorIsWcf404 ||
+					    errorIsBogusPathException ) {
+						setStatusCode( 404 );
+						return;
+					}
 
-				if( !handleErrorIfOnErrorPage( "An exception occurred", exception ) ) {
-					var accessDeniedException = exception.GetBaseException() as AccessDeniedException;
-					var pageDisabledException = exception.GetBaseException() as PageDisabledException;
-					if( accessDeniedException != null ) {
-						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
-						else {
-							if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled &&
-							    UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
-								if( accessDeniedException.LogInPage != null ) {
-									// We pass false here to avoid complicating things with ThreadAbortExceptions.
-									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
+					if( !handleErrorIfOnErrorPage( "An exception occurred", exception ) ) {
+						var accessDeniedException = exception.GetBaseException() as AccessDeniedException;
+						var pageDisabledException = exception.GetBaseException() as PageDisabledException;
+						if( accessDeniedException != null ) {
+							if( accessDeniedException.CausedByIntermediateUser )
+								transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
+							else {
+								if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
+									if( accessDeniedException.LogInPage != null ) {
+										// We pass false here to avoid complicating things with ThreadAbortExceptions.
+										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
 
-									CompleteRequest();
+										CompleteRequest();
+									}
+									else
+										transferRequest( MetaLogicFactory.GetLogInPageInfo( RequestState.Url ), true );
 								}
 								else
-									transferRequest( MetaLogicFactory.GetLogInPageInfo( RequestState.Url ), true );
+									transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );
 							}
-							else
-								transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );
+						}
+						else if( pageDisabledException != null )
+							transferRequest( MetaLogicFactory.CreatePageDisabledErrorPageInfo( pageDisabledException.Message ), true );
+						else {
+							RequestState.SetError( "", exception );
+							transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );
 						}
 					}
-					else if( pageDisabledException != null )
-						transferRequest( MetaLogicFactory.CreatePageDisabledErrorPageInfo( pageDisabledException.Message ), true );
-					else {
-						RequestState.SetError( "", exception );
-						transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );
-					}
-				}
-			},
-			                                   true,
-			                                   true );
+				},
+				true,
+				true );
 		}
 
 		private void executeWithBasicExceptionHandling( Action handler, bool setErrorInRequestState, bool set500StatusCode ) {
@@ -365,19 +379,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				handler();
 			}
 			catch( Exception e ) {
-				// Suppress all exceptions since there is no way to report them.
+				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
 				try {
-					StandardLibraryMethods.CallEveryMethod( delegate {
-						const string prefix = "An exception occurred that could not be handled by the main exception handler:";
-						if( setErrorInRequestState )
-							RequestState.SetError( prefix, e );
-						else
-							AppTools.EmailAndLogError( prefix, e );
-					},
-					                                        delegate {
-						                                        if( set500StatusCode )
-							                                        this.set500StatusCode( "Exception" );
-					                                        } );
+					StandardLibraryMethods.CallEveryMethod(
+						delegate {
+							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
+							if( setErrorInRequestState )
+								RequestState.SetError( prefix, e );
+							else
+								AppTools.EmailAndLogError( prefix, e );
+						},
+						delegate {
+							if( set500StatusCode )
+								this.set500StatusCode( "Exception" );
+						} );
 				}
 				catch {}
 			}
@@ -458,6 +473,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.
 		/// </summary>
-		protected void ewfApplicationEnd() {}
+		protected void ewfApplicationEnd() {
+			if( ewlInitialized )
+				AppTools.CleanUp();
+		}
 	}
 }

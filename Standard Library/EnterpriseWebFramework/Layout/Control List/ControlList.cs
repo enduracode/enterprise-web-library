@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -74,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public ControlList() {
 			NumberOfColumns = 1;
-			EmptyCellCreator = () => new EwfTableCell( "" );
+			EmptyCellCreator = () => "";
 			IsStandard = true;
 			SpacerCellSetup = new ControlListSpacerCellSetup();
 		}
@@ -83,7 +82,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Add the given list of strings to the control list. Do not pass null for any of the strings. If you do, it will be converted to the empty string.
 		/// </summary>
 		public void AddText( params string[] text ) {
-			AddControls( text.Select( s => new EwfTableCell( s ) ).ToArray() );
+			AddControls( text.Select( s => (EwfTableCell)s ).ToArray() );
 		}
 
 		/// <summary>

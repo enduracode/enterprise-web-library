@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -184,7 +185,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
 
 		internal void ClearUser() {
 			user = null;
@@ -231,23 +235,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var databaseNameCopy = databaseName;
 				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
 			}
-			methods.Add( () => {
-				try {
-					if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
-						DataAccessState.Current.DisableCache();
-						try {
-							foreach( var i in nonTransactionalModificationMethods )
-								i();
-						}
-						finally {
-							DataAccessState.Current.ResetCache();
+			methods.Add(
+				() => {
+					try {
+						if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
+							DataAccessState.Current.DisableCache();
+							try {
+								foreach( var i in nonTransactionalModificationMethods )
+									i();
+							}
+							finally {
+								DataAccessState.Current.ResetCache();
+							}
 						}
 					}
-				}
-				finally {
-					nonTransactionalModificationMethods.Clear();
-				}
-			} );
+					finally {
+						nonTransactionalModificationMethods.Clear();
+					}
+				} );
 			StandardLibraryMethods.CallEveryMethod( methods.ToArray() );
 			transactionMarkedForRollback = false;
 		}

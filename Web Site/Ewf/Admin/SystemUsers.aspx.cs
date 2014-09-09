@@ -12,8 +12,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var table = new DynamicTable( new EwfTableColumn( new EwfTableCell( "Email" ), Unit.Percentage( 50 ) ),
-			                              new EwfTableColumn( new EwfTableCell( "Role" ), Unit.Percentage( 50 ) ) );
+			var table = new DynamicTable( new EwfTableColumn( "Email", Unit.Percentage( 50 ) ), new EwfTableColumn( "Role", Unit.Percentage( 50 ) ) );
 			table.AddActionLink( new ActionButtonSetup( "Create User", new EwfLink( new EditUser.Info( es.info, null ) ) ) );
 			foreach( var user in UserManagementStatics.GetUsers() )
 				table.AddTextRow( new RowSetup { ClickScript = ClickScript.CreateRedirectScript( new EditUser.Info( es.info, user.UserId ) ) }, user.Email, user.Role.Name );

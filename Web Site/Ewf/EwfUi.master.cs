@@ -75,19 +75,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				return new[]
 					{
 						new CssElement( "UiGlobalBlock", globalBlockSelector ),
-						new CssElement( "UiAppLogoAndUserInfoBlock",
-						                EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
-						new CssElement( "UiAppLogoBlock",
-						                EwfImage.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
-						                        .Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
-						                        .ToArray() ),
-						new CssElement( "UiUserInfoControlList",
-						                ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
+						new CssElement(
+							"UiAppLogoAndUserInfoBlock",
+							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
+						new CssElement(
+							"UiAppLogoBlock",
+							EwfImage.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
+								.Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
+								.ToArray() ),
+						new CssElement(
+							"UiUserInfoControlList",
+							ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
 						new CssElement( "UiGlobalNavBlock", globalNavBlockSelector ),
 						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
-						new CssElement( "UiTopErrorMessageControlListBlock",
-						                ErrorMessageControlListBlockStatics.CssElementCreator.Selectors.Select(
-							                i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass ).ToArray() )
+						new CssElement(
+							"UiTopErrorMessageControlListBlock",
+							ErrorMessageControlListBlockStatics.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass )
+								.ToArray() )
 					};
 			}
 
@@ -99,9 +103,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 				elements.Add( new CssElement( "UiEntityAndTopTabBlock", entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabBlockCssClass ) );
 				elements.AddRange( getEntityElements( entityAndTabAndContentBlockSelector ) );
-				elements.Add( new CssElement( "UiTopTabControlList",
-				                              ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + TopTabListCssClass )
-				                                         .ToArray() ) );
+				elements.Add(
+					new CssElement(
+						"UiTopTabControlList",
+						ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + TopTabListCssClass ).ToArray() ) );
 				elements.AddRange( getSideTabAndContentElements( entityAndTabAndContentBlockSelector ) );
 				elements.AddRange( getTabElements() );
 				return elements;
@@ -111,15 +116,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				return new[]
 					{
 						new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
-						new CssElement( "UiEntityNavAndActionBlock",
-						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass )
-						                        .ToArray() ),
-						new CssElement( "UiEntityNavControlList",
-						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass )
-						                           .ToArray() ),
-						new CssElement( "UiEntityActionControlList",
-						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass )
-						                           .ToArray() ),
+						new CssElement(
+							"UiEntityNavAndActionBlock",
+							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass ).ToArray() ),
+						new CssElement(
+							"UiEntityNavControlList",
+							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass ).ToArray() ),
+						new CssElement(
+							"UiEntityActionControlList",
+							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass ).ToArray() ),
 						new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
 					};
 			}
@@ -128,30 +133,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				var contentCellSelector = entityAndTabAndContentBlockSelector + " td." + ContentCellCssClass;
 				return new[]
 					{
-						new CssElement( "UiSideTabAndContentBlock",
-						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
-						                        .ToArray() ),
+						new CssElement(
+							"UiSideTabAndContentBlock",
+							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
 						new CssElement( "UiSideTabCell", entityAndTabAndContentBlockSelector + " td." + SideTabCellCssClass ),
 						new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ), new CssElement( "UiContentCell", contentCellSelector ),
 						new CssElement( "UiPageActionControlList", ControlLine.CssElementCreator.Selectors.Select( i => contentCellSelector + " > " + i ).ToArray() ),
 						new CssElement( "UiContentBlock", contentCellSelector + " > " + "div." + ContentBlockCssClass ),
 						new CssElement( "UiContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentFootCellCssClass ),
-						new CssElement( "UiContentFootBlock",
-						                EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass )
-						                        .ToArray() ),
-						new CssElement( "UiContentFootActionControlList",
-						                ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass )
-						                           .ToArray() )
+						new CssElement(
+							"UiContentFootBlock",
+							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass ).ToArray() ),
+						new CssElement(
+							"UiContentFootActionControlList",
+							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass ).ToArray() )
 					};
 			}
 
 			private IEnumerable<CssElement> getTabElements() {
 				return new[]
 					{
-						new CssElement( "UiCurrentTabActionControl",
-						                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
-						new CssElement( "UiDisabledTabActionControl",
-						                EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
+						new CssElement(
+							"UiCurrentTabActionControl",
+							EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
+						new CssElement(
+							"UiDisabledTabActionControl",
+							EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
 					};
 			}
 
@@ -203,22 +210,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {
-					EwfPage.AddStatusMessage( StatusMessageType.Warning,
-					                          StringTools.ConcatenateWithDelimiter( " ",
-					                                                                new[]
-						                                                                {
-							                                                                "We've detected that you are not using the latest version of your browser.",
-							                                                                "While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet."
-						                                                                } ) + "<br/>" +
-					                          NetTools.BuildBasicLink( "Click here to get Firefox (it's free)",
-					                                                   new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(),
-					                                                   true ) + "<br />" +
-					                          NetTools.BuildBasicLink( "Click here to get Chrome (it's free)",
-					                                                   new ExternalPageInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
-					                                                   true ) + "<br />" +
-					                          NetTools.BuildBasicLink( "Click here to get the latest Internet Explorer (it's free)",
-					                                                   new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
-					                                                   true ) );
+					EwfPage.AddStatusMessage(
+						StatusMessageType.Warning,
+						StringTools.ConcatenateWithDelimiter(
+							" ",
+							new[]
+								{
+									"We've detected that you are not using the latest version of your browser.",
+									"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet."
+								} ) + "<br/>" + NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(), true ) +
+						"<br />" +
+						NetTools.BuildBasicLink( "Click here to get Chrome (it's free)", new ExternalPageInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(), true ) +
+						"<br />" +
+						NetTools.BuildBasicLink(
+							"Click here to get the latest Internet Explorer (it's free)",
+							new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
+							true ) );
 				}
 				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 			}
@@ -228,13 +235,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return
 				new Block(
 					new[] { getAppLogoAndUserInfoBlock(), getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList ) }.Where( i => i != null )
-					                                                                                                                          .ToArray() )
-					{
-						ClientIDMode =
-							ClientIDMode.Static,
-						ID =
-							CssElementCreator.GlobalBlockId
-					};
+						.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {
@@ -246,15 +247,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
 
 			ControlStack userInfoList = null;
-			var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
-			if( changePasswordPage.UserCanAccessPageAndAllControls && AppTools.User != null ) {
-				var userInfo = new UserInfo();
-				userInfo.LoadData( changePasswordPage );
-				userInfoList = ControlStack.CreateWithControls( true, userInfo );
-				userInfoList.CssClass = CssElementCreator.UserInfoListCssClass;
+			if( AppRequestState.Instance.UserAccessible ) {
+				var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+				if( changePasswordPage.UserCanAccessPageAndAllControls && AppTools.User != null ) {
+					var userInfo = new UserInfo();
+					userInfo.LoadData( changePasswordPage );
+					userInfoList = ControlStack.CreateWithControls( true, userInfo );
+					userInfoList.CssClass = CssElementCreator.UserInfoListCssClass;
+				}
 			}
 
-			table.AddItem( () => new EwfTableItem( new EwfTableCell( appLogoBlock ), new EwfTableCell( userInfoList ) ) );
+			table.AddItem( () => new EwfTableItem( appLogoBlock, userInfoList ) );
 			return table;
 		}
 
@@ -306,10 +309,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private Control getPagePath() {
 			var pagePath =
-				new PagePath( currentPageBehavior:
-					              getEntityPageGroups().Any()
-						              ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
-						              : PagePathCurrentPageBehavior.IncludeCurrentPage );
+				new PagePath(
+					currentPageBehavior:
+						getEntityPageGroups().Any()
+							? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+							: PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? null : pagePath;
 		}
 
@@ -331,11 +335,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					.ToArray();
 			return !controls.Any()
 				       ? null
-				       : new EwfTableCell( new ControlLine( controls )
+				       : new ControlLine( controls )
 					       {
 						       CssClass = CssElementCreator.EntityNavListCssClass,
 						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					       } );
+					       };
 		}
 
 		private EwfTableCell getEntityActionCell() {
@@ -344,11 +348,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			return !actionControls.Any()
 				       ? null
-				       : new EwfTableCell( new ControlLine( actionControls )
+				       : new ControlLine( actionControls )
 					       {
 						       CssClass = CssElementCreator.EntityActionListCssClass,
 						       ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					       } ) { TextAlignment = TextAlignment.Right };
+					       }.ToCell(
+						       new TableCellSetup( textAlignment: TextAlignment.Right ) );
 		}
 
 		private Control getEntitySummaryBlock() {
@@ -444,10 +449,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray() );
 			table.AddItem(
-				new EwfTableItem( new EwfTableCell( new PlaceHolder().AddControlsReturnThis( controls ) )
-					{
-						TextAlignment = contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center
-					} ) );
+				new EwfTableItem(
+					controls.ToCell( new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );
 			return table;
 		}
 
@@ -461,10 +464,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			var ewlWebSite = new ExternalPageInfo( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessPageAndAllControls && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
-				controls.Add( new Paragraph( "Powered by the ".GetLiteralControl(),
-				                             EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( "Enterprise Web Library" ) ),
-				                             ( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" )
-					                             .GetLiteralControl() ) { CssClass = CssElementCreator.PoweredByEwlFooterCssClass } );
+				controls.Add(
+					new Paragraph(
+						"Powered by the ".GetLiteralControl(),
+						EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( "Enterprise Web Library" ) ),
+						( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).GetLiteralControl() )
+						{
+							CssClass = CssElementCreator.PoweredByEwlFooterCssClass
+						} );
 			}
 
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;

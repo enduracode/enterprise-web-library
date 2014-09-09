@@ -57,10 +57,11 @@ namespace RedStapler.StandardLibrary.Email {
 		}
 
 		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {
-			// We want this method to use the SendGrid API, but doing so while EWL still targets .NET 4.0 creates too many NuGet package dependencies.
+			// We want this method to use the SendGrid API (https://github.com/sendgrid/sendgrid-csharp), but as of 20 June 2014 it looks like the SendGrid Web API
+			// does not support CC recipients!
 
 			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
-			var smtpClient = new System.Net.Mail.SmtpClient( "smtp.sendgrid.net" );
+			var smtpClient = new System.Net.Mail.SmtpClient( "smtp.sendgrid.net", 587 );
 			try {
 				smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
 				smtpClient.Credentials = new System.Net.NetworkCredential( sendGrid.UserName, sendGrid.Password );

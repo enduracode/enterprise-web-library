@@ -7,6 +7,7 @@ using System.Reflection;
 using System.ServiceModel;
 using System.Threading;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.Machine;
 using RedStapler.StandardLibrary.DataAccess;
@@ -115,38 +116,41 @@ namespace RedStapler.StandardLibrary {
 				if( provider == null )
 					throw new ApplicationException( "General provider not found in system" );
 
+				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling and cleanup work.
+				initialized = true;
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";
 
 				try {
-					// Setting the initialized flag to true must be done first so the exception handling works.
-					initialized = true;
+					try {
+						var asposeLicense = provider.AsposeLicenseName;
+						if( asposeLicense.Any() ) {
+							new Aspose.Pdf.License().SetLicense( asposeLicense );
+							new Aspose.Words.License().SetLicense( asposeLicense );
+							new Aspose.Cells.License().SetLicense( asposeLicense );
+						}
 
-					var asposeLicense = provider.AsposeLicenseName;
-					if( asposeLicense.Any() ) {
-						new Aspose.Pdf.License().SetLicense( asposeLicense );
-						new Aspose.Words.License().SetLicense( asposeLicense );
-						new Aspose.Cells.License().SetLicense( asposeLicense );
+						// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
+						AppMemoryCache.Init();
+						BlobFileOps.Init( systemLogic.GetType() );
+						DataAccessStatics.Init( systemLogic.GetType() );
+						DataAccessState.Init( mainDataAccessStateGetter );
+						EncryptionOps.Init( systemLogic.GetType() );
+						HtmlBlockStatics.Init( systemLogic.GetType() );
+						InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
+						UserManagementStatics.Init( systemLogic.GetType() );
+
+						systemLogic.InitSystem();
+
+						initializationLog += Environment.NewLine + "Succeeded in secondary init.";
 					}
-
-					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
-					BlobFileOps.Init( systemLogic.GetType() );
-					DataAccessStatics.Init( systemLogic.GetType() );
-					DataAccessState.Init( mainDataAccessStateGetter );
-					EncryptionOps.Init( systemLogic.GetType() );
-					HtmlBlockStatics.Init( systemLogic.GetType() );
-					InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
-					UserManagementStatics.Init( systemLogic.GetType() );
-
-					systemLogic.InitSystem();
-
-					initializationLog += Environment.NewLine + "Succeeded in secondary init.";
+					catch( Exception e ) {
+						secondaryInitFailed = true;
+						EmailAndLogError( "An exception occurred during application initialization:", e );
+					}
 				}
-				catch( Exception e ) {
-					// NOTE: For web apps, non web apps that are being run non-interactively, and maybe all other apps too, we should suppress all exceptions from here
-					// since they will only result in events being logged or error dialogs appearing, and neither of these is really helpful to us. We may also want to
-					// suppress exceptions from the catch block in ExecuteAppWithStandardExceptionHandling.
-					secondaryInitFailed = true;
-					EmailAndLogError( "An exception occurred during application initialization:", e );
+				catch {
+					CleanUp();
+					throw;
 				}
 			}
 			catch( Exception e ) {
@@ -173,6 +177,20 @@ namespace RedStapler.StandardLibrary {
 			get {
 				assertClassInitialized();
 				return secondaryInitFailed;
+			}
+		}
+
+		/// <summary>
+		/// Performs cleanup activities so the application can be shut down.
+		/// </summary>
+		public static void CleanUp() {
+			assertClassInitialized();
+
+			try {
+				AppMemoryCache.CleanUp();
+			}
+			catch( Exception e ) {
+				EmailAndLogError( "An exception occurred during application cleanup:", e );
 			}
 		}
 
@@ -328,7 +346,7 @@ namespace RedStapler.StandardLibrary {
 			var m = new EmailMessage();
 			foreach( var developer in InstallationConfiguration.Developers )
 				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + InstallationConfiguration.FullName;
+			m.Subject = "Error in " + InstallationConfiguration.SystemName;
 			if( isClientSideProgram )
 				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
 			m.BodyHtml = body.GetTextAsEncodedHtml();
@@ -557,8 +575,9 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return
 					StandardLibraryMethods.CombinePaths(
-						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
-						                                                   InstallationConfiguration.InstallationType == InstallationType.Development ),
+						InstallationFileStatics.GetGeneralFilesFolderPath(
+							InstallationConfiguration.InstallationPath,
+							InstallationConfiguration.InstallationType == InstallationType.Development ),
 						InstallationFileStatics.FilesFolderName );
 			}
 		}
@@ -581,6 +600,13 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return InstallationConfiguration.ConfigurationFolderPath;
 			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? StandardLibraryMethods.GetProjectOutputFolderPath( true ) : ""; }
 		}
 
 		private static void assertClassInitialized() {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
 	<element name="systemDevelopmentConfiguration" type="rs:SystemDevelopmentConfiguration" />
 	<complexType name="SystemDevelopmentConfiguration">
@@ -85,6 +85,13 @@
 				</complexType>
 			</element>
 			<element name="SmallTables" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Table" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="TablesUsingRowVersionedDataCaching" minOccurs="0">
 				<complexType>
 					<sequence>
 						<element name="Table" type="string" maxOccurs="unbounded" />

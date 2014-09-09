@@ -35,14 +35,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 			if( removalIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the version and extension in the URL.", null );
 			var cssInfo =
-				EwfApp.GlobalType.Assembly.CreateInstance( CombineNamespacesAndProcessEwfIfNecessary( EwfApp.GlobalType.Namespace,
-				                                                                                      url.Remove( removalIndex )
-				                                                                                         .Separate( "/", false )
-				                                                                                         .Select( StandardLibraryMethods.GetCSharpIdentifier )
-				                                                                                         .Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as CssInfo;
+				EwfApp.GlobalType.Assembly.CreateInstance(
+					CombineNamespacesAndProcessEwfIfNecessary(
+						EwfApp.GlobalType.Namespace,
+						url.Remove( removalIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) )
+				as CssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
-			if( cssInfo.GetUrl() != context.Request.AppRelativeCurrentExecutionFilePath && !url.StartsWith( WysiwygHtmlEditor.CkEditorFolderUrl ) )
+			if( cssInfo.GetUrl() != context.Request.AppRelativeCurrentExecutionFilePath )
 				throw new ResourceNotAvailableException( "The URL does not exactly match the Info object for the request.", null );
 
 			var response = context.Response;
