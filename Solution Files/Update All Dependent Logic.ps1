@@ -9,4 +9,3 @@ New-Item packages\EWL\packages.config -Force -ItemType file -Value "<?xml versio
 
 cd "packages\EWL\Ewl*\Development Utility"
 & .\EnterpriseWebLibrary.DevelopmentUtility ..\..\..\.. UpdateAllDependentLogic
-pause
