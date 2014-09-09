@@ -101,6 +101,22 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 		}
 
+		/// <summary>
+		/// Executes the specified method with the cache enabled. Supports nested calls by leaving the cache alone if it is already enabled. Do not modify data in
+		/// the method; this could cause a stale cache and lead to data integrity problems!
+		/// </summary>
+		public T ExecuteWithCache<T>( Func<T> method ) {
+			if( cacheEnabled )
+				return method();
+			ResetCache();
+			try {
+				return method();
+			}
+			finally {
+				DisableCache();
+			}
+		}
+
 		internal void ResetCache() {
 			cacheEnabled = true;
 			cache = new Cache<string, object>( false );
