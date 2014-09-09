@@ -57,6 +57,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Export EWL to Local Feed.bat" />
-    <None Include="Update All Dependent Logic.bat" />
+    <None Include="Update All Dependent Logic.ps1" />
   </ItemGroup>
 </Project>
