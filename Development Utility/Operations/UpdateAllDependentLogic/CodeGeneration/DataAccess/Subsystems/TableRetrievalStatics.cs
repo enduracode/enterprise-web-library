@@ -198,21 +198,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeGetRowMatchingIdMethod(
 			DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool tableUsesRowVersionedCaching,
 			bool isRevisionHistoryTable ) {
-			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id, bool? allowNull= false ) {" );
+			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id, bool returnNullIfNoMatch = false ) {" );
 			if( isSmallTable ) {
 				writer.WriteLine( "var cache = Cache.Current;" );
 				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToSingleElementArray()" : "new InlineDbCommandCondition[ 0 ]";
 				writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
 				writeResultSetCreatorBody( cn, writer, database, table, tableColumns, tableUsesRowVersionedCaching, isRevisionHistoryTable, "true" );
 				writer.WriteLine( "} );" );
-				var cacheProperty = "cache." + ( isRevisionHistoryTable ? "LatestRevision" : "" ) + "RowsByPk";
-				writer.WriteLine( "if ((allowNull ?? false) && !" + cacheProperty + ".ContainsKey(System.Tuple.Create(id))) return null;" );
-				writer.WriteLine( "return " + cacheProperty + "[ System.Tuple.Create( id ) ];" );
+
+				var rowsByPkExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
+				writer.WriteLine( "if( !returnNullIfNoMatch )" );
+				writer.WriteLine( "return {0}[ System.Tuple.Create( id ) ];".FormatWith( rowsByPkExpression ) );
+				writer.WriteLine( "Row row;" );
+				writer.WriteLine( "return {0}.TryGetValue( System.Tuple.Create( id ), out row ) ? row : null;".FormatWith( rowsByPkExpression ) );
 			}
 			else {
-				writer.WriteLine( "var rows = GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) +
-				                  "( id ) );" );
-				writer.WriteLine( "return (allowNull ?? false) ? rows.SingleOrDefault() : rows.Single();" );
+				writer.WriteLine(
+					"var rows = GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) + "( id ) );" );
+				writer.WriteLine( "return returnNullIfNoMatch ? rows.SingleOrDefault() : rows.Single();" );
 			}
 			writer.WriteLine( "}" );
 		}
