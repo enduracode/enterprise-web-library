@@ -54,10 +54,6 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 				response.Write( textContents );
 			else
 				response.OutputStream.Write( binaryContents, 0, binaryContents.Length );
-			// NOTE:  In my exerpeince in writing my applications I have learned that calling response.End() is not good practice. For one, it throws a ThreadAbortedException, which caused me problems. Throwing exceptions is expensive.
-			// Ref: http://stackoverflow.com/questions/1087777/is-response-end-considered-harmful
-			// Instead, we should be using HttpContext.Current.ApplicationInstance.CompleteRequest();
-			response.End();
 		}
 	}
 }
