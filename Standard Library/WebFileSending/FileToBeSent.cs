@@ -1,59 +1,44 @@
 using System.Web;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 
 namespace RedStapler.StandardLibrary.WebFileSending {
 	/// <summary>
 	/// A file that will be sent to the user.
 	/// </summary>
 	public class FileToBeSent {
-		/// <summary>
-		/// File name.
-		/// </summary>
-		protected readonly string fileName;
-
-		/// <summary>
-		/// Content type.
-		/// </summary>
-		protected readonly string contentType;
-
-		// One of these should always be null.
-		private readonly string textContents;
-
-		/// <summary>
-		/// Binary contents.
-		/// </summary>
-		protected byte[] binaryContents;
+		private FullResponse response;
 
 		/// <summary>
 		/// Creates a new text file to be sent. Do not pass null for the content type if you don't have it; instead pass the empty string.
 		/// </summary>
 		public FileToBeSent( string fileName, string contentType, string contents ) {
-			this.fileName = fileName;
-			this.contentType = contentType;
-			textContents = contents;
+			response = new FullResponse( contentType, fileName, contents );
 		}
 
 		/// <summary>
 		/// Creates a new binary file to be sent. Do not pass null for the content type if you don't have it; instead pass the empty string.
 		/// </summary>
 		public FileToBeSent( string fileName, string contentType, byte[] contents ) {
-			this.fileName = fileName;
-			this.contentType = contentType;
-			binaryContents = contents;
+			response = new FullResponse( contentType, fileName, contents );
+		}
+
+		protected void changeBinaryContents( byte[] contents ) {
+			response = new FullResponse( response.ContentType, response.FileName, contents );
 		}
 
 		internal void WriteToResponse( bool sendInline ) {
-			var response = HttpContext.Current.Response;
+			var aspNetResponse = HttpContext.Current.Response;
 
-			response.ClearHeaders();
-			response.ClearContent();
-			if( contentType.Length > 0 )
-				response.ContentType = contentType;
+			aspNetResponse.ClearHeaders();
+			aspNetResponse.ClearContent();
+			if( response.ContentType.Length > 0 )
+				aspNetResponse.ContentType = response.ContentType;
 			if( !sendInline )
-				response.AppendHeader( "content-disposition", "attachment; filename=\"" + fileName + "\"" );
-			if( textContents != null )
-				response.Write( textContents );
+				aspNetResponse.AppendHeader( "content-disposition", "attachment; filename=\"" + response.FileName + "\"" );
+			if( response.TextBody != null )
+				aspNetResponse.Write( response.TextBody );
 			else
-				response.OutputStream.Write( binaryContents, 0, binaryContents.Length );
+				aspNetResponse.OutputStream.Write( response.BinaryBody, 0, response.BinaryBody.Length );
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 
 							using( var toStream = new MemoryStream() ) {
 								resizedImage.Save( toStream, ImageFormat.Jpeg );
-								binaryContents = toStream.ToArray();
+								changeBinaryContents( toStream.ToArray() );
 							}
 						}
 					}
