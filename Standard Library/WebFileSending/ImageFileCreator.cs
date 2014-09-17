@@ -13,7 +13,9 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 			method = () => {
 				var file = BlobFileOps.SystemProvider.GetFile( fileId );
 				var contents = BlobFileOps.SystemProvider.GetFileContents( fileId );
-				return new ImageToBeSent( file.FileName, file.ContentType, contents, forcedWidth );
+				if( forcedWidth.HasValue )
+					contents = StandardLibraryMethods.ResizeImage( contents, forcedWidth.Value );
+				return new FileToBeSent( file.FileName, file.ContentType, contents );
 			};
 		}
 	}

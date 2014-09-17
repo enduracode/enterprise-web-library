@@ -6,7 +6,7 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 	/// A file that will be sent to the user.
 	/// </summary>
 	public class FileToBeSent {
-		private FullResponse response;
+		private readonly FullResponse response;
 
 		/// <summary>
 		/// Creates a new text file to be sent. Do not pass null for the content type if you don't have it; instead pass the empty string.
@@ -20,10 +20,6 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 		/// </summary>
 		public FileToBeSent( string fileName, string contentType, byte[] contents ) {
 			response = new FullResponse( contentType, fileName, contents );
-		}
-
-		protected void changeBinaryContents( byte[] contents ) {
-			response = new FullResponse( response.ContentType, response.FileName, contents );
 		}
 
 		internal void WriteToResponse( bool sendInline ) {

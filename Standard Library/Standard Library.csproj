@@ -517,7 +517,6 @@
     <Compile Include="EnterpriseWebFramework\ResourceNotAvailableException.cs" />
     <Compile Include="StandardLibraryMethods.cs" />
     <Compile Include="WebFileSending\ImageFileCreator.cs" />
-    <Compile Include="WebFileSending\ImageToBeSent.cs" />
     <Compile Include="WebSessionState\StandardLibrarySessionState.cs" />
     <Compile Include="WebSessionState\StatusMessageType.cs" />
     <Compile Include="IO\ZipOps.cs" />

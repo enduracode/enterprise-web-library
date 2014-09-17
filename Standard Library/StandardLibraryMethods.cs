@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -279,8 +282,9 @@ namespace RedStapler.StandardLibrary {
 
 		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
 			return
-				new ApplicationException( providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-				                          ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
+				new ApplicationException(
+					providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
+					ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
 		}
 
 		/// <summary>
@@ -380,6 +384,35 @@ namespace RedStapler.StandardLibrary {
 			message.Subject = StringTools.ConcatenateWithDelimiter( " ", "Health check", freeSpaceIsLow ? "and WARNING" : "", "from " + appFullName );
 			message.BodyHtml = body.ToString().GetTextAsEncodedHtml();
 			AppTools.SendEmailWithDefaultFromAddress( message );
+		}
+
+		public static byte[] ResizeImage( byte[] image, int newWidth ) {
+			// Do not invest time in this method until you've read
+			// http://www.hanselman.com/blog/NuGetPackageOfWeek11ImageResizerEnablesCleanClearImageResizingInASPNET.aspx.
+			// Also try to resolve EnduraCode Task 4100.
+			using( var fromStream = new MemoryStream( image ) ) {
+				using( var imageSource = Image.FromStream( fromStream ) ) {
+					var height = getHeightFromImageAndNewWidth( imageSource, newWidth );
+
+					using( var resizedImage = new Bitmap( newWidth, height ) ) {
+						using( var gr = Graphics.FromImage( resizedImage ) ) {
+							gr.SmoothingMode = SmoothingMode.AntiAlias;
+							gr.InterpolationMode = InterpolationMode.HighQualityBicubic;
+							gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
+							gr.DrawImage( imageSource, 0, 0, newWidth, height );
+						}
+
+						using( var toStream = new MemoryStream() ) {
+							resizedImage.Save( toStream, ImageFormat.Jpeg );
+							return toStream.ToArray();
+						}
+					}
+				}
+			}
+		}
+
+		private static int getHeightFromImageAndNewWidth( Image image, int width ) {
+			return width * image.Height / image.Width;
 		}
 	}
 }
