@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Web;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.WebFileSending {
@@ -66,6 +67,22 @@ namespace RedStapler.StandardLibrary.WebFileSending {
 
 		internal FileToBeSent CreateFile() {
 			return method();
+		}
+
+		internal void WriteResponse( bool sendInline ) {
+			var ewfResponse = CreateFile().Response;
+			var aspNetResponse = HttpContext.Current.Response;
+
+			aspNetResponse.ClearHeaders();
+			aspNetResponse.ClearContent();
+			if( ewfResponse.ContentType.Length > 0 )
+				aspNetResponse.ContentType = ewfResponse.ContentType;
+			if( !sendInline )
+				aspNetResponse.AppendHeader( "content-disposition", "attachment; filename=\"" + ewfResponse.FileName + "\"" );
+			if( ewfResponse.TextBody != null )
+				aspNetResponse.Write( ewfResponse.TextBody );
+			else
+				aspNetResponse.OutputStream.Write( ewfResponse.BinaryBody, 0, ewfResponse.BinaryBody.Length );
 		}
 	}
 }
