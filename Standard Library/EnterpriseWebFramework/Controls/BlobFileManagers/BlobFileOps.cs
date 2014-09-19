@@ -6,7 +6,6 @@ using System.Web.UI;
 using Aspose.Pdf.Facades;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -125,7 +124,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				new PostBackButton(
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => new PostBackAction( FileCreator.CreateFromFileCollection( fileCollectionId ) ) ),
+						actionGetter:
+							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ) ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}
@@ -144,7 +144,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				new PostBackButton(
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => new PostBackAction( new FileCreator( fileId ) ) ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ) ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}

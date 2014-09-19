@@ -1,5 +1,8 @@
 ﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
-	internal class FullResponse {
+	/// <summary>
+	/// EWF use only.
+	/// </summary>
+	public class FullResponse {
 		internal readonly string ContentType;
 		internal readonly string FileName;
 
@@ -7,13 +10,13 @@
 		internal readonly string TextBody;
 		internal readonly byte[] BinaryBody;
 
-		public FullResponse( string contentType, string fileName, string textBody ) {
+		internal FullResponse( string contentType, string fileName, string textBody ) {
 			ContentType = contentType;
 			FileName = fileName;
 			TextBody = textBody;
 		}
 
-		public FullResponse( string contentType, string fileName, byte[] binaryBody ) {
+		internal FullResponse( string contentType, string fileName, byte[] binaryBody ) {
 			ContentType = contentType;
 			FileName = fileName;
 			BinaryBody = binaryBody;

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.MailMerging.MailMergeTesting;
 using RedStapler.StandardLibrary.MailMerging.RowTree;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.MailMerging {
 	/// <summary>
@@ -94,20 +94,26 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
 		/// a page break before it.
 		/// </summary>
-		public static FileToBeSent CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string inputFilePath ) {
-			using( var sourceDocStream = new MemoryStream( File.ReadAllBytes( inputFilePath ) ) )
-				return CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, sourceDocStream );
+		public static EwfResponse CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string inputFilePath ) {
+			return CreateMsWordDoc(
+				rowTree,
+				ensureAllFieldsHaveValues,
+				writer => {
+					using( var sourceDocStream = new MemoryStream( File.ReadAllBytes( inputFilePath ) ) )
+						writer( sourceDocStream );
+				} );
 		}
 
 		/// <summary>
 		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
 		/// a page break before it.
 		/// </summary>
-		public static FileToBeSent CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Stream inputStream ) {
-			using( var destinationStream = new MemoryStream() ) {
-				CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream );
-				return new FileToBeSent( "MergedLetter" + FileExtensions.WordDoc, ContentTypes.WordDoc, destinationStream.ToArray() );
-			}
+		public static EwfResponse CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) {
+			return new EwfResponse(
+				ContentTypes.WordDoc,
+				new EwfResponseBodyCreator(
+					destinationStream => inputStreamProvider( inputStream => CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
+				() => "MergedLetter" + FileExtensions.WordDoc );
 		}
 
 		/// <summary>
@@ -212,15 +218,33 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		}
 
 		/// <summary>
-		/// Creates a single sheet Excel Workbook from the top level of a row tree and writes it to a stream. There will be one column for each merge field
+		/// Returns a response containing a single-sheet Excel Workbook created from the top level of a row tree. There will be one column for each merge field
 		/// specified in the list of field names. Each column head will be named by calling ToEnglishFromCamel on the merge field's name or using the Microsoft Word
 		/// name without modification, the latter if useMsWordFieldNames is true.
 		/// This overload should be used when sending the workbook to the browser.
 		/// </summary>
-		public static FileInfoToBeSent CreateExcelWorkbook(
-			MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension, Stream destinationStream, bool useMsWordFieldNames = false ) {
-			var excelFile = new ExcelFileWriter();
+		public static EwfResponse CreateExcelWorkbook(
+			MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension, bool useMsWordFieldNames = false ) {
+			var excelFile = createExcelFileWriter( rowTree, fieldNames, useMsWordFieldNames );
+			return new EwfResponse(
+				excelFile.ContentType,
+				new EwfResponseBodyCreator( excelFile.SaveToStream ),
+				fileNameCreator: () => excelFile.GetSafeFileName( fileNameWithoutExtension ) );
+		}
 
+		/// <summary>
+		/// Creates a single-sheet Excel Workbook from the top level of a row tree and writes it to a stream. There will be one column for each merge field
+		/// specified in the list of field names. Each column head will be named by calling ToEnglishFromCamel on the merge field's name or using the Microsoft Word
+		/// name without modification, the latter if useMsWordFieldNames is true.
+		/// This overload should be used when not sending the workbook to the browser.
+		/// </summary>
+		public static void CreateExcelWorkbook( MergeRowTree rowTree, IEnumerable<string> fieldNames, Stream destinationStream, bool useMsWordFieldNames = false ) {
+			var excelFile = createExcelFileWriter( rowTree, fieldNames, useMsWordFieldNames );
+			excelFile.SaveToStream( destinationStream );
+		}
+
+		private static ExcelFileWriter createExcelFileWriter( MergeRowTree rowTree, IEnumerable<string> fieldNames, bool useMsWordFieldNames ) {
+			var excelFile = new ExcelFileWriter();
 			if( rowTree.Rows.Any() ) {
 				foreach( var fieldName in fieldNames ) {
 					if( !rowTree.Rows.First().Values.Any( i => i.Name == fieldName ) ) {
@@ -252,19 +276,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 							} ).ToArray() );
 				}
 			}
-
-			excelFile.SaveToStream( destinationStream );
-			return new FileInfoToBeSent( excelFile.GetSafeFileName( fileNameWithoutExtension ), excelFile.ContentType );
-		}
-
-		/// <summary>
-		/// Creates a single sheet Excel Workbook from the top level of a row tree and writes it to a stream. There will be one column for each merge field
-		/// specified in the list of field names. Each column head will be named by calling ToEnglishFromCamel on the merge field's name or using the Microsoft Word
-		/// name without modification, the latter if useMsWordFieldNames is true.
-		/// This overload should be used when not sending the workbook to the browser.
-		/// </summary>
-		public static void CreateExcelWorkbook( MergeRowTree rowTree, IEnumerable<string> fieldNames, Stream destinationStream, bool useMsWordFieldNames = false ) {
-			CreateExcelWorkbook( rowTree, fieldNames, "", destinationStream, useMsWordFieldNames: useMsWordFieldNames );
+			return excelFile;
 		}
 
 		/// <summary>

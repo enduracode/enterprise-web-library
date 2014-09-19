@@ -1,9 +1,7 @@
-﻿using RedStapler.StandardLibrary.WebFileSending;
-
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class PostBackAction {
 		private readonly PageInfo page;
-		private readonly FileCreator file;
+		private readonly SecondaryResponse secondaryResponse;
 
 		/// <summary>
 		/// Creates an action that will navigate to the specified page.
@@ -14,14 +12,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates an action that will send the specified file, using a client-side redirect.
+		/// Creates an action that will send a secondary response in a new window/tab or as an attachment.
 		/// </summary>
-		/// <param name="file"></param>
-		public PostBackAction( FileCreator file ) {
-			this.file = file;
+		/// <param name="response">The secondary response.</param>
+		public PostBackAction( SecondaryResponse response ) {
+			secondaryResponse = response;
 		}
 
 		internal PageInfo Page { get { return page; } }
-		internal FileCreator File { get { return file; } }
+		internal SecondaryResponse SecondaryResponse { get { return secondaryResponse; } }
 	}
 }

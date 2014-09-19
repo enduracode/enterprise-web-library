@@ -12,7 +12,6 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
 
@@ -123,8 +122,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( fileCreator != null ) {
-				fileCreator.WriteResponse( sendsFileInline );
+			if( responseWriter != null ) {
+				responseWriter.WriteResponse();
 
 				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
 				// EWF from Web Forms. This is EnduraCode goal 790.
@@ -143,14 +142,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
-		/// Gets the FileCreator for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
+		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual FileCreator fileCreator { get { return null; } }
-
-		/// <summary>
-		/// Gets whether the page sends its file inline or as an attachment. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
-		/// </summary>
-		protected virtual bool sendsFileInline { get { return true; } }
+		protected virtual EwfSafeResponseWriter responseWriter { get { return null; } }
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
@@ -309,8 +303,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									if( postBackAction == null )
 										return;
 									redirectInfo = postBackAction.Page;
-									if( postBackAction.File != null )
-										StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
+									if( postBackAction.SecondaryResponse != null ) {
+										// It's important that we put the response in session state first since it's used by the Info.init method of the get-file page.
+										postBackAction.SecondaryResponse.SetInSessionState();
+										StandardLibrarySessionState.Instance.SetClientSideRedirect(
+											EwfApp.MetaLogicFactory.CreateGetFilePageInfo().GetUrl(),
+											!postBackAction.SecondaryResponse.HasFileName,
+											null );
+									}
 								} );
 						}
 						catch {
@@ -660,13 +660,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
 			string clientSideRedirectUrl;
+			bool clientSideRedirectInNewWindow;
 			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
-			var locationReplaceStatement = "";
+			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay(
+				out clientSideRedirectUrl,
+				out clientSideRedirectInNewWindow,
+				out clientSideRedirectDelay );
+			var clientSideRedirectStatements = "";
 			if( clientSideRedirectUrl.Length > 0 ) {
-				locationReplaceStatement = "location.replace( '" + this.GetClientUrl( clientSideRedirectUrl ) + "' );";
+				var url = this.GetClientUrl( clientSideRedirectUrl );
+				if( clientSideRedirectInNewWindow )
+					clientSideRedirectStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideRedirectStatements = "location.replace( '" + url + "' );";
 				if( clientSideRedirectDelay.HasValue )
-					locationReplaceStatement = "setTimeout( \"" + locationReplaceStatement + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
+					clientSideRedirectStatements = "setTimeout( \"" + clientSideRedirectStatements + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
 			}
 
 			ClientScript.RegisterClientScriptBlock(
@@ -680,7 +688,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, locationReplaceStatement )
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideRedirectStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) ) + " } );",
 				true );

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class PostBack {
@@ -52,11 +51,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// are included in this post-back.</param>
 		/// <param name="firstTopValidationMethod"></param>
 		/// <param name="firstModificationMethod"></param>
-		/// <param name="fileGetter">A method that returns the file EWF will send if there were no modification errors.</param>
+		/// <param name="secondaryResponseGetter">A method that returns the secondary response EWF will send, in a new window/tab or as an attachment, if there were
+		/// no modification errors.</param>
 		public static ActionPostBack CreateIntermediate(
 			IEnumerable<UpdateRegionSet> updateRegions, DataModification validationDm, bool forceFullPagePostBack = false, string id = "main",
 			bool skipModificationIfNoChanges = false, Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null,
-			Func<FileCreator> fileGetter = null ) {
+			Func<SecondaryResponse> secondaryResponseGetter = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
 			if( validationDm == null )
@@ -69,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				skipModificationIfNoChanges,
 				firstTopValidationMethod,
 				firstModificationMethod,
-				fileGetter != null ? new Func<PostBackAction>( () => new PostBackAction( fileGetter() ) ) : null,
+				secondaryResponseGetter != null ? new Func<PostBackAction>( () => new PostBackAction( secondaryResponseGetter() ) ) : null,
 				validationDm );
 		}
 

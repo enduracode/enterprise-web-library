@@ -2,7 +2,6 @@ using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -52,7 +51,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 						actionGetter: () => {
 							// Refresh the file here in case a new one was uploaded on the same post-back.
-							return new PostBackAction( new FileCreator( () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId ) );
+							return
+								new PostBackAction(
+									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ) ) );
 						} ),
 					new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
 					false );

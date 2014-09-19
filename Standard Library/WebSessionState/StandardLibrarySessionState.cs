@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.WebSessionState {
 	/// <summary>
@@ -11,8 +10,14 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 	public class StandardLibrarySessionState {
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 		private string clientSideRedirectUrl = "";
+		private bool clientSideRedirectInNewWindow;
 		private int? clientSideRedirectDelay;
-		private FileToBeSent fileToDownload;
+
+		/// <summary>
+		/// EWF use only.
+		/// </summary>
+		public FullResponse ResponseToSend { get; set; }
+
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		private StandardLibrarySessionState() {}
@@ -34,8 +39,7 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen as soon as the page is finished loading.
 		/// </summary>
 		public void SetInstantClientSideRedirect( string url ) {
-			clientSideRedirectUrl = url;
-			clientSideRedirectDelay = null;
+			SetClientSideRedirect( url, false, null );
 		}
 
 		/// <summary>
@@ -43,30 +47,24 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		/// finished loading.
 		/// </summary>
 		public void SetTimedClientSideRedirect( string url, int numberOfSeconds ) {
-			clientSideRedirectUrl = url;
-			clientSideRedirectDelay = numberOfSeconds;
+			SetClientSideRedirect( url, false, numberOfSeconds );
 		}
 
-		internal void GetClientSideRedirectUrlAndDelay( out string url, out int? numberOfSeconds ) {
+		internal void SetClientSideRedirect( string url, bool navigateInNewWindow, int? delayInSeconds ) {
+			clientSideRedirectUrl = url;
+			clientSideRedirectInNewWindow = navigateInNewWindow;
+			clientSideRedirectDelay = delayInSeconds;
+		}
+
+		internal void GetClientSideRedirectUrlAndDelay( out string url, out bool navigateInNewWindow, out int? delayInSeconds ) {
 			url = clientSideRedirectUrl;
-			numberOfSeconds = clientSideRedirectDelay;
+			navigateInNewWindow = clientSideRedirectInNewWindow;
+			delayInSeconds = clientSideRedirectDelay;
 		}
 
 		internal void ClearClientSideRedirectUrlAndDelay() {
 			clientSideRedirectUrl = "";
 			clientSideRedirectDelay = null;
-		}
-
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		public FileToBeSent FileToBeDownloaded {
-			get { return fileToDownload; }
-			set {
-				// It's important that we set the fileToDownload first, because creating GetFile's info object will result in a call to the getter of this property.
-				fileToDownload = value;
-				SetInstantClientSideRedirect( EwfApp.MetaLogicFactory.CreateGetFilePageInfo().GetUrl() );
-			}
 		}
 
 		/// <summary>
