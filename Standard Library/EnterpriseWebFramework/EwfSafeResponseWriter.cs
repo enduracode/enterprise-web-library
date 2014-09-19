@@ -11,9 +11,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return () => {
 				var aspNetResponse = HttpContext.Current.Response;
 
-				aspNetResponse.ClearHeaders();
-				aspNetResponse.ClearContent();
-
 				var response = responseCreator();
 				if( response.ContentType.Length > 0 )
 					aspNetResponse.ContentType = response.ContentType;
