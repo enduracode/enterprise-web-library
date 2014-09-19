@@ -15,6 +15,15 @@ namespace RedStapler.StandardLibrary.MailMerging {
 	/// Contains methods that perform mail merging operations.
 	/// </summary>
 	public static class MergeOps {
+		private class ImageFieldMergingCallBack: IFieldMergingCallback {
+			void IFieldMergingCallback.FieldMerging( FieldMergingArgs args ) {}
+
+			void IFieldMergingCallback.ImageFieldMerging( ImageFieldMergingArgs e ) {
+				if( e.FieldValue != null )
+					e.ImageStream = new MemoryStream( (byte[])e.FieldValue );
+			}
+		}
+
 		/// <summary>
 		/// Merges a row with a template string.
 		/// </summary>
@@ -118,8 +127,8 @@ namespace RedStapler.StandardLibrary.MailMerging {
 				createMsWordDocOrPdfFromMsWordDoc( rowTree, ensureAllFieldsHaveValues, sourcePdfStream, destinationStream, false );
 		}
 
-		private static void createMsWordDocOrPdfFromMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Stream inputStream, Stream destinationStream,
-		                                                       bool saveAsMsWordDoc ) {
+		private static void createMsWordDocOrPdfFromMsWordDoc(
+			MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Stream inputStream, Stream destinationStream, bool saveAsMsWordDoc ) {
 			var doc = new Aspose.Words.Document( inputStream );
 
 			// This is a hack we need to do because Aspose changed MailMerge.Execute to only support a single level of data. Since we support multiple levels, i.e.
@@ -146,8 +155,9 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// <summary>
 		/// Merges a row tree with a PDF document containing form fields.
 		/// </summary>
-		public static void CreatePdf( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string sourcePdfFilePath, Stream destinationStream,
-		                              bool useLegacyBehaviorOfIgnoringInvalidFields = false ) {
+		public static void CreatePdf(
+			MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string sourcePdfFilePath, Stream destinationStream,
+			bool useLegacyBehaviorOfIgnoringInvalidFields = false ) {
 			// Use a memory stream because the stream may be read multiple times and we only want to access the file once.
 			using( var sourcePdfStream = new MemoryStream( File.ReadAllBytes( sourcePdfFilePath ) ) )
 				CreatePdf( rowTree, ensureAllFieldsHaveValues, sourcePdfStream, destinationStream, useLegacyBehaviorOfIgnoringInvalidFields );
@@ -156,8 +166,9 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// <summary>
 		/// Merges a row tree with a PDF document containing form fields.
 		/// </summary>
-		public static void CreatePdf( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, MemoryStream sourcePdfStream, Stream destinationStream,
-		                              bool useLegacyBehaviorOfIgnoringInvalidFields = false ) {
+		public static void CreatePdf(
+			MergeRowTree rowTree, bool ensureAllFieldsHaveValues, MemoryStream sourcePdfStream, Stream destinationStream,
+			bool useLegacyBehaviorOfIgnoringInvalidFields = false ) {
 			var streams = new List<Stream>();
 			try {
 				foreach( var row in rowTree.Rows ) {
@@ -206,8 +217,8 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// name without modification, the latter if useMsWordFieldNames is true.
 		/// This overload should be used when sending the workbook to the browser.
 		/// </summary>
-		public static FileInfoToBeSent CreateExcelWorkbook( MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension,
-		                                                    Stream destinationStream, bool useMsWordFieldNames = false ) {
+		public static FileInfoToBeSent CreateExcelWorkbook(
+			MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension, Stream destinationStream, bool useMsWordFieldNames = false ) {
 			var excelFile = new ExcelFileWriter();
 
 			if( rowTree.Rows.Any() ) {
@@ -221,22 +232,24 @@ namespace RedStapler.StandardLibrary.MailMerging {
 				var sheet = excelFile.DefaultWorksheet;
 				sheet.AddHeaderToWorksheet(
 					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) )
-					          .Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.CamelToEnglish() )
-					          .ToArray() );
+						.Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.CamelToEnglish() )
+						.ToArray() );
 				sheet.FreezeHeaderRow();
 				foreach( var row in rowTree.Rows ) {
-					sheet.AddRowToWorksheet( fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select( mergeValue => {
-						var mergeValueAsString = mergeValue as MergeValue<string>;
-						string value = null;
-						if( mergeValueAsString != null )
-							value = mergeValueAsString.Evaluate( false );
-						if( value == null ) {
-							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-							throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-						}
+					sheet.AddRowToWorksheet(
+						fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select(
+							mergeValue => {
+								var mergeValueAsString = mergeValue as MergeValue<string>;
+								string value = null;
+								if( mergeValueAsString != null )
+									value = mergeValueAsString.Evaluate( false );
+								if( value == null ) {
+									// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+									throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+								}
 
-						return value;
-					} ).ToArray() );
+								return value;
+							} ).ToArray() );
 				}
 			}
 
@@ -320,8 +333,9 @@ namespace RedStapler.StandardLibrary.MailMerging {
 		/// </summary>
 		public static MergeFieldNameTree GetXmlSupportedMergeFields( MergeRowTree rowTree ) {
 			var firstRow = rowTree.Rows.First();
-			return new MergeFieldNameTree( firstRow.Values.Where( mergeValueTypeIsSupportedInXml ).Select( i => i.Name ),
-			                               childNamesAndChildren: firstRow.Children.Select( i => Tuple.Create( i.NodeName, GetXmlSupportedMergeFields( i ) ) ) );
+			return new MergeFieldNameTree(
+				firstRow.Values.Where( mergeValueTypeIsSupportedInXml ).Select( i => i.Name ),
+				childNamesAndChildren: firstRow.Children.Select( i => Tuple.Create( i.NodeName, GetXmlSupportedMergeFields( i ) ) ) );
 		}
 
 		private static bool mergeValueTypeIsSupportedInXml( MergeValue mv ) {
@@ -360,15 +374,17 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			const string singleRowWordDocAsPdf = "SingleRowMsWordDoc" + FileExtensions.Pdf;
 			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowWordDocAsPdf ) ) )
 				CreatePdfFromMsWordDoc( singleRowTree, false, wordDocx, outputFile );
-			explanations.Add( Tuple.Create( singleRowWordDocAsPdf,
-			                                "Should be {0} with only one page, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
+			explanations.Add(
+				Tuple.Create( singleRowWordDocAsPdf, "Should be {0} with only one page, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
 
 			//Excel
 			const string singleRowExcel = "SingleRowExcel" + FileExtensions.ExcelXlsx;
 			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowExcel ) ) )
 				CreateExcelWorkbook( singleRowTree, GetExcelSupportedMergeFields( singleRowTree ), outputFile );
-			explanations.Add( Tuple.Create( singleRowExcel,
-			                                "An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. One more row with data should be present." ) );
+			explanations.Add(
+				Tuple.Create(
+					singleRowExcel,
+					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. One more row with data should be present." ) );
 
 			// Pdf
 			const string singleRowPdf = "SingleRowPdf" + FileExtensions.Pdf;
@@ -389,15 +405,17 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			const string multipleRowsWordDocAsPdf = "MultipleRowMsWordDoc" + FileExtensions.Pdf;
 			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowsWordDocAsPdf ) ) )
 				CreatePdfFromMsWordDoc( pseudoTableRowTree, false, wordDocx, outputFile );
-			explanations.Add( Tuple.Create( multipleRowsWordDocAsPdf,
-			                                "Should be {0} with three pages, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
+			explanations.Add(
+				Tuple.Create( multipleRowsWordDocAsPdf, "Should be {0} with three pages, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
 
 			// Excel
 			const string multipleRowExcel = "MultipleRowExcel" + FileExtensions.ExcelXlsx;
 			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowExcel ) ) )
 				CreateExcelWorkbook( pseudoTableRowTree, GetExcelSupportedMergeFields( pseudoTableRowTree ), outputFile );
-			explanations.Add( Tuple.Create( multipleRowExcel,
-			                                "An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. Three more row with data should be present." ) );
+			explanations.Add(
+				Tuple.Create(
+					multipleRowExcel,
+					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. Three more row with data should be present." ) );
 
 			// Pdf
 			const string multipleRowPdf = "MultipleRowPdf" + FileExtensions.Pdf;
@@ -406,15 +424,6 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			explanations.Add( Tuple.Create( multipleRowPdf, "Should be {0} with three pages, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
 
 			TestStatics.OutputReadme( outputFolder, explanations );
-		}
-
-		private class ImageFieldMergingCallBack: IFieldMergingCallback {
-			void IFieldMergingCallback.FieldMerging( FieldMergingArgs args ) {}
-
-			void IFieldMergingCallback.ImageFieldMerging( ImageFieldMergingArgs e ) {
-				if( e.FieldValue != null )
-					e.ImageStream = new MemoryStream( (byte[])e.FieldValue );
-			}
 		}
 	}
 }

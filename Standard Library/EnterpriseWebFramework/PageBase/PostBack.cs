@@ -20,20 +20,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="firstTopValidationMethod"></param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="actionGetter">A method that returns the action EWF will perform if there were no modification errors.</param>
-		public static ActionPostBack CreateFull( string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false,
-		                                         Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null,
-		                                         Func<PostBackAction> actionGetter = null ) {
+		public static ActionPostBack CreateFull(
+			string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false,
+			Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null, Func<PostBackAction> actionGetter = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
-			return new ActionPostBack( true,
-			                           null,
-			                           id,
-			                           forcePageDataUpdate,
-			                           skipModificationIfNoChanges,
-			                           firstTopValidationMethod,
-			                           firstModificationMethod,
-			                           actionGetter,
-			                           null );
+			return new ActionPostBack(
+				true,
+				null,
+				id,
+				forcePageDataUpdate,
+				skipModificationIfNoChanges,
+				firstTopValidationMethod,
+				firstModificationMethod,
+				actionGetter,
+				null );
 		}
 
 		/// <summary>
@@ -52,23 +53,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="firstTopValidationMethod"></param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="fileGetter">A method that returns the file EWF will send if there were no modification errors.</param>
-		public static ActionPostBack CreateIntermediate( IEnumerable<UpdateRegionSet> updateRegions, DataModification validationDm, bool forceFullPagePostBack = false,
-		                                                 string id = "main", bool skipModificationIfNoChanges = false,
-		                                                 Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null,
-		                                                 Action firstModificationMethod = null, Func<FileCreator> fileGetter = null ) {
+		public static ActionPostBack CreateIntermediate(
+			IEnumerable<UpdateRegionSet> updateRegions, DataModification validationDm, bool forceFullPagePostBack = false, string id = "main",
+			bool skipModificationIfNoChanges = false, Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null,
+			Func<FileCreator> fileGetter = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
 			if( validationDm == null )
 				throw new ApplicationException( "A validation data-modification is required." );
-			return new ActionPostBack( forceFullPagePostBack,
-			                           updateRegions,
-			                           id,
-			                           null,
-			                           skipModificationIfNoChanges,
-			                           firstTopValidationMethod,
-			                           firstModificationMethod,
-			                           fileGetter != null ? new Func<PostBackAction>( () => new PostBackAction( fileGetter() ) ) : null,
-			                           validationDm );
+			return new ActionPostBack(
+				forceFullPagePostBack,
+				updateRegions,
+				id,
+				null,
+				skipModificationIfNoChanges,
+				firstTopValidationMethod,
+				firstModificationMethod,
+				fileGetter != null ? new Func<PostBackAction>( () => new PostBackAction( fileGetter() ) ) : null,
+				validationDm );
 		}
 
 		internal static PostBack CreateDataUpdate() {
@@ -98,9 +100,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Func<PostBackAction> actionGetter;
 		private readonly DataModification validationDm;
 
-		internal ActionPostBack( bool forceFullPagePostBack, IEnumerable<UpdateRegionSet> updateRegions, string id, bool? forcePageDataUpdate,
-		                         bool skipModificationIfNoChanges, Action<PostBackValueDictionary, Validator> firstTopValidationMethod, Action firstModificationMethod,
-		                         Func<PostBackAction> actionGetter, DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
+		internal ActionPostBack(
+			bool forceFullPagePostBack, IEnumerable<UpdateRegionSet> updateRegions, string id, bool? forcePageDataUpdate, bool skipModificationIfNoChanges,
+			Action<PostBackValueDictionary, Validator> firstTopValidationMethod, Action firstModificationMethod, Func<PostBackAction> actionGetter,
+			DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
 			this.updateRegions = updateRegions ?? new UpdateRegionSet[ 0 ];
 			this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
@@ -149,11 +152,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool Execute( bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
-			return dataModification.Execute( skipModificationIfNoChanges,
-			                                 formValuesChanged,
-			                                 validationErrorHandler,
-			                                 performValidationOnly: actionSetter == null,
-			                                 additionalMethod: actionGetter != null ? new Action( () => actionSetter( actionGetter() ) ) : null );
+			return dataModification.Execute(
+				skipModificationIfNoChanges,
+				formValuesChanged,
+				validationErrorHandler,
+				performValidationOnly: actionSetter == null,
+				additionalMethod: actionGetter != null ? new Action( () => actionSetter( actionGetter() ) ) : null );
 		}
 
 		internal DataModification ValidationDm { get { return validationDm; } }
