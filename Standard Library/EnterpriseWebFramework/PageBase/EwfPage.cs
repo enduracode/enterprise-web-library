@@ -308,7 +308,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									if( postBackAction.SecondaryResponse != null ) {
 										// It's important that we put the response in session state first since it's used by the Info.init method of the get-file page.
 										postBackAction.SecondaryResponse.SetInSessionState();
-										StandardLibrarySessionState.Instance.SetClientSideRedirect(
+										StandardLibrarySessionState.Instance.SetClientSideNavigation(
 											EwfApp.MetaLogicFactory.CreateGetFilePageInfo().GetUrl(),
 											!postBackAction.SecondaryResponse.HasFileName,
 											null );
@@ -661,22 +661,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideRedirectUrl;
-			bool clientSideRedirectInNewWindow;
-			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay(
-				out clientSideRedirectUrl,
-				out clientSideRedirectInNewWindow,
-				out clientSideRedirectDelay );
-			var clientSideRedirectStatements = "";
-			if( clientSideRedirectUrl.Length > 0 ) {
-				var url = this.GetClientUrl( clientSideRedirectUrl );
-				if( clientSideRedirectInNewWindow )
-					clientSideRedirectStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+			string clientSideNavigationUrl;
+			bool clientSideNavigationInNewWindow;
+			int? clientSideNavigationDelay;
+			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+				out clientSideNavigationUrl,
+				out clientSideNavigationInNewWindow,
+				out clientSideNavigationDelay );
+			var clientSideNavigationStatements = "";
+			if( clientSideNavigationUrl.Any() ) {
+				var url = this.GetClientUrl( clientSideNavigationUrl );
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
 				else
-					clientSideRedirectStatements = "location.replace( '" + url + "' );";
-				if( clientSideRedirectDelay.HasValue )
-					clientSideRedirectStatements = "setTimeout( \"" + clientSideRedirectStatements + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				if( clientSideNavigationDelay.HasValue )
+					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
 			ClientScript.RegisterClientScriptBlock(
@@ -690,7 +690,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideRedirectStatements )
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) ) + " } );",
 				true );
@@ -894,7 +894,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
 			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
+			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 			DataAccessState.Current.DisableCache();
 			try {
 				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {

@@ -9,9 +9,9 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 	/// </summary>
 	public class StandardLibrarySessionState {
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
-		private string clientSideRedirectUrl = "";
-		private bool clientSideRedirectInNewWindow;
-		private int? clientSideRedirectDelay;
+		private string clientSideNavigationUrl = "";
+		private bool clientSideNavigationInNewWindow;
+		private int? clientSideNavigationDelay;
 
 		/// <summary>
 		/// EWF use only.
@@ -38,33 +38,32 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		/// <summary>
 		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen as soon as the page is finished loading.
 		/// </summary>
-		public void SetInstantClientSideRedirect( string url ) {
-			SetClientSideRedirect( url, false, null );
+		public void SetInstantClientSideNavigation( string url ) {
+			SetClientSideNavigation( url, false, null );
 		}
 
 		/// <summary>
 		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen the specified number of seconds after the page is
 		/// finished loading.
 		/// </summary>
-		public void SetTimedClientSideRedirect( string url, int numberOfSeconds ) {
-			SetClientSideRedirect( url, false, numberOfSeconds );
+		public void SetTimedClientSideNavigation( string url, int numberOfSeconds ) {
+			SetClientSideNavigation( url, false, numberOfSeconds );
 		}
 
-		internal void SetClientSideRedirect( string url, bool navigateInNewWindow, int? delayInSeconds ) {
-			clientSideRedirectUrl = url;
-			clientSideRedirectInNewWindow = navigateInNewWindow;
-			clientSideRedirectDelay = delayInSeconds;
+		internal void SetClientSideNavigation( string url, bool navigateInNewWindow, int? delayInSeconds ) {
+			clientSideNavigationUrl = url;
+			clientSideNavigationInNewWindow = navigateInNewWindow;
+			clientSideNavigationDelay = delayInSeconds;
 		}
 
-		internal void GetClientSideRedirectUrlAndDelay( out string url, out bool navigateInNewWindow, out int? delayInSeconds ) {
-			url = clientSideRedirectUrl;
-			navigateInNewWindow = clientSideRedirectInNewWindow;
-			delayInSeconds = clientSideRedirectDelay;
+		internal void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow, out int? delayInSeconds ) {
+			url = clientSideNavigationUrl;
+			navigateInNewWindow = clientSideNavigationInNewWindow;
+			delayInSeconds = clientSideNavigationDelay;
 		}
 
-		internal void ClearClientSideRedirectUrlAndDelay() {
-			clientSideRedirectUrl = "";
-			clientSideRedirectDelay = null;
+		internal void ClearClientSideNavigation() {
+			clientSideNavigationUrl = "";
 		}
 
 		/// <summary>
