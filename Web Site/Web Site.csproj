@@ -134,6 +134,13 @@
       <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\MetaLogicFactory.cs" />
+    <Compile Include="Ewf\PreBuiltResponse.aspx.cs">
+      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\PreBuiltResponse.aspx.designer.cs">
+      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
+    </Compile>
     <Compile Include="GetSchema.aspx.cs">
       <DependentUpon>GetSchema.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -321,13 +328,6 @@
     <Compile Include="Ewf\ErrorPages\UnhandledException.aspx.designer.cs">
       <DependentUpon>UnhandledException.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\GetFile.aspx.cs">
-      <DependentUpon>GetFile.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\GetFile.aspx.designer.cs">
-      <DependentUpon>GetFile.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\UserManagement\ChangePassword\Page.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>Page.aspx</DependentUpon>
@@ -454,6 +454,7 @@
     <Content Include="Ewf\FileUploader\Upload.aspx" />
     <Content Include="Ewf\Images\ajax-loader.gif" />
     <Content Include="Ewf\Modernizr.js" />
+    <Content Include="Ewf\PreBuiltResponse.aspx" />
     <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
     <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
     <Content Include="Ewf\Styles\Basic.css" />
@@ -558,7 +559,6 @@
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
     <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
     <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
-    <Content Include="Ewf\GetFile.aspx" />
     <Content Include="Ewf\Images\Calendar\button_currentmonth.gif" />
     <Content Include="Ewf\Images\Calendar\button_next.gif" />
     <Content Include="Ewf\Images\Calendar\button_previous.gif" />

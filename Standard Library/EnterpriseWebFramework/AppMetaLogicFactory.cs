@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		PageInfo CreateGetFilePageInfo();
+		PageInfo CreatePreBuiltResponsePageInfo();
 
 		/// <summary>
 		/// Standard Library use only.

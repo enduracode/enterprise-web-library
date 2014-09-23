@@ -2,7 +2,7 @@ using System;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	partial class GetFile: EwfPage {
+	partial class PreBuiltResponse: EwfPage {
 		partial class Info {
 			protected override void init() {
 				if( StandardLibrarySessionState.Instance.ResponseToSend == null )

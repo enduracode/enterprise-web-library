@@ -309,7 +309,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 										// It's important that we put the response in session state first since it's used by the Info.init method of the get-file page.
 										postBackAction.SecondaryResponse.SetInSessionState();
 										StandardLibrarySessionState.Instance.SetClientSideNavigation(
-											EwfApp.MetaLogicFactory.CreateGetFilePageInfo().GetUrl(),
+											EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
 											!postBackAction.SecondaryResponse.HasFileName,
 											null );
 									}
