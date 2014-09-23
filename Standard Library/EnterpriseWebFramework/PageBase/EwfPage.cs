@@ -996,7 +996,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				formValueString.Append( formValue.GetDurableValueAsString() );
 			}
 
-			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
 			var hashString = "";
 			foreach( var b in hash )
 				hashString += b.ToString( "x2" );
