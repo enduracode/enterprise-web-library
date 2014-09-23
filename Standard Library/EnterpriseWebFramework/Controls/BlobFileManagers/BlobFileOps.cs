@@ -125,7 +125,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 						actionGetter:
-							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ) ) ) ),
+							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}
@@ -144,7 +144,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				new PostBackButton(
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ) ) ) ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}

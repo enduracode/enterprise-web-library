@@ -121,6 +121,7 @@
   <ItemGroup>
     <Compile Include="Caching\AppMemoryCache.cs" />
     <Compile Include="AppTools.cs" />
+    <Compile Include="Caching\DateAndTimeVersionedCache.cs" />
     <Compile Include="Caching\PeriodicEvictionCompositeCacheEntry.cs" />
     <Compile Include="CertificateAuthenticationModule.cs" />
     <Compile Include="Chronometer.cs" />
@@ -221,6 +222,7 @@
     <Compile Include="EnterpriseWebFramework\HTTP\EwfResponse.cs" />
     <Compile Include="EnterpriseWebFramework\HTTP\EwfResponseBodyCreator.cs" />
     <Compile Include="EnterpriseWebFramework\HTTP\FullResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\ResponseMemoryCachingSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />

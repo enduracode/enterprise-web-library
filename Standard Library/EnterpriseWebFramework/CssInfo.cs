@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -9,6 +10,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns an app relative URL for the CSS file.
 		/// </summary>
 		public abstract string GetUrl();
+
+		/// <summary>
+		/// Gets the last-modification date/time of the resource.
+		/// </summary>
+		public abstract DateTimeOffset GetResourceLastModificationDateAndTime();
 
 		/// <summary>
 		/// Gets the path of the CSS file.

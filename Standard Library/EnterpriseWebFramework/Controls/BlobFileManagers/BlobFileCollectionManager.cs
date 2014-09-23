@@ -145,7 +145,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							if( fileIsUnread && markFileAsReadMethod != null )
 								markFileAsReadMethod( file.FileId );
 						},
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ) ) ) ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ),
 					new TextActionControlStyle( file.FileName ),
 					false ) { ToolTip = file.FileName } );
 

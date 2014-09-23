@@ -25,6 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal DateTime FileLastModificationDateAndTime { get { return file.UploadedDate; } }
+		internal string MemoryCacheKey { get { return "blobFile-" + file.FileId; } }
 
 		internal EwfResponse GetResponse() {
 			return new EwfResponse(

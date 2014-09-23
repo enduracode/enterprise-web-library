@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -36,16 +35,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal FullResponse CreateFullResponse() {
-			if( BodyCreator.TextBodyWriter != null ) {
-				using( var writer = new StringWriter() ) {
-					BodyCreator.TextBodyWriter( writer );
-					return new FullResponse( ContentType, FileNameCreator(), writer.ToString() );
-				}
-			}
-			using( var stream = new MemoryStream() ) {
-				BodyCreator.BinaryBodyWriter( stream );
-				return new FullResponse( ContentType, FileNameCreator(), stream.ToArray() );
-			}
+			return BodyCreator.BodyIsText
+				       ? new FullResponse( ContentType, FileNameCreator(), BodyCreator.TextBodyCreator() )
+				       : new FullResponse( ContentType, FileNameCreator(), BodyCreator.BinaryBodyCreator() );
 		}
 	}
 }

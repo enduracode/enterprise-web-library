@@ -53,7 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							// Refresh the file here in case a new one was uploaded on the same post-back.
 							return
 								new PostBackAction(
-									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ) ) );
+									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ), false ) );
 						} ),
 					new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
 					false );

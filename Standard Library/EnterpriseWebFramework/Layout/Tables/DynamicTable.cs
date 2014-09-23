@@ -442,7 +442,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				else
 					workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
 			}
-			return new PostBackAction( new SecondaryResponse( workbook.GetExcelFileResponse( caption.Length > 0 ? caption : "Excel export" ) ) );
+			return new PostBackAction( new SecondaryResponse( () => workbook.GetExcelFileResponse( caption.Length > 0 ? caption : "Excel export" ) ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {

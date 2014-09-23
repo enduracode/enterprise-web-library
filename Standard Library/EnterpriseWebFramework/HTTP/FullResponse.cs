@@ -1,8 +1,16 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿using System;
+using RedStapler.StandardLibrary.Caching;
+
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// EWF use only.
 	/// </summary>
 	public class FullResponse {
+		internal static FullResponse GetFromCache( string key, DateTimeOffset lastModificationDateAndTime, Func<FullResponse> valueCreator ) {
+			var cache = AppMemoryCache.GetCacheValue( "ewfResponse-" + key, () => new DateAndTimeVersionedCache<FullResponse>() );
+			return cache.ValuesByDateAndTime.GetOrAdd( lastModificationDateAndTime, valueCreator );
+		}
+
 		internal readonly string ContentType;
 		internal readonly string FileName;
 

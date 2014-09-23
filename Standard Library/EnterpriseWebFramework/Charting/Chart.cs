@@ -246,21 +246,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
 							actionGetter: () => new PostBackAction(
 								                    new SecondaryResponse(
-								                    new EwfResponse(
-								                    "text/csv",
-								                    new EwfResponseBodyCreator(
-								                    output => {
-									                    var csv = new CsvFileWriter();
-									                    var writer = new StreamWriter( output );
+								                    () => new EwfResponse(
+									                          "text/csv",
+									                          new EwfResponseBodyCreator(
+									                          output => {
+										                          var csv = new CsvFileWriter();
+										                          var writer = new StreamWriter( output );
 
-									                    csv.AddValuesToLine( headers.ToArray() );
-									                    csv.WriteCurrentLineToFile( writer );
-									                    foreach( var td in tableData ) {
-										                    csv.AddValuesToLine( td.ToArray() );
-										                    csv.WriteCurrentLineToFile( writer );
-									                    }
-								                    } ),
-								                    () => "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ) ) ) ) ),
+										                          csv.AddValuesToLine( headers.ToArray() );
+										                          csv.WriteCurrentLineToFile( writer );
+										                          foreach( var td in tableData ) {
+											                          csv.AddValuesToLine( td.ToArray() );
+											                          csv.WriteCurrentLineToFile( writer );
+										                          }
+									                          } ),
+									                          () => "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ) ) ) ) ),
 						new TextActionControlStyle( "Export" ),
 						usesSubmitBehavior: false ) );
 			block.Style.Add( "text-align", "right" );

@@ -20,7 +20,12 @@ namespace EnterpriseWebLibrary.WebSite {
 		}
 
 		protected override EwfSafeResponseWriter responseWriter {
-			get { return new EwfSafeResponseWriter( new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ) ); }
+			get {
+				return new EwfSafeResponseWriter(
+					() => new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
+					AppTools.EwlBuildDateTime,
+					() => "getSchema" + info.FileName );
+			}
 		}
 	}
 }
