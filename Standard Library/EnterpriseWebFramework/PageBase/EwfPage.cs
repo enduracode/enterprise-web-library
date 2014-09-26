@@ -748,7 +748,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void validateFormSubmission( string formValueHash ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
+			var webFormsHiddenFields = new[]
+				{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
