@@ -321,9 +321,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						try {
 							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 						}
-						catch {
+						finally {
 							DataAccessState.Current.ResetCache();
-							throw;
 						}
 					}
 
