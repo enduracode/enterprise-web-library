@@ -33,7 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal bool Execute(
 			bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
-			Action additionalMethod = null ) {
+			Tuple<Action, Action> actionMethodAndPostModificationMethod = null ) {
 			var validationNeeded = validations.Any() && ( !skipIfNoChanges || formValuesChanged );
 			if( validationNeeded ) {
 				var topValidator = new Validator();
@@ -53,7 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !formValuesChanged );
-			if( performValidationOnly || ( skipModification && additionalMethod == null ) )
+			if( performValidationOnly || ( skipModification && actionMethodAndPostModificationMethod == null ) )
 				return validationNeeded;
 
 			DataAccessState.Current.DisableCache();
@@ -62,10 +62,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					foreach( var method in modificationMethods )
 						method();
 				}
-				if( additionalMethod != null )
-					additionalMethod();
+				if( actionMethodAndPostModificationMethod != null )
+					actionMethodAndPostModificationMethod.Item1();
 				DataAccessState.Current.ResetCache();
 				AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
+				if( actionMethodAndPostModificationMethod != null )
+					actionMethodAndPostModificationMethod.Item2();
 			}
 			catch {
 				AppRequestState.Instance.RollbackDatabaseTransactions();

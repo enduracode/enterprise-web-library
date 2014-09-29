@@ -221,7 +221,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						}
 					} );
 				if( navigationNeeded )
-					navigate( null );
+					navigate( null, null );
 			}
 		}
 
@@ -260,6 +260,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			PageInfo redirectInfo = null;
+			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
 					validateFormSubmission( formValueHash );
@@ -305,14 +306,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									if( postBackAction == null )
 										return;
 									redirectInfo = postBackAction.Page;
-									if( postBackAction.SecondaryResponse != null ) {
-										// It's important that we put the response in session state first since it's used by the Info.init method of the get-file page.
-										postBackAction.SecondaryResponse.SetInSessionState();
-										StandardLibrarySessionState.Instance.SetClientSideNavigation(
-											EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
-											!postBackAction.SecondaryResponse.HasFileName,
-											null );
-									}
+									if( postBackAction.SecondaryResponse != null )
+										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
 								} );
 						}
 						catch {
@@ -350,7 +345,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						requestState.PostBackValues = null;
 				} );
 
-			navigate( redirectInfo );
+			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 			return null;
 		}
 
@@ -840,7 +835,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
 		}
 
-		private void navigate( PageInfo destination ) {
+		private void navigate( PageInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
@@ -859,14 +854,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			else
 				destination = createInfoFromNewParameterValues();
 
+			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
+			// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
+			// page as the redirect destination. The resulting transfer would lead the user to an error page.
+			var destinationUrl = destination.GetUrl();
+
+			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
+			if( secondaryResponse != null ) {
+				// It's important that we put the response in session state first since it's used by the Info.init method of the pre-built-response page.
+				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
+				StandardLibrarySessionState.Instance.SetClientSideNavigation(
+					EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
+					!secondaryResponse.FileName.Any(),
+					null );
+			}
+
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
 			if( destination.IsIdenticalToCurrent() ) {
-				// Force developers to get an error email if a page modifies data to invalidate itself without specifying a different page as the redirect
-				// destination. The resulting transfer would lead the user to an error page.
-				// An alternative to this GetUrl call is to detect in initEntitySetupAndCreateInfoObjects if we are on the back side of a transfer and make all
-				// exceptions unhandled. This would be harder to implement and has no benefits over the approach here.
-				destination.GetUrl();
-
 				AppRequestState.Instance.ClearUser();
 				resetPage();
 			}
@@ -875,7 +879,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( destination.GetType() == InfoAsBaseType.GetType() )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-			NetTools.Redirect( destination.GetUrl() );
+			NetTools.Redirect( destinationUrl );
 		}
 
 		/// <summary>

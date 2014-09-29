@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
-using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class SecondaryResponse {
-		private readonly Lazy<FullResponse> fullResponse;
+		private readonly Func<FullResponse> fullResponseGetter;
 
 		/// <summary>
 		/// Creates a BLOB-file secondary response.
@@ -19,21 +17,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a generic secondary response.
 		/// </summary>
-		/// <param name="responseCreator">The generic-response creator.</param>
+		/// <param name="responseCreator">The generic-response creator. Executes with the data-access cache enabled.</param>
 		/// <param name="memoryCachingSetup">The memory-caching setup object for the response. Pass null if you do not want to use EWL's memory cache.</param>
 		public SecondaryResponse( Func<EwfResponse> responseCreator, ResponseMemoryCachingSetup memoryCachingSetup = null ) {
-			fullResponse =
-				new Lazy<FullResponse>(
-					() =>
-					memoryCachingSetup != null
-						? FullResponse.GetFromCache( memoryCachingSetup.CacheKey, memoryCachingSetup.LastModificationDateAndTime, () => responseCreator().CreateFullResponse() )
-						: responseCreator().CreateFullResponse() );
+			fullResponseGetter =
+				() =>
+				memoryCachingSetup != null
+					? FullResponse.GetFromCache( memoryCachingSetup.CacheKey, memoryCachingSetup.LastModificationDateAndTime, () => responseCreator().CreateFullResponse() )
+					: responseCreator().CreateFullResponse();
 		}
 
-		internal void SetInSessionState() {
-			StandardLibrarySessionState.Instance.ResponseToSend = fullResponse.Value;
+		internal FullResponse GetFullResponse() {
+			return fullResponseGetter();
 		}
-
-		internal bool HasFileName { get { return fullResponse.Value.FileName.Any(); } }
 	}
 }

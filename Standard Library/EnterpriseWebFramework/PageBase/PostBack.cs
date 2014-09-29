@@ -152,12 +152,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool Execute( bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
+			PostBackAction action = null;
 			return dataModification.Execute(
 				skipModificationIfNoChanges,
 				formValuesChanged,
 				validationErrorHandler,
 				performValidationOnly: actionSetter == null,
-				additionalMethod: actionGetter != null ? new Action( () => actionSetter( actionGetter() ) ) : null );
+				actionMethodAndPostModificationMethod:
+					actionGetter != null ? new Tuple<Action, Action>( () => action = actionGetter(), () => actionSetter( action ) ) : null );
 		}
 
 		internal DataModification ValidationDm { get { return validationDm; } }
