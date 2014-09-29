@@ -730,15 +730,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual Control controlWithInitialFocus { get { return contentContainer.GetDescendants().FirstOrDefault( i => i is FormControl ); } }
 
-		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence ) {
-			var sentences = new[]
-				{
-					"Possible developer mistake.", messageSentence,
-					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
-		}
-
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
 				method();
@@ -837,26 +828,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void navigate( PageInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-			// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
-			// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
-			// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
-			// scenario:
-			// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
-			//    would throw an exception from init if it were re-created.
-			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-				destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
-			else if( destination != null )
-				destination = destination.CloneAndReplaceDefaultsIfPossible( false );
-			else
-				destination = createInfoFromNewParameterValues();
+			string destinationUrl;
+			try {
+				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
+				// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
+				// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
+				// scenario:
+				// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
+				//    would throw an exception from init if it were re-created.
+				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+				if( requestState.ModificationErrorsExist ||
+				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
+					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
+				else if( destination != null )
+					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
+				else
+					destination = createInfoFromNewParameterValues();
 
-			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
-			// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
-			// page as the redirect destination. The resulting transfer would lead the user to an error page.
-			var destinationUrl = destination.GetUrl();
+				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
+				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
+				// page as the redirect destination. The resulting transfer would lead the user to an error page.
+				destinationUrl = destination.GetUrl();
+			}
+			catch( Exception e ) {
+				throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
+			}
 
 			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
 			if( secondaryResponse != null ) {
@@ -885,6 +882,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Creates a page info object using the new parameter value fields in this page.
 		/// </summary>
 		protected abstract PageInfo createInfoFromNewParameterValues();
+
+		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+			var sentences = new[]
+				{
+					"Possible developer mistake.", messageSentence,
+					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+				};
+			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+		}
 
 		private void resetPage() {
 			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
