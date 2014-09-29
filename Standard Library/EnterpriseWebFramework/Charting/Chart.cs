@@ -260,7 +260,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 											                          csv.WriteCurrentLineToFile( writer );
 										                          }
 									                          } ),
-									                          () => "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ) ) ) ) ),
+									                          () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ),
 						new TextActionControlStyle( "Export" ),
 						usesSubmitBehavior: false ) );
 			block.Style.Add( "text-align", "right" );
