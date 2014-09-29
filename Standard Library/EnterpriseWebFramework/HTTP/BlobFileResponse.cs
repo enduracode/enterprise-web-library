@@ -25,7 +25,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal DateTime FileLastModificationDateAndTime { get { return file.UploadedDate; } }
-		internal string MemoryCacheKey { get { return "blobFile-" + file.FileId; } }
+
+		internal string MemoryCacheKey {
+			get { return "blobFile-{0}-{1}".FormatWith( file.FileId, forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" ); }
+		}
 
 		internal EwfResponse GetResponse() {
 			return new EwfResponse(
