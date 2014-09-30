@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Aspose.Cells;
+using ClosedXML.Excel;
 
 namespace RedStapler.StandardLibrary.IO {
 	/// <summary>
@@ -9,18 +9,13 @@ namespace RedStapler.StandardLibrary.IO {
 	/// </summary>
 	public class ExcelFileWriter {
 		// NOTE: It's a shame that this can't be a TabularDataFileWriter.
-		private readonly Workbook workbook;
+		private readonly XLWorkbook workbook;
 		private readonly Dictionary<string, ExcelWorksheet> namesToWorksheets = new Dictionary<string, ExcelWorksheet>();
 
 		/// <summary>
 		/// The content type of this file (MsExcel).
 		/// </summary>
-		public string ContentType { get { return UseLegacyExcelFormat ? ContentTypes.ExcelXls : ContentTypes.ExcelXlsx; } }
-
-		/// <summary>
-		/// True if the file should be saved in XLS (Excel 2003) format. Otherwise, the default of XLSX (Excel 2007 ) format is used.
-		/// </summary>
-		public bool UseLegacyExcelFormat { get; set; }
+		public string ContentType { get { return ContentTypes.ExcelXlsx; } }
 
 		/// <summary>
 		/// True if every worksheet should auto-fit its column widths immediately before saving. The default is true when creating a new blank ExcelFileWriter.
@@ -36,22 +31,20 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Creates a new Excel File Writer with one worksheet (the default worksheet) in the workbook.
 		/// </summary>
 		public ExcelFileWriter( bool createDefaultWorksheet = true ) {
-			workbook = new Workbook();
+			workbook = new XLWorkbook();
 			AutofitOnSave = true;
 			if( createDefaultWorksheet ) {
-				var newWorkSheet = new ExcelWorksheet( workbook.Worksheets[ 0 ] );
+				var newWorkSheet = new ExcelWorksheet( workbook.AddWorksheet( "Sheet1" ) );
 				namesToWorksheets.Add( newWorkSheet.Name, newWorkSheet );
 				DefaultWorksheet = newWorkSheet;
 			}
-			else
-				workbook.Worksheets.Clear();
 		}
 
 		/// <summary>
 		/// Opens an excel file from the given file path.
 		/// </summary>
 		public ExcelFileWriter( string filePath ) {
-			workbook = new Workbook( filePath );
+			workbook = new XLWorkbook( filePath );
 			loadWorksheets();
 		}
 
@@ -59,7 +52,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Opens an excel file.
 		/// </summary>
 		public ExcelFileWriter( Stream fileStream ) {
-			workbook = new Workbook( fileStream );
+			workbook = new XLWorkbook( fileStream );
 			loadWorksheets();
 		}
 
@@ -67,7 +60,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Loads the worksheets in the opened workbook into a dictionary.
 		/// </summary>
 		private void loadWorksheets() {
-			foreach( Worksheet worksheet in workbook.Worksheets )
+			foreach( var worksheet in workbook.Worksheets )
 				namesToWorksheets.Add( worksheet.Name, new ExcelWorksheet( worksheet ) );
 			DefaultWorksheet = namesToWorksheets.First().Value;
 		}
@@ -94,7 +87,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Gets a safe file name (using ToSafeFileName) using the appropriate extension (either .xls or .xlsx, depending on the value of UseLegacyExcelFormat).
 		/// </summary>
 		public string GetSafeFileName( string fileNameWithoutExtension ) {
-			return ( fileNameWithoutExtension + ( UseLegacyExcelFormat ? ".xls" : ".xlsx" ) ).ToSafeFileName();
+			return ( fileNameWithoutExtension + ".xlsx" ).ToSafeFileName();
 		}
 
 		/// <summary>
@@ -113,13 +106,13 @@ namespace RedStapler.StandardLibrary.IO {
 		public void SaveToStream( Stream stream ) {
 			if( AutofitOnSave )
 				autoFit();
-			workbook.Save( stream, UseLegacyExcelFormat ? SaveFormat.Excel97To2003 : SaveFormat.Xlsx );
+			workbook.SaveAs( stream );
 		}
 
 		private void autoFit() {
-			foreach( Worksheet worksheet in workbook.Worksheets ) {
-				worksheet.AutoFitColumns();
-				worksheet.AutoFitRows();
+			foreach( var worksheet in workbook.Worksheets ) {
+				worksheet.ColumnsUsed().AdjustToContents();
+				worksheet.RowsUsed().AdjustToContents();
 			}
 		}
 	}

@@ -125,7 +125,24 @@
     <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
     <Compile Include="DateTimeTools\DateTimeRangeOverlapsDateRange.cs" />
     <Compile Include="DoubleTools\ToMoneyString.cs" />
+    <Compile Include="IO\ExcelFileWriterTester.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeManagerMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\TestFileMergeFields\FullName.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\MergeTestData.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\PhysicianEmail.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\FirstName.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\LastName.cs" />
+    <Compile Include="MailMerging\MergeOpsTester.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PhysicianDataStructure\PhysicianMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeManagerDataStructure\PracticeManagerMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeMockData.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeDocumentMergeFields\PracticeName.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\TheValue.cs" />
     <Compile Include="RsLibraryTester.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Validation\UrlValidatorTester.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -160,11 +177,24 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="TestFiles\MergeOps\pdf.pdf" />
-    <None Include="TestFiles\MergeOps\word.docx" />
-    <None Include="TestFiles\PdfOps\onepage.pdf" />
-    <None Include="TestFiles\PdfOps\threepage.pdf" />
-    <None Include="TestFiles\PdfOps\twopage.pdf" />
+    <None Include="TestFiles\MergeOps\pdf.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\MergeOps\PracticesUserAccess.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\MergeOps\word.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\onepage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\threepage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\twopage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
