@@ -11,7 +11,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class EwfSafeResponseWriter {
 		internal const string UrlVersionStringFormat = "yyyyMMddHHmm";
 
-		internal static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
+		/// <summary>
+		/// Returns the URL resource-version string for the specified date/time.
+		/// </summary>
+		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
 			return dateAndTime.ToString( UrlVersionStringFormat );
 		}
 
