@@ -79,8 +79,8 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Convenience method for converting a collection into a HashSet.
 		/// </summary>
-		public static HashSet<T> ToHashSet<T>(this IEnumerable<T> items) {
-			return new HashSet<T>(items);
+		public static HashSet<T> ToHashSet<T>( this IEnumerable<T> items ) {
+			return new HashSet<T>( items );
 		}
 	}
 }
