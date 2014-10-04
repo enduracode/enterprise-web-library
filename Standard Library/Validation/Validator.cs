@@ -224,6 +224,7 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// <summary>
 		/// Returns the validated int type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
+		/// <paramref name="min"/> and <paramref name="max"/> are inclusive.
 		/// </summary>
 		public int GetInt( ValidationErrorHandler errorHandler, string intAsString, int min, int max ) {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>(
