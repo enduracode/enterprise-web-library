@@ -31,7 +31,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal string MemoryCacheKey {
-			get { return "blobFile-{0}-{1}".FormatWith( file.FileId, forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" ); }
+			get {
+				return "blobFile-{0}-{1}-{2}".FormatWith(
+					file.FileId,
+					processAsAttachment.Value ? "a" : "i",
+					forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" );
+			}
 		}
 
 		internal EwfResponse GetResponse() {
