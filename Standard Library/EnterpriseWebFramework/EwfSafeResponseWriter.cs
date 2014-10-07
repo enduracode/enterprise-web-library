@@ -33,8 +33,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// response-creator functions, we need to incorporate the chosen response's content type into the ETag if we want it to remain a strong ETag. We also
 				// need to incorporate the content type into the memory-cache key.
 
+				// If we don't have caching information, the response is probably not shareable.
 				aspNetResponse.Cache.SetCacheability(
 					urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null ? HttpCacheability.Public : HttpCacheability.Private );
+
 				aspNetResponse.Cache.SetMaxAge( urlVersionString.Any() ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
 
 				var lastModificationDateAndTime = lastModificationDateAndTimeGetter != null ? new Lazy<DateTimeOffset>( lastModificationDateAndTimeGetter ) : null;
