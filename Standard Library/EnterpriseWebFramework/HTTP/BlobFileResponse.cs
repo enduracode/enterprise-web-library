@@ -7,7 +7,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class BlobFileResponse {
 		private readonly BlobFile file;
-		private readonly Func<bool> processAsAttachmentGetter;
+		private readonly Lazy<bool> processAsAttachment;
 		private readonly Lazy<int?> forcedImageWidth;
 
 		/// <summary>
@@ -20,11 +20,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// ratio. The file must be an image. Pass null or return null if the file is not an image or you do not want scaling.</param>
 		public BlobFileResponse( int fileId, Func<bool> processAsAttachmentGetter, Func<int?> forcedImageWidthGetter = null ) {
 			file = BlobFileOps.SystemProvider.GetFile( fileId );
-			this.processAsAttachmentGetter = processAsAttachmentGetter ?? ( () => false );
+			processAsAttachment = new Lazy<bool>( processAsAttachmentGetter ?? ( () => false ) );
 			forcedImageWidth = new Lazy<int?>( forcedImageWidthGetter ?? ( () => null ) );
 		}
 
 		internal DateTime FileLastModificationDateAndTime { get { return file.UploadedDate; } }
+
+		internal string ETagBase {
+			get { return ( processAsAttachment.Value ? "a" : "i" ) + ( forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "" ); }
+		}
 
 		internal string MemoryCacheKey {
 			get { return "blobFile-{0}-{1}".FormatWith( file.FileId, forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" ); }
@@ -40,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							contents = StandardLibraryMethods.ResizeImage( contents, forcedImageWidth.Value.Value );
 						return contents;
 					} ),
-				fileNameCreator: () => processAsAttachmentGetter() ? file.FileName : "" );
+				fileNameCreator: () => processAsAttachment.Value ? file.FileName : "" );
 		}
 	}
 }

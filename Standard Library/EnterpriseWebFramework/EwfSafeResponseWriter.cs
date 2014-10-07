@@ -19,7 +19,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private static Action<HttpRequest, HttpResponse> createWriter(
-			Func<EwfResponse> responseCreator, string urlVersionString, Func<DateTimeOffset> lastModificationDateAndTimeGetter, Func<string> memoryCacheKeyGetter ) {
+			Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<DateTimeOffset> lastModificationDateAndTimeGetter,
+			Func<string> memoryCacheKeyGetter ) {
 			return ( aspNetRequest, aspNetResponse ) => {
 				// Disable ASP.NET output caching.
 				aspNetResponse.Cache.SetNoServerCaching();
@@ -39,8 +40,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				string eTag;
 				if( urlVersionString.Any() )
 					eTag = urlVersionString;
-				else if( lastModificationDateAndTimeGetter != null )
-					eTag = GetUrlVersionString( lastModificationDateAndTime.Value ).Substring( 1 );
+				else if( eTagBase.Any() || lastModificationDateAndTimeGetter != null )
+					eTag = eTagBase + ( lastModificationDateAndTimeGetter != null ? GetUrlVersionString( lastModificationDateAndTime.Value ) : "" );
 				else {
 					// Buffer the response body.
 					var responseWithBufferedBody = new EwfResponse(
@@ -107,6 +108,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			writer = createWriter(
 				() => response.Value.GetResponse(),
 				urlVersionString,
+				urlVersionString.Any() ? null : response.Value.ETagBase,
 				() => response.Value.FileLastModificationDateAndTime,
 				() => useMemoryCacheGetter() ? response.Value.MemoryCacheKey : "" );
 		}
@@ -116,20 +118,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="response">The response.</param>
 		public EwfSafeResponseWriter( EwfResponse response ) {
-			writer = createWriter( () => response, "", null, () => "" );
+			writer = createWriter( () => response, "", "", null, () => "" );
 		}
 
 		/// <summary>
 		/// Creates a response writer with a generic response, a last-modification date/time (which enables conditional requests), and an optional memory-cache key.
-		/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since those elements cannot
-		/// currently be incorporated into the ETag.
+		/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since a parameter doesn't
+		/// exist yet to incorporate those elements into the ETag.
 		/// </summary>
 		/// <param name="responseCreator">The response creator.</param>
 		/// <param name="lastModificationDateAndTime">The last-modification date/time of the resource.</param>
 		/// <param name="memoryCacheKeyGetter">A function that gets the memory-cache key for this response. Pass null or return the empty string if you do not want
 		/// to use EWL's memory cache. Do not return null.</param>
 		public EwfSafeResponseWriter( Func<EwfResponse> responseCreator, DateTimeOffset lastModificationDateAndTime, Func<string> memoryCacheKeyGetter = null ) {
-			writer = createWriter( responseCreator, "", () => lastModificationDateAndTime, memoryCacheKeyGetter ?? ( () => "" ) );
+			writer = createWriter( responseCreator, "", "", () => lastModificationDateAndTime, memoryCacheKeyGetter ?? ( () => "" ) );
 		}
 
 		/// <summary>
@@ -147,6 +149,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			writer = createWriter(
 				responseCreator,
 				urlVersionString,
+				"",
 				() => memoryCachingSetup.Value.LastModificationDateAndTime,
 				() => memoryCachingSetup.Value != null ? memoryCachingSetup.Value.CacheKey : "" );
 		}
