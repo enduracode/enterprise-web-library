@@ -99,8 +99,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="responseCreator">The response creator.</param>
 		/// <param name="urlVersionString">The resource-version string from the request URL. Including a version string in a resource's URL greatly improves the
-		/// cacheability of the resource, so you should use this technique whenever you have the ability to change the URL when the resource changes. Do not pass
-		/// null.</param>
+		/// cacheability of the resource, so you should use this technique whenever you have the ability to change the URL when the resource changes. Do not use a
+		/// version string if the response will vary based on non-URL elements of the request, such as the authenticated user. Do not pass null.</param>
 		/// <param name="useMemoryCacheGetter">A function that gets whether you want to use EWL's memory cache for this response. Do not pass null.</param>
 		public EwfSafeResponseWriter( Func<BlobFileResponse> responseCreator, string urlVersionString, Func<bool> useMemoryCacheGetter ) {
 			var response = new Lazy<BlobFileResponse>( responseCreator );
@@ -121,6 +121,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Creates a response writer with a generic response, a last-modification date/time (which enables conditional requests), and an optional memory-cache key.
+		/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since those elements cannot
+		/// currently be incorporated into the ETag.
 		/// </summary>
 		/// <param name="responseCreator">The response creator.</param>
 		/// <param name="lastModificationDateAndTime">The last-modification date/time of the resource.</param>
@@ -133,7 +135,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a response writer with a generic response, a resource-version string from the request URL, and optional memory caching information. Including a
 		/// version string in a resource's URL greatly improves the cacheability of the resource, so you should use this technique whenever you have the ability to
-		/// change the URL when the resource changes.
+		/// change the URL when the resource changes. Do not use a version string if the response will vary based on non-URL elements of the request, such as the
+		/// authenticated user.
 		/// </summary>
 		/// <param name="responseCreator">The response creator.</param>
 		/// <param name="urlVersionString">The resource-version string from the request URL. Do not pass null or the empty string.</param>
