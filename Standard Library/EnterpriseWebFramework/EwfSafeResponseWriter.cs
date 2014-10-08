@@ -113,10 +113,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="useMemoryCacheGetter">A function that gets whether you want to use EWL's memory cache for this response. Do not pass null.</param>
 		public EwfSafeResponseWriter( Func<BlobFileResponse> responseCreator, string urlVersionString, Func<bool> useMemoryCacheGetter ) {
 			var response = new Lazy<BlobFileResponse>( responseCreator );
+
+			// The ETag base is unused and unnecessary if we have a resource-version string from the request URL. Otherwise, it is only necessary if the response
+			// varies based on non-URL elements of the request. We don't know if this is true, so we assume that it is.
 			writer = createWriter(
 				() => response.Value.GetResponse(),
 				urlVersionString,
-				urlVersionString.Any() ? null : response.Value.ETagBase,
+				urlVersionString.Any() ? "" : response.Value.ETagBase,
 				() => response.Value.FileLastModificationDateAndTime,
 				() => useMemoryCacheGetter() ? response.Value.MemoryCacheKey : "" );
 		}

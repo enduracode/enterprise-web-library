@@ -26,11 +26,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal DateTime FileLastModificationDateAndTime { get { return file.UploadedDate; } }
 
-		internal string ETagBase {
-			get { return ( processAsAttachment.Value ? "a" : "i" ) + ( forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "" ); }
-		}
+		internal string ETagBase { get { return identifier; } }
+		internal string MemoryCacheKey { get { return identifier; } }
 
-		internal string MemoryCacheKey {
+		private string identifier {
 			get {
 				return "blobFile-{0}-{1}-{2}".FormatWith(
 					file.FileId,
