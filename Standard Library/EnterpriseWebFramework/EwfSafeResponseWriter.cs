@@ -33,9 +33,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// response-creator functions, we need to incorporate the chosen response's content type into the ETag if we want it to remain a strong ETag. We also
 				// need to incorporate the content type into the memory-cache key.
 
+				// Assume that all HTTPS responses are private. This isn't true for CSS, JavaScript, etc. requests that are only secure in order to match the security
+				// of a page, but that's not a big deal since most shared caches can't open and cache HTTPS anyway.
+				//
 				// If we don't have caching information, the response is probably not shareable.
 				aspNetResponse.Cache.SetCacheability(
-					urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null ? HttpCacheability.Public : HttpCacheability.Private );
+					!aspNetRequest.IsSecureConnection && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
+						? HttpCacheability.Public
+						: HttpCacheability.Private );
 
 				aspNetResponse.Cache.SetMaxAge( urlVersionString.Any() ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
 
