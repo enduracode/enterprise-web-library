@@ -30,6 +30,11 @@ namespace RedStapler.StandardLibrary {
 		/// CSS.
 		/// </summary>
 		public const string Css = "text/css";
+		
+		/// <summary>
+		/// CSV
+		/// </summary>
+		public const string Csv = "text/csv";
 
 		/// <summary>
 		/// Content type to be used by PDF files.
@@ -37,7 +42,7 @@ namespace RedStapler.StandardLibrary {
 		public const string Pdf = MediaTypeNames.Application.Pdf;
 
 		/// <summary>
-		/// Content type to be used by plain text files (.txt, .csv, etc.).
+		/// Content type to be used by plain text files (.txt, etc.).
 		/// </summary>
 		public const string PlainText = MediaTypeNames.Text.Plain;
 
@@ -105,7 +110,7 @@ namespace RedStapler.StandardLibrary {
 				case FileExtensions.Css:
 					return Css;
 				case FileExtensions.Csv:
-					return PlainText;
+					return Csv;
 				case FileExtensions.ExcelXls:
 					return ExcelXls;
 				case FileExtensions.ExcelXlsx:
