@@ -78,8 +78,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "partial class AppTools {" );
 						CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
 						writer.WriteLine(
-							"public static readonly DateTimeOffset EwlBuildDateTime = DateTimeOffset.Parse( \"" + DateTimeOffset.UtcNow.ToString( "o" ) +
-							"\", null, DateTimeStyles.RoundtripKind );" );
+							"public static readonly DateTimeOffset EwlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 					} );
@@ -379,6 +378,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System;" );
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Collections.ObjectModel;" );
+				writer.WriteLine( "using System.Globalization;" );
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -389,6 +389,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
+				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, webProject.name );

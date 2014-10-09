@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			Response.TrySkipIisCustomErrors = true;
 
 			if( info.ShowHomeLink )
-				StandardLibrarySessionState.Instance.SetTimedClientSideRedirect( NetTools.HomeUrl, 5 );
+				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation( NetTools.HomeUrl, 5 );
 			else
 				homeLit.Visible = false;
 		}

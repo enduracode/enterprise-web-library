@@ -2,7 +2,6 @@ using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -47,15 +46,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			var controlStack = ControlStack.Create( true );
 			if( file != null ) {
-				var download = new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-				                                                        actionGetter: () => {
-					                                                        // Refresh the file here in case a new one was uploaded on the same post-back.
-					                                                        return
-						                                                        new PostBackAction(
-							                                                        new FileCreator( () => BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId ) );
-				                                                        } ),
-				                                   new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
-				                                   false );
+				var download = new PostBackButton(
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter: () => {
+							// Refresh the file here in case a new one was uploaded on the same post-back.
+							return
+								new PostBackAction(
+									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ), false ) );
+						} ),
+					new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
+					false );
 				controlStack.AddControls( download );
 			}
 			else if( !HideNoExistingFileMessage )
@@ -64,8 +65,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			uploadedFile = new EwfFileUpload();
 			if( file != null ) {
 				uploadedFile.SetInitialDisplay( false );
-				var replaceExistingFileLink = new ToggleButton( uploadedFile.ToSingleElementArray(),
-				                                                new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ) ) { AlternateText = "" };
+				var replaceExistingFileLink = new ToggleButton(
+					uploadedFile.ToSingleElementArray(),
+					new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ) ) { AlternateText = "" };
 				controlStack.AddControls( replaceExistingFileLink );
 			}
 
@@ -106,8 +108,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			validateFormValues( validator, subject, requireUploadIfNoFile, validateImage, true );
 		}
 
-		private void validateFormValues( Validator validator, string subject, bool requireUploadIfNoFile, Action<Validator, System.Drawing.Image> validateImage,
-		                                 bool mustBeImage ) {
+		private void validateFormValues(
+			Validator validator, string subject, bool requireUploadIfNoFile, Action<Validator, System.Drawing.Image> validateImage, bool mustBeImage ) {
 			BlobFileOps.ValidateUploadedFile( validator, uploadedFile, acceptableFileExtensions, validateImage, mustBeImage );
 			if( requireUploadIfNoFile && file == null && !uploadedFile.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
 				validator.NoteErrorAndAddMessage( Translation.PleaseUploadAFile + " '" + subject + "'." );

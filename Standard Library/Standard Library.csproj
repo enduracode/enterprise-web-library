@@ -124,6 +124,7 @@
   <ItemGroup>
     <Compile Include="Caching\AppMemoryCache.cs" />
     <Compile Include="AppTools.cs" />
+    <Compile Include="Caching\DateAndTimeVersionedCache.cs" />
     <Compile Include="Caching\PeriodicEvictionCompositeCacheEntry.cs" />
     <Compile Include="CertificateAuthenticationModule.cs" />
     <Compile Include="Chronometer.cs" />
@@ -204,6 +205,7 @@
     <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\ErrorMessageControlListBlockStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />
@@ -219,6 +221,11 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\BlobFileResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\EwfResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\EwfResponseBodyCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\FullResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\ResponseMemoryCachingSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />
@@ -328,6 +335,7 @@
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\SecondaryPostBackOperation.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\SecondaryResponse.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
@@ -458,15 +466,12 @@
     <Compile Include="Tools\TimeSpanTools.cs" />
     <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
-    <Compile Include="WebFileSending\FileInfoToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />
     <Compile Include="InitializationAwareValue.cs" />
     <Compile Include="IO\TabDelimitedFileWriter.cs" />
     <Compile Include="IO\TabularDataFileWriter.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
-    <Compile Include="WebFileSending\FileCreator.cs" />
-    <Compile Include="WebFileSending\FileToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -518,8 +523,6 @@
     <Compile Include="MultiColumnForms\MultiColumnValidator.cs" />
     <Compile Include="EnterpriseWebFramework\ResourceNotAvailableException.cs" />
     <Compile Include="StandardLibraryMethods.cs" />
-    <Compile Include="WebFileSending\ImageFileCreator.cs" />
-    <Compile Include="WebFileSending\ImageToBeSent.cs" />
     <Compile Include="WebSessionState\StandardLibrarySessionState.cs" />
     <Compile Include="WebSessionState\StatusMessageType.cs" />
     <Compile Include="IO\ZipOps.cs" />

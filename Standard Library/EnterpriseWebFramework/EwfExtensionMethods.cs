@@ -5,7 +5,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -13,15 +12,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public static class EwfExtensionMethods {
 		/// <summary>
-		/// Saves the given Excel work book to the response stream. It is not necessary to save the workbook before calling this method.
-		/// Automatically executes inside an EhModifyDataAndSendFile method. Automatically converts the given file name to a safe file name.
+		/// Gets a response with the given Excel work book. It is not necessary to save the workbook before calling this method. Automatically converts the given
+		/// file name to a safe file name.
 		/// </summary>
-		public static FileCreator GetExcelFileCreator( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			return new FileCreator(
-				stream => {
-					workbook.SaveToStream( stream );
-					return new FileInfoToBeSent( workbook.GetSafeFileName( fileNameWithoutExtension ), workbook.ContentType );
-				} );
+		public static EwfResponse GetExcelFileResponse( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
+			return new EwfResponse(
+				workbook.ContentType,
+				new EwfResponseBodyCreator( workbook.SaveToStream ),
+				fileNameCreator: () => workbook.GetSafeFileName( fileNameWithoutExtension ) );
 		}
 
 		/// <summary>

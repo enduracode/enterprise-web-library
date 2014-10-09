@@ -12,7 +12,6 @@ using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
 
@@ -123,8 +122,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( fileCreator != null )
-				fileCreator.CreateFile().WriteToResponse( sendsFileInline );
+			if( responseWriter != null ) {
+				Response.ClearHeaders();
+				Response.ClearContent();
+				responseWriter.WriteResponse();
+
+				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
+				// EWF from Web Forms. This is EnduraCode goal 790.
+				Response.End();
+			}
 		}
 
 		/// <summary>
@@ -138,14 +144,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
-		/// Gets the FileCreator for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
+		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual FileCreator fileCreator { get { return null; } }
-
-		/// <summary>
-		/// Gets whether the page sends its file inline or as an attachment. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
-		/// </summary>
-		protected virtual bool sendsFileInline { get { return true; } }
+		protected virtual EwfSafeResponseWriter responseWriter { get { return null; } }
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
@@ -220,7 +221,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						}
 					} );
 				if( navigationNeeded )
-					navigate( null );
+					navigate( null, null );
 			}
 		}
 
@@ -259,6 +260,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			PageInfo redirectInfo = null;
+			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
 					validateFormSubmission( formValueHash );
@@ -304,8 +306,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 									if( postBackAction == null )
 										return;
 									redirectInfo = postBackAction.Page;
-									if( postBackAction.File != null )
-										StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
+									if( postBackAction.SecondaryResponse != null )
+										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
 								} );
 						}
 						catch {
@@ -319,9 +321,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						try {
 							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 						}
-						catch {
+						finally {
 							DataAccessState.Current.ResetCache();
-							throw;
 						}
 					}
 
@@ -343,7 +344,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						requestState.PostBackValues = null;
 				} );
 
-			navigate( redirectInfo );
+			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 			return null;
 		}
 
@@ -654,14 +655,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideRedirectUrl;
-			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
-			var locationReplaceStatement = "";
-			if( clientSideRedirectUrl.Length > 0 ) {
-				locationReplaceStatement = "location.replace( '" + this.GetClientUrl( clientSideRedirectUrl ) + "' );";
-				if( clientSideRedirectDelay.HasValue )
-					locationReplaceStatement = "setTimeout( \"" + locationReplaceStatement + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
+			string clientSideNavigationUrl;
+			bool clientSideNavigationInNewWindow;
+			int? clientSideNavigationDelay;
+			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+				out clientSideNavigationUrl,
+				out clientSideNavigationInNewWindow,
+				out clientSideNavigationDelay );
+			var clientSideNavigationStatements = "";
+			if( clientSideNavigationUrl.Any() ) {
+				var url = this.GetClientUrl( clientSideNavigationUrl );
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				if( clientSideNavigationDelay.HasValue )
+					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
 			ClientScript.RegisterClientScriptBlock(
@@ -675,7 +684,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, locationReplaceStatement )
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) ) + " } );",
 				true );
@@ -720,15 +729,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
 		protected virtual Control controlWithInitialFocus { get { return contentContainer.GetDescendants().FirstOrDefault( i => i is FormControl ); } }
-
-		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence ) {
-			var sentences = new[]
-				{
-					"Possible developer mistake.", messageSentence,
-					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
-		}
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -826,33 +826,48 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
 		}
 
-		private void navigate( PageInfo destination ) {
+		private void navigate( PageInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-			// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
-			// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
-			// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
-			// scenario:
-			// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
-			//    would throw an exception from init if it were re-created.
-			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-				destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
-			else if( destination != null )
-				destination = destination.CloneAndReplaceDefaultsIfPossible( false );
-			else
-				destination = createInfoFromNewParameterValues();
+			string destinationUrl;
+			try {
+				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
+				// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
+				// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
+				// scenario:
+				// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
+				//    would throw an exception from init if it were re-created.
+				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+				if( requestState.ModificationErrorsExist ||
+				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
+					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
+				else if( destination != null )
+					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
+				else
+					destination = createInfoFromNewParameterValues();
+
+				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
+				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
+				// page as the redirect destination. The resulting transfer would lead the user to an error page.
+				destinationUrl = destination.GetUrl();
+			}
+			catch( Exception e ) {
+				throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
+			}
+
+			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
+			if( secondaryResponse != null ) {
+				// It's important that we put the response in session state first since it's used by the Info.init method of the pre-built-response page.
+				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
+				StandardLibrarySessionState.Instance.SetClientSideNavigation(
+					EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
+					!secondaryResponse.FileName.Any(),
+					null );
+			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
 			if( destination.IsIdenticalToCurrent() ) {
-				// Force developers to get an error email if a page modifies data to invalidate itself without specifying a different page as the redirect
-				// destination. The resulting transfer would lead the user to an error page.
-				// An alternative to this GetUrl call is to detect in initEntitySetupAndCreateInfoObjects if we are on the back side of a transfer and make all
-				// exceptions unhandled. This would be harder to implement and has no benefits over the approach here.
-				destination.GetUrl();
-
 				AppRequestState.Instance.ClearUser();
 				resetPage();
 			}
@@ -861,13 +876,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( destination.GetType() == InfoAsBaseType.GetType() )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-			NetTools.Redirect( destination.GetUrl() );
+			NetTools.Redirect( destinationUrl );
 		}
 
 		/// <summary>
 		/// Creates a page info object using the new parameter value fields in this page.
 		/// </summary>
 		protected abstract PageInfo createInfoFromNewParameterValues();
+
+		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+			var sentences = new[]
+				{
+					"Possible developer mistake.", messageSentence,
+					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+				};
+			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+		}
 
 		private void resetPage() {
 			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
@@ -880,7 +904,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
 			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
+			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 			DataAccessState.Current.DisableCache();
 			try {
 				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
@@ -982,7 +1006,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				formValueString.Append( formValue.GetDurableValueAsString() );
 			}
 
-			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
 			var hashString = "";
 			foreach( var b in hash )
 				hashString += b.ToString( "x2" );

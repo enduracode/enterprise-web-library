@@ -8,14 +8,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 	/// ISU and internal use only.
 	/// </summary>
 	public class CssHandler: IHttpHandler {
-		// We assume that all version strings will have the same length as this format string.
-		private const string versionFormatString = "-yyyyMMddHHmm";
+		private const string urlVersionStringPrefix = "-";
 
 		/// <summary>
-		/// ISU use only.
+		/// Development Utility use only.
 		/// </summary>
-		public static string GetFileVersionString( DateTime dateAndTime ) {
-			return dateAndTime.ToString( versionFormatString );
+		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
+			return urlVersionStringPrefix + EwfSafeResponseWriter.GetMinuteResolutionUrlVersionString( dateAndTime );
 		}
 
 		/// <summary>
@@ -31,33 +30,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 
 		void IHttpHandler.ProcessRequest( HttpContext context ) {
 			var url = context.Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
-			var removalIndex = url.LastIndexOf( "." ) - versionFormatString.Length;
-			if( removalIndex < 0 )
+
+			// We assume that all URL version strings will have the same length as the format string.
+			var prefixedVersionStringIndex = url.LastIndexOf( "." ) -
+			                                 ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.MinuteResolutionUrlVersionStringFormat.Length );
+
+			if( prefixedVersionStringIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the version and extension in the URL.", null );
 			var cssInfo =
 				EwfApp.GlobalType.Assembly.CreateInstance(
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
-						url.Remove( removalIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) )
-				as CssInfo;
+						url.Remove( prefixedVersionStringIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) +
+						"+Info" ) ) as CssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
-			if( cssInfo.GetUrl() != context.Request.AppRelativeCurrentExecutionFilePath )
-				throw new ResourceNotAvailableException( "The URL does not exactly match the Info object for the request.", null );
+			var urlVersionString = url.Substring(
+				prefixedVersionStringIndex + urlVersionStringPrefix.Length,
+				EwfSafeResponseWriter.MinuteResolutionUrlVersionStringFormat.Length );
+			if( EwfSafeResponseWriter.GetMinuteResolutionUrlVersionString( cssInfo.GetResourceLastModificationDateAndTime() ) != urlVersionString )
+				throw new ResourceNotAvailableException( "The URL version string does not match the last-modification date/time of the resource.", null );
 
-			var response = context.Response;
-			response.AddFileDependency( cssInfo.FilePath );
-
-			response.ContentType = ContentTypes.Css;
-			response.Cache.SetLastModifiedFromFileDependencies();
-			response.Cache.SetMaxAge( TimeSpan.FromDays( 365 ) );
-			response.Cache.SetCacheability( HttpCacheability.Public );
-			response.Cache.SetValidUntilExpires( true );
-
-			// SetMaxAge has no effect without this line. We are not sure why.
-			response.Cache.SetSlidingExpiration( true );
-
-			response.Write( CssPreprocessor.TransformCssFile( File.ReadAllText( cssInfo.FilePath ) ) );
+			new EwfSafeResponseWriter(
+				() => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( File.ReadAllText( cssInfo.FilePath ) ) ) ),
+				urlVersionString,
+				memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( cssInfo.GetUrl(), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }

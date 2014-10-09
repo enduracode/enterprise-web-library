@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class CssFile {
@@ -16,6 +14,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "public class " + generalData.ClassName + " {" );
 			writer.WriteLine( "public sealed class Info: CssInfo {" );
 			writeGetUrlMethod( writer );
+
+			// We could use the last write time of the file instead of the current date/time, but that would prevent re-downloading when we change the expansion of a
+			// CSS element without changing the source file.
+			writer.WriteLine(
+				"public override DateTimeOffset GetResourceLastModificationDateAndTime() { return " + AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) +
+				"; }" );
+
 			writeAppRelativeFilePathProperty( writer );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
@@ -26,13 +31,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "public override string GetUrl() {" );
 
 			var extensionIndex = generalData.UrlRelativeToProject.LastIndexOf( "." );
-
-			// We could use the last write time of the file for the version string instead of DateTime.Now, but that would prevent re-downloading when we change the
-			// expansion of a CSS element without changing the source file.
-			writer.WriteLine( "return \"" +
-			                  NetTools.CombineUrls( "~",
-			                                        generalData.UrlRelativeToProject.Remove( extensionIndex ) + CssHandler.GetFileVersionString( DateTime.Now ) +
-			                                        generalData.UrlRelativeToProject.Substring( extensionIndex ) ) + "\";" );
+			writer.WriteLine(
+				"return \"~/" + generalData.UrlRelativeToProject.Remove( extensionIndex ) +
+				"\" + CssHandler.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) + \"" + generalData.UrlRelativeToProject.Substring( extensionIndex ) +
+				"\";" );
 
 			writer.WriteLine( "}" );
 		}

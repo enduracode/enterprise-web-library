@@ -6,7 +6,6 @@ using System.Web.UI;
 using Aspose.Pdf.Facades;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -50,8 +49,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Pass null for acceptableFileExtensions if there is no restriction on file extension.
 		/// PerformAdditionalImageValidation cannot be null but may be an empty delegate.
 		/// </summary>
-		public static void ValidateUploadedFile( Validator validator, EwfFileUpload uploadedFile, string[] acceptableFileExtensions,
-		                                         Action<Validator, System.Drawing.Image> performAdditionalImageValidation, bool mustBeRenderableImage ) {
+		public static void ValidateUploadedFile(
+			Validator validator, EwfFileUpload uploadedFile, string[] acceptableFileExtensions, Action<Validator, System.Drawing.Image> performAdditionalImageValidation,
+			bool mustBeRenderableImage ) {
 			var file = uploadedFile.GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			if( file == null )
 				return;
@@ -122,8 +122,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				return textIfNoFile.GetLiteralControl();
 			return
 				new PostBackButton(
-					PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-					                     actionGetter: () => new PostBackAction( FileCreator.CreateFromFileCollection( fileCollectionId ) ) ),
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter:
+							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}
@@ -140,7 +142,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				return textIfNoFile.GetLiteralControl();
 			return
 				new PostBackButton(
-					PostBack.CreateFull( id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ), actionGetter: () => new PostBackAction( new FileCreator( fileId ) ) ),
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ),
 					new TextActionControlStyle( labelOverride ?? file.FileName ),
 					false );
 		}

@@ -6,7 +6,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -146,7 +145,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							if( fileIsUnread && markFileAsReadMethod != null )
 								markFileAsReadMethod( file.FileId );
 						},
-						actionGetter: () => new PostBackAction( new FileCreator( () => file.FileId ) ) ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ),
 					new TextActionControlStyle( file.FileName ),
 					false ) { ToolTip = file.FileName } );
 

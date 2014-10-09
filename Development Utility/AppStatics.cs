@@ -4,7 +4,7 @@ using System.Linq;
 using RedStapler.StandardLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
-	internal class AppStatics {
+	internal static class AppStatics {
 		internal const string WebProjectFilesFolderName = "Web Project Files";
 		internal const string EwfFolderName = "Ewf";
 		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
@@ -26,6 +26,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 						e );
 				}
 			}
+		}
+
+		internal static string GetLiteralDateTimeExpression( DateTimeOffset dateTime ) {
+			return "DateTimeOffset.Parse( \"" + dateTime.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind )";
 		}
 	}
 }

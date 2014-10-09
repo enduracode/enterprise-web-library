@@ -10,7 +10,6 @@ using JetBrains.Annotations;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -246,20 +245,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						PostBack.CreateFull(
 							id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
 							actionGetter: () => new PostBackAction(
-								                    new FileCreator(
-								                    output => {
-									                    var csv = new CsvFileWriter();
-									                    var writer = new StreamWriter( output );
+								                    new SecondaryResponse(
+								                    () => new EwfResponse(
+									                          "text/csv",
+									                          new EwfResponseBodyCreator(
+									                          output => {
+										                          var csv = new CsvFileWriter();
+										                          var writer = new StreamWriter( output );
 
-									                    csv.AddValuesToLine( headers.ToArray() );
-									                    csv.WriteCurrentLineToFile( writer );
-									                    foreach( var td in tableData ) {
-										                    csv.AddValuesToLine( td.ToArray() );
-										                    csv.WriteCurrentLineToFile( writer );
-									                    }
-
-									                    return new FileInfoToBeSent( "{0} {1}.csv".FormatWith( setup.ExportFileName, DateTime.Now ), "text/csv" );
-								                    } ) ) ),
+										                          csv.AddValuesToLine( headers.ToArray() );
+										                          csv.WriteCurrentLineToFile( writer );
+										                          foreach( var td in tableData ) {
+											                          csv.AddValuesToLine( td.ToArray() );
+											                          csv.WriteCurrentLineToFile( writer );
+										                          }
+									                          } ),
+									                          () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ),
 						new TextActionControlStyle( "Export" ),
 						usesSubmitBehavior: false ) );
 			block.Style.Add( "text-align", "right" );

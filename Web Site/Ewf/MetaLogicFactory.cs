@@ -11,8 +11,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return new UserManagement.LogIn.Info( returnUrl );
 		}
 
-		PageInfo AppMetaLogicFactory.CreateGetFilePageInfo() {
-			return new GetFile.Info();
+		PageInfo AppMetaLogicFactory.CreatePreBuiltResponsePageInfo() {
+			return new PreBuiltResponse.Info();
 		}
 
 		PageInfo AppMetaLogicFactory.CreateAccessDeniedErrorPageInfo( bool showHomeLink ) {
