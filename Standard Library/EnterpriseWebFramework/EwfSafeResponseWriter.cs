@@ -41,10 +41,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// of a page, but that's not a big deal since most shared caches can't open and cache HTTPS anyway.
 				//
 				// If we don't have caching information, the response is probably not shareable.
+				//
+				// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
+				// (i.e. server caching) will still be disabled because of our SetNoServerCaching call above.
 				aspNetResponse.Cache.SetCacheability(
 					!aspNetRequest.IsSecureConnection && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
 						? HttpCacheability.Public
-						: HttpCacheability.Private );
+						: HttpCacheability.ServerAndPrivate );
 
 				aspNetResponse.Cache.SetMaxAge( urlVersionString.Any() ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
 
