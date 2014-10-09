@@ -247,7 +247,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							actionGetter: () => new PostBackAction(
 								                    new SecondaryResponse(
 								                    () => new EwfResponse(
-									                          "text/csv",
+									                          ContentTypes.Csv,
 									                          new EwfResponseBodyCreator(
 									                          output => {
 										                          var csv = new CsvFileWriter();
