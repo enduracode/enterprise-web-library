@@ -435,14 +435,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// an external button rather than an action on this table.
 		/// </summary>
 		public PostBackAction ExportToExcel() {
-			var workbook = new ExcelFileWriter();
-			foreach( var rowSetup in rowSetups ) {
-				if( rowSetup.IsHeader )
-					workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
-				else
-					workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
-			}
-			return new PostBackAction( new SecondaryResponse( () => workbook.GetExcelFileResponse( caption.Length > 0 ? caption : "Excel export" ) ) );
+			return new PostBackAction(
+				new SecondaryResponse(
+					() => new EwfResponse(
+						      () => caption.Any() ? caption : "Excel export",
+						      () => {
+							      var workbook = new ExcelFileWriter();
+							      foreach( var rowSetup in rowSetups ) {
+								      if( rowSetup.IsHeader )
+									      workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
+								      else
+									      workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
+							      }
+							      return workbook;
+						      } ) ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
