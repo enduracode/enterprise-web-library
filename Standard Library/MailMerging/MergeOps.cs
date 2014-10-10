@@ -229,7 +229,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			return new EwfResponse(
 				ExcelFileWriter.ContentType,
 				new EwfResponseBodyCreator( excelFile.SaveToStream ),
-				fileNameCreator: () => excelFile.GetSafeFileName( fileNameWithoutExtension ) );
+				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( fileNameWithoutExtension ) );
 		}
 
 		/// <summary>

@@ -13,6 +13,13 @@ namespace RedStapler.StandardLibrary.IO {
 		/// </summary>
 		public static string ContentType { get { return ContentTypes.ExcelXlsx; } }
 
+		/// <summary>
+		/// Gets a safe file name (using ToSafeFileName) using the appropriate extension.
+		/// </summary>
+		public static string GetSafeFileName( string fileNameWithoutExtension ) {
+			return "{0}.xlsx".FormatWith( fileNameWithoutExtension ).ToSafeFileName();
+		}
+
 		// NOTE: It's a shame that this can't be a TabularDataFileWriter.
 		private readonly XLWorkbook workbook;
 		private readonly Dictionary<string, ExcelWorksheet> namesToWorksheets = new Dictionary<string, ExcelWorksheet>();
@@ -81,13 +88,6 @@ namespace RedStapler.StandardLibrary.IO {
 			ExcelWorksheet workSheet;
 			namesToWorksheets.TryGetValue( name, out workSheet );
 			return workSheet;
-		}
-
-		/// <summary>
-		/// Gets a safe file name (using ToSafeFileName) using the appropriate extension (either .xls or .xlsx, depending on the value of UseLegacyExcelFormat).
-		/// </summary>
-		public string GetSafeFileName( string fileNameWithoutExtension ) {
-			return ( fileNameWithoutExtension + ".xlsx" ).ToSafeFileName();
 		}
 
 		/// <summary>

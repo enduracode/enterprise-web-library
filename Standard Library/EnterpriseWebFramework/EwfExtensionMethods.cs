@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return new EwfResponse(
 				ExcelFileWriter.ContentType,
 				new EwfResponseBodyCreator( workbook.SaveToStream ),
-				fileNameCreator: () => workbook.GetSafeFileName( fileNameWithoutExtension ) );
+				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( fileNameWithoutExtension ) );
 		}
 
 		/// <summary>

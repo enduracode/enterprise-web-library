@@ -214,7 +214,7 @@ namespace RedStapler.StandardLibraryTester.IO {
 			Console.WriteLine( "Making sure safe filename works." );
 			var writer = new ExcelFileWriter();
 			const string fileName = "get safe filename testing :" + "_gibberish_here_*$#*&(#@)*(?|\\/@#_end_gibberish";
-			var safeFileName = writer.GetSafeFileName( fileName );
+			var safeFileName = ExcelFileWriter.GetSafeFileName( fileName );
 			Assert.AreEqual( safeFileName, "GetSafeFilenameTesting_Gibberish_here_$#&(#@)(@#_end_gibberish.xlsx" );
 
 			/* Then actually write it so we're sure the filesystem accepts it too. */
@@ -413,7 +413,7 @@ namespace RedStapler.StandardLibraryTester.IO {
 			var start = DateTime.Now;
 			var writer = includeDefaultWorksheet ? new ExcelFileWriter() : new ExcelFileWriter( false );
 			var fileName = code( writer );
-			var filePath = Path.Combine( outputFolderPath, writer.GetSafeFileName( timestampPrefix + fileName ) );
+			var filePath = Path.Combine( outputFolderPath, ExcelFileWriter.GetSafeFileName( timestampPrefix + fileName ) );
 			var doneCreating = DateTime.Now;
 			long size;
 			using( var f = File.Create( filePath ) ) {
