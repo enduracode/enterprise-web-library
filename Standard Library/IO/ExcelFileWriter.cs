@@ -8,14 +8,14 @@ namespace RedStapler.StandardLibrary.IO {
 	/// Represents an Excel workbook (file).
 	/// </summary>
 	public class ExcelFileWriter {
+		/// <summary>
+		/// The content type of Excel files.
+		/// </summary>
+		public static string ContentType { get { return ContentTypes.ExcelXlsx; } }
+
 		// NOTE: It's a shame that this can't be a TabularDataFileWriter.
 		private readonly XLWorkbook workbook;
 		private readonly Dictionary<string, ExcelWorksheet> namesToWorksheets = new Dictionary<string, ExcelWorksheet>();
-
-		/// <summary>
-		/// The content type of this file (MsExcel).
-		/// </summary>
-		public string ContentType { get { return ContentTypes.ExcelXlsx; } }
 
 		/// <summary>
 		/// True if every worksheet should auto-fit its column widths immediately before saving. The default is true when creating a new blank ExcelFileWriter.

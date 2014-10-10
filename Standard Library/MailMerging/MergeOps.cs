@@ -227,7 +227,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension, bool useMsWordFieldNames = false ) {
 			var excelFile = createExcelFileWriter( rowTree, fieldNames, useMsWordFieldNames );
 			return new EwfResponse(
-				excelFile.ContentType,
+				ExcelFileWriter.ContentType,
 				new EwfResponseBodyCreator( excelFile.SaveToStream ),
 				fileNameCreator: () => excelFile.GetSafeFileName( fileNameWithoutExtension ) );
 		}
