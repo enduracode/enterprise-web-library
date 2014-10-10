@@ -11,15 +11,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// Useful methods that require a web context.
 	/// </summary>
 	public static class EwfExtensionMethods {
-		/// <summary>
-		/// Gets a response with the given Excel work book. It is not necessary to save the workbook before calling this method. Automatically converts the given
-		/// file name to a safe file name.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
 		public static EwfResponse GetExcelFileResponse( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			return new EwfResponse(
-				ExcelFileWriter.ContentType,
-				new EwfResponseBodyCreator( workbook.SaveToStream ),
-				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( fileNameWithoutExtension ) );
+			return new EwfResponse( () => fileNameWithoutExtension, () => workbook );
 		}
 
 		/// <summary>
