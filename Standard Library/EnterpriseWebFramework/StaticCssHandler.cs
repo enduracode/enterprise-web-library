@@ -52,9 +52,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				throw new ResourceNotAvailableException( "The URL version string does not match the last-modification date/time of the resource.", null );
 
 			new EwfSafeResponseWriter(
-				() => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( File.ReadAllText( cssInfo.FilePath ) ) ) ),
+				() => File.ReadAllText( cssInfo.FilePath ),
 				urlVersionString,
-				memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( cssInfo.GetUrl(), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
+				() => new ResponseMemoryCachingSetup( cssInfo.GetUrl(), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }
