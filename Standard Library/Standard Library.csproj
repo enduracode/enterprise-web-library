@@ -184,6 +184,10 @@
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
@@ -320,11 +324,7 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssElement.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\ControlCssElementCreator.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandlingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\CssInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />

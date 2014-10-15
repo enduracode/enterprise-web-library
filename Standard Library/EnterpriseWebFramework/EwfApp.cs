@@ -6,7 +6,6 @@ using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -91,9 +90,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
 					if( systemLogic != null )
-						CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+						CssPreprocessingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
 					else
-						CssHandlingStatics.Init( GlobalType.Assembly );
+						CssPreprocessingStatics.Init( GlobalType.Assembly );
 					EwfUiStatics.Init( GlobalType );
 
 					initializeWebApp();

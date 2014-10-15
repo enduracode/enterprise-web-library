@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A custom element that can be used in CSS files. When used it will expand into its selectors.
 	/// </summary>

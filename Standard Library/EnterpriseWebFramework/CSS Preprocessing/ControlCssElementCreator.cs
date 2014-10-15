@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that defines one or more CSS elements.
 	/// </summary>
