@@ -389,7 +389,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;" );
 				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, webProject.name );

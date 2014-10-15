@@ -320,7 +320,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandler.cs" />
     <Compile Include="EnterpriseWebFramework\CssHandling\CssElement.cs" />
     <Compile Include="EnterpriseWebFramework\CssHandling\ControlCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\CssHandling\CssHandlingStatics.cs" />
@@ -340,6 +339,7 @@
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
+    <Compile Include="EnterpriseWebFramework\StaticCssHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />

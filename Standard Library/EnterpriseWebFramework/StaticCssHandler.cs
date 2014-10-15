@@ -2,12 +2,13 @@
 using System.IO;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// ISU and internal use only.
 	/// </summary>
-	public class CssHandler: IHttpHandler {
+	public class StaticCssHandler: IHttpHandler {
 		private const string urlVersionStringPrefix = "-";
 
 		/// <summary>
@@ -58,5 +59,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }
+	}
+
+	[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticCssHandler class instead." ) ]
+	public class CssHandler {
+		[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticCssHandler class instead." ) ]
+		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
+			return StaticCssHandler.GetUrlVersionString( dateAndTime );
+		}
 	}
 }

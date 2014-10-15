@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			var extensionIndex = generalData.UrlRelativeToProject.LastIndexOf( "." );
 			writer.WriteLine(
 				"return \"~/" + generalData.UrlRelativeToProject.Remove( extensionIndex ) +
-				"\" + CssHandler.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) + \"" + generalData.UrlRelativeToProject.Substring( extensionIndex ) +
+				"\" + StaticCssHandler.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) + \"" + generalData.UrlRelativeToProject.Substring( extensionIndex ) +
 				"\";" );
 
 			writer.WriteLine( "}" );
