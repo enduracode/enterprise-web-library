@@ -3,9 +3,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class BoxDemo: EwfPage {
+	partial class BoxDemo: EwfPage {
 		partial class Info {
-			public override string PageName { get { return "Box"; } }
+			public override string ResourceName { get { return "Box"; } }
 		}
 
 		protected override void loadData() {

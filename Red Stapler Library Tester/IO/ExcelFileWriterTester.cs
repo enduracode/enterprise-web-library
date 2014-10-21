@@ -388,7 +388,7 @@ namespace RedStapler.StandardLibraryTester.IO {
 									"http://www.google.com/search?q=" + i,
 									i.ToString( "D3" ) + "-867-5309"
 								},
-							ClickScript = ClickScript.CreateRedirectScript( new ExternalPageInfo( "http://google.com" ) ),
+							ClickScript = ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://google.com" ) ),
 							CssClass = "gibberish_string_for_testing",
 							IsHeader = false,
 							RankId = i,

@@ -5,9 +5,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class ColumnPrimaryTableDemo: EwfPage {
-		public partial class Info {
-			public override string PageName { get { return "Column Primary"; } }
+	partial class ColumnPrimaryTableDemo: EwfPage {
+		partial class Info {
+			public override string ResourceName { get { return "Column Primary"; } }
 		}
 
 		protected override void loadData() {

@@ -8,9 +8,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class SelectListDemo: EwfPage {
-		public partial class Info {
-			public override string PageName { get { return "Select List"; } }
+	partial class SelectListDemo: EwfPage {
+		partial class Info {
+			public override string ResourceName { get { return "Select List"; } }
 		}
 
 		private ActionPostBack pb;

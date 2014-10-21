@@ -16,7 +16,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class EwfTextBoxDemo: EwfPage {
 		partial class Info {
-			public override string PageName { get { return "Text Box"; } }
+			public override string ResourceName { get { return "Text Box"; } }
 		}
 
 		protected override void loadData() {

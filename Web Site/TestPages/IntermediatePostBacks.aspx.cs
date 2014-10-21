@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				package.ItemIds = new[] { 0, 1, 2 };
 			}
 
-			public override string PageName { get { return "Intermediate Post-Backs"; } }
+			public override string ResourceName { get { return "Intermediate Post-Backs"; } }
 		}
 
 		protected override void loadData() {

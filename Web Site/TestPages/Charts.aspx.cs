@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class Charts: EwfPage {
 		partial class Info {
-			public override string PageName { get { return "Chart"; } }
+			public override string ResourceName { get { return "Chart"; } }
 		}
 
 		protected override void loadData() {
