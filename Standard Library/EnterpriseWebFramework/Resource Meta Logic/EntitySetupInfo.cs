@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A base set of functionality that can be used to discover information about an entity setup before requesting a page that uses it.
+	/// A base set of functionality that can be used to discover information about an entity setup before requesting a resource that uses it.
 	/// </summary>
 	public abstract class EntitySetupInfo {
-		private bool parentPageLoaded;
-		private PageInfo parentPage;
-		private ReadOnlyCollection<PageGroup> pages;
-		private readonly Lazy<AlternativePageMode> alternativeMode;
+		private bool parentResourceLoaded;
+		private ResourceInfo parentResource;
+		private ReadOnlyCollection<ResourceGroup> resources;
+		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 
 		/// <summary>
 		/// Creates an entity setup info object.
 		/// </summary>
 		protected EntitySetupInfo() {
-			alternativeMode = new Lazy<AlternativePageMode>( createAlternativeMode );
+			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		}
 
 		/// <summary>
@@ -26,31 +25,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected virtual void init() {}
 
 		/// <summary>
-		/// Creates a page info object for the parent page of this entity setup. Returns null if there is no parent page.
+		/// Creates a resource info object for the parent resource of this entity setup. Returns null if there is no parent resource.
 		/// </summary>
-		protected abstract PageInfo createParentPageInfo();
+		protected abstract ResourceInfo createParentResourceInfo();
 
 		/// <summary>
-		/// Creates a list of page groups for the pages that are part of this entity setup.
+		/// Creates a list of resource groups for the resources that are part of this entity setup.
 		/// </summary>
-		protected abstract List<PageGroup> createPageInfos();
+		protected abstract List<ResourceGroup> createResourceInfos();
 
 		/// <summary>
-		/// Gets the page info object for the parent page of this entity setup. Returns null if there is no parent page.
+		/// Gets the resource info object for the parent resource of this entity setup. Returns null if there is no parent resource.
 		/// </summary>
-		public PageInfo ParentPage {
+		public ResourceInfo ParentResource {
 			get {
-				if( parentPageLoaded )
-					return parentPage;
-				parentPageLoaded = true;
-				return parentPage = createParentPageInfo();
+				if( parentResourceLoaded )
+					return parentResource;
+				parentResourceLoaded = true;
+				return parentResource = createParentResourceInfo();
 			}
 		}
 
 		/// <summary>
-		/// Gets the list of page info objects for the pages that are part of this entity setup.
+		/// Gets the list of resource info objects for the resources that are part of this entity setup.
 		/// </summary>
-		public ReadOnlyCollection<PageGroup> Pages { get { return pages ?? ( pages = createPageInfos().AsReadOnly() ); } }
+		public ReadOnlyCollection<ResourceGroup> Resources { get { return resources ?? ( resources = createResourceInfos().AsReadOnly() ); } }
 
 		/// <summary>
 		/// Returns the name of the entity setup.
@@ -63,19 +62,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected internal virtual bool UserCanAccessEntitySetup { get { return true; } }
 
 		/// <summary>
-		/// Gets the log in page to use for pages that are part of this entity setup if the system supports forms authentication.
+		/// Gets the log in page to use for resources that are part of this entity setup if the system supports forms authentication.
 		/// </summary>
-		protected internal virtual PageInfo LogInPage { get { return ParentPage != null ? ParentPage.LogInPage : null; } }
+		protected internal virtual PageInfo LogInPage { get { return ParentResource != null ? ParentResource.LogInPage : null; } }
 
 		/// <summary>
 		/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 		/// doing so will result in a stack overflow.
 		/// </summary>
-		public AlternativePageMode AlternativeMode {
+		public AlternativeResourceMode AlternativeMode {
 			get {
 				// It's important to do the parent disabled check first so the entity setup doesn't have to repeat any of it in its disabled check.
-				if( ParentPage != null && ParentPage.AlternativeMode is DisabledPageMode )
-					return ParentPage.AlternativeMode;
+				if( ParentResource != null && ParentResource.AlternativeMode is DisabledResourceMode )
+					return ParentResource.AlternativeMode;
 				return AlternativeModeDirect;
 			}
 		}
@@ -85,20 +84,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// e.g. when implementing a parent that should have new content when one or more children have new content. When calling this property take care to meet
 		/// any preconditions that would normally be handled by ancestor logic.
 		/// </summary>
-		public AlternativePageMode AlternativeModeDirect { get { return alternativeMode.Value; } }
+		public AlternativeResourceMode AlternativeModeDirect { get { return alternativeMode.Value; } }
 
 		/// <summary>
 		/// Creates the alternative mode for this entity setup or returns null if it is in normal mode.
 		/// </summary>
-		protected virtual AlternativePageMode createAlternativeMode() {
+		protected virtual AlternativeResourceMode createAlternativeMode() {
 			return null;
 		}
 
 		/// <summary>
-		/// Gets the desired security setting for requests to pages that are part of this entity setup.
+		/// Gets the desired security setting for requests to resources that are part of this entity setup.
 		/// </summary>
 		protected internal virtual ConnectionSecurity ConnectionSecurity {
-			get { return ParentPage != null ? ParentPage.ConnectionSecurity : ConnectionSecurity.SecureIfPossible; }
+			get { return ParentResource != null ? ParentResource.ConnectionSecurity : ConnectionSecurity.SecureIfPossible; }
 		}
 	}
 }

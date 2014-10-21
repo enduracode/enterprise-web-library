@@ -9,7 +9,6 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
@@ -112,13 +111,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			// This logic depends on the authenticated user and on page and entity setup info objects.
-			if( !InfoAsBaseType.UserCanAccessPageAndAllControls ) {
+			if( !InfoAsBaseType.UserCanAccessResource ) {
 				throw new AccessDeniedException(
-					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicPage && !AppRequestState.Instance.IntermediateUserExists,
+					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
 			}
 
-			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledPageMode;
+			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
@@ -259,7 +258,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			PageInfo redirectInfo = null;
+			ResourceInfo redirectInfo = null;
 			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
@@ -305,7 +304,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 								postBackAction => {
 									if( postBackAction == null )
 										return;
-									redirectInfo = postBackAction.Page;
+									redirectInfo = postBackAction.Resource;
 									if( postBackAction.SecondaryResponse != null )
 										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
 								} );
@@ -371,7 +370,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Title = StringTools.ConcatenateWithDelimiter(
 				" - ",
 				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
-				PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator, InfoAsBaseType.ParentPageEntityPathString, InfoAsBaseType.PageFullName ) );
+				ResourceInfo.CombineResourcePathStrings(
+					ResourceInfo.ResourcePathSeparator,
+					InfoAsBaseType.ParentResourceEntityPathString,
+					InfoAsBaseType.ResourceFullName ) );
 
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData();
@@ -826,7 +828,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
 		}
 
-		private void navigate( PageInfo destination, FullResponse secondaryResponse ) {
+		private void navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			string destinationUrl;

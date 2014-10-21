@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 				return TabMode.Vertical;
 			var mode = modeOverrider.GetTabMode();
 			if( mode == TabMode.Automatic )
-				return ( esInfo.Pages.Count == 1 && esInfo.Pages.Single().Pages.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
+				return ( esInfo.Resources.Count == 1 && esInfo.Resources.Single().Resources.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
 			return mode;
 		}
 

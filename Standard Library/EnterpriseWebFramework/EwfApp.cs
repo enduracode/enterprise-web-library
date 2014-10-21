@@ -168,7 +168,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				ConnectionSecurity.SecureIfPossible,
 				() => {
 					var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-					return page.UserCanAccessPageAndAllControls ? page : null;
+					return page.UserCanAccessResource ? page : null;
 				} );
 
 			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
@@ -195,12 +195,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 
-				var page = resolver.Function();
-				if( page == null )
+				var resource = resolver.Function();
+				if( resource == null )
 					throw new AccessDeniedException( false, resolver.LogInPageGetter != null ? resolver.LogInPageGetter() : null );
-				if( page is ExternalPageInfo )
-					NetTools.Redirect( page.GetUrl() );
-				HttpContext.Current.RewritePath( getTransferPath( page ), false );
+				if( resource is ExternalResourceInfo )
+					NetTools.Redirect( resource.GetUrl() );
+				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
 				break;
 			}
 		}
@@ -453,9 +453,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				CompleteRequest();
 		}
 
-		private string getTransferPath( PageInfo page ) {
-			var url = page.GetUrl( true, true, false );
-			if( page.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
+		private string getTransferPath( ResourceInfo resource ) {
+			var url = resource.GetUrl( true, true, false );
+			if( resource.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
 			return url;
 		}

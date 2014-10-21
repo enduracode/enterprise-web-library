@@ -1,14 +1,14 @@
 ﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class PostBackAction {
-		private readonly PageInfo page;
+		private readonly ResourceInfo resource;
 		private readonly SecondaryResponse secondaryResponse;
 
 		/// <summary>
-		/// Creates an action that will navigate to the specified page.
+		/// Creates an action that will navigate to the specified resource.
 		/// </summary>
-		/// <param name="page">Pass null for no navigation.</param>
-		public PostBackAction( PageInfo page ) {
-			this.page = page;
+		/// <param name="resource">Pass null for no navigation.</param>
+		public PostBackAction( ResourceInfo resource ) {
+			this.resource = resource;
 		}
 
 		/// <summary>
@@ -19,7 +19,7 @@
 			secondaryResponse = response;
 		}
 
-		internal PageInfo Page { get { return page; } }
+		internal ResourceInfo Resource { get { return resource; } }
 		internal SecondaryResponse SecondaryResponse { get { return secondaryResponse; } }
 	}
 }
