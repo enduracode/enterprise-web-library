@@ -23,22 +23,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ph.AddControlsReturnThis(
 				FormItemBlock.CreateFormItemTable(
 					formItems:
-						FormItem.Create( "Enter your password for this non-live installation",
-						                 new EwfTextBox( "", masksCharacters: true ),
-						                 validationGetter: control => new Validation( ( pbv, validator ) => {
-							                 // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-							                 var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
-							                 if( !passwordMatch )
-								                 validator.NoteErrorAndAddMessage( "Incorrect password." );
-						                 },
-						                                                              pb ) ).ToSingleElementArray() ) );
+						FormItem.Create(
+							"Enter your password for this non-live installation",
+							new EwfTextBox( "", masksCharacters: true ),
+							validationGetter: control => new Validation(
+								                             ( pbv, validator ) => {
+									                             // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+									                             var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
+									                             if( !passwordMatch )
+										                             validator.NoteErrorAndAddMessage( "Incorrect password." );
+								                             },
+								                             pb ) ).ToSingleElementArray() ) );
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( pb ) ) );
 
-			pb.AddModificationMethod( () => {
-				IntermediateAuthenticationMethods.SetCookie();
-				AppRequestState.Instance.IntermediateUserExists = true;
-			} );
+			pb.AddModificationMethod(
+				() => {
+					IntermediateAuthenticationMethods.SetCookie();
+					AppRequestState.Instance.IntermediateUserExists = true;
+				} );
 		}
 	}
 }

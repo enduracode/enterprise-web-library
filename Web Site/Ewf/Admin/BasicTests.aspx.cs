@@ -4,16 +4,17 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class BasicTests: EwfPage {
 		protected override void loadData() {
-			ph.AddControlsReturnThis( ControlStack.CreateWithControls( true,
-			                                                           new PostBackButton(
-				                                                           PostBack.CreateFull( id: "sendHealthCheck",
-				                                                                                firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
-				                                                           new ButtonActionControlStyle( "Send Health Check" ),
-				                                                           usesSubmitBehavior: false ),
-			                                                           new PostBackButton(
-				                                                           PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ),
-				                                                           new ButtonActionControlStyle( "Throw Unhandled Exception" ),
-				                                                           usesSubmitBehavior: false ) ) );
+			ph.AddControlsReturnThis(
+				ControlStack.CreateWithControls(
+					true,
+					new PostBackButton(
+						PostBack.CreateFull( id: "sendHealthCheck", firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
+						new ButtonActionControlStyle( "Send Health Check" ),
+						usesSubmitBehavior: false ),
+					new PostBackButton(
+						PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ),
+						new ButtonActionControlStyle( "Throw Unhandled Exception" ),
+						usesSubmitBehavior: false ) ) );
 		}
 
 		private void throwException() {
