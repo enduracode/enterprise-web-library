@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
 						url.Remove( prefixedVersionStringIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) +
-						"+Info" ) ) as CssInfo;
+						"+Info" ) ) as StaticCssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 			var urlVersionString = url.Substring(
@@ -54,7 +54,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			new EwfSafeResponseWriter(
 				() => File.ReadAllText( cssInfo.FilePath ),
 				urlVersionString,
-				() => new ResponseMemoryCachingSetup( cssInfo.GetUrl(), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
+				() => new ResponseMemoryCachingSetup( cssInfo.GetUrl( false, false, false ), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }

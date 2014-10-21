@@ -35,8 +35,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return Admin.BasicTests.GetInfo();
 		}
 
-		IEnumerable<CssInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
-			var infos = new List<CssInfo>();
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
+			var infos = new List<ResourceInfo>();
 			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104Custommin.Info() );
 			infos.Add( new ThirdParty.Select2.Select2_343.Select2.Info() );
 			infos.Add( new ThirdParty.TimePicker.Styles.Info() );
@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return infos;
 		}
 
-		IEnumerable<CssInfo> AppMetaLogicFactory.GetPrintMediaCssInfos() {
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetPrintMediaCssInfos() {
 			return new Styles.Print.Info().ToSingleElementArray();
 		}
 	}

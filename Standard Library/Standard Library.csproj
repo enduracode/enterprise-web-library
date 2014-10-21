@@ -321,7 +321,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\CssInfo.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
@@ -344,6 +343,7 @@
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticCssInfo.cs" />
     <Compile Include="EnterpriseWebFramework\StaticCssHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />

@@ -466,13 +466,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
 			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
 
 			foreach( var info in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
 
 			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "print" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
 
 			foreach( var i in styleSheetLinks )
 				Header.Controls.Add( i );

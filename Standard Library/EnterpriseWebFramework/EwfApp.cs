@@ -228,8 +228,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates and returns a list of custom style sheets that should be used on all EWF pages, including those not using the EWF user interface.
 		/// </summary>
-		protected internal virtual List<CssInfo> GetStyleSheets() {
-			return new List<CssInfo>();
+		protected internal virtual List<ResourceInfo> GetStyleSheets() {
+			return new List<ResourceInfo>();
 		}
 
 		/// <summary>
