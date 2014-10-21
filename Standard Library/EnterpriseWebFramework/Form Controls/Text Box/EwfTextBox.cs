@@ -49,7 +49,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly FormValue<string> formValue;
 		private PostBack postBack;
 		private readonly bool autoPostBack;
-		private PageInfo autoCompleteService;
+		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
 		private string watermarkText = "";
 
@@ -108,7 +108,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Sets this text box up for AJAX auto-complete.
 		/// </summary>
-		public void SetupAutoComplete( PageInfo service, AutoCompleteOption option ) {
+		public void SetupAutoComplete( ResourceInfo service, AutoCompleteOption option ) {
 			autoCompleteService = service;
 			autoCompleteOption = option;
 		}
