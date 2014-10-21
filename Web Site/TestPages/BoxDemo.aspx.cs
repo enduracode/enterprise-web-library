@@ -9,9 +9,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			ph.AddControlsReturnThis( new Box( new Paragraph( "This is a basic box." ).ToSingleElementArray() ),
-			                          new Box( "Heading Box", new Paragraph( "This is a box with heading." ).ToSingleElementArray() ),
-			                          new Box( "Expandable Box", new Paragraph( "This is an expandable box." ).ToSingleElementArray(), expanded: false ) );
+			ph.AddControlsReturnThis(
+				new Box( new Paragraph( "This is a basic box." ).ToSingleElementArray() ),
+				new Box( "Heading Box", new Paragraph( "This is a box with heading." ).ToSingleElementArray() ),
+				new Box( "Expandable Box", new Paragraph( "This is an expandable box." ).ToSingleElementArray(), expanded: false ) );
 		}
 	}
 }
