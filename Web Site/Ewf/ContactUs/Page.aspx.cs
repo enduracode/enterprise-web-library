@@ -8,15 +8,15 @@ using RedStapler.StandardLibrary.WebSessionState;
 // Parameter: string returnUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
-	public partial class Page: EwfPage {
+	partial class Page: EwfPage {
 		partial class Info {
-			public override string PageName { get { return ""; } }
+			public override string ResourceName { get { return ""; } }
 		}
 
 		private string emailText;
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( info.ReturnUrl ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 
 			ph.AddControlsReturnThis(
 				FormItem.Create(

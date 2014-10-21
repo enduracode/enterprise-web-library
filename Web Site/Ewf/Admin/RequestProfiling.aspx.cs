@@ -1,16 +1,15 @@
 using System;
 using RedStapler.StandardLibrary.Caching;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	public partial class RequestProfiling: EwfPage {
-		public partial class Info {
-			protected override AlternativePageMode createAlternativeMode() {
+	partial class RequestProfiling: EwfPage {
+		partial class Info {
+			protected override AlternativeResourceMode createAlternativeMode() {
 				return UserManagementStatics.UserManagementEnabled
 					       ? null
-					       : new DisabledPageMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );
+					       : new DisabledResourceMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );
 			}
 		}
 

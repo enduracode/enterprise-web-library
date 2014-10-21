@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private void throwException() {
-			throw new ApplicationException( "This is a test from the {0} page.".FormatWith( info.PageFullName ) );
+			throw new ApplicationException( "This is a test from the {0} page.".FormatWith( info.ResourceFullName ) );
 		}
 	}
 }

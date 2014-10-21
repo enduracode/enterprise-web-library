@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -217,13 +216,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								{
 									"We've detected that you are not using the latest version of your browser.",
 									"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet."
-								} ) + "<br/>" + NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalPageInfo( "http://www.getfirefox.com" ).GetUrl(), true ) +
-						"<br />" +
-						NetTools.BuildBasicLink( "Click here to get Chrome (it's free)", new ExternalPageInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(), true ) +
-						"<br />" +
+								} ) + "<br/>" +
+						NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalResourceInfo( "http://www.getfirefox.com" ).GetUrl(), true ) + "<br />" +
+						NetTools.BuildBasicLink(
+							"Click here to get Chrome (it's free)",
+							new ExternalResourceInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
+							true ) + "<br />" +
 						NetTools.BuildBasicLink(
 							"Click here to get the latest Internet Explorer (it's free)",
-							new ExternalPageInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
+							new ExternalResourceInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
 							true ) );
 				}
 				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
@@ -248,7 +249,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			ControlStack userInfoList = null;
 			if( AppRequestState.Instance.UserAccessible ) {
 				var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
-				if( changePasswordPage.UserCanAccessPageAndAllControls && AppTools.User != null ) {
+				if( changePasswordPage.UserCanAccessResource && AppTools.User != null ) {
 					var userInfo = new UserInfo();
 					userInfo.LoadData( changePasswordPage );
 					userInfoList = ControlStack.CreateWithControls( true, userInfo );
@@ -290,11 +291,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private Control getEntityAndTopTabBlock() {
 			var controls = new List<Control> { getEntityBlock() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
-				var pageGroups = getEntityPageGroups();
-				if( pageGroups.Count > 1 )
-					throw new ApplicationException( "Top tabs are not supported with multiple page groups." );
-				if( pageGroups.Any() )
-					controls.Add( getTopTabList( pageGroups.Single() ) );
+				var resourceGroups = getEntityResourceGroups();
+				if( resourceGroups.Count > 1 )
+					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
+				if( resourceGroups.Any() )
+					controls.Add( getTopTabList( resourceGroups.Single() ) );
 			}
 			return new Block( controls.ToArray() ) { CssClass = CssElementCreator.EntityAndTopTabBlockCssClass };
 		}
@@ -310,7 +311,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var pagePath =
 				new PagePath(
 					currentPageBehavior:
-						getEntityPageGroups().Any()
+						getEntityResourceGroups().Any()
 							? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 							: PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? null : pagePath;
@@ -342,7 +343,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private EwfTableCell getEntityActionCell() {
-			if( entityDisplaySetup == null || EwfPage.Instance.InfoAsBaseType.ParentPage != null )
+			if( entityDisplaySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			return !actionControls.Any()
@@ -364,8 +365,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return null;
 		}
 
-		private Control getTopTabList( PageGroup pageGroup ) {
-			return new ControlLine( getTabControlsForPages( pageGroup ).ToArray() )
+		private Control getTopTabList( ResourceGroup resourceGroup ) {
+			return new ControlLine( getTabControlsForResources( resourceGroup ).ToArray() )
 				{
 					CssClass = CssElementCreator.TopTabListCssClass,
 					VerticalAlignment = TableCellVerticalAlignment.Bottom
@@ -374,36 +375,36 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private bool entityUsesTabMode( TabMode tabMode ) {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
-			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentPage == null && entitySetupInfo.GetTabMode() == tabMode;
+			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.GetTabMode() == tabMode;
 		}
 
 		private void setUpSideTabs() {
-			var pageGroups = getEntityPageGroups();
-			tabCell.Visible = pageGroups.Any();
+			var resourceGroups = getEntityResourceGroups();
+			tabCell.Visible = resourceGroups.Any();
 
-			foreach( var pageGroup in pageGroups ) {
-				var tabs = getTabControlsForPages( pageGroup );
-				if( tabs.Any() && pageGroup.Name.Length > 0 )
-					tabCell.Controls.Add( new Block( pageGroup.Name.GetLiteralControl() ) { CssClass = CssElementCreator.SideTabGroupHeadCssClass } );
+			foreach( var resourceGroup in resourceGroups ) {
+				var tabs = getTabControlsForResources( resourceGroup );
+				if( tabs.Any() && resourceGroup.Name.Length > 0 )
+					tabCell.Controls.Add( new Block( resourceGroup.Name.GetLiteralControl() ) { CssClass = CssElementCreator.SideTabGroupHeadCssClass } );
 				foreach( var control in tabs )
 					tabCell.Controls.Add( control );
 			}
 		}
 
-		private ReadOnlyCollection<PageGroup> getEntityPageGroups() {
+		private ReadOnlyCollection<ResourceGroup> getEntityResourceGroups() {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
-			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentPage == null ? entitySetupInfo.Pages : new List<PageGroup>().AsReadOnly();
+			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null ? entitySetupInfo.Resources : new List<ResourceGroup>().AsReadOnly();
 		}
 
-		private IEnumerable<Control> getTabControlsForPages( PageGroup pageGroup ) {
+		private IEnumerable<Control> getTabControlsForResources( ResourceGroup resourceGroup ) {
 			var tabs = new List<Control>();
-			foreach( var page in pageGroup.Pages.Where( p => p.UserCanAccessPageAndAllControls ) ) {
+			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) ) {
 				// NOTE: Should we use CustomActionControlStyle for the link so it doesn't have any built-in styling?
-				var tab = EwfLink.Create( page.IsIdenticalToCurrent() ? null : page, new TextActionControlStyle( page.PageName ) );
+				var tab = EwfLink.Create( resource.IsIdenticalToCurrent() ? null : resource, new TextActionControlStyle( resource.ResourceName ) );
 
-				tab.CssClass = page.IsIdenticalToCurrent()
+				tab.CssClass = resource.IsIdenticalToCurrent()
 					               ? CssElementCreator.CurrentTabCssClass
-					               : page.AlternativeMode is DisabledPageMode ? CssElementCreator.DisabledTabCssClass : "";
+					               : resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabCssClass : "";
 				tabs.Add( tab );
 			}
 			return tabs;
@@ -461,8 +462,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
 				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
-			var ewlWebSite = new ExternalPageInfo( "http://enterpriseweblibrary.org/" );
-			if( ewlWebSite.UserCanAccessPageAndAllControls && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
+			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
+			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
 				controls.Add(
 					new Paragraph(
 						"Powered by the ".GetLiteralControl(),

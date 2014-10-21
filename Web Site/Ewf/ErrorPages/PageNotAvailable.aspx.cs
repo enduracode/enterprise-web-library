@@ -3,9 +3,9 @@ using RedStapler.StandardLibrary.WebSessionState;
 // Parameter: bool showHomeLink
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
-	public partial class PageNotAvailable: EwfPage {
+	partial class PageNotAvailable: EwfPage {
 		partial class Info {
-			protected override bool IsIntermediateInstallationPublicPage { get { return true; } }
+			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
 			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.MatchingCurrentRequest; } }
 		}
 

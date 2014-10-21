@@ -72,7 +72,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							PostBack.CreateFull(
 								id: "ewfIntermediateLogOut",
 								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-								actionGetter: () => new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) ) ),
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
 							new ButtonActionControlStyle( "Log Out" ),
 							false ) );
 				}

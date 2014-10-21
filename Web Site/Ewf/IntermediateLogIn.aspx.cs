@@ -5,20 +5,20 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 // Parameter: string returnUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	public partial class IntermediateLogIn: EwfPage {
-		public partial class Info {
+	partial class IntermediateLogIn: EwfPage {
+		partial class Info {
 			protected override void init() {
 				// This guarantees that the page will always be secure, even for non intermediate installations.
 				if( !EwfApp.SupportsSecureConnections )
 					throw new ApplicationException();
 			}
 
-			public override string PageName { get { return "Non-Live Installation Log In"; } }
-			protected override bool IsIntermediateInstallationPublicPage { get { return true; } }
+			public override string ResourceName { get { return "Non-Live Installation Log In"; } }
+			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
 		}
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( info.ReturnUrl ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 
 			ph.AddControlsReturnThis(
 				FormItemBlock.CreateFormItemTable(
