@@ -33,21 +33,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "private ParametersModification parametersModification;" );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType { get { return " + ( entitySetup != null ? "es" : "null" ) + "; } }" );
 			writer.WriteLine( "public override PageInfo InfoAsBaseType { get { return info; } }" );
-			writer.WriteLine( "public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
-			                  ( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
+			writer.WriteLine(
+				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
+				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
 			writeInitEntitySetupMethod( writer );
-			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod( writer,
-			                                                          requiredParameters,
-			                                                          optionalParameters,
-			                                                          "protected override void ",
-			                                                          entitySetup != null ? "es.info" : "" );
+			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod(
+				writer,
+				requiredParameters,
+				optionalParameters,
+				"protected override void ",
+				entitySetup != null ? "es.info" : "" );
 			writeGetInfoMethod( writer );
 			generalData.ReadPageStateVariablesFromCodeAndWriteTypedPageStateMethods( writer );
-			WebMetaLogicStatics.WriteCreateInfoFromNewParameterValuesMethod( writer,
-			                                                                 requiredParameters,
-			                                                                 optionalParameters,
-			                                                                 "protected override PageInfo ",
-			                                                                 entitySetup != null ? "es.CreateInfoFromNewParameterValues()" : "" );
+			WebMetaLogicStatics.WriteCreateInfoFromNewParameterValuesMethod(
+				writer,
+				requiredParameters,
+				optionalParameters,
+				"protected override PageInfo ",
+				entitySetup != null ? "es.CreateInfoFromNewParameterValues()" : "" );
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
@@ -85,16 +88,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				if( optionalParameters.Contains( parameter ) || ( entitySetup != null && entitySetup.OptionalParameters.Contains( parameter ) ) ) {
 					// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
 					// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
-					writer.WriteLine( "if( !( (" + defaultParameterWasSpecifiedReference + " && " +
-					                  ( parameter.IsEnumerable
-					                    	? defaultParameterReference + ".SequenceEqual( " + parameterReference + " )"
-					                    	: defaultParameterReference + " == " + parameterReference ) + " ) || ( !" + defaultParameterWasSpecifiedReference + " && " +
-					                  ( parameter.IsEnumerable
-					                    	? "!" + parameterReference + ".Any()"
-					                    	: parameterReference + " == " + ( parameter.IsString ? "\"\"" : "default(" + parameter.TypeName + ")" ) ) + " ) ) )" );
+					writer.WriteLine(
+						"if( !( (" + defaultParameterWasSpecifiedReference + " && " +
+						( parameter.IsEnumerable
+							  ? defaultParameterReference + ".SequenceEqual( " + parameterReference + " )"
+							  : defaultParameterReference + " == " + parameterReference ) + " ) || ( !" + defaultParameterWasSpecifiedReference + " && " +
+						( parameter.IsEnumerable
+							  ? "!" + parameterReference + ".Any()"
+							  : parameterReference + " == " + ( parameter.IsString ? "\"\"" : "default(" + parameter.TypeName + ")" ) ) + " ) ) )" );
 				}
-				writer.WriteLine( "url += \"" + parameter.PropertyName + "=\" + HttpUtility.UrlEncode( " + parameter.GetUrlSerializationExpression( parameterReference ) +
-				                  " ) + '&';" );
+				writer.WriteLine(
+					"url += \"" + parameter.PropertyName + "=\" + HttpUtility.UrlEncode( " + parameter.GetUrlSerializationExpression( parameterReference ) + " ) + '&';" );
 			}
 
 			writer.WriteLine( "return url.Remove( url.Length - 1 );" );
@@ -119,28 +123,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( optionalParameters.Any() ) {
 				writer.WriteLine( "var parametersModification = Instance.ParametersModificationAsBaseType as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
-				writer.WriteLine( "return new Info( " +
-				                  StringTools.ConcatenateWithDelimiter( ", ",
-				                                                        entitySetup != null
-				                                                        	? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )"
-				                                                        	: "",
-				                                                        InfoStatics.GetInfoConstructorArguments( requiredParameters,
-				                                                                                                 optionalParameters,
-				                                                                                                 parameter => parameter.FieldName,
-				                                                                                                 parameter =>
-				                                                                                                 InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " +
-				                                                                                                 parameter.FieldName + " : parametersModification." +
-				                                                                                                 parameter.PropertyName ),
-				                                                        "uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
+				writer.WriteLine(
+					"return new Info( " +
+					StringTools.ConcatenateWithDelimiter(
+						", ",
+						entitySetup != null ? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
+						InfoStatics.GetInfoConstructorArguments(
+							requiredParameters,
+							optionalParameters,
+							parameter => parameter.FieldName,
+							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." + parameter.PropertyName ),
+						"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			}
-			writer.WriteLine( "return new Info( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        entitySetup != null ? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
-			                                                        InfoStatics.GetInfoConstructorArguments( requiredParameters,
-			                                                                                                 optionalParameters,
-			                                                                                                 parameter => parameter.FieldName,
-			                                                                                                 parameter => parameter.FieldName ),
-			                                                        "uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
+			writer.WriteLine(
+				"return new Info( " +
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					entitySetup != null ? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
+					InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ),
+					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );
 		}
 
@@ -157,35 +158,33 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeGetInfoMethod( TextWriter writer ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Creates an info object for this page. Use the Info class constructor instead of this method if you want to reuse the entity setup info object." );
-			writer.WriteLine( "public static Info GetInfo( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        entitySetup != null
-			                                                        	? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters )
-			                                                        	: "",
-			                                                        WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
-			                                                        entitySetup != null && entitySetup.OptionalParameters.Count > 0
-			                                                        	? "EntitySetup.OptionalParameterPackage entitySetupOptionalParameterPackage = null"
-			                                                        	: "",
-			                                                        optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
-			                                                        "string uriFragmentIdentifier = \"\"" ) + " ) {" );
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Creates an info object for this page. Use the Info class constructor instead of this method if you want to reuse the entity setup info object." );
+			writer.WriteLine(
+				"public static Info GetInfo( " +
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					entitySetup != null ? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
+					WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
+					entitySetup != null && entitySetup.OptionalParameters.Count > 0 ? "EntitySetup.OptionalParameterPackage entitySetupOptionalParameterPackage = null" : "",
+					optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
+					"string uriFragmentIdentifier = \"\"" ) + " ) {" );
 			var entitySetupArgs = entitySetup != null
-			                      	? "new EntitySetup.Info( " +
-			                      	  StringTools.ConcatenateWithDelimiter( ", ",
-			                      	                                        InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( entitySetup.RequiredParameters,
-			                      	                                                                                                      parameter => parameter.Name ),
-			                      	                                        entitySetup.OptionalParameters.Count > 0
-			                      	                                        	? "optionalParameterPackage: entitySetupOptionalParameterPackage"
-			                      	                                        	: "" ) + " )"
-			                      	: "";
-			writer.WriteLine( "return new Info( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        entitySetupArgs,
-			                                                        InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters,
-			                                                                                                                      parameter => parameter.Name ),
-			                                                        optionalParameters.Count > 0 ? "optionalParameterPackage: optionalParameterPackage" : "",
-			                                                        "uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
+				                      ? "new EntitySetup.Info( " +
+				                        StringTools.ConcatenateWithDelimiter(
+					                        ", ",
+					                        InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( entitySetup.RequiredParameters, parameter => parameter.Name ),
+					                        entitySetup.OptionalParameters.Count > 0 ? "optionalParameterPackage: entitySetupOptionalParameterPackage" : "" ) + " )"
+				                      : "";
+			writer.WriteLine(
+				"return new Info( " +
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					entitySetupArgs,
+					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.Name ),
+					optionalParameters.Count > 0 ? "optionalParameterPackage: optionalParameterPackage" : "",
+					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}
