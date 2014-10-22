@@ -17,15 +17,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly string ckEditorVariableOverrides;
+		private readonly string ckEditorConfiguration;
 		private readonly HtmlBlockEditorModification mod;
 		private WysiwygHtmlEditor wysiwygEditor;
 
 		/// <summary>
 		/// Creates an HTML block editor.
 		/// </summary>
-		public HtmlBlockEditor( int? htmlBlockId, Action<int> idSetter, out HtmlBlockEditorModification mod, string ckEditorVariableOverrides = null ) {
-			this.ckEditorVariableOverrides = ckEditorVariableOverrides;
+		/// <param name="htmlBlockId"></param>
+		/// <param name="idSetter"></param>
+		/// <param name="mod"></param>
+		/// <param name="ckEditorConfiguration">Do not pass null.</param>
+		public HtmlBlockEditor( int? htmlBlockId, Action<int> idSetter, out HtmlBlockEditorModification mod, string ckEditorConfiguration = "" ) {
+			this.ckEditorConfiguration = ckEditorConfiguration;
 			this.mod = mod = new HtmlBlockEditorModification( htmlBlockId, htmlBlockId.HasValue ? HtmlBlockStatics.GetHtml( htmlBlockId.Value ) : "", idSetter );
 		}
 
@@ -36,7 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html, ckEditorVariableOverrides ) );
+			this.AddControlsReturnThis( wysiwygEditor = new WysiwygHtmlEditor( mod.Html, ckEditorConfiguration: ckEditorConfiguration ) );
 		}
 
 		/// <summary>

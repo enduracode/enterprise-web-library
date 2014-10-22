@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -8,15 +9,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A WYSIWYG HTML editor.
 	/// </summary>
 	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
+		private readonly string ckEditorConfiguration;
 		private readonly FormValue<string> formValue;
-		private readonly string ckEditorVariableOverrides;
 
 		/// <summary>
-		/// Creates a simple HTML editor. Do not pass null for value.
-		/// To customize the underlying CKEditor (changing the toolbar, etc.) you may pass in a comma-separated list of variable overrides ("toolbar: ['Bold', 'Italic'], etc. ). 'contentsCss: ' will be set automatically.
+		/// Creates a simple HTML editor.
 		/// </summary>
-		public WysiwygHtmlEditor( string value, string ckEditorVariableOverrides = null ) {
-			this.ckEditorVariableOverrides = ckEditorVariableOverrides;
+		/// <param name="value">Do not pass null.</param>
+		/// <param name="ckEditorConfiguration">A comma-separated list of CKEditor configuration options ("toolbar: [ [ 'Bold', 'Italic' ] ]", etc.). Use this to
+		/// customize the underlying CKEditor. Do not pass null.</param>
+		public WysiwygHtmlEditor( string value, string ckEditorConfiguration = "" ) {
+			this.ckEditorConfiguration = ckEditorConfiguration;
+
 			formValue = new FormValue<string>(
 				() => value,
 				() => this.IsOnPage() ? UniqueID : "",
@@ -42,9 +46,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			const string toolbar =
 				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Image', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink', 'Styles' ]";
-
-			var variableSpecs = ckEditorVariableOverrides ?? "toolbar: [ " + toolbar + " ]";
-			return "CKEDITOR.replace( '" + ClientID + "', { " + variableSpecs + " } );";
+			var configuration = ckEditorConfiguration.Any() ? ckEditorConfiguration : "toolbar: [ " + toolbar + " ]";
+			return "CKEDITOR.replace( '" + ClientID + "', { " + configuration + " } );";
 		}
 
 		FormValue FormControl.FormValue { get { return formValue; } }
