@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class EntitySetup: UserControl, EntityDisplaySetup {
-		partial class Info: TabModeOverrider {
+		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {
 				return ActionControls.GetInfo();
 			}
@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 
 			public override string EntitySetupName { get { return ""; } }
 
-			TabMode TabModeOverrider.GetTabMode() {
+			public override TabMode GetTabMode() {
 				return TabMode.Horizontal;
 			}
 		}

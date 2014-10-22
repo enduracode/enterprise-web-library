@@ -40,7 +40,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeInfoClass( TextWriter writer ) {
-			writer.WriteLine( "public sealed partial class Info: EntitySetupInfo {" );
+			writer.WriteLine(
+				"public sealed partial class Info: " + ( generalData.PathRelativeToProject.EndsWith( ".ascx" ) ? "EwfUiEntitySetupInfo" : "EntitySetupInfo" ) + " {" );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, false, true );
 			writeInfoIsIdenticalToMethod( writer );
