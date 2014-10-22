@@ -25,8 +25,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		public static AppEwfUiProvider AppProvider {
 			get {
 				if( provider == null ) {
-					throw new ApplicationException( providerName + " provider not found in application. To implement, create a class named " + providerName +
-					                                @"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
+					throw new ApplicationException(
+						providerName + " provider not found in application. To implement, create a class named " + providerName +
+						@"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
 				}
 				return provider;
 			}
@@ -48,7 +49,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// Gets the current EWF UI master page. Standard Library use only.
 		/// </summary>
-		public static AppEwfUiMasterPage AppMasterPage { get { return EwfPage.Instance.Master.Master != null ? getSecondLevelMaster( EwfPage.Instance.Master ) as AppEwfUiMasterPage : null; } }
+		public static AppEwfUiMasterPage AppMasterPage {
+			get { return EwfPage.Instance.Master.Master != null ? getSecondLevelMaster( EwfPage.Instance.Master ) as AppEwfUiMasterPage : null; }
+		}
 
 		private static MasterPage getSecondLevelMaster( MasterPage master ) {
 			return master.Master.Master == null ? master : getSecondLevelMaster( master.Master );
