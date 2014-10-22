@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -11,6 +10,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
 		private readonly FormValue<string> formValue;
 		private readonly string ckEditorVariableOverrides;
+
 		/// <summary>
 		/// Creates a simple HTML editor. Do not pass null for value.
 		/// To customize the underlying CKEditor (changing the toolbar, etc.) you may pass in a comma-separated list of variable overrides ("toolbar: ['Bold', 'Italic'], etc. ). 'contentsCss: ' will be set automatically.

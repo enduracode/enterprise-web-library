@@ -9,7 +9,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A control for editing an HTML block.
 	/// </summary>
 	public class HtmlBlockEditor: WebControl, ControlTreeDataLoader {
-		private readonly string ckEditorVariableOverrides;
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -18,6 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		private readonly string ckEditorVariableOverrides;
 		private readonly HtmlBlockEditorModification mod;
 		private WysiwygHtmlEditor wysiwygEditor;
 
