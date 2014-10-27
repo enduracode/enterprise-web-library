@@ -5,7 +5,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.Configuration.Machine;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
@@ -73,7 +72,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							PostBack.CreateFull(
 								id: "ewfIntermediateLogOut",
 								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-								actionGetter: () => new PostBackAction( new ExternalPageInfo( NetTools.HomeUrl ) ) ),
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
 							new ButtonActionControlStyle( "Log Out" ),
 							false ) );
 				}

@@ -111,6 +111,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly Action<HttpRequest, HttpResponse> writer;
 
 		/// <summary>
+		/// Creates a response writer with CSS text.
+		/// </summary>
+		/// <param name="cssGetter">A function that gets the CSS that will be preprocessed and used as the response. Do not pass or return null.</param>
+		/// <param name="urlVersionString">The resource-version string from the request URL. Do not pass null or the empty string; this parameter is required
+		/// because it greatly improves cacheability, which is important for CSS. You must change the URL when the CSS changes, and you must not vary the response
+		/// based on non-URL elements of the request, such as the authenticated user.</param>
+		/// <param name="memoryCachingSetupGetter">A function that gets the memory-caching setup object for the response. Do not pass or return null; memory caching
+		/// is important for CSS and is therefore required.</param>
+		public EwfSafeResponseWriter( Func<string> cssGetter, string urlVersionString, Func<ResponseMemoryCachingSetup> memoryCachingSetupGetter ) {
+			var memoryCachingSetup = new Lazy<ResponseMemoryCachingSetup>( memoryCachingSetupGetter );
+			writer = createWriter(
+				() => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+				urlVersionString,
+				"",
+				() => memoryCachingSetup.Value.LastModificationDateAndTime,
+				() => memoryCachingSetup.Value.CacheKey );
+		}
+
+		/// <summary>
 		/// Creates a response writer with a BLOB-file response.
 		/// </summary>
 		/// <param name="responseCreator">The response creator.</param>

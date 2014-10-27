@@ -3,11 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Web;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// ISU and internal use only.
 	/// </summary>
-	public class CssHandler: IHttpHandler {
+	public class StaticCssHandler: IHttpHandler {
 		private const string urlVersionStringPrefix = "-";
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
 						url.Remove( prefixedVersionStringIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) +
-						"+Info" ) ) as CssInfo;
+						"+Info" ) ) as StaticCssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 			var urlVersionString = url.Substring(
@@ -52,11 +52,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 				throw new ResourceNotAvailableException( "The URL version string does not match the last-modification date/time of the resource.", null );
 
 			new EwfSafeResponseWriter(
-				() => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( File.ReadAllText( cssInfo.FilePath ) ) ) ),
+				() => File.ReadAllText( cssInfo.FilePath ),
 				urlVersionString,
-				memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( cssInfo.GetUrl(), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
+				() => new ResponseMemoryCachingSetup( cssInfo.GetUrl( false, false, false ), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }
+	}
+
+	[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticCssHandler class instead." ) ]
+	public class CssHandler {
+		[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticCssHandler class instead." ) ]
+		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
+			return StaticCssHandler.GetUrlVersionString( dateAndTime );
+		}
 	}
 }

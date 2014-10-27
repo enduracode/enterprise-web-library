@@ -4,11 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Provides access to custom elements.
 	/// </summary>
-	internal static class CssHandlingStatics {
+	internal static class CssPreprocessingStatics {
 		private static readonly List<CssElement> elements = new List<CssElement>();
 
 		/// <summary>

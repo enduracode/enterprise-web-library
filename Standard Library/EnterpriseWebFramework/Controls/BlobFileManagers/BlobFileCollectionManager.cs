@@ -48,9 +48,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public NewFileNotificationMethod NewFileNotificationMethod { private get; set; }
 
 		/// <summary>
-		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a page info object.
+		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a resource info object.
 		/// </summary>
-		public Func<decimal, PageInfo> ThumbnailPageInfoCreator { private get; set; }
+		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
 		/// <summary>
 		/// Creates a file collection manager.
@@ -94,7 +94,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			var columnSetups = new List<ColumnSetup>();
-			if( ThumbnailPageInfoCreator != null )
+			if( ThumbnailResourceInfoCreator != null )
 				columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 10 ) } );
 			columnSetups.Add( new ColumnSetup { CssClassOnAllCells = "ewfOverflowedCell" } );
 			columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 13 ) } );
@@ -112,7 +112,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				addFileRow( table, file, deletePb, deleteModMethods );
 			if( !ReadOnly ) {
 				table.AddRow(
-					getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailPageInfoCreator != null ? 3 : 2 ) ),
+					getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
 					( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
 						new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 			}
@@ -131,7 +131,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private void addFileRow( DynamicTable table, BlobFile file, ActionPostBack deletePb, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
+			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
 			if( thumbnailControl != null )
 				cells.Add( thumbnailControl );
 

@@ -3,9 +3,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class DateAndTimePickers: EwfPage {
-		public partial class Info {
-			public override string PageName { get { return "Date/Time Pickers"; } }
+	partial class DateAndTimePickers: EwfPage {
+		partial class Info {
+			public override string ResourceName { get { return "Date/Time Pickers"; } }
 		}
 
 		protected override void loadData() {

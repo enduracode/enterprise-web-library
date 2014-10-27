@@ -6,13 +6,13 @@ using RedStapler.StandardLibrary.WebSessionState;
 // Parameter: int userId
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public {
-	public partial class ConfirmPasswordReset: EwfPage {
+	partial class ConfirmPasswordReset: EwfPage {
 		partial class Info {
-			public override string PageName { get { return ""; } }
+			public override string ResourceName { get { return ""; } }
 		}
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( es.info.DestinationUrl ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.DestinationUrl ) ) );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password", new PostBackButton( pb ) ) );
 
 			pb.AddModificationMethod( modifyData );

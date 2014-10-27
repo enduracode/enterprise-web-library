@@ -6,7 +6,6 @@ using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -91,9 +90,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
 					if( systemLogic != null )
-						CssHandlingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+						CssPreprocessingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
 					else
-						CssHandlingStatics.Init( GlobalType.Assembly );
+						CssPreprocessingStatics.Init( GlobalType.Assembly );
 					EwfUiStatics.Init( GlobalType );
 
 					initializeWebApp();
@@ -169,7 +168,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				ConnectionSecurity.SecureIfPossible,
 				() => {
 					var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-					return page.UserCanAccessPageAndAllControls ? page : null;
+					return page.UserCanAccessResource ? page : null;
 				} );
 
 			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
@@ -196,12 +195,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 
-				var page = resolver.Function();
-				if( page == null )
+				var resource = resolver.Function();
+				if( resource == null )
 					throw new AccessDeniedException( false, resolver.LogInPageGetter != null ? resolver.LogInPageGetter() : null );
-				if( page is ExternalPageInfo )
-					NetTools.Redirect( page.GetUrl() );
-				HttpContext.Current.RewritePath( getTransferPath( page ), false );
+				if( resource is ExternalResourceInfo )
+					NetTools.Redirect( resource.GetUrl() );
+				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
 				break;
 			}
 		}
@@ -229,8 +228,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates and returns a list of custom style sheets that should be used on all EWF pages, including those not using the EWF user interface.
 		/// </summary>
-		protected internal virtual List<CssInfo> GetStyleSheets() {
-			return new List<CssInfo>();
+		protected internal virtual List<ResourceInfo> GetStyleSheets() {
+			return new List<ResourceInfo>();
 		}
 
 		/// <summary>
@@ -454,9 +453,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				CompleteRequest();
 		}
 
-		private string getTransferPath( PageInfo page ) {
-			var url = page.GetUrl( true, true, false );
-			if( page.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
+		private string getTransferPath( ResourceInfo resource ) {
+			var url = resource.GetUrl( true, true, false );
+			if( resource.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
 			return url;
 		}

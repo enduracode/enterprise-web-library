@@ -30,8 +30,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
 			writer.WriteLine( "EntitySetupInfo EntitySetupBase.InfoAsBaseType { get { return info; } }" );
-			writer.WriteLine( "ParametersModificationBase EntitySetupBase.ParametersModificationAsBaseType { get { return " +
-			                  ( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
+			writer.WriteLine(
+				"ParametersModificationBase EntitySetupBase.ParametersModificationAsBaseType { get { return " +
+				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
 			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod( writer, requiredParameters, optionalParameters, "void EntitySetupBase.", "" );
 			WebMetaLogicStatics.WriteCreateInfoFromNewParameterValuesMethod( writer, requiredParameters, optionalParameters, "internal Info ", "" );
 			writer.WriteLine( "}" );
@@ -39,7 +40,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeInfoClass( TextWriter writer ) {
-			writer.WriteLine( "public sealed partial class Info: EntitySetupInfo {" );
+			writer.WriteLine(
+				"public sealed partial class Info: " + ( generalData.PathRelativeToProject.EndsWith( ".ascx" ) ? "EwfUiEntitySetupInfo" : "EntitySetupInfo" ) + " {" );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, false, true );
 			writeInfoIsIdenticalToMethod( writer );
@@ -59,19 +61,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine(
 					"var parametersModification = ( EwfPage.Instance.EsAsBaseType != null ? EwfPage.Instance.EsAsBaseType.ParametersModificationAsBaseType : null ) as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
-				writer.WriteLine( "return new Info( " +
-				                  InfoStatics.GetInfoConstructorArguments( requiredParameters,
-				                                                           optionalParameters,
-				                                                           parameter => parameter.FieldName,
-				                                                           parameter =>
-				                                                           InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName +
-				                                                           " : parametersModification." + parameter.PropertyName ) + " );" );
+				writer.WriteLine(
+					"return new Info( " +
+					InfoStatics.GetInfoConstructorArguments(
+						requiredParameters,
+						optionalParameters,
+						parameter => parameter.FieldName,
+						parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." + parameter.PropertyName ) +
+					" );" );
 			}
-			writer.WriteLine( "return new Info( " +
-			                  InfoStatics.GetInfoConstructorArguments( requiredParameters,
-			                                                           optionalParameters,
-			                                                           parameter => parameter.FieldName,
-			                                                           parameter => parameter.FieldName ) + " );" );
+			writer.WriteLine(
+				"return new Info( " +
+				InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ) +
+				" );" );
 			writer.WriteLine( "}" );
 		}
 	}

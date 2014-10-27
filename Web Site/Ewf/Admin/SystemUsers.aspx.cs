@@ -1,13 +1,12 @@
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	public partial class SystemUsers: EwfPage {
-		public partial class Info {
-			protected override AlternativePageMode createAlternativeMode() {
-				return UserManagementStatics.UserManagementEnabled ? null : new DisabledPageMode( "User management is not enabled in this system." );
+	partial class SystemUsers: EwfPage {
+		partial class Info {
+			protected override AlternativeResourceMode createAlternativeMode() {
+				return UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );
 			}
 		}
 

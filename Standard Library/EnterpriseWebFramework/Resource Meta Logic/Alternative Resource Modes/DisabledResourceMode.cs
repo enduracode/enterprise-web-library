@@ -1,14 +1,14 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes {
+﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A mode that prevents a page or entity setup from being accessed.
+	/// A mode that prevents a resource or entity setup from being accessed.
 	/// </summary>
-	public class DisabledPageMode: AlternativePageMode {
+	public class DisabledResourceMode: AlternativeResourceMode {
 		private readonly string message;
 
 		/// <summary>
 		/// Creates a disabled page mode object.
 		/// </summary>
-		public DisabledPageMode( string message ) {
+		public DisabledResourceMode( string message ) {
 			this.message = message;
 		}
 

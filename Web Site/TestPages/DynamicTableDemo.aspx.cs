@@ -1,16 +1,15 @@
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class DynamicTableDemo: EwfPage {
+	partial class DynamicTableDemo: EwfPage {
 		partial class Info {
-			public override string PageName { get { return "Old Table"; } }
+			public override string ResourceName { get { return "Old Table"; } }
 
-			protected override AlternativePageMode createAlternativeMode() {
-				return new DisabledPageMode( "This demo is disabled." );
+			protected override AlternativeResourceMode createAlternativeMode() {
+				return new DisabledResourceMode( "This demo is disabled." );
 			}
 		}
 

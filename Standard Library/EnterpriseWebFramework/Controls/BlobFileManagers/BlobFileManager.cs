@@ -19,9 +19,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public bool HideNoExistingFileMessage { get; set; }
 
 		/// <summary>
-		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a page info object.
+		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a resource info object.
 		/// </summary>
-		public Func<decimal, PageInfo> ThumbnailPageInfoCreator { private get; set; }
+		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
 		/// <summary>
 		/// Call this during LoadData.  This does not need to be called if there is no existing file collection.
@@ -73,7 +73,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			controlStack.AddControls( uploadedFile );
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
+			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
 			if( thumbnailControl != null )
 				Controls.Add( thumbnailControl );
 			Controls.Add( controlStack );

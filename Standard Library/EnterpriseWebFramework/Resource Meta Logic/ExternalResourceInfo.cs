@@ -2,14 +2,14 @@
 	/// <summary>
 	/// A web resource outside of the system.
 	/// </summary>
-	public sealed class ExternalPageInfo: PageInfo {
+	public sealed class ExternalResourceInfo: ResourceInfo {
 		private readonly string url;
 		private readonly string name;
 
 		/// <summary>
-		/// Creates an ExternalPageInfo. Do not pass null or the empty string for url. Do not pass null for uriFragmentIdentifier or name.
+		/// Creates an ExternalResourceInfo. Do not pass null or the empty string for url. Do not pass null for uriFragmentIdentifier or name.
 		/// </summary>
-		public ExternalPageInfo( string url, string uriFragmentIdentifier = "", string name = "" ) {
+		public ExternalResourceInfo( string url, string uriFragmentIdentifier = "", string name = "" ) {
 			this.url = url;
 			base.uriFragmentIdentifier = uriFragmentIdentifier;
 			this.name = name;
@@ -23,7 +23,7 @@
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public override string PageName { get { return name; } }
+		public override string ResourceName { get { return name; } }
 
 		/// <summary>
 		/// Standard Library use only.
@@ -35,16 +35,16 @@
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		protected override bool isIdenticalTo( PageInfo infoAsBaseType ) {
-			var info = infoAsBaseType as ExternalPageInfo;
+		protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {
+			var info = infoAsBaseType as ExternalResourceInfo;
 			return info != null && info.url == url && info.uriFragmentIdentifier == uriFragmentIdentifier && info.name == name;
 		}
 
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		protected internal override PageInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
-			return new ExternalPageInfo( url, uriFragmentIdentifier: uriFragmentIdentifier, name: name );
+		protected internal override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
+			return new ExternalResourceInfo( url, uriFragmentIdentifier: uriFragmentIdentifier, name: name );
 		}
 	}
 }

@@ -2,8 +2,6 @@ using System;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {

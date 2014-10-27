@@ -6,9 +6,9 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class EwfTableDemo: EwfPage {
-		public partial class Info {
-			public override string PageName { get { return "EWF Table"; } }
+	partial class EwfTableDemo: EwfPage {
+		partial class Info {
+			public override string ResourceName { get { return "EWF Table"; } }
 		}
 
 		protected override void loadData() {

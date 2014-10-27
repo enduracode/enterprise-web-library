@@ -96,17 +96,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Returns null if the file is null, the file is not an image, or there is no thumbnail page info creator.
+		/// Returns null if the file is null, the file is not an image, or there is no thumbnail resource info creator.
 		/// </summary>
-		internal static Control GetThumbnailControl( BlobFile file, Func<decimal, PageInfo> thumbnailPageInfoCreator ) {
+		internal static Control GetThumbnailControl( BlobFile file, Func<decimal, ResourceInfo> thumbnailResourceInfoCreator ) {
 			// NOTE: We'd like to check here whether the file is a renderable image or not. But we can't because we don't have the file contents.
 			// So, we'll have to make sure that all ThumbnailPageInfoCreators provide a page that knows how to handle NEF files (ideally we'd want
 			// it to behave as if there was no thumbnail at all if there is an unrenderable image file).
 			// The only alternative to this that I can think of is creating a new file table field called "IsRenderable" that we store when
 			// we first save the image.
-			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailPageInfoCreator == null )
+			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailResourceInfoCreator == null )
 				return null;
-			return new EwfImage( thumbnailPageInfoCreator( file.FileId ).GetUrl() ) { SizesToAvailableWidth = true };
+			return new EwfImage( thumbnailResourceInfoCreator( file.FileId ).GetUrl() ) { SizesToAvailableWidth = true };
 		}
 
 		// NOTE: Use this from blob file manager, etc.

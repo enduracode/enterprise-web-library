@@ -5,8 +5,8 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 // Parameter: int? userId
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	public partial class EditUser: EwfPage {
-		public partial class Info {
+	partial class EditUser: EwfPage {
+		partial class Info {
 			internal User User { get; private set; }
 
 			protected override void init() {
@@ -14,11 +14,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					User = UserManagementStatics.GetUser( UserId.Value, true );
 			}
 
-			protected override PageInfo createParentPageInfo() {
+			protected override ResourceInfo createParentResourceInfo() {
 				return new SystemUsers.Info( esInfo );
 			}
 
-			public override string PageName { get { return User == null ? "New User" : User.Email; } }
+			public override string ResourceName { get { return User == null ? "New User" : User.Email; } }
 		}
 
 		private UserFieldTable userFieldTable;
@@ -32,7 +32,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							PostBack.CreateFull( id: "delete", firstModificationMethod: deleteUser, actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
 			}
 
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( es.info.ParentPage ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( es.info.ParentResource ) );
 
 			userFieldTable = new UserFieldTable();
 			userFieldTable.LoadData( info.UserId, pb );

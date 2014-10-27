@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Allows custom elements, constants, and other feature extensions to CSS.
 	/// </summary>
@@ -20,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 
 			var customElementsDetected = from Match match in Regex.Matches( sourceCssText, customElementPattern ) select match.Value;
 			customElementsDetected = customElementsDetected.Distinct();
-			var knownCustomElements = CssHandlingStatics.Elements.Select( ce => reservedCustomElementPrefix + ce.Name );
+			var knownCustomElements = CssPreprocessingStatics.Elements.Select( ce => reservedCustomElementPrefix + ce.Name );
 			var unknownCustomElements = customElementsDetected.Except( knownCustomElements ).ToList();
 			if( unknownCustomElements.Any() ) {
 				throw new MultiMessageApplicationException(
@@ -67,7 +67,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling {
 			if( !match.Success )
 				yield return selectorWithCustomElements;
 			else {
-				foreach( var elementSelector in CssHandlingStatics.Elements.Single( i => reservedCustomElementPrefix + i.Name == match.Value ).Selectors ) {
+				foreach( var elementSelector in CssPreprocessingStatics.Elements.Single( i => reservedCustomElementPrefix + i.Name == match.Value ).Selectors ) {
 					foreach( var selectorTail in getSelectors( selectorWithCustomElements.Substring( match.Index + match.Length ) ) )
 						yield return selectorWithCustomElements.Substring( 0, match.Index ) + elementSelector + selectorTail;
 				}

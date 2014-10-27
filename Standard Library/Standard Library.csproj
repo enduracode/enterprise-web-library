@@ -184,6 +184,10 @@
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
@@ -193,9 +197,6 @@
     <Compile Include="Email\EmailSendingException.cs" />
     <Compile Include="Encryption\EncryptionOps.cs" />
     <Compile Include="EnterpriseWebFramework\ActionButtonSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageMode.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageModes\DisabledPageMode.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageModes\NewContentPageMode.cs" />
     <Compile Include="EnterpriseWebFramework\AppMetaLogicFactory.cs" />
     <Compile Include="EnterpriseWebFramework\AppRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
@@ -320,12 +321,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandler.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssElement.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\ControlCssElementCreator.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandlingStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\CssInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
@@ -340,13 +335,22 @@
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\AlternativeResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\EntitySetupInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ExternalResourceInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\PageInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceGroup.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticCssInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\StaticCssHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Entity\TabModeOverrider.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EntitySetupBase.cs" />
-    <Compile Include="EnterpriseWebFramework\EntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
@@ -356,10 +360,8 @@
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModificationException.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPageRequestState.cs" />
-    <Compile Include="EnterpriseWebFramework\ExternalPageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\IntermediateAuthenticationMethods.cs" />
     <Compile Include="EnterpriseWebFramework\PageDisabledException.cs" />
-    <Compile Include="EnterpriseWebFramework\PageGroup.cs" />
     <Compile Include="EnterpriseWebFramework\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
@@ -476,7 +478,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\PageBase\ScrollPosition.cs" />
-    <Compile Include="EnterpriseWebFramework\PageInfo.cs" />
     <Compile Include="Encryption\Password.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUser.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUserManagementProvider.cs" />

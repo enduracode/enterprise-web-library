@@ -15,7 +15,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var logInPb =
 				PostBack.CreateFull(
 					actionGetter:
-						() => new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as PageInfo : new ExternalPageInfo( info.ReturnUrl ) ) );
+						() =>
+						new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
