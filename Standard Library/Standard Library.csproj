@@ -334,7 +334,7 @@
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\AlternativeResourceMode.cs" />

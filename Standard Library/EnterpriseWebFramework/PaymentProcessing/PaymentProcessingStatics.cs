@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// email address).</param>
 		public static Func<string> GetCreditCardCollectionJsFunctionCall(
 			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
-			Func<string, decimal, StatusMessageAndPage> successHandler, string prefilledEmailAddressOverride = null ) {
+			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !HttpContext.Current.Request.IsSecureConnection )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
@@ -39,10 +39,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
 
-			PageInfo successPage = null;
+			ResourceInfo successDestination = null;
 			var postBack = PostBack.CreateFull(
 				id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
-				actionGetter: () => new PostBackAction( successPage ) );
+				actionGetter: () => new PostBackAction( successDestination ) );
 			var token = new DataValue<string>();
 
 			Func<PostBackValueDictionary, string> tokenHiddenFieldValueGetter; // unused
@@ -68,10 +68,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					}
 
 					try {
-						var messageAndPage = successHandler( (string)response.id, amountInDollars.Value );
-						if( messageAndPage.Message.Any() )
-							EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndPage.Message );
-						successPage = messageAndPage.Page;
+						var messageAndDestination = successHandler( (string)response.id, amountInDollars.Value );
+						if( messageAndDestination.Message.Any() )
+							EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndDestination.Message );
+						successDestination = messageAndDestination.Destination;
 					}
 					catch( Exception e ) {
 						throw new ApplicationException( "An exception occurred after a credit card was charged.", e );
