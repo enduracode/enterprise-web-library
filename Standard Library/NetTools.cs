@@ -129,8 +129,7 @@ namespace RedStapler.StandardLibrary {
 		/// Gets whether a request for the specified URL returns an HTTP status code other than 200 OK.
 		/// </summary>
 		public static bool LinkIsBroken( string url ) {
-			// NOTE: Use WebRequest.CreateHttp when EWL moves to .NET 4.5.
-			var request = WebRequest.Create( url ) as HttpWebRequest;
+			var request = WebRequest.CreateHttp( url );
 
 			request.Method = "HEAD";
 			using( var response = request.getResponseIfPossible() )
