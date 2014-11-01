@@ -17,6 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public abstract class EwfApp: HttpApplication {
 		private static bool ewlInitialized;
 		private static bool initialized;
+		private static Timer initFailureUnloadTimer;
 		private static SystemGeneralConfigurationApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
@@ -70,38 +71,57 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 			}
 			ewlInitialized = true;
-			if( AppTools.SecondaryInitFailed )
-				return;
 
 			// Initialize web application.
-			executeWithBasicExceptionHandling(
-				delegate {
-					webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
+			if( !AppTools.SecondaryInitFailed ) {
+				executeWithBasicExceptionHandling(
+					() => {
+						webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
 
-					// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
-					MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
+						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
+						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
-					GlobalType = GetType().BaseType;
-					MetaLogicFactory =
-						GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
-						AppMetaLogicFactory;
-					if( MetaLogicFactory == null )
-						throw new ApplicationException( "Meta logic factory not found." );
+						GlobalType = GetType().BaseType;
+						MetaLogicFactory =
+							GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
+							AppMetaLogicFactory;
+						if( MetaLogicFactory == null )
+							throw new ApplicationException( "Meta logic factory not found." );
 
-					// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
-					if( systemLogic != null )
-						CssPreprocessingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
-					else
-						CssPreprocessingStatics.Init( GlobalType.Assembly );
-					EwfUiStatics.Init( GlobalType );
+						// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
+						if( systemLogic != null )
+							CssPreprocessingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
+						else
+							CssPreprocessingStatics.Init( GlobalType.Assembly );
+						EwfUiStatics.Init( GlobalType );
 
-					initializeWebApp();
+						initializeWebApp();
 
-					initTimeDataAccessState = null;
-					initialized = true;
-				},
-				false,
-				false );
+						initTimeDataAccessState = null;
+						initialized = true;
+					},
+					false,
+					false );
+			}
+
+			// If initialization failed, unload and restart the application after a reasonable delay.
+			if( !initialized && !AppTools.IsDevelopmentInstallation ) {
+				const int unloadDelay = 60000; // milliseconds
+				initFailureUnloadTimer = new Timer(
+					state => executeWithBasicExceptionHandling(
+						() => {
+							HttpRuntime.UnloadAppDomain();
+
+							// Restart the application by making a request. Idea from Rick Strahl:
+							// http://weblog.west-wind.com/posts/2013/Oct/02/Use-IIS-Application-Initialization-for-keeping-ASPNET-Apps-alive.
+							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => { } );
+						},
+						false,
+						false ),
+					null,
+					unloadDelay,
+					Timeout.Infinite );
+			}
 		}
 
 		/// <summary>
@@ -475,6 +495,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected void ewfApplicationEnd() {
 			if( ewlInitialized )
 				AppTools.CleanUp();
+
+			if( !initialized ) {
+				var waitHandle = new ManualResetEvent( false );
+				initFailureUnloadTimer.Dispose( waitHandle );
+				waitHandle.WaitOne();
+			}
 		}
 	}
 }
