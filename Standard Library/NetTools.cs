@@ -129,11 +129,17 @@ namespace RedStapler.StandardLibrary {
 		/// Gets whether a request for the specified URL returns an HTTP status code other than 200 OK.
 		/// </summary>
 		public static bool LinkIsBroken( string url ) {
+			bool? broken = null;
+			ExecuteWithResponse( url, response => broken = response == null || response.StatusCode != HttpStatusCode.OK );
+			return broken.Value;
+		}
+
+		internal static void ExecuteWithResponse( string url, Action<HttpWebResponse> method ) {
 			var request = WebRequest.CreateHttp( url );
 
 			request.Method = "HEAD";
 			using( var response = request.getResponseIfPossible() )
-				return response == null || response.StatusCode != HttpStatusCode.OK;
+				method( response );
 		}
 
 		private static HttpWebResponse getResponseIfPossible( this HttpWebRequest request ) {
