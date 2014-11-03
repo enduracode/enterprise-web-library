@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// Private use only.
 		/// </summary>
 		protected override void OnStart( string[] args ) {
-			Action method = delegate {
+			Action method = () => {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
 
@@ -44,37 +44,39 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// Private use only.
 		/// </summary>
 		protected override void OnStop() {
-			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				var waitHandle = new ManualResetEvent( false );
-				timer.Dispose( waitHandle );
-				waitHandle.WaitOne();
+			AppTools.ExecuteBlockWithStandardExceptionHandling(
+				() => {
+					var waitHandle = new ManualResetEvent( false );
+					timer.Dispose( waitHandle );
+					waitHandle.WaitOne();
 
-				service.CleanUp();
-			} );
+					service.CleanUp();
+				} );
 		}
 
 		private void tick( object state ) {
-			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
-				// exception stack traces.
-				try {
-					var now = DateTime.Now;
-					if( AppTools.IsLiveInstallation && !MachineConfiguration.GetIsStandbyServer() &&
-					    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
-						StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
-					lastHealthCheckDateAndTime = now;
-
-					service.Tick();
-				}
-				finally {
+			AppTools.ExecuteBlockWithStandardExceptionHandling(
+				() => {
+					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
+					// exception stack traces.
 					try {
-						timer.Change( tickInterval, Timeout.Infinite );
+						var now = DateTime.Now;
+						if( AppTools.IsLiveInstallation && !MachineConfiguration.GetIsStandbyServer() &&
+						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
+							StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
+						lastHealthCheckDateAndTime = now;
+
+						service.Tick();
 					}
-					catch( ObjectDisposedException ) {
-						// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
+					finally {
+						try {
+							timer.Change( tickInterval, Timeout.Infinite );
+						}
+						catch( ObjectDisposedException ) {
+							// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
+						}
 					}
-				}
-			} );
+				} );
 		}
 	}
 }

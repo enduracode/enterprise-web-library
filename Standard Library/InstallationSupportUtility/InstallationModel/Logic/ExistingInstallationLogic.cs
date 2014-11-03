@@ -13,8 +13,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 
-		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths( Environment.GetEnvironmentVariable( "windir" ),
-		                                                                                 @"system32\inetsrv\AppCmd.exe" );
+		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths(
+			Environment.GetEnvironmentVariable( "windir" ),
+			@"system32\inetsrv\AppCmd.exe" );
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
@@ -26,7 +27,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		public InstallationConfiguration RuntimeConfiguration { get { return runtimeConfiguration; } }
 
-		public string DatabaseUpdateFilePath { get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); } }
+		public string DatabaseUpdateFilePath {
+			get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); }
+		}
 
 		/// <summary>
 		/// Creates a text file named "Error Log.txt" in the root of the installation folder and gives NETWORK SERVICE full control over it.
@@ -77,14 +80,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		/// </summary>
 		public void Start() {
 			var allServices = ServiceController.GetServices();
-			foreach( var service in RuntimeConfiguration.WindowsServices.Select( s => {
-				var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == s.InstalledName );
-				if( serviceController == null ) {
-					throw new UserCorrectableException( "The \"" + s.InstalledName +
-					                                    "\" service could not be found. Re-install the services for the installation to correct this error." );
-				}
-				return serviceController;
-			} ) ) {
+			foreach( var service in RuntimeConfiguration.WindowsServices.Select(
+				s => {
+					var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == s.InstalledName );
+					if( serviceController == null ) {
+						throw new UserCorrectableException(
+							"The \"" + s.InstalledName + "\" service could not be found. Re-install the services for the installation to correct this error." );
+					}
+					return serviceController;
+				} ) ) {
 				try {
 					service.Start();
 				}
@@ -116,13 +120,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
 			try {
-				StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
-				                                   ( uninstall ? "/u " : "" ) + "\"" +
-				                                   StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ),
-				                                                                        service.NamespaceAndAssemblyName + ".exe"
-					                                   /* file extension is required */ ) + "\"",
-				                                   "",
-				                                   true );
+				StandardLibraryMethods.RunProgram(
+					StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
+					( uninstall ? "/u " : "" ) + "\"" +
+					StandardLibraryMethods.CombinePaths(
+						GetWindowsServiceFolderPath( service, true ),
+						service.NamespaceAndAssemblyName + ".exe"
+						/* file extension is required */ ) + "\"",
+					"",
+					true );
 			}
 			catch( Exception e ) {
 				const string message = "Installer tool failed.";
