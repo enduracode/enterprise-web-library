@@ -105,11 +105,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			// If initialization failed, unload and restart the application after a reasonable delay.
-			if( !initialized && !AppTools.IsDevelopmentInstallation ) {
+			if( !initialized ) {
 				const int unloadDelay = 60000; // milliseconds
 				initFailureUnloadTimer = new Timer(
 					state => executeWithBasicExceptionHandling(
 						() => {
+							if( AppTools.IsDevelopmentInstallation )
+								return;
 							HttpRuntime.UnloadAppDomain();
 
 							// Restart the application by making a request. Idea from Rick Strahl:
@@ -493,8 +495,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.
 		/// </summary>
 		protected void ewfApplicationEnd() {
-			if( ewlInitialized )
-				AppTools.CleanUp();
+			if( !ewlInitialized )
+				return;
+			AppTools.CleanUp();
 
 			if( !initialized ) {
 				var waitHandle = new ManualResetEvent( false );
