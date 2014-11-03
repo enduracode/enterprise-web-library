@@ -30,14 +30,22 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// Private use only.
 		/// </summary>
 		protected override void OnStart( string[] args ) {
+			if( AppTools.SecondaryInitFailed ) {
+				ExitCode = 0x425; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
+				Stop();
+				return;
+			}
+
 			Action method = () => {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
 
 				timer.Change( tickInterval, Timeout.Infinite );
 			};
-			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) )
+			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) ) {
+				ExitCode = 0x428; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
 				Stop();
+			}
 		}
 
 		/// <summary>
