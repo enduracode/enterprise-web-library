@@ -13,7 +13,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 
 		private DateTime lastHealthCheckDateAndTime;
 		private readonly WindowsServiceBase service;
-		private readonly Timer timer;
+		private Timer timer;
 
 		/// <summary>
 		/// Creates a ServiceBase adapter. Generated code use only.
@@ -23,7 +23,6 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 			AutoLog = false;
 
 			this.service = service;
-			timer = new Timer( tick, null, Timeout.Infinite, Timeout.Infinite );
 		}
 
 		/// <summary>
@@ -40,7 +39,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
 
-				timer.Change( tickInterval, Timeout.Infinite );
+				timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
 			};
 			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) ) {
 				ExitCode = 0x428; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
@@ -54,9 +53,11 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		protected override void OnStop() {
 			AppTools.ExecuteBlockWithStandardExceptionHandling(
 				() => {
-					var waitHandle = new ManualResetEvent( false );
-					timer.Dispose( waitHandle );
-					waitHandle.WaitOne();
+					if( timer != null ) {
+						var waitHandle = new ManualResetEvent( false );
+						timer.Dispose( waitHandle );
+						waitHandle.WaitOne();
+					}
 
 					service.CleanUp();
 				} );
