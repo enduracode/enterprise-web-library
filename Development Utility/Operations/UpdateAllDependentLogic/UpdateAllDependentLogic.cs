@@ -424,8 +424,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "InitAppTools();" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine(
-					"AppTools.ExecuteAppWithStandardExceptionHandling( delegate { ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
-					"() ) ); } );" );
+					"AppTools.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() + "() ) ) );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
 				writer.WriteLine( "AppTools.CleanUp();" );
