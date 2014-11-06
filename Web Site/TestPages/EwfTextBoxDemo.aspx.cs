@@ -41,8 +41,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var table = FormItemBlock.CreateFormItemTable();
 			table.AddFormItems(
-				FormItem.Create( "Textarea", new EwfTextBox( "This is a paragraph.", rows: 4 ) ),
-				FormItem.Create( "Masked Input", new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
+				FormItem.Create( "Textarea".GetLiteralControl(), new EwfTextBox( "This is a paragraph.", rows: 4 ) ),
+				FormItem.Create( "Masked Input".GetLiteralControl(), new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
 			ph.AddControlsReturnThis( table );
 
 			EwfUiStatics.SetContentFootActions(
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateFull( id: "test2" );
 			var box =
 				FormItem.Create(
-					"",
+					"".GetLiteralControl(),
 					new EwfTextBox( "", postBack: pb ),
 					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnItemSelect );
@@ -100,7 +100,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateFull( id: "test3" );
 			var box =
 				FormItem.Create(
-					"",
+					"".GetLiteralControl(),
 					new EwfTextBox( "", postBack: pb ),
 					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
@@ -115,7 +115,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateFull( id: "test4" );
 			var box =
 				FormItem.Create(
-					"",
+					"".GetLiteralControl(),
 					new EwfTextBox( "", postBack: pb, autoPostBack: true ),
 					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			return new Box( "Post-back on change.", box.ToSingleElementArray() );
@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateFull( id: "test5" );
 			var box =
 				FormItem.Create(
-					"",
+					"".GetLiteralControl(),
 					new EwfTextBox( "", postBack: pb ),
 					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			return new Box( "Post-back on enter.", box.ToSingleElementArray() );
@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateFull( id: "test6" );
 			var box =
 				FormItem.Create(
-					"",
+					"".GetLiteralControl(),
 					new EwfTextBox( "", postBack: pb ),
 					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			var button = new PostBackButton( pb, new ButtonActionControlStyle( "OK" ), usesSubmitBehavior: false );

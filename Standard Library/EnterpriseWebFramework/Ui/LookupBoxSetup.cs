@@ -37,7 +37,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 			var postBack = PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( handler( val.Value ) ) );
 
 			var textBox = FormItem.Create(
-				"",
+				null,
 				new EwfTextBox( "", postBack: postBack ) { Width = new Unit( pixelWidth ) },
 				validationGetter: control => new Validation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ), postBack ) );
 			textBox.Control.SetWatermarkText( defaultText );
