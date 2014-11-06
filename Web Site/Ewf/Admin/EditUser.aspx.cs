@@ -5,39 +5,41 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 // Parameter: int? userId
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	public partial class EditUser: EwfPage {
-		public partial class Info {
+	partial class EditUser: EwfPage {
+		partial class Info {
 			internal User User { get; private set; }
 
 			protected override void init() {
 				if( UserId.HasValue )
-					User = UserManagementStatics.GetUser( UserId.Value );
+					User = UserManagementStatics.GetUser( UserId.Value, true );
 			}
 
-			protected override PageInfo createParentPageInfo() {
+			protected override ResourceInfo createParentResourceInfo() {
 				return new SystemUsers.Info( esInfo );
 			}
 
-			public override string PageName { get { return User == null ? "New User" : User.Email; } }
+			public override string ResourceName { get { return User == null ? "New User" : User.Email; } }
 		}
 
 		private UserFieldTable userFieldTable;
 
 		protected override void loadData() {
 			if( info.UserId.HasValue ) {
-				EwfUiStatics.SetPageActions( new ActionButtonSetup( "Delete User",
-				                                                    new PostBackButton( new DataModification( firstModificationMethod: deleteUser ),
-				                                                                        () => EhRedirect( new SystemUsers.Info( es.info ) ) ) ) );
+				EwfUiStatics.SetPageActions(
+					new ActionButtonSetup(
+						"Delete User",
+						new PostBackButton(
+							PostBack.CreateFull( id: "delete", firstModificationMethod: deleteUser, actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
 			}
 
-			var dm = new DataModification();
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( es.info.ParentResource ) );
 
 			userFieldTable = new UserFieldTable();
-			userFieldTable.LoadData( info.UserId, dm );
+			userFieldTable.LoadData( info.UserId, pb );
 			ph.AddControlsReturnThis( userFieldTable );
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( dm, () => EhRedirect( es.info.ParentPage ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void deleteUser() {
@@ -45,25 +47,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private void modifyData() {
-			if( UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
-				var provider = UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider;
+			if( FormsAuthStatics.FormsAuthEnabled ) {
 				if( info.UserId.HasValue ) {
-					provider.InsertOrUpdateUser( info.User.UserId,
-					                             userFieldTable.Email,
-					                             userFieldTable.Salt,
-					                             userFieldTable.SaltedPassword,
-					                             userFieldTable.RoleId,
-					                             info.User.LastRequestDateTime,
-					                             userFieldTable.MustChangePassword );
+					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+						info.User.UserId,
+						userFieldTable.Email,
+						userFieldTable.RoleId,
+						info.User.LastRequestDateTime,
+						userFieldTable.Salt,
+						userFieldTable.SaltedPassword,
+						userFieldTable.MustChangePassword );
 				}
 				else {
-					provider.InsertOrUpdateUser( null,
-					                             userFieldTable.Email,
-					                             userFieldTable.Salt,
-					                             userFieldTable.SaltedPassword,
-					                             userFieldTable.RoleId,
-					                             null,
-					                             userFieldTable.MustChangePassword );
+					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+						null,
+						userFieldTable.Email,
+						userFieldTable.RoleId,
+						null,
+						userFieldTable.Salt,
+						userFieldTable.SaltedPassword,
+						userFieldTable.MustChangePassword );
 				}
 			}
 			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {

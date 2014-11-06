@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -50,18 +49,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "", disableBrowserAutoComplete: true )
-				{
-					AutoPostBack = autoPostBack
-				};
-			Controls.Add( textBox );
+			textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "", disableBrowserAutoComplete: true, autoPostBack: autoPostBack );
+			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}
 
+		private WebControl getIconButton() {
+			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-clock-o timepickerIcon" ) };
+			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
+			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
+		}
+
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return "$( '#" + textBox.TextBoxClientId + "' ).timepicker( { timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
+			return "$( '#" + textBox.TextBoxClientId + "' ).timepicker( { timeFormat: 'h:mmt', stepMinute: " + minuteInterval + ", showButtonPanel: false } );";
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {
@@ -74,9 +76,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public TimeSpan? ValidateAndGetNullableTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
 		                                                 bool allowEmpty ) {
 			return validator.GetNullableTimeOfDayTimeSpan( errorHandler,
-			                                               textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                               DateTimeTools.HourAndMinuteFormat.ToSingleElementArray(),
-			                                               allowEmpty );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.HourAndMinuteFormat.ToSingleElementArray(),
+				allowEmpty );
 		}
 
 		/// <summary>
@@ -84,8 +86,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public TimeSpan ValidateAndGetTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
 			return validator.GetTimeOfDayTimeSpan( errorHandler,
-			                                       textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                       DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
 		}
 
 		/// <summary>

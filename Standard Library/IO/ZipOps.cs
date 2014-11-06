@@ -8,6 +8,7 @@ namespace RedStapler.StandardLibrary.IO {
 	/// <summary>
 	/// Contains methods that zip and unzip data.
 	/// </summary>
+	// As of July 2014, it looks like SharpZipLib is still easier to work with than System.IO.Compression.
 	public static class ZipOps {
 		internal static void Test() {
 			// NOTE: This path is probably wrong, and should not be hard-coded.
@@ -128,7 +129,7 @@ namespace RedStapler.StandardLibrary.IO {
 		// scattered files and folders -> ZIP stream
 
 		/// <summary>
-		/// Zips all specified files into a memory stream. All files are put in the root of the zip file. The caller is responsible for disposing the stream.
+		/// Zips all specified files into a stream. All files are put in the root of the zip file. The caller is responsible for disposing the stream.
 		/// </summary>
 		public static void ZipFilesAsStream( IEnumerable<string> filePaths, Stream outputStream ) {
 			using( var zipOutputStream = createZipOutputStream( outputStream ) ) {

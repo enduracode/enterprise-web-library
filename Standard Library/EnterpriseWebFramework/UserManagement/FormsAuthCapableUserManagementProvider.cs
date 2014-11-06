@@ -9,28 +9,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Retrieves all users.
 		/// </summary>
-		List<FormsAuthCapableUser> GetUsers();
+		IEnumerable<FormsAuthCapableUser> GetUsers();
 
 		/// <summary>
-		/// Retrieves the user with the specified ID.
+		/// Returns the user with the specified ID, or null if a user with that ID does not exist.
 		/// </summary>
 		FormsAuthCapableUser GetUser( int userId );
 
 		/// <summary>
-		/// Retrieves the user with the specified email address.
+		/// Returns the user with the specified email address, or null if a user with that email address does not exist. We recommend that you use case-insensitive
+		/// comparison.
 		/// </summary>
 		FormsAuthCapableUser GetUser( string email );
 
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( int? userId, string email, int salt, byte[] saltedPassword, int roleId, DateTime? lastRequestDateTime, bool mustChangePassword );
+		void InsertOrUpdateUser( int? userId, string email, int roleId, DateTime? lastRequestDateTime, int salt, byte[] saltedPassword, bool mustChangePassword );
 
 		/// <summary>
 		/// Gets the subject and body of the message that will be sent to the specified user when a password reset is requested.
-		/// Body is HTML encoded automatically.
+		/// <paramref name="bodyHtml"/> must be HTML, so if needed call GetTextAsEncodedHtml() on plain text.
 		/// </summary>
-		void GetPasswordResetParams( string email, string password, out string subject, out string body );
+		void GetPasswordResetParams( string email, string password, out string subject, out string bodyHtml );
 
 		/// <summary>
 		/// Gets the name of the company responsible for administrating the web site.

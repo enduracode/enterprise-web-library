@@ -10,8 +10,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// NOTE: This method will be deleted when RSIS Goal 925 is completed. But continue using it when necessary since there is no good alternative.
 		/// </summary>
-		public static ActionButtonSetup CreateWithUrl( string text, PageInfo pageInfo ) {
-			return new ActionButtonSetup( text, new EwfLink( pageInfo ) );
+		public static ActionButtonSetup CreateWithUrl( string text, ResourceInfo resourceInfo ) {
+			return new ActionButtonSetup( text, new EwfLink( resourceInfo ) );
 		}
 
 		private readonly ActionControl actionControl;

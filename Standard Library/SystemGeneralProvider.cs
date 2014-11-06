@@ -32,10 +32,5 @@
 		/// Gets the email default from address.
 		/// </summary>
 		string EmailDefaultFromAddress { get; }
-
-		/// <summary>
-		/// Not yet documented.
-		/// </summary>
-		System.Net.Mail.SmtpClient CreateClientSideAppSmtpClient();
 	}
 }

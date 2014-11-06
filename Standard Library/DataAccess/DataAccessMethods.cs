@@ -59,7 +59,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
 					// NOTE: We may want to use a different type of exception. It's important that this gets displayed in the GUI for standby web apps.
 					if( errorNumber == 3906 && Configuration.Machine.MachineConfiguration.GetIsStandbyServer() )
-						return new EwfException( "You cannot make changes to standby versions of a system." );
+						return new DataModificationException( "You cannot make changes to standby versions of a system." );
 
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
@@ -75,12 +75,17 @@ namespace RedStapler.StandardLibrary.DataAccess {
 						customMessage =
 							"The connection with the server has probably been severed. This likely happened because we did not disable connection pooling and a connection was taken from the pool that was no longer valid.";
 					}
+
+					if( !customMessage.Any() )
+						generalMessage += " Error number: {0}.".FormatWith( errorNumber.Value );
 				}
 			}
 
 			if( databaseInfo is MySqlInfo ) {
 				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
+				if( innerException.Message.Contains( "Timeout expired" ) )
+					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
 
 			if( databaseInfo is OracleInfo ) {
@@ -103,7 +108,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					customMessage = "Failed to connect to Oracle because of a connection timeout. Check the Oracle configuration on the machine and in this system.";
 				if( new[] { "ORA-01017", "ORA-1017" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage = "Failed to connect to Oracle as " + ( databaseInfo as OracleInfo ).UserAndSchema + ". You may need to execute an Update Data operation.";
-				if( innerException.Message.Contains( "ORA-03114" ) ) {
+				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) ) {
 					customMessage =
 						"Failed to connect to Oracle or connection to Oracle was lost. This should not happen often and may be caused by a bug in the data access components or the database.";
 				}

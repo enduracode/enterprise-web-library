@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		PageInfo CreateGetFilePageInfo();
+		PageInfo CreatePreBuiltResponsePageInfo();
 
 		/// <summary>
 		/// Standard Library use only.
@@ -48,11 +48,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<CssInfo> GetDisplayMediaCssInfos();
+		IEnumerable<ResourceInfo> GetDisplayMediaCssInfos();
 
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<CssInfo> GetPrintMediaCssInfos();
+		IEnumerable<ResourceInfo> GetPrintMediaCssInfos();
 	}
 }

@@ -6,21 +6,20 @@ using RedStapler.StandardLibrary.WebSessionState;
 // Parameter: int userId
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public {
-	public partial class ConfirmPasswordReset: EwfPage {
+	partial class ConfirmPasswordReset: EwfPage {
 		partial class Info {
-			public override string PageName { get { return ""; } }
+			public override string ResourceName { get { return ""; } }
 		}
 
 		protected override void loadData() {
-			var dm = new DataModification();
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password",
-			                                                           new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( es.info.DestinationUrl ) ) ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.DestinationUrl ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Reset Password", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {
-			UserManagementStatics.ResetAndSendPassword( info.UserId );
+			FormsAuthStatics.ResetAndSendPassword( info.UserId );
 			AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 		}
 	}

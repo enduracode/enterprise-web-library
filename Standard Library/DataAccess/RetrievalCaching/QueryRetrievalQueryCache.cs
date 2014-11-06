@@ -12,12 +12,12 @@ namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
 		public QueryRetrievalQueryCache() {
-			cache = new Cache<object[], IEnumerable<RowType>>( comparer: new StructuralEqualityComparer<object[]>() );
+			cache = new Cache<object[], IEnumerable<RowType>>( false, comparer: new StructuralEqualityComparer<object[]>() );
 		}
 
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
 		public IEnumerable<RowType> GetResultSet( object[] parameterValues, Func<IEnumerable<RowType>> resultSetCreator ) {
-			return cache.GetOrAddValue( parameterValues, resultSetCreator );
+			return cache.GetOrAdd( parameterValues, resultSetCreator );
 		}
 	}
 }

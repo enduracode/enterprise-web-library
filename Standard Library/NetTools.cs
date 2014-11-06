@@ -8,8 +8,8 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -129,12 +129,17 @@ namespace RedStapler.StandardLibrary {
 		/// Gets whether a request for the specified URL returns an HTTP status code other than 200 OK.
 		/// </summary>
 		public static bool LinkIsBroken( string url ) {
-			// NOTE: Use WebRequest.CreateHttp when EWL moves to .NET 4.5.
-			var request = WebRequest.Create( url ) as HttpWebRequest;
+			bool? broken = null;
+			ExecuteWithResponse( url, response => broken = response == null || response.StatusCode != HttpStatusCode.OK );
+			return broken.Value;
+		}
+
+		internal static void ExecuteWithResponse( string url, Action<HttpWebResponse> method ) {
+			var request = WebRequest.CreateHttp( url );
 
 			request.Method = "HEAD";
 			using( var response = request.getResponseIfPossible() )
-				return response == null || response.StatusCode != HttpStatusCode.OK;
+				method( response );
 		}
 
 		private static HttpWebResponse getResponseIfPossible( this HttpWebRequest request ) {
@@ -163,34 +168,36 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Creates an image with the given text and font and returns a FileCreator.
+		/// Creates an image with the given text and font and returns a response object.
 		/// Text will be all on one line and will not be wider than 800 pixels or higher than 150 pixels.
 		/// Do not pass null for text. Passing null for font will result in a generic Sans Serif, 10pt font.
 		/// </summary>
-		public static FileCreator CreateImageFromText( string text, Font font ) {
-			return new FileCreator( stream => {
-				font = font ?? new Font( FontFamily.GenericSansSerif, 10 );
+		public static EwfResponse CreateImageFromText( string text, Font font ) {
+			return new EwfResponse(
+				ContentTypes.Png,
+				new EwfResponseBodyCreator(
+					stream => {
+						font = font ?? new Font( FontFamily.GenericSansSerif, 10 );
 
-				const int startingBitmapWidth = 800;
-				const int startingBitmapHeight = 150;
+						const int startingBitmapWidth = 800;
+						const int startingBitmapHeight = 150;
 
-				var b = new Bitmap( startingBitmapWidth, startingBitmapHeight );
-				var g = Graphics.FromImage( b );
-				g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
-				g.Clear( Color.White );
+						var b = new Bitmap( startingBitmapWidth, startingBitmapHeight );
+						var g = Graphics.FromImage( b );
+						g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
+						g.Clear( Color.White );
 
-				// Find the size of the text we're drawing
-				var stringFormat = new StringFormat();
-				stringFormat.SetMeasurableCharacterRanges( new[] { new CharacterRange( 0, text.Length ) } );
-				var textRegion = g.MeasureCharacterRanges( text, font, new Rectangle( 0, 0, startingBitmapWidth, startingBitmapHeight ), stringFormat ).Single();
+						// Find the size of the text we're drawing
+						var stringFormat = new StringFormat();
+						stringFormat.SetMeasurableCharacterRanges( new[] { new CharacterRange( 0, text.Length ) } );
+						var textRegion = g.MeasureCharacterRanges( text, font, new Rectangle( 0, 0, startingBitmapWidth, startingBitmapHeight ), stringFormat ).Single();
 
-				// Draw the text, crop our image to size, make transparent and save to stream.
-				g.DrawString( text, font, Brushes.Black, new PointF() );
-				var finalImage = b.Clone( textRegion.GetBounds( g ), b.PixelFormat );
-				finalImage.MakeTransparent( Color.White );
-				finalImage.Save( stream, ImageFormat.Png );
-				return new FileInfoToBeSent( "TextAsImage" + FileExtensions.Png, ContentTypes.Png );
-			} );
+						// Draw the text, crop our image to size, make transparent and save to stream.
+						g.DrawString( text, font, Brushes.Black, new PointF() );
+						var finalImage = b.Clone( textRegion.GetBounds( g ), b.PixelFormat );
+						finalImage.MakeTransparent( Color.White );
+						finalImage.Save( stream, ImageFormat.Png );
+					} ) );
 		}
 
 		public static HttpCookie GetCookie( string name ) {
@@ -200,6 +207,13 @@ namespace RedStapler.StandardLibrary {
 				return HttpContext.Current.Response.Cookies[ name ];
 
 			return HttpContext.Current.Request.Cookies[ name ];
+		}
+
+		internal static string GetAppCookiePath() {
+			// It's important that the cookie path not end with a slash. If it does, Internet Explorer will not transmit the cookie if the user requests the root
+			// URL of the site without a trailing slash, e.g. integration.redstapler.biz/Todd. One justification for adding a trailing slash to the cookie path is
+			// http://stackoverflow.com/questions/2156399/restful-cookie-path-fails-in-ie-without-trailing-slash.
+			return HttpRuntime.AppDomainAppVirtualPath;
 		}
 	}
 }

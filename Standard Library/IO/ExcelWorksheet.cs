@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Aspose.Cells;
+using ClosedXML.Excel;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.IO {
@@ -8,8 +8,8 @@ namespace RedStapler.StandardLibrary.IO {
 	/// Respresents a worksheet inside an Excel workbook (file).
 	/// </summary>
 	public class ExcelWorksheet {
-		private readonly Worksheet worksheet;
-		private int rowIndex;
+		private readonly IXLWorksheet worksheet;
+		private int rowIndex = 1;
 
 		/// <summary>
 		/// The name of the worksheet that appears in the tab at the bottom of the workbook.
@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// <summary>
 		/// Creates a new worksheet.
 		/// </summary>
-		internal ExcelWorksheet( Worksheet worksheet ) {
+		internal ExcelWorksheet( IXLWorksheet worksheet ) {
 			this.worksheet = worksheet;
 		}
 
@@ -27,7 +27,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Freezes the first row of this worksheet so when you scroll vertically, it does not scroll.
 		/// </summary>
 		public void FreezeHeaderRow() {
-			worksheet.FreezePanes( 1, 0, 1, 0 );
+			worksheet.SheetView.FreezeRows( 1 );
 		}
 
 		/// <summary>
@@ -35,7 +35,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Using the most specific overload for the datatype passed will be recognized by Excel.
 		/// </summary>
 		public void PutCellValue( string cellName, string cellValue ) {
-			worksheet.Cells[ cellName ].PutValue( cellValue );
+			worksheet.Cell( cellName ).Value = cellValue;
 		}
 
 		/// <summary>
@@ -43,7 +43,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Using the most specific overload for the datatype passed will be recognized by Excel.
 		/// </summary>
 		public void PutCellValue( string cellName, double cellValue ) {
-			worksheet.Cells[ cellName ].PutValue( cellValue );
+			worksheet.Cell( cellName ).Value = cellValue;
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Using the most specific overload for the datatype passed will be recognized by Excel.
 		/// </summary>
 		public void PutCellValue( string cellName, DateTime cellValue ) {
-			worksheet.Cells[ cellName ].PutValue( cellValue );
+			worksheet.Cell( cellName ).Value = cellValue;
 		}
 
 		/// <summary>
@@ -59,9 +59,9 @@ namespace RedStapler.StandardLibrary.IO {
 		/// The formula should include the equals sign prefix.
 		/// </summary>
 		public void PutFormula( string cellName, string formula ) {
-			var cell = worksheet.Cells[ cellName ];
-			cell.Formula = formula;
-			setOrAddCellStyle( cell, false, bold: true );
+			var cell = worksheet.Cell( cellName );
+			cell.FormulaA1 = formula;
+			setOrAddCellStyle( cell, bold: true );
 		}
 
 		/// <summary>
@@ -80,42 +80,43 @@ namespace RedStapler.StandardLibrary.IO {
 		}
 
 		private void addRowToWorksheet( bool bold, params string[] cellValues ) {
-			var columnIndex = 0;
+			var columnIndex = 1;
 			foreach( var cellValue in cellValues ) {
-				var cell = worksheet.Cells[ rowIndex, columnIndex++ ];
+				var cell = worksheet.Cell( rowIndex, columnIndex++ );
 
-				setOrAddCellStyle( cell, false, bold: bold, textWrapped: true );
+				setOrAddCellStyle( cell, bold: bold, textWrapped: true );
 
 				var v = new Validator();
-				var detectedDate = v.GetNullableDateTime( new ValidationErrorHandler( "" ),
-				                                          cellValue,
-				                                          DateTimeTools.DayMonthYearFormats.Concat( DateTimeTools.MonthDayYearFormats ).ToArray(),
-				                                          false,
-				                                          DateTime.MinValue,
-				                                          DateTime.MaxValue );
+				var detectedDate = v.GetNullableDateTime(
+					new ValidationErrorHandler( "" ),
+					cellValue,
+					DateTimeTools.DayMonthYearFormats.Concat( DateTimeTools.MonthDayYearFormats ).ToArray(),
+					false,
+					DateTime.MinValue,
+					DateTime.MaxValue );
 				if( !v.ErrorsOccurred ) {
 					setOrAddCellStyle( cell, false, date: true );
-					cell.PutValue( detectedDate );
+					cell.Value = detectedDate;
 					continue;
 				}
 
 				v = new Validator();
-				// NOTE: Task 5940 detecting email has to come before detecting URL because email addresses get detected as valid URLs
 				v.GetEmailAddress( new ValidationErrorHandler( "" ), cellValue, false );
 				if( !v.ErrorsOccurred ) {
-					worksheet.Hyperlinks.Add( cell.Name, 1, 1, "mailto:" + cellValue );
-					cell.PutValue( cellValue, false );
+					cell.Value = cellValue;
+					cell.Hyperlink = new XLHyperlink( "mailto:" + cellValue );
 					continue;
 				}
 
 				v = new Validator();
-				v.GetUrl( new ValidationErrorHandler( "" ), cellValue, false );
+				var validatedUrl = v.GetUrl( new ValidationErrorHandler( "" ), cellValue, false );
 				if( !v.ErrorsOccurred ) {
-					worksheet.Hyperlinks.Add( cell.Name, 1, 1, cellValue );
+					cell.Value = cellValue;
+					cell.Hyperlink = new XLHyperlink( validatedUrl );
 					continue;
 				}
 
-				cell.PutValue( cellValue, true );
+				cell.Value = cellValue;
 			}
 			++rowIndex;
 		}
@@ -123,15 +124,13 @@ namespace RedStapler.StandardLibrary.IO {
 		/// <summary>
 		/// Adds simplicity to adding cell styles
 		/// </summary>
-		private static void setOrAddCellStyle( Cell cell, bool replaceCurrentStyles, bool bold = false, bool textWrapped = false, bool date = false ) {
-			var style = replaceCurrentStyles ? new Style() : cell.GetStyle();
+		private static void setOrAddCellStyle( IXLCell cell, bool bold = false, bool textWrapped = false, bool date = false ) {
 			if( bold )
-				style.Font.IsBold = true;
+				cell.Style.Font.Bold = true;
 			if( textWrapped )
-				style.IsTextWrapped = true;
+				cell.Style.Alignment.WrapText = true;
 			if( date )
-				style.Custom = "mm/dd/yyyy";
-			cell.SetStyle( style );
+				cell.Style.DateFormat.SetFormat( "mm/dd/yyyy" );
 		}
 	}
 }

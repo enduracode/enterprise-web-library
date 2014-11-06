@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -33,7 +32,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			var selectList = SelectList.CreateRadioList( tabs.Select( i => EwfListItem.Create( i.Item1, i.Item1 ) ), tabs.First().Item1, useHorizontalLayout: true );
+			var selectList = SelectList.CreateRadioList( tabs.Select( i => SelectListItem.Create( i.Item1, i.Item1 ) ), tabs.First().Item1, useHorizontalLayout: true );
 			foreach( var i in tabs ) {
 				Controls.Add( i.Item2 );
 				selectList.AddDisplayLink( i.Item1.ToSingleElementArray(), true, i.Item2.ToSingleElementArray() );
