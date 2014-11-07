@@ -39,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			b.AddFormItems(
 				FormItem.Create(
-					"Email address".GetLiteralControl(),
+					"Email address",
 					new EwfTextBox( user != null ? user.Email : "" ),
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				var group = new RadioButtonGroup( false );
 
 				var keepPassword = FormItem.Create(
-					null,
+					"",
 					group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
@@ -69,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 						                             vl ) );
 
 				var generatePassword = FormItem.Create(
-					null,
+					"",
 					group.CreateInlineRadioButton( false, label: "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" ),
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
@@ -85,21 +85,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					new EwfTableItem(
 						"Password",
 						FormItem.Create(
-							null,
+							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
 							validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 				newPasswordTable.AddItem(
 					new EwfTableItem(
 						"Password again",
 						FormItem.Create(
-							null,
+							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
 							validationGetter: control => new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );
 				var providePassword = FormItem.Create(
-					null,
+					"",
 					providePasswordRadio,
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
@@ -114,12 +114,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 						                             vl ) );
 
 				b.AddFormItems(
-					FormItem.Create( "Password".GetLiteralControl(), ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
+					FormItem.Create( "Password", ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
 			}
 
 			b.AddFormItems(
 				FormItem.Create(
-					"Role".GetLiteralControl(),
+					"Role",
 					SelectList.CreateDropDown(
 						from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ),
 						user != null ? user.Role.RoleId as int? : null ),

@@ -25,10 +25,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var staticTable = FormItemBlock.CreateFormItemTable();
 			staticTable.AddFormItems(
-				FormItem.Create( "Static Field".GetLiteralControl(), new EwfTextBox( "Values here will be retained across post-backs" ) ),
-				FormItem.Create( "Static Field".GetLiteralControl(), new EwfTextBox( "" ) ),
+				FormItem.Create( "Static Field", new EwfTextBox( "Values here will be retained across post-backs" ) ),
+				FormItem.Create( "Static Field", new EwfTextBox( "" ) ),
 				FormItem.Create(
-					"Static Field".GetLiteralControl(),
+					"Static Field",
 					new EwfTextBox( "Edit this one to get a validation error" ),
 					validationGetter: control => new Validation(
 						                             ( pbv, validator ) => {
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			if( info.Toggled ) {
 				regionControls.Add(
 					FormItem.Create(
-						"Dynamic Field".GetLiteralControl(),
+						"Dynamic Field",
 						new EwfTextBox( "This was just added!" ),
 						validationGetter: control => new Validation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
 			}

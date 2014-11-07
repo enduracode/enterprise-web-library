@@ -99,7 +99,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				}
 				formItems.Add(
 					FormItem.Create(
-						null,
+						"",
 						new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( IncludeButtonWithThisText ) ) { Width = Unit.Percentage( 50 ) },
 						textAlignment: TextAlignment.Right,
 						cellSpan: defaultFormItemCellSpan ) );
@@ -150,7 +150,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private FormItem<Literal> getPlaceholderFormItem() {
-			return FormItem.Create( null, "".GetLiteralControl(), cellSpan: 1 );
+			return FormItem.Create( "", "".GetLiteralControl(), cellSpan: 1 );
 		}
 
 		private int getCellSpan( FormItem formItem ) {

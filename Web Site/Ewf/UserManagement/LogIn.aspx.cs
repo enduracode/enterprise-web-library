@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			emailAddress = new DataValue<string>();
 			var emailVl = new BasicValidationList();
 			registeredTable.AddItem(
-				new EwfTableItem( "Email address", emailAddress.GetEmailAddressFormItem( null, "Please enter a valid email address.", emailVl ).ToControl() ) );
+				new EwfTableItem( "Email address", emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address.", emailVl ).ToControl() ) );
 			logInPb.AddValidations( emailVl );
 			newPasswordPb.AddValidations( emailVl );
 
@@ -37,7 +37,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				new EwfTableItem(
 					"Password",
 					FormItem.Create(
-						null,
+						"",
 						new EwfTextBox( "", masksCharacters: true ),
 						validationGetter: control => new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
 

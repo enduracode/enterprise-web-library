@@ -24,7 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				FormItemBlock.CreateFormItemTable(
 					formItems:
 						FormItem.Create(
-							"Enter your password for this non-live installation".GetLiteralControl(),
+							"Enter your password for this non-live installation",
 							new EwfTextBox( "", masksCharacters: true ),
 							validationGetter: control => new Validation(
 								                             ( pbv, validator ) => {

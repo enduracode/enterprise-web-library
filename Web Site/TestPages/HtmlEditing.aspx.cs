@@ -13,9 +13,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private void addHtmlEditor() {
 			HtmlBlockEditorModification mod;
 			ph.AddControlsReturnThis(
-				FormItem.Create( null,
-				                 new HtmlBlockEditor( null, id => { }, out mod ),
-				                 validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
+				FormItem.Create(
+					"",
+					new HtmlBlockEditor( null, id => { }, out mod ),
+					validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
 		}
 	}
 }

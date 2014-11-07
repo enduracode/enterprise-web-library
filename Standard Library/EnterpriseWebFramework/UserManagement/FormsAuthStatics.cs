@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using System.Web.UI;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -78,7 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Gets an email address form item for use on log-in pages. The validation sets this data value to the post back value of the text box, if valid, or adds
 		/// the specified error message to the form item.
 		/// </summary>
-		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, Control label, string errorMessage, ValidationList vl ) {
+		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage, ValidationList vl ) {
 			return FormItem.Create(
 				label,
 				new EwfTextBox( "" ),

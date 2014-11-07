@@ -30,9 +30,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem GetFormItem<ItemIdType>(
-			Control label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod, string caption = "",
-			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null, PostBack postBack = null,
-			int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null, ValidationList validationList = null ) {
+			FormItemLabel label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
+			string caption = "", bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null,
+			PostBack postBack = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null,
+			ValidationList validationList = null ) {
 			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>(
 				items,
 				selectedItemIds,
@@ -74,7 +75,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem GetFormItem<ItemIdType>(
-			Control label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, string caption = "",
+			FormItemLabel label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, string caption = "",
 			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, PostBack postBack = null, int? cellSpan = null,
 			TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null, ValidationList validationList = null ) {
 			var itemArray = items.ToArray();

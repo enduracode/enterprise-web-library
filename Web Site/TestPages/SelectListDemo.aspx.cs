@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									", ",
 									items.Count() == 4 ? "Default in list" : "Default not in list",
 									selectedItemId.HasValue ? "One selected" : "default selected",
-									defaultValueItemLabel.Any() ? "default label" : "no default label" ).GetLiteralControl(),
+									defaultValueItemLabel.Any() ? "default label" : "no default label" ),
 								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
 								validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
 					}
@@ -91,7 +91,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 										items.Count() == 4 ? "Default in list" : "Default not in list",
 										selectedItemId.HasValue ? "One selected" : "default selected",
 										defaultValueItemLabel.Any() ? "default label" : "no default label",
-										placeholderIsValid ? "placeholder valid" : "placeholder not valid" ).GetLiteralControl(),
+										placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
 									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
 									validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
 						}

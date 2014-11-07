@@ -20,13 +20,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			newPassword = new DataValue<string>();
 			fib.AddFormItems(
 				FormItem.Create(
-					"New password".GetLiteralControl(),
+					"New password",
 					new EwfTextBox( "", masksCharacters: true ),
 					validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			var newPasswordConfirm = new DataValue<string>();
 			fib.AddFormItems(
 				FormItem.Create(
-					"Re-type new password".GetLiteralControl(),
+					"Re-type new password",
 					new EwfTextBox( "", masksCharacters: true ),
 					validationGetter: control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
