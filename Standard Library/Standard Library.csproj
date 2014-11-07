@@ -179,6 +179,7 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemLabel.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\Chart.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />

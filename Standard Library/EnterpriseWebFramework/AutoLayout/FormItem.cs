@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.UI;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
@@ -10,13 +11,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item with the given label and control. Cell span only applies to adjacent layouts.
 		/// </summary>
-		public static FormItem<ControlType> Create<ControlType>( Control label, ControlType control, int? cellSpan = null,
-		                                                         TextAlignment textAlignment = TextAlignment.NotSpecified,
-		                                                         Func<ControlType, Validation> validationGetter = null ) where ControlType: Control {
+		// By taking a FormItemLabel instead of a Control for label, we retain the ability to implement additional behavior for string labels, such as automatically
+		// making them bold.
+		public static FormItem<ControlType> Create<ControlType>(
+			FormItemLabel label, ControlType control, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+			Func<ControlType, Validation> validationGetter = null ) where ControlType: Control {
 			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter != null ? validationGetter( control ) : null );
 		}
 
-		private readonly Control label;
+		private readonly FormItemLabel label;
 		private readonly Control control;
 
 		// NOTE: We may want to bundle all display stuff into one class. How would we make that easy to use, though?
@@ -28,8 +31,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item.
 		/// </summary>
-		protected FormItem( Control label, Control control, int? cellSpan, TextAlignment textAlignment, Validation validation ) {
+		protected FormItem( FormItemLabel label, Control control, int? cellSpan, TextAlignment textAlignment, Validation validation ) {
+			if( label == null )
+				throw new ApplicationException( "The label cannot be a null FormItemLabel reference." );
 			this.label = label;
+
 			this.control = control;
 			this.cellSpan = cellSpan;
 			this.textAlignment = textAlignment;
@@ -39,7 +45,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual Control Label { get { return label; } }
+		public virtual Control Label { get { return label.Text != null ? label.Text.Any() ? label.Text.GetLiteralControl() : null : label.Control; } }
 
 		/// <summary>
 		/// Gets the control.
@@ -59,7 +65,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// This can be used to insert controls to a page without a <see cref="FormItemBlock"/> and display inline error messages.
 		/// </summary>
 		public LabeledControl ToControl( bool omitLabel = false ) {
-			return new LabeledControl( omitLabel ? null : label, control, validation );
+			return new LabeledControl( omitLabel ? null : Label, control, validation );
 		}
 	}
 
@@ -69,7 +75,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class FormItem<ControlType>: FormItem where ControlType: Control {
 		private readonly ControlType control;
 
-		internal FormItem( Control label, ControlType control, int? cellSpan, TextAlignment textAlignment, Validation validation )
+		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, Validation validation )
 			: base( label, control, cellSpan, textAlignment, validation ) {
 			this.control = control;
 		}
