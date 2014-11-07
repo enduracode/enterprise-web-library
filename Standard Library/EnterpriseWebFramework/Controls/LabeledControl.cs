@@ -15,8 +15,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				return new[]
 					{
 						new CssElement( "LabeledControl", "div." + CssClass ),
-						new CssElement( "LabeledControlItem",
-						                ControlStack.CssElementCreator.Selectors.Select( i => i + " > " + ControlStack.CssElementCreator.ItemSelector ).ToArray() )
+						new CssElement(
+							"LabeledControlItem",
+							ControlStack.CssElementCreator.Selectors.Select( i => i + " > " + ControlStack.CssElementCreator.ItemSelector ).ToArray() )
 					};
 			}
 		}
@@ -26,8 +27,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly Validation validation;
 
 		/// <summary>
-		/// Creates a new instance of a LabeledControl with the specified control and label. You may pass null for the label.
+		/// Creates a new instance of a LabeledControl with the specified control and label.
 		/// </summary>
+		/// <param name="wrappedControl">The control.</param>
+		/// <param name="label">The label. Pass null if you don't want a label.</param>
 		public LabeledControl( Control wrappedControl, Control label ): this( label, wrappedControl, null ) {
 			wrappedControls.Add( wrappedControl );
 			this.label = label;
@@ -45,15 +48,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( label != null )
 				controlStack.AddControls( label );
 			if( validation != null ) {
-				controlStack.AddModificationErrorItem( validation,
-				                                       errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+				controlStack.AddModificationErrorItem(
+					validation,
+					errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
 			}
 			controlStack.AddControls( new PlaceHolder().AddControlsReturnThis( wrappedControls ) );
 			Controls.Add( controlStack );
 		}
 
 		/// <summary>
-		/// Returns the div tag, which represents this control in HTML.
+		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
 	}
