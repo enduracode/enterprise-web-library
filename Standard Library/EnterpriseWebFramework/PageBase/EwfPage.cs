@@ -495,15 +495,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
 				return;
 			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "<script type=\"text/javascript\">" );
-				sw.WriteLine( "var _gaq = _gaq || [];" );
-				sw.WriteLine( "_gaq.push(['_setAccount', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "']);" );
-				sw.WriteLine( "_gaq.push(['_trackPageview']);" );
-				sw.WriteLine( "(function() {" );
-				sw.WriteLine( "var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;" );
-				sw.WriteLine( "ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';" );
-				sw.WriteLine( "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);" );
-				sw.WriteLine( "})();" );
+				sw.WriteLine( "<script>" );
+				sw.WriteLine( "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" );
+				sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
+				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
+				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
+				sw.WriteLine( "ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto');" );
+				sw.WriteLine( "ga('send', 'pageview');" );
 				sw.WriteLine( "</script>" );
 				Header.Controls.Add( new Literal { Text = sw.ToString() } );
 			}
