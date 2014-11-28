@@ -66,9 +66,14 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					if( errorNumber.Value == 4060 )
 						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
 
-					// -2 is the code for a timeout. See http://blog.colinmackay.net/archive/2007/06/23/65.aspx.
+					// -2 is the code for a timeout.
 					if( errorNumber.Value == -2 )
 						customMessage = "Failed to connect to SQL Server because of a connection timeout.";
+
+					if( errorNumber.Value == 258 ) {
+						customMessage =
+							"Failed to connect to SQL Server because of a connection timeout. SQL Server may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+					}
 
 					// We also handle this error at the command level.
 					if( errorNumber.Value == 233 ) {
