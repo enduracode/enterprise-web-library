@@ -92,6 +92,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			if( databaseInfo is MySqlInfo ) {
 				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
+				if( innerException.Message.Contains( "ERROR 2013" ) ) {
+					customMessage =
+						"Failed to connect to MySQL. MySQL may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+				}
 				if( innerException.Message.Contains( "Timeout expired" ) )
 					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
