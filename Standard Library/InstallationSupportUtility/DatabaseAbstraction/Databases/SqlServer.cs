@@ -263,7 +263,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			return summary;
 		}
 
-		public List<string> GetTables() {
+		List<string> Database.GetTables() {
 			var tables = new List<string>();
 			ExecuteDbMethod(
 				delegate( DBConnection cn ) {
