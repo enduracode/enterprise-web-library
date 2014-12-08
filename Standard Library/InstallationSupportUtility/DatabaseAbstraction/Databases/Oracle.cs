@@ -317,7 +317,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			ExecuteDbMethod(
 				cn => {
 					var command = cn.DatabaseInfo.CreateCommand();
-					command.CommandText = "SELECT index_name FROM user_indexes";
+					command.CommandText = "SELECT index_name FROM user_indexes WHERE index_type != 'LOB'";
 					var indexes = new List<string>();
 					cn.ExecuteReaderCommand(
 						command,
