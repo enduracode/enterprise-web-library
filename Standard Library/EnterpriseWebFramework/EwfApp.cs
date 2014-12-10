@@ -116,7 +116,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 							// Restart the application by making a request. Idea from Rick Strahl:
 							// http://weblog.west-wind.com/posts/2013/Oct/02/Use-IIS-Application-Initialization-for-keeping-ASPNET-Apps-alive.
-							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => { } );
+							//
+							// Disable server certificate validation so that this request gets through even for web sites that don't use a certificate that is trusted by
+							// default. There is no security risk since we're not sending any sensitive information and we're not using the response.
+							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => { }, disableCertificateValidation: true );
 						},
 						false,
 						false ),

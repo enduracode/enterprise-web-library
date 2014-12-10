@@ -134,10 +134,12 @@ namespace RedStapler.StandardLibrary {
 			return broken.Value;
 		}
 
-		internal static void ExecuteWithResponse( string url, Action<HttpWebResponse> method ) {
+		internal static void ExecuteWithResponse( string url, Action<HttpWebResponse> method, bool disableCertificateValidation = false ) {
 			var request = WebRequest.CreateHttp( url );
 
 			request.Method = "HEAD";
+			if( disableCertificateValidation )
+				request.ServerCertificateValidationCallback += ( sender, certificate, chain, errors ) => true;
 			using( var response = request.getResponseIfPossible() )
 				method( response );
 		}
