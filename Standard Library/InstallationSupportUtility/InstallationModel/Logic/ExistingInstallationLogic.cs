@@ -12,9 +12,11 @@ using RedStapler.StandardLibrary.Email;
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
+		private const int serviceFailureResetPeriod = 3600; // seconds
 
-		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths( Environment.GetEnvironmentVariable( "windir" ),
-		                                                                                 @"system32\inetsrv\AppCmd.exe" );
+		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths(
+			Environment.GetEnvironmentVariable( "windir" ),
+			@"system32\inetsrv\AppCmd.exe" );
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
@@ -26,7 +28,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		public InstallationConfiguration RuntimeConfiguration { get { return runtimeConfiguration; } }
 
-		public string DatabaseUpdateFilePath { get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); } }
+		public string DatabaseUpdateFilePath {
+			get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); }
+		}
 
 		/// <summary>
 		/// Creates a text file named "Error Log.txt" in the root of the installation folder and gives NETWORK SERVICE full control over it.
@@ -66,7 +70,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		private void stopServices() {
 			var allServices = ServiceController.GetServices();
 			var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
-			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) && sc.Status != ServiceControllerStatus.Stopped ) ) {
+			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) ) ) {
+				// Clear failure actions.
+				StandardLibraryMethods.RunProgram( "sc", "failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ), "", true );
+
+				if( service.Status == ServiceControllerStatus.Stopped )
+					continue;
 				service.Stop();
 				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Stopped );
 			}
@@ -77,14 +86,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		/// </summary>
 		public void Start() {
 			var allServices = ServiceController.GetServices();
-			foreach( var service in RuntimeConfiguration.WindowsServices.Select( s => {
-				var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == s.InstalledName );
-				if( serviceController == null ) {
-					throw new UserCorrectableException( "The \"" + s.InstalledName +
-					                                    "\" service could not be found. Re-install the services for the installation to correct this error." );
-				}
-				return serviceController;
-			} ) ) {
+			foreach( var service in RuntimeConfiguration.WindowsServices.Select(
+				s => {
+					var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == s.InstalledName );
+					if( serviceController == null ) {
+						throw new UserCorrectableException(
+							"The \"" + s.InstalledName + "\" service could not be found. Re-install the services for the installation to correct this error." );
+					}
+					return serviceController;
+				} ) ) {
 				try {
 					service.Start();
 				}
@@ -99,6 +109,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 					throw new ApplicationException( message, e );
 				}
 				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
+
+				// Set failure actions.
+				const int restartDelay = 60000; // milliseconds
+				StandardLibraryMethods.RunProgram(
+					"sc",
+					"failure \"{0}\" reset= {1} actions= restart/{2}".FormatWith( service.ServiceName, serviceFailureResetPeriod, restartDelay ),
+					"",
+					true );
+				StandardLibraryMethods.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( service.ServiceName ), "", true );
 			}
 			if( runtimeConfiguration.InstallationType != InstallationType.Development ) {
 				foreach( var site in runtimeConfiguration.WebSiteNames )
@@ -116,13 +135,15 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
 			try {
-				StandardLibraryMethods.RunProgram( StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
-				                                   ( uninstall ? "/u " : "" ) + "\"" +
-				                                   StandardLibraryMethods.CombinePaths( GetWindowsServiceFolderPath( service, true ),
-				                                                                        service.NamespaceAndAssemblyName + ".exe"
-					                                   /* file extension is required */ ) + "\"",
-				                                   "",
-				                                   true );
+				StandardLibraryMethods.RunProgram(
+					StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
+					( uninstall ? "/u " : "" ) + "\"" +
+					StandardLibraryMethods.CombinePaths(
+						GetWindowsServiceFolderPath( service, true ),
+						service.NamespaceAndAssemblyName + ".exe"
+						/* file extension is required */ ) + "\"",
+					"",
+					true );
 			}
 			catch( Exception e ) {
 				const string message = "Installer tool failed.";

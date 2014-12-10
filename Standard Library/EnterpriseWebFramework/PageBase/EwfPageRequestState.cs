@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -12,11 +13,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		// set during modifications
 		internal string ControlWithInitialFocusId { get; set; }
-		internal string[] TopModificationErrors { get; set; }
+		internal Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
+		internal IEnumerable<string> TopModificationErrors { get; set; }
 		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; private set; }
 
-		// set before transfer
-		internal string StaticFormValueHash { get; set; }
+		// set before navigation and used to detect possible developer mistakes
+		internal string StaticRegionContents { get; private set; }
+		internal IEnumerable<Tuple<string, string>> UpdateRegionKeysAndArguments { get; private set; }
 
 		internal EwfPageRequestState( PageState pageState, string scrollPositionX, string scrollPositionY ) {
 			this.pageState = pageState;
@@ -32,5 +35,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal string ScrollPositionY { get { return scrollPositionY; } }
 
 		internal bool ModificationErrorsExist { get { return TopModificationErrors.Any(); } }
+
+		internal void SetStaticAndUpdateRegionState( string staticRegionContents, IEnumerable<Tuple<string, string>> updateRegionKeysAndArguments ) {
+			StaticRegionContents = staticRegionContents;
+			UpdateRegionKeysAndArguments = updateRegionKeysAndArguments;
+		}
 	}
 }

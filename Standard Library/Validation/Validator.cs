@@ -112,10 +112,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public bool GetBoolean( ValidationErrorHandler errorHandler, string booleanAsString ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<bool>( errorHandler,
-			                                                                             booleanAsString,
-			                                                                             false,
-			                                                                             delegate { return validateBoolean( booleanAsString, errorHandler ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<bool>(
+				errorHandler,
+				booleanAsString,
+				false,
+				delegate { return validateBoolean( booleanAsString, errorHandler ); } );
 		}
 
 		/// <summary>
@@ -124,10 +125,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public bool? GetNullableBoolean( ValidationErrorHandler errorHandler, string booleanAsString, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<bool?>( errorHandler,
-			                                                                              booleanAsString,
-			                                                                              allowEmpty,
-			                                                                              delegate { return validateBoolean( booleanAsString, errorHandler ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<bool?>(
+				errorHandler,
+				booleanAsString,
+				allowEmpty,
+				delegate { return validateBoolean( booleanAsString, errorHandler ); } );
 		}
 
 		private static bool validateBoolean( string booleanAsString, ValidationErrorHandler errorHandler ) {
@@ -152,12 +154,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public byte GetByte( ValidationErrorHandler errorHandler, string byteAsString, byte min, byte max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<byte>( errorHandler,
-			                                                                             byteAsString,
-			                                                                             false,
-			                                                                             delegate {
-				                                                                             return validateGenericIntegerType<byte>( errorHandler, byteAsString, min, max );
-			                                                                             } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<byte>(
+				errorHandler,
+				byteAsString,
+				false,
+				delegate { return validateGenericIntegerType<byte>( errorHandler, byteAsString, min, max ); } );
 		}
 
 		/// <summary>
@@ -165,15 +166,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public byte? GetNullableByte( ValidationErrorHandler errorHandler, string byteAsString, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<byte?>( errorHandler,
-			                                                                              byteAsString,
-			                                                                              allowEmpty,
-			                                                                              delegate {
-				                                                                              return validateGenericIntegerType<byte>( errorHandler,
-				                                                                                                                       byteAsString,
-				                                                                                                                       byte.MinValue,
-				                                                                                                                       byte.MaxValue );
-			                                                                              } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<byte?>(
+				errorHandler,
+				byteAsString,
+				allowEmpty,
+				delegate { return validateGenericIntegerType<byte>( errorHandler, byteAsString, byte.MinValue, byte.MaxValue ); } );
 		}
 
 		/// <summary>
@@ -189,15 +186,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public short GetShort( ValidationErrorHandler errorHandler, string shortAsString, short min, short max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<short>( errorHandler,
-			                                                                              shortAsString,
-			                                                                              false,
-			                                                                              delegate {
-				                                                                              return validateGenericIntegerType<short>( errorHandler,
-				                                                                                                                        shortAsString,
-				                                                                                                                        min,
-				                                                                                                                        max );
-			                                                                              } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<short>(
+				errorHandler,
+				shortAsString,
+				false,
+				delegate { return validateGenericIntegerType<short>( errorHandler, shortAsString, min, max ); } );
 		}
 
 		/// <summary>
@@ -213,15 +206,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public short? GetNullableShort( ValidationErrorHandler errorHandler, string shortAsString, bool allowEmpty, short min, short max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<short?>( errorHandler,
-			                                                                               shortAsString,
-			                                                                               allowEmpty,
-			                                                                               delegate {
-				                                                                               return validateGenericIntegerType<short>( errorHandler,
-				                                                                                                                         shortAsString,
-				                                                                                                                         min,
-				                                                                                                                         max );
-			                                                                               } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<short?>(
+				errorHandler,
+				shortAsString,
+				allowEmpty,
+				delegate { return validateGenericIntegerType<short>( errorHandler, shortAsString, min, max ); } );
 		}
 
 		/// <summary>
@@ -235,29 +224,26 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// <summary>
 		/// Returns the validated int type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
+		/// <paramref name="min"/> and <paramref name="max"/> are inclusive.
 		/// </summary>
 		public int GetInt( ValidationErrorHandler errorHandler, string intAsString, int min, int max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>( errorHandler,
-			                                                                            intAsString,
-			                                                                            false,
-			                                                                            delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, min, max );
-			                                                                            } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>(
+				errorHandler,
+				intAsString,
+				false,
+				delegate { return validateGenericIntegerType<int>( errorHandler, intAsString, min, max ); } );
 		}
 
 		/// <summary>
 		/// Returns the validated int type from the given string and validation package.
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
-		public int? GetNullableInt( ValidationErrorHandler errorHandler, string intAsString, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int?>( errorHandler,
-			                                                                             intAsString,
-			                                                                             allowEmpty,
-			                                                                             delegate {
-				                                                                             return validateGenericIntegerType<int>( errorHandler,
-				                                                                                                                     intAsString,
-				                                                                                                                     int.MinValue,
-				                                                                                                                     int.MaxValue );
-			                                                                             } );
+		public int? GetNullableInt( ValidationErrorHandler errorHandler, string intAsString, bool allowEmpty, int min = int.MinValue, int max = int.MaxValue ) {
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int?>(
+				errorHandler,
+				intAsString,
+				allowEmpty,
+				() => validateGenericIntegerType<int>( errorHandler, intAsString, min, max ) );
 		}
 
 		private static T validateGenericIntegerType<T>( ValidationErrorHandler errorHandler, string valueAsString, long minValue, long maxValue ) {
@@ -292,10 +278,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public float GetFloat( ValidationErrorHandler errorHandler, string floatAsString, float min, float max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<float>( errorHandler,
-			                                                                              floatAsString,
-			                                                                              false,
-			                                                                              delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<float>(
+				errorHandler,
+				floatAsString,
+				false,
+				delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
 		}
 
 		/// <summary>
@@ -303,10 +290,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public float? GetNullableFloat( ValidationErrorHandler errorHandler, string floatAsString, bool allowEmpty, float min, float max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<float?>( errorHandler,
-			                                                                               floatAsString,
-			                                                                               allowEmpty,
-			                                                                               delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<float?>(
+				errorHandler,
+				floatAsString,
+				allowEmpty,
+				delegate { return validateFloat( floatAsString, errorHandler, min, max ); } );
 		}
 
 		private static float validateFloat( string floatAsString, ValidationErrorHandler errorHandler, float min, float max ) {
@@ -333,7 +321,6 @@ namespace RedStapler.StandardLibrary.Validation {
 			return floatValue;
 		}
 
-
 		/// <summary>
 		/// Returns a validated decimal type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
@@ -347,10 +334,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public Decimal GetDecimal( ValidationErrorHandler errorHandler, string decimalAsString, Decimal min, Decimal max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal>( errorHandler,
-			                                                                                decimalAsString,
-			                                                                                false,
-			                                                                                delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal>(
+				errorHandler,
+				decimalAsString,
+				false,
+				delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
 		}
 
 		/// <summary>
@@ -366,10 +354,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public Decimal? GetNullableDecimal( ValidationErrorHandler errorHandler, string decimalAsString, bool allowEmpty, Decimal min, Decimal max ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal?>( errorHandler,
-			                                                                                 decimalAsString,
-			                                                                                 allowEmpty,
-			                                                                                 delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<decimal?>(
+				errorHandler,
+				decimalAsString,
+				allowEmpty,
+				delegate { return validateDecimal( decimalAsString, errorHandler, min, max ); } );
 		}
 
 		private static decimal validateDecimal( string decimalAsString, ValidationErrorHandler errorHandler, decimal min, decimal max ) {
@@ -417,19 +406,19 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Automatically trims whitespace from edges of returned string.
 		/// </summary>
 		public string GetString( ValidationErrorHandler errorHandler, string text, bool allowEmpty, int minLength, int maxLength ) {
-			return handleEmptyAndReturnEmptyStringIfInvalid( errorHandler,
-			                                                 text,
-			                                                 allowEmpty,
-			                                                 delegate {
-				                                                 var errorMessage = "The length of the " + errorHandler.Subject + " must be between " + minLength + " and " +
-				                                                                    maxLength + " characters.";
-				                                                 if( text.Length > maxLength )
-					                                                 errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooLong, errorMessage ) );
-				                                                 else if( text.Length < minLength )
-					                                                 errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooShort, errorMessage ) );
+			return handleEmptyAndReturnEmptyStringIfInvalid(
+				errorHandler,
+				text,
+				allowEmpty,
+				delegate {
+					var errorMessage = "The length of the " + errorHandler.Subject + " must be between " + minLength + " and " + maxLength + " characters.";
+					if( text.Length > maxLength )
+						errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooLong, errorMessage ) );
+					else if( text.Length < minLength )
+						errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooShort, errorMessage ) );
 
-				                                                 return text.Trim();
-			                                                 } );
+					return text.Trim();
+				} );
 		}
 
 		/// <summary>
@@ -440,33 +429,30 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If you pass a different value for maxLength, you'd better have a good reason.
 		/// </summary>
 		public string GetEmailAddress( ValidationErrorHandler errorHandler, string emailAddress, bool allowEmpty, int maxLength = 254 ) {
-			return handleEmptyAndReturnEmptyStringIfInvalid( errorHandler,
-			                                                 emailAddress,
-			                                                 allowEmpty,
-			                                                 delegate {
-				                                                 // Validate as a string with same restrictions - if it fails on that, return
-				                                                 emailAddress = GetString( errorHandler, emailAddress, allowEmpty, maxLength );
-				                                                 if( errorHandler.LastResult == ErrorCondition.NoError ) {
-					                                                 // [^@ \n] means any character but a @ or a newline or a space.  This forces only one @ to exist.
-					                                                 //([^@ \n\.]+\.)+ forces any positive number of (anything.)s to exist in a row.  Doesn't allow "..".
-					                                                 // Allows anything.anything123-anything@anything.anything123.anything
-					                                                 const string localPartUnconditionallyPermittedCharacters = @"[a-z0-9!#\$%&'\*\+\-/=\?\^_`\{\|}~]";
-					                                                 const string localPart =
-						                                                 "(" + localPartUnconditionallyPermittedCharacters + @"+\.?)*" +
-						                                                 localPartUnconditionallyPermittedCharacters + "+";
-					                                                 const string domainUnconditionallyPermittedCharacters = @"[a-z0-9-]";
-					                                                 const string domain =
-						                                                 "(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters +
-						                                                 "+";
-					                                                 // The first two conditions are for performance only.
-					                                                 if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
-					                                                     !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
-						                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
-					                                                 // Max length is already checked by the string validation
-					                                                 // NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
-				                                                 }
-				                                                 return emailAddress;
-			                                                 } );
+			return handleEmptyAndReturnEmptyStringIfInvalid(
+				errorHandler,
+				emailAddress,
+				allowEmpty,
+				delegate {
+					// Validate as a string with same restrictions - if it fails on that, return
+					emailAddress = GetString( errorHandler, emailAddress, allowEmpty, maxLength );
+					if( errorHandler.LastResult == ErrorCondition.NoError ) {
+						// [^@ \n] means any character but a @ or a newline or a space.  This forces only one @ to exist.
+						//([^@ \n\.]+\.)+ forces any positive number of (anything.)s to exist in a row.  Doesn't allow "..".
+						// Allows anything.anything123-anything@anything.anything123.anything
+						const string localPartUnconditionallyPermittedCharacters = @"[a-z0-9!#\$%&'\*\+\-/=\?\^_`\{\|}~]";
+						const string localPart = "(" + localPartUnconditionallyPermittedCharacters + @"+\.?)*" + localPartUnconditionallyPermittedCharacters + "+";
+						const string domainUnconditionallyPermittedCharacters = @"[a-z0-9-]";
+						const string domain = "(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters + "+";
+						// The first two conditions are for performance only.
+						if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
+						    !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
+							errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						// Max length is already checked by the string validation
+						// NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
+					}
+					return emailAddress;
+				} );
 		}
 
 		/// <summary>
@@ -476,47 +462,66 @@ namespace RedStapler.StandardLibrary.Validation {
 			return GetUrl( errorHandler, url, allowEmpty, MaxUrlLength );
 		}
 
-
-		private static readonly string[] validSchemes = new[] { "http", "https", "ftp" };
+		private static readonly string[] validSchemes = { "http", "https", "ftp" };
 
 		/// <summary>
 		/// Returns a validated URL. Note that you may run into problems with certain browsers if you pass a length longer than 2048.
 		/// </summary>
 		public string GetUrl( ValidationErrorHandler errorHandler, string url, bool allowEmpty, int maxUrlLength ) {
-			return handleEmptyAndReturnEmptyStringIfInvalid( errorHandler,
-			                                                 url,
-			                                                 allowEmpty,
-			                                                 delegate {
-				                                                 url = GetString( errorHandler,
-				                                                                  validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url,
-				                                                                  true,
-				                                                                  maxUrlLength );
-				                                                 if( errorHandler.LastResult == ErrorCondition.NoError ) {
-					                                                 try {
-						                                                 // Don't allow relative URLs
-						                                                 var uri = new Uri( url, UriKind.Absolute );
-						                                                 // Must be a valid DNS-style hostname or IP address
-						                                                 // Must contain at least one '.', to prevent just host names
-						                                                 // Must be one of the common web browser-accessible schemes
-						                                                 if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 &&
-						                                                     uri.HostNameType != UriHostNameType.IPv6 || !uri.Host.Any( c => c == '.' ) ||
-						                                                     !validSchemes.Any( s => s == uri.Scheme ) )
-							                                                 throw new UriFormatException();
-					                                                 }
-					                                                 catch( UriFormatException ) {
-						                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
-					                                                 }
-				                                                 }
-				                                                 return url;
-			                                                 } );
+			return handleEmptyAndReturnEmptyStringIfInvalid(
+				errorHandler,
+				url,
+				allowEmpty,
+				delegate {
+					/* If the string is just a number, reject it right out. */
+					int numberTesting;
+					double doubleTesting;
+					if( int.TryParse( url, out numberTesting ) || double.TryParse( url, out doubleTesting ) ) {
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it's an email, it's not an URL. */
+					var testingValidator = new Validator();
+					testingValidator.GetEmailAddress( new ValidationErrorHandler( "" ), url, allowEmpty );
+					if( !testingValidator.ErrorsOccurred ) {
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it doesn't start with one of our whitelisted schemes, add in the best guess. */
+					url = GetString( errorHandler, validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url, true, maxUrlLength );
+
+					/* If the getstring didn't fail, keep on keepin keepin on. */
+					if( errorHandler.LastResult == ErrorCondition.NoError ) {
+						try {
+							if( !Uri.IsWellFormedUriString( url, UriKind.Absolute ) )
+								throw new UriFormatException();
+
+							// Don't allow relative URLs
+							var uri = new Uri( url, UriKind.Absolute );
+
+							// Must be a valid DNS-style hostname or IP address
+							// Must contain at least one '.', to prevent just host names
+							// Must be one of the common web browser-accessible schemes
+							if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 && uri.HostNameType != UriHostNameType.IPv6 ||
+							    uri.Host.All( c => c != '.' ) || validSchemes.All( s => s != uri.Scheme ) )
+								throw new UriFormatException();
+						}
+						catch( UriFormatException ) {
+							errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						}
+					}
+					return url;
+				} );
 		}
 
 		/// <summary>
 		/// The same as GetPhoneNumber, except the given default area code will be prepended on the phone number if necessary.
 		/// This is useful when working with data that had the area code omitted because the number was local.
 		/// </summary>
-		public string GetPhoneNumberWithDefaultAreaCode( ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty,
-		                                                 bool allowSurroundingGarbage, string defaultAreaCode ) {
+		public string GetPhoneNumberWithDefaultAreaCode(
+			ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, string defaultAreaCode ) {
 			var validator = new Validator(); // We need to use a separate one so that erroneous error messages don't get left in the collection
 			var fakeHandler = new ValidationErrorHandler( "" );
 
@@ -539,8 +544,8 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Pass true for allow surrounding garbage if you want to allow "The phone number is 585-455-6476yadayada." to be parsed into 585-455-6476
 		/// and count as a valid phone number.
 		/// </summary>
-		public string GetPhoneNumber( ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty,
-		                              bool allowSurroundingGarbage ) {
+		public string GetPhoneNumber(
+			ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage ) {
 			return GetPhoneWithLastFiveMapping( errorHandler, completePhoneNumber, allowExtension, allowEmpty, allowSurroundingGarbage, null );
 		}
 
@@ -548,74 +553,68 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Returns a validated phone number as a standard phone number string given the complete phone number with optional extension or the last five digits of the number and a dictionary of single
 		/// digits to five-digit groups that become the first five digits of the full number.  If allow empty is true and an empty string or null is given, the empty string is returned.
 		/// </summary>
-		public string GetPhoneWithLastFiveMapping( ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty,
-		                                           bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
+		public string GetPhoneWithLastFiveMapping(
+			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
 			return GetPhoneNumberAsObject( errorHandler, input, allowExtension, allowEmpty, allowSurroundingGarbage, firstFives ).StandardPhoneString;
 		}
 
-		internal PhoneNumber GetPhoneNumberAsObject( ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty,
-		                                             bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( errorHandler,
-			                                                                       input,
-			                                                                       allowEmpty,
-			                                                                       delegate {
-				                                                                       var invalidPrefix = "The " + errorHandler.Subject + " (" + input + ") is invalid.";
-				                                                                       // Remove all of the valid delimiter characters so we can just deal with numbers and whitespace
-				                                                                       input = input.RemoveCharacters( new[] { '-', '(', ')', '.' } ).Trim();
+		internal PhoneNumber GetPhoneNumberAsObject(
+			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid(
+				errorHandler,
+				input,
+				allowEmpty,
+				delegate {
+					var invalidPrefix = "The " + errorHandler.Subject + " (" + input + ") is invalid.";
+					// Remove all of the valid delimiter characters so we can just deal with numbers and whitespace
+					input = input.RemoveCharacters( new[] { '-', '(', ')', '.' } ).Trim();
 
-				                                                                       var invalidMessage = invalidPrefix +
-				                                                                                            " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
-				                                                                       var phoneNumber = PhoneNumber.CreateFromParts( "", "", "" );
+					var invalidMessage = invalidPrefix +
+					                     " Phone numbers may be entered in any format, such as or xxx-xxx-xxxx, with an optional extension up to 5 digits long.  International numbers should begin with a '+' sign.";
+					var phoneNumber = PhoneNumber.CreateFromParts( "", "", "" );
 
-				                                                                       // NOTE: AllowSurroundingGarbage does not apply to first five or international numbers.
+					// NOTE: AllowSurroundingGarbage does not apply to first five or international numbers.
 
-				                                                                       // First-five shortcut (intra-org phone numbers)
-				                                                                       if( firstFives != null && Regex.IsMatch( input, @"^\d{5}$" ) ) {
-					                                                                       string firstFive;
-					                                                                       if( firstFives.ContainsKey( input.Substring( 0, 1 ) ) ) {
-						                                                                       firstFive = firstFives[ input.Substring( 0, 1 ) ];
-						                                                                       phoneNumber = PhoneNumber.CreateFromParts( firstFive.Substring( 0, 3 ),
-						                                                                                                                  firstFive.Substring( 3 ) + input,
-						                                                                                                                  "" );
-					                                                                       }
-					                                                                       else
-						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
-						                                                                                                                                  "The five digit phone number you entered isn't recognized." ) );
-				                                                                       }
-					                                                                       // International phone numbers
-					                                                                       // We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
-					                                                                       // We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
-					                                                                       // We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
-				                                                                       else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
-					                                                                       phoneNumber = PhoneNumber.CreateInternational( input );
-					                                                                       // Validated it as a North American Numbering Plan phone number
-				                                                                       else {
-					                                                                       var regex =
-						                                                                       @"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
-					                                                                       if( !allowSurroundingGarbage )
-						                                                                       regex = "^" + regex + "$";
+					// First-five shortcut (intra-org phone numbers)
+					if( firstFives != null && Regex.IsMatch( input, @"^\d{5}$" ) ) {
+						string firstFive;
+						if( firstFives.ContainsKey( input.Substring( 0, 1 ) ) ) {
+							firstFive = firstFives[ input.Substring( 0, 1 ) ];
+							phoneNumber = PhoneNumber.CreateFromParts( firstFive.Substring( 0, 3 ), firstFive.Substring( 3 ) + input, "" );
+						}
+						else
+							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, "The five digit phone number you entered isn't recognized." ) );
+					}
+						// International phone numbers
+						// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
+						// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
+						// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
+					else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
+						phoneNumber = PhoneNumber.CreateInternational( input );
+						// Validated it as a North American Numbering Plan phone number
+					else {
+						var regex = @"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
+						if( !allowSurroundingGarbage )
+							regex = "^" + regex + "$";
 
-					                                                                       var match = Regex.Match( input, regex );
+						var match = Regex.Match( input, regex );
 
-					                                                                       if( match.Success ) {
-						                                                                       var areaCode = match.Groups[ "ac" ].Value;
-						                                                                       var number = match.Groups[ "num1" ].Value + match.Groups[ "num2" ].Value;
-						                                                                       var extension = match.Groups[ "ext" ].Value;
-						                                                                       phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
-						                                                                       if( !allowExtension && phoneNumber.Extension.Length > 0 ) {
-							                                                                       errorHandler.SetValidationResult( ValidationResult.Custom(
-								                                                                       ErrorCondition.Invalid,
-								                                                                       invalidPrefix +
-								                                                                       " Extensions are not permitted in this field. Use the separate extension field." ) );
-						                                                                       }
-					                                                                       }
-					                                                                       else
-						                                                                       errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid,
-						                                                                                                                                  invalidMessage ) );
-				                                                                       }
-				                                                                       return phoneNumber;
-			                                                                       },
-			                                                                       PhoneNumber.CreateFromParts( "", "", "" ) );
+						if( match.Success ) {
+							var areaCode = match.Groups[ "ac" ].Value;
+							var number = match.Groups[ "num1" ].Value + match.Groups[ "num2" ].Value;
+							var extension = match.Groups[ "ext" ].Value;
+							phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
+							if( !allowExtension && phoneNumber.Extension.Length > 0 ) {
+								errorHandler.SetValidationResult(
+									ValidationResult.Custom( ErrorCondition.Invalid, invalidPrefix + " Extensions are not permitted in this field. Use the separate extension field." ) );
+							}
+						}
+						else
+							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, invalidMessage ) );
+					}
+					return phoneNumber;
+				},
+				PhoneNumber.CreateFromParts( "", "", "" ) );
 		}
 
 		/// <summary>
@@ -623,16 +622,17 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allow empty is true and the empty string or null is given, the empty string is returned.
 		/// </summary>
 		public string GetPhoneNumberExtension( ValidationErrorHandler errorHandler, string extension, bool allowEmpty ) {
-			return handleEmptyAndReturnEmptyStringIfInvalid( errorHandler,
-			                                                 extension,
-			                                                 allowEmpty,
-			                                                 delegate {
-				                                                 extension = extension.Trim();
-				                                                 if( !Regex.IsMatch( extension, @"^ *(?<ext>\d{1,5}) *$" ) )
-					                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
+			return handleEmptyAndReturnEmptyStringIfInvalid(
+				errorHandler,
+				extension,
+				allowEmpty,
+				delegate {
+					extension = extension.Trim();
+					if( !Regex.IsMatch( extension, @"^ *(?<ext>\d{1,5}) *$" ) )
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
 
-				                                                 return extension;
-			                                                 } );
+					return extension;
+				} );
 		}
 
 		/// <summary>
@@ -648,40 +648,42 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Example: A social security number (987-65-4321) would be GetNumber( errorHandler, ssn, 9, true, "-" ).
 		/// </summary>
 		public string GetNumber( ValidationErrorHandler errorHandler, string text, int numberOfDigits, bool allowEmpty, params string[] acceptableGarbageStrings ) {
-			return handleEmptyAndReturnEmptyStringIfInvalid( errorHandler,
-			                                                 text,
-			                                                 allowEmpty,
-			                                                 delegate {
-				                                                 foreach( var garbageString in acceptableGarbageStrings )
-					                                                 text = text.Replace( garbageString, "" );
-				                                                 text = text.Trim();
-				                                                 if( !Regex.IsMatch( text, @"^\d{" + numberOfDigits + "}$" ) )
-					                                                 errorHandler.SetValidationResult( ValidationResult.Invalid() );
-				                                                 return text;
-			                                                 } );
+			return handleEmptyAndReturnEmptyStringIfInvalid(
+				errorHandler,
+				text,
+				allowEmpty,
+				delegate {
+					foreach( var garbageString in acceptableGarbageStrings )
+						text = text.Replace( garbageString, "" );
+					text = text.Trim();
+					if( !Regex.IsMatch( text, @"^\d{" + numberOfDigits + "}$" ) )
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+					return text;
+				} );
 		}
 
 		/// <summary>
 		/// Gets a validated United States zip code object given the complete zip code with optional +4 digits.
 		/// </summary>
 		public ZipCode GetZipCode( ValidationErrorHandler errorHandler, string zipCode, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( errorHandler,
-			                                                                       zipCode,
-			                                                                       allowEmpty,
-			                                                                       delegate { return ZipCode.CreateUsZipCode( errorHandler, zipCode ); },
-			                                                                       new ZipCode() );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid(
+				errorHandler,
+				zipCode,
+				allowEmpty,
+				delegate { return ZipCode.CreateUsZipCode( errorHandler, zipCode ); },
+				new ZipCode() );
 		}
-
 
 		/// <summary>
 		/// Gets a validated US or Canadian zip code.
 		/// </summary>
 		public ZipCode GetUsOrCanadianZipCode( ValidationErrorHandler errorHandler, string zipCode, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( errorHandler,
-			                                                                       zipCode,
-			                                                                       allowEmpty,
-			                                                                       delegate { return ZipCode.CreateUsOrCanadianZipCode( errorHandler, zipCode ); },
-			                                                                       new ZipCode() );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid(
+				errorHandler,
+				zipCode,
+				allowEmpty,
+				delegate { return ZipCode.CreateUsOrCanadianZipCode( errorHandler, zipCode ); },
+				new ZipCode() );
 		}
 
 		/// <summary>
@@ -690,16 +692,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
 		/// </summary>
 		public DateTime GetSqlSmallDateTime( ValidationErrorHandler errorHandler, string dateAsString ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( errorHandler,
-			                                                                                 dateAsString,
-			                                                                                 false,
-			                                                                                 delegate {
-				                                                                                 return validateDateTime( errorHandler,
-				                                                                                                          dateAsString,
-				                                                                                                          null,
-				                                                                                                          SqlSmallDateTimeMinValue,
-				                                                                                                          SqlSmallDateTimeMaxValue );
-			                                                                                 } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>(
+				errorHandler,
+				dateAsString,
+				false,
+				delegate { return validateDateTime( errorHandler, dateAsString, null, SqlSmallDateTimeMinValue, SqlSmallDateTimeMaxValue ); } );
 		}
 
 		/// <summary>
@@ -708,16 +705,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// If allowEmpty is true and the given string is empty, null will be returned.
 		/// </summary>
 		public DateTime? GetNullableSqlSmallDateTime( ValidationErrorHandler errorHandler, string dateAsString, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>( errorHandler,
-			                                                                                  dateAsString,
-			                                                                                  allowEmpty,
-			                                                                                  delegate {
-				                                                                                  return validateDateTime( errorHandler,
-				                                                                                                           dateAsString,
-				                                                                                                           null,
-				                                                                                                           SqlSmallDateTimeMinValue,
-				                                                                                                           SqlSmallDateTimeMaxValue );
-			                                                                                  } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>(
+				errorHandler,
+				dateAsString,
+				allowEmpty,
+				delegate { return validateDateTime( errorHandler, dateAsString, null, SqlSmallDateTimeMinValue, SqlSmallDateTimeMaxValue ); } );
 		}
 
 		/// <summary>
@@ -752,12 +744,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Pattern specifies the date format, such as "MM/dd/yyyy".
 		/// </summary>
 		public DateTime GetSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( errorHandler,
-			                                                                                 dateAsString,
-			                                                                                 false,
-			                                                                                 delegate {
-				                                                                                 return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern );
-			                                                                                 } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>(
+				errorHandler,
+				dateAsString,
+				false,
+				delegate { return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern ); } );
 		}
 
 		/// <summary>
@@ -765,12 +756,11 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Pattern specifies the date format, such as "MM/dd/yyyy".
 		/// </summary>
 		public DateTime? GetNullableSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>( errorHandler,
-			                                                                                  dateAsString,
-			                                                                                  allowEmpty,
-			                                                                                  delegate {
-				                                                                                  return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern );
-			                                                                                  } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>(
+				errorHandler,
+				dateAsString,
+				allowEmpty,
+				delegate { return validateSqlSmallDateTimeExact( errorHandler, dateAsString, pattern ); } );
 		}
 
 		private static DateTime validateSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern ) {
@@ -818,22 +808,24 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// <summary>
 		/// Validates the date using given allowEmpty, min, and max constraints.
 		/// </summary>
-		public DateTime? GetNullableDateTime( ValidationErrorHandler handler, string dateAsString, string[] formats, bool allowEmpty, DateTime minDate,
-		                                      DateTime maxDate ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>( handler,
-			                                                                                  dateAsString,
-			                                                                                  allowEmpty,
-			                                                                                  () => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
+		public DateTime? GetNullableDateTime(
+			ValidationErrorHandler handler, string dateAsString, string[] formats, bool allowEmpty, DateTime minDate, DateTime maxDate ) {
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime?>(
+				handler,
+				dateAsString,
+				allowEmpty,
+				() => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
 		}
 
 		/// <summary>
 		/// Validates the date using given min and max constraints.
 		/// </summary>
 		public DateTime GetDateTime( ValidationErrorHandler handler, string dateAsString, string[] formats, DateTime minDate, DateTime maxDate ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>( handler,
-			                                                                                 dateAsString,
-			                                                                                 false,
-			                                                                                 () => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<DateTime>(
+				handler,
+				dateAsString,
+				false,
+				() => validateDateTime( handler, dateAsString, formats, minDate, maxDate ) );
 		}
 
 		/// <summary>
@@ -847,44 +839,37 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// Validates the given time span.
 		/// </summary>
 		public TimeSpan GetTimeSpan( ValidationErrorHandler handler, TimeSpan? timeSpan ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan>( handler,
-			                                                                                 timeSpan,
-			                                                                                 false,
-			                                                                                 delegate { return timeSpan == null ? default( TimeSpan ) : timeSpan.Value; } );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan>(
+				handler,
+				timeSpan,
+				false,
+				delegate { return timeSpan == null ? default( TimeSpan ) : timeSpan.Value; } );
 		}
 
 		/// <summary>
 		/// Validates the given time span.
 		/// </summary>
 		public TimeSpan? GetNullableTimeOfDayTimeSpan( ValidationErrorHandler handler, string timeSpanAsString, string[] formats, bool allowEmpty ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan?>( handler,
-			                                                                                  timeSpanAsString,
-			                                                                                  allowEmpty,
-			                                                                                  () =>
-			                                                                                  validateDateTime( handler,
-			                                                                                                    timeSpanAsString,
-			                                                                                                    formats,
-			                                                                                                    DateTime.MinValue,
-			                                                                                                    DateTime.MaxValue ).TimeOfDay );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan?>(
+				handler,
+				timeSpanAsString,
+				allowEmpty,
+				() => validateDateTime( handler, timeSpanAsString, formats, DateTime.MinValue, DateTime.MaxValue ).TimeOfDay );
 		}
 
 		/// <summary>
 		/// Validates the given time span.
 		/// </summary>
 		public TimeSpan GetTimeOfDayTimeSpan( ValidationErrorHandler handler, string timeSpanAsString, string[] formats ) {
-			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan>( handler,
-			                                                                                 timeSpanAsString,
-			                                                                                 false,
-			                                                                                 () =>
-			                                                                                 validateDateTime( handler,
-			                                                                                                   timeSpanAsString,
-			                                                                                                   formats,
-			                                                                                                   DateTime.MinValue,
-			                                                                                                   DateTime.MaxValue ).TimeOfDay );
+			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<TimeSpan>(
+				handler,
+				timeSpanAsString,
+				false,
+				() => validateDateTime( handler, timeSpanAsString, formats, DateTime.MinValue, DateTime.MaxValue ).TimeOfDay );
 		}
 
-		private T executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<T>( ValidationErrorHandler handler, object valueAsObject, bool allowEmpty,
-		                                                                             ValidationMethod<T> method, T customDefaultReturnValue = default( T ) ) {
+		private T executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<T>(
+			ValidationErrorHandler handler, object valueAsObject, bool allowEmpty, ValidationMethod<T> method, T customDefaultReturnValue = default( T ) ) {
 			var result = customDefaultReturnValue;
 			if( !isEmpty( handler, valueAsObject, allowEmpty ) )
 				result = method();
@@ -897,8 +882,8 @@ namespace RedStapler.StandardLibrary.Validation {
 			return result;
 		}
 
-		private string handleEmptyAndReturnEmptyStringIfInvalid( ValidationErrorHandler handler, object valueAsObject, bool allowEmpty,
-		                                                         ValidationMethod<string> method ) {
+		private string handleEmptyAndReturnEmptyStringIfInvalid(
+			ValidationErrorHandler handler, object valueAsObject, bool allowEmpty, ValidationMethod<string> method ) {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid( handler, valueAsObject, allowEmpty, method, "" );
 		}
 

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
@@ -74,10 +73,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var controlsToggled = false;
 			EwfHiddenField.Create( EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString(),
 			                       postBackValue => controlsToggled = getControlsToggled( postBackValue ),
-			                       EwfPage.Instance.PostBackDataModification,
+			                       EwfPage.Instance.DataUpdate,
 			                       out controlsToggledHiddenFieldValueGetter,
 			                       out controlsToggledHiddenFieldClientIdGetter );
-			EwfPage.Instance.PostBackDataModification.AddModificationMethod(
+			EwfPage.Instance.DataUpdate.AddModificationMethod(
 				() => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
 
 			if( TagKey == HtmlTextWriterTag.Button )

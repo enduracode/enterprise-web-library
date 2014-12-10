@@ -21,23 +21,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// The intermediate user cookie is secure to make it harder for unauthorized users to access intermediate installations, which often are placed on the
 			// Internet with no additional security.
 			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName, cookieValue )
-			                                          	{ Path = cookiePath, Secure = true, Expires = DateTime.Now.AddMonths( 1 ), HttpOnly = true } );
+				{
+					Path = NetTools.GetAppCookiePath(),
+					Secure = true,
+					Expires = DateTime.Now.AddMonths( 1 ),
+					HttpOnly = true
+				} );
 		}
 
 		/// <summary>
 		/// Clears the intermediate user cookie.
 		/// </summary>
 		public static void ClearCookie() {
-			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName ) { Path = cookiePath, Expires = DateTime.Now.AddDays( -1 ) } );
-		}
-
-		private static string cookiePath {
-			get {
-				// It's important that the cookie path not end with a slash. If it does, Internet Explorer will not transmit the cookie if the user requests the root
-				// URL of the site without a trailing slash, e.g. integration.redstapler.biz/Todd. One justification for adding a trailing slash to the cookie path is
-				// http://stackoverflow.com/questions/2156399/restful-cookie-path-fails-in-ie-without-trailing-slash.
-				return HttpRuntime.AppDomainAppVirtualPath;
-			}
+			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } );
 		}
 	}
 }

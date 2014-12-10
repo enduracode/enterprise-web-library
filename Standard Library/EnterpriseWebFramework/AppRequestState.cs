@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -161,27 +162,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( !userLoaded )
-					loadUser();
+				if( !userLoaded ) {
+					user = UserManagementStatics.UserManagementEnabled ? UserManagementStatics.GetUserFromRequest() : null;
+					userLoaded = true;
+				}
 				return user;
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.IsSecureRequest; } }
-
-		private void loadUser() {
-			var identity = HttpContext.Current.User.Identity;
-
-			// Try to associate a user with the current identity, if it is authenticated. Expose this user via the AuthenticatedUser property.
-			if( identity.IsAuthenticated && UserManagementStatics.UserManagementEnabled ) {
-				if( identity.AuthenticationType == "Forms" )
-					user = UserManagementStatics.GetUser( int.Parse( identity.Name ) );
-				else if( identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
-					user = UserManagementStatics.GetUser( identity.Name );
-			}
-
-			userLoaded = true;
-		}
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.IsSecureRequest; } }
 
 		internal void ClearUser() {
 			user = null;
@@ -202,7 +194,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal void CleanUp() {
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
+			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
+			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
 			if( errorException != null ) {
 				AppTools.EmailAndLogError( errorPrefix, errorException );
@@ -219,69 +212,70 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods() {
+		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( bool skipNonTransactionalModificationMethods = false ) {
 			var methods = new List<Action>();
-			if( primaryDatabaseConnectionInitialized ) {
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.PrimaryDatabaseConnection;
-					primaryDatabaseConnectionInitialized = false;
-					cleanUpDatabaseConnection( tempConnection );
-				} );
-			}
+			if( primaryDatabaseConnectionInitialized )
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.PrimaryDatabaseConnection ) );
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
 				var databaseNameCopy = databaseName;
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy );
-					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
-					cleanUpDatabaseConnection( tempConnection );
-				} );
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
 			}
-			methods.Add( () => {
-				try {
-					if( !transactionMarkedForRollback ) {
-						DataAccessState.Current.DisableCache();
-						try {
-							foreach( var i in nonTransactionalModificationMethods )
-								i();
-						}
-						finally {
-							DataAccessState.Current.ResetCache();
+			methods.Add(
+				() => {
+					try {
+						if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
+							DataAccessState.Current.DisableCache();
+							try {
+								foreach( var i in nonTransactionalModificationMethods )
+									i();
+							}
+							finally {
+								DataAccessState.Current.ResetCache();
+							}
 						}
 					}
-				}
-				finally {
-					nonTransactionalModificationMethods.Clear();
-				}
-			} );
+					finally {
+						nonTransactionalModificationMethods.Clear();
+					}
+				} );
 			StandardLibraryMethods.CallEveryMethod( methods.ToArray() );
 			transactionMarkedForRollback = false;
 		}
 
-		private void cleanUpDatabaseConnection( DBConnection cn ) {
+		private void cleanUpDatabaseConnection( DBConnection connection ) {
+			// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
 			try {
-				if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( cn.DatabaseInfo ) )
-					return;
-
 				try {
-					if( !transactionMarkedForRollback )
-						cn.CommitTransaction();
-				}
-				catch {
-					// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
-					// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
-					// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
-					// until we implement a true distributed transaction model with two-phase commit.
-					transactionMarkedForRollback = true;
+					if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+						return;
 
-					throw;
+					try {
+						if( !transactionMarkedForRollback )
+							connection.CommitTransaction();
+					}
+					catch {
+						// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
+						// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
+						// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
+						// until we implement a true distributed transaction model with two-phase commit.
+						transactionMarkedForRollback = true;
+
+						throw;
+					}
+					finally {
+						if( transactionMarkedForRollback )
+							connection.RollbackTransaction();
+					}
 				}
 				finally {
-					if( transactionMarkedForRollback )
-						cn.RollbackTransaction();
+					connection.Close();
 				}
 			}
 			finally {
-				cn.Close();
+				if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
+					secondaryDatabasesWithInitializedConnections.Remove( connection.DatabaseInfo.SecondaryDatabaseName );
+				else
+					primaryDatabaseConnectionInitialized = false;
 			}
 		}
 	}

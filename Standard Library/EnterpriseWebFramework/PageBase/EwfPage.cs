@@ -9,14 +9,8 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.JavaScriptWriting;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
 
@@ -25,7 +19,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A System.Web.UI.Page that contains special Red Stapler Enterprise Web Framework logic. Requires that view state and session state be enabled.
 	/// </summary>
 	public abstract class EwfPage: Page {
-		internal const string EventPostBackArgument = "event";
+		// This string is duplicated in the JavaScript file.
+		private const string postBackHiddenFieldName = "ewfPostBack";
+
+		internal const string ButtonElementName = "ewfButton";
 
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
@@ -41,15 +38,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private Control contentContainer;
-		private readonly DataModification postBackDataModification = new DataModification();
+		private readonly BasicDataModification dataUpdate = new BasicDataModification();
+		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
+		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
-		private readonly List<Tuple<WebControl, string, Control>> postBackOnEnterControlsAndPredicatesAndTargets = new List<Tuple<WebControl, string, Control>>();
+		private readonly List<UpdateRegionLinker> updateRegionLinkers = new List<UpdateRegionLinker>();
 		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
-		private string formValueHash;
-		private PageInfo redirectInfo;
+		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
 		/// <summary>
@@ -113,18 +111,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			// This logic depends on the authenticated user and on page and entity setup info objects.
-			if( !InfoAsBaseType.UserCanAccessPageAndAllControls ) {
+			if( !InfoAsBaseType.UserCanAccessResource ) {
 				throw new AccessDeniedException(
-					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicPage && !AppRequestState.Instance.IntermediateUserExists,
+					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
 			}
 
-			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledPageMode;
+			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( fileCreator != null )
-				fileCreator.CreateFile().WriteToResponse( sendsFileInline );
+			if( responseWriter != null ) {
+				Response.ClearHeaders();
+				Response.ClearContent();
+				responseWriter.WriteResponse();
+
+				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
+				// EWF from Web Forms. This is EnduraCode goal 790.
+				Response.End();
+			}
 		}
 
 		/// <summary>
@@ -138,45 +143,84 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
-		/// Gets the FileCreator for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
+		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual FileCreator fileCreator { get { return null; } }
-
-		/// <summary>
-		/// Gets whether the page sends its file inline or as an attachment. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
-		/// </summary>
-		protected virtual bool sendsFileInline { get { return true; } }
+		protected virtual EwfSafeResponseWriter responseWriter { get { return null; } }
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
 		/// </summary>
 		protected override sealed void OnInitComplete( EventArgs e ) {
 			base.OnInitComplete( e );
-			if( !IsPostBack ) {
-				if( AppRequestState.Instance.EwfPageRequestState != null )
-					PageState.ClearCustomStateControlKeys();
-				else if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
-					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
-					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
-					PageState.ClearCustomStateControlKeys();
+			if( IsPostBack )
+				return;
+
+			if( AppRequestState.Instance.EwfPageRequestState != null )
+				PageState.ClearCustomStateControlKeys();
+			else if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
+				AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
+				StandardLibrarySessionState.Instance.EwfPageRequestState = null;
+				PageState.ClearCustomStateControlKeys();
+			}
+			else
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+
+			onLoadData();
+
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			if( requestState.StaticRegionContents != null ) {
+				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
+				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
+					keyAndArg => {
+						UpdateRegionLinker linker;
+						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
+							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
+						return linker.PostModificationRegionGetter( keyAndArg.Item2 );
+					} );
+
+				var staticRegionContents = getStaticRegionContents( updateRegionControls );
+				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
+				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
+					throw getPossibleDeveloperMistakeException(
+						requestState.ModificationErrorsExist
+							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
+							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
+								  ? "Form controls outside of update regions may not change on an intermediate post-back."
+								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 				}
-				else
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+			}
 
-				onLoadData();
+			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
+				var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
+				if( secondaryDm == null )
+					throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
 
-				if( AppRequestState.Instance.EwfPageRequestState.StaticFormValueHash != null &&
-				    generateFormValueHash( false ) != AppRequestState.Instance.EwfPageRequestState.StaticFormValueHash ) {
-					var sentences = new[]
-						{
-							"Possible developer mistake.",
-							"Form controls, modification error display keys, and post back event handlers may not change on a post back with modification errors.",
-							"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-						};
-					throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
-				}
+				var navigationNeeded = true;
+				executeWithDataModificationExceptionHandling(
+					() => {
+						if( secondaryDm == dataUpdate ) {
+							navigationNeeded = dataUpdate.Execute(
+								true,
+								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+								handleValidationErrors,
+								performValidationOnly: true );
+						}
+						else {
+							var formValuesChanged =
+								contentContainer.GetDescendants()
+									.OfType<FormControl>()
+									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
+						}
 
-				formValueHash = generateFormValueHash( true );
+						if( navigationNeeded ) {
+							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
+							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1, new Tuple<string, string>[ 0 ] );
+						}
+					} );
+				if( navigationNeeded )
+					navigate( null, null );
 			}
 		}
 
@@ -185,16 +229,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// changes.
 		/// </summary>
 		protected override sealed object LoadPageStateFromPersistenceMedium() {
+			string formValueHash = null;
+			string lastPostBackFailingDmId = null;
 			try {
 				// Based on our implementation of SavePageStateToPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
 				// with no First object.
 				var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
 
 				var savedState = PageState.CreateFromViewState( (object[])pair.Second );
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( savedState.Item1,
-				                                                                        Request.Form[ "__SCROLLPOSITIONX" ],
-				                                                                        Request.Form[ "__SCROLLPOSITIONY" ] );
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
+					savedState.Item1,
+					Request.Form[ "__SCROLLPOSITIONX" ],
+					Request.Form[ "__SCROLLPOSITIONY" ] );
 				formValueHash = (string)savedState.Item2[ 0 ];
+				lastPostBackFailingDmId = (string)savedState.Item2[ 1 ];
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
@@ -210,43 +258,92 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			ResourceInfo redirectInfo = null;
+			FullResponse fullSecondaryResponse = null;
+			executeWithDataModificationExceptionHandling(
+				() => {
+					validateFormSubmission( formValueHash );
 
-			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
-			var eventButtonUniqueId = FindControl( Request.Form[ "__EVENTTARGET" ] ) is PostBackButton
-				                          ? Request.Form[ "__EVENTTARGET" ].ToSingleElementArray()
-				                          : new string[ 0 ];
-			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
-			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
-			requestState.PostBackValues = new PostBackValueDictionary( new Dictionary<string, object>() );
-			var extraPostBackValuesExist =
-				requestState.PostBackValues.AddFromRequest( Request.Form.Cast<string>().Except( webFormsHiddenFields.Concat( eventButtonUniqueId ) ),
-				                                            postBackValueKeys.Contains,
-				                                            key => Request.Form[ key ] ) |
-				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
+					// Get the post-back object and, if necessary, the last post-back's failing data modification.
+					var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
+					var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
+					if( postBack == null )
+						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
+					var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
+						                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
+						                            : null;
+					if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
+						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
-			// Make sure data didn't change under this page's feet since the last request.
-			var invalidPostBackValuesExist = activeFormValues.Any( i => !i.PostBackValueIsValid( requestState.PostBackValues ) );
-			var newFormValueHash = generateFormValueHash( true );
-			if( extraPostBackValuesExist || invalidPostBackValuesExist || newFormValueHash != formValueHash ) {
-				requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageHtml.ToSingleElementArray();
+					// Execute the page's data update.
+					var dmExecuted = false;
+					if( !postBack.IsIntermediate ) {
+						try {
+							dmExecuted |= dataUpdate.Execute(
+								!postBack.ForcePageDataUpdate,
+								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
+								handleValidationErrors );
+						}
+						catch {
+							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
+							throw;
+						}
+					}
 
-				// Update the hash variable with the value from this request since the user has now been warned that changes have been made under their feet.
-				formValueHash = newFormValueHash;
-			}
-			else {
-				// This logic can go anywhere between here and the first EH method call, which is in OnLoad. It's convenient to have it here since it should only run on
-				// post backs and so it can be inside the else block.
-				if( isEventPostBack && !( FindControl( Request.Form[ "__EVENTTARGET" ] ) is IPostBackEventHandler ) ) {
-					requestState.TopModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToSingleElementArray();
+					// Execute the post-back.
+					var actionPostBack = postBack as ActionPostBack;
+					if( actionPostBack != null ) {
+						var formValuesChanged =
+							contentContainer.GetDescendants()
+								.OfType<FormControl>()
+								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+						try {
+							dmExecuted |= actionPostBack.Execute(
+								formValuesChanged,
+								handleValidationErrors,
+								postBackAction => {
+									if( postBackAction == null )
+										return;
+									redirectInfo = postBackAction.Resource;
+									if( postBackAction.SecondaryResponse != null )
+										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
+								} );
+						}
+						catch {
+							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
+							throw;
+						}
+					}
 
-					// There is no need to explicitly cancel the post back event since ASP.NET will not be able to do anything anyway if it can't find an
-					// IPostBackEventHandler that corresponds to the __EVENTTARGET.
-				}
-			}
+					if( dmExecuted ) {
+						AppRequestState.AddNonTransactionalModificationMethod( () => StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages ) );
+						try {
+							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+						}
+						finally {
+							DataAccessState.Current.ResetCache();
+						}
+					}
 
-			if( postBackDataModification.ContainsAnyValidationsOrModifications() && formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ) )
-				ExecuteDataModification( postBackDataModification, null );
+					if( postBack.IsIntermediate ) {
+						var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
+						var preModRegions =
+							updateRegionLinkers.SelectMany(
+								i => i.PreModificationRegions,
+								( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } ).Where( i => regionSets.Contains( i.Set ) ).ToArray();
+						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
+						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
+						requestState.DmIdAndSecondaryOp = Tuple.Create(
+							actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
+							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
+						requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
+					}
+					else
+						requestState.PostBackValues = null;
+				} );
+
+			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 			return null;
 		}
 
@@ -270,11 +367,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 
 			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
-			Title = StringTools.ConcatenateWithDelimiter( " - ",
-			                                              EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
-			                                              PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator,
-			                                                                               InfoAsBaseType.ParentPageEntityPathString,
-			                                                                               InfoAsBaseType.PageFullName ) );
+			Title = StringTools.ConcatenateWithDelimiter(
+				" - ",
+				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
+				ResourceInfo.CombineResourcePathStrings(
+					ResourceInfo.ResourcePathSeparator,
+					InfoAsBaseType.ParentResourceEntityPathString,
+					InfoAsBaseType.ResourceFullName ) );
 
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData();
@@ -294,22 +393,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				etherealControlsForJsStartUpLogic.Add( etherealControl );
 			}
 
-			var submitButtons = getSubmitButtons( this );
-			if( submitButtons.Count > 1 ) {
-				var helpfulMessage = "Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
-				                     StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + ".";
-				if( AppTools.IsDevelopmentInstallation )
-					throw new ApplicationException( helpfulMessage );
-				AppTools.EmailAndLogError( helpfulMessage, null );
-			}
-			var submitButton = submitButtons.FirstOrDefault();
-
 			foreach( var i in controlTreeValidations )
 				i();
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
 				throw new ApplicationException( "Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
+
+			// Using this approach of initializing the hidden field to the submit button's post-back gives the enter key good behavior with Internet Explorer when
+			// there is one text box on the page.
+			// The empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted.
+			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
 
 			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
 			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
@@ -318,27 +412,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 
 			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
-			foreach( var controlAndTarget in postBackOnEnterControlsAndPredicatesAndTargets.Where( i => i.Item3 != null || submitButton != null ) ) {
-				controlAndTarget.Item1.AddJavaScriptEventScript( JsWritingMethods.onkeypress,
-				                                                 "if( event.which == 13 " + controlAndTarget.Item2.PrependDelimiter( " && " ) + " ) { " +
-				                                                 PostBackButton.GetPostBackScript( controlAndTarget.Item3 ?? submitButton, true ) + "; }" );
-			}
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
 
 			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
-			addJavaScriptStartUpLogic( submitButton, etherealControlsForJsStartUpLogic, !AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist );
+			addJavaScriptStartUpLogic( etherealControlsForJsStartUpLogic );
 
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
 		}
 
 		private void addMetadataAndFaviconLinks() {
-			Header.Controls.Add( new HtmlMeta
-				{
-					Name = "application-name",
-					Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName
-				} );
+			Header.Controls.Add(
+				new HtmlMeta { Name = "application-name", Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName } );
 
 			// Chrome start URL
 			Header.Controls.Add( new HtmlMeta { Name = "application-url", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
@@ -363,12 +449,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addTypekitLogicIfNecessary() {
 			if( EwfApp.Instance.TypekitId.Length > 0 ) {
-				Header.Controls.Add( new Literal
-					{
-						Text =
+				Header.Controls.Add(
+					new Literal
+						{
+							Text =
 							"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.IsSecureRequest ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
-							".js\"></script>"
-					} );
+								".js\"></script>"
+						} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
 		}
@@ -376,15 +463,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
 
-			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css", "" );
+			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
+			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
 
 			foreach( var info in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
 
 			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "print" );
+				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
 
 			foreach( var i in styleSheetLinks )
 				Header.Controls.Add( i );
@@ -407,15 +495,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
 				return;
 			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "<script type=\"text/javascript\">" );
-				sw.WriteLine( "var _gaq = _gaq || [];" );
-				sw.WriteLine( "_gaq.push(['_setAccount', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "']);" );
-				sw.WriteLine( "_gaq.push(['_trackPageview']);" );
-				sw.WriteLine( "(function() {" );
-				sw.WriteLine( "var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;" );
-				sw.WriteLine( "ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';" );
-				sw.WriteLine( "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);" );
-				sw.WriteLine( "})();" );
+				sw.WriteLine( "<script>" );
+				sw.WriteLine( "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" );
+				sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
+				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
+				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
+				sw.WriteLine( "ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto');" );
+				sw.WriteLine( "ga('send', 'pageview');" );
 				sw.WriteLine( "</script>" );
 				Header.Controls.Add( new Literal { Text = sw.ToString() } );
 			}
@@ -424,29 +510,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addJavaScriptIncludes() {
 			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
 			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
 
-			ClientScript.RegisterClientScriptInclude( GetType(),
-			                                          "jQuery UI",
-			                                          this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
+			ClientScript.RegisterClientScriptInclude(
+				GetType(),
+				"jQuery UI",
+				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
 			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
-
-			// From http://stackoverflow.com/a/2548133/35349.
-			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "endsWith",
-			                                        "function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
-			                                        true );
-
-			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
-			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "CKEditor GetUrl",
-			                                        "function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-				                                        .FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
-			                                        true );
-
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
+			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
+			ClientScript.RegisterClientScriptInclude( GetType(), "ChartJs", this.GetClientUrl( "~/Ewf/ThirdParty/ChartJs/Chart.min.js?v=1" ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
 			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
 			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
@@ -466,21 +540,39 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the page's Post-Back Data Modification (PBDM), which executes on every post back. The PBDM executes prior to the post back event's data
-		/// modification and handler if they exist. WARNING: Do *not* use the PBDM for modifications that should happen as a result of the post back event, e.g.
-		/// adding a new item to the database when a button is clicked. There are two reasons for this. First, there may be other post back controls such as buttons
-		/// or lookup boxes on the page, any of which could cause the PBDM to execute. Second, the PBDM currently only runs if form controls were modified, which
-		/// would not be the case if a user clicks the button on an add item page before entering any data.
+		/// Gets the page's data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
+		/// modifications that should happen because of a specific post-back action, e.g. adding a new item to the database when a button is clicked. There are two
+		/// reasons for this. First, there may be other post-back controls such as buttons or lookup boxes on the page, any of which could also cause the update to
+		/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item
+		/// page before entering any data.
 		/// </summary>
-		public DataModification PostBackDataModification { get { return postBackDataModification; } }
+		public DataModification DataUpdate { get { return dataUpdate; } }
 
 		/// <summary>
-		/// Standard Library use only. Gets whether the page forces post backs when links are clicked.
+		/// Gets a post-back that updates the page's data without performing any other actions.
 		/// </summary>
-		public virtual bool IsAutoDataModifier { get { return false; } }
+		public PostBack DataUpdatePostBack { get { return dataUpdatePostBack; } }
+
+		/// <summary>
+		/// Gets whether the page forces a post-back when a link is clicked.
+		/// </summary>
+		public virtual bool IsAutoDataUpdater { get { return false; } }
 
 		internal void AddEtherealControl( EtherealControl etherealControl ) {
 			etherealControls.Enqueue( etherealControl );
+		}
+
+		internal void AddPostBack( PostBack postBack ) {
+			PostBack existingPostBack;
+			if( !postBacksById.TryGetValue( postBack.Id, out existingPostBack ) )
+				postBacksById.Add( postBack.Id, postBack );
+			else if( existingPostBack != postBack )
+				throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
+		}
+
+		internal PostBack GetPostBack( string id ) {
+			PostBack value;
+			return postBacksById.TryGetValue( id, out value ) ? value : null;
 		}
 
 		internal void AddFormValue( FormValue formValue ) {
@@ -494,13 +586,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			displayLinks.Add( displayLink );
 		}
 
-		/// <summary>
-		/// Causes the specified control to submit the form when the enter key is pressed while the control has focus. Specify null for the target to give the event
-		/// to the submit button, which you should do if you want the post back to simulate the user clicking the button. If you specify a non null target, it must
-		/// be a post back event handler. If you specify a post back button, it should not be the submit button.
-		/// </summary>
-		internal void MakeControlPostBackOnEnter( WebControl control, Control target, string predicate = "" ) {
-			postBackOnEnterControlsAndPredicatesAndTargets.Add( Tuple.Create( control, predicate, target ) );
+		internal void AddUpdateRegionLinker( UpdateRegionLinker linker ) {
+			updateRegionLinkers.Add( linker );
 		}
 
 		/// <summary>
@@ -541,75 +628,66 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); }
 		}
 
-		private List<Control> getSubmitButtons( Control control ) {
-			var submitButtons = new List<Control>();
-			if( control.Visible &&
-			    ( ( control is PostBackButton && ( control as PostBackButton ).UsesSubmitBehavior ) || ( control is Button && ( control as Button ).UseSubmitBehavior ) ) )
-				submitButtons.Add( control );
-			foreach( Control childControl in control.Controls )
-				submitButtons.AddRange( getSubmitButtons( childControl ) );
-			return submitButtons;
-		}
-
-		private void addJavaScriptStartUpLogic( Control submitButton, IEnumerable<EtherealControl> etherealControls, bool noErrorMessagesExist ) {
-			// This gives the enter key good behavior with Internet Explorer when there is one text box on the page.
-			var eventTargetAndEventArgumentStatements = "";
-			if( submitButton != null ) {
-				// Force ASP.NET to create __EVENTTARGET and __EVENTARGUMENT hidden fields if it hasn't already.
-				PostBackButton.GetPostBackScript( submitButton, true );
-
-				eventTargetAndEventArgumentStatements = "$( 'input#__EVENTTARGET' ).val( '" + submitButton.UniqueID + "' ); $( 'input#__EVENTARGUMENT' ).val( '" +
-				                                        EventPostBackArgument + "' );";
-			}
-
+		private void addJavaScriptStartUpLogic( IEnumerable<EtherealControl> etherealControls ) {
 			var controlInitStatements =
-				getImplementersWithinControl<ControlWithJsInitLogic>( this )
-					.Cast<ControlWithJsInitLogic>()
+				this.GetDescendants()
+					.OfType<ControlWithJsInitLogic>()
 					.Select( i => i.GetJsInitStatements() )
 					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
 					.Aggregate( ( a, b ) => a + b );
 
 			var statusMessageDialogFadeOutStatement = "";
-			if( StatusMessages.Any() && !StatusMessages.Any( i => i.Item1 == StatusMessageType.Warning ) )
+			if( StatusMessages.Any() && StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
 				statusMessageDialogFadeOutStatement = "setTimeout( 'fadeOutStatusMessageDialog( 400 );', " + StatusMessages.Count() * 1000 + " );";
 
 			MaintainScrollPositionOnPostBack = true;
-			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && noErrorMessagesExist;
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
+			             ( !requestState.ModificationErrorsExist ||
+			               ( requestState.DmIdAndSecondaryOp != null &&
+			                 new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+				                 requestState.DmIdAndSecondaryOp.Item2 ) ) );
 
 			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scrollStatement = "";
 			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 				scrollStatement = "window.scrollTo(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideRedirectUrl;
-			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
-			var locationReplaceStatement = "";
-			if( clientSideRedirectUrl.Length > 0 ) {
-				locationReplaceStatement = "location.replace( '" + this.GetClientUrl( clientSideRedirectUrl ) + "' );";
-				if( clientSideRedirectDelay.HasValue )
-					locationReplaceStatement = "setTimeout( \"" + locationReplaceStatement + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
+			string clientSideNavigationUrl;
+			bool clientSideNavigationInNewWindow;
+			int? clientSideNavigationDelay;
+			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+				out clientSideNavigationUrl,
+				out clientSideNavigationInNewWindow,
+				out clientSideNavigationDelay );
+			var clientSideNavigationStatements = "";
+			if( clientSideNavigationUrl.Any() ) {
+				var url = this.GetClientUrl( clientSideNavigationUrl );
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				if( clientSideNavigationDelay.HasValue )
+					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
-			ClientScript.RegisterClientScriptBlock( GetType(),
-			                                        "jQueryDocumentReadyBlock",
-			                                        "$( document ).ready( function() { " +
-			                                        StringTools.ConcatenateWithDelimiter( " ",
-			                                                                              eventTargetAndEventArgumentStatements,
-			                                                                              "OnDocumentReady();",
-			                                                                              controlInitStatements,
-			                                                                              statusMessageDialogFadeOutStatement,
-			                                                                              EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-			                                                                              javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-			                                                                              StringTools.ConcatenateWithDelimiter( " ",
-			                                                                                                                    scrollStatement,
-			                                                                                                                    locationReplaceStatement )
-			                                                                                         .PrependDelimiter( "window.onload = function() { " )
-			                                                                                         .AppendDelimiter( " };" ) ) + " } );",
-			                                        true );
+			ClientScript.RegisterClientScriptBlock(
+				GetType(),
+				"jQueryDocumentReadyBlock",
+				"$( document ).ready( function() { " +
+				StringTools.ConcatenateWithDelimiter(
+					" ",
+					"OnDocumentReady();",
+					controlInitStatements,
+					statusMessageDialogFadeOutStatement,
+					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
+					.PrependDelimiter( "window.onload = function() { " )
+					.AppendDelimiter( " };" ) ) + " } );",
+				true );
 
 			setFocus();
 		}
@@ -650,136 +728,57 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
-		protected virtual Control controlWithInitialFocus { get { return getImplementersWithinControl<FormControl>( contentContainer ).FirstOrDefault(); } }
+		protected virtual Control controlWithInitialFocus { get { return contentContainer.GetDescendants().FirstOrDefault( i => i is FormControl ); } }
 
-		/// <summary>
-		/// Notifies the server control that caused the postback that it should handle an incoming postback event.
-		/// </summary>
-		protected override void RaisePostBackEvent( IPostBackEventHandler sourceControl, string eventArgument ) {
-			if( isEventPostBack )
-				base.RaisePostBackEvent( sourceControl, eventArgument );
-		}
-
-		// Filtering post backs with __EVENTARGUMENT is a hack, but is necessary because not all post backs are associated with a server side event. For example, a
-		// drop down list may trigger a post back when the selected item changes, but the server side control is not a post back event handler and therefore does
-		// not want to receive an event specifically because of a post back. It may be interested in a "selected item changed" event, but that type of event has
-		// nothing to do with post backs.
-		//
-		// We would have preferred to represent *non event* post backs with an empty __EVENTTARGET instead of representing *event* post backs with a special
-		// __EVENTARGUMENT. The former solution would have eliminated the need for this property as well as the override of RaisePostBackEvent, but wasn't practical
-		// since the GetPostBackEventReference method requires a control to be passed.
-		private bool isEventPostBack { get { return Request.Form[ "__EVENTARGUMENT" ] == EventPostBackArgument; } }
-
-		internal void ExecuteDataModification( DataModification dataModification, Action eventHandler ) {
-			var errorHandler = new Action<Validation, IEnumerable<string>>( ( validation, errorMessages ) => {
-				if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
-					return;
-				foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-					var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
-					errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
-				}
-			} );
-			EhValidateAndModifyData( topValidator => dataModification.ValidateFormValues( topValidator, errorHandler ), dataModification.ModifyData );
-
-			if( eventHandler == null )
-				return;
-
-			var canRun = false;
-			EhExecute( () => canRun = true );
-			if( canRun )
-				eventHandler();
-		}
-
-		/// <summary>
-		/// Executes a method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhExecute( Action method ) {
-			if( AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist )
-				return;
-
+		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
-				DataAccessState.Current.DisableCache();
-				try {
-					method();
-				}
-				finally {
-					DataAccessState.Current.ResetCache();
-				}
+				method();
 			}
 			catch( Exception e ) {
-				var ewfException = e.GetChain().OfType<EwfException>().FirstOrDefault();
+				var ewfException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
 				if( ewfException == null )
 					throw;
-				AppRequestState.Instance.RollbackDatabaseTransactions();
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
+				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
+					getStaticRegionContents( new Control[ 0 ] ).Item1,
+					new Tuple<string, string>[ 0 ] );
 			}
 		}
 
-		/// <summary>
-		/// Performs a secondary modification unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhModifyData( Action<DBConnection> modificationMethod ) {
-			EhValidateAndModifyData( delegate { }, modificationMethod );
+		private void validateFormSubmission( string formValueHash ) {
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+
+			var webFormsHiddenFields = new[]
+				{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
+			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
+			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
+			requestState.PostBackValues = new PostBackValueDictionary();
+			var extraPostBackValuesExist =
+				requestState.PostBackValues.AddFromRequest(
+					Request.Form.Cast<string>().Except( new[] { postBackHiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
+					postBackValueKeys.Contains,
+					key => Request.Form[ key ] ) |
+				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
+
+			// Make sure data didn't change under this page's feet since the last request.
+			var invalidPostBackValuesExist = activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
+			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
+			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree ) {
+				// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
+				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid( requestState.PostBackValues ) select i.GetPostBackValueKey();
+				requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
+
+				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml );
+			}
 		}
 
-		/// <summary>
-		/// Performs a secondary validation/modification unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhValidateAndModifyData( Action<Validator> validationMethod, Action<DBConnection> modificationMethod ) {
-			EhExecute( delegate { executeModification( validationMethod, () => modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ); } );
-		}
-
-		/// <summary>
-		/// Performs a secondary modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhModifyDataAndRedirect( Func<DBConnection, string> method ) {
-			EhValidateAndModifyDataAndRedirect( delegate { }, method );
-		}
-
-		/// <summary>
-		/// Performs a secondary validation/modification and redirects to the URL returned by the modification method unless there was a primary modification that failed earlier in the postback.
-		/// </summary>
-		public void EhValidateAndModifyDataAndRedirect( Action<Validator> validationMethod, Func<DBConnection, string> modificationMethod ) {
-			EhExecute( () => executeModification( validationMethod,
-			                                      () => {
-				                                      var url = modificationMethod( DataAccessState.Current.PrimaryDatabaseConnection ) ?? "";
-				                                      redirectInfo = url.Any() ? new ExternalPageInfo( url ) : null;
-			                                      } ) );
-		}
-
-		private void executeModification( Action<Validator> validationMethod, Action modificationMethod ) {
-			var validator = new Validator();
-			validationMethod( validator );
-			if( validator.ErrorsOccurred )
-				throw new EwfException( Translation.PleaseCorrectTheErrorsShownBelow.ToSingleElementArray().Concat( validator.ErrorMessages ).ToArray() );
-			modificationMethod();
-		}
-
-		/// <summary>
-		/// Redirects to the specified page unless a modification fails during the post back.
-		/// Passing null for pageInfo will result in no redirection.
-		/// </summary>
-		public void EhRedirect( PageInfo pageInfo ) {
-			EhExecute( () => redirectInfo = pageInfo );
-		}
-
-		/// <summary>
-		/// Sets up a client side redirect to the file created by the specified file creator.
-		/// NOTE: Rename to EhSendFile?
-		/// </summary>
-		public void EhModifyDataAndSendFile( FileCreator fileCreator ) {
-			EhExecute( delegate { StandardLibrarySessionState.Instance.FileToBeDownloaded = fileCreator.CreateFile(); } );
-		}
-
-		/// <summary>
-		/// Returns a list of all form controls in the page that were modified during this post back. This method will probably be removed; don't use it. It is only
-		/// used by the Edit Task page in RSIS.
-		/// </summary>
-		public bool ModifiedFormControlsExistWithinContentContainer() {
-			return
-				getImplementersWithinControl<FormControl>( contentContainer )
-					.Cast<FormControl>()
-					.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) );
+		private void handleValidationErrors( Validation validation, IEnumerable<string> errorMessages ) {
+			if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
+				return;
+			foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
+				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
+				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
+			}
 		}
 
 		/// <summary>
@@ -791,30 +790,47 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			AppRequestState.Instance.EwfPageRequestState.ControlWithInitialFocusId = control.UniqueID;
 		}
 
-		protected override sealed void OnPreRender( EventArgs eventArgs ) {
-			var requestState = AppRequestState.Instance;
+		private Tuple<string, IEnumerable<FormValue>> getStaticRegionContents( IEnumerable<Control> updateRegionControls ) {
+			var contents = new StringBuilder();
 
-			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by post back modifications.
-				try {
-					requestState.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
-				}
-				catch( EwfException e ) {
-					requestState.RollbackDatabaseTransactions();
-					DataAccessState.Current.ResetCache();
-					requestState.EwfPageRequestState.TopModificationErrors = e.Messages;
-				}
+			updateRegionControls = new HashSet<Control>( updateRegionControls );
+			var staticFormValues =
+				this.GetDescendants( i => !updateRegionControls.Contains( i ) )
+					.OfType<FormControl>()
+					.Select( i => i.FormValue )
+					.Where( i => i != null )
+					.Distinct()
+					.OrderBy( i => i.GetPostBackValueKey() )
+					.ToArray();
+			foreach( var formValue in staticFormValues ) {
+				contents.Append( formValue.GetPostBackValueKey() );
+				contents.Append( formValue.GetDurableValueAsString() );
 			}
 
-			if( IsPostBack ) {
-				if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-					requestState.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-					StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
-					requestState.EwfPageRequestState.PostBackValues = null;
-				}
-				else
-					requestState.EwfPageRequestState.StaticFormValueHash = generateFormValueHash( false );
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			if( requestState.ModificationErrorsExist ) {
+				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
+				// errors from being displayed.
+				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
+					contents.Append( modErrorDisplayKey + " " );
+			}
 
+			if( requestState.ModificationErrorsExist ||
+			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) ) {
+				// It's probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
+				// processed.
+				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
+					contents.Append( postBack.Id );
+			}
+
+			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
+		}
+
+		private void navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+
+			string destinationUrl;
+			try {
 				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
 				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
 				// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
@@ -823,94 +839,44 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
 				//    would throw an exception from init if it were re-created.
 				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-				if( requestState.EwfPageRequestState.ModificationErrorsExist )
-					redirectInfo = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
-				else if( redirectInfo != null )
-					redirectInfo = redirectInfo.CloneAndReplaceDefaultsIfPossible( false );
+				if( requestState.ModificationErrorsExist ||
+				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
+					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
+				else if( destination != null )
+					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
 				else
-					redirectInfo = createInfoFromNewParameterValues();
+					destination = createInfoFromNewParameterValues();
 
-				// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
-				if( redirectInfo.IsIdenticalToCurrent() ) {
-					// Force developers to get an error email if a page modifies data to invalidate itself without specifying a different page as the redirect
-					// destination. The resulting transfer would lead the user to an error page.
-					// An alternative to this GetUrl call is to detect in initEntitySetupAndCreateInfoObjects if we are on the back side of a transfer and make all
-					// exceptions unhandled. This would be harder to implement and has no benefits over the approach here.
-					redirectInfo.GetUrl();
-
-					requestState.ClearUser();
-					resetPage();
-				}
-
-				// If the redirect destination is the current page, but with different query parameters, save page state and scroll position in session state until the
-				// next request.
-				if( redirectInfo.GetType() == InfoAsBaseType.GetType() )
-					StandardLibrarySessionState.Instance.EwfPageRequestState = requestState.EwfPageRequestState;
-
-				NetTools.Redirect( redirectInfo.GetUrl() );
+				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
+				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
+				// page as the redirect destination. The resulting transfer would lead the user to an error page.
+				destinationUrl = destination.GetUrl();
+			}
+			catch( Exception e ) {
+				throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
 			}
 
-			base.OnPreRender( eventArgs );
-
-			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
-			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
-			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
-			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
-			if( !requestState.EwfPageRequestState.ModificationErrorsExist ) {
-				DataAccessState.Current.DisableCache();
-				try {
-					if( AppRequestState.Instance.UserAccessible && AppTools.User != null && !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
-						updateLastPageRequestTimeForUser();
-						EwfApp.Instance.ExecuteInitialRequestDataModifications();
-						executeInitialRequestDataModifications();
-					}
-				}
-				finally {
-					DataAccessState.Current.ResetCache();
-				}
-
-				// This call to PreExecuteCommitTimeValidationMethods catches errors caused by initial request data modifications.
-				requestState.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
-			}
-		}
-
-		private string generateFormValueHash( bool forConcurrencyCheck ) {
-			var formValueString = new StringBuilder();
-			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
-				formValueString.Append( formValue.GetPostBackValueKey() );
-				formValueString.Append( formValue.GetDurableValueAsString() );
+			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
+			if( secondaryResponse != null ) {
+				// It's important that we put the response in session state first since it's used by the Info.init method of the pre-built-response page.
+				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
+				StandardLibrarySessionState.Instance.SetClientSideNavigation(
+					EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
+					!secondaryResponse.FileName.Any(),
+					null );
 			}
 
-			if( !forConcurrencyCheck && AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ) {
-				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
-				// errors from being displayed.
-				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
-					formValueString.Append( modErrorDisplayKey + " " );
-
-				// It's probably bad if a developer puts a PostBackButton or other IPostBackEventHandler on the page because of a modification error. It will be gone on
-				// the post back and cannot be processed.
-				foreach( var postBackEventHandler in getImplementersWithinControl<IPostBackEventHandler>( this ) ) {
-					formValueString.Append( postBackEventHandler.GetType().ToString() );
-					formValueString.Append( postBackEventHandler.UniqueID );
-				}
+			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
+			if( destination.IsIdenticalToCurrent() ) {
+				AppRequestState.Instance.ClearUser();
+				resetPage();
 			}
 
-			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
-			var hashString = "";
-			foreach( var b in hash )
-				hashString += b.ToString( "x2" );
-			return hashString;
-		}
+			// If the redirect destination is the current page, but with different query parameters, save request state in session state until the next request.
+			if( destination.GetType() == InfoAsBaseType.GetType() )
+				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-		private IEnumerable<Control> getImplementersWithinControl<InterfaceType>( Control control ) {
-			var matchingControls = new List<Control>();
-			foreach( Control childControl in control.Controls ) {
-				if( childControl is InterfaceType )
-					matchingControls.Add( childControl );
-				matchingControls.AddRange( getImplementersWithinControl<InterfaceType>( childControl ) );
-			}
-			return matchingControls;
+			NetTools.Redirect( destinationUrl );
 		}
 
 		/// <summary>
@@ -918,8 +884,42 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract PageInfo createInfoFromNewParameterValues();
 
+		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+			var sentences = new[]
+				{
+					"Possible developer mistake.", messageSentence,
+					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+				};
+			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+		}
+
 		private void resetPage() {
 			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
+		}
+
+		protected override sealed void OnPreRender( EventArgs eventArgs ) {
+			base.OnPreRender( eventArgs );
+
+			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
+			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
+			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
+			StandardLibrarySessionState.Instance.StatusMessages.Clear();
+			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+			DataAccessState.Current.DisableCache();
+			try {
+				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
+					EwfApp.Instance.ExecuteInitialRequestDataModifications();
+					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
+						updateLastPageRequestTimeForUser();
+					executeInitialRequestDataModifications();
+				}
+				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+
+				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			}
+			finally {
+				DataAccessState.Current.ResetCache();
+			}
 		}
 
 		/// <summary>
@@ -933,51 +933,42 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( ( DateTime.Now - AppTools.User.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
 				return;
 
-			var formsAuthProvider = UserManagementStatics.SystemProvider as FormsAuthCapableUserManagementProvider;
-			var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
 			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
 			// in another browser window while the first one is still running.
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser = new DataAccessState().ExecuteWithThis( () => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => {
-				try {
-					// NOTE: Why do I not know that it's going to be one provider or the other?
-					// NOTE: We could make a GetUserAsBaseType method in the base interface
-					if( formsAuthProvider != null )
-						return (User)formsAuthProvider.GetUser( AppTools.User.UserId );
-					if( externalAuthProvider != null )
-						return (User)externalAuthProvider.GetUser( AppTools.User.UserId );
-				}
-				catch {
-					// If we can't get the user for any reason, we don't really care. We'll just not do the update.
-				}
-				return null;
-			} ) );
+			var newlyQueriedUser =
+				new DataAccessState().ExecuteWithThis(
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( AppTools.User.UserId, false ) ) );
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
 				return;
 
-			try {
-				if( formsAuthProvider != null ) {
-					var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
-					formsAuthProvider.InsertOrUpdateUser( AppTools.User.UserId,
-					                                      AppTools.User.Email,
-					                                      formsAuthCapableUser.Salt,
-					                                      formsAuthCapableUser.SaltedPassword,
-					                                      AppTools.User.Role.RoleId,
-					                                      DateTime.Now,
-					                                      formsAuthCapableUser.MustChangePassword );
-				}
-				else if( externalAuthProvider != null )
-					externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
-			}
-			catch( DbConcurrencyException ) {
-				// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-				// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to get
-				// an error email if the update fails.
-				AppRequestState.Instance.RollbackDatabaseTransactions();
-			}
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+				() => {
+					try {
+						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+						if( FormsAuthStatics.FormsAuthEnabled ) {
+							var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+								AppTools.User.UserId,
+								AppTools.User.Email,
+								AppTools.User.Role.RoleId,
+								DateTime.Now,
+								formsAuthCapableUser.Salt,
+								formsAuthCapableUser.SaltedPassword,
+								formsAuthCapableUser.MustChangePassword );
+						}
+						else if( externalAuthProvider != null )
+							externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
+					}
+					catch( DbConcurrencyException ) {
+						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
+						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
+						// get an error email if the update fails.
+						throw new DoNotCommitException();
+					}
+				} );
 		}
 
 		/// <summary>
@@ -1000,7 +991,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Saves hidden field state.
 		/// </summary>
 		protected override sealed void SavePageStateToPersistenceMedium( object state ) {
-			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new object[] { formValueHash } ) );
+			var rs = AppRequestState.Instance.EwfPageRequestState;
+			var failingDmId = rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null &&
+			                  rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
+				                  ? rs.DmIdAndSecondaryOp.Item1
+				                  : null;
+			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new object[] { generateFormValueHash(), failingDmId } ) );
+		}
+
+		private string generateFormValueHash() {
+			var formValueString = new StringBuilder();
+			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
+				formValueString.Append( formValue.GetPostBackValueKey() );
+				formValueString.Append( formValue.GetDurableValueAsString() );
+			}
+
+			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+			var hashString = "";
+			foreach( var b in hash )
+				hashString += b.ToString( "x2" );
+			return hashString;
 		}
 	}
 }

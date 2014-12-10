@@ -20,14 +20,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			fib.AddFormItems( parametersModification.GetField1TextFormItem( true ), parametersModification.GetField2TextFormItem( true ) );
 			ph.AddControlsReturnThis( fib );
 
-			ph.AddControlsReturnThis( new PostBackButton( new DataModification(),
-			                                              () => EhRedirect( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) )
-				{
-					UsesSubmitBehavior = false,
-					ActionControlStyle = new ButtonActionControlStyle( "Navigate and change Field 2" )
-				} );
+			ph.AddControlsReturnThis(
+				new PostBackButton(
+					PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ),
+					new ButtonActionControlStyle( "Navigate and change Field 2" ),
+					usesSubmitBehavior: false ) );
 
-			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url".ToCell(), "Valid?".ToCell() ) } );
+			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url", "Valid?" ) } );
 			ph.AddControlsReturnThis( table );
 
 			foreach( var scheme in new[] { "http://", "ftp://", "file://" } ) {
@@ -63,13 +62,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private void testUrl( EwfTable table, string url ) {
 			var validator = new Validator();
 			validator.GetUrl( new ValidationErrorHandler( "" ), url, false );
-			table.AddItem( new EwfTableItem( url.ToCell(),
-			                                 new EwfTableCell( ( !validator.ErrorsOccurred ).BooleanToYesNo( false ) )
-				                                 {
-					                                 CssClass = validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green
-				                                 } ) );
+			table.AddItem(
+				new EwfTableItem(
+					url,
+					( !validator.ErrorsOccurred ).BooleanToYesNo( false )
+						.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToSingleElementArray() ) ) ) );
 		}
 
-		public override bool IsAutoDataModifier { get { return true; } }
+		public override bool IsAutoDataUpdater { get { return true; } }
 	}
 }

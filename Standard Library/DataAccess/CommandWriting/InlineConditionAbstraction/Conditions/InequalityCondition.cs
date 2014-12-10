@@ -47,7 +47,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 		}
 
 		void InlineDbCommandCondition.AddToCommand( IDbCommand command, DatabaseInfo databaseInfo, string parameterName ) {
-			columnValue.Parameter.Name = parameterName;
+			var parameter = columnValue.GetParameter( name: parameterName );
 			var operatorString = "<=";
 			if( op == Operator.GreaterThan )
 				operatorString = ">";
@@ -56,8 +56,8 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 			if( op == Operator.LessThan )
 				operatorString = "<";
 
-			command.CommandText += columnValue.ColumnName + " " + operatorString + " " + columnValue.Parameter.GetNameForCommandText( databaseInfo );
-			command.Parameters.Add( columnValue.Parameter.GetAdoDotNetParameter( databaseInfo ) );
+			command.CommandText += columnValue.ColumnName + " " + operatorString + " " + parameter.GetNameForCommandText( databaseInfo );
+			command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 		}
 
 		public override bool Equals( object obj ) {
@@ -66,7 +66,8 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 
 		public bool Equals( InlineDbCommandCondition other ) {
 			var otherInequalityCondition = other as InequalityCondition;
-			return other != null && op == otherInequalityCondition.op && StandardLibraryMethods.AreEqual( columnValue, otherInequalityCondition.columnValue );
+			return otherInequalityCondition != null && op == otherInequalityCondition.op &&
+			       StandardLibraryMethods.AreEqual( columnValue, otherInequalityCondition.columnValue );
 		}
 
 		public override int GetHashCode() {

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net.Mime;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -13,12 +14,12 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Content type to be used by .zip files.
 		/// </summary>
-		public const string ApplicationZip = "application/zip";
+		public const string ApplicationZip = MediaTypeNames.Application.Zip;
 
 		/// <summary>
 		/// Content type to be used by .htm and .html files.
 		/// </summary>
-		public const string Html = "text/html";
+		public const string Html = MediaTypeNames.Text.Html;
 
 		/// <summary>
 		/// Content type to be used for JSON files.
@@ -29,21 +30,26 @@ namespace RedStapler.StandardLibrary {
 		/// CSS.
 		/// </summary>
 		public const string Css = "text/css";
+		
+		/// <summary>
+		/// CSV
+		/// </summary>
+		public const string Csv = "text/csv";
 
 		/// <summary>
 		/// Content type to be used by PDF files.
 		/// </summary>
-		public const string Pdf = "application/pdf";
+		public const string Pdf = MediaTypeNames.Application.Pdf;
 
 		/// <summary>
-		/// Content type to be used by plain text files (.txt, .csv, etc.).
+		/// Content type to be used by plain text files (.txt, etc.).
 		/// </summary>
-		public const string PlainText = "text/plain";
+		public const string PlainText = MediaTypeNames.Text.Plain;
 
 		/// <summary>
 		/// Content type to be used by XML files.
 		/// </summary>
-		public const string Xml = "text/xml";
+		public const string Xml = MediaTypeNames.Text.Xml;
 
 		/// <summary>
 		/// Content type to be used by Microsoft Word files.
@@ -68,12 +74,12 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// Content type to be used by JPEG images.
 		/// </summary>
-		public const string Jpeg = "image/jpeg";
+		public const string Jpeg = MediaTypeNames.Image.Jpeg;
 
 		/// <summary>
 		/// Content type to be used by GIF images.
 		/// </summary>
-		public const string Gif = "image/gif";
+		public const string Gif = MediaTypeNames.Image.Gif;
 
 		/// <summary>
 		/// Content type to be used by PNG images.
@@ -104,7 +110,7 @@ namespace RedStapler.StandardLibrary {
 				case FileExtensions.Css:
 					return Css;
 				case FileExtensions.Csv:
-					return PlainText;
+					return Csv;
 				case FileExtensions.ExcelXls:
 					return ExcelXls;
 				case FileExtensions.ExcelXlsx:

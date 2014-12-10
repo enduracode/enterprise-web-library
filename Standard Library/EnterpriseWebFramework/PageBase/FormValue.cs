@@ -10,7 +10,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		string GetPostBackValueKey();
 
 		string GetDurableValueAsString();
-		bool PostBackValueIsValid( PostBackValueDictionary postBackValues );
+		bool PostBackValueIsInvalid( PostBackValueDictionary postBackValues );
 		bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues );
 	}
 
@@ -73,24 +73,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return stringValueSelector( durableValueGetter() );
 		}
 
-		bool FormValue.PostBackValueIsValid( PostBackValueDictionary postBackValues ) {
-			return validatePostBackValue( postBackValues ).IsValid;
+		bool FormValue.PostBackValueIsInvalid( PostBackValueDictionary postBackValues ) {
+			var key = postBackValueKeyGetter();
+			return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 		}
 
 		internal T GetValue( PostBackValueDictionary postBackValues ) {
-			if( postBackValues == null )
+			var key = postBackValueKeyGetter();
+			if( !key.Any() || postBackValues == null || postBackValues.KeyRemoved( key ) )
 				return durableValueGetter();
-			var result = validatePostBackValue( postBackValues );
+			var result = validatePostBackValue( postBackValues.GetValue( key ) );
 			return result.IsValid && result.HasValue ? result.Value : durableValueGetter();
 		}
 
-		private PostBackValueValidationResult<T> validatePostBackValue( PostBackValueDictionary postBackValues ) {
-			var key = postBackValueKeyGetter();
-			if( !key.Any() )
-				return PostBackValueValidationResult<T>.CreateInvalid();
-
-			var value = postBackValues.GetValue( key );
-
+		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
 			if( filePostBackValueValidator != null ) {
 				var fileValue = value as HttpPostedFile;
 				return value == null || fileValue != null ? filePostBackValueValidator( fileValue ) : PostBackValueValidationResult<T>.CreateInvalid();

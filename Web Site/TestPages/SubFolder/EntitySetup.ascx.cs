@@ -6,19 +6,19 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
-	public partial class EntitySetup: UserControl, EntityDisplaySetup {
-		public partial class Info: TabModeOverrider {
-			protected override PageInfo createParentPageInfo() {
+	partial class EntitySetup: UserControl, EntityDisplaySetup {
+		partial class Info {
+			protected override ResourceInfo createParentResourceInfo() {
 				return ActionControls.GetInfo();
 			}
 
-			protected override List<PageGroup> createPageInfos() {
-				return new List<PageGroup> { new PageGroup( new General.Info( this ), new Details.Info( this ), new Disabled.Info( this ), new New.Info( this ) ) };
+			protected override List<ResourceGroup> createResourceInfos() {
+				return new List<ResourceGroup> { new ResourceGroup( new General.Info( this ), new Details.Info( this ), new Disabled.Info( this ), new New.Info( this ) ) };
 			}
 
 			public override string EntitySetupName { get { return ""; } }
 
-			TabMode TabModeOverrider.GetTabMode() {
+			public override TabMode GetTabMode() {
 				return TabMode.Horizontal;
 			}
 		}

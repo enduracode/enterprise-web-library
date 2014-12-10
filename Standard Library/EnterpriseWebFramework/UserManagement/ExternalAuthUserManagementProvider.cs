@@ -9,15 +9,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Retrieves all users.
 		/// </summary>
-		List<ExternalAuthUser> GetUsers();
+		IEnumerable<ExternalAuthUser> GetUsers();
 
 		/// <summary>
-		/// Retrieves the user with the specified ID.
+		/// Returns the user with the specified ID, or null if a user with that ID does not exist.
 		/// </summary>
 		ExternalAuthUser GetUser( int userId );
 
 		/// <summary>
-		/// Retrieves the user with the specified email address.
+		/// Returns the user with the specified email address, or null if a user with that email address does not exist. We recommend that you use case-insensitive
+		/// comparison.
 		/// </summary>
 		ExternalAuthUser GetUser( string email );
 

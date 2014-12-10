@@ -49,41 +49,51 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		string Database.SecondaryDatabaseName { get { return ( info as DatabaseInfo ).SecondaryDatabaseName; } }
 
 		void Database.ExecuteSqlScriptInTransaction( string script ) {
-			executeMethodWithDbExceptionHandling( delegate {
-				try {
-					StandardLibraryMethods.RunProgram( "sqlcmd",
-					                                   ( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
-					                                   "BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" +
-					                                   Environment.NewLine + "EXIT" + Environment.NewLine,
-					                                   true );
-				}
-				catch( Exception e ) {
-					throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
-				}
-			} );
+			executeMethodWithDbExceptionHandling(
+				delegate {
+					try {
+						StandardLibraryMethods.RunProgram(
+							"sqlcmd",
+							( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
+							"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine + "EXIT" +
+							Environment.NewLine,
+							true );
+					}
+					catch( Exception e ) {
+						throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
+					}
+				} );
 		}
 
 		int Database.GetLineMarker() {
 			var value = 0;
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var cmd = cn.DatabaseInfo.CreateCommand();
-				cmd.CommandText = "SELECT ParameterValue FROM GlobalInts WHERE ParameterName = 'LineMarker'";
-				value = (int)cn.ExecuteScalarCommand( cmd );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var cmd = cn.DatabaseInfo.CreateCommand();
+					cmd.CommandText = "SELECT ParameterValue FROM GlobalInts WHERE ParameterName = 'LineMarker'";
+					value = (int)cn.ExecuteScalarCommand( cmd );
+				} );
 			return value;
 		}
 
 		void Database.UpdateLineMarker( int value ) {
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var command = new InlineUpdate( "GlobalInts" );
-				command.AddColumnModification( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ) );
-				command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
-				command.Execute( cn );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var command = new InlineUpdate( "GlobalInts" );
+					command.AddColumnModification( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ) );
+					command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
+					command.Execute( cn );
+				} );
 		}
 
 		void Database.ExportToFile( string filePath ) {
-			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + filePath + "'" ) );
+			try {
+				ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + backupFilePath + "'" ) );
+				IoMethods.CopyFile( backupFilePath, filePath );
+			}
+			finally {
+				IoMethods.DeleteFile( backupFilePath );
+			}
 		}
 
 		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
@@ -106,99 +116,118 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			Directory.CreateDirectory( sqlServerFilesFolderPath );
 
 			try {
-				// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
-				// without their physical files colliding.
-				var restoreCommand = "RESTORE DATABASE " + info.Database + " FROM DISK = '" + filePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
-				                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
-				                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
+				IoMethods.CopyFile( filePath, backupFilePath );
+				try {
+					// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
+					// without their physical files colliding.
+					var restoreCommand = "RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
+					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
+					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
 
-				if( keepDbInStandbyMode )
-					restoreCommand += ", STANDBY = '" + getStandbyFilePath() + "'";
+					if( keepDbInStandbyMode )
+						restoreCommand += ", STANDBY = '" + getStandbyFilePath() + "'";
 
-				executeLongRunningCommand( cn, restoreCommand );
+					executeLongRunningCommand( cn, restoreCommand );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+				}
 			}
-			catch( Exception e ) {
-				throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+			finally {
+				IoMethods.DeleteFile( backupFilePath );
 			}
 		}
 
+		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
+		private string backupFilePath { get { return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, info.Database + ".bak" ); } }
+
 		void Database.BackupTransactionLog( string folderPath ) {
 			Directory.CreateDirectory( folderPath );
-			ExecuteDbMethod( cn => {
-				var newId = new InlineInsert( "MainSequence" ).Execute( cn );
-				var newTransactionLogBackupFileName = newId + " " + StandardLibraryMethods.GetLocalHostName();
+			ExecuteDbMethod(
+				cn => {
+					var newId = new InlineInsert( "MainSequence" ).Execute( cn );
+					var newTransactionLogBackupFileName = newId + " " + StandardLibraryMethods.GetLocalHostName();
 
 
-				// We definitely do not want the following statements in a transaction because we want to be sure that the insert is included in the backup. Also, if
-				// the insert succeeds and the backup fails, that is totally fine.
+					// We definitely do not want the following statements in a transaction because we want to be sure that the insert is included in the backup. Also, if
+					// the insert succeeds and the backup fails, that is totally fine.
 
-				var insert = new InlineInsert( "RsisLogBackups" );
-				insert.AddColumnModification( new InlineDbCommandColumnValue( "RsisLogBackupId", new DbParameterValue( newId, "Int" ) ) );
-				insert.AddColumnModification( new InlineDbCommandColumnValue( "DateAndTimeSaved", new DbParameterValue( DateTime.Now, "DateTime2" ) ) );
-				insert.AddColumnModification( new InlineDbCommandColumnValue( "TransactionLogFileName", new DbParameterValue( newTransactionLogBackupFileName, "VarChar" ) ) );
-				insert.Execute( cn );
+					var insert = new InlineInsert( "RsisLogBackups" );
+					insert.AddColumnModification( new InlineDbCommandColumnValue( "RsisLogBackupId", new DbParameterValue( newId, "Int" ) ) );
+					insert.AddColumnModification( new InlineDbCommandColumnValue( "DateAndTimeSaved", new DbParameterValue( DateTime.Now, "DateTime2" ) ) );
+					insert.AddColumnModification(
+						new InlineDbCommandColumnValue( "TransactionLogFileName", new DbParameterValue( newTransactionLogBackupFileName, "VarChar" ) ) );
+					insert.Execute( cn );
 
-				var filePath = StandardLibraryMethods.CombinePaths( folderPath, newTransactionLogBackupFileName );
-				executeLongRunningCommand( cn, "BACKUP LOG " + info.Database + " TO DISK = '" + filePath + "'" );
-			} );
+					var filePath = StandardLibraryMethods.CombinePaths( folderPath, newTransactionLogBackupFileName );
+					executeLongRunningCommand( cn, "BACKUP LOG " + info.Database + " TO DISK = '" + filePath + "'" );
+				} );
 		}
 
 		void Database.RestoreNewTransactionLogs( string folderPath ) {
 			var lastRestoredTransactionLogFileName = "";
-			ExecuteDbMethod( cn => {
-				var command = new InlineSelect( "select TransactionLogFileName from RsisLogBackups", orderByClause: "order by RsisLogBackupId desc" );
-				command.Execute( cn,
-				                 r => {
-					                 if( r.Read() )
-						                 lastRestoredTransactionLogFileName = r.GetString( 0 );
-				                 } );
-			} );
+			ExecuteDbMethod(
+				cn => {
+					var command = new InlineSelect(
+						"TransactionLogFileName".ToSingleElementArray(),
+						"from RsisLogBackups",
+						false,
+						orderByClause: "order by RsisLogBackupId desc" );
+					command.Execute(
+						cn,
+						r => {
+							if( r.Read() )
+								lastRestoredTransactionLogFileName = r.GetString( 0 );
+						} );
+				} );
 
 			// We want all logs whose ID is greater than that of the last restored log file.
 			var newLogFileNames = GetLogFilesOrderedByNewest( folderPath, lastRestoredTransactionLogFileName );
 
 			// The following commands must be executed against the master database because there can't be any active connections when doing a restore (including the connection you are using
 			// to run the command).
-			executeDbMethodAgainstMaster( cn => {
-				try {
-					executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" );
+			executeDbMethodAgainstMaster(
+				cn => {
+					try {
+						executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" );
 
-					foreach( var logFileName in newLogFileNames.Reverse() ) {
-						var filePath = StandardLibraryMethods.CombinePaths( folderPath, logFileName );
+						foreach( var logFileName in newLogFileNames.Reverse() ) {
+							var filePath = StandardLibraryMethods.CombinePaths( folderPath, logFileName );
 
-						// We do not want this to be in a transaction (it probably wouldn't even work because having a transaction writes to the transaction log, and we can't write anything to a
-						// SQL Server database in standby mode.
-						try {
-							executeLongRunningCommand( cn, "RESTORE LOG " + info.Database + " FROM DISK = '" + filePath + "' WITH STANDBY = '" + getStandbyFilePath() + "'" );
-						}
-						catch( Exception e ) {
-							var sqlException = e.GetBaseException() as SqlException;
-							if( sqlException != null ) {
-								// 3117: The log or differential backup cannot be restored because no files are ready to rollforward.
-								if( sqlException.Number == 3117 ) {
-									throw new UserCorrectableException(
-										"Failed to restore log, probably because we failed to do a full restore with force new package download after creating a log-shipping-enabled backup on the live server.",
-										e );
-								}
-
-								// 4305: The log in this backup set begins at LSN X, which is too recent to apply to the database. An earlier log backup that includes LSN Y can be restored. 
-								if( sqlException.Number == 4305 ) {
-									throw new UserCorrectableException(
-										"Failed to restore log because the oldest log available for download from the live server is still too new to restore on this standby server. This happens if the standby server falls so far behind that the live server starts cleaning up old logs before they are downloaded.",
-										e );
-								}
+							// We do not want this to be in a transaction (it probably wouldn't even work because having a transaction writes to the transaction log, and we can't write anything to a
+							// SQL Server database in standby mode.
+							try {
+								executeLongRunningCommand( cn, "RESTORE LOG " + info.Database + " FROM DISK = '" + filePath + "' WITH STANDBY = '" + getStandbyFilePath() + "'" );
 							}
+							catch( Exception e ) {
+								var sqlException = e.GetBaseException() as SqlException;
+								if( sqlException != null ) {
+									// 3117: The log or differential backup cannot be restored because no files are ready to rollforward.
+									if( sqlException.Number == 3117 ) {
+										throw new UserCorrectableException(
+											"Failed to restore log, probably because we failed to do a full restore with force new package download after creating a log-shipping-enabled backup on the live server.",
+											e );
+									}
 
-							throw;
+									// 4305: The log in this backup set begins at LSN X, which is too recent to apply to the database. An earlier log backup that includes LSN Y can be restored. 
+									if( sqlException.Number == 4305 ) {
+										throw new UserCorrectableException(
+											"Failed to restore log because the oldest log available for download from the live server is still too new to restore on this standby server. This happens if the standby server falls so far behind that the live server starts cleaning up old logs before they are downloaded.",
+											e );
+									}
+								}
+
+								throw;
+							}
 						}
 					}
-				}
-				finally {
-					// Sometimes the database isn't ready to go yet and this command will fail. So, we retry.
-					StandardLibraryMethods.Retry( () => executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET MULTI_USER" ),
-					                              "Database is in Restoring state and is not recovering." );
-				}
-			} );
+					finally {
+						// Sometimes the database isn't ready to go yet and this command will fail. So, we retry.
+						StandardLibraryMethods.Retry(
+							() => executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET MULTI_USER" ),
+							"Database is in Restoring state and is not recovering." );
+					}
+				} );
 		}
 
 		private string getStandbyFilePath() {
@@ -207,40 +236,46 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		public string GetLogSummary( string folderPath ) {
 			var summary = "";
-			ExecuteDbMethod( cn => {
-				var cutOffDateTime = DateTime.Now.AddHours( -24 );
+			ExecuteDbMethod(
+				cn => {
+					var cutOffDateTime = DateTime.Now.AddHours( -24 );
 
-				var command = new InlineSelect( "select count( * ) from RsisLogBackups" );
-				command.AddCondition( new InequalityCondition( InequalityCondition.Operator.GreaterThan,
-				                                               new InlineDbCommandColumnValue( "DateAndTimeSaved", new DbParameterValue( cutOffDateTime, "DateTime2" ) ) ) );
-				var numberOfLogsRestored = 0;
-				command.Execute( cn,
-				                 r => {
-					                 r.Read();
-					                 numberOfLogsRestored = r.GetInt32( 0 );
-				                 } );
+					var command = new InlineSelect( "count( * )".ToSingleElementArray(), "from RsisLogBackups", false );
+					command.AddCondition(
+						new InequalityCondition(
+							InequalityCondition.Operator.GreaterThan,
+							new InlineDbCommandColumnValue( "DateAndTimeSaved", new DbParameterValue( cutOffDateTime, "DateTime2" ) ) ) );
+					var numberOfLogsRestored = 0;
+					command.Execute(
+						cn,
+						r => {
+							r.Read();
+							numberOfLogsRestored = r.GetInt32( 0 );
+						} );
 
-				summary = "In the last 24 hours, " + numberOfLogsRestored + " logs were successfully restored.";
-				if( Directory.Exists( folderPath ) ) {
-					var logsDownloaded = new DirectoryInfo( folderPath ).GetFiles().Where( f => f.LastWriteTime > cutOffDateTime ).ToList();
-					var totalSizeInBytes = logsDownloaded.Sum( f => f.Length );
-					summary += " " + logsDownloaded.Count() + " logs were downloaded, with a total size of " + FormattingMethods.GetFormattedBytes( totalSizeInBytes ) + ".";
-				}
-			} );
+					summary = "In the last 24 hours, " + numberOfLogsRestored + " logs were successfully restored.";
+					if( Directory.Exists( folderPath ) ) {
+						var logsDownloaded = new DirectoryInfo( folderPath ).GetFiles().Where( f => f.LastWriteTime > cutOffDateTime ).ToList();
+						var totalSizeInBytes = logsDownloaded.Sum( f => f.Length );
+						summary += " " + logsDownloaded.Count() + " logs were downloaded, with a total size of " + FormattingMethods.GetFormattedBytes( totalSizeInBytes ) + ".";
+					}
+				} );
 			return summary;
 		}
 
-		public List<string> GetTables() {
+		List<string> Database.GetTables() {
 			var tables = new List<string>();
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				var command = cn.DatabaseInfo.CreateCommand();
-				command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
-				cn.ExecuteReaderCommand( command,
-				                         reader => {
-					                         while( reader.Read() )
-						                         tables.Add( reader.GetString( 0 ) );
-				                         } );
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					var command = cn.DatabaseInfo.CreateCommand();
+					command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
+					cn.ExecuteReaderCommand(
+						command,
+						reader => {
+							while( reader.Read() )
+								tables.Add( reader.GetString( 0 ) );
+						} );
+				} );
 			return tables;
 		}
 
@@ -253,12 +288,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		void Database.PerformMaintenance() {
-			ExecuteDbMethod( delegate( DBConnection cn ) {
-				foreach( var tableName in GetTables() ) {
-					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + tableName + " REBUILD" );
-					executeLongRunningCommand( cn, "UPDATE STATISTICS " + tableName );
-				}
-			} );
+			ExecuteDbMethod(
+				delegate( DBConnection cn ) {
+					foreach( var tableName in DatabaseOps.GetDatabaseTables( this ) ) {
+						executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + tableName + " REBUILD" );
+						executeLongRunningCommand( cn, "UPDATE STATISTICS " + tableName );
+					}
+				} );
 		}
 
 		void Database.ShrinkAfterPostUpdateDataCommands() {
@@ -303,28 +339,32 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		private void executeDbMethodAgainstMaster( Action<DBConnection> method ) {
 			executeDbMethodWithSpecifiedDatabaseInfo(
-				new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
-				                   info.Server,
-				                   info.LoginName,
-				                   info.Password,
-				                   "master",
-				                   info.SupportsConnectionPooling,
-				                   info.FullTextCatalog ),
+				new SqlServerInfo(
+					( info as DatabaseInfo ).SecondaryDatabaseName,
+					info.Server,
+					info.LoginName,
+					info.Password,
+					"master",
+					info.SupportsConnectionPooling,
+					info.FullTextCatalog ),
 				method );
 		}
 
 		private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, Action<DBConnection> method ) {
-			executeMethodWithDbExceptionHandling( () => {
-				var connection =
-					new DBConnection( new SqlServerInfo( ( info as DatabaseInfo ).SecondaryDatabaseName,
-					                                     info.Server,
-					                                     info.LoginName,
-					                                     info.Password,
-					                                     info.Database,
-					                                     false,
-					                                     info.FullTextCatalog ) );
-				connection.ExecuteWithConnectionOpen( () => method( connection ) );
-			} );
+			executeMethodWithDbExceptionHandling(
+				() => {
+					var connection =
+						new DBConnection(
+							new SqlServerInfo(
+								( info as DatabaseInfo ).SecondaryDatabaseName,
+								info.Server,
+								info.LoginName,
+								info.Password,
+								info.Database,
+								false,
+								info.FullTextCatalog ) );
+					connection.ExecuteWithConnectionOpen( () => method( connection ) );
+				} );
 		}
 
 		private void executeMethodWithDbExceptionHandling( Action method ) {

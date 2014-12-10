@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
@@ -42,10 +42,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
 			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
-			return CssHandler.CombineNamespacesAndProcessEwfIfNecessary( projectNamespace,
-			                                                             StringTools.ConcatenateWithDelimiter( ".",
-			                                                                                                   tokens.Select( StandardLibraryMethods.GetCSharpIdentifier )
-			                                                                                                         .ToArray() ) );
+			return StaticCssHandler.CombineNamespacesAndProcessEwfIfNecessary(
+				projectNamespace,
+				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( StandardLibraryMethods.GetCSharpIdentifier ).ToArray() ) );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }

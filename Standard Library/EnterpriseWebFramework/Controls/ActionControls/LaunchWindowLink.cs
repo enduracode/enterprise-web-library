@@ -28,8 +28,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public Control ToolTipControl { get; set; }
 
+		// GMS NOTE: Why would we have a constructor that doesn't take a control style if it seems to be absolutely required?
 		/// <summary>
 		/// Creates a new LaunchWindowLink with the given ModalWindow to launch when clicked.
+		/// You must set the ActionControlStyle after creating this object.
 		/// </summary>
 		public LaunchWindowLink( ModalWindow windowToLaunch ) {
 			ActionControlStyle = new TextActionControlStyle( "" );
