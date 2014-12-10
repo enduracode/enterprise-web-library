@@ -416,7 +416,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( errorNumber == 1205 || errorNumber == 3960 || errorNumber == 3961 )
 					return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
 
-				// -2 is the code for a timeout. See http://blog.colinmackay.net/archive/2007/06/23/65.aspx.
+				// -2 is the code for a timeout.
 				if( errorNumber == -2 )
 					return new DbCommandTimeoutException( getCommandExceptionMessage( command, "A command timeout occurred." ), innerException );
 
@@ -445,7 +445,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		private string getCommandExceptionMessage( DbCommand command, string customMessage ) {
 			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "Failed to execute a command against the " + DataAccessMethods.GetDbName( databaseInfo ) + " database. " + customMessage + " Command details:" );
+				sw.WriteLine(
+					"Failed to execute a command against the " + DataAccessMethods.GetDbName( databaseInfo ) + " database. " + customMessage + " Command details:" );
 				sw.WriteLine();
 				sw.WriteLine( "Type: " + command.CommandType );
 				sw.WriteLine( "Text: " + command.CommandText );

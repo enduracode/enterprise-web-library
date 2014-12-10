@@ -63,12 +63,20 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
-					if( errorNumber.Value == 4060 )
-						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
+					if( errorNumber.Value == 6005 )
+						customMessage = "Failed to connect to SQL Server because the service is in the process of shutting down.";
 
-					// -2 is the code for a timeout. See http://blog.colinmackay.net/archive/2007/06/23/65.aspx.
+					// -2 is the code for a timeout.
 					if( errorNumber.Value == -2 )
 						customMessage = "Failed to connect to SQL Server because of a connection timeout.";
+
+					if( errorNumber.Value == 258 ) {
+						customMessage =
+							"Failed to connect to SQL Server because of a connection timeout. SQL Server may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+					}
+
+					if( errorNumber.Value == 4060 )
+						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
 
 					// We also handle this error at the command level.
 					if( errorNumber.Value == 233 ) {
@@ -84,6 +92,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			if( databaseInfo is MySqlInfo ) {
 				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
+				if( innerException.Message.Contains( "ERROR 2013" ) ) {
+					customMessage =
+						"Failed to connect to MySQL. MySQL may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+				}
 				if( innerException.Message.Contains( "Timeout expired" ) )
 					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
