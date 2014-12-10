@@ -110,7 +110,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					info.SupportsConnectionPooling,
 					info.SupportsLinguisticIndexes ),
 				cn => {
-					executeUserReCreationCommand( cn, "CREATE OR REPLACE DIRECTORY " + dataPumpOracleDirectoryName + " AS '" + dataPumpFolderPath + "'" );
+					executeLongRunningCommand( cn, "CREATE OR REPLACE DIRECTORY " + dataPumpOracleDirectoryName + " AS '" + dataPumpFolderPath + "'" );
 					deleteAndReCreateUser( cn );
 				} );
 
@@ -170,19 +170,19 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			deleteUser( cn );
 
 			// Re-create the user with the minimally required privileges.
-			executeUserReCreationCommand( cn, "CREATE USER " + info.UserAndSchema + " IDENTIFIED BY " + info.Password + " ACCOUNT UNLOCK" );
+			executeLongRunningCommand( cn, "CREATE USER " + info.UserAndSchema + " IDENTIFIED BY " + info.Password + " ACCOUNT UNLOCK" );
 
 			// This allows the user to connect to the database.
-			executeUserReCreationCommand( cn, "GRANT CREATE SESSION TO " + info.UserAndSchema );
+			executeLongRunningCommand( cn, "GRANT CREATE SESSION TO " + info.UserAndSchema );
 
 			// This overrides all tablespace quotas for this user, which default to 0 and therefore prevent the user from creating any tables or other objects.
-			executeUserReCreationCommand( cn, "GRANT UNLIMITED TABLESPACE TO " + info.UserAndSchema );
+			executeLongRunningCommand( cn, "GRANT UNLIMITED TABLESPACE TO " + info.UserAndSchema );
 
-			executeUserReCreationCommand( cn, "GRANT CREATE PROCEDURE TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
-			executeUserReCreationCommand( cn, "GRANT CREATE SEQUENCE TO " + info.UserAndSchema );
-			executeUserReCreationCommand( cn, "GRANT CREATE TABLE TO " + info.UserAndSchema );
-			executeUserReCreationCommand( cn, "GRANT CREATE TRIGGER TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
-			executeUserReCreationCommand( cn, "GRANT READ, WRITE ON DIRECTORY " + dataPumpOracleDirectoryName + " TO " + info.UserAndSchema );
+			executeLongRunningCommand( cn, "GRANT CREATE PROCEDURE TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
+			executeLongRunningCommand( cn, "GRANT CREATE SEQUENCE TO " + info.UserAndSchema );
+			executeLongRunningCommand( cn, "GRANT CREATE TABLE TO " + info.UserAndSchema );
+			executeLongRunningCommand( cn, "GRANT CREATE TRIGGER TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
+			executeLongRunningCommand( cn, "GRANT READ, WRITE ON DIRECTORY " + dataPumpOracleDirectoryName + " TO " + info.UserAndSchema );
 
 			// Get all tablespaces currently in the database.
 			var command = cn.DatabaseInfo.CreateCommand();
@@ -199,7 +199,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			foreach( var nonExistentTs in latestTableSpaces.Select( s => s.ToLower() ).Except( currentTableSpaces ) ) {
 				var tableSpaceFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Oracle Tablespaces" );
 				Directory.CreateDirectory( tableSpaceFolderPath );
-				executeUserReCreationCommand(
+				executeLongRunningCommand(
 					cn,
 					"CREATE TABLESPACE " + nonExistentTs + " DATAFILE '" + StandardLibraryMethods.CombinePaths( tableSpaceFolderPath, nonExistentTs + ".dbf" ) + "' SIZE 100M" );
 			}
@@ -227,7 +227,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 		private void deleteUser( DBConnection cn ) {
 			try {
-				executeUserReCreationCommand( cn, "DROP USER " + info.UserAndSchema + " CASCADE" );
+				executeLongRunningCommand( cn, "DROP USER " + info.UserAndSchema + " CASCADE" );
 			}
 			catch( Exception e ) {
 				if( e.GetBaseException().Message.Contains( "ORA-01940" ) ) {
@@ -240,15 +240,6 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				if( !e.GetBaseException().Message.Contains( "ORA-01918" ) )
 					throw;
 			}
-		}
-
-		private void executeUserReCreationCommand( DBConnection cn, string commandText ) {
-			var command = cn.DatabaseInfo.CreateCommand();
-			command.CommandTimeout = 0; // This means the command can take as much time as it needs.
-			command.CommandText = commandText;
-
-			// NOTE: Not sure if this is the right execute method to use.
-			cn.ExecuteNonQueryCommand( command );
 		}
 
 		void Database.BackupTransactionLog( string folderPath ) {
@@ -322,7 +313,31 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			throw new ApplicationException( "Unknown parameter direction string." );
 		}
 
-		void Database.PerformMaintenance() {}
+		void Database.PerformMaintenance() {
+			ExecuteDbMethod(
+				cn => {
+					var command = cn.DatabaseInfo.CreateCommand();
+					command.CommandText = "SELECT index_name FROM user_indexes WHERE index_type != 'LOB'";
+					var indexes = new List<string>();
+					cn.ExecuteReaderCommand(
+						command,
+						reader => {
+							while( reader.Read() )
+								indexes.Add( reader.GetString( 0 ) );
+						} );
+					foreach( var index in indexes )
+						executeLongRunningCommand( cn, "ALTER INDEX {0} REBUILD ONLINE".FormatWith( index ) );
+				} );
+		}
+
+		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
+			var command = cn.DatabaseInfo.CreateCommand();
+			command.CommandTimeout = 0; // This means the command can take as much time as it needs.
+			command.CommandText = commandText;
+
+			// NOTE: Not sure if this is the right execute method to use.
+			cn.ExecuteNonQueryCommand( command );
+		}
 
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
 
