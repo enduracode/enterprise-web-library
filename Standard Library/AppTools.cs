@@ -116,46 +116,44 @@ namespace RedStapler.StandardLibrary {
 				if( provider == null )
 					throw new ApplicationException( "General provider not found in system" );
 
-				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling and cleanup work.
+				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
 				initialized = true;
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";
-
-				try {
-					try {
-						var asposeLicense = provider.AsposeLicenseName;
-						if( asposeLicense.Any() ) {
-							new Aspose.Pdf.License().SetLicense( asposeLicense );
-							new Aspose.Words.License().SetLicense( asposeLicense );
-						}
-
-						// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
-						AppMemoryCache.Init();
-						BlobFileOps.Init( systemLogic.GetType() );
-						DataAccessStatics.Init( systemLogic.GetType() );
-						DataAccessState.Init( mainDataAccessStateGetter );
-						EncryptionOps.Init( systemLogic.GetType() );
-						HtmlBlockStatics.Init( systemLogic.GetType() );
-						InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
-						UserManagementStatics.Init( systemLogic.GetType() );
-
-						systemLogic.InitSystem();
-
-						initializationLog += Environment.NewLine + "Succeeded in secondary init.";
-					}
-					catch( Exception e ) {
-						secondaryInitFailed = true;
-						EmailAndLogError( "An exception occurred during application initialization:", e );
-					}
-				}
-				catch {
-					CleanUp();
-					throw;
-				}
 			}
 			catch( Exception e ) {
 				initializationLog += Environment.NewLine + e;
 				StandardLibraryMethods.EmergencyLog( "Initialization log", initializationLog );
 				throw;
+			}
+
+			try {
+				var asposeLicense = provider.AsposeLicenseName;
+				if( asposeLicense.Any() ) {
+					new Aspose.Pdf.License().SetLicense( asposeLicense );
+					new Aspose.Words.License().SetLicense( asposeLicense );
+				}
+
+				// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
+				AppMemoryCache.Init();
+				BlobFileOps.Init( systemLogic.GetType() );
+				DataAccessStatics.Init( systemLogic.GetType() );
+				DataAccessState.Init( mainDataAccessStateGetter );
+				EncryptionOps.Init( systemLogic.GetType() );
+				HtmlBlockStatics.Init( systemLogic.GetType() );
+				InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
+				UserManagementStatics.Init( systemLogic.GetType() );
+
+				systemLogic.InitSystem();
+			}
+			catch( Exception e ) {
+				secondaryInitFailed = true;
+
+				// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
+				// automatically restart themselves. Other apps could find this knowledge useful as well.
+				try {
+					EmailAndLogError( "An exception occurred during application initialization:", e );
+				}
+				catch {}
 			}
 		}
 
