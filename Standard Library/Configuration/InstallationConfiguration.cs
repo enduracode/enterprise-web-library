@@ -79,8 +79,9 @@ namespace RedStapler.StandardLibrary.Configuration {
 			// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
 			// could potentially be served up to users.
 			configurationFolderPath =
-				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
-				                                     ConfigurationFolderName );
+				StandardLibraryMethods.CombinePaths(
+					InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
+					ConfigurationFolderName );
 
 
 			// Do not perform schema validation for non-development installations because the schema files won't be available on non-development machines. For
@@ -97,15 +98,17 @@ namespace RedStapler.StandardLibrary.Configuration {
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
-				                                          ? StandardLibraryMethods.CombinePaths( ConfigurationFolderPath,
-				                                                                                 InstallationConfigurationFolderName,
-				                                                                                 InstallationsFolderName,
-				                                                                                 DevelopmentInstallationFolderName )
+				                                          ? StandardLibraryMethods.CombinePaths(
+					                                          ConfigurationFolderPath,
+					                                          InstallationConfigurationFolderName,
+					                                          InstallationsFolderName,
+					                                          DevelopmentInstallationFolderName )
 				                                          : StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
 
 			// installation standard configuration
-			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath,
-			                                                                                     InstallationStandardConfigurationFileName );
+			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths(
+				installationConfigurationFolderPath,
+				InstallationStandardConfigurationFileName );
 			installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
 
 
@@ -228,13 +231,14 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, Database database ) {
 			if( database is SqlServerDatabase ) {
 				var sqlServerDatabase = database as SqlServerDatabase;
-				return new SqlServerInfo( secondaryDatabaseName,
-				                          sqlServerDatabase.server,
-				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
-				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
-				                          sqlServerDatabase.database ?? FullShortName,
-				                          true,
-				                          sqlServerDatabase.FullTextCatalog );
+				return new SqlServerInfo(
+					secondaryDatabaseName,
+					sqlServerDatabase.server,
+					sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
+					sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
+					sqlServerDatabase.database ?? FullShortName,
+					true,
+					sqlServerDatabase.FullTextCatalog );
 			}
 			if( database is MySqlDatabase ) {
 				var mySqlDatabase = database as MySqlDatabase;
@@ -242,12 +246,13 @@ namespace RedStapler.StandardLibrary.Configuration {
 			}
 			if( database is OracleDatabase ) {
 				var oracleDatabase = database as OracleDatabase;
-				return new OracleInfo( secondaryDatabaseName,
-				                       oracleDatabase.tnsName,
-				                       oracleDatabase.userAndSchema,
-				                       oracleDatabase.password,
-				                       !oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
-				                       !oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
+				return new OracleInfo(
+					secondaryDatabaseName,
+					oracleDatabase.tnsName,
+					oracleDatabase.userAndSchema,
+					oracleDatabase.password,
+					!oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
+					!oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
 			}
 			throw new ApplicationException( "Unknown database type." );
 		}
