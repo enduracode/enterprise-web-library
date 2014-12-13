@@ -25,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly DateTime beginTime;
-	  internal readonly Uri Uri;
+		private readonly string url;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
 		private readonly DataAccessState dataAccessState;
@@ -54,25 +54,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public HttpBrowserCapabilities Browser { get; private set; }
 
-		internal AppRequestState( string hostHeader ) {
+		internal AppRequestState( string url ) {
 			beginTime = DateTime.Now;
 			MiniProfiler.Start();
-
-			// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer will
-			// bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances running this
-			// web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on someIp:81 and someIp:82.
-			// For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of using the host and port from
-			// the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url returns http://someIp:81?something=1
-			// instead of http://mydomain.com?something=1. See
-			// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
-			try {
-				Uri = new Uri( HttpContext.Current.Request.Url.Scheme + "://" + hostHeader + HttpContext.Current.Request.Url.PathAndQuery );
-			}
-			catch( Exception e ) {
-				throw new ApplicationException(
-					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".",
-					e );
-			}
+			this.url = url;
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
@@ -85,9 +70,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// This is the absolute URL of the request. Absolute means the entire URL, including scheme, host, query strings and fragments.
+		/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
 		/// </summary>
-		internal string Url { get { return Uri.AbsoluteUri; } }
+		internal string Url { get { return url; } }
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 
@@ -173,7 +158,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.IsSecureRequest; } }
+		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); } }
 
 		internal void ClearUser() {
 			user = null;

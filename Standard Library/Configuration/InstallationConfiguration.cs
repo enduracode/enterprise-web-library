@@ -64,6 +64,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private readonly string configurationFolderPath;
 		private readonly SystemGeneralConfiguration systemGeneralConfiguration;
 		private readonly InstallationStandardConfiguration installationStandardConfiguration;
+		private readonly IEnumerable<WebApplication> webApplications;
 		private readonly string installationCustomConfigurationFilePath;
 		private readonly bool isDevelopmentInstallation;
 
@@ -108,6 +109,24 @@ namespace RedStapler.StandardLibrary.Configuration {
 			installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
 
 
+			var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ];
+			webApplications = from systemElement in systemWebApplicationElements
+			                  let name = systemElement.Name
+			                  let supportsSecureConnections = systemElement.SupportsSecureConnections
+			                  select
+				                  isDevelopmentInstallation
+					                  ? new WebApplication( name, supportsSecureConnections, installationPath, SystemShortName, systemWebApplicationElements.Skip( 1 ).Any() )
+					                  : InstallationType == InstallationType.Live
+						                    ? new WebApplication(
+							                      name,
+							                      supportsSecureConnections,
+							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == systemElement.Name ) )
+						                    : new WebApplication(
+							                      name,
+							                      supportsSecureConnections,
+							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == systemElement.Name ) );
+			webApplications = webApplications.ToArray();
+
 			// installation custom configuration
 			installationCustomConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
 
@@ -137,9 +156,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// Gets a list of the web applications in the system.
 		/// </summary>
-		public SystemGeneralConfigurationApplication[] WebApplications {
-			get { return systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ]; }
-		}
+		public IEnumerable<WebApplication> WebApplications { get { return webApplications; } }
 
 		/// <summary>
 		/// Gets a list of the services in the system.
@@ -180,10 +197,6 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// Gets the short name of the installation.
 		/// </summary>
 		public string InstallationShortName { get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; } }
-
-		internal string BaseUrlOverride { get { return installationStandardConfiguration.BaseUrlOverride ?? ""; } }
-
-		internal bool DisableNonPreferredDomainChecking { get { return installationStandardConfiguration.DisableNonPreferredDomainChecking; } }
 
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 

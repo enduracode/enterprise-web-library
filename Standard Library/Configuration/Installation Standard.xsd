@@ -10,8 +10,6 @@
 			<element name="EmailDefaultFromNameAndAddressOverride" type="rs:InstallationStandardNameAndEmailAddress" minOccurs="0" />
 
 			<element name="CertificateEmailAddressOverride" type="string" minOccurs="0" />
-			<element name="BaseUrlOverride" type="string" minOccurs="0" />
-			<element name="DisableNonPreferredDomainChecking" type="boolean" minOccurs="0" />
 			<element name="administrators">
 				<complexType>
 					<sequence>
@@ -118,6 +116,13 @@
 			<extension base="rs:InstallationTypeConfiguration">
 				<sequence>
 					<element name="EmailSendingService" type="rs:EmailSendingService" />
+					<element name="WebApplications" minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="Application" type="rs:LiveInstallationWebApplication" maxOccurs="unbounded" />
+							</sequence>
+						</complexType>
+					</element>
 				</sequence>
 			</extension>
 		</complexContent>
@@ -129,6 +134,13 @@
 					<element name="EmailFromName" type="string" />
 					<element name="EmailFromAddress" type="string" />
 					<element name="EmailSendingService" type="rs:EmailSendingService" />
+					<element name="WebApplications" minOccurs="0">
+						<complexType>
+							<sequence>
+								<element name="Application" type="rs:IntermediateInstallationWebApplication" maxOccurs="unbounded" />
+							</sequence>
+						</complexType>
+					</element>
 				</sequence>
 			</extension>
 		</complexContent>
@@ -159,6 +171,27 @@
 		<sequence>
 			<element name="UserName" type="string" />
 			<element name="Password" type="string" />
+		</sequence>
+	</complexType>
+	<complexType name="LiveInstallationWebApplication">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+		</sequence>
+	</complexType>
+	<complexType name="IntermediateInstallationWebApplication">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+		</sequence>
+	</complexType>
+	<complexType name="InstallationStandardBaseUrl">
+		<sequence>
+			<element name="Host" type="string" />
+			<element name="NonsecurePort" type="int" minOccurs="0" />
+			<element name="SecurePort" type="int" minOccurs="0" />
+			<element name="Path" type="string" minOccurs="0" />
 		</sequence>
 	</complexType>
 </schema>

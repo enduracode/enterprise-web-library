@@ -122,6 +122,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseUrl.cs" />
     <Compile Include="Caching\AppMemoryCache.cs" />
     <Compile Include="AppTools.cs" />
     <Compile Include="Caching\DateAndTimeVersionedCache.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
     <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
+    <Compile Include="Configuration\WebApplication.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />

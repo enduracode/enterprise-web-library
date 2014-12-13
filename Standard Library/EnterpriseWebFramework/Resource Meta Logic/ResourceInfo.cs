@@ -214,7 +214,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Returns an absolute URL that can be used to request the resource. This method uses HttpContext.Current and can only be called from within web requests.
+		/// Returns an absolute URL that can be used to request the resource.
 		/// </summary>
 		/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
 		/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
@@ -233,7 +233,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "GetUrl was called for a resource that is disabled. The URL would have been " + url + "." );
 			if( makeAbsolute )
-				url = url.Replace( "~", EwfApp.GetBaseUrlWithSpecificSecurity( ShouldBeSecureGivenCurrentRequest ) );
+				url = url.Replace( "~", EwfApp.GetDefaultBaseUrl( ShouldBeSecureGivenCurrentRequest ) );
 			return url;
 		}
 

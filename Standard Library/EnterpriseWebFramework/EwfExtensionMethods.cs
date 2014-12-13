@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
@@ -37,7 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return true;
 
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-				       ? EwfApp.Instance.IsSecureRequest
+				       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null && EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request )
 				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfApp.SupportsSecureConnections;
 		}
 

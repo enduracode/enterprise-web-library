@@ -45,7 +45,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
 				// (i.e. server caching) will still be disabled because of our SetNoServerCaching call above.
 				aspNetResponse.Cache.SetCacheability(
-					!aspNetRequest.IsSecureConnection && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
+					!EwfApp.Instance.RequestIsSecure( aspNetRequest ) && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
 						? HttpCacheability.Public
 						: HttpCacheability.ServerAndPrivate );
 

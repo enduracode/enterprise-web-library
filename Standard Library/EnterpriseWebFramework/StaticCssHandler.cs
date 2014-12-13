@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		void IHttpHandler.ProcessRequest( HttpContext context ) {
-			var url = context.Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
+			var url = EwfApp.GetRequestAppRelativeUrl( context.Request );
 
 			// We assume that all URL version strings will have the same length as the format string.
 			var prefixedVersionStringIndex = url.LastIndexOf( "." ) -

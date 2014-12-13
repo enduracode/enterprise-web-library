@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration.SystemGeneral;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private static bool ewlInitialized;
 		private static bool initialized;
 		private static Timer initFailureUnloadTimer;
-		private static SystemGeneralConfigurationApplication webAppConfiguration;
+		private static WebApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
@@ -139,6 +139,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static bool SupportsSecureConnections { get { return webAppConfiguration.SupportsSecureConnections || AppTools.IsIntermediateInstallation; } }
 
+		internal static string GetDefaultBaseUrl( bool secure ) {
+			return webAppConfiguration.DefaultBaseUrl.GetUrlString( secure );
+		}
+
 		private void handleBeginRequest( object sender, EventArgs e ) {
 			if( !initialized ) {
 				// We can't redirect to a normal page to communicate this information because since initialization failed, the request for that page will trigger
@@ -158,20 +162,69 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
 					}
 
-					var hostHeader = HttpContext.Current.Request.Headers[ "Host" ];
-					if( hostHeader == null ) {
+
+					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
+					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
+					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
+					// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
+					// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
+					// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
+					// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
+
+					var baseUrl = getRequestBaseUrl( Request );
+					if( !baseUrl.Any() ) {
 						setStatusCode( 400 );
 						return;
 					}
+					var appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
+
+					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
+					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
+					var url = !getRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length ? baseUrl : baseUrl + appRelativeUrl;
+
 
 					// This blocks until the entire request has been received from the client.
 					// This won't compile unless it is assigned to something, which is why it is unused.
 					var stream = Request.InputStream;
 
-					RequestState = new AppRequestState( hostHeader );
+					RequestState = new AppRequestState( url );
 				},
 				false,
 				true );
+		}
+
+		private string getRequestBaseUrl( HttpRequest request ) {
+			var host = getRequestHost( request );
+			return host.Any() ? BaseUrl.GetUrlString( RequestIsSecure( request ), host, getRequestBasePath( request ) ) : "";
+		}
+
+		/// <summary>
+		/// Returns true if the specified request is secure. Override this to be more than just <see cref="HttpRequest.IsSecureConnection"/> if you are using a
+		/// reverse proxy to perform SSL termination. Remember that your implementation should support not just live installations, but also development and
+		/// intermediate installations.
+		/// </summary>
+		protected internal virtual bool RequestIsSecure( HttpRequest request ) {
+			return request.IsSecureConnection;
+		}
+
+		/// <summary>
+		/// Returns the host name for the specified request. Override this if you are using a reverse proxy that is changing the Host header. Include the port
+		/// number in the return value if it is not the default port. Never return null. If the host name is unavailable (i.e. the request uses HTTP 1.0 and does
+		/// not include a Host header), return the empty string, which will cause a 400 status code to be returned. Remember that your implementation should support
+		/// not just live installations, but also development and intermediate installations.
+		/// </summary>
+		protected virtual string getRequestHost( HttpRequest request ) {
+			var host = request.Headers[ "Host" ]; // returns null if field missing
+			return host ?? "";
+		}
+
+		/// <summary>
+		/// Returns the base path for the specified request. Override this if you are using a reverse proxy and are changing the base path. Never return null.
+		/// Return the empty string to represent the root path. Remember that your implementation should support not just live installations, but also development
+		/// and intermediate installations.
+		/// </summary>
+		protected virtual string getRequestBasePath( HttpRequest request ) {
+			return request.RawUrl.Truncate( HttpRuntime.AppDomainAppVirtualPath.Length ).Substring( "/".Length );
 		}
 
 		private void handleAuthenticateRequest( object sender, EventArgs e ) {
@@ -185,8 +238,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void rewritePathIfShortcutUrl() {
-			// Remove the "~/" since it's part of every URL and is therefore useless when distinguishing between URLs.
-			var url = Request.AppRelativeCurrentExecutionFilePath.Substring( NetTools.HomeUrl.Length );
+			var url = GetRequestAppRelativeUrl( Request );
 
 			var ewfResolver = new ShortcutUrlResolver(
 				"ewf",
@@ -200,24 +252,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
 					continue;
 
-				// Redirect to the same shortcut URL to normalize the casing, fix the connection security, or both.
-				var canonicalAbsoluteUrl = NetTools.CombineUrls(
-					GetBaseUrlWithSpecificSecurity( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ),
-					resolver.ShortcutUrl );
-				if( HttpRuntime.AppDomainAppVirtualPath == "/" && resolver.ShortcutUrl.Length == 0 )
-					canonicalAbsoluteUrl += "/";
-
-				Action redirect = () => NetTools.Redirect( canonicalAbsoluteUrl );
-
-				var canonicalUri = new Uri( canonicalAbsoluteUrl, UriKind.Absolute );
-				var requestUri = new Uri( RequestState.Url, UriKind.Absolute );
-
-				if( !IsSecureRequest && canonicalUri.Scheme == "https" )
-					redirect();
-
-				if( !AppTools.InstallationConfiguration.DisableNonPreferredDomainChecking &&
-				    canonicalAbsoluteUrl.Substring( ( canonicalUri.Scheme + "://" ).Length ) != RequestState.Url.Substring( ( requestUri.Scheme + "://" ).Length ) )
-					redirect();
+				// Redirect to the same shortcut URL to fix the connection security, normalize the base URL, normalize the shortcut URL casing, or any combination of
+				// these.
+				var canonicalAbsoluteUrl = GetDefaultBaseUrl( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ) +
+				                           resolver.ShortcutUrl.PrependDelimiter( "/" );
+				if( canonicalAbsoluteUrl != RequestState.Url )
+					NetTools.Redirect( canonicalAbsoluteUrl );
 
 				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
@@ -230,6 +270,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
 				break;
 			}
+		}
+
+		// One difference between this and HttpRequest.AppRelativeCurrentExecutionFilePath is that the latter does not include the query string.
+		internal static string GetRequestAppRelativeUrl( HttpRequest request, bool disableLeadingSlashRemoval = false ) {
+			var url = request.RawUrl;
+
+			// If a base path exists (on the web server, not the reverse proxy), remove it along with the subsequent slash if one exists. Otherwise just remove the
+			// leading slash, which we know exists since an HTTP request path must start with a slash. We're doing this slash removal ultimately because we are trying
+			// to normalize the difference between root applications and subdirectory applications by not distinguishing between app-relative URLs of "" and "/". In
+			// root applications this distinction doesn't exist. We've decided on a standard of never allowing an app-relative URL of "/".
+			if( HttpRuntime.AppDomainAppVirtualPath.Substring( "/".Length ).Any() ) {
+				url = url.Substring( HttpRuntime.AppDomainAppVirtualPath.Length );
+				url = url.StartsWith( "/" ) && !disableLeadingSlashRemoval ? url.Substring( 1 ) : url;
+			}
+			else if( !disableLeadingSlashRemoval )
+				url = url.Substring( 1 );
+
+			return url;
 		}
 
 		/// <summary>
@@ -280,12 +338,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.
 		/// </summary>
 		protected internal virtual string JavaScriptDocumentReadyFunctionCall { get { return ""; } }
-
-		/// <summary>
-		/// Returns true if this application is accessed via https.
-		/// A situation where this isn't as obvious as <see cref="HttpContext.Current.Request.IsSecureConnection"/> is when a reverse proxy is in place.
-		/// </summary>
-		public virtual bool IsSecureRequest { get { return Request.IsSecureConnection; } }
 
 		/// <summary>
 		/// Standard library use only.
@@ -488,7 +540,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private string getTransferPath( ResourceInfo resource ) {
 			var url = resource.GetUrl( true, true, false );
-			if( resource.ShouldBeSecureGivenCurrentRequest != IsSecureRequest )
+			if( resource.ShouldBeSecureGivenCurrentRequest != RequestIsSecure( Request ) )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
 			return url;
 		}
@@ -501,21 +553,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the page that users will be redirected to when errors occur in the application.
 		/// </summary>
 		protected virtual PageInfo errorPage { get { return null; } }
-
-		internal static string GetBaseUrlWithSpecificSecurity( bool secure ) {
-			var scheme = ( secure ? "https" : "http" ) + "://";
-			if( !AppTools.InstallationConfiguration.BaseUrlOverride.IsWhitespace() )
-				return scheme + AppTools.InstallationConfiguration.BaseUrlOverride;
-
-			var appRequestState = AppRequestState.Instance;
-			if( appRequestState == null ) {
-				throw new ApplicationException(
-					"GetBaseUrlWithSpecificSecurity cannot be called outside the context of the web application unless BaseUrlOverride is specified." );
-			}
-			return NetTools.CombineUrls(
-				scheme + appRequestState.Uri.Host + ( appRequestState.Uri.IsDefaultPort ? "" : ( ":" + appRequestState.Uri.Port ) ),
-				HttpRuntime.AppDomainAppVirtualPath );
-		}
 
 		/// <summary>
 		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.

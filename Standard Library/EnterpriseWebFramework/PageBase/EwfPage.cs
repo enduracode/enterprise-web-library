@@ -102,8 +102,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				// If the request doesn't match the page's specified security level, redirect with the proper level. Do this before ensuring that the user can access the
 				// page since in certificate authentication systems this can be affected by the connection security level.
-				// NOTE: Also redirect if the domain isn't correct. Probably only do this on GET requests since we don't want to wipe out post backs.
-				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.IsSecureRequest )
+				//
+				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs. We probably
+				// should only do this on GET requests since we don't want to wipe out post backs.
+				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request ) )
 					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
 			}
 			finally {
@@ -453,8 +455,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					new Literal
 						{
 							Text =
-							"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.IsSecureRequest ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
-								".js\"></script>"
+								"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( Request ) ? "s" : "" ) + "://use.typekit.com/" +
+								EwfApp.Instance.TypekitId + ".js\"></script>"
 						} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
