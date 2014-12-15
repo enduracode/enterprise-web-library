@@ -215,7 +215,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl &&
 				    ( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) )
 					generateGeneralProvider( writer, installation );
-				generateDataAccessCode( writer, installation );
 				writer.WriteLine();
 				TypedCssClassStatics.Generate(
 					installation.GeneralLogic.Path,
@@ -223,6 +222,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer );
 				writer.WriteLine();
 				generateServerSideConsoleAppStatics( writer, installation );
+				generateDataAccessCode( writer, installation );
 			}
 		}
 
@@ -231,6 +231,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				"namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Providers {" );
 			writer.WriteLine( "internal partial class General: SystemGeneralProvider {" );
 			ConfigurationLogic.SystemProvider.WriteGeneralProviderMembers( writer );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
+		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
+			writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+			writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
+				writer.WriteLine(
+					"public static void Start" + project.Name.EnglishToPascal() + "( string arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
+				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
+				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
+
+				var programPath = "StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
+				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
+				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
+
+				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
+				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
+				writer.WriteLine( "else" );
+				writer.WriteLine( runProgramExpression + ";" );
+
+				writer.WriteLine( "}" );
+			}
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
@@ -338,30 +362,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Count() > 1 ? "do" : "does" ) +
 					" not exist." );
 			}
-		}
-
-		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
-			writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
-			writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
-			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
-				writer.WriteLine(
-					"public static void Start" + project.Name.EnglishToPascal() + "( string arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
-				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
-				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
-
-				var programPath = "StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
-				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
-				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
-
-				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
-				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
-				writer.WriteLine( "else" );
-				writer.WriteLine( runProgramExpression + ";" );
-
-				writer.WriteLine( "}" );
-			}
-			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
 		}
 
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
