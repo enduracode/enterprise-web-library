@@ -274,7 +274,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		// One difference between this and HttpRequest.AppRelativeCurrentExecutionFilePath is that the latter does not include the query string.
 		internal static string GetRequestAppRelativeUrl( HttpRequest request, bool disableLeadingSlashRemoval = false ) {
-			var url = request.RawUrl;
+			// We'd like to use HttpRequest.RawUrl instead, but we can't until we eliminate our usage of HttpServerUtility.TransferRequest, which we should be able to
+			// do when we've completed the transition away from Web Forms. Url.PathAndQuery changes after TransferRequest; RawUrl doesn't.
+			var url = request.Url.PathAndQuery;
 
 			// If a base path exists (on the web server, not the reverse proxy), remove it along with the subsequent slash if one exists. Otherwise just remove the
 			// leading slash, which we know exists since an HTTP request path must start with a slash. We're doing this slash removal ultimately because we are trying
