@@ -131,6 +131,7 @@
     <Compile Include="Chronometer.cs" />
     <Compile Include="Collections\Cache.cs" />
     <Compile Include="Collections\OneToOneMap.cs" />
+    <Compile Include="Configuration\ConfigurationStatics.cs" />
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
