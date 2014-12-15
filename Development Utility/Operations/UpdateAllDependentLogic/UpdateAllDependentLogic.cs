@@ -215,6 +215,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl &&
 				    ( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) )
 					generateGeneralProvider( writer, installation );
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
+					writer.WriteLine();
+					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+					writer.WriteLine( "public static class WebApplicationNames {" );
+					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+						writer.WriteLine(
+							"public const string {0} = \"{1}\";".FormatWith( StandardLibraryMethods.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
+					}
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				}
 				writer.WriteLine();
 				TypedCssClassStatics.Generate(
 					installation.GeneralLogic.Path,

@@ -7,7 +7,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 	/// A web application.
 	/// </summary>
 	public class WebApplication {
-		internal readonly string Name;
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public readonly string Name;
+
 		internal readonly bool SupportsSecureConnections;
 		internal readonly BaseUrl DefaultBaseUrl;
 
