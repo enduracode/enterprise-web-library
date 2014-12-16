@@ -2,6 +2,8 @@
 
 namespace RedStapler.StandardLibrary.Configuration {
 	public static class ConfigurationStatics {
+		public static bool MachineIsStandbyServer { get { return AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.IsStandbyServerEffective; } }
+
 		/// <summary>
 		/// Returns the default base URL for the specified web application. This will never have a trailing slash.
 		/// </summary>

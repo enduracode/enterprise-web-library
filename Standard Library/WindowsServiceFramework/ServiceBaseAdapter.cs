@@ -2,7 +2,7 @@
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
-using RedStapler.StandardLibrary.Configuration.Machine;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -70,7 +70,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 					// exception stack traces.
 					try {
 						var now = DateTime.Now;
-						if( AppTools.IsLiveInstallation && !MachineConfiguration.GetIsStandbyServer() &&
+						if( AppTools.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
 						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
 							StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 						lastHealthCheckDateAndTime = now;

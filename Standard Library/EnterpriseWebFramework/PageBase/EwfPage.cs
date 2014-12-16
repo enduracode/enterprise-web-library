@@ -909,7 +909,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 			DataAccessState.Current.DisableCache();
 			try {
-				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
+				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
 					EwfApp.Instance.ExecuteInitialRequestDataModifications();
 					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
 						updateLastPageRequestTimeForUser();

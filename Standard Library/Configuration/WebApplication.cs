@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
-using RedStapler.StandardLibrary.Configuration.Machine;
 
 namespace RedStapler.StandardLibrary.Configuration {
 	/// <summary>
@@ -31,7 +30,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		}
 
 		internal WebApplication( string name, bool supportsSecureConnections, LiveInstallationWebApplication configuration )
-			: this( name, supportsSecureConnections, MachineConfiguration.GetIsStandbyServer() ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl ) {}
+			: this( name, supportsSecureConnections, ConfigurationStatics.MachineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl ) {}
 
 		internal WebApplication( string name, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
 			: this( name, supportsSecureConnections, configuration.DefaultBaseUrl ) {}
