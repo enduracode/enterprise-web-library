@@ -94,7 +94,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Convert absolute URLs to connection-security-specific application relative URLs
 			foreach( var secure in new[] { true, false } ) {
-				var baseUrl = EwfApp.GetDefaultBaseUrl( secure );
+				// Later, we may handle URLs for all web applications in the system rather than just the current one. See the comments in decodeIntraSiteUris.
+				var baseUrl = AppTools.InstallationConfiguration.WebApplications.Single( i => i.Name == AppTools.AppName ).DefaultBaseUrl.GetUrlString( secure );
+
 				html = html.Replace( baseUrl, secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix );
 			}
 

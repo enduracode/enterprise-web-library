@@ -22,6 +22,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
+		// This is a hack that can be removed when goal 448 (Clean URLs) is complete. At that point resources will be able to have their own base URLs.
+		public static Func<BaseUrl> BaseUrlOverrideGetter;
+
 		// This member is per web user (request). We must be careful to never accidentally use values from a previous request.
 		internal AppRequestState RequestState { get; private set; }
 
@@ -140,6 +143,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static bool SupportsSecureConnections { get { return webAppConfiguration.SupportsSecureConnections || AppTools.IsIntermediateInstallation; } }
 
 		internal static string GetDefaultBaseUrl( bool secure ) {
+			if( BaseUrlOverrideGetter != null )
+				return BaseUrlOverrideGetter().CompleteWithDefaults( webAppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
+
 			return webAppConfiguration.DefaultBaseUrl.GetUrlString( secure );
 		}
 
