@@ -71,7 +71,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// Creates a new installation configuration.
 		/// </summary>
-		public InstallationConfiguration( string installationPath, bool isDevelopmentInstallation ) {
+		public InstallationConfiguration( bool machineIsStandbyServer, string installationPath, bool isDevelopmentInstallation ) {
 			this.installationPath = installationPath;
 
 			// The EWL configuration folder is not inside any particular app's folder the way that Web.config and app.config are. This is for two reasons. First, EWL
@@ -123,6 +123,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 						                    ? new WebApplication(
 							                      name,
 							                      supportsSecureConnections,
+							                      machineIsStandbyServer,
 							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == systemElement.Name ) )
 						                    : new WebApplication(
 							                      name,

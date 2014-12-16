@@ -105,7 +105,10 @@ namespace RedStapler.StandardLibrary {
 						installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, "..", "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 				}
 				initializationLog += Environment.NewLine + "Successfully determined installation path";
-				InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
+				InstallationConfiguration = new InstallationConfiguration(
+					machineConfiguration != null && machineConfiguration.IsStandbyServerEffective,
+					installationPath,
+					isDevelopmentInstallation );
 				initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
 				if( systemLogic == null )

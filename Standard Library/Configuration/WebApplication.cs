@@ -29,8 +29,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 				systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 		}
 
-		internal WebApplication( string name, bool supportsSecureConnections, LiveInstallationWebApplication configuration )
-			: this( name, supportsSecureConnections, ConfigurationStatics.MachineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl ) {}
+		internal WebApplication( string name, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration )
+			: this( name, supportsSecureConnections, machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl ) {}
 
 		internal WebApplication( string name, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
 			: this( name, supportsSecureConnections, configuration.DefaultBaseUrl ) {}

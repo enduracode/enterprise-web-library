@@ -55,7 +55,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 		private static DevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );
-			var existingInstallationLogic = new ExistingInstallationLogic( generalInstallationLogic, new InstallationConfiguration( path, true ) );
+			var existingInstallationLogic = new ExistingInstallationLogic(
+				generalInstallationLogic,
+				new InstallationConfiguration( ConfigurationStatics.MachineIsStandbyServer, path, true ) );
 
 			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
 				ConfigurationLogic.Init();
