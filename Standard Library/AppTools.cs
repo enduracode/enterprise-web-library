@@ -273,15 +273,13 @@ namespace RedStapler.StandardLibrary {
 			m.From = new EmailAddress(
 				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
 				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
-			SendEmail( m );
+			EmailStatics.SendEmail( m );
 		}
 
-		/// <summary>
-		/// Sends the specified mail message using the SMTP server specified in the config file.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.SendEmail instead." ) ]
 		public static void SendEmail( EmailMessage message ) {
 			assertClassInitialized();
-			EmailStatics.SendEmail( ConfigurationStatics.InstallationConfiguration, message );
+			EmailStatics.SendEmail( message );
 		}
 
 		/// <summary>
@@ -417,13 +415,11 @@ namespace RedStapler.StandardLibrary {
 			return chrono.Elapsed;
 		}
 
-		/// <summary>
-		/// A list of developer email addresses.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.GetDeveloperEmailAddresses instead." ) ]
 		public static List<EmailAddress> DeveloperEmailAddresses {
 			get {
 				assertClassInitialized();
-				return EmailStatics.GetDeveloperEmailAddresses( ConfigurationStatics.InstallationConfiguration ).ToList();
+				return EmailStatics.GetDeveloperEmailAddresses().ToList();
 			}
 		}
 

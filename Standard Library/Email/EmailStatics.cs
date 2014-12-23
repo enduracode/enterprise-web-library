@@ -6,23 +6,23 @@ using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 
 namespace RedStapler.StandardLibrary.Email {
-	internal class EmailStatics {
+	public class EmailStatics {
 		/// <summary>
-		/// AppTools use only.
+		/// Sends the specified mail message using the SMTP server specified in the config file.
 		/// </summary>
-		internal static void SendEmail( InstallationConfiguration configuration, EmailMessage message ) {
-			if( configuration.InstallationType == InstallationType.Development )
+		public static void SendEmail( EmailMessage message ) {
+			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
 				sendEmailWithSmtpServer( null, message );
 			else {
 				EmailSendingService service;
-				if( configuration.InstallationType == InstallationType.Live ) {
-					var liveConfig = configuration.LiveInstallationConfiguration;
+				if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live ) {
+					var liveConfig = ConfigurationStatics.InstallationConfiguration.LiveInstallationConfiguration;
 					service = liveConfig.EmailSendingService;
 				}
 				else {
-					alterMessageForIntermediateInstallation( configuration, message );
+					alterMessageForIntermediateInstallation( message );
 
-					var intermediateConfig = configuration.IntermediateInstallationConfiguration;
+					var intermediateConfig = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
 					service = intermediateConfig.EmailSendingService;
 				}
 
@@ -35,8 +35,8 @@ namespace RedStapler.StandardLibrary.Email {
 			}
 		}
 
-		private static void alterMessageForIntermediateInstallation( InstallationConfiguration configuration, EmailMessage m ) {
-			m.Subject = "[{0}] ".FormatWith( configuration.FullShortName ) + m.Subject;
+		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
+			m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
 
 			var recipients = m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection();
 			m.BodyHtml =
@@ -46,14 +46,14 @@ namespace RedStapler.StandardLibrary.Email {
 
 			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
 			// bad idea to mix testing and demo mail into deliverability reports for live mail.
-			var config = configuration.IntermediateInstallationConfiguration;
+			var config = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
 			m.From = new EmailAddress( config.EmailFromAddress, config.EmailFromName );
 
 			// Don't actually send email to recipients (they may be real people). Instead, send to the developers.
 			m.ToAddresses.Clear();
 			m.CcAddresses.Clear();
 			m.BccAddresses.Clear();
-			m.ToAddresses.AddRange( GetDeveloperEmailAddresses( configuration ) );
+			m.ToAddresses.AddRange( GetDeveloperEmailAddresses() );
 		}
 
 		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {
@@ -120,8 +120,11 @@ namespace RedStapler.StandardLibrary.Email {
 			}
 		}
 
-		internal static IEnumerable<EmailAddress> GetDeveloperEmailAddresses( InstallationConfiguration configuration ) {
-			return configuration.Developers.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
+		/// <summary>
+		/// Returns a list of developer email addresses.
+		/// </summary>
+		public static IEnumerable<EmailAddress> GetDeveloperEmailAddresses() {
+			return ConfigurationStatics.InstallationConfiguration.Developers.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
 		}
 	}
 }

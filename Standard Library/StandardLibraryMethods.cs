@@ -352,7 +352,7 @@ namespace RedStapler.StandardLibrary {
 
 		internal static void SendHealthCheckEmail( string appFullName ) {
 			var message = new EmailMessage();
-			message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
+			message.ToAddresses.AddRange( EmailStatics.GetDeveloperEmailAddresses() );
 
 			var body = new StringBuilder();
 			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
