@@ -1,4 +1,5 @@
 using System;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
@@ -29,7 +30,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							validationGetter: control => new Validation(
 								                             ( pbv, validator ) => {
 									                             // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-									                             var passwordMatch = control.GetPostBackValue( pbv ) == AppTools.SystemProvider.IntermediateLogInPassword;
+									                             var passwordMatch = control.GetPostBackValue( pbv ) ==
+									                                                 ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
 									                             if( !passwordMatch )
 										                             validator.NoteErrorAndAddMessage( "Incorrect password." );
 								                             },

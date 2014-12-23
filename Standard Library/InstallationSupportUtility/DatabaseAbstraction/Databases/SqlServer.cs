@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
@@ -14,7 +15,9 @@ using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
-		private static readonly string sqlServerFilesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "SQL Server Databases" );
+		private static readonly string sqlServerFilesFolderPath = StandardLibraryMethods.CombinePaths(
+			ConfigurationStatics.RedStaplerFolderPath,
+			"SQL Server Databases" );
 
 		/// <summary>
 		/// Returns the list of file names in the given folder, ordered with the newest log file first (according to ID).
@@ -139,7 +142,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
-		private string backupFilePath { get { return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, info.Database + ".bak" ); } }
+		private string backupFilePath { get { return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, info.Database + ".bak" ); } }
 
 		void Database.BackupTransactionLog( string folderPath ) {
 			Directory.CreateDirectory( folderPath );

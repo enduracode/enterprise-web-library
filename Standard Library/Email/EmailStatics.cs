@@ -98,7 +98,7 @@ namespace RedStapler.StandardLibrary.Email {
 				else {
 					smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory;
 
-					var pickupFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Outgoing Dev Mail" );
+					var pickupFolderPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Outgoing Dev Mail" );
 					Directory.CreateDirectory( pickupFolderPath );
 					smtpClient.PickupDirectoryLocation = pickupFolderPath;
 				}

@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				new InstallationConfiguration( ConfigurationStatics.MachineIsStandbyServer, path, true ) );
 
 			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
-				ConfigurationLogic.Init();
+				ConfigurationLogic.Init2();
 				SystemListStatics.RefreshSystemList();
 				var knownSystemLogic =
 					new KnownSystemLogic(

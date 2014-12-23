@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
 			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, StandardLibraryMethods.ProvidersFolderAndNamespaceName ) );
+			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ConfigurationStatics.ProvidersFolderAndNamespaceName ) );
 			if( !includeDatabaseUpdates )
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
@@ -88,7 +88,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// other files
 			var filesFolderInInstallationPath =
-				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+				StandardLibraryMethods.CombinePaths(
+					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 					InstallationFileStatics.FilesFolderName );
 			if( Directory.Exists( filesFolderInInstallationPath ) )
 				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );

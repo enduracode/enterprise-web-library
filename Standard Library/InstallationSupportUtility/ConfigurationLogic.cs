@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 	public static class ConfigurationLogic {
@@ -11,19 +12,25 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedDataPackagesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Data Packages" );
+		public static string DownloadedDataPackagesFolderPath = StandardLibraryMethods.CombinePaths(
+			ConfigurationStatics.RedStaplerFolderPath,
+			"Downloaded Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Web Site.
 		/// </summary>
-		public static string DataPackageRepositoryPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
+		public static string DataPackageRepositoryPath = StandardLibraryMethods.CombinePaths(
+			ConfigurationStatics.RedStaplerFolderPath,
+			"RSIS Web Site Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedTransactionLogsFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Downloaded Transaction Logs" );
+		public static string DownloadedTransactionLogsFolderPath = StandardLibraryMethods.CombinePaths(
+			ConfigurationStatics.RedStaplerFolderPath,
+			"Downloaded Transaction Logs" );
 
-		public static string TransactionLogBackupsPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Transaction Log Backups" );
+		public static string TransactionLogBackupsPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Transaction Log Backups" );
 
 		private static SystemIsuProvider provider;
 
@@ -31,8 +38,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemIsuProvider;
+		internal static void Init1() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemIsuProvider;
 
 			if( NDependIsPresent ) {
 				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
@@ -40,10 +47,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
 						return null;
 					return
-						Assembly.LoadFrom( StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-						                                                        provider.NDependFolderPathInUserProfileFolder,
-						                                                        "Lib",
-						                                                        assemblyName + ".dll" ) );
+						Assembly.LoadFrom(
+							StandardLibraryMethods.CombinePaths(
+								Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+								provider.NDependFolderPathInUserProfileFolder,
+								"Lib",
+								assemblyName + ".dll" ) );
 				};
 			}
 		}
@@ -59,7 +68,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		public static SystemIsuProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}
@@ -70,12 +79,14 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		public static bool NDependIsPresent {
 			get {
 				return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
-				       Directory.Exists( StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-				                                                              provider.NDependFolderPathInUserProfileFolder ) );
+				       Directory.Exists(
+					       StandardLibraryMethods.CombinePaths(
+						       Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+						       provider.NDependFolderPathInUserProfileFolder ) );
 			}
 		}
 
-		public static void Init() {
+		public static void Init2() {
 			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
 			programRunnerUnstreamedServiceFactory = getHttpChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed>( "ProgramRunnerUnstreamed.svc" );
@@ -170,8 +181,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			StatusStatics.SetStatus( "Performed " + action + "." );
 		}
 
-		private static ResultType executeWebMethodWithResult<ContractType, ResultType>( Func<ContractType, ResultType> method, ChannelFactory<ContractType> factory,
-		                                                                                string action ) {
+		private static ResultType executeWebMethodWithResult<ContractType, ResultType>(
+			Func<ContractType, ResultType> method, ChannelFactory<ContractType> factory, string action ) {
 			StatusStatics.SetStatus( "Performing " + action + "." );
 			ResultType ret;
 			try {
@@ -194,8 +205,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			}
 			if( innerException is FaultException ) {
 				// We do not pass the fault exception as an inner exception because its message includes a big ugly stack trace.
-				throw new UserCorrectableException( generalMessage +
-				                                    " The web service was reachable but did not execute properly. This could be due to a database error on the server. Try again, as these types of errors usually do not persist." );
+				throw new UserCorrectableException(
+					generalMessage +
+					" The web service was reachable but did not execute properly. This could be due to a database error on the server. Try again, as these types of errors usually do not persist." );
 			}
 
 			// EndpointNotFoundException and FaultException are derived from CommunicationException, so their conditions must be before this condition.
@@ -209,9 +221,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 
 		public static string AuthenticationKey {
 			get {
-				if( AppTools.MachineConfiguration == null || AppTools.MachineConfiguration.RsisAuthenticationKey == null )
+				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.RsisAuthenticationKey == null )
 					throw new UserCorrectableException( "Missing RSIS authentication key in machine configuration file." );
-				return AppTools.MachineConfiguration.RsisAuthenticationKey;
+				return ConfigurationStatics.MachineConfiguration.RsisAuthenticationKey;
 			}
 		}
 
@@ -220,32 +232,33 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static string InstallationsFolderPath {
 			get {
-				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.InstallationsFolderPath != null )
-					return AppTools.MachineConfiguration.InstallationsFolderPath;
-				return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Installations" );
+				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.InstallationsFolderPath != null )
+					return ConfigurationStatics.MachineConfiguration.InstallationsFolderPath;
+				return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Installations" );
 			}
 		}
 
 		public static string RevisionControlFolderPath {
 			get {
-				if( AppTools.MachineConfiguration != null && AppTools.MachineConfiguration.VaultWorkingFolderPath != null )
-					return AppTools.MachineConfiguration.VaultWorkingFolderPath;
-				return StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Revision Control" );
+				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath != null )
+					return ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath;
+				return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
 			}
 		}
 
 		public static string GetBuildFilePath( int systemId ) {
-			return StandardLibraryMethods.CombinePaths( DataPackageRepositoryPath
-			                                            /*NOTE: Make this the generic web-site-accessible folder and change this and DataPackageRepositoryPath to be a subfolder of that.*/,
-			                                            "Latest Builds",
-			                                            systemId.ToString() );
+			return StandardLibraryMethods.CombinePaths(
+				DataPackageRepositoryPath
+				/*NOTE: Make this the generic web-site-accessible folder and change this and DataPackageRepositoryPath to be a subfolder of that.*/,
+				"Latest Builds",
+				systemId.ToString() );
 		}
 
 		public static string OracleSysPassword {
 			get {
-				if( AppTools.MachineConfiguration == null || AppTools.MachineConfiguration.OracleSysPassword == null )
+				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.OracleSysPassword == null )
 					throw new UserCorrectableException( "Missing Oracle sys password in machine configuration file." );
-				return AppTools.MachineConfiguration.OracleSysPassword;
+				return ConfigurationStatics.MachineConfiguration.OracleSysPassword;
 			}
 		}
 	}

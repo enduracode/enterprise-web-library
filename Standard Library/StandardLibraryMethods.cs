@@ -18,11 +18,6 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static class StandardLibraryMethods {
 		/// <summary>
-		/// Standard Library and RSIS use only.
-		/// </summary>
-		public const string ProvidersFolderAndNamespaceName = "Providers";
-
-		/// <summary>
 		/// Standard Library and Development Utility use only.
 		/// </summary>
 		public const string EwfFolderBaseNamespace = "RedStapler.StandardLibrary.EnterpriseWebFramework";
@@ -272,19 +267,6 @@ namespace RedStapler.StandardLibrary {
 						throw new ApplicationException( failureMessage, e );
 				}
 			}
-		}
-
-		internal static object GetSystemLibraryProvider( Type systemLogicType, string providerName ) {
-			var systemLibraryAssembly = systemLogicType.Assembly;
-			var typeName = systemLogicType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
-			return systemLibraryAssembly.GetType( typeName ) != null ? systemLibraryAssembly.CreateInstance( typeName ) : null;
-		}
-
-		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
-			return
-				new ApplicationException(
-					providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-					ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
 		}
 
 		/// <summary>

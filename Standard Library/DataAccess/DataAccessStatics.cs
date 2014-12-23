@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 
 namespace RedStapler.StandardLibrary.DataAccess {
@@ -9,16 +9,14 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private static SystemDataAccessProvider provider;
 		private static IEnumerable<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemDataAccessProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemDataAccessProvider;
 
 			var automaticTransactionDisablingProvider = provider as AutomaticTransactionDisablingProvider;
 			disabledAutomaticTransactionSecondaryDatabases = automaticTransactionDisablingProvider != null
 				                                                 ? automaticTransactionDisablingProvider.GetDisabledAutomaticTransactionSecondaryDatabaseNames()
-				                                                                                        .Select(
-					                                                                                        i =>
-					                                                                                        AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( i ) )
-				                                                                                        .ToArray()
+					                                                   .Select( i => ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( i ) )
+					                                                   .ToArray()
 				                                                 : new DatabaseInfo[ 0 ];
 		}
 
@@ -28,7 +26,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public static SystemDataAccessProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -13,14 +14,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private static SystemHtmlBlockEditingProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemHtmlBlockEditingProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemHtmlBlockEditingProvider;
 		}
 
 		internal static SystemHtmlBlockEditingProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}
@@ -95,7 +96,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Convert absolute URLs to connection-security-specific application relative URLs
 			foreach( var secure in new[] { true, false } ) {
 				// Later, we may handle URLs for all web applications in the system rather than just the current one. See the comments in decodeIntraSiteUris.
-				var baseUrl = AppTools.InstallationConfiguration.WebApplications.Single( i => i.Name == AppTools.AppName ).DefaultBaseUrl.GetUrlString( secure );
+				var baseUrl =
+					ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => i.Name == ConfigurationStatics.AppName ).DefaultBaseUrl.GetUrlString( secure );
 
 				html = html.Replace( baseUrl, secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix );
 			}
@@ -112,7 +114,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				html = Regex.Replace(
 					html,
 					secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
-					AppTools.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.GetUrlString( secure ) );
+					ConfigurationStatics.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.GetUrlString( secure ) );
 			}
 			return html;
 		}
