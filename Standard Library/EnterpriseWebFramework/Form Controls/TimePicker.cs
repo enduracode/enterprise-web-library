@@ -124,7 +124,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var selectedItemIdInPostBack = selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 			if( selectedItemIdInPostBack.HasValue )
 				return selectedItemIdInPostBack.Value;
-			validator.NoteErrorAndAddMessage( "Please make a selection." );
+			errorHandler.SetValidationResult( ValidationResult.Empty() );
+			errorHandler.HandleResult( validator, true );
 			return default( TimeSpan );
 		}
 
