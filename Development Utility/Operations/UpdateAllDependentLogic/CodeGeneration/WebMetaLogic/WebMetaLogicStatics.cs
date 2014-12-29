@@ -33,10 +33,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			// Generate code for pages and user controls in the current folder.
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.aspx" ) ) {
-				// NOTE: This is a hack. What we really need to do is not generate code for pages that don't inherit from EwfPage.
-				if( fileName == "Kiosk.aspx" )
-					continue;
-
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
 				new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
 			}
