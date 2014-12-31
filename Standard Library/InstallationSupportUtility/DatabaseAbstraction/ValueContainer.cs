@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 

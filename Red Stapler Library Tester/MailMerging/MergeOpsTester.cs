@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using NUnit.Framework;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.MailMerging;

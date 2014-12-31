@@ -2,6 +2,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;

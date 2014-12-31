@@ -1,5 +1,6 @@
 using System.IO;
 using System.Reflection;
+using Humanizer;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.IO;
 

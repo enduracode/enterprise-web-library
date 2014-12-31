@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 
@@ -55,12 +56,13 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 			var newCommandText = "";
 			// NOTE: Is it important to tell the user they've been capped? How would we do that?
 			foreach( var token in tokens.Take( 20 /*Google allows many more tokens than this.*/ ) ) {
-				var parameter = new DbCommandParameter( parameterName + "L" + parameterNumber++,
-				                                        new DbParameterValue( token.Truncate( 128 /*This is Google's cap on word length.*/ ) ) );
-				newCommandText = StringTools.ConcatenateWithDelimiter( " AND ",
-				                                                       newCommandText,
-				                                                       ( columnName + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" )
-					                                                       .FormatWith( concatCharacter ) );
+				var parameter = new DbCommandParameter(
+					parameterName + "L" + parameterNumber++,
+					new DbParameterValue( token.Truncate( 128 /*This is Google's cap on word length.*/ ) ) );
+				newCommandText = StringTools.ConcatenateWithDelimiter(
+					" AND ",
+					newCommandText,
+					( columnName + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" ).FormatWith( concatCharacter ) );
 				command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 			}
 			command.CommandText += newCommandText;

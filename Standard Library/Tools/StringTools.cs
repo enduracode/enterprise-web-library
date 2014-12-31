@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
-using JetBrains.Annotations;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -351,7 +350,11 @@ namespace RedStapler.StandardLibrary {
 		/// For example, "This 'quoted text'.".RemoveTextBetweenStrings( "'", "'" ) returns "This ''.";
 		/// </summary>
 		public static string RemoveTextBetweenStrings( this string s, string beginString, string endString ) {
-			return Regex.Replace( s, getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ), beginString + endString, RegexOptions.Multiline );
+			return Regex.Replace(
+				s,
+				getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ),
+				beginString + endString,
+				RegexOptions.Multiline );
 		}
 
 		private static string getRegexSafeString( string s ) {
@@ -470,14 +473,6 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static bool EqualsIgnoreCaseAndWhitespace( this string s, string otherString ) {
 			return s.Trim().EqualsIgnoreCase( otherString.Trim() );
-		}
-
-		/// <summary>
-		/// Allows for extension method syntax for string.Format.
-		/// </summary>
-		[ StringFormatMethod( "s" ) ]
-		public static string FormatWith( this string s, params object[] objects ) {
-			return String.Format( s, objects );
 		}
 
 		/// <summary>

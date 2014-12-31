@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {

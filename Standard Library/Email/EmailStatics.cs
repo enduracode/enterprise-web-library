@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 

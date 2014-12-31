@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;

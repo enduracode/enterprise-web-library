@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;

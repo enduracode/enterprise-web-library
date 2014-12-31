@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Collections;
 using RedStapler.StandardLibrary.DataAccess;

@@ -1,4 +1,5 @@
 using System;
+using Humanizer;
 using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;

@@ -1,4 +1,5 @@
 using System;
+using Humanizer;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {

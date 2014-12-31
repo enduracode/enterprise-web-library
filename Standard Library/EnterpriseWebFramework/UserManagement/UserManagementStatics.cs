@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>

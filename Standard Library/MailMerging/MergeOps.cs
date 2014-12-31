@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
+using Humanizer;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.MailMerging.MailMergeTesting;

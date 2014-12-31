@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;

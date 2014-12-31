@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using Humanizer;
 using JetBrains.Annotations;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
