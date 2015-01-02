@@ -384,10 +384,23 @@ namespace RedStapler.StandardLibrary {
 			AppTools.SendEmailWithDefaultFromAddress( message );
 		}
 
-		public static byte[] ResizeImage( byte[] image, int newWidth ) {
+		/// <summary>
+		/// Shrinks the specified image down to the specified width, preserving the aspect ratio.
+		/// </summary>
+		/// <param name="image"></param>
+		/// <param name="newWidth">The new width of the image.</param>
+		/// <param name="newHeight">The new height of the image. If you specify this, the image may be cropped in one of the dimensions in order to keep the new
+		/// width and height as close as possible to the values you specify without stretching the image.</param>
+		public static byte[] ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
 			using( var fromStream = new MemoryStream( image ) ) {
 				using( var toStream = new MemoryStream() ) {
-					ImageBuilder.Current.Build( new ImageJob( fromStream, toStream, new Instructions { Width = newWidth }, false, false ) );
+					ImageBuilder.Current.Build(
+						new ImageJob(
+							fromStream,
+							toStream,
+							newHeight.HasValue ? new Instructions { Width = newWidth, Height = newHeight, Mode = FitMode.Crop } : new Instructions { Width = newWidth },
+							false,
+							false ) );
 					return toStream.ToArray();
 				}
 			}
