@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using ImageResizer;
 using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {
@@ -387,32 +385,12 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		public static byte[] ResizeImage( byte[] image, int newWidth ) {
-			// Do not invest time in this method until you've read
-			// http://www.hanselman.com/blog/NuGetPackageOfWeek11ImageResizerEnablesCleanClearImageResizingInASPNET.aspx.
-			// Also try to resolve EnduraCode Task 4100.
 			using( var fromStream = new MemoryStream( image ) ) {
-				using( var imageSource = Image.FromStream( fromStream ) ) {
-					var height = getHeightFromImageAndNewWidth( imageSource, newWidth );
-
-					using( var resizedImage = new Bitmap( newWidth, height ) ) {
-						using( var gr = Graphics.FromImage( resizedImage ) ) {
-							gr.SmoothingMode = SmoothingMode.AntiAlias;
-							gr.InterpolationMode = InterpolationMode.HighQualityBicubic;
-							gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
-							gr.DrawImage( imageSource, 0, 0, newWidth, height );
-						}
-
-						using( var toStream = new MemoryStream() ) {
-							resizedImage.Save( toStream, ImageFormat.Jpeg );
-							return toStream.ToArray();
-						}
-					}
+				using( var toStream = new MemoryStream() ) {
+					ImageBuilder.Current.Build( new ImageJob( fromStream, toStream, new Instructions { Width = newWidth }, false, false ) );
+					return toStream.ToArray();
 				}
 			}
-		}
-
-		private static int getHeightFromImageAndNewWidth( Image image, int width ) {
-			return width * image.Height / image.Width;
 		}
 	}
 }
