@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.ServiceProcess;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -27,7 +28,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		}
 
 		internal static string GetServiceInstalledName( WindowsServiceBase service ) {
-			return AppTools.InstallationConfiguration.WindowsServices.Single( s => s.Name == service.Name ).InstalledName;
+			return ConfigurationStatics.InstallationConfiguration.WindowsServices.Single( s => s.Name == service.Name ).InstalledName;
 		}
 	}
 }

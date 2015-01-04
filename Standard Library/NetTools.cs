@@ -217,5 +217,9 @@ namespace RedStapler.StandardLibrary {
 			// http://stackoverflow.com/questions/2156399/restful-cookie-path-fails-in-ie-without-trailing-slash.
 			return HttpRuntime.AppDomainAppVirtualPath;
 		}
+
+		internal static bool IsWebApp() {
+			return HttpContext.Current != null;
+		}
 	}
 }

@@ -31,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the EwfApp object for the current HTTP context.
 		/// </summary>
-		public static EwfApp Instance { get { return HttpContext.Current == null ? null : HttpContext.Current.ApplicationInstance as EwfApp; } }
+		public static EwfApp Instance { get { return NetTools.IsWebApp() ? HttpContext.Current.ApplicationInstance as EwfApp : null; } }
 
 		/// <summary>
 		/// Registers event handlers for certain application events.
@@ -79,7 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !AppTools.SecondaryInitFailed ) {
 				executeWithBasicExceptionHandling(
 					() => {
-						webAppConfiguration = AppTools.InstallationConfiguration.WebApplications.Single( a => a.Name == AppTools.AppName );
+						webAppConfiguration = ConfigurationStatics.InstallationConfiguration.WebApplications.Single( a => a.Name == ConfigurationStatics.AppName );
 
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
@@ -351,7 +351,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Standard library use only.
 		/// </summary>
 		public void SendHealthCheck() {
-			StandardLibraryMethods.SendHealthCheckEmail( AppTools.InstallationConfiguration.FullShortName + " - " + AppTools.AppName );
+			StandardLibraryMethods.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
 		}
 
 		/// <summary>

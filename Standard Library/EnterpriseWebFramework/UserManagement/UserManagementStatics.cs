@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -14,8 +15,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		private static SystemUserManagementProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemUserManagementProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemUserManagementProvider;
 			FormsAuthStatics.Init( () => SystemProvider );
 		}
 
@@ -30,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		public static SystemUserManagementProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}

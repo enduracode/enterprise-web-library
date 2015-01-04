@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RedStapler.StandardLibrary.Collections;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.DataAccess {
 	public class DataAccessState {
@@ -55,7 +56,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// Gets the connection to the primary database.
 		/// </summary>
 		public DBConnection PrimaryDatabaseConnection {
-			get { return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ) ); }
+			get {
+				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
+			}
 		}
 
 		/// <summary>
@@ -64,8 +67,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
 			DBConnection connection;
 			secondaryConnectionsByName.TryGetValue( databaseName, out connection );
-			if( connection == null )
-				secondaryConnectionsByName.Add( databaseName, connection = new DBConnection( AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
+			if( connection == null ) {
+				secondaryConnectionsByName.Add(
+					databaseName,
+					connection = new DBConnection( ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
+			}
 			return initConnection( connection );
 		}
 

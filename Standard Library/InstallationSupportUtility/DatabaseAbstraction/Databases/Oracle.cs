@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
@@ -16,7 +17,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
 		private const string databaseFileDumpFileName = "Dump File.dmp";
 		private const string databaseFileSchemaNameFileName = "Schema.txt";
-		private static readonly string dataPumpFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Oracle Data Pump" );
+		private static readonly string dataPumpFolderPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Data Pump" );
 
 		private readonly OracleInfo info;
 		private readonly List<string> latestTableSpaces;
@@ -197,7 +198,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 			// Create necessary tablespaces that don't already exist.
 			foreach( var nonExistentTs in latestTableSpaces.Select( s => s.ToLower() ).Except( currentTableSpaces ) ) {
-				var tableSpaceFolderPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Oracle Tablespaces" );
+				var tableSpaceFolderPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Tablespaces" );
 				Directory.CreateDirectory( tableSpaceFolderPath );
 				executeLongRunningCommand(
 					cn,

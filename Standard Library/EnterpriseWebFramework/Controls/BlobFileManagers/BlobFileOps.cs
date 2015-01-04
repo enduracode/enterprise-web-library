@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using Aspose.Pdf.Facades;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
 
@@ -15,14 +16,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private const string providerName = "BlobFileManagement";
 		private static SystemBlobFileManagementProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemBlobFileManagementProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemBlobFileManagementProvider;
 		}
 
 		internal static SystemBlobFileManagementProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}
