@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.ServiceProcess;
+using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.Email;

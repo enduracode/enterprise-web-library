@@ -5,6 +5,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading;
 using System.Web;
+using Humanizer;
 using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;

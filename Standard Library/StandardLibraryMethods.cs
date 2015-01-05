@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using Humanizer;
 using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {

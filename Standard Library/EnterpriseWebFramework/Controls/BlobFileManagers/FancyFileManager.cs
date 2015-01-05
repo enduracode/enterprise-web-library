@@ -1,5 +1,6 @@
 ﻿using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.Encryption;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {

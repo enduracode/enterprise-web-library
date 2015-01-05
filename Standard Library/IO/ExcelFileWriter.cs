@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ClosedXML.Excel;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary.IO {
 	/// <summary>

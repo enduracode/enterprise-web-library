@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
+using Humanizer;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;

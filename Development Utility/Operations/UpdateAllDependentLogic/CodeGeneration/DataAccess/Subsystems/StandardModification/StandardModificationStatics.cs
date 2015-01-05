@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;

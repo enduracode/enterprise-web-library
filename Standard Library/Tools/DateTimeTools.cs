@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// Provides helpful DateTime methods.
 	/// </summary>
 	public static class DateTimeTools {
-		internal static readonly string[] DayMonthYearFormats = new[] { dayMonthYearFormatLz, dayMonthYearFormat };
-		internal static readonly string[] MonthDayYearFormats = new[] { monthDayYearFormat, "MM/dd/yy" };
+		internal static readonly string[] DayMonthYearFormats = { dayMonthYearFormatLz, dayMonthYearFormat };
+		internal static readonly string[] MonthDayYearFormats = { monthDayYearFormat, "MM/dd/yy" };
 		internal const string HourAndMinuteFormat = "h:mmt";
 
 		private const string dayMonthYearFormatLz = "dd MMM yyyy";

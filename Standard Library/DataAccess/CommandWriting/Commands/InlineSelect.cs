@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
