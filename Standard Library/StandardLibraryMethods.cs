@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using Humanizer;
+using ImageResizer;
 using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {
@@ -369,33 +367,26 @@ namespace RedStapler.StandardLibrary {
 			AppTools.SendEmailWithDefaultFromAddress( message );
 		}
 
-		public static byte[] ResizeImage( byte[] image, int newWidth ) {
-			// Do not invest time in this method until you've read
-			// http://www.hanselman.com/blog/NuGetPackageOfWeek11ImageResizerEnablesCleanClearImageResizingInASPNET.aspx.
-			// Also try to resolve EnduraCode Task 4100.
+		/// <summary>
+		/// Shrinks the specified image down to the specified width, preserving the aspect ratio.
+		/// </summary>
+		/// <param name="image"></param>
+		/// <param name="newWidth">The new width of the image.</param>
+		/// <param name="newHeight">The new height of the image. If you specify this, the image may be cropped in one of the dimensions in order to keep the new
+		/// width and height as close as possible to the values you specify without stretching the image.</param>
+		public static byte[] ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
 			using( var fromStream = new MemoryStream( image ) ) {
-				using( var imageSource = Image.FromStream( fromStream ) ) {
-					var height = getHeightFromImageAndNewWidth( imageSource, newWidth );
-
-					using( var resizedImage = new Bitmap( newWidth, height ) ) {
-						using( var gr = Graphics.FromImage( resizedImage ) ) {
-							gr.SmoothingMode = SmoothingMode.AntiAlias;
-							gr.InterpolationMode = InterpolationMode.HighQualityBicubic;
-							gr.PixelOffsetMode = PixelOffsetMode.HighQuality;
-							gr.DrawImage( imageSource, 0, 0, newWidth, height );
-						}
-
-						using( var toStream = new MemoryStream() ) {
-							resizedImage.Save( toStream, ImageFormat.Jpeg );
-							return toStream.ToArray();
-						}
-					}
+				using( var toStream = new MemoryStream() ) {
+					ImageBuilder.Current.Build(
+						new ImageJob(
+							fromStream,
+							toStream,
+							newHeight.HasValue ? new Instructions { Width = newWidth, Height = newHeight, Mode = FitMode.Crop } : new Instructions { Width = newWidth },
+							false,
+							false ) );
+					return toStream.ToArray();
 				}
 			}
-		}
-
-		private static int getHeightFromImageAndNewWidth( Image image, int width ) {
-			return width * image.Height / image.Width;
 		}
 	}
 }
