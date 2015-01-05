@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standard Library", "Standard Library\Standard Library.csproj", "{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web Site", "Web Site\Web Site.csproj", "{1FEF500E-B420-42D6-8702-D998CDF65C23}"
@@ -10,13 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solution Files", "Solution Files\Solution Files.csproj", "{D1934BF3-2370-49BD-8FE7-3781E575C448}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{3398B3A5-8445-410E-A69B-33EE3E914A03}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D057E121-79DB-4775-B492-BE29D531FEE2}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Development Utility", "Development Utility\Development Utility.csproj", "{621E8A1E-19BC-4734-BBF5-D322312044A3}"
 EndProject

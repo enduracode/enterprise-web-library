@@ -82,6 +82,9 @@ div.textBoxWrapper:hover {
 div.textBoxWrapperFocused {
 	border-color: #515151;
 }
+div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"] {
+	height: 22px;
+}
 div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="password"], div.textBoxWrapper > textarea {
 	display: block;
 	margin: 0;
@@ -90,29 +93,6 @@ div.textBoxWrapper > input[type="text"], div.textBoxWrapper > input[type="passwo
 	width: 100%;
 	font-family: inherit;
 	font-size: inherit;
-}
-ewfTextBoxCompletionList {
-	visibility: hidden;
-	margin: 0 !important;
-	background-color: window;
-	color: windowtext;
-	border: buttonshadow;
-	border-width: 1px !important;
-	border-style: solid;
-	overflow: auto;
-	height: 200px;
-	text-align: left;
-	list-style-type: none;
-}
-ewfTextBoxCompletionList > ewfTextBoxCompletionListItemAllStates {
-	background-color: window;
-	color: windowtext;
-	padding: 1px !important;
-	margin: 0 !important;
-}
-ewfTextBoxCompletionList > ewfTextBoxCompletionListItemSelectedState {
-	background-color: #ffff99;
-	color: black;
 }
 /* This prevents Chrome and Safari from allowing the user to resize textareas. */
 textarea {
@@ -153,8 +133,11 @@ ewfDatePicker, ewfTimePicker {
 ewfDateAndTimePicker {
 	max-width: 15em;
 }
-.icon-calendar {
+.datepickerIcon, .timepickerIcon {
 	font-size: 1.4em;
+}
+.datetimepickerIcon {
+	font-size: .8em
 }
 
 /* action controls */
@@ -248,12 +231,14 @@ ewfErrorMessageControlListBlock {
 ewfActionControlAllStylesAllActionStates, .ewfClickable {
 	cursor: pointer;
 }
-ewfActionControlAllStylesActionlessState, .ewfNotClickable, ewfTextBoxCompletionList {
+ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 	cursor: default;
 }
 
 /* EwfPage and master page */
 div.ewfNonLiveWarning {
+	position: relative;
+	z-index: 9999;
 	margin-bottom: 4px;
 	border: solid #464646 1px;
 	background-color: Red;
@@ -262,12 +247,6 @@ div.ewfNonLiveWarning {
 	color: White;
 	font-size: 1.2em;
 	font-weight: bold;
-}
-ewfClickBlockingBlock {
-	z-index: 10000;
-}
-ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
-	z-index: 10001;
 }
 ewfClickBlockingBlock, ewfProcessingDialogBlock {
 	display: none;
@@ -278,10 +257,14 @@ ewfClickBlockingBlock {
 	right: 0;
 	bottom: 0;
 	left: 0;
+	z-index: 10000;
 	background-color: Gray;
 	opacity: 0.3;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
-	filter: alpha(opacity=30);
+	filter: alpha( opacity=30 );
+}
+ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
+	z-index: 10001;
 }
 ewfProcessingDialogBlock {
 	position: fixed;

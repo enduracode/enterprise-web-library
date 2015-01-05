@@ -17,11 +17,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="validationList">The DataModification or BasicValidationList to which this validation will be added.</param>
 		public Validation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList ) {
 			this.method = method;
-
-			if( validationList is DataModification )
-				( validationList as DataModification ).AddValidation( this );
-			else
-				( validationList as BasicValidationList ).AddValidation( this );
+			( (ValidationListInternal)validationList ).AddValidation( this );
 		}
 
 		internal Action<PostBackValueDictionary, Validator> Method { get { return method; } }

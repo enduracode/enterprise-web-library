@@ -22,8 +22,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		/// for the server to represent the local machine. Specify null for the login name and password if SQL Server Authentication is not being used. Pass null
 		/// for fullTextCatalog to represent no full text catalog.
 		/// </summary>
-		public SqlServerInfo( string secondaryDatabaseName, string server, string loginName, string password, string database, bool supportsConnectionPooling,
-		                      string fullTextCatalog ) {
+		public SqlServerInfo(
+			string secondaryDatabaseName, string server, string loginName, string password, string database, bool supportsConnectionPooling, string fullTextCatalog ) {
 			this.secondaryDatabaseName = secondaryDatabaseName;
 			this.server = server;
 			this.loginName = loginName;
@@ -36,6 +36,14 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
 
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
+		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "@@IDENTITY"; } }
+
+		string DatabaseInfo.QueryCacheHint {
+			get {
+				// SQL Server doesn't have a query cache.
+				return "";
+			}
+		}
 
 		/// <summary>
 		/// Gets the server. Returns null to represent the local machine.
@@ -72,7 +80,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		DbCommand DatabaseInfo.CreateCommand() {
-			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 8 }, null, MiniProfiler.Current );
+			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 15 }, null, MiniProfiler.Current );
 		}
 
 		DbParameter DatabaseInfo.CreateParameter() {

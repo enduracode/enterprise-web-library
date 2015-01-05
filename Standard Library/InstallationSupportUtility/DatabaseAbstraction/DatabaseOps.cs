@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
@@ -77,8 +78,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {
-			return StandardLibraryMethods.CombinePaths( dataPackageFolderPath,
-			                                            ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
+			return StandardLibraryMethods.CombinePaths(
+				dataPackageFolderPath,
+				( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
 		}
 
 		/// <summary>
@@ -105,6 +107,13 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					lines++;
 			}
 			return lines;
+		}
+
+		/// <summary>
+		/// Gets the tables in the specified database, ordered by name.
+		/// </summary>
+		public static IEnumerable<string> GetDatabaseTables( Database database ) {
+			return database.GetTables().OrderBy( i => i );
 		}
 	}
 }

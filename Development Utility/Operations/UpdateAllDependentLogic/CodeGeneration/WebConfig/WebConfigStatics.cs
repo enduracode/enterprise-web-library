@@ -8,9 +8,9 @@ using RedStapler.StandardLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig {
 	internal class WebConfigStatics {
-		internal static void GenerateWebConfig( WebProject webProject, string webProjectPath, string systemName ) {
+		internal static void GenerateWebConfig( WebProject webProject, string webProjectPath ) {
 			var sections = new XmlDocument { PreserveWhitespace = true };
-			using( var reader = new StringReader( getSectionString( webProject, systemName ) ) )
+			using( var reader = new StringReader( getSectionString( webProject ) ) )
 				sections.Load( reader );
 
 			if( !File.Exists( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) ) )
@@ -33,17 +33,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			}
 		}
 
-		private static string getSectionString( WebProject webProject, string systemName ) {
+		private static string getSectionString( WebProject webProject ) {
 			var sections = File.ReadAllText( StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
 
+			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
+
 			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
-
-			sections = sections.Replace( "@@AuthenticationMode", useCertificateAuth ? "None" : "Forms" );
-			sections = sections.Replace( "@@FormsAuthenticationName",
-			                             ( webProject.name + systemName + "FormsAuth" ).RemoveCommonNonAlphaNumericCharacters().Replace( " ", "" ) );
-
-			sections = sections.Replace( "@@SessionTimeout", ( (int)UserManagementStatics.SessionDuration.TotalMinutes ).ToString() );
-
 			sections = sections.Replace( "@@CertificateAuthenticationModulePlace",
 			                             useCertificateAuth
 				                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"

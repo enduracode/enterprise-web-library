@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.21022</ProductVersion>
@@ -36,7 +36,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -78,6 +78,7 @@
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -101,11 +102,12 @@
     <WarningLevel>4</WarningLevel>
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -119,8 +121,28 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CollectionTools\TakeLast.cs" />
     <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
+    <Compile Include="DateTimeTools\DateTimeRangeOverlapsDateRange.cs" />
+    <Compile Include="DoubleTools\ToMoneyString.cs" />
+    <Compile Include="IO\ExcelFileWriterTester.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeManagerMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\TestFileMergeFields\FullName.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\MergeTestData.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\PhysicianEmail.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\FirstName.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\LastName.cs" />
+    <Compile Include="MailMerging\MergeOpsTester.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PhysicianDataStructure\PhysicianMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeManagerDataStructure\PracticeManagerMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeMockData.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeDocumentMergeFields\PracticeName.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\TheValue.cs" />
     <Compile Include="RsLibraryTester.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Validation\UrlValidatorTester.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -155,11 +177,24 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="TestFiles\MergeOps\pdf.pdf" />
-    <None Include="TestFiles\MergeOps\word.docx" />
-    <None Include="TestFiles\PdfOps\onepage.pdf" />
-    <None Include="TestFiles\PdfOps\threepage.pdf" />
-    <None Include="TestFiles\PdfOps\twopage.pdf" />
+    <None Include="TestFiles\MergeOps\pdf.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\MergeOps\PracticesUserAccess.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\MergeOps\word.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\onepage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\threepage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\PdfOps\twopage.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -168,5 +203,4 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

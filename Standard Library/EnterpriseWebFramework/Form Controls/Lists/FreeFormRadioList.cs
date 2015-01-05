@@ -23,12 +23,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( bool allowNoSelection, ItemIdType selectedItemId, bool disableSingleButtonDetection = false ) {
 			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
 		}
-
-		[ Obsolete( "Guaranteed through 30 November 2013. Please use the other Create method." ) ]
-		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( string groupName, bool allowNoSelection, ItemIdType selectedItemId,
-		                                                                bool disableSingleButtonDetection = false ) {
-			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
-		}
 	}
 
 	/// <summary>
@@ -85,9 +79,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an in-line radio button that is part of the list.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
+		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new EwfCheckBox( formValue, label, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new EwfCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
@@ -95,9 +89,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", bool autoPostBack = false ) {
+		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new BlockCheckBox( formValue, label, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new BlockCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}

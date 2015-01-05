@@ -124,8 +124,8 @@ namespace RedStapler.StandardLibrary.IO {
 		/// Gets a list of file paths in the specified folder, ordered by last modified date descending, that match the specified search pattern. The default search
 		/// option is to not include files in subfolders. If the folder does not exist, returns an empty collection.
 		/// </summary>
-		public static IEnumerable<string> GetFilePathsInFolder( string folderPath, string searchPattern = "*",
-		                                                        SearchOption searchOption = SearchOption.TopDirectoryOnly ) {
+		public static IEnumerable<string> GetFilePathsInFolder(
+			string folderPath, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly ) {
 			if( !Directory.Exists( folderPath ) )
 				return new List<string>();
 			return new DirectoryInfo( folderPath ).GetFiles( searchPattern, searchOption ).OrderByDescending( f => f.LastWriteTime ).Select( f => f.FullName );
@@ -177,6 +177,18 @@ namespace RedStapler.StandardLibrary.IO {
 		public static FileStream GetFileStreamForWrite( string filePath ) {
 			Directory.CreateDirectory( Path.GetDirectoryName( filePath ) );
 			return File.Create( filePath );
+		}
+
+		/// <summary>
+		/// Executes the specified method with a stream for a temporary file. The file will be deleted after the method executes.
+		/// </summary>
+		public static void ExecuteWithTempFileStream( Action<FileStream> method ) {
+			const int bufferSize = 4096; // This was the FileStream default as of 13 October 2014.
+
+			// Instead of deleting the file in a finally block, we pass FileOptions.DeleteOnClose because it will ensure that the file gets deleted even if our
+			// process terminates unexpectedly.
+			using( var stream = new FileStream( Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite, FileShare.None, bufferSize, FileOptions.DeleteOnClose ) )
+				method( stream );
 		}
 
 		public static void ExecuteWithTempFolder( Action<string> method ) {

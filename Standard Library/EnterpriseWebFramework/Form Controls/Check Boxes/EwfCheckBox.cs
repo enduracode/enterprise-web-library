@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -36,18 +35,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal static FormValue<bool> GetFormValue( bool isChecked, Control checkBox ) {
 			return new FormValue<bool>( () => isChecked,
-			                            () => checkBox.IsOnPage() ? checkBox.UniqueID : "",
-			                            v => v.ToString(),
-			                            rawValue =>
-			                            rawValue == null
-				                            ? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
-				                            : rawValue == "on"
-					                              ? PostBackValueValidationResult<bool>.CreateValidWithValue( true )
-					                              : PostBackValueValidationResult<bool>.CreateInvalid() );
+				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
+				v => v.ToString(),
+				rawValue =>
+				rawValue == null
+					? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
+					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValidWithValue( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
 		internal static void AddCheckBoxAttributes( WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue,
-		                                            FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId, bool autoPostBack,
+		                                            FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId, PostBack postBack, bool autoPostBack,
 		                                            IEnumerable<string> onClickJsMethods ) {
 			checkBoxElement.Attributes.Add( "type", checkBoxFormValue != null ? "checkbox" : "radio" );
 			checkBoxElement.Attributes.Add( "name", checkBoxFormValue != null ? checkBox.UniqueID : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() );
@@ -58,9 +55,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
+			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
-			var postBackScript = autoPostBack && !isSelectedRadioButton ? PostBackButton.GetPostBackScript( checkBox, false, includeReturnFalse: false ) : "";
+			var postBackScript = autoPostBack && !isSelectedRadioButton
+				                     ? PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack, includeReturnFalse: false )
+				                     : "";
 			var customScript = StringTools.ConcatenateWithDelimiter( "; ", onClickJsMethods.ToArray() );
 			checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "; ", postBackScript, customScript ) );
 		}
@@ -69,25 +69,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
 		private readonly string label;
+		private readonly PostBack postBack;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private WebControl checkBox;
-		private PostBackButton defaultSubmitButton;
 
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
 		/// </summary>
-		public EwfCheckBox( bool isChecked, string label = "" ) {
+		public EwfCheckBox( bool isChecked, string label = "", PostBack postBack = null ) {
 			checkBoxFormValue = GetFormValue( isChecked, this );
 			this.label = label;
+			this.postBack = postBack;
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
-		internal EwfCheckBox( FormValue<CommonCheckBox> formValue, string label, string listItemId = null ) {
+		internal EwfCheckBox( FormValue<CommonCheckBox> formValue, string label, PostBack postBack, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
+			this.postBack = postBack;
 		}
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
@@ -114,13 +116,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onClickJsMethods.Add( jsMethodInvocation );
 		}
 
-		/// <summary>
-		/// Assigns this to submit the given PostBackButton. This will disable the button's submit behavior. Do not pass null.
-		/// </summary>
-		public void SetDefaultSubmitButton( PostBackButton pbb ) {
-			defaultSubmitButton = pbb;
-		}
-
 		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
 
 		/// <summary>
@@ -129,15 +124,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
+			if( postBack != null || AutoPostBack )
+				EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+
 			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender += delegate {
-				AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, AutoPostBack, onClickJsMethods );
+				AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, postBack, AutoPostBack, onClickJsMethods );
 				checkBox.Attributes.Add( "class", CssElementCreator.CssClass );
 			};
-			if( defaultSubmitButton != null )
-				EwfPage.Instance.MakeControlPostBackOnEnter( checkBox, defaultSubmitButton );
 			Controls.Add( checkBox );
 
 			EwfLabel labelControl = null;

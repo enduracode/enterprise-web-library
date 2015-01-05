@@ -27,6 +27,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
 
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
+		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "LAST_INSERT_ID()"; } }
+		string DatabaseInfo.QueryCacheHint { get { return "SQL_CACHE"; } }
 
 		/// <summary>
 		/// Gets the database.
@@ -57,8 +59,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		}
 
 		void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
-			var oracleDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" );
-			oracleDbTypeProperty.SetValue( parameter, Enum.Parse( factory.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), dbTypeString ), null );
+			var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" );
+			mySqlDbTypeProperty.SetValue( parameter, Enum.Parse( factory.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), dbTypeString ), null );
 		}
 	}
 }

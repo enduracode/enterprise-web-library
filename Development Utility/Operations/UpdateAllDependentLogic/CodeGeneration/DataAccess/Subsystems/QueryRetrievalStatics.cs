@@ -12,8 +12,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class QueryRetrievalStatics {
 		private static DatabaseInfo info;
 
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-		                               RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static void Generate(
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.queries == null )
 				return;
 
@@ -33,7 +34,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "public static partial class " + query.name + "Retrieval {" );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClass( writer, columns, cn.DatabaseInfo );
+				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => { } );
 				writeCacheClass( writer, database, query );
 
 				writer.WriteLine( "private const string selectFromClause = @\"" + query.selectFromClause + " \";" );
@@ -49,7 +50,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Attempt to query with every postSelectFromClause to ensure validity.
 			foreach( var postSelectFromClause in query.postSelectFromClauses ) {
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
-					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ), r => { } );
+					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ),
+					r => { } );
 			}
 
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
@@ -57,8 +59,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeCacheClass( TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query ) {
 			writer.WriteLine( "private partial class Cache {" );
-			writer.WriteLine( "internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + database.SecondaryDatabaseName + query.name +
-			                  "QueryRetrieval\", () => new Cache() ); } }" );
+			writer.WriteLine(
+				"internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + database.SecondaryDatabaseName + query.name +
+				"QueryRetrieval\", () => new Cache() ); } }" );
 			foreach( var i in query.postSelectFromClauses ) {
 				var type = getQueryCacheType( query, i );
 				writer.WriteLine( "private readonly " + type + " " + getQueryCacheName( query, i, true ) + " = new " + type + "();" );
@@ -71,19 +74,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static string getQueryCacheType( RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
-		                                         RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+		private static string getQueryCacheType(
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
 			return DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any()
 				       ? "QueryRetrievalQueryCache<Row>"
 				       : "ParameterlessQueryCache<Row>";
 		}
 
-		private static void writeQueryMethod( TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
-		                                      RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+		private static void writeQueryMethod(
+			TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Queries the database and returns the full results collection immediately." );
-			writer.WriteLine( "public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
-			                  DataAccessStatics.GetMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
+			writer.WriteLine(
+				"public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
+				DataAccessStatics.GetMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
 
 
 			// body
@@ -96,8 +102,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );
 			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
 			writer.WriteLine( "var results = new List<Row>();" );
-			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) +
-			                  ".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( r ) ); } );" );
+			writer.WriteLine(
+				DataAccessStatics.GetConnectionExpression( database ) +
+				".ExecuteReaderCommand( cmd, r => { while( r.Read() ) results.Add( new Row( new BasicRow( r ) ) ); } );" );
 
 			// Update single-row caches.
 			writer.WriteLine( "foreach( var i in results )" );
@@ -107,32 +114,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
-
-
-			// NOTE: Delete this after 30 September 2013.
-			writer.WriteLine( "[ System.Obsolete( \"Guaranteed through 30 September 2013. Please use the overload without the DBConnection parameter.\" ) ]" );
-			writer.WriteLine( "public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
-			                  getOldMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
-			writer.WriteLine( "return GetRows" + postSelectFromClause.name + "( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value )
-			                                                                         .ToArray() ) + " );" );
-			writer.WriteLine( "}" );
 		}
 
-		private static string getQueryCacheName( RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
-		                                         RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause,
-		                                         bool getFieldName ) {
+		private static string getQueryCacheName(
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Query query,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause, bool getFieldName ) {
 			return ( getFieldName ? "rows" : "Rows" ) + postSelectFromClause.name +
 			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any() ? "Queries" : "Query" );
-		}
-
-		// NOTE: Delete this after 30 September 2013.
-		private static string getOldMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
-			var methodParams = "DBConnection cn";
-			foreach( var param in DataAccessStatics.GetNamedParamList( info, commandText ) )
-				methodParams += ", " + "object " + param;
-			return methodParams;
 		}
 	}
 }

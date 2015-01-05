@@ -8,28 +8,29 @@ using RedStapler.StandardLibrary.WebSessionState;
 // Parameter: string returnUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
-	public partial class Page: EwfPage {
+	partial class Page: EwfPage {
 		partial class Info {
-			public override string PageName { get { return ""; } }
+			public override string ResourceName { get { return ""; } }
 		}
 
 		private string emailText;
 
 		protected override void loadData() {
-			var dm = new DataModification();
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 
 			ph.AddControlsReturnThis(
-				FormItem.Create( "You may report any problems, make suggestions, or ask for help here.",
-				                 new EwfTextBox( "" ) { Rows = 20 },
-				                 validationGetter:
-					                 control =>
-					                 new Validation(
-						                 ( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ), dm ) )
-				        .ToControl() );
+				FormItem.Create(
+					"You may report any problems, make suggestions, or ask for help here.",
+					new EwfTextBox( "", rows: 20 ),
+					validationGetter:
+						control =>
+						new Validation(
+							( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ),
+							pb ) ).ToControl() );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Send", new PostBackButton( dm, () => EhRedirect( new ExternalPageInfo( info.ReturnUrl ) ) ) ) );
+			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Send", new PostBackButton( pb ) ) );
 
-			dm.AddModificationMethod( modifyData );
+			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {

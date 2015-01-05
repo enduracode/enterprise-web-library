@@ -4,4 +4,3 @@ If they aren't part of a subsystem, they should go in the root of EnterpriseWebF
 All new classes in EWF should have a namespace of RedStapler.StandardLibrary.EnterpriseWebFramework, regardless of what folder they are in.
 
 For example, we want all user management classes to be in the same folder instead of split into Controls and non-Controls.
-Also, the Controls/Tables folder should be in the root of EWF.

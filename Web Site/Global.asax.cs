@@ -27,8 +27,8 @@ namespace EnterpriseWebLibrary.WebSite {
 			}
 		}
 
-		protected override List<CssInfo> GetStyleSheets() {
-			return new List<CssInfo> { new Test.Info() };
+		protected override List<ResourceInfo> GetStyleSheets() {
+			return new List<ResourceInfo> { new Test.Info() };
 		}
 	}
 }

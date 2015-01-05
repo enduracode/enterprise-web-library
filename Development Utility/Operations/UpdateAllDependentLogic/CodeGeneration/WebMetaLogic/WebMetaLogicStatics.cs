@@ -12,8 +12,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			generateCodeForWebItemsInFolder( writer, webProjectPath, "", configuration );
 		}
 
-		private static void generateCodeForWebItemsInFolder( TextWriter writer, string webProjectPath, string folderPathRelativeToProject,
-		                                                     WebProject webProjectConfiguration ) {
+		private static void generateCodeForWebItemsInFolder(
+			TextWriter writer, string webProjectPath, string folderPathRelativeToProject, WebProject webProjectConfiguration ) {
 			var folderPath = StandardLibraryMethods.CombinePaths( webProjectPath, folderPathRelativeToProject );
 
 			// Generate code for the entity setup if one exists in this folder.
@@ -33,10 +33,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			// Generate code for pages and user controls in the current folder.
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.aspx" ) ) {
-				// NOTE: This is a hack. What we really need to do is not generate code for pages that don't inherit from EwfPage.
-				if( fileName == "Kiosk.aspx" )
-					continue;
-
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
 				new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
 			}
@@ -57,9 +53,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				generateCodeForWebItemsInFolder( writer, webProjectPath, Path.Combine( folderPathRelativeToProject, subFolderName ), webProjectConfiguration );
 		}
 
-		internal static void WriteCreateInfoFromQueryStringMethod( TextWriter writer, List<VariableSpecification> requiredParameters,
-		                                                           List<VariableSpecification> optionalParameters, string methodNamePrefix,
-		                                                           string infoConstructorArgPrefix ) {
+		internal static void WriteCreateInfoFromQueryStringMethod(
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
+			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromQueryString() {" );
 
 			writer.WriteLine( "try {" );
@@ -68,14 +64,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			// Create a local variable for all query parameters to hold their raw query value.
 			foreach( var parameter in allParameters ) {
 				// If a query parameter is not specified, Request.QueryString[it] returns null. If it is specified as blank (&it=), Request.QueryString[it] returns the empty string.
-				writer.WriteLine( "var " + getLocalQueryValueVariableName( parameter ) + " = HttpContext.Current.Request.QueryString[ \"" + parameter.PropertyName + "\" ];" );
+				writer.WriteLine(
+					"var " + getLocalQueryValueVariableName( parameter ) + " = HttpContext.Current.Request.QueryString[ \"" + parameter.PropertyName + "\" ];" );
 			}
 
 			// Enforce specification of all required parameters.
 			foreach( var parameter in requiredParameters ) {
 				// Blow up if a required parameter was not specified.
-				writer.WriteLine( "if( " + getLocalQueryValueVariableName( parameter ) +
-				                  " == null ) throw new ApplicationException( \"Required parameter not included in query string: " + parameter.Name + "\" );" );
+				writer.WriteLine(
+					"if( " + getLocalQueryValueVariableName( parameter ) + " == null ) throw new ApplicationException( \"Required parameter not included in query string: " +
+					parameter.Name + "\" );" );
 			}
 
 			// Build up the call to the info constructor.
@@ -88,8 +86,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "var optionalParameterPackage = new OptionalParameterPackage();" );
 				foreach( var parameter in optionalParameters ) {
 					// If the optional parameter was not specified, do not set its value (let it remain its default value).
-					writer.WriteLine( "if( " + getLocalQueryValueVariableName( parameter ) + " != null ) optionalParameterPackage." + parameter.PropertyName + " = " +
-					                  getChangeTypeExpression( parameter ) + ";" );
+					writer.WriteLine(
+						"if( " + getLocalQueryValueVariableName( parameter ) + " != null ) optionalParameterPackage." + parameter.PropertyName + " = " +
+						getChangeTypeExpression( parameter ) + ";" );
 				}
 			}
 
@@ -130,20 +129,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			return text;
 		}
 
-		internal static void WriteCreateInfoFromNewParameterValuesMethod( TextWriter writer, List<VariableSpecification> requiredParameters,
-		                                                                  List<VariableSpecification> optionalParameters, string methodNamePrefix,
-		                                                                  string infoConstructorArgPrefix ) {
+		internal static void WriteCreateInfoFromNewParameterValuesMethod(
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
+			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromNewParameterValues() {" );
-			writer.WriteLine( "return new Info( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        infoConstructorArgPrefix,
-			                                                        InfoStatics.GetInfoConstructorArguments( requiredParameters,
-			                                                                                                 optionalParameters,
-			                                                                                                 parameter =>
-			                                                                                                 "parametersModification." + parameter.PropertyName,
-			                                                                                                 parameter =>
-			                                                                                                 "parametersModification." + parameter.PropertyName ) ) +
-			                  " );" );
+			writer.WriteLine(
+				"return new Info( " +
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					infoConstructorArgPrefix,
+					InfoStatics.GetInfoConstructorArguments(
+						requiredParameters,
+						optionalParameters,
+						parameter => "parametersModification." + parameter.PropertyName,
+						parameter => "parametersModification." + parameter.PropertyName ) ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web.Script.Serialization;
 using JetBrains.Annotations;
 
 namespace RedStapler.StandardLibrary {
@@ -276,15 +277,6 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static bool IsWhitespace( this string text ) {
 			return text.Trim().Length == 0;
-		}
-
-		/// <summary>
-		/// Returns o.ToString() unless o is null. In this case, returns either null (if nullToEmptyString is false) or the empty string (if nullToEmptyString is true).
-		/// </summary>
-		public static string ObjectToString( this object o, bool nullToEmptyString ) {
-			if( o != null )
-				return o.ToString();
-			return nullToEmptyString ? String.Empty : null;
 		}
 
 		/// <summary>
@@ -631,19 +623,18 @@ namespace RedStapler.StandardLibrary {
 			return (T)Enum.Parse( typeof( T ), s );
 		}
 
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToEnglishFromCamel( this string text ) {
-			return text.CamelToEnglish();
+		/// <summary>
+		/// Serializes the given object into json.
+		/// </summary>
+		public static string ToJson( this object o ) {
+			return new JavaScriptSerializer().Serialize( o );
 		}
 
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToCamelCase( this string text ) {
-			return text.EnglishToCamel();
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2013." ) ]
-		public static string ToPascalCase( this string text ) {
-			return text.EnglishToPascal();
+		/// <summary>
+		/// Converts the given json into the given type.
+		/// </summary>
+		public static T FromJson<T>( this string json ) {
+			return new JavaScriptSerializer().Deserialize<T>( json );
 		}
 	}
 }
