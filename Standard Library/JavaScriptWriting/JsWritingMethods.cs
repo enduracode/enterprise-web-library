@@ -1,5 +1,6 @@
 using System;
 using System.Web.UI;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary.JavaScriptWriting {
 	/// <summary>
@@ -94,17 +95,18 @@ namespace RedStapler.StandardLibrary.JavaScriptWriting {
 		/// Returns a script that can be used to open a pop up window with the specified url and settings.
 		/// </summary>
 		public static string GetPopUpWindowScript( string url, Control urlResolver, PopUpWindowSettings settings ) {
-			Func<bool, string> toOptionBool = b => b ? "yes" : "no";
+			Func<bool, string> boolToYesNo = b => b ? "yes" : "no";
 			return
-				@"var popUpWindow = window.open('{0}','{1}','scrollbars={2},resizable={3},status=no,width={4},height={5},toolbar={6},location={7}'); popUpWindow.focus();".FormatWith(
-					urlResolver.GetClientUrl( url ),
-					settings.Name,
-					toOptionBool( settings.ShowsScrollBarsWhenNecessary ),
-					toOptionBool( settings.Resizable ),
-					settings.Width,
-					settings.Height,
-					toOptionBool( settings.ToolBar ),
-					toOptionBool( settings.Location ) );
+				"var popUpWindow = window.open( '{0}', '{1}', 'width={2},height={3},toolbar={4},location={5},status=no,resizable={6},scrollbars={7}' ); popUpWindow.focus();"
+					.FormatWith(
+						urlResolver.GetClientUrl( url ),
+						settings.Name,
+						settings.Width,
+						settings.Height,
+						boolToYesNo( settings.ShowsNavigationToolbar ),
+						boolToYesNo( settings.ShowsLocationBar ),
+						boolToYesNo( settings.IsResizable ),
+						boolToYesNo( settings.ShowsScrollBarsWhenNecessary ) );
 		}
 	}
 }
