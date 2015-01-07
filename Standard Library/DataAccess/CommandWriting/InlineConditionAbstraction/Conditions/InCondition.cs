@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 
 		public bool Equals( InlineDbCommandCondition other ) {
 			var otherInCondition = other as InCondition;
-			return other != null && columnName == otherInCondition.columnName && subQuery == otherInCondition.subQuery;
+			return otherInCondition != null && columnName == otherInCondition.columnName && subQuery == otherInCondition.subQuery;
 		}
 
 		public override int GetHashCode() {

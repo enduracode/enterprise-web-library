@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using Aspose.Pdf.Facades;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -16,14 +16,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private const string providerName = "BlobFileManagement";
 		private static SystemBlobFileManagementProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemBlobFileManagementProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemBlobFileManagementProvider;
 		}
 
 		internal static SystemBlobFileManagementProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}
@@ -50,8 +50,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Pass null for acceptableFileExtensions if there is no restriction on file extension.
 		/// PerformAdditionalImageValidation cannot be null but may be an empty delegate.
 		/// </summary>
-		public static void ValidateUploadedFile( Validator validator, EwfFileUpload uploadedFile, string[] acceptableFileExtensions,
-		                                         Action<Validator, System.Drawing.Image> performAdditionalImageValidation, bool mustBeRenderableImage ) {
+		public static void ValidateUploadedFile(
+			Validator validator, EwfFileUpload uploadedFile, string[] acceptableFileExtensions, Action<Validator, System.Drawing.Image> performAdditionalImageValidation,
+			bool mustBeRenderableImage ) {
 			var file = uploadedFile.GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			if( file == null )
 				return;
@@ -96,17 +97,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Returns null if the file is null, the file is not an image, or there is no thumbnail page info creator.
+		/// Returns null if the file is null, the file is not an image, or there is no thumbnail resource info creator.
 		/// </summary>
-		internal static Control GetThumbnailControl( BlobFile file, Func<decimal, PageInfo> thumbnailPageInfoCreator ) {
+		internal static Control GetThumbnailControl( BlobFile file, Func<decimal, ResourceInfo> thumbnailResourceInfoCreator ) {
 			// NOTE: We'd like to check here whether the file is a renderable image or not. But we can't because we don't have the file contents.
 			// So, we'll have to make sure that all ThumbnailPageInfoCreators provide a page that knows how to handle NEF files (ideally we'd want
 			// it to behave as if there was no thumbnail at all if there is an unrenderable image file).
 			// The only alternative to this that I can think of is creating a new file table field called "IsRenderable" that we store when
 			// we first save the image.
-			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailPageInfoCreator == null )
+			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailResourceInfoCreator == null )
 				return null;
-			return new EwfImage( thumbnailPageInfoCreator( file.FileId ).GetUrl() ) { SizesToAvailableWidth = true };
+			return new EwfImage( thumbnailResourceInfoCreator( file.FileId ).GetUrl() ) { SizesToAvailableWidth = true };
 		}
 
 		// NOTE: Use this from blob file manager, etc.
@@ -120,10 +121,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var file = GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhModifyDataAndSendFile( FileCreator.CreateFromFileCollection( fileCollectionId ) ),
-			                           new TextActionControlStyle( labelOverride ?? file.FileName ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter:
+							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ),
+					new TextActionControlStyle( labelOverride ?? file.FileName ),
+					false );
 		}
 
 		/// <summary>
@@ -136,10 +141,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var file = SystemProvider.GetFile( fileId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return new PostBackButton( new DataModification(),
-			                           () => EwfPage.Instance.EhModifyDataAndSendFile( new FileCreator( fileId ) ),
-			                           new TextActionControlStyle( labelOverride ?? file.FileName ),
-			                           false );
+			return
+				new PostBackButton(
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ),
+					new TextActionControlStyle( labelOverride ?? file.FileName ),
+					false );
 		}
 
 		/// <summary>

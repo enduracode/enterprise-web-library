@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.DataAccess {
 	public class DataAccessState {
@@ -57,11 +57,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		/// </summary>
 		public DBConnection PrimaryDatabaseConnection {
 			get {
-				// This can be removed after EWF [web] applications stop unconditionally grabbing the primary database connection.
-				if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && !AppTools.DatabaseExists )
-					return null;
-
-				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( AppTools.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
+				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
 			}
 		}
 
@@ -71,8 +67,11 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
 			DBConnection connection;
 			secondaryConnectionsByName.TryGetValue( databaseName, out connection );
-			if( connection == null )
-				secondaryConnectionsByName.Add( databaseName, connection = new DBConnection( AppTools.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
+			if( connection == null ) {
+				secondaryConnectionsByName.Add(
+					databaseName,
+					connection = new DBConnection( ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
+			}
 			return initConnection( connection );
 		}
 
@@ -87,7 +86,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		public T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 			if( !cacheEnabled )
 				return valueCreator();
-			return (T)cache.GetOrAddValue( key, () => valueCreator() );
+			return (T)cache.GetOrAdd( key, () => valueCreator() );
 		}
 
 		/// <summary>
@@ -108,9 +107,25 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 		}
 
+		/// <summary>
+		/// Executes the specified method with the cache enabled. Supports nested calls by leaving the cache alone if it is already enabled. Do not modify data in
+		/// the method; this could cause a stale cache and lead to data integrity problems!
+		/// </summary>
+		public T ExecuteWithCache<T>( Func<T> method ) {
+			if( cacheEnabled )
+				return method();
+			ResetCache();
+			try {
+				return method();
+			}
+			finally {
+				DisableCache();
+			}
+		}
+
 		internal void ResetCache() {
 			cacheEnabled = true;
-			cache = new Cache<string, object>();
+			cache = new Cache<string, object>( false );
 		}
 
 		internal void DisableCache() {

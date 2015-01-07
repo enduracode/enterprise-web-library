@@ -2,6 +2,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using RedStapler.StandardLibrary.DatabaseSpecification;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
@@ -58,29 +59,46 @@ namespace RedStapler.StandardLibrary.DataAccess {
 				if( errorNumber.HasValue ) {
 					// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
 					// NOTE: We may want to use a different type of exception. It's important that this gets displayed in the GUI for standby web apps.
-					if( errorNumber == 3906 && Configuration.Machine.MachineConfiguration.GetIsStandbyServer() )
-						return new EwfException( "You cannot make changes to standby versions of a system." );
+					if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
+						return new DataModificationException( "You cannot make changes to standby versions of a system." );
 
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
-					if( errorNumber.Value == 4060 )
-						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
+					if( errorNumber.Value == 6005 )
+						customMessage = "Failed to connect to SQL Server because the service is in the process of shutting down.";
 
-					// -2 is the code for a timeout. See http://blog.colinmackay.net/archive/2007/06/23/65.aspx.
+					// -2 is the code for a timeout.
 					if( errorNumber.Value == -2 )
 						customMessage = "Failed to connect to SQL Server because of a connection timeout.";
+
+					if( errorNumber.Value == 258 ) {
+						customMessage =
+							"Failed to connect to SQL Server because of a connection timeout. SQL Server may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+					}
+
+					if( errorNumber.Value == 4060 )
+						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
 
 					// We also handle this error at the command level.
 					if( errorNumber.Value == 233 ) {
 						customMessage =
 							"The connection with the server has probably been severed. This likely happened because we did not disable connection pooling and a connection was taken from the pool that was no longer valid.";
 					}
+
+					if( !customMessage.Any() )
+						generalMessage += " Error number: {0}.".FormatWith( errorNumber.Value );
 				}
 			}
 
 			if( databaseInfo is MySqlInfo ) {
 				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
+				if( innerException.Message.Contains( "ERROR 2013" ) ) {
+					customMessage =
+						"Failed to connect to MySQL. MySQL may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
+				}
+				if( innerException.Message.Contains( "Timeout expired" ) )
+					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
 
 			if( databaseInfo is OracleInfo ) {
@@ -103,7 +121,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					customMessage = "Failed to connect to Oracle because of a connection timeout. Check the Oracle configuration on the machine and in this system.";
 				if( new[] { "ORA-01017", "ORA-1017" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage = "Failed to connect to Oracle as " + ( databaseInfo as OracleInfo ).UserAndSchema + ". You may need to execute an Update Data operation.";
-				if( innerException.Message.Contains( "ORA-03114" ) ) {
+				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) ) {
 					customMessage =
 						"Failed to connect to Oracle or connection to Oracle was lost. This should not happen often and may be caused by a bug in the data access components or the database.";
 				}

@@ -1,6 +1,6 @@
 syntax: glob
 
-Enterprise Web Library.suo
+Enterprise Web Library.v12.suo
 packages/
 _ReSharper*
 Enterprise Web Library.sln.DotSettings.user

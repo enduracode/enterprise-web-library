@@ -11,8 +11,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return new UserManagement.LogIn.Info( returnUrl );
 		}
 
-		PageInfo AppMetaLogicFactory.CreateGetFilePageInfo() {
-			return new GetFile.Info();
+		PageInfo AppMetaLogicFactory.CreatePreBuiltResponsePageInfo() {
+			return new PreBuiltResponse.Info();
 		}
 
 		PageInfo AppMetaLogicFactory.CreateAccessDeniedErrorPageInfo( bool showHomeLink ) {
@@ -35,12 +35,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return Admin.BasicTests.GetInfo();
 		}
 
-		IEnumerable<CssInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
-			var infos = new List<CssInfo>();
-			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1103Custom.Css.Custom_theme.Jquery_ui_1103Custommin.Info() );
-			infos.Add( new ThirdParty.Select2.Select2_340.Select2.Info() );
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
+			var infos = new List<ResourceInfo>();
+			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104Custommin.Info() );
+			infos.Add( new ThirdParty.Select2.Select2_343.Select2.Info() );
 			infos.Add( new ThirdParty.TimePicker.Styles.Info() );
-			infos.Add( new ThirdParty.Qtip2.Jqueryqtipmin.Info() );
 			infos.Add( new Styles.Basic.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
 				infos.Add( new Styles.EwfUi.Colors.Info() );
@@ -57,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return infos;
 		}
 
-		IEnumerable<CssInfo> AppMetaLogicFactory.GetPrintMediaCssInfos() {
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetPrintMediaCssInfos() {
 			return new Styles.Print.Info().ToSingleElementArray();
 		}
 	}

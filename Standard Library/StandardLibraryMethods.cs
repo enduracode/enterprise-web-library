@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
-using Microsoft.Web.Administration;
+using Humanizer;
+using ImageResizer;
 using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {
@@ -14,11 +16,6 @@ namespace RedStapler.StandardLibrary {
 	/// A collection of miscellaneous static methods that may be useful in different projects.
 	/// </summary>
 	public static class StandardLibraryMethods {
-		/// <summary>
-		/// Standard Library and RSIS use only.
-		/// </summary>
-		public const string ProvidersFolderAndNamespaceName = "Providers";
-
 		/// <summary>
 		/// Standard Library and Development Utility use only.
 		/// </summary>
@@ -271,18 +268,6 @@ namespace RedStapler.StandardLibrary {
 			}
 		}
 
-		internal static object GetSystemLibraryProvider( Type systemLogicType, string providerName ) {
-			var systemLibraryAssembly = systemLogicType.Assembly;
-			var typeName = systemLogicType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
-			return systemLibraryAssembly.GetType( typeName ) != null ? systemLibraryAssembly.CreateInstance( typeName ) : null;
-		}
-
-		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
-			return
-				new ApplicationException( providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-				                          ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
-		}
-
 		/// <summary>
 		/// Gets a valid C# identifier from the specified string.
 		/// </summary>
@@ -351,29 +336,6 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Standard Library and RSIS use only.
-		/// </summary>
-		public static void ConfigureIis() {
-			// Overlapping commitment of changes to server manager do not end well.
-			AppTools.ExecuteAsCriticalRegion( "{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
-			                                  false,
-			                                  delegate {
-				                                  using( var serverManager = new ServerManager() ) {
-					                                  var config = serverManager.GetApplicationHostConfiguration();
-
-					                                  var modulesSection = config.GetSection( "system.webServer/modules", "" );
-					                                  foreach( var element in modulesSection.GetCollection() )
-						                                  element.SetMetadata( "lockItem", null );
-
-					                                  var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-					                                  serverRuntimeSection.OverrideMode = OverrideMode.Allow;
-
-					                                  serverManager.CommitChanges();
-				                                  }
-			                                  } );
-		}
-
-		/// <summary>
 		/// Returns true if the specified objects are equal according to the default equality comparer.
 		/// </summary>
 		public static bool AreEqual<T>( T x, T y ) {
@@ -389,15 +351,42 @@ namespace RedStapler.StandardLibrary {
 
 		internal static void SendHealthCheckEmail( string appFullName ) {
 			var message = new EmailMessage();
-			message.ToAddresses.AddRange( AppTools.DeveloperEmailAddresses );
+			message.ToAddresses.AddRange( EmailStatics.GetDeveloperEmailAddresses() );
 
-			var bytesFreeOnCDrive = new DriveInfo( "c" ).TotalFreeSpace;
+			var body = new StringBuilder();
 			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
-			var freeSpaceIsLow = bytesFreeOnCDrive < tenGibibytes;
+			var freeSpaceIsLow = false;
+			foreach( var driveInfo in DriveInfo.GetDrives().Where( d => d.DriveType == DriveType.Fixed ) ) {
+				var bytesFree = driveInfo.TotalFreeSpace;
+				freeSpaceIsLow = freeSpaceIsLow || bytesFree < tenGibibytes;
+				body.AppendLine( "{0} free on {1} drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFree ), driveInfo.Name ) );
+			}
 
 			message.Subject = StringTools.ConcatenateWithDelimiter( " ", "Health check", freeSpaceIsLow ? "and WARNING" : "", "from " + appFullName );
-			message.BodyHtml = ( "{0} free on C drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFreeOnCDrive ) ) ).GetTextAsEncodedHtml();
+			message.BodyHtml = body.ToString().GetTextAsEncodedHtml();
 			AppTools.SendEmailWithDefaultFromAddress( message );
+		}
+
+		/// <summary>
+		/// Shrinks the specified image down to the specified width, preserving the aspect ratio.
+		/// </summary>
+		/// <param name="image"></param>
+		/// <param name="newWidth">The new width of the image.</param>
+		/// <param name="newHeight">The new height of the image. If you specify this, the image may be cropped in one of the dimensions in order to keep the new
+		/// width and height as close as possible to the values you specify without stretching the image.</param>
+		public static byte[] ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
+			using( var fromStream = new MemoryStream( image ) ) {
+				using( var toStream = new MemoryStream() ) {
+					ImageBuilder.Current.Build(
+						new ImageJob(
+							fromStream,
+							toStream,
+							newHeight.HasValue ? new Instructions { Width = newWidth, Height = newHeight, Mode = FitMode.Crop } : new Instructions { Width = newWidth },
+							false,
+							false ) );
+					return toStream.ToArray();
+				}
+			}
 		}
 	}
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using Humanizer;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -71,11 +71,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "", preventAutoComplete: true )
-				{
-					AutoPostBack = autoPostBack
-				};
-			Controls.Add( textBox );
+			textBox = new EwfTextBox(
+				value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "",
+				disableBrowserAutoComplete: true,
+				autoPostBack: autoPostBack );
+			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
 			min = DateTime.MinValue;
 			max = DateTime.MaxValue;
@@ -92,6 +92,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}
 
+		private WebControl getIconButton() {
+			var parent = new HtmlGenericControl( "span" );
+			parent.Attributes[ "class" ] = "fa-stack datetimepickerIcon";
+			var iconCal = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-calendar-o fa-stack-2x" ) };
+			var iconTime = new LiteralControl
+				{
+					Text = @"<i class=""{0}"" style=""{1}""></i>".FormatWith( "fa fa-clock-o fa-stack-1x", "position:relative; top: .20em" )
+				};
+			parent.AddControlsReturnThis( iconCal, iconTime );
+
+			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( parent ) );
+			return new CustomButton( () => "$( '#{0}' ).datetimepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) )
+				{
+					ActionControlStyle = style,
+					CssClass = "icon"
+				};
+		}
+
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return "$( '#" + textBox.TextBoxClientId + "' ).datetimepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
 			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ), timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
@@ -104,25 +122,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Validates the date and returns the nullable date.
 		/// </summary>
-		public DateTime? ValidateAndGetNullablePostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
-		                                                     bool allowEmpty ) {
-			return validator.GetNullableDateTime( errorHandler,
-			                                      textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                                      DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
-			                                      allowEmpty,
-			                                      min,
-			                                      max );
+		public DateTime? ValidateAndGetNullablePostBackDate(
+			PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
+			return validator.GetNullableDateTime(
+				errorHandler,
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
+				allowEmpty,
+				min,
+				max );
 		}
 
 		/// <summary>
 		/// Validates the date and returns the date.
 		/// </summary>
 		public DateTime ValidateAndGetPostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
-			return validator.GetDateTime( errorHandler,
-			                              textBox.GetPostBackValue( postBackValues ).ToUpper(),
-			                              DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
-			                              min,
-			                              max );
+			return validator.GetDateTime(
+				errorHandler,
+				textBox.GetPostBackValue( postBackValues ).ToUpper(),
+				DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
+				min,
+				max );
 		}
 
 		/// <summary>

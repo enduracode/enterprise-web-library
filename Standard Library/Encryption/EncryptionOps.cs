@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.Encryption {
 	/// <summary>
@@ -12,14 +13,14 @@ namespace RedStapler.StandardLibrary.Encryption {
 		private const string providerName = "Encryption";
 		private static SystemEncryptionProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemEncryptionProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemEncryptionProvider;
 		}
 
 		internal static SystemEncryptionProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}

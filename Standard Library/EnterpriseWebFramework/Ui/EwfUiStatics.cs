@@ -25,8 +25,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		public static AppEwfUiProvider AppProvider {
 			get {
 				if( provider == null ) {
-					throw new ApplicationException( providerName + " provider not found in application. To implement, create a class named " + providerName +
-					                                @"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
+					throw new ApplicationException(
+						providerName + " provider not found in application. To implement, create a class named " + providerName +
+						@"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
 				}
 				return provider;
 			}
@@ -36,19 +37,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		/// EwfUiMaster use only. Returns the tab mode, or null for no tabs. NOTE: Doesn't return null for no tabs yet.
 		/// </summary>
 		public static TabMode? GetTabMode( this EntitySetupInfo esInfo ) {
-			var modeOverrider = esInfo as TabModeOverrider;
-			if( modeOverrider == null )
-				return TabMode.Vertical;
-			var mode = modeOverrider.GetTabMode();
+			var mode = ( (EwfUiEntitySetupInfo)esInfo ).GetTabMode();
 			if( mode == TabMode.Automatic )
-				return ( esInfo.Pages.Count == 1 && esInfo.Pages.Single().Pages.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
+				return ( esInfo.Resources.Count == 1 && esInfo.Resources.Single().Resources.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
 			return mode;
 		}
 
 		/// <summary>
 		/// Gets the current EWF UI master page. Standard Library use only.
 		/// </summary>
-		public static AppEwfUiMasterPage AppMasterPage { get { return EwfPage.Instance.Master.Master != null ? getSecondLevelMaster( EwfPage.Instance.Master ) as AppEwfUiMasterPage : null; } }
+		public static AppEwfUiMasterPage AppMasterPage {
+			get { return EwfPage.Instance.Master.Master != null ? getSecondLevelMaster( EwfPage.Instance.Master ) as AppEwfUiMasterPage : null; }
+		}
 
 		private static MasterPage getSecondLevelMaster( MasterPage master ) {
 			return master.Master.Master == null ? master : getSecondLevelMaster( master.Master );

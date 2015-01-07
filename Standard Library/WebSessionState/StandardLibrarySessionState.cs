@@ -2,17 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.WebFileSending;
 
 namespace RedStapler.StandardLibrary.WebSessionState {
 	/// <summary>
 	/// Contains and allows access to all data stored in ASP.NET session state.
+	/// Do NOT add anything new to this class since we no longer support session state. See Deliberate Omissions: https://enduracode.fogbugz.com/default.asp?W6.
+	/// When we're ready to remove this class, we should also disable session state in the Web.config file, although we might want to provide a way for individual
+	/// systems to keep it enabled if necessary.
 	/// </summary>
 	public class StandardLibrarySessionState {
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
-		private string clientSideRedirectUrl = "";
-		private int? clientSideRedirectDelay;
-		private FileToBeSent fileToDownload;
+		private string clientSideNavigationUrl = "";
+		private bool clientSideNavigationInNewWindow;
+		private int? clientSideNavigationDelay;
+
+		/// <summary>
+		/// EWF use only.
+		/// </summary>
+		public FullResponse ResponseToSend { get; set; }
+
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		private StandardLibrarySessionState() {}
@@ -33,40 +41,32 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		/// <summary>
 		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen as soon as the page is finished loading.
 		/// </summary>
-		public void SetInstantClientSideRedirect( string url ) {
-			clientSideRedirectUrl = url;
-			clientSideRedirectDelay = null;
+		public void SetInstantClientSideNavigation( string url ) {
+			SetClientSideNavigation( url, false, null );
 		}
 
 		/// <summary>
 		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen the specified number of seconds after the page is
 		/// finished loading.
 		/// </summary>
-		public void SetTimedClientSideRedirect( string url, int numberOfSeconds ) {
-			clientSideRedirectUrl = url;
-			clientSideRedirectDelay = numberOfSeconds;
+		public void SetTimedClientSideNavigation( string url, int numberOfSeconds ) {
+			SetClientSideNavigation( url, false, numberOfSeconds );
 		}
 
-		internal void GetClientSideRedirectUrlAndDelay( out string url, out int? numberOfSeconds ) {
-			url = clientSideRedirectUrl;
-			numberOfSeconds = clientSideRedirectDelay;
+		internal void SetClientSideNavigation( string url, bool navigateInNewWindow, int? delayInSeconds ) {
+			clientSideNavigationUrl = url;
+			clientSideNavigationInNewWindow = navigateInNewWindow;
+			clientSideNavigationDelay = delayInSeconds;
 		}
 
-		internal void ClearClientSideRedirectUrlAndDelay() {
-			clientSideRedirectUrl = "";
-			clientSideRedirectDelay = null;
+		internal void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow, out int? delayInSeconds ) {
+			url = clientSideNavigationUrl;
+			navigateInNewWindow = clientSideNavigationInNewWindow;
+			delayInSeconds = clientSideNavigationDelay;
 		}
 
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		public FileToBeSent FileToBeDownloaded {
-			get { return fileToDownload; }
-			set {
-				// It's important that we set the fileToDownload first, because creating GetFile's info object will result in a call to the getter of this property.
-				fileToDownload = value;
-				SetInstantClientSideRedirect( EwfApp.MetaLogicFactory.CreateGetFilePageInfo().GetUrl() );
-			}
+		internal void ClearClientSideNavigation() {
+			clientSideNavigationUrl = "";
 		}
 
 		/// <summary>

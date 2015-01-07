@@ -36,6 +36,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onblur, "ApplyTimeSpanFormat(this)" );
 			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onkeypress, "return NumericalOnly(event, this)" );
 			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onfocus, "this.value = this.value.replace(':',''); this.select()" );
+			durationPicker.AddJavaScriptEventScript( JsWritingMethods.onmouseup, "return false" );
 			durationPicker.ToolTip = "hours:minutes";
 			base.Controls.Add( durationPicker );
 		}

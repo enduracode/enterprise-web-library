@@ -51,7 +51,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				panel.Style.Add( HtmlTextWriterStyle.MarginLeft, "2em" );
 				panel.Controls.Add( buildTree( child.NodeName, child.Rows ) );
 
-				table.AddRow( new EwfTableCell( panel ) { FieldSpan = 2 } );
+				table.AddRow( panel.ToCell( new TableCellSetup( fieldSpan: 2 ) ) );
 			}
 
 			return table;

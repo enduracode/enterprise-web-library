@@ -1,4 +1,3 @@
-using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
@@ -12,12 +11,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			// NOTE: The attributes need to have a value...
 			ph.AddControlsReturnThis( new FancyFileManager( "first one!", "a" ) );
-			var dataModification = new DataModification( firstTopValidationMethod: ( pbv, v ) => v.NoteErrorAndAddMessage( "error" ) );
-			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "woo",
-			                                                             formItems:
-				                                                             new FormItem[] { FormItem.Create( "Files", new FancyFileManager( "second one!", "" ) ) } ) );
+			var postBack = PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => v.NoteErrorAndAddMessage( "error" ) );
+			ph.AddControlsReturnThis(
+				FormItemBlock.CreateFormItemTable( heading: "woo", formItems: new FormItem[] { FormItem.Create( "Files", new FancyFileManager( "second one!", "" ) ) } ) );
 
-			ph.AddControlsReturnThis( new PostBackButton( dataModification, () => { } ) );
+			ph.AddControlsReturnThis( new PostBackButton( postBack ) );
 		}
 	}
 }
