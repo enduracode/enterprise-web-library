@@ -211,7 +211,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			AppRequestState.AddNonTransactionalModificationMethod(
 				() =>
 				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( name, value ) { Path = NetTools.GetAppCookiePath(), Secure = EwfConfigurationStatics.AppSupportsSecureConnections, HttpOnly = true } ) );
+					new HttpCookie( name, value ) { Path = CookieStatics.GetAppCookiePath(), Secure = EwfConfigurationStatics.AppSupportsSecureConnections, HttpOnly = true } ) );
 		}
 
 		private static string[] verifyTestCookie() {
@@ -276,7 +276,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			AppRequestState.AddNonTransactionalModificationMethod(
 				() =>
 				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( FormsAuthCookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
+					new HttpCookie( FormsAuthCookieName ) { Path = CookieStatics.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
 		}
 
 		internal static string FormsAuthCookieName { get { return "User"; } }

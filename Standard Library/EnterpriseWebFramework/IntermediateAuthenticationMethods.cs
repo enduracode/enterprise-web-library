@@ -20,20 +20,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static void SetCookie() {
 			// The intermediate user cookie is secure to make it harder for unauthorized users to access intermediate installations, which often are placed on the
 			// Internet with no additional security.
-			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName, cookieValue )
-				{
-					Path = NetTools.GetAppCookiePath(),
-					Secure = true,
-					Expires = DateTime.Now.AddMonths( 1 ),
-					HttpOnly = true
-				} );
+			HttpContext.Current.Response.Cookies.Add(
+				new HttpCookie( cookieName, cookieValue ) { Path = CookieStatics.GetAppCookiePath(), Secure = true, Expires = DateTime.Now.AddMonths( 1 ), HttpOnly = true } );
 		}
 
 		/// <summary>
 		/// Clears the intermediate user cookie.
 		/// </summary>
 		public static void ClearCookie() {
-			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } );
+			HttpContext.Current.Response.Cookies.Add( new HttpCookie( cookieName ) { Path = CookieStatics.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } );
 		}
 	}
 }

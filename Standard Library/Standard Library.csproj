@@ -192,6 +192,7 @@
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\CookieStatics.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
