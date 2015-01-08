@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ConfigurationStatics.ProvidersFolderAndNamespaceName ) );
 			if( !includeDatabaseUpdates )
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
-			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, DevelopmentInstallationLogic.SystemDevelopmentConfigurationFileName ) );
+			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
 			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
 			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
 

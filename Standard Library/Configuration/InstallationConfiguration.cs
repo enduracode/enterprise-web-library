@@ -19,6 +19,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public const string ConfigurationFolderName = "Configuration";
 
 		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public const string SystemDevelopmentConfigurationFileName = "Development.xml";
+
+		/// <summary>
 		/// Red Stapler Information System use only.
 		/// </summary>
 		public const string InstallationConfigurationFolderName = "Installation";
@@ -63,10 +68,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private readonly string installationPath;
 		private readonly string configurationFolderPath;
 		private readonly SystemGeneralConfiguration systemGeneralConfiguration;
+		private readonly SystemDevelopment.SystemDevelopmentConfiguration systemDevelopmentConfiguration;
 		private readonly InstallationStandardConfiguration installationStandardConfiguration;
 		private readonly IEnumerable<WebApplication> webApplications;
 		private readonly string installationCustomConfigurationFilePath;
-		private readonly bool isDevelopmentInstallation;
 
 		/// <summary>
 		/// Creates a new installation configuration.
@@ -84,18 +89,21 @@ namespace RedStapler.StandardLibrary.Configuration {
 					ConfigurationFolderName );
 
 
-			// Do not perform schema validation for non-development installations because the schema files won't be available on non-development machines. For
-			// development installations, also do not perform schema validation since the schema files on disk may not match this version of the Standard Library.
-			// This can happen, for example, when you are trying to run a system using the released or last built version of the library at the same time that you
-			// are making changes to one of the schema files.
-			//
-			// Another reason to not perform schema validation for development installations is that we may create sample solutions and send them to tech support
-			// people for troubleshooting. These people may not have the Standard Library solution in the right location on their machines, or they may not have it at
-			// all. In either of these cases we would not have access to the schema files.
+			// Do not perform schema validation for non-development installations because the schema files may not be available. For development installations, also
+			// do not perform schema validation since the schema files may not match this version of the library. This can happen, for example, when you are trying to
+			// run a system using an unreleased version of the library that contains schema changes.
 
 			// system general configuration
 			var systemGeneralConfigurationFilePath = StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, "General.xml" );
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
+
+			// system development configuration
+			if( isDevelopmentInstallation ) {
+				systemDevelopmentConfiguration =
+					XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
+						StandardLibraryMethods.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
+						false );
+			}
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
 				                                          ? StandardLibraryMethods.CombinePaths(
@@ -133,8 +141,6 @@ namespace RedStapler.StandardLibrary.Configuration {
 
 			// installation custom configuration
 			installationCustomConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
-
-			this.isDevelopmentInstallation = isDevelopmentInstallation;
 		}
 
 		/// <summary>
@@ -288,6 +294,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 				return isLive ? InstallationType.Live : InstallationType.Intermediate;
 			}
 		}
+
+		private bool isDevelopmentInstallation { get { return systemDevelopmentConfiguration != null; } }
+
+		public SystemDevelopment.SystemDevelopmentConfiguration SystemDevelopmentConfiguration { get { return systemDevelopmentConfiguration; } }
 
 		internal LiveInstallationConfiguration LiveInstallationConfiguration {
 			get { return (LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }
