@@ -126,17 +126,23 @@ namespace RedStapler.StandardLibrary.Configuration {
 			                  let supportsSecureConnections = systemElement.SupportsSecureConnections
 			                  select
 				                  isDevelopmentInstallation
-					                  ? new WebApplication( name, supportsSecureConnections, installationPath, SystemShortName, systemWebApplicationElements.Skip( 1 ).Any() )
+					                  ? new WebApplication(
+						                    name,
+						                    supportsSecureConnections,
+						                    installationPath,
+						                    SystemShortName,
+						                    systemWebApplicationElements.Skip( 1 ).Any(),
+						                    systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
 					                  : InstallationType == InstallationType.Live
 						                    ? new WebApplication(
 							                      name,
 							                      supportsSecureConnections,
 							                      machineIsStandbyServer,
-							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == systemElement.Name ) )
+							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
 						                    : new WebApplication(
 							                      name,
 							                      supportsSecureConnections,
-							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == systemElement.Name ) );
+							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) );
 			webApplications = webApplications.ToArray();
 
 			// installation custom configuration
@@ -207,9 +213,6 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// Gets the short name of the installation.
 		/// </summary>
 		public string InstallationShortName { get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; } }
-
-
-		internal bool SaveCookiesAtRoot { get { return installationStandardConfiguration.SaveCookiesAtRoot; } }
 
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 
