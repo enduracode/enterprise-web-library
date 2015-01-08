@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using Humanizer;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -71,10 +71,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() : "",
-			                          disableBrowserAutoComplete: true,
-			                          postBack: postBack,
-			                          autoPostBack: autoPostBack );
+			textBox = new EwfTextBox(
+				value.HasValue ? value.Value.ToMonthDayYearString() : "",
+				disableBrowserAutoComplete: true,
+				postBack: postBack,
+				autoPostBack: autoPostBack );
 
 			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
@@ -94,7 +95,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "icon-calendar" ) };
+			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-calendar datepickerIcon" ) };
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
 			return new CustomButton( () => "$( '#{0}' ).datepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}
@@ -111,8 +112,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Validates the date and returns the nullable date.
 		/// </summary>
-		public DateTime? ValidateAndGetNullablePostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
-		                                                     bool allowEmpty ) {
+		public DateTime? ValidateAndGetNullablePostBackDate(
+			PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
 			var date = validator.GetNullableDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, allowEmpty, min, max );
 			if( errorHandler.LastResult == ErrorCondition.NoError && date.HasTime() )
 				validator.NoteErrorAndAddMessage( "Time information is not allowed." );

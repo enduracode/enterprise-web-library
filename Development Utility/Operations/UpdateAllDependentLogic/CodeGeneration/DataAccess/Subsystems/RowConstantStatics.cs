@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
@@ -12,8 +13,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 	internal static class RowConstantStatics {
 		private const string dictionaryName = "valuesAndNames";
 
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-		                               RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static void Generate(
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.rowConstantTables == null )
 				return;
 
@@ -25,22 +27,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var names = new List<string>();
 				try {
 					var columns = new TableColumns( cn, table.tableName, false );
-					valueColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
-					var nameColumn = columns.AllColumns.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
+					valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
+					var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
-					var cmd = new InlineSelect( "SELECT " + valueColumn.Name + ", " + nameColumn.Name + " FROM " + table.tableName,
-					                            orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
-					cmd.Execute( cn,
-					             reader => {
-						             while( reader.Read() ) {
-							             var valueString = reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) ? "null" : reader[ valueColumn.Name ].ToString();
-							             if( valueColumn.DataTypeName == typeof( string ).ToString() )
-								             values.Add( "\"" + valueString + "\"" );
-							             else
-								             values.Add( valueString );
-							             names.Add( reader[ nameColumn.Name ].ToString() );
-						             }
-					             } );
+					var cmd = new InlineSelect(
+						new[] { valueColumn.Name, nameColumn.Name },
+						"FROM " + table.tableName,
+						false,
+						orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
+					cmd.Execute(
+						cn,
+						reader => {
+							while( reader.Read() ) {
+								if( reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) )
+									values.Add( valueColumn.NullValueExpression.Any() ? valueColumn.NullValueExpression : "null" );
+								else {
+									var valueString = valueColumn.ConvertIncomingValue( reader[ valueColumn.Name ] ).ToString();
+									values.Add( valueColumn.DataTypeName == typeof( string ).ToString() ? "\"{0}\"".FormatWith( valueString ) : valueString );
+								}
+								names.Add( nameColumn.ConvertIncomingValue( reader[ nameColumn.Name ] ).ToString() );
+							}
+						} );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException(
@@ -55,6 +62,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// constants
 				for( var i = 0; i < values.Count; i++ ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
+					// It's important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
 					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
 				}
 
@@ -103,16 +111,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeGetValuesToNamesMethod( TextWriter writer, string valueTypeName ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Returns a list of key value pairs where the key is the value of the row constant and the value is the name of the row constant." );
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Returns a list of key value pairs where the key is the value of the row constant and the value is the name of the row constant." );
 			writer.WriteLine( "public static ICollection<KeyValuePair<" + valueTypeName + ", string>> GetValuesToNames() {" );
 			writer.WriteLine( "return valuesAndNames.GetAllPairs();" );
 			writer.WriteLine( "}" ); // method
 		}
 
 		private static void writeFillListControlMethod( TextWriter writer, Column valueColumn ) {
-			writer.WriteLine( "public static IEnumerable<EwfListItem<" + valueColumn.NullableDataTypeName + ">> GetListItems() {" );
-			writer.WriteLine( "return from i in valuesAndNames.GetAllPairs() select EwfListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
+			writer.WriteLine( "public static IEnumerable<SelectListItem<" + valueColumn.NullableDataTypeName + ">> GetListItems() {" );
+			writer.WriteLine( "return from i in valuesAndNames.GetAllPairs() select SelectListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
 			writer.WriteLine( "}" );
 		}
 	}

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
+using System.Web.Script.Serialization;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -350,7 +350,11 @@ namespace RedStapler.StandardLibrary {
 		/// For example, "This 'quoted text'.".RemoveTextBetweenStrings( "'", "'" ) returns "This ''.";
 		/// </summary>
 		public static string RemoveTextBetweenStrings( this string s, string beginString, string endString ) {
-			return Regex.Replace( s, getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ), beginString + endString, RegexOptions.Multiline );
+			return Regex.Replace(
+				s,
+				getRegexSafeString( beginString ) + @"(.*?\s*)*" + getRegexSafeString( endString ),
+				beginString + endString,
+				RegexOptions.Multiline );
 		}
 
 		private static string getRegexSafeString( string s ) {
@@ -469,14 +473,6 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static bool EqualsIgnoreCaseAndWhitespace( this string s, string otherString ) {
 			return s.Trim().EqualsIgnoreCase( otherString.Trim() );
-		}
-
-		/// <summary>
-		/// Allows for extension method syntax for string.Format.
-		/// </summary>
-		[ StringFormatMethod( "s" ) ]
-		public static string FormatWith( this string s, params object[] objects ) {
-			return String.Format( s, objects );
 		}
 
 		/// <summary>
@@ -620,6 +616,20 @@ namespace RedStapler.StandardLibrary {
 		/// C# doesn't allow constraining the value to an Enum
 		public static T ToEnum<T>( this string s ) {
 			return (T)Enum.Parse( typeof( T ), s );
+		}
+
+		/// <summary>
+		/// Serializes the given object into json.
+		/// </summary>
+		public static string ToJson( this object o ) {
+			return new JavaScriptSerializer().Serialize( o );
+		}
+
+		/// <summary>
+		/// Converts the given json into the given type.
+		/// </summary>
+		public static T FromJson<T>( this string json ) {
+			return new JavaScriptSerializer().Deserialize<T>( json );
 		}
 	}
 }

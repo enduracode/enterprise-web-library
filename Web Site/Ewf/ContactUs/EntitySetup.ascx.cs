@@ -4,14 +4,14 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
-	public partial class EntitySetup: UserControl, EntityDisplaySetup {
+	partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
-			protected override PageInfo createParentPageInfo() {
+			protected override ResourceInfo createParentResourceInfo() {
 				return null;
 			}
 
-			protected override List<PageGroup> createPageInfos() {
-				return new List<PageGroup>();
+			protected override List<ResourceGroup> createResourceInfos() {
+				return new List<ResourceGroup>();
 			}
 
 			public override string EntitySetupName { get { return "Contact Us"; } }

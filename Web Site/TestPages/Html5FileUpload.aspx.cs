@@ -12,9 +12,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			// NOTE: The attributes need to have a value...
 			ph.AddControlsReturnThis( new FancyFileManager( "first one!", "a" ) );
 			var postBack = PostBack.CreateFull( firstTopValidationMethod: ( pbv, v ) => v.NoteErrorAndAddMessage( "error" ) );
-			ph.AddControlsReturnThis( FormItemBlock.CreateFormItemTable( heading: "woo",
-			                                                             formItems:
-				                                                             new FormItem[] { FormItem.Create( "Files", new FancyFileManager( "second one!", "" ) ) } ) );
+			ph.AddControlsReturnThis(
+				FormItemBlock.CreateFormItemTable( heading: "woo", formItems: new FormItem[] { FormItem.Create( "Files", new FancyFileManager( "second one!", "" ) ) } ) );
 
 			ph.AddControlsReturnThis( new PostBackButton( postBack ) );
 		}

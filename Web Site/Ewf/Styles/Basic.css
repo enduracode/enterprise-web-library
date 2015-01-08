@@ -133,8 +133,11 @@ ewfDatePicker, ewfTimePicker {
 ewfDateAndTimePicker {
 	max-width: 15em;
 }
-.icon-calendar {
+.datepickerIcon, .timepickerIcon {
 	font-size: 1.4em;
+}
+.datetimepickerIcon {
+	font-size: .8em
 }
 
 /* action controls */
@@ -234,6 +237,8 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 
 /* EwfPage and master page */
 div.ewfNonLiveWarning {
+	position: relative;
+	z-index: 9999;
 	margin-bottom: 4px;
 	border: solid #464646 1px;
 	background-color: Red;
@@ -242,12 +247,6 @@ div.ewfNonLiveWarning {
 	color: White;
 	font-size: 1.2em;
 	font-weight: bold;
-}
-ewfClickBlockingBlock {
-	z-index: 10000;
-}
-ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
-	z-index: 10001;
 }
 ewfClickBlockingBlock, ewfProcessingDialogBlock {
 	display: none;
@@ -258,10 +257,14 @@ ewfClickBlockingBlock {
 	right: 0;
 	bottom: 0;
 	left: 0;
+	z-index: 10000;
 	background-color: Gray;
 	opacity: 0.3;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
-	filter: alpha(opacity=30);
+	filter: alpha( opacity=30 );
+}
+ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
+	z-index: 10001;
 }
 ewfProcessingDialogBlock {
 	position: fixed;

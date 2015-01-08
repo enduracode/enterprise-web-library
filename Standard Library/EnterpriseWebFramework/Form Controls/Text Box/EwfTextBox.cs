@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -33,14 +34,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
-	public class EwfTextBox: WebControl, ControlTreeDataLoader, INamingContainer, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
 		internal static void AddTextareaValue( Control textarea, string value ) {
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
 			// does in their System.Web.UI.WebControls.TextBox implementation.
 			textarea.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( Environment.NewLine + value ) } );
 		}
 
-		private int rows;
+		private readonly int rows;
 		private readonly bool masksCharacters;
 		private int? maxLength;
 		private readonly bool readOnly;
@@ -49,7 +50,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly FormValue<string> formValue;
 		private PostBack postBack;
 		private readonly bool autoPostBack;
-		private PageInfo autoCompleteService;
+		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
 		private string watermarkText = "";
 
@@ -67,9 +68,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		internal string TextBoxClientId { get { return textBox.ClientID; } }
 
-		[ Obsolete( "Guaranteed through 31 January 2014. Please specify via constructor." ) ]
-		public int MaxCharacters { get { return maxLength ?? 0; } set { maxLength = value; } }
-
 		/// <summary>
 		/// Creates a text box.
 		/// </summary>
@@ -79,14 +77,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </param>
 		/// <param name="maxLength">The maximum number of characters that can be entered in this text box.</param>
 		/// <param name="readOnly">Pass true to prevent the contents of the text box from being changed.</param>
-		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
+		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered. Keep in mind that there is
+		/// currently an "arms race" taking place over forms auto-complete. Banks and other "high-security" organizations keep looking for ways to disable
+		/// auto-complete on their login forms while browsers and password managers are always trying to preserve this functionality for their users. Because of
+		/// this war, it's possible that your request to disable auto-complete will be ignored. See http://stackoverflow.com/a/23234498/35349 for more information.
+		/// </param>
 		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox does spell check multi-line text
 		/// boxes. Setting this parameter to a value will set the spellcheck attribute on the text box to enable/disable spell checking, if the user agent supports
 		/// it.</param>
 		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the text box or selects an auto-complete item.</param>
 		/// <param name="autoPostBack">Pass true to cause an automatic post-back when the text box loses focus.</param>
-		public EwfTextBox( string value, int rows = 1, bool masksCharacters = false, int? maxLength = null, bool readOnly = false,
-		                   bool disableBrowserAutoComplete = false, bool? suggestSpellCheck = null, PostBack postBack = null, bool autoPostBack = false ) {
+		public EwfTextBox(
+			string value, int rows = 1, bool masksCharacters = false, int? maxLength = null, bool readOnly = false, bool disableBrowserAutoComplete = false,
+			bool? suggestSpellCheck = null, PostBack postBack = null, bool autoPostBack = false ) {
 			this.rows = rows;
 			this.masksCharacters = masksCharacters;
 			this.maxLength = maxLength;
@@ -96,25 +99,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			if( value == null )
 				throw new ApplicationException( "You cannot create a text box with a null value. Please use the empty string instead." );
-			formValue = new FormValue<string>( () => value,
-			                                   () => this.IsOnPage() ? UniqueID : "",
-			                                   v => v,
-			                                   rawValue =>
-			                                   rawValue != null
-				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
-				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
+			formValue = new FormValue<string>(
+				() => value,
+				() => this.IsOnPage() ? UniqueID : "",
+				v => v,
+				rawValue =>
+				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.postBack = postBack;
 			this.autoPostBack = autoPostBack;
 		}
 
-		[ Obsolete( "Guaranteed through 31 January 2014. Please specify via constructor." ) ]
-		public int Rows { get { return rows; } set { rows = value; } }
-
 		/// <summary>
 		/// Sets this text box up for AJAX auto-complete.
 		/// </summary>
-		public void SetupAutoComplete( PageInfo service, AutoCompleteOption option ) {
+		public void SetupAutoComplete( ResourceInfo service, AutoCompleteOption option ) {
 			autoCompleteService = service;
 			autoCompleteOption = option;
 		}
@@ -164,27 +163,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( watermarkText.Any() ) {
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onfocus, "if( value == '" + watermarkText + "' ) value = ''" );
 				textBox.AddJavaScriptEventScript( JsWritingMethods.onblur, "if( value == '' ) value = '" + watermarkText + "'" );
-				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(),
-				                                                         UniqueID + "watermark",
-				                                                         "$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText +
-				                                                         "'; } ).val( '' )" );
+				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
+					GetType(),
+					UniqueID + "watermark",
+					"$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText + "'; } ).val( '' )" );
 			}
 
-			var postBackOnEnter = postBack != null || autoPostBack ||
-			                      ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
+			var jsNeededForImplicitSubmission = postBack != null || autoPostBack ||
+			                                    ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
 			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
 				postBack = EwfPage.Instance.DataUpdatePostBack;
 
-			if( postBack != null ) {
+			if( postBack != null )
 				EwfPage.Instance.AddPostBack( postBack );
+			PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
+
+			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
 				PreRender += delegate {
-					if( postBackOnEnter )
-						PostBackButton.MakeControlPostBackOnEnter( this, postBack );
-					if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
-						// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
-						textBox.AddJavaScriptEventScript( JsWritingMethods.onchange,
-						                                  "setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
-					}
+					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
+					textBox.AddJavaScriptEventScript(
+						JsWritingMethods.onchange,
+						"setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
 				};
 			}
 
@@ -213,14 +212,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteService.GetUrl() + "'" ) );
 
 				if( autoCompleteOption != AutoCompleteOption.NoPostBack ) {
-					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( textBox.ClientID,
-					                                                                                               PostBackButton.GetPostBackScript( postBack ) );
+					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith(
+						textBox.ClientID,
+						PostBackButton.GetPostBackScript( postBack ) );
 					autocompleteOptions.Add( Tuple.Create( "select", handler ) );
 				}
 
-				script.Append( @"$( '#" + textBox.ClientID +
-				               "' ).autocomplete( {{ {0} }} );".FormatWith(
-					               autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
+				script.Append(
+					@"$( '#" + textBox.ClientID +
+					"' ).autocomplete( {{ {0} }} );".FormatWith(
+						autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
 			}
 
 			return script.ToString();

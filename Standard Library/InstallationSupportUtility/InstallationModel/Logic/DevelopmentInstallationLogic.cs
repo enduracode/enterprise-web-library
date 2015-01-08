@@ -13,8 +13,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		private readonly DatabaseAbstraction.Database database;
 		private readonly List<DatabaseAbstraction.Database> databasesForCodeGeneration;
 
-		public DevelopmentInstallationLogic( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
-		                                     RecognizedInstallationLogic recognizedInstallationLogic ) {
+		public DevelopmentInstallationLogic(
+			GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
+			RecognizedInstallationLogic recognizedInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 
@@ -26,22 +27,22 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 					false );
 
 			database = recognizedInstallationLogic != null
-			           	? recognizedInstallationLogic.Database
-			           	: DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo, new List<string>() );
+				           ? recognizedInstallationLogic.Database
+				           : DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo, new List<string>() );
 
 			databasesForCodeGeneration = new List<DatabaseAbstraction.Database>();
 			if( developmentConfiguration.database != null )
 				DatabasesForCodeGeneration.Add( database );
 			if( developmentConfiguration.secondaryDatabases != null ) {
 				foreach( var secondaryDatabaseInDevelopmentConfiguration in developmentConfiguration.secondaryDatabases ) {
-					DatabasesForCodeGeneration.Add( ( recognizedInstallationLogic != null
-					                                  	? recognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
-					                                  		sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name )
-					                                  	: null ) ??
-					                                DatabaseAbstraction.DatabaseOps.CreateDatabase(
-					                                	this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo(
-					                                		secondaryDatabaseInDevelopmentConfiguration.name ),
-					                                	new List<string>() ) );
+					DatabasesForCodeGeneration.Add(
+						( recognizedInstallationLogic != null
+							  ? recognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
+								  sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name )
+							  : null ) ??
+						DatabaseAbstraction.DatabaseOps.CreateDatabase(
+							this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseInDevelopmentConfiguration.name ),
+							new List<string>() ) );
 				}
 			}
 		}

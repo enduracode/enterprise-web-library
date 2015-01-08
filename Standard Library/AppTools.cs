@@ -1,21 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.ServiceModel;
 using System.Threading;
 using System.Web;
+using Humanizer;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Configuration.Machine;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.Encryption;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -23,23 +21,7 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static partial class AppTools {
 		private static bool initialized;
-		internal static string AppName { get; private set; }
-		private static bool isClientSideProgram;
-		private static MachineConfiguration machineConfiguration;
-		private static Assembly appAssembly;
-		internal static InstallationConfiguration InstallationConfiguration { get; private set; }
-		private static SystemGeneralProvider provider;
 		private static bool secondaryInitFailed;
-
-		/// <summary>
-		/// RSIS use only. The path to the machine configuration XML file.
-		/// </summary>
-		public static readonly string MachineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
-
-		/// <summary>
-		/// Gets the path of the Red Stapler folder on the machine.
-		/// </summary>
-		public static string RedStaplerFolderPath { get { return Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler"; } }
 
 		/// <summary>
 		/// Initializes the class. This includes loading application settings from the configuration file. The application name should be scoped within the system.
@@ -60,113 +42,52 @@ namespace RedStapler.StandardLibrary {
 				if( initialized )
 					throw new ApplicationException( "This class can only be initialized once." );
 
-				AppName = appName;
-				AppTools.isClientSideProgram = isClientSideProgram;
-
-				initializationLog += Environment.NewLine + "About to load machine config";
-
-				// Load machine configuration.
-				if( File.Exists( MachineConfigXmlFilePath ) ) {
-					// Do not perform schema validation since the schema file won't be available on non-development machines.
-					machineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( MachineConfigXmlFilePath, false );
-				}
-
-				initializationLog += Environment.NewLine + "About to determine installation path";
-
-				// Determine the installation path and load configuration information.
-				string installationPath;
-				bool isDevelopmentInstallation;
-				if( isWebApp() ) {
-					initializationLog += Environment.NewLine + "Is a web app";
-
-					// Assume the first assembly up the call stack that is not this assembly is the web application assembly.
-					var stackFrames = new StackTrace().GetFrames();
-					if( stackFrames == null )
-						throw new ApplicationException( "No stack trace available." );
-					appAssembly = stackFrames.Select( frame => frame.GetMethod().DeclaringType.Assembly ).First( assembly => assembly != Assembly.GetExecutingAssembly() );
-
-					initializationLog += Environment.NewLine + "Stack trace loaded, about to create installation path";
-
-					installationPath = StandardLibraryMethods.CombinePaths( HttpRuntime.AppDomainAppPath, ".." );
-					isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
-				}
-				else {
-					initializationLog += Environment.NewLine + "Is not a web app";
-
-					// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation.
-					// We use the assembly folder path here so we're not relying on the working directory of the application.
-					// Installed executables are one level below the installation folder.
-					appAssembly = Assembly.GetCallingAssembly();
-					var assemblyFolderPath = Path.GetDirectoryName( appAssembly.Location );
-					installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, ".." );
-					isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
-					if( isDevelopmentInstallation )
-						installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, "..", "..", ".." ); // Visual Studio puts executables inside bin\Debug.
-				}
-				initializationLog += Environment.NewLine + "Successfully determined installation path";
-				InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
-				initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
-
 				if( systemLogic == null )
 					throw new ApplicationException( "The system must have a global logic class and you must pass an instance of it to AppTools.Init." );
 
-				// Initialize the provider before the exception handling block below because it's reasonable for the exception handling to depend on this provider.
-				provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogic.GetType(), "General" ) as SystemGeneralProvider;
-				if( provider == null )
-					throw new ApplicationException( "General provider not found in system" );
+				// Initialize ConfigurationStatics, including the general provider, before the exception handling block below because it's reasonable for the exception
+				// handling to depend on this.
+				ConfigurationStatics.Init( systemLogic.GetType(), appName, isClientSideProgram, ref initializationLog );
 
+				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
+				initialized = true;
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";
-
-				try {
-					// Setting the initialized flag to true must be done first so the exception handling works.
-					initialized = true;
-
-					var asposeLicense = provider.AsposeLicenseName;
-					if( asposeLicense.Any() ) {
-						new Aspose.Pdf.License().SetLicense( asposeLicense );
-						new Aspose.Words.License().SetLicense( asposeLicense );
-						new Aspose.Cells.License().SetLicense( asposeLicense );
-					}
-
-					// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
-					BlobFileOps.Init( systemLogic.GetType() );
-					DataAccessStatics.Init( systemLogic.GetType() );
-					DataAccessState.Init( mainDataAccessStateGetter );
-					EncryptionOps.Init( systemLogic.GetType() );
-					HtmlBlockStatics.Init( systemLogic.GetType() );
-					InstallationSupportUtility.ConfigurationLogic.Init( systemLogic.GetType() );
-					UserManagementStatics.Init( systemLogic.GetType() );
-
-					systemLogic.InitSystem();
-
-					initializationLog += Environment.NewLine + "Succeeded in secondary init.";
-				}
-				catch( Exception e ) {
-					// NOTE: For web apps, non web apps that are being run non-interactively, and maybe all other apps too, we should suppress all exceptions from here
-					// since they will only result in events being logged or error dialogs appearing, and neither of these is really helpful to us. We may also want to
-					// suppress exceptions from the catch block in ExecuteAppWithStandardExceptionHandling.
-					secondaryInitFailed = true;
-					EmailAndLogError( "An exception occurred during application initialization:", e );
-				}
 			}
 			catch( Exception e ) {
 				initializationLog += Environment.NewLine + e;
 				StandardLibraryMethods.EmergencyLog( "Initialization log", initializationLog );
 				throw;
 			}
-		}
 
-		/// <summary>
-		/// Loads installation-specific custom configuration information.
-		/// </summary>
-		public static T LoadInstallationCustomConfiguration<T>() {
-			assertClassInitialized();
+			try {
+				var asposeLicense = ConfigurationStatics.SystemGeneralProvider.AsposeLicenseName;
+				if( asposeLicense.Any() ) {
+					new Aspose.Pdf.License().SetLicense( asposeLicense );
+					new Aspose.Words.License().SetLicense( asposeLicense );
+				}
 
-			// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not
-			// perform schema validation for development installations because we may create sample solutions and send them to tech support people for
-			// troubleshooting, and these people may not put the solution in the proper location on disk. In this case we would not have access to the schema since
-			// we use absolute paths in the XML files to refer to the schema files.
-			return XmlOps.DeserializeFromFile<T>( InstallationConfiguration.InstallationCustomConfigurationFilePath, false );
+				// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
+				AppMemoryCache.Init();
+				BlobFileOps.Init();
+				DataAccessStatics.Init();
+				DataAccessState.Init( mainDataAccessStateGetter );
+				EncryptionOps.Init();
+				HtmlBlockStatics.Init();
+				InstallationSupportUtility.ConfigurationLogic.Init1();
+				UserManagementStatics.Init();
+
+				systemLogic.InitSystem();
+			}
+			catch( Exception e ) {
+				secondaryInitFailed = true;
+
+				// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
+				// automatically restart themselves. Other apps could find this knowledge useful as well.
+				try {
+					EmailAndLogError( "An exception occurred during application initialization:", e );
+				}
+				catch {}
+			}
 		}
 
 		internal static bool SecondaryInitFailed {
@@ -177,12 +98,16 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Standard Library and ISU use only.
+		/// Performs cleanup activities so the application can be shut down.
 		/// </summary>
-		public static MachineConfiguration MachineConfiguration {
-			get {
-				assertClassInitialized();
-				return machineConfiguration;
+		public static void CleanUp() {
+			assertClassInitialized();
+
+			try {
+				AppMemoryCache.CleanUp();
+			}
+			catch( Exception e ) {
+				EmailAndLogError( "An exception occurred during application cleanup:", e );
 			}
 		}
 
@@ -192,14 +117,14 @@ namespace RedStapler.StandardLibrary {
 		public static string SystemName {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.SystemName;
+				return ConfigurationStatics.InstallationConfiguration.SystemName;
 			}
 		}
 
 		internal static bool IsDevelopmentInstallation {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.InstallationType == InstallationType.Development;
+				return ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development;
 			}
 		}
 
@@ -209,7 +134,7 @@ namespace RedStapler.StandardLibrary {
 		public static bool IsIntermediateInstallation {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.InstallationType == InstallationType.Intermediate;
+				return ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Intermediate;
 			}
 		}
 
@@ -220,24 +145,14 @@ namespace RedStapler.StandardLibrary {
 		public static bool IsLiveInstallation {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.InstallationType == InstallationType.Live;
-			}
-		}
-
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		public static SystemGeneralProvider SystemProvider {
-			get {
-				assertClassInitialized();
-				return provider;
+				return ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live;
 			}
 		}
 
 		internal static bool DatabaseExists {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.PrimaryDatabaseInfo != null;
+				return ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo != null;
 			}
 		}
 
@@ -281,7 +196,7 @@ namespace RedStapler.StandardLibrary {
 					sw.WriteLine();
 				}
 
-				if( isWebApp() ) {
+				if( NetTools.IsWebApp() ) {
 					// This check ensures that there is an actual request, which is not the case during application initialization.
 					if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
 						sw.WriteLine( "URL: " + EwfApp.Instance.RequestState.Url );
@@ -310,8 +225,8 @@ namespace RedStapler.StandardLibrary {
 					}
 				}
 				else {
-					sw.WriteLine( "Program: " + AppName );
-					sw.WriteLine( "Version: " + appAssembly.GetName().Version );
+					sw.WriteLine( "Program: " + ConfigurationStatics.AppName );
+					sw.WriteLine( "Version: " + ConfigurationStatics.AppAssembly.GetName().Version );
 					sw.WriteLine( "Machine: " + StandardLibraryMethods.GetLocalHostName() );
 				}
 
@@ -326,10 +241,10 @@ namespace RedStapler.StandardLibrary {
 			assertClassInitialized();
 
 			var m = new EmailMessage();
-			foreach( var developer in InstallationConfiguration.Developers )
+			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
 				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + InstallationConfiguration.FullName;
-			if( isClientSideProgram )
+			m.Subject = "Error in " + ConfigurationStatics.InstallationConfiguration.SystemName;
+			if( ConfigurationStatics.IsClientSideProgram )
 				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
 			m.BodyHtml = body.GetTextAsEncodedHtml();
 			SendEmailWithDefaultFromAddress( m );
@@ -342,9 +257,9 @@ namespace RedStapler.StandardLibrary {
 			assertClassInitialized();
 
 			var m = new EmailMessage();
-			foreach( var developer in InstallationConfiguration.Developers )
+			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
 				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Warning: {0} - {1}".FormatWith( subject, InstallationConfiguration.FullName );
+			m.Subject = "Warning: {0} - {1}".FormatWith( subject, ConfigurationStatics.InstallationConfiguration.FullName );
 			m.BodyHtml = body.GetTextAsEncodedHtml();
 			SendEmailWithDefaultFromAddress( m );
 		}
@@ -356,20 +271,16 @@ namespace RedStapler.StandardLibrary {
 		public static void SendEmailWithDefaultFromAddress( EmailMessage m ) {
 			assertClassInitialized();
 
-			m.From = new EmailAddress( provider.EmailDefaultFromAddress, provider.EmailDefaultFromName );
-			SendEmail( m );
+			m.From = new EmailAddress(
+				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
+				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
+			EmailStatics.SendEmail( m );
 		}
 
-		/// <summary>
-		/// Sends the specified mail message using the SMTP server specified in the config file.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.SendEmail instead." ) ]
 		public static void SendEmail( EmailMessage message ) {
 			assertClassInitialized();
-			EmailStatics.SendEmail( InstallationConfiguration, message );
-		}
-
-		private static bool isWebApp() {
-			return HttpContext.Current != null;
+			EmailStatics.SendEmail( message );
 		}
 
 		/// <summary>
@@ -505,13 +416,11 @@ namespace RedStapler.StandardLibrary {
 			return chrono.Elapsed;
 		}
 
-		/// <summary>
-		/// A list of developer email addresses.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.GetDeveloperEmailAddresses instead." ) ]
 		public static List<EmailAddress> DeveloperEmailAddresses {
 			get {
 				assertClassInitialized();
-				return EmailStatics.GetDeveloperEmailAddresses( InstallationConfiguration ).ToList();
+				return EmailStatics.GetDeveloperEmailAddresses().ToList();
 			}
 		}
 
@@ -522,7 +431,9 @@ namespace RedStapler.StandardLibrary {
 			get {
 				assertClassInitialized();
 				// NOTE: Why is Administrator a different type than Developer?
-				return InstallationConfiguration.Administrators.Select( administrator => new EmailAddress( administrator.EmailAddress, administrator.Name ) ).ToList();
+				return
+					ConfigurationStatics.InstallationConfiguration.Administrators.Select( administrator => new EmailAddress( administrator.EmailAddress, administrator.Name ) )
+						.ToList();
 			}
 		}
 
@@ -532,7 +443,7 @@ namespace RedStapler.StandardLibrary {
 			assertClassInitialized();
 
 			lock( key ) {
-				using( var writer = new StreamWriter( File.Open( InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) ) ) {
+				using( var writer = new StreamWriter( File.Open( ConfigurationStatics.InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) ) ) {
 					writer.WriteLine( DateTime.Now + ":" );
 					writer.WriteLine();
 					writer.Write( errorText );
@@ -545,7 +456,7 @@ namespace RedStapler.StandardLibrary {
 		internal static string CertificateEmailAddressOverride {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.CertificateEmailAddressOverride;
+				return ConfigurationStatics.InstallationConfiguration.CertificateEmailAddressOverride;
 			}
 		}
 
@@ -557,8 +468,9 @@ namespace RedStapler.StandardLibrary {
 				assertClassInitialized();
 				return
 					StandardLibraryMethods.CombinePaths(
-						InstallationFileStatics.GetGeneralFilesFolderPath( InstallationConfiguration.InstallationPath,
-						                                                   InstallationConfiguration.InstallationType == InstallationType.Development ),
+						InstallationFileStatics.GetGeneralFilesFolderPath(
+							ConfigurationStatics.InstallationConfiguration.InstallationPath,
+							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development ),
 						InstallationFileStatics.FilesFolderName );
 			}
 		}
@@ -569,7 +481,7 @@ namespace RedStapler.StandardLibrary {
 		public static string InstallationPath {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.InstallationPath;
+				return ConfigurationStatics.InstallationConfiguration.InstallationPath;
 			}
 		}
 
@@ -579,7 +491,18 @@ namespace RedStapler.StandardLibrary {
 		public static string ConfigurationFolderPath {
 			get {
 				assertClassInitialized();
-				return InstallationConfiguration.ConfigurationFolderPath;
+				return ConfigurationStatics.InstallationConfiguration.ConfigurationFolderPath;
+			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get {
+				return ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
+					       ? StandardLibraryMethods.GetProjectOutputFolderPath( true )
+					       : "";
 			}
 		}
 

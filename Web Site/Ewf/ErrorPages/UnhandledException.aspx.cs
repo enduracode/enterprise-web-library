@@ -1,9 +1,9 @@
- // Parameter: string dummy
+// Parameter: string dummy
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
-	public partial class UnhandledException: EwfPage {
+	partial class UnhandledException: EwfPage {
 		partial class Info {
-			protected override bool IsIntermediateInstallationPublicPage { get { return true; } }
+			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
 			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.MatchingCurrentRequest; } }
 		}
 

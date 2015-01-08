@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 		private static string getSectionString( WebProject webProject ) {
 			var sections = File.ReadAllText( StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
 
-			sections = sections.Replace( "@@SessionTimeout", ( (int)UserManagementStatics.SessionDuration.TotalMinutes ).ToString() );
+			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
 			sections = sections.Replace( "@@CertificateAuthenticationModulePlace",

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using Selenium;
 
@@ -63,7 +64,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			var baseUrl = "https://integration.redstapler.biz/";
 
 			if( AppTools.IsDevelopmentInstallation ) {
-				if( AppTools.InstallationConfiguration.WebApplications.Any( wa => wa.SupportsSecureConnections ) )
+				if( ConfigurationStatics.InstallationConfiguration.WebApplications.Any( wa => wa.SupportsSecureConnections ) )
 					baseUrl = "https://localhost/";
 				else
 					baseUrl = "http://localhost/";
@@ -74,32 +75,34 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			selenium.Start();
 
 			if( AppTools.IsIntermediateInstallation ) {
-				executeSeleniumBlock( "Intermediate log on",
-				                      delegate {
-				                      	// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
-				                      	selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
-				                      	// NOTE: Does not work for MIT Calendar, etc.
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", AppTools.SystemProvider.IntermediateLogInPassword );
-				                      	// NOTE: Move g8Summit to machine configuration file.
-				                      	SubmitForm( selenium );
-				                      	selenium.WaitForPageToLoad( "30000" );
-				                      } );
+				executeSeleniumBlock(
+					"Intermediate log on",
+					delegate {
+						// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
+						selenium.Open( "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
+						// NOTE: Does not work for MIT Calendar, etc.
+						selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword );
+						// NOTE: Move g8Summit to machine configuration file.
+						SubmitForm( selenium );
+						selenium.WaitForPageToLoad( "30000" );
+					} );
 			}
-			if( UserManagementStatics.UserManagementEnabled && UserManagementStatics.SystemProvider is FormsAuthCapableUserManagementProvider ) {
-				executeSeleniumBlock( "Forms log on",
-				                      delegate {
-				                      	// NOTE: System-name approach suffers from same problem as above.
-				                      	selenium.Open( "/" + AppTools.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=" );
+			if( UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
+				executeSeleniumBlock(
+					"Forms log on",
+					delegate {
+						// NOTE: System-name approach suffers from same problem as above.
+						selenium.Open( "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=" );
 
-				                      	// NOTE: I don't think we need waits after opens.
-				                      	selenium.WaitForPageToLoad( "30000" );
-				                      	Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
-				                      	// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", AppTools.SystemProvider.FormsLogInEmail );
-				                      	selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", AppTools.SystemProvider.FormsLogInPassword );
-				                      	SubmitForm( selenium );
-				                      	selenium.WaitForPageToLoad( "30000" );
-				                      } );
+						// NOTE: I don't think we need waits after opens.
+						selenium.WaitForPageToLoad( "30000" );
+						Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
+						// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
+						selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInEmail );
+						selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInPassword );
+						SubmitForm( selenium );
+						selenium.WaitForPageToLoad( "30000" );
+					} );
 			}
 		}
 
@@ -114,17 +117,16 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 		/// This method runs the test, handles any errors and returns true if there is an error.
 		/// </summary>
 		private void executeTest( Type testClass ) {
-			executeSeleniumBlock( testClass.Name,
-			                      delegate {
-			                      	try {
-			                      		testClass.GetMethods().Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 ).Single().Invoke( null,
-			                      		                                                                                                                        new object[]
-			                      		                                                                                                                        	{ selenium } );
-			                      	}
-			                      	catch( TargetInvocationException e ) {
-			                      		throw e.InnerException;
-			                      	}
-			                      } );
+			executeSeleniumBlock(
+				testClass.Name,
+				delegate {
+					try {
+						testClass.GetMethods().Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 ).Single().Invoke( null, new object[] { selenium } );
+					}
+					catch( TargetInvocationException e ) {
+						throw e.InnerException;
+					}
+				} );
 		}
 
 		/// <summary>

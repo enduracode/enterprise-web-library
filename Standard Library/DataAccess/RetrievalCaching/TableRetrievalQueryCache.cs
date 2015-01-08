@@ -14,14 +14,14 @@ namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
 		public TableRetrievalQueryCache() {
-			cache = new Cache<InlineDbCommandCondition[], IEnumerable<RowType>>( comparer: new StructuralEqualityComparer<InlineDbCommandCondition[]>() );
+			cache = new Cache<InlineDbCommandCondition[], IEnumerable<RowType>>( false, comparer: new StructuralEqualityComparer<InlineDbCommandCondition[]>() );
 		}
 
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public IEnumerable<RowType> GetResultSet( IEnumerable<InlineDbCommandCondition> conditions,
-		                                          Func<IEnumerable<InlineDbCommandCondition>, IEnumerable<RowType>> resultSetCreator ) {
+		public IEnumerable<RowType> GetResultSet(
+			IEnumerable<InlineDbCommandCondition> conditions, Func<IEnumerable<InlineDbCommandCondition>, IEnumerable<RowType>> resultSetCreator ) {
 			var conditionArray = conditions.OrderBy( i => i ).ToArray();
-			return cache.GetOrAddValue( conditionArray, () => resultSetCreator( conditionArray ) );
+			return cache.GetOrAdd( conditionArray, () => resultSetCreator( conditionArray ) );
 		}
 	}
 }

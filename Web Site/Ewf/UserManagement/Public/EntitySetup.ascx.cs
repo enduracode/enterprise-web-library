@@ -7,14 +7,14 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 // Parameter: string destinationUrl
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public {
-	public partial class EntitySetup: UserControl, EntityDisplaySetup {
+	partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
-			protected override PageInfo createParentPageInfo() {
+			protected override ResourceInfo createParentResourceInfo() {
 				return null;
 			}
 
-			protected override List<PageGroup> createPageInfos() {
-				return new List<PageGroup>();
+			protected override List<ResourceGroup> createResourceInfos() {
+				return new List<ResourceGroup>();
 			}
 
 			public override string EntitySetupName { get { return "Confirm Password Reset"; } }
@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		void EntitySetupBase.LoadData() {}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
-			return new List<ActionButtonSetup> { new ActionButtonSetup( "Back", new EwfLink( new ExternalPageInfo( info.DestinationUrl ) ) ) };
+			return new List<ActionButtonSetup> { new ActionButtonSetup( "Back", new EwfLink( new ExternalResourceInfo( info.DestinationUrl ) ) ) };
 		}
 
 		public List<LookupBoxSetup> CreateLookupBoxSetups() {

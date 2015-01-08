@@ -8,7 +8,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 	/// A parameter for a database command.
 	/// </summary>
 	public class DbCommandParameter {
-		private string name;
+		private readonly string name;
 		private readonly DbParameterValue value;
 		private DbParameter parameter;
 
@@ -20,22 +20,11 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 			this.value = value;
 		}
 
-		internal string Name {
-			set {
-				if( parameter != null )
-					throw new ApplicationException( "Name cannot be set after the ADO.NET parameter object has been created." );
-				name = value;
-			}
-		}
-
 		/// <summary>
 		/// Returns true if the value of this parameter is null.
 		/// </summary>
 		internal bool ValueIsNull { get { return value.Value == null; } }
 
-		/// <summary>
-		/// Returns @abc for sql server and :abc for oracle.
-		/// </summary>
 		public string GetNameForCommandText( DatabaseInfo databaseInfo ) {
 			return databaseInfo.ParameterPrefix + name;
 		}
