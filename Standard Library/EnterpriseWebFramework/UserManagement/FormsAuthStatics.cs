@@ -211,7 +211,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			AppRequestState.AddNonTransactionalModificationMethod(
 				() =>
 				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( name, value ) { Path = NetTools.GetAppCookiePath(), Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } ) );
+					new HttpCookie( name, value ) { Path = NetTools.GetAppCookiePath(), Secure = EwfConfigurationStatics.AppSupportsSecureConnections, HttpOnly = true } ) );
 		}
 
 		private static string[] verifyTestCookie() {

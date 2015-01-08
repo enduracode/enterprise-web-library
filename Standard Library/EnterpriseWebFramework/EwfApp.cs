@@ -18,7 +18,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private static bool ewlInitialized;
 		private static bool initialized;
 		private static Timer initFailureUnloadTimer;
-		private static WebApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
@@ -79,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !AppTools.SecondaryInitFailed ) {
 				executeWithBasicExceptionHandling(
 					() => {
-						webAppConfiguration = ConfigurationStatics.InstallationConfiguration.WebApplications.Single( a => a.Name == ConfigurationStatics.AppName );
+						EwfConfigurationStatics.Init();
 
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
@@ -137,16 +136,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract void initializeWebApp();
 
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public static bool SupportsSecureConnections { get { return webAppConfiguration.SupportsSecureConnections || AppTools.IsIntermediateInstallation; } }
-
 		internal static string GetDefaultBaseUrl( bool secure ) {
 			if( BaseUrlOverrideGetter != null )
-				return BaseUrlOverrideGetter().CompleteWithDefaults( webAppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
+				return BaseUrlOverrideGetter().CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
 
-			return webAppConfiguration.DefaultBaseUrl.GetUrlString( secure );
+			return EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( secure );
 		}
 
 		private void handleBeginRequest( object sender, EventArgs e ) {
