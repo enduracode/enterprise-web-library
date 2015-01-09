@@ -48,7 +48,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Ensure that the domain and path of the cookie are in scope for both the request URL and resource URL. These two URLs can be different on shortcut URL
 			// requests, requests that transfer to the log-in page, etc.
-			var currentUrls = new[] { AppRequestState.Instance.Url, EwfPage.Instance.InfoAsBaseType.GetUrl() };
+			var currentUrls = new[] { AppRequestState.Instance.Url, EwfPage.Instance.InfoAsBaseType.GetUrl( false, false, true ) };
 			foreach( var url in currentUrls ) {
 				var uri = new Uri( url );
 				if( !( "." + uri.Host ).EndsWith( "." + domain ) )
