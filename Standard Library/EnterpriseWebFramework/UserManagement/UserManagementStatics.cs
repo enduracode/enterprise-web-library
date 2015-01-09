@@ -77,7 +77,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		internal static User GetUserFromRequest() {
-			var cookie = HttpContext.Current.Request.Cookies[ FormsAuthStatics.FormsAuthCookieName ];
+			var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
 			if( cookie != null ) {
 				var ticket = FormsAuthStatics.GetFormsAuthTicket( cookie );
 				if( ticket != null )

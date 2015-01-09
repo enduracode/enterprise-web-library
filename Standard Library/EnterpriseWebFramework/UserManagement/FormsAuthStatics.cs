@@ -209,13 +209,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 		private static void setCookie( string name, string value ) {
 			AppRequestState.AddNonTransactionalModificationMethod(
-				() =>
-				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( name, value ) { Path = CookieStatics.GetAppCookiePath(), Secure = EwfConfigurationStatics.AppSupportsSecureConnections, HttpOnly = true } ) );
+				() => CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true ) );
 		}
 
 		private static string[] verifyTestCookie() {
-			return HttpContext.Current.Request.Cookies[ testCookieName ] == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
+			return CookieStatics.GetCookie( testCookieName ) == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
 		}
 
 		private static void addStatusMessageIfClockNotSynchronized( DataValue<string> utcOffset ) {
@@ -238,7 +236,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		// Cookie Updating
 
 		internal static void UpdateFormsAuthCookieIfNecessary() {
-			var cookie = HttpContext.Current.Request.Cookies[ FormsAuthCookieName ];
+			var cookie = CookieStatics.GetCookie( FormsAuthCookieName );
 			if( cookie == null )
 				return;
 
@@ -273,10 +271,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void clearFormsAuthCookie() {
-			AppRequestState.AddNonTransactionalModificationMethod(
-				() =>
-				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( FormsAuthCookieName ) { Path = CookieStatics.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
+			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( FormsAuthCookieName ) );
 		}
 
 		internal static string FormsAuthCookieName { get { return "User"; } }
