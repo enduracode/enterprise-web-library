@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web;
 using Humanizer;
 
@@ -38,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
 			var defaultBaseUrl = new Uri( EwfApp.GetDefaultBaseUrl( false ) );
 
-			domain = domain ?? defaultAttributes.Domain ?? defaultBaseUrl.Host;
+			domain = domain ?? defaultAttributes.Domain ?? "";
 
 			// It's important that the cookie path not end with a slash. If it does, Internet Explorer will not transmit the cookie if the user requests the root URL
 			// of the application without a trailing slash, e.g. integration.redstapler.biz/Todd. One justification for adding a trailing slash to the cookie path is
@@ -48,13 +49,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Ensure that the domain and path of the cookie are in scope for both the request URL and resource URL. These two URLs can be different on shortcut URL
 			// requests, requests that transfer to the log-in page, etc.
-			var currentUrls = new[] { AppRequestState.Instance.Url, EwfPage.Instance.InfoAsBaseType.GetUrl( false, false, true ) };
-			foreach( var url in currentUrls ) {
+			var requestUrls = new[] { AppRequestState.Instance.Url, EwfPage.Instance.InfoAsBaseType.GetUrl( false, false, true ) };
+			foreach( var url in requestUrls ) {
 				var uri = new Uri( url );
-				if( !( "." + uri.Host ).EndsWith( "." + domain ) )
+				if( domain.Any() && !( "." + uri.Host ).EndsWith( "." + domain ) )
 					throw new ApplicationException( "The cookie domain of \"{0}\" is not in scope for \"{1}\".".FormatWith( domain, url ) );
-				if( !( uri.AbsolutePath + "/" ).StartsWith( path + "/" ) )
+				if( path != "/" && !( uri.AbsolutePath + "/" ).StartsWith( path + "/" ) )
 					throw new ApplicationException( "The cookie path of \"{0}\" is not in scope for \"{1}\".".FormatWith( path, url ) );
+			}
+			if( !domain.Any() ) {
+				var requestHosts = requestUrls.Select( i => new Uri( i ).Host );
+				if( requestHosts.Distinct().Count() > 1 ) {
+					throw new ApplicationException(
+						"The cookie domain could arbitrarily be either {0} depending upon the request URL.".FormatWith(
+							StringTools.ConcatenateWithDelimiter( " or ", requestHosts.ToArray() ) ) );
+				}
 			}
 
 			return Tuple.Create( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, domain, path );
