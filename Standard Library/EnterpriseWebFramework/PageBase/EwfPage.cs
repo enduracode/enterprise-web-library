@@ -186,7 +186,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
-							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
+							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
+							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
