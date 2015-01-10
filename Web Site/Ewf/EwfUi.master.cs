@@ -232,10 +232,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private Control getGlobalBlock() {
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			var appLogoAndUserInfoControlOverrider = EwfUiStatics.AppProvider as AppLogoAndUserInfoControlOverrider;
+
 			return
 				new Block(
-					new[] { getAppLogoAndUserInfoBlock(), getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList ) }.Where( i => i != null )
-						.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
+					new[]
+						{
+							appLogoAndUserInfoControlOverrider != null ? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl() : getAppLogoAndUserInfoBlock(),
+							getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList )
+						}.Where( i => i != null ).ToArray() )
+					{
+						ClientIDMode = ClientIDMode.Static,
+						ID = CssElementCreator.GlobalBlockId
+					};
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {
