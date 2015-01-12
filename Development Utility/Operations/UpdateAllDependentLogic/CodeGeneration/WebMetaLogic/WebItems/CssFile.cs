@@ -15,11 +15,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "public sealed class Info: StaticCssInfo {" );
 			writeBuildUrlMethod( writer );
 
-			// We could use the last write time of the file instead of the current date/time, but that would prevent re-downloading when we change the expansion of a
-			// CSS element without changing the source file.
 			writer.WriteLine(
-				"public override DateTimeOffset GetResourceLastModificationDateAndTime() { return " + AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) +
-				"; }" );
+				"protected override DateTimeOffset getBuildDateAndTime() { return " + AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) + "; }" );
 
 			writeAppRelativeFilePathProperty( writer );
 			writer.WriteLine( "}" );
