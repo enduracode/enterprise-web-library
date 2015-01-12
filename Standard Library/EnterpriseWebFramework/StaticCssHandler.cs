@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Development Utility use only.
 		/// </summary>
 		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return urlVersionStringPrefix + EwfSafeResponseWriter.GetMinuteResolutionUrlVersionString( dateAndTime );
+			return urlVersionStringPrefix + EwfSafeResponseWriter.GetUrlVersionString( dateAndTime );
 		}
 
 		/// <summary>
@@ -32,8 +32,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var url = EwfApp.GetRequestAppRelativeUrl( context.Request );
 
 			// We assume that all URL version strings will have the same length as the format string.
-			var prefixedVersionStringIndex = url.LastIndexOf( "." ) -
-			                                 ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.MinuteResolutionUrlVersionStringFormat.Length );
+			var prefixedVersionStringIndex = url.LastIndexOf( "." ) - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
 
 			if( prefixedVersionStringIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the version and extension in the URL.", null );
@@ -45,10 +44,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						"+Info" ) ) as StaticCssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
-			var urlVersionString = url.Substring(
-				prefixedVersionStringIndex + urlVersionStringPrefix.Length,
-				EwfSafeResponseWriter.MinuteResolutionUrlVersionStringFormat.Length );
-			if( EwfSafeResponseWriter.GetMinuteResolutionUrlVersionString( cssInfo.GetResourceLastModificationDateAndTime() ) != urlVersionString )
+			var urlVersionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
+			if( EwfSafeResponseWriter.GetUrlVersionString( cssInfo.GetResourceLastModificationDateAndTime() ) != urlVersionString )
 				throw new ResourceNotAvailableException( "The URL version string does not match the last-modification date/time of the resource.", null );
 
 			new EwfSafeResponseWriter(
