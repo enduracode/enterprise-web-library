@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the last-modification date/time of the resource.
 		/// </summary>
-		public virtual DateTimeOffset GetResourceLastModificationDateAndTime() {
+		public DateTimeOffset GetResourceLastModificationDateAndTime() {
 			// The build date/time is an important factor here. Exclusively using the last write time of the file would prevent re-downloading when we change the
 			// expansion of a CSS element without changing the source file. And for non-development installations, we don't use the last write time at all because
 			// it's probably much slower (the build date/time is just a literal) and also because we don't expect files to be modified on servers.
@@ -41,9 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return getBuildDateAndTime();
 		}
 
-		protected virtual DateTimeOffset getBuildDateAndTime() {
-			return DateTimeOffset.MinValue;
-		}
+		protected abstract DateTimeOffset getBuildDateAndTime();
 
 		/// <summary>
 		/// Gets the path of the CSS file.
