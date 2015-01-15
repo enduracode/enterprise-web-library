@@ -149,7 +149,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Standard Library use only.
 		/// </summary>
 		public int? ProfilingUserId {
-			get { return ImpersonatorExists ? ImpersonatorUser != null ? (int?)ImpersonatorUser.UserId : null : UserAndImpersonator.Item1.UserId; }
+			get {
+				var profilingUser = ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1;
+				return profilingUser != null ? (int?)profilingUser.UserId : null;
+			}
 		}
 
 		/// <summary>
