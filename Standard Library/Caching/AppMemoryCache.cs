@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.Caching;
 using System.Threading;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary.Caching {
 	/// <summary>
@@ -80,14 +81,14 @@ namespace RedStapler.StandardLibrary.Caching {
 		/// <summary>
 		/// Standard library use only.
 		/// </summary>
-		public static bool UserIsProfilingRequests( int userId ) {
+		public static bool UserIsProfilingRequests( int? userId ) {
 			return cache.Contains( getRequestProfilingKey( userId ) );
 		}
 
 		/// <summary>
 		/// Standard library use only.
 		/// </summary>
-		public static void SetRequestProfilingForUser( int userId, TimeSpan duration ) {
+		public static void SetRequestProfilingForUser( int? userId, TimeSpan duration ) {
 			if( duration != TimeSpan.Zero ) {
 				cache.Set(
 					getRequestProfilingKey( userId ),
@@ -98,8 +99,8 @@ namespace RedStapler.StandardLibrary.Caching {
 				cache.Remove( getRequestProfilingKey( userId ) );
 		}
 
-		private static string getRequestProfilingKey( int userId ) {
-			return keyPrefix + "requestProfiling-" + userId;
+		private static string getRequestProfilingKey( int? userId ) {
+			return keyPrefix + "requestProfiling-{0}".FormatWith( userId.HasValue ? userId.Value.ToString() : "unrecognized" );
 		}
 
 

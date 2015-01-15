@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
@@ -76,19 +77,35 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			throw new ApplicationException( "Unknown user management setup type." );
 		}
 
-		internal static User GetUserFromRequest() {
-			var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
-			if( cookie != null ) {
-				var ticket = FormsAuthStatics.GetFormsAuthTicket( cookie );
-				if( ticket != null )
-					return GetUser( int.Parse( ticket.Name ), false );
+		/// <summary>
+		/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a tuple with a null user if impersonation is taking
+		/// place with an impersonator who doesn't correspond to a user, or (3) a tuple containing the impersonator.
+		/// </summary>
+		internal static Tuple<User, Tuple<User>> GetUserAndImpersonatorFromRequest() {
+			var user = new Func<User>[]
+				{
+					() => {
+						var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
+						if( cookie == null )
+							return null;
+						var ticket = FormsAuthStatics.GetFormsAuthTicket( cookie );
+						return ticket != null ? GetUser( int.Parse( ticket.Name ), false ) : null;
+					},
+					() => {
+						var identity = HttpContext.Current.User.Identity;
+						return identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType
+							       ? GetUser( identity.Name )
+							       : null;
+					}
+				}.Select( i => new Lazy<User>( i ) ).FirstOrDefault( i => i.Value != null );
+
+			if( ( user != null && user.Value.Role.CanManageUsers ) || !AppTools.IsLiveInstallation ) {
+				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
+				if( cookie != null )
+					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, Tuple.Create( user.Value ) );
 			}
 
-			var identity = HttpContext.Current.User.Identity;
-			if( identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
-				return GetUser( identity.Name );
-
-			return null;
+			return Tuple.Create( user.Value, (Tuple<User>)null );
 		}
 	}
 }

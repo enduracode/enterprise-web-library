@@ -871,7 +871,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
 			if( destination.IsIdenticalToCurrent() ) {
-				AppRequestState.Instance.ClearUser();
+				AppRequestState.Instance.ClearUserAndImpersonator();
 				resetPage();
 			}
 
@@ -912,8 +912,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			try {
 				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
 					EwfApp.Instance.ExecuteInitialRequestDataModifications();
-					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
-						updateLastPageRequestTimeForUser();
+					if( AppRequestState.Instance.UserAccessible ) {
+						if( AppTools.User != null )
+							updateLastPageRequestTimeForUser( AppTools.User );
+						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+							updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
+					}
 					executeInitialRequestDataModifications();
 				}
 				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
@@ -929,11 +933,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
 		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 		/// </summary>
-		private void updateLastPageRequestTimeForUser() {
+		private void updateLastPageRequestTimeForUser( User user ) {
 			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
 			// rapidly assigning tasks to one another in RSIS or similar situations.
 			// NOTE: This makes the comment on line 688 much less important.
-			if( ( DateTime.Now - AppTools.User.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
 				return;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
@@ -943,8 +947,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// another transaction has modified its value during this transaction.
 			var newlyQueriedUser =
 				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( AppTools.User.UserId, false ) ) );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
 				return;
 
 			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -952,18 +956,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					try {
 						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
 						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+							var formsAuthCapableUser = (FormsAuthCapableUser)user;
 							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								AppTools.User.UserId,
-								AppTools.User.Email,
-								AppTools.User.Role.RoleId,
+								user.UserId,
+								user.Email,
+								user.Role.RoleId,
 								DateTime.Now,
 								formsAuthCapableUser.Salt,
 								formsAuthCapableUser.SaltedPassword,
 								formsAuthCapableUser.MustChangePassword );
 						}
 						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
+							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
 					}
 					catch( DbConcurrencyException ) {
 						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
