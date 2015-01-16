@@ -24,6 +24,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
+			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.SelectUserPageBodyCssClass;
+
 			ph.AddControlsReturnThis( new PageName() );
 
 			if( AppTools.IsLiveInstallation ) {
@@ -56,11 +58,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								                             validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 						                             },
 						                             pb ) ).ToControl(),
-				new PostBackButton(
-					pb,
-					new ButtonActionControlStyle(
-						AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
-						buttonSize: ButtonActionControlStyle.ButtonSize.Large ) ) );
+				new Paragraph(
+					new PostBackButton(
+						pb,
+						new ButtonActionControlStyle(
+							AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
+							buttonSize: ButtonActionControlStyle.ButtonSize.Large ) ) ) );
 
 			pb.AddModificationMethod( () => UserImpersonationStatics.BeginImpersonation( user.Value ) );
 		}

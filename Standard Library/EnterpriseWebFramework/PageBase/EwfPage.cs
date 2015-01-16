@@ -466,6 +466,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
 
+			addStyleSheetLink( styleSheetLinks, "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic", "" );
 			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
 			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
 			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )

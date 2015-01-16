@@ -109,6 +109,7 @@
     <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
       <DependentUpon>SystemUsers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\CssElementCreator.cs" />
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
