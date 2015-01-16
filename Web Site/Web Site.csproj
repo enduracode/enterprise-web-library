@@ -145,6 +145,13 @@
     <Compile Include="Ewf\PreBuiltResponse.aspx.designer.cs">
       <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\UserManagement\SelectUser.aspx.cs">
+      <DependentUpon>SelectUser.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\UserManagement\SelectUser.aspx.designer.cs">
+      <DependentUpon>SelectUser.aspx</DependentUpon>
+    </Compile>
     <Compile Include="GetSchema.aspx.cs">
       <DependentUpon>GetSchema.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -537,6 +544,7 @@
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-TW.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
+    <Content Include="Ewf\UserManagement\SelectUser.aspx" />
     <Content Include="GetSchema.aspx" />
     <Content Include="Global.asax" />
   </ItemGroup>
