@@ -92,7 +92,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					"This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() );
 			}
 
-			if( AppRequestState.Instance.ImpersonatorExists ) {
+			if( AppRequestState.Instance.ImpersonatorExists && ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),
