@@ -3,13 +3,18 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader {
 		internal class CssElementCreator: ControlCssElementCreator {
+			internal const string TopWarningBlockCssClass = "ewfTopWarning";
+
 			// Some of these are used by the Standard Library JavaScript file.
 			internal const string ClickBlockingBlockCssClass = "ewfClickBlocker";
 			internal const string ProcessingDialogBlockCssClass = "ewfProcessingDialog";
@@ -21,6 +26,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				// Some of the elements below cover a subset of other CSS elements in a more specific way. See the comment in EwfUi.master for more information.
 
 				var elements = new List<CssElement>();
+
+				elements.Add( new CssElement( "TopWarningBlock", "div.{0}".FormatWith( TopWarningBlockCssClass ) ) );
+
 				elements.Add( new CssElement( "ClickBlockingBlock", "div." + ClickBlockingBlockCssClass ) );
 
 				const string processingDialogBlockSelector = "div." + ProcessingDialogBlockCssClass;
@@ -63,9 +71,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			basicBody.Attributes.Add( "onpagehide", "hideProcessingDialog();" );
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 
+			var warningControls = new List<Control>();
 			if( !AppTools.IsLiveInstallation ) {
 				var children = new List<Control>();
-				children.Add( "This is not the live installation of the system. All changes made here will be lost and are not recoverable. ".GetLiteralControl() );
+				children.Add( "This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
@@ -73,19 +82,36 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								id: "ewfIntermediateLogOut",
 								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
 								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
-							new ButtonActionControlStyle( "Log Out" ),
+							new ButtonActionControlStyle( "Log Out", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 							false ) );
 				}
-
-				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
-				ph.AddControlsReturnThis( new Block( children.ToArray() ) { CssClass = "ewfNonLiveWarning" } );
+				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
 			}
 			else if( ConfigurationStatics.MachineIsStandbyServer ) {
-				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
-				ph.AddControlsReturnThis(
-					new Block(
-						"This is a standby version of the system. This operates off a read-only database, and any attempt to make a modification will result in an error."
-							.GetLiteralControl() ) { CssClass = "ewfNonLiveWarning" } );
+				warningControls.Add(
+					"This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() );
+			}
+
+			if( AppRequestState.Instance.ImpersonatorExists ) {
+				warningControls.Add(
+					new PlaceHolder().AddControlsReturnThis(
+						"User impersonation is in effect. ".GetLiteralControl(),
+						EwfLink.Create(
+							SelectUser.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ),
+							new ButtonActionControlStyle( "Change User", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ),
+						" ".GetLiteralControl(),
+						new PostBackButton(
+							PostBack.CreateFull(
+								id: "ewfEndImpersonation",
+								firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
+							new ButtonActionControlStyle( "End Impersonation", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							usesSubmitBehavior: false ) ) );
+			}
+
+			if( warningControls.Any() ) {
+				var warningControl = warningControls.Count() > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
+				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = CssElementCreator.TopWarningBlockCssClass } );
 			}
 
 			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );

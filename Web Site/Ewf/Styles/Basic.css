@@ -236,16 +236,16 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 }
 
 /* EwfPage and master page */
-div.ewfNonLiveWarning {
+ewfTopWarningBlock {
 	position: relative;
 	z-index: 9999;
-	margin-bottom: 4px;
-	border: solid #464646 1px;
-	background-color: Red;
-	padding: 4px;
+	margin-bottom: .5em;
+	border: 1px solid #464646;
+	border-radius: .5em;
+	background-color: hsla( 0, 100%, 50%, 0.75 );
+	padding: .5em;
 	text-align: center;
-	color: White;
-	font-size: 1.2em;
+	color: white;
 	font-weight: bold;
 }
 ewfClickBlockingBlock, ewfProcessingDialogBlock {
