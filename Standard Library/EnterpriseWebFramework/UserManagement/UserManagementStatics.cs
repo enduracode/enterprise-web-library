@@ -82,7 +82,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// place with an impersonator who doesn't correspond to a user, or (3) a tuple containing the impersonator.
 		/// </summary>
 		internal static Tuple<User, Tuple<User>> GetUserAndImpersonatorFromRequest() {
-			var user = new Func<User>[]
+			var userLazy = new Func<User>[]
 				{
 					() => {
 						var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
@@ -98,14 +98,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 							       : null;
 					}
 				}.Select( i => new Lazy<User>( i ) ).FirstOrDefault( i => i.Value != null );
+			var user = userLazy != null ? userLazy.Value : null;
 
-			if( ( user != null && user.Value.Role.CanManageUsers ) || !AppTools.IsLiveInstallation ) {
+			if( ( user != null && user.Role.CanManageUsers ) || !AppTools.IsLiveInstallation ) {
 				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
 				if( cookie != null )
-					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, Tuple.Create( user.Value ) );
+					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, Tuple.Create( user ) );
 			}
 
-			return Tuple.Create( user.Value, (Tuple<User>)null );
+			return Tuple.Create( user, (Tuple<User>)null );
 		}
 	}
 }
