@@ -18,7 +18,13 @@ namespace EnterpriseWebLibrary.WebSite {
 		protected override void initializeWebApp() {}
 
 		protected override IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers() {
-			yield return new ShortcutUrlResolver( "", ConnectionSecurity.SecureIfPossible, () => ActionControls.GetInfo() );
+			yield return new ShortcutUrlResolver(
+				"",
+				ConnectionSecurity.SecureIfPossible,
+				() => {
+					var page = ActionControls.GetInfo();
+					return page.UserCanAccessResource ? page : null;
+				} );
 
 			foreach( var i in GlobalLogic.ConfigurationXsdFileNames ) {
 				var fileName = i;
