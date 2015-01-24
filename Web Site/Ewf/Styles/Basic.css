@@ -274,7 +274,7 @@ ewfProcessingDialogBlock {
 	margin-left: -13em;
 	background-color: white;
 	padding: 1em;
-	height: 6ex;
+	height: 7ex;
 	width: 26em;
 	color: black;
 	border-radius: 15px;
@@ -284,6 +284,14 @@ ewfProcessingDialogBlock {
 	font-size: 2em;
 	cursor: default;
 	margin: 0;
+}
+
+#ewfProcessing, #ellipsis1, #ellipsis2, #ellipsis3 {
+	vertical-align: -0.5ex;
+}
+
+.ewfTimeOut {
+	display: none;
 }
 
 #ellipsis1, #ellipsis2, #ellipsis3 {
