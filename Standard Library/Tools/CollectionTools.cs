@@ -76,5 +76,12 @@ namespace RedStapler.StandardLibrary {
 			var count = c.Count();
 			return c.Skip( count - n );
 		}
+
+		/// <summary>
+		/// Convenience method for converting a collection into a HashSet.
+		/// </summary>
+		public static HashSet<T> ToHashSet<T>( this IEnumerable<T> items ) {
+			return new HashSet<T>( items );
+		}
 	}
 }
