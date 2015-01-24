@@ -4,9 +4,8 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.Configuration.Machine;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
@@ -31,12 +30,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 				const string statusMessageDialogBlockSelector = "div." + StatusMessageDialogBlockCssClass;
 				elements.Add( new CssElement( "StatusMessageDialogBlock", statusMessageDialogBlockSelector ) );
-				elements.Add( new CssElement( "StatusMessageDialogControlListInfoItem",
-				                              ControlStack.CssElementCreator.Selectors.Select(
-					                              i =>
-					                              statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-					                              StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
-				elements.Add( new CssElement( "StatusMessageDialogControlListWarningItem",
+				elements.Add(
+					new CssElement(
+						"StatusMessageDialogControlListInfoItem",
+						ControlStack.CssElementCreator.Selectors.Select(
+							i =>
+							statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
+							StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
+				elements.Add(
+					new CssElement(
+						"StatusMessageDialogControlListWarningItem",
 				                              ControlStack.CssElementCreator.Selectors.SelectMany(
 					                              stack =>
 					                              ControlLine.CssElementCreator.Selectors.Select(
@@ -67,19 +70,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				var children = new List<Control>();
 				children.Add( "This is not the live installation of the system. All changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
-					children.Add( new PostBackButton( new DataModification(),
-					                                  () => EwfPage.Instance.EhModifyDataAndRedirect( delegate {
-						                                  IntermediateAuthenticationMethods.ClearCookie();
-						                                  return NetTools.HomeUrl;
-					                                  } ),
-					                                  new ButtonActionControlStyle( "Log Out" ),
-					                                  false ) );
+					children.Add(
+						new PostBackButton(
+							PostBack.CreateFull(
+								id: "ewfIntermediateLogOut",
+								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
+							new ButtonActionControlStyle( "Log Out" ),
+							false ) );
 				}
 
 				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
 				ph.AddControlsReturnThis( new Block( children.ToArray() ) { CssClass = "ewfNonLiveWarning" } );
 			}
-			else if( MachineConfiguration.GetIsStandbyServer() ) {
+			else if( ConfigurationStatics.MachineIsStandbyServer ) {
 				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
 				ph.AddControlsReturnThis(
 					new Block(
@@ -103,7 +107,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );
 			ph2.AddControlsReturnThis( ajaxLoadingImage );
-			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted();" );
+			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
 		private Control getProcessingDialog() {

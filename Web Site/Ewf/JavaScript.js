@@ -14,9 +14,8 @@ function toggleElementDisplay( id ) {
 }
 
 function getClientUtcOffset( id ) {
-	var utcOffset = $get( id );
 	var timeString = new Date().toUTCString();
-	utcOffset.value = timeString;
+	$( "#" + id ).val( timeString );
 }
 
 // Supports DurationPicker
@@ -56,18 +55,18 @@ function NumericalOnly( evt, field ) {
 
 	var charCode = ( evt.which || evt.which == 0 ) ? evt.which : evt.keyCode;
 	switch( charCode ) {
-	//Enter
-	case 13:
-		ApplyTimeSpanFormat( field );
-	//Backspace
-	case 8:
-	// Keys that don't produce a character
-	case 0:
-		return true;
-	default:
-		// Max of maxValueLength digits, numbers only.
+		//Enter
+		case 13:
+			ApplyTimeSpanFormat( field );
+		//Backspace
+		case 8:
+		// Keys that don't produce a character
+		case 0:
+			return true;
+		default:
+			// Max of maxValueLength digits, numbers only.
 		// If some of the field is selected, let them replace the contents even if it's full
-		return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
+			return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
 	}
 }
 
@@ -122,6 +121,14 @@ function RemoveClickScriptBinding() {
 			$( this ).children( ":not(.ewfNotClickable)" ).click( clickScript );
 		}
 	);
+}
+
+function postBack( postBackId ) {
+	var theForm = document.getElementById( "aspnetForm" );
+	if( !theForm.onsubmit || ( theForm.onsubmit() != false ) ) {
+		$( "#ewfPostBack" ).val( postBackId );
+		theForm.submit();
+	}
 }
 
 function postBackRequestStarted() {
@@ -208,19 +215,6 @@ function toggleCheckBoxes( checklistClientId, setChecked ) {
 	$( '#' + checklistClientId ).find( 'input[type=checkbox]' ).prop( 'checked', setChecked ).each( function( i, checkBox ) {
 		changeCheckBoxColor( checkBox );
 	} );
-}
-
-
-// Supports ModalWindow
-// Adds a function to center the calling window when the user resizes or scrolls the page
-
-function HookUpModalWindowMoveEventHandlers( radWindowClientId ) {
-	var fixWindowPosition = function() {
-		var window = $find( radWindowClientId );
-		if( window.isVisible() )
-			window.center();
-	};
-	$( window ).scroll( fixWindowPosition ).resize( fixWindowPosition );
 }
 
 // Supports DurationPicker.

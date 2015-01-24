@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -24,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly DateTime beginTime;
-		private readonly Uri url;
+		private readonly string url;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
 		private readonly DataAccessState dataAccessState;
@@ -53,25 +54,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public HttpBrowserCapabilities Browser { get; private set; }
 
-		internal AppRequestState( string hostHeader ) {
+		internal AppRequestState( string url ) {
 			beginTime = DateTime.Now;
 			MiniProfiler.Start();
-
-			// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer will
-			// bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances running this
-			// web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on someIp:81 and someIp:82.
-			// For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of using the host and port from
-			// the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url returns http://someIp:81?something=1
-			// instead of http://mydomain.com?something=1. See
-			// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
-			try {
-				url = new Uri( HttpContext.Current.Request.Url.Scheme + "://" + hostHeader + HttpContext.Current.Request.Url.PathAndQuery );
-			}
-			catch( Exception e ) {
-				throw new ApplicationException(
-					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".",
-					e );
-			}
+			this.url = url;
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
@@ -83,13 +69,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Browser = HttpContext.Current.Request.Browser;
 		}
 
-		internal string Url { get { return url.AbsoluteUri; } }
-
-		internal string GetBaseUrlWithSpecificSecurity( bool secure ) {
-			// NOTE: Make this method decisive about a domain to use instead of just using the current one.
-			return NetTools.CombineUrls( ( secure ? "https" : "http" ) + "://" + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ),
-			                             HttpRuntime.AppDomainAppVirtualPath );
-		}
+		/// <summary>
+		/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
+		/// </summary>
+		internal string Url { get { return url; } }
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 
@@ -164,27 +147,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( !userLoaded )
-					loadUser();
+				if( !userLoaded ) {
+					user = UserManagementStatics.UserManagementEnabled ? UserManagementStatics.GetUserFromRequest() : null;
+					userLoaded = true;
+				}
 				return user;
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
-
-		private void loadUser() {
-			var identity = HttpContext.Current.User.Identity;
-
-			// Try to associate a user with the current identity, if it is authenticated. Expose this user via the AuthenticatedUser property.
-			if( identity.IsAuthenticated && UserManagementStatics.UserManagementEnabled ) {
-				if( identity.AuthenticationType == "Forms" )
-					user = UserManagementStatics.GetUser( int.Parse( identity.Name ) );
-				else if( identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType )
-					user = UserManagementStatics.GetUser( identity.Name );
-			}
-
-			userLoaded = true;
-		}
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); } }
 
 		internal void ClearUser() {
 			user = null;
@@ -205,7 +179,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal void CleanUp() {
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
+			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
+			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
 			if( errorException != null ) {
 				AppTools.EmailAndLogError( errorPrefix, errorException );
@@ -222,69 +197,70 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods() {
+		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( bool skipNonTransactionalModificationMethods = false ) {
 			var methods = new List<Action>();
-			if( primaryDatabaseConnectionInitialized ) {
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.PrimaryDatabaseConnection;
-					primaryDatabaseConnectionInitialized = false;
-					cleanUpDatabaseConnection( tempConnection );
-				} );
-			}
+			if( primaryDatabaseConnectionInitialized )
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.PrimaryDatabaseConnection ) );
 			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
 				var databaseNameCopy = databaseName;
-				methods.Add( delegate {
-					var tempConnection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy );
-					secondaryDatabasesWithInitializedConnections.Remove( databaseNameCopy );
-					cleanUpDatabaseConnection( tempConnection );
-				} );
+				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
 			}
-			methods.Add( () => {
-				try {
-					if( !transactionMarkedForRollback ) {
-						DataAccessState.Current.DisableCache();
-						try {
-							foreach( var i in nonTransactionalModificationMethods )
-								i();
-						}
-						finally {
-							DataAccessState.Current.ResetCache();
+			methods.Add(
+				() => {
+					try {
+						if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
+							DataAccessState.Current.DisableCache();
+							try {
+								foreach( var i in nonTransactionalModificationMethods )
+									i();
+							}
+							finally {
+								DataAccessState.Current.ResetCache();
+							}
 						}
 					}
-				}
-				finally {
-					nonTransactionalModificationMethods.Clear();
-				}
-			} );
+					finally {
+						nonTransactionalModificationMethods.Clear();
+					}
+				} );
 			StandardLibraryMethods.CallEveryMethod( methods.ToArray() );
 			transactionMarkedForRollback = false;
 		}
 
-		private void cleanUpDatabaseConnection( DBConnection cn ) {
+		private void cleanUpDatabaseConnection( DBConnection connection ) {
+			// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
 			try {
-				if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( cn.DatabaseInfo ) )
-					return;
-
 				try {
-					if( !transactionMarkedForRollback )
-						cn.CommitTransaction();
-				}
-				catch {
-					// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
-					// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
-					// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
-					// until we implement a true distributed transaction model with two-phase commit.
-					transactionMarkedForRollback = true;
+					if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+						return;
 
-					throw;
+					try {
+						if( !transactionMarkedForRollback )
+							connection.CommitTransaction();
+					}
+					catch {
+						// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
+						// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
+						// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
+						// until we implement a true distributed transaction model with two-phase commit.
+						transactionMarkedForRollback = true;
+
+						throw;
+					}
+					finally {
+						if( transactionMarkedForRollback )
+							connection.RollbackTransaction();
+					}
 				}
 				finally {
-					if( transactionMarkedForRollback )
-						cn.RollbackTransaction();
+					connection.Close();
 				}
 			}
 			finally {
-				cn.Close();
+				if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
+					secondaryDatabasesWithInitializedConnections.Remove( connection.DatabaseInfo.SecondaryDatabaseName );
+				else
+					primaryDatabaseConnectionInitialized = false;
 			}
 		}
 	}

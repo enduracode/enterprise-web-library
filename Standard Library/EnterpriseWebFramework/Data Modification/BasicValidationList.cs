@@ -5,10 +5,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// A validation list that allows its validations to be added to other validation lists. Can be useful if validations need to be added to multiple data
 	/// modifications or if you want to defer the adding of validations to a data modification.
 	/// </summary>
-	public class BasicValidationList: ValidationList {
+	public class BasicValidationList: ValidationList, ValidationListInternal {
 		private readonly List<Validation> validations = new List<Validation>();
 
-		internal void AddValidation( Validation validation ) {
+		void ValidationListInternal.AddValidation( Validation validation ) {
 			validations.Add( validation );
 		}
 

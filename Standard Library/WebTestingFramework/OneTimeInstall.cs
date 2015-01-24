@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.ServiceProcess;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.WebTestingFramework {
@@ -9,7 +10,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 		/// This is the code to install and start the SeleniumRC service.
 		/// </summary>
 		public static void InstallSeleniumServiceIfNecessary() {
-			var supportFilesDestinationPath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "Selenium Support" );
+			var supportFilesDestinationPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Selenium Support" );
 			const string serviceName = "SeleniumRC";
 			const string seleniumJarFile = "selenium-server.jar";
 			const string srvany = "srvany.exe";

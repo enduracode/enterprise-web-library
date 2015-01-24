@@ -17,26 +17,29 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly string radioButtonListItemId;
 		private readonly string label;
 		private readonly bool highlightWhenChecked;
+		private readonly PostBack postBack;
 		private readonly List<string> onClickJsMethods = new List<string>();
 		private WebControl checkBox;
 
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
 		/// </summary>
-		public BlockCheckBox( bool isChecked, string label = "", bool highlightWhenChecked = false ) {
+		public BlockCheckBox( bool isChecked, string label = "", bool highlightWhenChecked = false, PostBack postBack = null ) {
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 			this.label = label;
 			this.highlightWhenChecked = highlightWhenChecked;
+			this.postBack = postBack;
 			NestedControls = new List<Control>();
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
-		internal BlockCheckBox( FormValue<CommonCheckBox> formValue, string label, string listItemId = null ) {
+		internal BlockCheckBox( FormValue<CommonCheckBox> formValue, string label, PostBack postBack, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
+			this.postBack = postBack;
 			NestedControls = new List<Control>();
 		}
 
@@ -84,6 +87,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
+			if( postBack != null || AutoPostBack )
+				EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+
 			PreRender += delegate {
 				if( highlightWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
 					CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
@@ -95,7 +101,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender +=
 				delegate {
-					EwfCheckBox.AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, AutoPostBack, onClickJsMethods );
+					EwfCheckBox.AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, postBack, AutoPostBack, onClickJsMethods );
 				};
 
 			var checkBoxCell = new TableCell().AddControlsReturnThis( checkBox );

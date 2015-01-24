@@ -1,15 +1,18 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>
-	public class EwfLink: WebControl, ControlTreeDataLoader, IPostBackEventHandler, ControlWithJsInitLogic, ActionControl {
+	public class EwfLink: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
+		internal static PostBack GetLinkPostBack( ResourceInfo destination ) {
+			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
+			return EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) );
+		}
+
 		/// <summary>
 		/// Creates a link.
 		/// </summary>
@@ -17,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="actionControlStyle">Choices are: TextActionControlStyle, ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.</param>
 		/// <param name="toolTipText">EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.</param>
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
-		public static EwfLink Create( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null, Control toolTipControl = null ) {
+		public static EwfLink Create( ResourceInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null, Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo ) { ActionControlStyle = actionControlStyle, toolTip = toolTipText, toolTipControl = toolTipControl };
 		}
 
@@ -29,8 +32,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="toolTipText">EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.</param>
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
 		/// <returns></returns>
-		public static EwfLink CreateForNavigationInNewWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null,
-		                                                      Control toolTipControl = null ) {
+		public static EwfLink CreateForNavigationInNewWindow(
+			ResourceInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null, Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo )
 				{
 					ActionControlStyle = actionControlStyle,
@@ -48,8 +51,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="actionControlStyle">Choices are: TextActionControlStyle, ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.</param>
 		/// <param name="toolTipText">EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.</param>
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
-		public static EwfLink CreateForNavigationInPopUpWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle,
-		                                                        PopUpWindowSettings popUpWindowSettings, string toolTipText = null, Control toolTipControl = null ) {
+		public static EwfLink CreateForNavigationInPopUpWindow(
+			ResourceInfo navigatePageInfo, ActionControlStyle actionControlStyle, PopUpWindowSettings popUpWindowSettings, string toolTipText = null,
+			Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo )
 				{
 					ActionControlStyle = actionControlStyle,
@@ -66,8 +70,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="actionControlStyle">Choices are: TextActionControlStyle, ImageActionControlStyle, ButtonActionControlStyle, CustomActionControlStyle, and BoxActionControlStyle.</param>
 		/// <param name="toolTipText">EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.</param>
 		/// <param name="toolTipControl">Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.</param>
-		public static EwfLink CreateForNavigationInOpeningWindow( PageInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null,
-		                                                          Control toolTipControl = null ) {
+		public static EwfLink CreateForNavigationInOpeningWindow(
+			ResourceInfo navigatePageInfo, ActionControlStyle actionControlStyle, string toolTipText = null, Control toolTipControl = null ) {
 			return new EwfLink( navigatePageInfo )
 				{
 					ActionControlStyle = actionControlStyle,
@@ -77,7 +81,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				};
 		}
 
-		private readonly PageInfo destinationPageInfo;
+		private readonly ResourceInfo destinationResourceInfo;
 
 		private bool navigatesInNewWindow;
 		private PopUpWindowSettings popUpWindowSettings;
@@ -98,12 +102,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Guaranteed to stay public through 28 February 2013.
 		/// </summary>
-		public EwfLink( PageInfo destinationPageInfo ) {
-			this.destinationPageInfo = destinationPageInfo;
+		public EwfLink( ResourceInfo destinationResourceInfo ) {
+			this.destinationResourceInfo = destinationResourceInfo;
 			ActionControlStyle = new TextActionControlStyle( "" );
 		}
 
-		public PageInfo DestinationPageInfo { get { return destinationPageInfo; } }
+		public ResourceInfo DestinationResourceInfo { get { return destinationResourceInfo; } }
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
@@ -119,34 +123,37 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Standard library use only.
 		/// </summary>
 		public bool UserCanNavigateToDestination() {
-			return destinationPageInfo == null || destinationPageInfo.UserCanAccessPageAndAllControls;
+			return destinationResourceInfo == null || destinationResourceInfo.UserCanAccessResource;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			var url = "";
-			if( destinationPageInfo != null && !( destinationPageInfo.AlternativeMode is DisabledPageMode ) ) {
-				url = destinationPageInfo.GetUrl();
+			if( destinationResourceInfo != null && !( destinationResourceInfo.AlternativeMode is DisabledResourceMode ) ) {
+				url = destinationResourceInfo.GetUrl();
 				Attributes.Add( "href", this.GetClientUrl( url ) );
 			}
 
-			if( isPostBackButton && url.Any() )
-				this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( this, true ) );
+			if( isPostBackButton && url.Any() ) {
+				var postBack = GetLinkPostBack( destinationResourceInfo );
+				EwfPage.Instance.AddPostBack( postBack );
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) ); };
+			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );
 			if( popUpWindowSettings != null && url.Any() )
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, JsWritingMethods.GetPopUpWindowScript( url, this, popUpWindowSettings ) + " return false" );
-			if( navigatesInOpeningWindow && ( destinationPageInfo == null || url.Any() ) ) {
-				var openingWindowNavigationScript = destinationPageInfo != null ? "opener.document.location = '" + this.GetClientUrl( url ) + "'; " : "";
+			if( navigatesInOpeningWindow && ( destinationResourceInfo == null || url.Any() ) ) {
+				var openingWindowNavigationScript = destinationResourceInfo != null ? "opener.document.location = '" + this.GetClientUrl( url ) + "'; " : "";
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, openingWindowNavigationScript + "window.close(); return false" );
 			}
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is NewContentPageMode )
+			if( destinationResourceInfo != null && destinationResourceInfo.AlternativeMode is NewContentResourceMode )
 				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
 			ActionControlStyle.SetUpControl( this, url, width, height, setWidth );
 
-			if( destinationPageInfo != null && destinationPageInfo.AlternativeMode is DisabledPageMode ) {
-				var message = ( destinationPageInfo.AlternativeMode as DisabledPageMode ).Message;
+			if( destinationResourceInfo != null && destinationResourceInfo.AlternativeMode is DisabledResourceMode ) {
+				var message = ( destinationResourceInfo.AlternativeMode as DisabledResourceMode ).Message;
 				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
 			}
 			else if( toolTip != null || toolTipControl != null )
@@ -161,15 +168,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
 
-		void IPostBackEventHandler.RaisePostBackEvent( string eventArgument ) {
-			EwfPage.Instance.EhRedirect( destinationPageInfo );
-		}
-
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
 
-		private bool isPostBackButton { get { return EwfPage.Instance.IsAutoDataModifier && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; } }
+		private bool isPostBackButton {
+			get { return EwfPage.Instance.IsAutoDataUpdater && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; }
+		}
 	}
 }

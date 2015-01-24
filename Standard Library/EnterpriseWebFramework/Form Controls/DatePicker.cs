@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using Humanizer;
 using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private DateTime? minDate;
 		private DateTime? maxDate;
 		private bool constrainToSqlSmallDateTimeRange = true;
-		private PostBackButton defaultSubmitButton;
+		private readonly PostBack postBack;
 
 		private EwfTextBox textBox;
 		private DateTime min;
@@ -31,8 +31,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a date picker.
 		/// </summary>
-		public DatePicker( DateTime? value ) {
+		/// <param name="value"></param>
+		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the date picker.</param>
+		public DatePicker( DateTime? value, PostBack postBack = null ) {
 			this.value = value.HasValue ? value.Value.Date as DateTime? : null;
+			this.postBack = postBack;
 		}
 
 		/// <summary>
@@ -65,20 +68,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool ConstrainToSqlSmallDateTimeRange { set { constrainToSqlSmallDateTimeRange = value; } }
 
-		/// <summary>
-		/// Assigns this to submit the given PostBackButton. This will disable the button's submit behavior. Do not pass null.
-		/// </summary>
-		public void SetDefaultSubmitButton( PostBackButton pbb ) {
-			defaultSubmitButton = pbb;
-		}
-
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox( value.HasValue ? value.Value.ToMonthDayYearString() : "", disableBrowserAutoComplete: true ) { AutoPostBack = autoPostBack };
-
-			if( defaultSubmitButton != null )
-				textBox.SetDefaultSubmitButton( defaultSubmitButton );
+			textBox = new EwfTextBox(
+				value.HasValue ? value.Value.ToMonthDayYearString() : "",
+				disableBrowserAutoComplete: true,
+				postBack: postBack,
+				autoPostBack: autoPostBack );
 
 			Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
@@ -115,8 +112,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Validates the date and returns the nullable date.
 		/// </summary>
-		public DateTime? ValidateAndGetNullablePostBackDate( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler,
-		                                                     bool allowEmpty ) {
+		public DateTime? ValidateAndGetNullablePostBackDate(
+			PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
 			var date = validator.GetNullableDateTime( errorHandler, textBox.GetPostBackValue( postBackValues ), null, allowEmpty, min, max );
 			if( errorHandler.LastResult == ErrorCondition.NoError && date.HasTime() )
 				validator.NoteErrorAndAddMessage( "Time information is not allowed." );

@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// An element that hovers over the page in the center of the browser window and prevents interaction with the page. There can only be one modal window
-	/// visible at a time.
+	/// visible at a time. This control is intended to be used with LaunchWindowLink.
 	/// </summary>
 	// NOTE: Prohibit form controls from existing in a modal window.
 	// NOTE: Prevent a modal window from opening another modal window, probably be prohibiting LaunchWindowLink controls from existing in a modal window.
@@ -33,17 +32,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		private readonly WebControl control;
 		private readonly string title;
-		private readonly PostBackButton postBackButton;
+		private readonly PostBack postBack;
 
 		/// <summary>
 		/// Creates a modal window.
 		/// </summary>
-		public ModalWindow( Control content, string title = "" ): this( content, title: title, postBackButton: null ) {}
+		public ModalWindow( Control content, string title = "" ): this( content, title: title, postBack: null ) {}
 
-		internal ModalWindow( Control content, string title = "", PostBackButton postBackButton = null ) {
+		internal ModalWindow( Control content, string title = "", PostBack postBack = null ) {
 			control = new Block( content ) { CssClass = CssElementCreator.CssClass };
 			this.title = title;
-			this.postBackButton = postBackButton;
+			this.postBack = postBack;
 
 			EwfPage.Instance.AddEtherealControl( this );
 		}
@@ -52,10 +51,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		string EtherealControl.GetJsInitStatements() {
 			return "$( '#" + control.ClientID + "' ).dialog( { autoOpen: false, width: 600, hide: 'fade', show: 'fade', " +
-			       ( postBackButton != null
-			         	? "buttons: { 'Cancel': function() { $( this ).dialog( 'close' ) }, 'Continue': function() { " +
-			         	  PostBackButton.GetPostBackScript( postBackButton, true ) + "; } }, "
-			         	: "" ) + "draggable: false, modal: true, resizable: false" + ( title.Any() ? ", title: '" + title + "'" : "" ) + " } );";
+			       ( postBack != null
+				         ? "buttons: { 'Cancel': function() { $( this ).dialog( 'close' ) }, 'Continue': function() { " + PostBackButton.GetPostBackScript( postBack ) +
+				           "; } }, "
+				         : "" ) + "draggable: false, modal: true, resizable: false" + ( title.Any() ? ", title: '" + title + "'" : "" ) + " } );";
 		}
 	}
 }

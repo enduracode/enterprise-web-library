@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -64,6 +65,23 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static IEnumerable<T> GetDuplicates<T>( this IEnumerable<T> items ) {
 			return items.GroupBy( i => i ).Where( i => i.Count() > 1 ).Select( i => i.Key );
+		}
+
+		/// <summary>
+		/// Returns the last <paramref name="n"/> elements.
+		/// </summary>
+		public static IEnumerable<T> TakeLast<T>( this IEnumerable<T> c, int n ) {
+			if( n < 0 )
+				throw new ApplicationException( "'n' was {0} which is less than zero.".FormatWith( n ) );
+			var count = c.Count();
+			return c.Skip( count - n );
+		}
+
+		/// <summary>
+		/// Convenience method for converting a collection into a HashSet.
+		/// </summary>
+		public static HashSet<T> ToHashSet<T>( this IEnumerable<T> items ) {
+			return new HashSet<T>( items );
 		}
 	}
 }
