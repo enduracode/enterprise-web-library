@@ -95,7 +95,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-calendar datepickerIcon" ) };
+			var icon = new FontAwesomeIcon( "fa-calendar", "datepickerIcon" );
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
 			return new CustomButton( () => "$( '#{0}' ).datepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}

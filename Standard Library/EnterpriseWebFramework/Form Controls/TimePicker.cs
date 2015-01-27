@@ -79,7 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var icon = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-clock-o timepickerIcon" ) };
+			var icon = new FontAwesomeIcon( "fa-clock-o", "timepickerIcon" );
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
 			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
 using RedStapler.StandardLibrary.Validation;
@@ -93,13 +92,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var parent = new HtmlGenericControl( "span" );
-			parent.Attributes[ "class" ] = "fa-stack datetimepickerIcon";
-			var iconCal = new LiteralControl { Text = @"<i class=""{0}""></i>".FormatWith( "fa fa-calendar-o fa-stack-2x" ) };
-			var iconTime = new LiteralControl
-				{
-					Text = @"<i class=""{0}"" style=""{1}""></i>".FormatWith( "fa fa-clock-o fa-stack-1x", "position:relative; top: .20em" )
-				};
+			var parent = new EwfLabel { CssClass = "fa-stack datetimepickerIcon" };
+			var iconCal = new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" );
+			var iconTime = new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" );
+			iconTime.Style.Add( HtmlTextWriterStyle.Position, "relative" );
+			iconTime.Style.Add( HtmlTextWriterStyle.Top, ".20em" );
 			parent.AddControlsReturnThis( iconCal, iconTime );
 
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( parent ) );
