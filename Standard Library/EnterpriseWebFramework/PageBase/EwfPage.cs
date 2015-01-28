@@ -356,10 +356,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void onLoadData() {
 			// This can go anywhere in the lifecycle.
 
-			// We need this header for two reasons. The most important reason is that without it, certain sites (such as MIT sites) will be forced into compatibility
-			// mode due to the Compatibility View Blacklist maintained by Microsoft. Also, this prevents future versions of IE from rendering things differently
-			// before we get a chance to check it and update the UI.
-			Response.AppendHeader( "X-UA-Compatible", "IE=10" );
+			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
