@@ -1,22 +1,28 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+﻿using System;
+
+namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A level (h2, h3, or h4) for a heading control.
 	/// </summary>
+	[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
 	public enum HeadingLevel {
 		/// <summary>
 		/// A second-level heading, which is the highest level that should be used within the content of a page since first-level headings are reserved for page
 		/// titles.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
 		H2,
 
 		/// <summary>
 		/// A third-level heading.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
 		H3,
 
 		/// <summary>
 		/// A fourth-level heading.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
 		H4
 	}
 
