@@ -11,16 +11,12 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class StatusMessages: EwfPage {
 		protected override void loadData() {
-			ph.AddControlsReturnThis( GetTests() );
-		}
-
-		internal static EwfTable GetTests() {
-			return
+			ph.AddControlsReturnThis(
 				EwfTable.CreateWithItems(
 					items:
 						getStatusTests()
 							.Select( tests => new EwfTableItem( tests.Item1, new PostBackButton( tests.Item2, new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false ) ) )
-						.ToFunctions() );
+							.ToFunctions() ) );
 		}
 
 		private IEnumerable<Tuple<string, ActionPostBack>> getStatusTests() {
@@ -83,18 +79,19 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
 					} ) );
 
-			yield return Tuple.Create( "Several info messages, Several warning messages",
-			                           PostBack.CreateFull( id: "10",
-			                                                firstModificationMethod: () => {
-				                                                AddStatusMessage( StatusMessageType.Info, "This is the info message." );
-				                                                AddStatusMessage( StatusMessageType.Info, "This is the second info message." );
-				                                                AddStatusMessage( StatusMessageType.Info, "This is the third info message." );
+			yield return Tuple.Create(
+				"Several info messages, Several warning messages",
+				PostBack.CreateFull(
+					id: "10",
+					firstModificationMethod: () => {
+						AddStatusMessage( StatusMessageType.Info, "This is the info message." );
+						AddStatusMessage( StatusMessageType.Info, "This is the second info message." );
+						AddStatusMessage( StatusMessageType.Info, "This is the third info message." );
 
-				                                                AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
-				                                                AddStatusMessage( StatusMessageType.Warning, "This is second warning message" );
-				                                                AddStatusMessage( StatusMessageType.Warning, "This is third warning message" );
-			                                                } ) );
-
+						AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
+						AddStatusMessage( StatusMessageType.Warning, "This is second warning message" );
+						AddStatusMessage( StatusMessageType.Warning, "This is third warning message" );
+					} ) );
 
 			yield return
 				Tuple.Create(

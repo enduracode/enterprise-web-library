@@ -31,8 +31,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new HtmlEditing.Info( this ),
 							new RegexHelper.Info( this ),
 							new TwoWeekCalendarTest.Info( this, DateTime.Now ),
-						               new StatusMessages.Info( this ),
-						               new StatusMessagesBasicPage.Info( this ) ),
+							new StatusMessages.Info( this ) ),
+						new ResourceGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new ResourceGroup( "Layout", new BoxDemo.Info( this ) ),
 						new ResourceGroup(
 							"Form Controls",
