@@ -30,28 +30,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			using( var writer = new StringWriter() ) {
 				using( var reader = new StringReader( sourceCssText ) ) {
 					int cAsInt;
+					var braceNestingLevel = 0;
 					var selectorBuffer = new StringBuilder();
 					while( ( cAsInt = reader.Read() ) != -1 ) {
 						var c = (char)cAsInt;
-						if( selectorBuffer != null ) {
-							if( c == ',' ) {
+						if( braceNestingLevel == 0 ) {
+							if( c == '{' || c == ',' ) {
 								writer.Write( getTransformedSelector( selectorBuffer.ToString() ) );
-								writer.Write( c );
 								selectorBuffer = new StringBuilder();
-							}
-							else if( c == '{' ) {
-								writer.Write( getTransformedSelector( selectorBuffer.ToString() ) );
 								writer.Write( c );
-								selectorBuffer = null;
 							}
 							else
 								selectorBuffer.Append( c );
 						}
-						else {
+						else
 							writer.Write( c );
-							if( c == '}' )
-								selectorBuffer = new StringBuilder();
-						}
+
+						if( c == '{' )
+							braceNestingLevel += 1;
+						else if( c == '}' )
+							braceNestingLevel -= 1;
 					}
 				}
 				return writer.ToString();
