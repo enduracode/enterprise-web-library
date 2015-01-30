@@ -6,6 +6,12 @@ using Humanizer;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	public class FontAwesomeIcon: WebControl, ControlTreeDataLoader {
+		internal class CssElementCreator: ControlCssElementCreator {
+			CssElement[] ControlCssElementCreator.CreateCssElements() {
+				return new[] { new CssElement( "Icon", "span.fa" ) };
+			}
+		}
+
 		private readonly IEnumerable<string> classes;
 
 		/// <summary>
