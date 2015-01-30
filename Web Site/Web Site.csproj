@@ -542,7 +542,7 @@
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_vi.js" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-CN.js" />
     <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-TW.js" />
-    <Content Include="Ewf\ThirdParty\Spin\spin.min.js" />
+    <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
     <Content Include="GetSchema.aspx" />
