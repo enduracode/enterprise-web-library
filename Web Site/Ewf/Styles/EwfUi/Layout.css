@@ -64,13 +64,12 @@ ewfCheckBoxList table.ewfBlockCheckBox {
 	padding-bottom: 2px;
 }
 
-/* boxes */
+/* sections */
 ewfSectionBothStates {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 5px;
 	padding: 4px;
-	clear: both;
 }
 ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
@@ -84,15 +83,6 @@ ewfSectionClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
 }
 ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: 4px;
-}
-ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
-	float: right;
-}
-ewfSectionClosedState > ewfSectionHeadingContainer > ewfSectionCloseLabel, ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionExpandLabel {
-	display: none;
-}
-ewfSectionClosedState > ewfSectionContentContainer {
-	display: none;
 }
 
 /* tables */

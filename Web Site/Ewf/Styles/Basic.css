@@ -25,6 +25,20 @@ div.ewfControlList > div > table {
 	table-layout: fixed;
 }
 
+/* sections */
+ewfSectionBothStates {
+	clear: both;
+}
+ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
+	float: right;
+}
+ewfSectionClosedState > ewfSectionHeadingContainer > ewfSectionCloseLabel, ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionExpandLabel {
+	display: none;
+}
+ewfSectionClosedState > ewfSectionContentContainer {
+	display: none;
+}
+
 /* tables */
 table {
 	border-width: 0;
