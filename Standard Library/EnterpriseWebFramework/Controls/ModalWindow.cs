@@ -16,8 +16,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	//       4. Should modal windows gray out the rest of the page?
 	//       5. Should modal windows be able to contain post back buttons that require [modal] confirmation?
 	//       6. Should modal windows be able to contain action controls that don't open another modal, such as EwfLink?
-	//       7. Can we reimplement info/warning status message boxes to use modal windows? For info messages, we'd need a way to make a modal window close
-	//          automatically on a timer.
 	public class ModalWindow: EtherealControl {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfModalConfirmation";

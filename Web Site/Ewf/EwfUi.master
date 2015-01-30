@@ -3,7 +3,6 @@
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="main">
 	<asp:PlaceHolder runat="server" ID="globalPlace" />
-	<div runat="server" id="statusPlace" style="margin-top: 4px"></div>
 	<div id="ewfUiEntityAndTabsAndContent"><asp:PlaceHolder runat="server" ID="entityAndTopTabPlace" />
 		<table class="ewfUiTabsAndContent">
 			<tr runat="server">

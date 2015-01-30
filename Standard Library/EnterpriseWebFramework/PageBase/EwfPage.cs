@@ -638,14 +638,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
 					.Aggregate( ( a, b ) => a + b );
 
-			var statusMessageDialogFadeOutStatement = "";
-			if( StatusMessages.Any() ) {
-				statusMessageDialogFadeOutStatement = "showClickBlocker(true);";
-				if( StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
-					statusMessageDialogFadeOutStatement += "setTimeout( 'fadeOutStatusMessageDialog( 400 ); hideClickBlocker();', " + StatusMessages.Count() * 1000 + " );";
-			}
-
-
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
@@ -687,7 +679,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					" ",
 					"OnDocumentReady();",
 					controlInitStatements,
-					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )

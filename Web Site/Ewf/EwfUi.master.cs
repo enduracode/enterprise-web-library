@@ -488,9 +488,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		private EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
-
-		public void AddStatusStatusMessages( Control statusControls ) {
-			statusPlace.AddControlsReturnThis( statusControls );
-		}
 	}
 }

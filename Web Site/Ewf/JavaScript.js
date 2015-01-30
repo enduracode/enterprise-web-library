@@ -65,22 +65,36 @@ function NumericalOnly( evt, field ) {
 			return true;
 		default:
 			// Max of maxValueLength digits, numbers only.
-		// If some of the field is selected, let them replace the contents even if it's full
+			// If some of the field is selected, let them replace the contents even if it's full
 			return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
 	}
 }
 
-
-// This variable gives us the ability to restore the processing dialog's initial height. This supports the case where the the processing dialog
-// displays taking-a-while message, they stop the operation and attempt it again.
-var initialEwfProcessingDialogHeight;
-
 //This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 
 function OnDocumentReady() {
-	initialEwfProcessingDialogHeight = $( '.ewfProcessingDialog' ).css( 'height' );
 	SetupTextBoxFocus();
 	RemoveClickScriptBinding();
+
+	var opts = {
+		lines: 13, // The number of lines to draw
+		length: 8, // The length of each line
+		width: 5, // The line thickness
+		radius: 9, // The radius of the inner circle
+		corners: 1, // Corner roundness (0..1)
+		rotate: 0, // The rotation offset
+		direction: 1, // 1: clockwise, -1: counterclockwise
+		color: '#000', // #rgb or #rrggbb or array of colors
+		speed: 1.2, // Rounds per second
+		trail: 71, // Afterglow percentage
+		shadow: false, // Whether to render a shadow
+		hwaccel: true, // Whether to use hardware acceleration
+		className: 'spinner', // The CSS class to assign to the spinner
+		zIndex: 2e9, // The z-index (defaults to 2000000000)
+		top: '50%', // Top position relative to parent
+		left: '50%' // Left position relative to parent
+	};
+	new Spinner( opts ).spin( document.getElementById( "ewfSpinner" ) );
 }
 
 //Finds all EwfTextBoxes and appends onfocus and onblur events to apply focus CSS styles to their parent.
@@ -118,7 +132,7 @@ function RemoveClickScriptBinding() {
 			//Unbind it from the row
 			$( this ).removeAttr( "onclick" );
 			//For each td
-			$( this ).children( ":not(.ewfNotClickable)" ).click( clickScript );
+			$( this ).children( ":not( .ewfNotClickable )" ).click( clickScript );
 		}
 	);
 }
@@ -136,65 +150,28 @@ function postBackRequestStarted() {
 	for( var i in CKEDITOR.instances )
 		CKEDITOR.instances[i].updateElement();
 
-	$( ".ewfTimeOut" ).hide();
-	showClickBlocker();
-	showProcessingDialog();
-	setTimeout("$('.ewfProcessingDialog').animate({height: '16ex'}, 200, function() { $('.ewfTimeOut').fadeIn(100);});", 10000);
+	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerA" );
+	$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogA" );
+
+	setTimeout( '$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogTo" );', 10000 );
 }
 
 function stopPostBackRequest() {
-	hideClickBlocker();
-	hideProcessingDialog();
+	deactivateProcessingDialog();
 	if( window.stop )
 		window.stop(); // Firefox
 	else
 		document.execCommand( 'Stop' ); // IE
-
-	$( '.ewfProcessingDialog' ).css( 'height', initialEwfProcessingDialogHeight );
 }
 
-function showClickBlocker( immediate ) {
-	$( ".ewfClickBlocker" ).fadeIn( immediate ? 0 : 200 );
+function deactivateProcessingDialog() {
+	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerI" );
+	$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogI" );
 }
 
-function hideClickBlocker() {
-	$( ".ewfClickBlocker" ).fadeOut( 200 );
-}
-
-var spinner;
-
-function showProcessingDialog() {
-	$( ".ewfProcessingDialog" ).show();
-
-	var opts = {
-		lines: 13, // The number of lines to draw
-		length: 8, // The length of each line
-		width: 5, // The line thickness
-		radius: 9, // The radius of the inner circle
-		corners: 1, // Corner roundness (0..1)
-		rotate: 0, // The rotation offset
-		direction: 1, // 1: clockwise, -1: counterclockwise
-		color: '#000', // #rgb or #rrggbb or array of colors
-		speed: 1.2, // Rounds per second
-		trail: 71, // Afterglow percentage
-		shadow: false, // Whether to render a shadow
-		hwaccel: true, // Whether to use hardware acceleration
-		className: 'spinner', // The CSS class to assign to the spinner
-		zIndex: 2e9, // The z-index (defaults to 2000000000)
-		top: '0', // Top position relative to parent in px
-		left: '0' // Left position relative to parent in px
-	};
-	spinner = new Spinner( opts ).spin( document.getElementById( 'spinner' ) );
-}
-
-function hideProcessingDialog() {
-	$( ".ewfProcessingDialog" ).hide();
-	if( spinner )
-		spinner.stop();
-}
-
-function fadeOutStatusMessageDialog( duration ) {
-	$( ".ewfStatusMessageDialog" ).fadeOut( duration );
+function dockNotificationSection() {
+	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
+	$( "#ewfNotificationSpacer" ).addClass( "ewfNotificationSpacerA" );
 }
 
 

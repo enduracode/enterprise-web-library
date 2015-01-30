@@ -47,7 +47,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <param name="expanded">Set to true or false if you want users to be able to expand or close the box by clicking on the heading.</param>
 		public Box( string heading, IEnumerable<Control> childControls, bool? expanded = null ): this( heading, childControls, expanded, false ) {}
 
-		internal Box( string heading, IEnumerable<Control> childControls, bool? expanded, bool disableStatePersistence ): base( "section" ) {
+		/// <summary>
+		/// Standard library use only.
+		/// </summary>
+		public Box( string heading, IEnumerable<Control> childControls, bool? expanded, bool disableStatePersistence ): base( "section" ) {
 			this.heading = heading;
 			this.childControls = childControls.ToArray();
 			this.expanded = expanded;

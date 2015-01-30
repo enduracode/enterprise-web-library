@@ -1,53 +1,94 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	public partial class BasicPage: MasterPage, ControlTreeDataLoader {
+	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
+		// Some of these are used by the Standard Library JavaScript file.
+		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
+		private const string clickBlockerActiveClass = "ewfClickBlockerA";
+		private const string processingDialogBlockInactiveClass = "ewfProcessingDialogI";
+		private const string processingDialogBlockActiveClass = "ewfProcessingDialogA";
+		private const string processingDialogBlockTimeOutClass = "ewfProcessingDialogTo";
+		private const string processingDialogProcessingParagraphClass = "ewfProcessingP";
+		private const string processingDialogTimeOutParagraphClass = "ewfTimeOutP";
+		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
+		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
+		private const string notificationSpacerActiveClass = "ewfNotificationSpacerA";
+		private const string infoMessageContainerClass = "ewfInfoMsg";
+		private const string warningMessageContainerClass = "ewfWarnMsg";
+		private const string statusMessageTextClass = "ewfStatusText";
+
 		internal class CssElementCreator: ControlCssElementCreator {
-			// Some of these are used by the Standard Library JavaScript file.
-			internal const string ClickBlockingBlockCssClass = "ewfClickBlocker";
-			internal const string ProcessingDialogBlockCssClass = "ewfProcessingDialog";
-			internal const string StatusMessageDialogBlockCssClass = "ewfStatusMessageDialog";
-			internal const string StatusMessageDialogControlListInfoItemCssClass = "ewfStatusMessageDialogInfoMessage";
-			internal const string StatusMessageDialogControlListWarningItemCssClass = "ewfStatusMessageDialogWarningMessage";
-
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				// Some of the elements below cover a subset of other CSS elements in a more specific way. See the comment in EwfUi.master for more information.
-
 				var elements = new List<CssElement>();
-				elements.Add( new CssElement( "ClickBlockingBlock", "div." + ClickBlockingBlockCssClass ) );
 
-				const string processingDialogBlockSelector = "div." + ProcessingDialogBlockCssClass;
-				elements.Add( new CssElement( "ProcessingDialogBlock", processingDialogBlockSelector ) );
-				elements.Add( new CssElement( "ProcessingDialogParagraph", processingDialogBlockSelector + " > p" ) );
+				const string clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass;
+				const string clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass;
+				elements.Add( new CssElement( "ClickBlockerBothStates", clickBlockingBlockInactiveSelector, clickBlockingBlockActiveSelector ) );
+				elements.Add( new CssElement( "ClickBlockerInactiveState", clickBlockingBlockInactiveSelector ) );
+				elements.Add( new CssElement( "ClickBlockerActiveState", clickBlockingBlockActiveSelector ) );
 
-				const string statusMessageDialogBlockSelector = "div." + StatusMessageDialogBlockCssClass;
-				elements.Add( new CssElement( "StatusMessageDialogBlock", statusMessageDialogBlockSelector ) );
-				elements.Add(
-					new CssElement(
-						"StatusMessageDialogControlListInfoItem",
-						ControlStack.CssElementCreator.Selectors.Select(
-							i =>
-							statusMessageDialogBlockSelector + " > " + i + " > " + ControlStack.CssElementCreator.ItemSelector + " > " + "span." +
-							StatusMessageDialogControlListInfoItemCssClass ).ToArray() ) );
-				elements.Add(
-					new CssElement(
-						"StatusMessageDialogControlListWarningItem",
-				                              ControlStack.CssElementCreator.Selectors.SelectMany(
-					                              stack =>
-					                              ControlLine.CssElementCreator.Selectors.Select(
-						                              line =>
-						                              statusMessageDialogBlockSelector + " > " + line + " " + stack + " > " + ControlStack.CssElementCreator.ItemSelector + " > " +
-						                              "span." + StatusMessageDialogControlListWarningItemCssClass ) ).ToArray() ) );
-
+				elements.AddRange( getProcessingDialogElements() );
+				elements.AddRange( getNotificationElements() );
 				return elements.ToArray();
+			}
+
+			private IEnumerable<CssElement> getProcessingDialogElements() {
+				var elements = new List<CssElement>();
+
+				const string blockInactiveSelector = "div." + processingDialogBlockInactiveClass;
+				const string blockActiveSelector = "div." + processingDialogBlockActiveClass;
+				const string blockTimeOutSelector = "div." + processingDialogBlockTimeOutClass;
+				var allBlockSelectors = new[] { blockInactiveSelector, blockActiveSelector, blockTimeOutSelector };
+				elements.AddRange(
+					new[]
+						{
+							new CssElement( "ProcessingDialogBlockAllStates", allBlockSelectors ), new CssElement( "ProcessingDialogBlockInactiveState", blockInactiveSelector ),
+							new CssElement( "ProcessingDialogBlockActiveState", blockActiveSelector ), new CssElement( "ProcessingDialogBlockTimeOutState", blockTimeOutSelector )
+						} );
+
+				elements.Add(
+					new CssElement( "ProcessingDialogProcessingParagraph", allBlockSelectors.Select( i => i + " > p." + processingDialogProcessingParagraphClass ).ToArray() ) );
+
+				const string timeOutParagraphSelector = "p." + processingDialogTimeOutParagraphClass;
+				elements.AddRange(
+					new[]
+						{
+							new CssElement( "ProcessingDialogTimeOutParagraphBothStates", allBlockSelectors.Select( i => i + " > " + timeOutParagraphSelector ).ToArray() ),
+							new CssElement(
+								"ProcessingDialogTimeOutParagraphInactiveState",
+								new[] { blockInactiveSelector, blockActiveSelector }.Select( i => i + " > " + timeOutParagraphSelector ).ToArray() ),
+							new CssElement( "ProcessingDialogTimeOutParagraphActiveState", blockTimeOutSelector + " > " + timeOutParagraphSelector )
+						} );
+
+				return elements;
+			}
+
+			private IEnumerable<CssElement> getNotificationElements() {
+				var elements = new List<CssElement>();
+
+				const string containerNotificationSelector = "div." + notificationSectionContainerNotificationClass;
+				const string containerDockedSelector = "div." + notificationSectionContainerDockedClass;
+				elements.AddRange(
+					new[]
+						{
+							new CssElement( "NotificationSectionContainerBothStates", containerNotificationSelector, containerDockedSelector ),
+							new CssElement( "NotificationSectionContainerNotificationState", containerNotificationSelector ),
+							new CssElement( "NotificationSectionContainerDockedState", containerDockedSelector )
+						} );
+
+				elements.Add( new CssElement( "NotificationSpacerActiveState", "div." + notificationSpacerActiveClass ) );
+				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass ) );
+				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass ) );
+				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass ) );
+
+				return elements;
 			}
 		}
 
@@ -63,8 +104,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		public HtmlGenericControl Body { get { return basicBody; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			basicBody.Attributes.Add( "onpagehide", "hideProcessingDialog();hideClickBlocker();" );
+			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
+
+			// This is used by the Standard Library JavaScript file.
+			const string notificationSpacerId = "ewfNotificationSpacer";
+
+			ph.AddControlsReturnThis( new Block { ClientIDMode = ClientIDMode.Static, ID = notificationSpacerId } );
 
 			if( !AppTools.IsLiveInstallation ) {
 				var children = new List<Control>();
@@ -91,28 +137,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							.GetLiteralControl() ) { CssClass = "ewfNonLiveWarning" } );
 			}
 
-			ph2.AddControlsReturnThis( new Block { CssClass = CssElementCreator.ClickBlockingBlockCssClass }, getProcessingDialog() );
+			// This is used by the Standard Library JavaScript file.
+			const string clickBlockerId = "ewfClickBlocker";
 
-			var statusControls = new NamingPlaceholder( new Control[ 0 ] );
-			var dialogStatusControls = new NamingPlaceholder( new Control[ 0 ] );
-			addStatusMessageControls( statusControls, dialogStatusControls );
-			ph2.AddControlsReturnThis( dialogStatusControls );
-
-			if( EwfPage.Instance.Master is EwfUi )
-				( (EwfUi)EwfPage.Instance.Master ).AddStatusStatusMessages( statusControls );
-			else
-				ph.AddControlsReturnThis( statusControls );
-
+			ph2.AddControlsReturnThis(
+				new Block { ClientIDMode = ClientIDMode.Static, ID = clickBlockerId, CssClass = clickBlockerInactiveClass },
+				getProcessingDialog(),
+				new NamingPlaceholder( getStatusMessageControl() ) );
 
 			var ajaxLoadingImage = new EwfImage( "Images/ajax-loader.gif" ) { CssClass = "ajaxloaderImage" };
 			ajaxLoadingImage.Style.Add( "display", "none" );
 			ph2.AddControlsReturnThis( ajaxLoadingImage );
+
 			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
 		private Control getProcessingDialog() {
 			/*
-			 * We switched to a JavaScript-based spinner due to a number of benefits.
+			 * We switched from an animated GIF to a JavaScript-based spinner due to a number of benefits.
 			 * First, IE stops animating all GIFs when a request is made, even with the latest version. They do not believe this is a bug.
 			 * Firefox stops animating GIFs in other situations, such as when we hide the processing dialog when the user wants to attempt
 			 * the request again.
@@ -124,80 +166,82 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			 * Another point against images is that you have to prevent dragging and disable selection, to make the interface look more professional.
 			 * Spin.js also has the benefit of being fully compatible with all browsers across the board.
 			 */
-			var image = new Literal { Text = "<span id='spinner'>&nbsp;</span>" };
 
-			// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
-			Func<int, Control> getEllipsis = n => new LiteralControl { Text = "<span id='ellipsis{0}'>.</span>".FormatWith( n ) };
+			// These are used by the Standard Library JavaScript file.
+			const string dialogId = "ewfProcessingDialog";
+			const string spinnerId = "ewfSpinner";
+
+			var spinnerParent = new EwfLabel { ClientIDMode = ClientIDMode.Static, ID = spinnerId };
+			spinnerParent.Style.Add( HtmlTextWriterStyle.Position, "relative" );
+			spinnerParent.Style.Add( HtmlTextWriterStyle.MarginLeft, "25px" );
+			spinnerParent.Style.Add( HtmlTextWriterStyle.MarginRight, "40px" );
+
 			return
 				new Block(
-					new Paragraph( image,
-					               " ".GetLiteralControl(),
-					               new Literal { Text = @"<span id=""ewfProcessing"">{0}</span>".FormatWith( Translation.Processing ) },
-					               getEllipsis( 1 ),
-					               getEllipsis( 2 ),
-					               getEllipsis( 3 ) ) { CssClass = "ewfProcessingDialogProgress" },
-					new Paragraph( new CustomButton( () => "stopPostBackRequest()" )
+					new Paragraph(
+						spinnerParent,
+						Translation.Processing.GetLiteralControl(),
+						getProcessingDialogEllipsisDot( 1 ),
+						getProcessingDialogEllipsisDot( 2 ),
+						getProcessingDialogEllipsisDot( 3 ) ) { CssClass = processingDialogProcessingParagraphClass },
+					new Paragraph(
+						new CustomButton( () => "stopPostBackRequest()" ) { ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile ) } )
 						{
-							ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile )
-						} )
-						{
-							CssClass = "ewfTimeOut"
-							/* This is used by the Standard Library JavaScript file. */
-						} ) { CssClass = CssElementCreator.ProcessingDialogBlockCssClass };
+							CssClass = processingDialogTimeOutParagraphClass
+						} ) { ClientIDMode = ClientIDMode.Static, ID = dialogId, CssClass = processingDialogBlockInactiveClass };
 		}
 
-		private static void addStatusMessageControls( Control staticControlsContainer, Control dialogControlContainer ) {
-			var messages = EwfPage.Instance.StatusMessages;
+		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
+		private Control getProcessingDialogEllipsisDot( int dotNumber ) {
+			// This is used by the Basic style sheet.
+			const string id = "ewfEllipsis";
 
-			if( !messages.Any() )
-				return;
-
-			var controls = new List<Control>();
-			var staticControls = new List<Control>();
-
-			var infoMessagesExist = messages.Any( i => i.Item1 == StatusMessageType.Info );
-			var warningMessagesExist = messages.Any( i => i.Item1 == StatusMessageType.Warning );
-
-			if( infoMessagesExist ) {
-				Func<Control> getInfoControlLine =
-					() =>
-					new ControlLine( new Literal { Text = @"<i class='fa fa-info-circle fa-2x' style='color: rgb(120, 160, 195);'></i>" },
-					                 getStackFromStatuses( messages.Where( message => message.Item1 == StatusMessageType.Info ),
-					                                       CssElementCreator.StatusMessageDialogControlListInfoItemCssClass ) );
-
-				controls.Add( getInfoControlLine() );
-				staticControls.Add( getInfoControlLine() );
-			}
-
-
-			if( infoMessagesExist && warningMessagesExist )
-				controls.Add( new Literal { Text = "<hr />" } );
-
-			if( warningMessagesExist ) {
-				Func<Control> getWarningControlLine =
-					() =>
-					new ControlLine( new Literal { Text = @"<i class='fa fa-exclamation-triangle fa-2x' style='color: #E69017;'></i>" },
-					                 getStackFromStatuses( messages.Where( message => message.Item1 == StatusMessageType.Warning ),
-					                                       CssElementCreator.StatusMessageDialogControlListWarningItemCssClass ) );
-
-				controls.Add( getWarningControlLine() );
-				staticControls.Add( getWarningControlLine() );
-
-				var alignRight = new HtmlGenericControl( "div" );
-				alignRight.Style[ "text-align" ] = "right";
-				alignRight.AddControlsReturnThis( new CustomButton( () => "fadeOutStatusMessageDialog( 0 ); hideClickBlocker();" )
-					{
-						ActionControlStyle = new ButtonActionControlStyle( "OK" )
-					} );
-				controls.Add( alignRight );
-			}
-
-			dialogControlContainer.AddControlsReturnThis( new Block( controls.ToArray() ) { CssClass = CssElementCreator.StatusMessageDialogBlockCssClass } );
-			staticControlsContainer.AddControlsReturnThis( ControlStack.CreateWithControls( true, staticControls.ToArray() ) );
+			return new EwfLabel { ClientIDMode = ClientIDMode.Static, ID = "{0}{1}".FormatWith( id, dotNumber ), Text = "." };
 		}
 
-		private static ControlStack getStackFromStatuses( IEnumerable<Tuple<StatusMessageType, string>> iEnumerable, string itemCssClass ) {
-			return ControlStack.CreateWithControls( true, ( iEnumerable.Select( message => new Label { CssClass = itemCssClass, Text = message.Item2 } ) ).ToArray() );
+		private IEnumerable<Control> getStatusMessageControl() {
+			var messagesExist = EwfPage.Instance.StatusMessages.Any();
+			new ModalWindow(
+				new NamingPlaceholder( messagesExist && !statusMessagesDisplayAsNotification() ? getStatusMessageControlList() : new Control[ 0 ] ),
+				title: "Messages",
+				open: messagesExist && !statusMessagesDisplayAsNotification() );
+
+			// This is used by the Standard Library JavaScript file.
+			const string notificationSectionContainerId = "ewfNotification";
+
+			return messagesExist && statusMessagesDisplayAsNotification()
+				       ? new Block( new Box( "Messages", getStatusMessageControlList(), false, true ) )
+					       {
+						       ClientIDMode = ClientIDMode.Static,
+						       ID = notificationSectionContainerId,
+						       CssClass = notificationSectionContainerNotificationClass
+					       }.ToSingleElementArray()
+				       : new Control[ 0 ];
+		}
+
+		private IEnumerable<Control> getStatusMessageControlList() {
+			return
+				ControlStack.CreateWithControls(
+					true,
+					EwfPage.Instance.StatusMessages.Select(
+						i =>
+						new Block(
+							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ),
+							new EwfLabel { CssClass = statusMessageTextClass, Text = i.Item2 } )
+							{
+								CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass
+							} as Control ).ToArray() )
+					.ToSingleElementArray();
+		}
+
+		string ControlWithJsInitLogic.GetJsInitStatements() {
+			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+				       ? "setTimeout( 'dockNotificationSection();', " + EwfPage.Instance.StatusMessages.Count() * 1000 + " );"
+				       : "";
+		}
+
+		private bool statusMessagesDisplayAsNotification() {
+			return EwfPage.Instance.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && EwfPage.Instance.StatusMessages.Count() <= 3;
 		}
 	}
 }
