@@ -19,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private const string processingDialogTimeOutParagraphClass = "ewfTimeOutP";
 		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
 		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
-		private const string notificationSpacerActiveClass = "ewfNotificationSpacerA";
+		private const string notificationSpacerClass = "ewfNotificationSpacer";
 		private const string infoMessageContainerClass = "ewfInfoMsg";
 		private const string warningMessageContainerClass = "ewfWarnMsg";
 		private const string statusMessageTextClass = "ewfStatusText";
@@ -83,7 +83,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							new CssElement( "NotificationSectionContainerDockedState", containerDockedSelector )
 						} );
 
-				elements.Add( new CssElement( "NotificationSpacerActiveState", "div." + notificationSpacerActiveClass ) );
+				elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass ) );
 				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass ) );
 				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass ) );
 				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass ) );
@@ -107,10 +107,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 
-			// This is used by the Standard Library JavaScript file.
-			const string notificationSpacerId = "ewfNotificationSpacer";
-
-			ph.AddControlsReturnThis( new Block { ClientIDMode = ClientIDMode.Static, ID = notificationSpacerId } );
+			if( EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification() )
+				ph.AddControlsReturnThis( new Block { CssClass = notificationSpacerClass } );
 
 			if( !AppTools.IsLiveInstallation ) {
 				var children = new List<Control>();

@@ -171,7 +171,6 @@ function deactivateProcessingDialog() {
 
 function dockNotificationSection() {
 	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
-	$( "#ewfNotificationSpacer" ).addClass( "ewfNotificationSpacerA" );
 }
 
 

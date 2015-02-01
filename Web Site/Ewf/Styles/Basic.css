@@ -387,38 +387,42 @@ ewfNotificationSectionContainerBothStates {
 	min-width: 10rem;
 	max-width: 40rem;
 }
-ewfNotificationSectionContainerBothStates > ewfSectionBothStates {
-	background-color: white;
-}
 ewfNotificationSectionContainerNotificationState {
 	top: 50%;
-	transform: translate( -50%, -50% );
+	transform: translateX( -50% ) translateY( -50% );
+}
+ewfNotificationSectionContainerDockedState {
+	top: 0;
+	transform: translateX( -50% );
+	-webkit-animation-name: notificationSectionPosition;
+	animation-name: notificationSectionPosition;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBothStates {
+	border-style: solid;
+	background-color: white;
 }
 ewfNotificationSectionContainerNotificationState > ewfSectionBothStates {
 	font-size: 1.1em;
 	box-shadow: 0 0 15px black;
 	border-width: .1em;
-	border-style: solid;
 	border-radius: 1em;
 	padding: 2em;
-}
-ewfNotificationSectionContainerNotificationState > ewfSectionBothStates > ewfSectionHeadingContainer {
-	display: none;
-}
-ewfNotificationSectionContainerNotificationState > ewfSectionBothStates > ewfSectionContentContainer {
-	display: block;
-}
-ewfNotificationSectionContainerDockedState {
-	top: 0;
-	transform: translateX( -50% );
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBothStates {
 	font-size: 1rem;
 	border-width: .1rem;
-	border-style: solid;
-	border-top-style: none;
+	border-top-width: 0;
 	border-radius: 0 0 .5em .5em;
 	padding: .2rem 1em;
+	transition-property: font-size, box-shadow, border-width, border-radius, padding;
+}
+ewfNotificationSectionContainerNotificationState > ewfSectionBothStates > ewfSectionHeadingContainer {
+	height: 0;
+	visibility: hidden;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBothStates > ewfSectionHeadingContainer {
+	-webkit-animation-name: notificationSectionDisplay;
+	animation-name: notificationSectionDisplay;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
@@ -433,7 +437,20 @@ ewfNotificationSectionContainerDockedState > ewfSectionClosedState > ewfSectionH
 ewfNotificationSectionContainerDockedState > ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: .2rem;
 }
-ewfNotificationSpacerActiveState {
+ewfNotificationSectionContainerBothStates > ewfSectionBothStates > ewfSectionContentContainer {
+	display: block;
+	overflow: hidden;
+}
+/* Using max-height in these two rules is a hack. We'd like to remove the first rule and use height in the second, but height doesn't transition properly when
+	"auto" is involved. */
+ewfNotificationSectionContainerNotificationState > ewfSectionClosedState > ewfSectionContentContainer {
+	max-height: 100em;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionClosedState > ewfSectionContentContainer {
+	max-height: 0;
+	transition-property: max-height;
+}
+ewfNotificationSpacer {
 	height: 1.7rem;
 }
 ewfInfoMessageContainer > ewfIcon {
@@ -444,6 +461,73 @@ ewfWarningMessageContainer > ewfIcon {
 }
 ewfWarningMessageContainer > ewfStatusMessageText {
 	font-weight: bold;
+}
+ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDockedState > ewfSectionBothStates > ewfSectionHeadingContainer {
+	-webkit-animation-duration: 800ms;
+	animation-duration: 800ms;
+}
+@keyframes notificationSectionPosition {
+	0% {
+		top: 50%;
+		transform: translateX( -50% ) translateY( -50% );
+		animation-timing-function: ease-in;
+	}
+	50% {
+		top: -50%;
+		transform: translateX( -50% ) translateY( -50% );
+	}
+	51% {
+		top: -1.7rem;
+		transform: translateX( -50% );
+		animation-timing-function: ease-out;
+	}
+}
+@-webkit-keyframes notificationSectionPosition {
+	0% {
+		top: 50%;
+		transform: translateX( -50% ) translateY( -50% );
+		-webkit-animation-timing-function: ease-in;
+	}
+	50% {
+		top: -50%;
+		transform: translateX( -50% ) translateY( -50% );
+	}
+	51% {
+		top: -1.7rem;
+		transform: translateX( -50% );
+		-webkit-animation-timing-function: ease-out;
+	}
+}
+@keyframes notificationSectionDisplay {
+	0% {
+		height: 0;
+		visibility: hidden;
+	}
+	50% {
+		height: 0;
+		visibility: hidden;
+	}
+	51% {
+		height: auto;
+		visibility: visible;
+	}
+}
+@-webkit-keyframes notificationSectionDisplay {
+	0% {
+		height: 0;
+		visibility: hidden;
+	}
+	50% {
+		height: 0;
+		visibility: hidden;
+	}
+	51% {
+		height: auto;
+		visibility: visible;
+	}
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBothStates, ewfNotificationSectionContainerDockedState > ewfSectionClosedState > ewfSectionContentContainer {
+	transition-delay: 400ms;
 }
 .profiler-results {
 	opacity: .4;
