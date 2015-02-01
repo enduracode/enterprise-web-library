@@ -498,18 +498,25 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 		-webkit-animation-timing-function: ease-out;
 	}
 }
+/* As of 31 Jan 2015, Firefox and IE didn't animate correctly without max-height. */
 @keyframes notificationSectionDisplay {
 	0% {
 		height: 0;
+		max-height: 0;
 		visibility: hidden;
 	}
 	50% {
 		height: 0;
+		max-height: 0;
 		visibility: hidden;
 	}
 	51% {
 		height: auto;
+		max-height: 100em;
 		visibility: visible;
+	}
+	100% {
+		max-height: 100em;
 	}
 }
 @-webkit-keyframes notificationSectionDisplay {
