@@ -382,17 +382,16 @@ ewfProcessingDialogTimeOutParagraphActiveState {
 ewfNotificationSectionContainerBothStates {
 	position: fixed;
 	font-size: 1rem;
+	top: 0;
 	left: 50%;
 	width: 80%;
 	min-width: 10rem;
 	max-width: 40rem;
 }
 ewfNotificationSectionContainerNotificationState {
-	top: 50%;
-	transform: translateX( -50% ) translateY( -50% );
+	transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 }
 ewfNotificationSectionContainerDockedState {
-	top: 0;
 	transform: translateX( -50% );
 	-webkit-animation-name: notificationSectionPosition;
 	animation-name: notificationSectionPosition;
@@ -468,33 +467,28 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 }
 @keyframes notificationSectionPosition {
 	0% {
-		top: 50%;
-		transform: translateX( -50% ) translateY( -50% );
+		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 		animation-timing-function: ease-in;
 	}
 	50% {
-		top: -50%;
-		transform: translateX( -50% ) translateY( -50% );
+		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 	}
 	51% {
-		top: -1.7rem;
-		transform: translateX( -50% );
+		transform: translateX( -50% ) translateY( -1.7em );
 		animation-timing-function: ease-out;
 	}
 }
 @-webkit-keyframes notificationSectionPosition {
 	0% {
-		top: 50%;
-		transform: translateX( -50% ) translateY( -50% );
+		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 		-webkit-animation-timing-function: ease-in;
 	}
 	50% {
-		top: -50%;
-		transform: translateX( -50% ) translateY( -50% );
+		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 	}
 	51% {
-		top: -1.7rem;
-		transform: translateX( -50% );
+		top: 0;
+		transform: translateX( -50% ) translateY( -1.7em );
 		-webkit-animation-timing-function: ease-out;
 	}
 }
