@@ -436,6 +436,7 @@ ewfNotificationSectionContainerDockedState > ewfSectionClosedState > ewfSectionH
 ewfNotificationSectionContainerDockedState > ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: .2rem;
 }
+/* As of 31 Jan 2015, "overflow: hidden" causes premature line wrapping in Chrome and Firefox when the container is in the notification state. */
 ewfNotificationSectionContainerBothStates > ewfSectionBothStates > ewfSectionContentContainer {
 	display: block;
 	overflow: hidden;
