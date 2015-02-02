@@ -286,7 +286,7 @@ ewfClickBlockerInactiveState {
 }
 ewfClickBlockerActiveState {
 	opacity: 0.3;
-	transition: opacity 400ms 250ms;
+	transition: opacity 400ms;
 }
 ewfProcessingDialogBlockAllStates {
 	position: fixed;
@@ -312,7 +312,7 @@ ewfProcessingDialogBlockInactiveState {
 	transition: height 0 400ms, visibility 400ms, opacity 400ms;
 }
 ewfProcessingDialogBlockActiveState {
-	transition: opacity 400ms 250ms;
+	transition: opacity 400ms;
 }
 ewfProcessingDialogBlockTimeOutState {
 	height: 8rem;
