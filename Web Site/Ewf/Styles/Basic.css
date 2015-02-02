@@ -473,7 +473,7 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 	50% {
 		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 	}
-	51% {
+	75% {
 		transform: translateX( -50% ) translateY( -1.7em );
 		animation-timing-function: ease-out;
 	}
@@ -486,8 +486,7 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 	50% {
 		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 	}
-	51% {
-		top: 0;
+	75% {
 		transform: translateX( -50% ) translateY( -1.7em );
 		-webkit-animation-timing-function: ease-out;
 	}
@@ -504,7 +503,7 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 		max-height: 0;
 		visibility: hidden;
 	}
-	51% {
+	50.1% {
 		height: auto;
 		max-height: 100em;
 		visibility: visible;
@@ -522,7 +521,7 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 		height: 0;
 		visibility: hidden;
 	}
-	51% {
+	50.1% {
 		height: auto;
 		visibility: visible;
 	}
