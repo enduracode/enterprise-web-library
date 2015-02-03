@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
+using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 
 namespace RedStapler.StandardLibrary.Configuration {
 	/// <summary>
@@ -13,8 +14,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 
 		internal readonly bool SupportsSecureConnections;
 		internal readonly BaseUrl DefaultBaseUrl;
+		internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
-		internal WebApplication( string name, bool supportsSecureConnections, string installationPath, string systemShortName, bool systemHasMultipleWebApplications ) {
+		internal WebApplication(
+			string name, bool supportsSecureConnections, string installationPath, string systemShortName, bool systemHasMultipleWebApplications, WebProject configuration ) {
 			Name = name;
 			SupportsSecureConnections = supportsSecureConnections;
 
@@ -27,15 +30,25 @@ namespace RedStapler.StandardLibrary.Configuration {
 				iisExpress ? 8080 : 80,
 				iisExpress ? 44300 : 443,
 				systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
+
+			var cookieAttributes = configuration.DefaultCookieAttributes;
+			DefaultCookieAttributes = cookieAttributes != null
+				                          ? new DefaultCookieAttributes( null, cookieAttributes.Path, cookieAttributes.NamePrefix )
+				                          : new DefaultCookieAttributes( null, null, null );
 		}
 
 		internal WebApplication( string name, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration )
-			: this( name, supportsSecureConnections, machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl ) {}
+			: this(
+				name,
+				supportsSecureConnections,
+				machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl,
+				machineIsStandbyServer ? configuration.StandbyDefaultCookieAttributes : configuration.DefaultCookieAttributes ) {}
 
 		internal WebApplication( string name, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
-			: this( name, supportsSecureConnections, configuration.DefaultBaseUrl ) {}
+			: this( name, supportsSecureConnections, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes ) {}
 
-		internal WebApplication( string name, bool supportsSecureConnections, InstallationStandardBaseUrl baseUrl ) {
+		internal WebApplication(
+			string name, bool supportsSecureConnections, InstallationStandardBaseUrl baseUrl, InstallationStandardCookieAttributes cookieAttributes ) {
 			Name = name;
 			SupportsSecureConnections = supportsSecureConnections;
 
@@ -45,6 +58,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 				baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
 				baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
 				baseUrl.Path ?? "" );
+
+			DefaultCookieAttributes = cookieAttributes != null
+				                          ? new DefaultCookieAttributes( cookieAttributes.Domain, cookieAttributes.Path, cookieAttributes.NamePrefix )
+				                          : new DefaultCookieAttributes( null, null, null );
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		partial class Info {
 			protected override void init() {
 				// This guarantees that the page will always be secure, even for non intermediate installations.
-				if( !EwfApp.SupportsSecureConnections )
+				if( !EwfConfigurationStatics.AppSupportsSecureConnections )
 					throw new ApplicationException();
 			}
 

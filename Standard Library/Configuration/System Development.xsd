@@ -48,8 +48,14 @@
 			<element name="name" type="string" />
 			<element name="NamespaceAndAssemblyName" type="string" />
 			<element name="useCertificateAuthentication" type="boolean" minOccurs="0" />
-			<element name="RequiresEnhancedSecurity" type="boolean" minOccurs="0" />
+			<element name="DefaultCookieAttributes" type="rs:SystemDevelopmentCookieAttributes" minOccurs="0" />
 			<element name="IsUpdateableWhenInstalled" type="boolean" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="SystemDevelopmentCookieAttributes">
+		<sequence>
+			<element name="Path" type="string" minOccurs="0" />
+			<element name="NamePrefix" type="string" minOccurs="0" />
 		</sequence>
 	</complexType>
 	<complexType name="ServerSideConsoleProject">

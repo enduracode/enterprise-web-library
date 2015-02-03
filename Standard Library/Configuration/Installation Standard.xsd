@@ -178,12 +178,15 @@
 			<element name="Name" type="string" />
 			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
 			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
+			<element name="StandbyDefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 		</sequence>
 	</complexType>
 	<complexType name="IntermediateInstallationWebApplication">
 		<sequence>
 			<element name="Name" type="string" />
 			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 		</sequence>
 	</complexType>
 	<complexType name="InstallationStandardBaseUrl">
@@ -192,6 +195,13 @@
 			<element name="NonsecurePort" type="int" minOccurs="0" />
 			<element name="SecurePort" type="int" minOccurs="0" />
 			<element name="Path" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="InstallationStandardCookieAttributes">
+		<sequence>
+			<element name="Domain" type="string" minOccurs="0" />
+			<element name="Path" type="string" minOccurs="0" />
+			<element name="NamePrefix" type="string" minOccurs="0" />
 		</sequence>
 	</complexType>
 </schema>
