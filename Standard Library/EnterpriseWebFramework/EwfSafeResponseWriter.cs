@@ -9,17 +9,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// An object that writes a response to a safe HTTP request (e.g. GET, HEAD).
 	/// </summary>
 	public class EwfSafeResponseWriter {
-		internal const string MinuteResolutionUrlVersionStringFormat = "yyyyMMddHHmm";
-
-		internal static string GetMinuteResolutionUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( MinuteResolutionUrlVersionStringFormat );
-		}
+		internal const string UrlVersionStringFormat = "yyyyMMddHHmmssfff";
 
 		/// <summary>
 		/// Returns the URL resource-version string for the specified date/time.
 		/// </summary>
 		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( MinuteResolutionUrlVersionStringFormat + "ssfff" );
+			return dateAndTime.ToString( UrlVersionStringFormat );
 		}
 
 		private static Action<HttpRequest, HttpResponse> createWriter(
