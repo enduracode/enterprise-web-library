@@ -389,9 +389,11 @@ ewfNotificationSectionContainerBothStates {
 	max-width: 40rem;
 }
 ewfNotificationSectionContainerNotificationState {
+	-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 	transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 }
 ewfNotificationSectionContainerDockedState {
+	-webkit-transform: translateX( -50% );
 	transform: translateX( -50% );
 	-webkit-animation-name: notificationSectionPosition;
 	animation-name: notificationSectionPosition;
@@ -481,13 +483,16 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 }
 @-webkit-keyframes notificationSectionPosition {
 	0% {
+		-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 		-webkit-animation-timing-function: ease-in;
 	}
 	50% {
+		-webkit-transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
 	}
 	75% {
+		-webkit-transform: translateX( -50% ) translateY( -1.7em );
 		transform: translateX( -50% ) translateY( -1.7em );
 		-webkit-animation-timing-function: ease-out;
 	}
