@@ -104,5 +104,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public static EwfTableCell ToCell( this Control control ) {
 			return new EwfTableCell( control );
 		}
+
+		/// <summary>
+		/// Returns true if this request is secure. Always use this method instead of IsSecureConnection.
+		/// </summary>
+		public static bool IsSecure( this HttpRequest request ) {
+			return EwfApp.Instance.RequestIsSecure( request );
+		}
 	}
 }
