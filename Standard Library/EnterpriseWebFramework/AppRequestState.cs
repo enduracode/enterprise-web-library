@@ -41,8 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private bool userEnabled;
 		internal bool UserDisabledByPage { get; set; }
-		private User user;
-		private bool userLoaded;
+		private Tuple<User, Tuple<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
 		private Exception errorException;
@@ -131,15 +130,35 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Abandon the profiling session if it's not needed. The boolean expressions are in this order because we don't want to short circuit the user check if
 			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
-			var userIsProfiling = UserAccessible && AppTools.User != null && AppMemoryCache.UserIsProfilingRequests( AppTools.User.UserId );
+			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && AppTools.IsLiveInstallation )
 				MiniProfiler.Stop( discardResults: true );
 		}
 
 		/// <summary>
-		/// AppTools.User use only.
+		/// Standard Library use only.
 		/// </summary>
-		internal User User {
+		public bool ImpersonatorExists { get { return UserAndImpersonator.Item2 != null; } }
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public User ImpersonatorUser { get { return UserAndImpersonator.Item2.Item1; } }
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public int? ProfilingUserId {
+			get {
+				var profilingUser = ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1;
+				return profilingUser != null ? (int?)profilingUser.UserId : null;
+			}
+		}
+
+		/// <summary>
+		/// AppTools.User and private use only.
+		/// </summary>
+		internal Tuple<User, Tuple<User>> UserAndImpersonator {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -147,11 +166,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( !userLoaded ) {
-					user = UserManagementStatics.UserManagementEnabled ? UserManagementStatics.GetUserFromRequest() : null;
-					userLoaded = true;
+				if( userAndImpersonator == null ) {
+					userAndImpersonator = UserManagementStatics.UserManagementEnabled
+						                      ? UserManagementStatics.GetUserAndImpersonatorFromRequest()
+						                      : Tuple.Create<User, Tuple<User>>( null, null );
 				}
-				return user;
+				return userAndImpersonator;
 			}
 		}
 
@@ -162,17 +182,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			get { return !EwfConfigurationStatics.AppSupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); }
 		}
 
-		internal void ClearUser() {
-			user = null;
-			userLoaded = false;
+		internal void ClearUserAndImpersonator() {
+			userAndImpersonator = null;
 		}
 
 		/// <summary>
-		/// For use by log in and log out post back logic only.
+		/// For use by user-management post back logic only. Assumes the user and impersonator (if one exists) are loaded.
 		/// </summary>
-		public void SetUser( FormsAuthCapableUser user ) {
-			this.user = user;
-			userLoaded = true;
+		internal void SetUser( User user ) {
+			userAndImpersonator = Tuple.Create( user, userAndImpersonator.Item2 );
+		}
+
+		/// <summary>
+		/// For use by impersonation post back logic only. Assumes the user and impersonator (if one exists) are loaded.
+		/// </summary>
+		/// <param name="user">Pass null to end impersonation. Pass a tuple to begin impersonation for the specified user or an anonymous user.</param>
+		internal void SetUserAndImpersonator( Tuple<User> user ) {
+			var impersonator = userAndImpersonator.Item2;
+			userAndImpersonator = user != null
+				                      ? Tuple.Create( user.Item1, impersonator ?? Tuple.Create( userAndImpersonator.Item1 ) )
+				                      : Tuple.Create( impersonator.Item1, (Tuple<User>)null );
 		}
 
 		internal void SetError( string prefix, Exception exception ) {

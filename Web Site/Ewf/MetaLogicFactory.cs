@@ -11,6 +11,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return new UserManagement.LogIn.Info( returnUrl );
 		}
 
+		PageInfo AppMetaLogicFactory.CreateSelectUserPageInfo( string returnUrl ) {
+			return new UserManagement.SelectUser.Info( returnUrl );
+		}
+
 		PageInfo AppMetaLogicFactory.CreatePreBuiltResponsePageInfo() {
 			return new PreBuiltResponse.Info();
 		}

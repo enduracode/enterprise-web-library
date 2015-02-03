@@ -190,16 +190,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void setFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
-			var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+			if( AppRequestState.Instance.ImpersonatorExists )
+				UserImpersonationStatics.SetCookie( user );
+			else {
+				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
 
-			// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-			var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
-				                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
-				                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
+				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
+					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
-			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
-			setFormsAuthCookie( ticket );
-
+				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
+				setFormsAuthCookie( ticket );
+			}
 			AppRequestState.Instance.SetUser( user );
 		}
 
@@ -266,7 +269,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Do not call if the system does not implement the forms authentication capable user management provider.
 		/// </summary>
 		public static void LogOutUser() {
-			clearFormsAuthCookie();
+			if( AppRequestState.Instance.ImpersonatorExists )
+				UserImpersonationStatics.SetCookie( null );
+			else
+				clearFormsAuthCookie();
 			AppRequestState.Instance.SetUser( null );
 		}
 

@@ -380,6 +380,7 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />

@@ -168,7 +168,7 @@ namespace RedStapler.StandardLibrary {
 		public static User User {
 			get {
 				assertClassInitialized();
-				return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.User : null;
+				return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.UserAndImpersonator.Item1 : null;
 			}
 		}
 
@@ -199,7 +199,7 @@ namespace RedStapler.StandardLibrary {
 				if( NetTools.IsWebApp() ) {
 					// This check ensures that there is an actual request, which is not the case during application initialization.
 					if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
-						sw.WriteLine( "URL: " + EwfApp.Instance.RequestState.Url );
+						sw.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
 						sw.WriteLine();
 						foreach( string fieldName in HttpContext.Current.Request.Form )
@@ -212,16 +212,19 @@ namespace RedStapler.StandardLibrary {
 						sw.WriteLine();
 						sw.WriteLine( "User agent: " + HttpContext.Current.Request.GetUserAgent() );
 						sw.WriteLine( "Referrer: " + NetTools.ReferringUrl );
+
 						User user = null;
+						User impersonator = null;
 
 						// exception-prone code
 						try {
 							user = User;
+							impersonator = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : null;
 						}
 						catch {}
 
 						if( user != null )
-							sw.WriteLine( "User: " + user.Email );
+							sw.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 					}
 				}
 				else {

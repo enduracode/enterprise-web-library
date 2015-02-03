@@ -238,17 +238,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void rewritePathIfShortcutUrl() {
+			var ewfResolvers = new[]
+				{
+					new ShortcutUrlResolver(
+						"ewf",
+						ConnectionSecurity.SecureIfPossible,
+						() => {
+							var page = MetaLogicFactory.CreateBasicTestsPageInfo();
+							return page.UserCanAccessResource ? page : null;
+						} ),
+					new ShortcutUrlResolver(
+						"ewf/impersonate",
+						ConnectionSecurity.SecureIfPossible,
+						() => {
+							if( !UserManagementStatics.UserManagementEnabled )
+								return null;
+							var page = MetaLogicFactory.CreateSelectUserPageInfo( "" );
+							return page.UserCanAccessResource ? page : null;
+						} )
+				};
+
 			var url = GetRequestAppRelativeUrl( Request );
-
-			var ewfResolver = new ShortcutUrlResolver(
-				"ewf",
-				ConnectionSecurity.SecureIfPossible,
-				() => {
-					var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-					return page.UserCanAccessResource ? page : null;
-				} );
-
-			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
+			foreach( var resolver in ewfResolvers.Concat( GetShortcutUrlResolvers() ) ) {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
 					continue;
 
@@ -434,7 +445,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							if( accessDeniedException.CausedByIntermediateUser )
 								transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
 							else {
-								if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
+								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
+								if( userNotYetAuthenticated && !AppTools.IsLiveInstallation && !RequestState.ImpersonatorExists )
+									transferRequest( MetaLogicFactory.CreateSelectUserPageInfo( RequestState.Url ), true );
+								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled ) {
 									if( accessDeniedException.LogInPage != null ) {
 										// We pass false here to avoid complicating things with ThreadAbortExceptions.
 										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
