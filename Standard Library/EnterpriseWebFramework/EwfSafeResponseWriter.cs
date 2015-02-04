@@ -71,7 +71,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// Strong ETags must vary by content coding. Since we don't know yet how this response will be encoded (gzip or otherwise), the best thing we can do is
 				// use the Accept-Encoding header value in the ETag.
 				var acceptEncoding = aspNetRequest.Headers[ "Accept-Encoding" ]; // returns null if field missing
-				eTag += acceptEncoding ?? "";
+				if( acceptEncoding != null )
+					eTag += acceptEncoding.Replace( ", ", "" ); // On 4 Feb 2015 we saw the comma/space cause Chrome to incorrectly split the ETag apart.
 
 				aspNetResponse.Cache.SetETag( eTag );
 
