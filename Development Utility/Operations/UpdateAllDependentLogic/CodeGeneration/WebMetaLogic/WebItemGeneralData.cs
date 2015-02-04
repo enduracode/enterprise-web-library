@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
 			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
-			return StaticCssHandler.CombineNamespacesAndProcessEwfIfNecessary(
+			return StaticFileHandler.CombineNamespacesAndProcessEwfIfNecessary(
 				projectNamespace,
 				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( StandardLibraryMethods.GetCSharpIdentifier ).ToArray() ) );
 		}

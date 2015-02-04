@@ -353,8 +353,8 @@
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticCssInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\StaticCssHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticFileInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />

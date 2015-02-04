@@ -4,9 +4,9 @@ using System.Web;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A base set of functionality that can be used to discover information about a static CSS file before actually requesting it.
+	/// A base set of functionality that can be used to discover information about a static file before actually requesting it.
 	/// </summary>
-	public abstract class StaticCssInfo: ResourceInfo {
+	public abstract class StaticFileInfo: ResourceInfo {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public override string ResourceName { get { return ""; } }
 
 		protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {
-			var info = infoAsBaseType as StaticCssInfo;
+			var info = infoAsBaseType as StaticFileInfo;
 			return info != null && info.appRelativeFilePath == appRelativeFilePath;
 		}
 
@@ -44,13 +44,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected abstract DateTimeOffset getBuildDateAndTime();
 
 		/// <summary>
-		/// Gets the path of the CSS file.
+		/// Gets the path of the file.
 		/// </summary>
 		internal string FilePath { get { return StandardLibraryMethods.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath ); } }
 
 		/// <summary>
-		/// Gets the app relative path of the CSS file.
+		/// Gets the app relative path of the file.
 		/// </summary>
 		protected abstract string appRelativeFilePath { get; }
 	}
+
+	[ Obsolete( "Guaranteed through 28 February 2015. Please use the StaticFileInfo class instead." ) ]
+	public abstract class StaticCssInfo: StaticFileInfo {}
 }

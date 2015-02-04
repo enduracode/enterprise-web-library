@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace " + generalData.Namespace + " {" );
 			writer.WriteLine( "public class " + generalData.ClassName + " {" );
-			writer.WriteLine( "public sealed class Info: StaticCssInfo {" );
+			writer.WriteLine( "public sealed class Info: StaticFileInfo {" );
 			writeBuildUrlMethod( writer );
 
 			writer.WriteLine(
@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			var extensionIndex = generalData.UrlRelativeToProject.LastIndexOf( "." );
 			writer.WriteLine(
 				"return \"~/" + generalData.UrlRelativeToProject.Remove( extensionIndex ) +
-				"\" + StaticCssHandler.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) + \"" + generalData.UrlRelativeToProject.Substring( extensionIndex ) +
+				"\" + StaticFileHandler.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) + \"" + generalData.UrlRelativeToProject.Substring( extensionIndex ) +
 				"\";" );
 
 			writer.WriteLine( "}" );
