@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,7 +16,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns the URL resource-version string for the specified date/time.
 		/// </summary>
 		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( UrlVersionStringFormat );
+			return dateAndTime.ToString( UrlVersionStringFormat, DateTimeFormatInfo.InvariantInfo );
 		}
 
 		private static Action<HttpRequest, HttpResponse> createWriter(

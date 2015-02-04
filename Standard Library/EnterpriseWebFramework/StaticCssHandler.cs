@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -30,28 +31,52 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void IHttpHandler.ProcessRequest( HttpContext context ) {
 			var url = EwfApp.GetRequestAppRelativeUrl( context.Request );
+			var extensionIndex = url.LastIndexOf( "." );
 
 			// We assume that all URL version strings will have the same length as the format string.
-			var prefixedVersionStringIndex = url.LastIndexOf( "." ) - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
+			var prefixedVersionStringIndex = extensionIndex - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
 
-			if( prefixedVersionStringIndex < 0 )
-				throw new ResourceNotAvailableException( "Failed to find the version and extension in the URL.", null );
+			var versionStringOrFileExtensionIndex = extensionIndex;
+			var urlVersionString = "";
+			if( prefixedVersionStringIndex >= 0 ) {
+				DateTimeOffset dateAndTime;
+				var versionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
+				if( DateTimeOffset.TryParseExact(
+					versionString,
+					EwfSafeResponseWriter.UrlVersionStringFormat,
+					DateTimeFormatInfo.InvariantInfo,
+					DateTimeStyles.None,
+					out dateAndTime ) ) {
+					versionStringOrFileExtensionIndex = prefixedVersionStringIndex;
+					urlVersionString = versionString;
+				}
+			}
+
+			if( versionStringOrFileExtensionIndex < 0 )
+				throw new ResourceNotAvailableException( "Failed to find the extension in the URL.", null );
 			var cssInfo =
 				EwfApp.GlobalType.Assembly.CreateInstance(
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
-						url.Remove( prefixedVersionStringIndex ).Separate( "/", false ).Select( StandardLibraryMethods.GetCSharpIdentifier ).Aggregate( ( a, b ) => a + "." + b ) +
-						"+Info" ) ) as StaticCssInfo;
+						url.Remove( versionStringOrFileExtensionIndex )
+							.Separate( "/", false )
+							.Select( StandardLibraryMethods.GetCSharpIdentifier )
+							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticCssInfo;
 			if( cssInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
-			var urlVersionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
-			if( EwfSafeResponseWriter.GetUrlVersionString( cssInfo.GetResourceLastModificationDateAndTime() ) != urlVersionString )
-				throw new ResourceNotAvailableException( "The URL version string does not match the last-modification date/time of the resource.", null );
 
-			new EwfSafeResponseWriter(
-				() => File.ReadAllText( cssInfo.FilePath ),
-				urlVersionString,
-				() => new ResponseMemoryCachingSetup( cssInfo.GetUrl( false, false, false ), cssInfo.GetResourceLastModificationDateAndTime() ) ).WriteResponse();
+			Func<string> cssGetter = () => File.ReadAllText( cssInfo.FilePath );
+			Func<string> cacheKeyGetter = () => cssInfo.GetUrl( false, false, false );
+			var responseWriter = urlVersionString.Any()
+				                     ? new EwfSafeResponseWriter(
+					                       cssGetter,
+					                       urlVersionString,
+					                       () => new ResponseMemoryCachingSetup( cacheKeyGetter(), cssInfo.GetResourceLastModificationDateAndTime() ) )
+				                     : new EwfSafeResponseWriter(
+					                       () => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+					                       cssInfo.GetResourceLastModificationDateAndTime(),
+					                       memoryCacheKeyGetter: cacheKeyGetter );
+			responseWriter.WriteResponse();
 		}
 
 		bool IHttpHandler.IsReusable { get { return true; } }
