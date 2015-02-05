@@ -41,9 +41,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
 			var infos = new List<ResourceInfo>();
+			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
+			infos.Add( new ExternalResourceInfo( "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Css.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
+			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css" ) );
 			infos.Add( new Styles.BasicCss.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
 				infos.Add( new Styles.EwfUi.ColorsCss.Info() );
