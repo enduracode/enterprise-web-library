@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -16,17 +17,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// <summary>
 			/// Standard Library use only.
 			/// </summary>
-			public static readonly string[] Selectors = new[] { "img." + CssClass, "div." + CssClass };
+			public static readonly string[] Selectors = { "img." + CssClass, "div." + CssClass };
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "Image", Selectors.First(), Selectors.Skip( 1 ).ToArray() ) };
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the URL location of the image. Do not pass null.
-		/// </summary>
-		public string ImageUrl { get; set; }
+		private ResourceInfo imageInfo;
+
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the constructor instead." ) ]
+		public string ImageUrl { get { return imageInfo.GetUrl(); } set { imageInfo = new ExternalResourceInfo( value ); } }
 
 		/// <summary>
 		/// Alternate text to be placed in the alt tag of the image.
@@ -53,24 +54,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates an image.
 		/// </summary>
-		public EwfImage() {
-			ImageUrl = "";
+		/// <param name="imageInfo">Do not pass null.</param>
+		public EwfImage( ResourceInfo imageInfo ) {
+			this.imageInfo = imageInfo;
 		}
 
-		/// <summary>
-		/// Creates an image with ImageUrl already populated. Do not pass null.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use another constructor." ) ]
+		public EwfImage() {}
+
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use another constructor." ) ]
 		public EwfImage( string imageUrl ) {
-			ImageUrl = imageUrl;
+			imageInfo = new ExternalResourceInfo( imageUrl );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			if( !SizesToAvailableWidth ) {
-				Attributes.Add( "src", this.GetClientUrl( ImageUrl ) );
+				Attributes.Add( "src", this.GetClientUrl( imageInfo.GetUrl() ) );
 				Attributes.Add( "alt", AlternateText ?? "" );
 			}
 			else
-				Controls.Add( new EwfImage( ImageUrl ) { IsAutoSizer = true, AlternateText = AlternateText } );
+				Controls.Add( new EwfImage( imageInfo ) { IsAutoSizer = true, AlternateText = AlternateText } );
 			CssClass = CssClass.ConcatenateWithSpace( IsAutoSizer ? "ewfAutoSizer" : CssElementCreator.CssClass );
 
 			if( ToolTip != null || ToolTipControl != null )
