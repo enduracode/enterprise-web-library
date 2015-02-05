@@ -35,13 +35,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		void IHttpHandler.ProcessRequest( HttpContext context ) {
 			var url = EwfApp.GetRequestAppRelativeUrl( context.Request );
-			var extensionIndex = url.LastIndexOf( "." );
+
+			var queryIndex = url.IndexOf( "?", StringComparison.Ordinal );
+			var urlQuery = "";
+			if( queryIndex >= 0 ) {
+				urlQuery = url.Substring( queryIndex );
+				url = url.Remove( queryIndex );
+			}
+
+			var extensionIndex = url.LastIndexOf( ".", StringComparison.Ordinal );
 
 			// We assume that all URL version strings will have the same length as the format string.
 			var prefixedVersionStringIndex = extensionIndex - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
 
 			var versionStringOrFileExtensionIndex = extensionIndex;
-			var urlVersionString = "";
+			var urlVersionString = urlQuery;
 			if( prefixedVersionStringIndex >= 0 ) {
 				DateTimeOffset dateAndTime;
 				var versionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
