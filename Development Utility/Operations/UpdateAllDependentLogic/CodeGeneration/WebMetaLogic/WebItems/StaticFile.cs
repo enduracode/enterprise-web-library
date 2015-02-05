@@ -2,10 +2,10 @@
 using System.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
-	internal class CssFile {
+	internal class StaticFile {
 		private readonly WebItemGeneralData generalData;
 
-		internal CssFile( WebItemGeneralData generalData ) {
+		internal StaticFile( WebItemGeneralData generalData ) {
 			this.generalData = generalData;
 		}
 

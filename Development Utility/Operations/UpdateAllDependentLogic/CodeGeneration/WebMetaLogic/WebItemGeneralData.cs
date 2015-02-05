@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private readonly string code;
 		private readonly WebProject webProjectConfiguration;
 
-		internal WebItemGeneralData( string webProjectPath, string pathRelativeToProject, WebProject webProjectConfiguration ) {
+		internal WebItemGeneralData( string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
 			this.pathRelativeToProject = pathRelativeToProject;
 
 			// Get the URL for this item. "Plain old class" entity setups do not have URLs.
@@ -35,7 +35,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( itemNamespace == null )
 				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
 
-			className = StandardLibraryMethods.GetCSharpIdentifier( System.IO.Path.GetFileNameWithoutExtension( path ) );
+			className =
+				StandardLibraryMethods.GetCSharpIdentifier(
+					System.IO.Path.GetFileNameWithoutExtension( path ) + ( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
 

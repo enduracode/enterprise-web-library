@@ -272,7 +272,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
 				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, "Standard Library Files.xml" ) );
+				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
 
 				var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
 				File.WriteAllText(
