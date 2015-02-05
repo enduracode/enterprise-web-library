@@ -6,7 +6,6 @@ using RedStapler.StandardLibrary;
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
 		internal const string WebProjectFilesFolderName = "Web Project Files";
-		internal const string EwfFolderName = "Ewf";
 		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
 
 		internal static string DotNetToolsFolderPath {

@@ -6,6 +6,7 @@ using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
 using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages;
@@ -35,8 +36,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					var webSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
 					var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
 					IoMethods.CopyFolder(
-						StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.EwfFolderName ),
-						StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ),
+						StandardLibraryMethods.CombinePaths( webSitePath, StaticFileHandler.EwfFolderName ),
+						StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ),
 						false );
 					IoMethods.CopyFile(
 						StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),

@@ -10,6 +10,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// ISU and internal use only.
 	/// </summary>
 	public class StaticFileHandler: IHttpHandler {
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public const string EwfFolderName = "Ewf";
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public const string VersionedFilesFolderName = "VersionedStaticFiles";
+
 		private const string urlVersionStringPrefix = "-";
 
 		/// <summary>
@@ -24,9 +34,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static string CombineNamespacesAndProcessEwfIfNecessary( string appNamespace, string appRelativeNamespace ) {
 			var ewfNamespace = StandardLibraryMethods.EwfFolderBaseNamespace + "." + appNamespace;
-			if( appRelativeNamespace == "Ewf" )
+			if( appRelativeNamespace == EwfFolderName )
 				return ewfNamespace;
-			if( appRelativeNamespace.StartsWith( "Ewf." ) )
+			if( appRelativeNamespace.StartsWith( EwfFolderName + "." ) )
 				return ewfNamespace + "." + appRelativeNamespace.Substring( 4 );
 
 			// App-relative namespace can be empty when this method is called from the ISU.
@@ -37,30 +47,31 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var url = EwfApp.GetRequestAppRelativeUrl( context.Request );
 
 			var queryIndex = url.IndexOf( "?", StringComparison.Ordinal );
-			var urlQuery = "";
-			if( queryIndex >= 0 ) {
-				urlQuery = url.Substring( queryIndex );
+			if( queryIndex >= 0 )
 				url = url.Remove( queryIndex );
-			}
 
 			var extensionIndex = url.LastIndexOf( ".", StringComparison.Ordinal );
 
-			// We assume that all URL version strings will have the same length as the format string.
-			var prefixedVersionStringIndex = extensionIndex - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
-
 			var versionStringOrFileExtensionIndex = extensionIndex;
-			var urlVersionString = urlQuery;
-			if( prefixedVersionStringIndex >= 0 ) {
-				DateTimeOffset dateAndTime;
-				var versionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
-				if( DateTimeOffset.TryParseExact(
-					versionString,
-					EwfSafeResponseWriter.UrlVersionStringFormat,
-					DateTimeFormatInfo.InvariantInfo,
-					DateTimeStyles.None,
-					out dateAndTime ) ) {
-					versionStringOrFileExtensionIndex = prefixedVersionStringIndex;
-					urlVersionString = versionString;
+			var urlVersionString = "";
+			if( url.StartsWith( VersionedFilesFolderName + "/" ) || url.StartsWith( EwfFolderName + "/" + VersionedFilesFolderName + "/" ) )
+				urlVersionString = "invariant";
+			else {
+				// We assume that all URL version strings will have the same length as the format string.
+				var prefixedVersionStringIndex = extensionIndex - ( urlVersionStringPrefix.Length + EwfSafeResponseWriter.UrlVersionStringFormat.Length );
+
+				if( prefixedVersionStringIndex >= 0 ) {
+					DateTimeOffset dateAndTime;
+					var versionString = url.Substring( prefixedVersionStringIndex + urlVersionStringPrefix.Length, EwfSafeResponseWriter.UrlVersionStringFormat.Length );
+					if( DateTimeOffset.TryParseExact(
+						versionString,
+						EwfSafeResponseWriter.UrlVersionStringFormat,
+						DateTimeFormatInfo.InvariantInfo,
+						DateTimeStyles.None,
+						out dateAndTime ) ) {
+						versionStringOrFileExtensionIndex = prefixedVersionStringIndex;
+						urlVersionString = versionString;
+					}
 				}
 			}
 
