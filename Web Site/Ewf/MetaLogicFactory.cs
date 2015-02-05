@@ -41,8 +41,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
 			var infos = new List<ResourceInfo>();
-			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
-			infos.Add( new ThirdParty.Select2.Select2_343.Select2Css.Info() );
+			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
+			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Css.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new Styles.BasicCss.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
