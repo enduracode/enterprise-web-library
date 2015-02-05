@@ -466,11 +466,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
-			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
+			foreach( var info in EwfApp.MetaLogicFactory.CreateDisplayMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
 			foreach( var info in EwfApp.Instance.GetStyleSheets() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
+			foreach( var info in EwfApp.MetaLogicFactory.CreatePrintMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
 
 			foreach( var i in styleSheetLinks )
@@ -487,7 +487,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addModernizrLogic() {
-			Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\" src=\"" + this.GetClientUrl( "~/Ewf/Modernizr.js" ) + "\"></script>" } );
+			Header.Controls.Add(
+				new Literal
+					{
+						Text =
+							"<script type=\"text/javascript\" src=\"" + this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) +
+							"\"></script>"
+					} );
 		}
 
 		private void addGoogleAnalyticsLogicIfNecessary() {
@@ -507,22 +513,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptIncludes() {
-			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
-			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
-
-			ClientScript.RegisterClientScriptInclude(
-				GetType(),
-				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ChartJs", this.GetClientUrl( "~/Ewf/ThirdParty/ChartJs/Chart.min.js?v=1" ) );
+			foreach( var url in from i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos() select i.GetUrl( false, false, false ) )
+				ClientScript.RegisterClientScriptInclude( GetType(), "ewf" + url, this.GetClientUrl( url ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
-			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
+			foreach( var url in from i in EwfApp.Instance.GetJavaScriptFiles() select i.GetUrl( false, false, false ) )
 				ClientScript.RegisterClientScriptInclude( GetType(), "systemSpecificFile" + url, this.GetClientUrl( url ) );
 		}
 

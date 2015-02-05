@@ -336,10 +336,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public virtual string GoogleAnalyticsWebPropertyId { get { return ""; } }
 
 		/// <summary>
-		/// Creates and returns a list of URLs for JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
+		/// Creates and returns a list of JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
 		/// </summary>
-		public virtual List<string> GetJavaScriptFileUrls() {
-			return new List<string>();
+		protected internal virtual List<ResourceInfo> GetJavaScriptFiles() {
+			return new List<ResourceInfo>();
 		}
 
 		/// <summary>
@@ -443,7 +443,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						var pageDisabledException = exception.GetBaseException() as PageDisabledException;
 						if( accessDeniedException != null ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
+								transferRequest( MetaLogicFactory.CreateIntermediateLogInPageInfo( RequestState.Url ), true );
 							else {
 								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
 								if( userNotYetAuthenticated && !AppTools.IsLiveInstallation && !RequestState.ImpersonatorExists )
@@ -456,7 +456,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 										CompleteRequest();
 									}
 									else
-										transferRequest( MetaLogicFactory.GetLogInPageInfo( RequestState.Url ), true );
+										transferRequest( MetaLogicFactory.CreateLogInPageInfo( RequestState.Url ), true );
 								}
 								else
 									transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );
