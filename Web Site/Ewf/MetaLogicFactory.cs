@@ -41,27 +41,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetDisplayMediaCssInfos() {
 			var infos = new List<ResourceInfo>();
-			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104Custommin.Info() );
-			infos.Add( new ThirdParty.Select2.Select2_343.Select2.Info() );
-			infos.Add( new ThirdParty.TimePicker.Styles.Info() );
-			infos.Add( new Styles.Basic.Info() );
+			infos.Add( new ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
+			infos.Add( new ThirdParty.Select2.Select2_343.Select2Css.Info() );
+			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
+			infos.Add( new Styles.BasicCss.Info() );
 			if( EwfUiStatics.AppMasterPage != null ) {
-				infos.Add( new Styles.EwfUi.Colors.Info() );
-				infos.Add( new Styles.EwfUi.Fonts.Info() );
-				infos.Add( new Styles.EwfUi.Layout.Info() );
+				infos.Add( new Styles.EwfUi.ColorsCss.Info() );
+				infos.Add( new Styles.EwfUi.FontsCss.Info() );
+				infos.Add( new Styles.EwfUi.LayoutCss.Info() );
 			}
-			infos.Add( new Styles.ToDeleteOrMove.Info() );
+			infos.Add( new Styles.ToDeleteOrMoveCss.Info() );
 
 			if( AppRequestState.Instance.Browser.IsFirefox35OrBelow() )
-				infos.Add( new Styles.Firefox.Info() );
+				infos.Add( new Styles.FirefoxCss.Info() );
 			if( AppRequestState.Instance.Browser.IsInternetExplorer() )
-				infos.Add( new Styles.InternetExplorer.Info() );
+				infos.Add( new Styles.InternetExplorerCss.Info() );
 
 			return infos;
 		}
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.GetPrintMediaCssInfos() {
-			return new Styles.Print.Info().ToSingleElementArray();
+			return new Styles.PrintCss.Info().ToSingleElementArray();
 		}
 	}
 }

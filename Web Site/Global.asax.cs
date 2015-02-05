@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.WebSite {
 		}
 
 		protected override List<ResourceInfo> GetStyleSheets() {
-			return new List<ResourceInfo> { new Test.Info() };
+			return new List<ResourceInfo> { new TestCss.Info() };
 		}
 	}
 }
