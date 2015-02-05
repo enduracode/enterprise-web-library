@@ -23,8 +23,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// ISU and internal use only.
 		/// </summary>
 		public static string CombineNamespacesAndProcessEwfIfNecessary( string appNamespace, string appRelativeNamespace ) {
+			var ewfNamespace = StandardLibraryMethods.EwfFolderBaseNamespace + "." + appNamespace;
+			if( appRelativeNamespace == "Ewf" )
+				return ewfNamespace;
 			if( appRelativeNamespace.StartsWith( "Ewf." ) )
-				return StandardLibraryMethods.EwfFolderBaseNamespace + "." + appNamespace + "." + appRelativeNamespace.Substring( 4 );
+				return ewfNamespace + "." + appRelativeNamespace.Substring( 4 );
 
 			// App-relative namespace can be empty when this method is called from the ISU.
 			return appNamespace + appRelativeNamespace.PrependDelimiter( "." );
@@ -59,8 +62,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				EwfApp.GlobalType.Assembly.CreateInstance(
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
-						url.Remove( versionStringOrFileExtensionIndex )
-							.Separate( "/", false )
+						( url.Remove( versionStringOrFileExtensionIndex ) + url.Substring( extensionIndex ).CapitalizeString() ).Separate( "/", false )
 							.Select( StandardLibraryMethods.GetCSharpIdentifier )
 							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
 			if( staticFileInfo == null )
