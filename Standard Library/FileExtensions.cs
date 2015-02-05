@@ -57,6 +57,11 @@ namespace RedStapler.StandardLibrary {
 		public const string Png = ".png";
 
 		/// <summary>
+		/// A Scalable Vector Graphics image.
+		/// </summary>
+		public const string Svg = ".svg";
+
+		/// <summary>
 		/// A text document.
 		/// </summary>
 		public const string Txt = ".txt";

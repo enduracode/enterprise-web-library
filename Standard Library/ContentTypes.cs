@@ -92,6 +92,11 @@ namespace RedStapler.StandardLibrary {
 		public const string Png = "image/png";
 
 		/// <summary>
+		/// Content type to be used by Scalable Vector Graphics images.
+		/// </summary>
+		public const string Svg = "image/svg+xml";
+
+		/// <summary>
 		/// Returns true if the given content type is any type of image.
 		/// </summary>
 		public static bool IsImageType( string contentType ) {
@@ -128,6 +133,8 @@ namespace RedStapler.StandardLibrary {
 					return Pdf;
 				case FileExtensions.Png:
 					return Png;
+				case FileExtensions.Svg:
+					return Svg;
 				case FileExtensions.Txt:
 					return PlainText;
 				case FileExtensions.WordDocx:
