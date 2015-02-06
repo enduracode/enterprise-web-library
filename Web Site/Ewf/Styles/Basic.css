@@ -251,9 +251,20 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 
 /* EwfPage and master page */
 ewfTopWarningBlock {
+	z-index: 9998;
+}
+ewfNotificationSectionContainerBothStates {
+	z-index: 9999;
+}
+ewfClickBlockerBothStates {
+	z-index: 10000;
+}
+ewfProcessingDialogBlockAllStates {
+	z-index: 10001;
+}
+ewfTopWarningBlock {
 	position: relative;
 	font-size: 1rem;
-	z-index: 9998;
 	margin-bottom: .5em;
 	border: 1px solid #464646;
 	border-radius: .5em;
@@ -262,15 +273,6 @@ ewfTopWarningBlock {
 	text-align: center;
 	color: white;
 	font-weight: bold;
-}
-ewfClickBlockerBothStates {
-	z-index: 10000;
-}
-ewfProcessingDialogBlockAllStates {
-	z-index: 10001;
-}
-ewfNotificationSectionContainerBothStates {
-	z-index: 9999;
 }
 ewfClickBlockerBothStates {
 	position: fixed;
