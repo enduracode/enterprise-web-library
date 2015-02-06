@@ -9,7 +9,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// A heading. This is currently only meant to be used from the codebehind because using it in the markup
 	/// requires asp:Literals.
 	/// </summary>
-	[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
+	[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "MarkupChildControls" ) ]
 	public class Heading: WebControl, ControlTreeDataLoader {
 		internal class CssElementCreator: ControlCssElementCreator {
@@ -26,13 +26,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// The level of the heading.
 		/// </summary>
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
 		public HeadingLevel Level { get; set; }
 
 		/// <summary>
 		/// Creates a heading with no child controls.
 		/// </summary>
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
 		public Heading() {
 			Level = HeadingLevel.H2;
 		}
@@ -40,7 +40,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a heading with the specified child controls.
 		/// </summary>
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
 		public Heading( params Control[] childControls ): this() {
 			codeControls.AddRange( childControls );
 		}
@@ -53,7 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Adds the specified child controls to the heading.
 		/// </summary>
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Box control instead, which will soon be renamed to Section." ) ]
+		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
 		public void AddChildControls( params Control[] controls ) {
 			codeControls.AddRange( controls );
 		}

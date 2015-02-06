@@ -228,7 +228,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()
-				       ? new Block( new Box( "Messages", getStatusMessageControlList(), false, true ) )
+				       ? new Block( new Section( SectionStyle.Box, "Messages", getStatusMessageControlList(), false, true ) )
 					       {
 						       ClientIDMode = ClientIDMode.Static,
 						       ID = notificationSectionContainerId,

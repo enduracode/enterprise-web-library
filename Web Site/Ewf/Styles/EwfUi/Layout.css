@@ -8,7 +8,7 @@ body {
 	width: 999px;
 }
 
-/* headings */
+/* headings and sections */
 ewfPagePath {
 	font-size: 1.4em;
 	margin: .3em 0;
@@ -22,22 +22,33 @@ ewfPagePath > h1 {
 	margin: 0;
 	font-weight: inherit;
 }
-ewfH2 {
-	font-size: 1.2em;
+ewfSectionNormalStyleBothStates, ewfH2 {
 	margin-top: 2em;
+}
+ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1.2em;
+	margin-top: 0;
 	margin-bottom: 1em;
 }
-ewfH3 {
+ewfH2 {
+	font-size: 1.2em;
+	margin-bottom: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates, ewfH3 {
+	margin-top: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading, ewfH3 {
 	font-size: 1.1em;
-	margin-top: 1em;
 	margin-bottom: 0;
 }
-ewfH4 {
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates, ewfH4 {
+	margin-top: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading, ewfH4 {
 	font-size: 1em;
-	margin-top: 1em;
 	margin-bottom: 0;
 }
-ewfH2:first-child, ewfH3:first-child, ewfH4:first-child {
+ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfH2:first-child, ewfH3:first-child, ewfH4:first-child {
 	margin-top: 0;
 }
 
@@ -64,24 +75,24 @@ ewfCheckBoxList table.ewfBlockCheckBox {
 	padding-bottom: 2px;
 }
 
-/* sections */
-ewfSectionBothStates {
+/* boxes */
+ewfSectionBoxStyleBothStates {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 5px;
 	padding: 4px;
 }
-ewfSectionBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
 	margin-top: -4px;
 	margin-right: -4px;
 	margin-left: -4px;
 	padding: 4px;
 }
-ewfSectionClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: -4px;
 }
-ewfSectionExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: 4px;
 }
 
@@ -148,10 +159,10 @@ ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
 }
 
 /* block element vertical spacing */
-p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiGlobalFootBlock {
+p, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiGlobalFootBlock {
 	margin-top: 1.5em;
 }
-p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child {
+p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child {
 	margin-top: 0;
 }
 p, ul {
