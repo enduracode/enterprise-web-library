@@ -464,7 +464,6 @@
     <Content Include="Ewf\FileUploader\progressbar.gif" />
     <Content Include="Ewf\FileUploader\progressbg_orange.gif" />
     <Content Include="Ewf\FileUploader\Upload.aspx" />
-    <Content Include="Ewf\Images\ajax-loader.gif" />
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\PreBuiltResponse.aspx" />
     <Content Include="Ewf\Styles\Basic.css" />
