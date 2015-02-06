@@ -76,7 +76,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
 			// versions.
-			infos.Add( new ExternalResourceInfo( "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js" ) );
+			infos.Add( new ExternalResourceInfo( "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" ) );
 
 			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Js.Jquery_ui_1104CustomminJs.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Js.Info() );
