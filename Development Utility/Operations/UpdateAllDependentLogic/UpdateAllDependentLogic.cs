@@ -12,6 +12,7 @@ using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
@@ -156,9 +157,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// Copy Ewf folder and customize namespaces in .aspx, .ascx, .master, and .cs files.
-			var webProjectEwfFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.EwfFolderName );
+			var webProjectEwfFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
 			IoMethods.DeleteFolder( webProjectEwfFolderPath );
-			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ), webProjectEwfFolderPath, false );
+			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
 			var matchingFiles = new List<string>();
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
@@ -646,7 +647,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine();
 					writer.WriteLine( webProject.name + "/bin/" );
 					writer.WriteLine( webProject.name + "/obj/" );
-					writer.WriteLine( webProject.name + "/" + AppStatics.EwfFolderName + "/" );
+					writer.WriteLine( webProject.name + "/" + StaticFileHandler.EwfFolderName + "/" );
 					writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
 					writer.WriteLine( webProject.name + "/Generated Code/" );
 				}

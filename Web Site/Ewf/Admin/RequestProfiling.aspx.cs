@@ -15,7 +15,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		}
 
 		protected override void loadData() {
-			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( AppTools.User.UserId );
+			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( AppRequestState.Instance.ProfilingUserId );
 			ph.AddControlsReturnThis(
 				new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ) ),
 				new Paragraph(
@@ -25,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							firstModificationMethod:
 								() =>
 								AppRequestState.AddNonTransactionalModificationMethod(
-									() => AppMemoryCache.SetRequestProfilingForUser( AppTools.User.UserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),
+									() => AppMemoryCache.SetRequestProfilingForUser( AppRequestState.Instance.ProfilingUserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),
 						new ButtonActionControlStyle( userIsProfiling ? "Turn Profiling OFF" : "Turn Profiling ON" ),
 						usesSubmitBehavior: false ) ) );
 		}

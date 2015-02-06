@@ -190,16 +190,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void setFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
-			var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+			if( AppRequestState.Instance.ImpersonatorExists )
+				UserImpersonationStatics.SetCookie( user );
+			else {
+				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
 
-			// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-			var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
-				                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
-				                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
+				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
+					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
-			var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
-			setFormsAuthCookie( ticket );
-
+				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
+				setFormsAuthCookie( ticket );
+			}
 			AppRequestState.Instance.SetUser( user );
 		}
 
@@ -209,13 +212,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 
 		private static void setCookie( string name, string value ) {
 			AppRequestState.AddNonTransactionalModificationMethod(
-				() =>
-				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( name, value ) { Path = NetTools.GetAppCookiePath(), Secure = EwfApp.SupportsSecureConnections, HttpOnly = true } ) );
+				() => CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true ) );
 		}
 
 		private static string[] verifyTestCookie() {
-			return HttpContext.Current.Request.Cookies[ testCookieName ] == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
+			return CookieStatics.GetCookie( testCookieName ) == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
 		}
 
 		private static void addStatusMessageIfClockNotSynchronized( DataValue<string> utcOffset ) {
@@ -238,7 +239,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		// Cookie Updating
 
 		internal static void UpdateFormsAuthCookieIfNecessary() {
-			var cookie = HttpContext.Current.Request.Cookies[ FormsAuthCookieName ];
+			var cookie = CookieStatics.GetCookie( FormsAuthCookieName );
 			if( cookie == null )
 				return;
 
@@ -268,15 +269,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// Do not call if the system does not implement the forms authentication capable user management provider.
 		/// </summary>
 		public static void LogOutUser() {
-			clearFormsAuthCookie();
+			if( AppRequestState.Instance.ImpersonatorExists )
+				UserImpersonationStatics.SetCookie( null );
+			else
+				clearFormsAuthCookie();
 			AppRequestState.Instance.SetUser( null );
 		}
 
 		private static void clearFormsAuthCookie() {
-			AppRequestState.AddNonTransactionalModificationMethod(
-				() =>
-				HttpContext.Current.Response.Cookies.Add(
-					new HttpCookie( FormsAuthCookieName ) { Path = NetTools.GetAppCookiePath(), Expires = DateTime.Now.AddDays( -1 ) } ) );
+			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( FormsAuthCookieName ) );
 		}
 
 		internal static string FormsAuthCookieName { get { return "User"; } }

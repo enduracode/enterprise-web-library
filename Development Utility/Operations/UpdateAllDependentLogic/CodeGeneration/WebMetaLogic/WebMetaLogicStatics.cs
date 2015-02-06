@@ -27,30 +27,36 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			EntitySetup entitySetup = null;
 			if( entitySetupFileName.Length > 0 ) {
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
-				entitySetup = new EntitySetup( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) );
+				entitySetup = new EntitySetup( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) );
 				entitySetup.GenerateCode( writer );
 			}
 
-			// Generate code for pages and user controls in the current folder.
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.aspx" ) ) {
-				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-				new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
-			}
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.ascx" ) ) {
-				if( fileName != entitySetupFileName ) {
-					var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-					new UserControl( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) ).GenerateCode( writer );
-				}
-			}
+			// Generate code for files in the current folder.
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) ) {
+				if( !folderPathRelativeToProject.Any() && ( fileName.Contains( ".csproj" ) || fileName == AppStatics.StandardLibraryFilesFileName ) )
+					continue;
+				var fileExtension = Path.GetExtension( fileName ).ToLowerInvariant();
+				if( new[] { ".cs", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
+					continue;
 
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.css" ) ) {
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-				new CssFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) ).GenerateCode( writer );
+				if( fileExtension == ".aspx" )
+					new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
+				else if( fileExtension == ".ascx" ) {
+					if( fileName != entitySetupFileName )
+						new UserControl( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) ).GenerateCode( writer );
+				}
+				else
+					new StaticFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, true, webProjectConfiguration ) ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.
-			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ) )
-				generateCodeForWebItemsInFolder( writer, webProjectPath, Path.Combine( folderPathRelativeToProject, subFolderName ), webProjectConfiguration );
+			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ) ) {
+				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
+				if( subFolderPath == "bin" || subFolderPath == "obj" )
+					continue;
+				generateCodeForWebItemsInFolder( writer, webProjectPath, subFolderPath, webProjectConfiguration );
+			}
 		}
 
 		internal static void WriteCreateInfoFromQueryStringMethod(

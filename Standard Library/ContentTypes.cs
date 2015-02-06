@@ -22,6 +22,11 @@ namespace RedStapler.StandardLibrary {
 		public const string Html = MediaTypeNames.Text.Html;
 
 		/// <summary>
+		/// Content type to be used for JavaScript files.
+		/// </summary>
+		public const string JavaScript = "application/javascript";
+
+		/// <summary>
 		/// Content type to be used for JSON files.
 		/// </summary>
 		public const string Json = "application/json";
@@ -30,7 +35,7 @@ namespace RedStapler.StandardLibrary {
 		/// CSS.
 		/// </summary>
 		public const string Css = "text/css";
-		
+
 		/// <summary>
 		/// CSV
 		/// </summary>
@@ -87,6 +92,11 @@ namespace RedStapler.StandardLibrary {
 		public const string Png = "image/png";
 
 		/// <summary>
+		/// Content type to be used by Scalable Vector Graphics images.
+		/// </summary>
+		public const string Svg = "image/svg+xml";
+
+		/// <summary>
 		/// Returns true if the given content type is any type of image.
 		/// </summary>
 		public static bool IsImageType( string contentType ) {
@@ -117,10 +127,14 @@ namespace RedStapler.StandardLibrary {
 					return ExcelXlsx;
 				case FileExtensions.Gif:
 					return Gif;
+				case FileExtensions.JavaScript:
+					return JavaScript;
 				case FileExtensions.Pdf:
 					return Pdf;
 				case FileExtensions.Png:
 					return Png;
+				case FileExtensions.Svg:
+					return Svg;
 				case FileExtensions.Txt:
 					return PlainText;
 				case FileExtensions.WordDocx:

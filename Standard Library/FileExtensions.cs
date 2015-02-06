@@ -34,12 +34,17 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// A JPG file.
 		/// </summary>
-		public static readonly string[] Jpeg = new[] { ".jpg", ".jpeg" };
+		public static readonly string[] Jpeg = { ".jpg", ".jpeg" };
 
 		/// <summary>
 		/// A GIF file.
 		/// </summary>
 		public const string Gif = ".gif";
+
+		/// <summary>
+		/// A JavaScript file.
+		/// </summary>
+		public const string JavaScript = ".js";
 
 		/// <summary>
 		/// A PDF file.
@@ -52,6 +57,11 @@ namespace RedStapler.StandardLibrary {
 		public const string Png = ".png";
 
 		/// <summary>
+		/// A Scalable Vector Graphics image.
+		/// </summary>
+		public const string Svg = ".svg";
+
+		/// <summary>
 		/// A text document.
 		/// </summary>
 		public const string Txt = ".txt";
@@ -59,7 +69,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// An Excel file.
 		/// </summary>
-		public static readonly string[] Excel = new[] { ExcelXls, ExcelXlsx };
+		public static readonly string[] Excel = { ExcelXls, ExcelXlsx };
 
 		/// <summary>
 		/// A pre-docx Word Document.
@@ -74,7 +84,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// A Word file.
 		/// </summary>
-		public static readonly string[] Word = new[] { WordDoc, WordDocx };
+		public static readonly string[] Word = { WordDoc, WordDocx };
 
 		/// <summary>
 		/// An XML file.

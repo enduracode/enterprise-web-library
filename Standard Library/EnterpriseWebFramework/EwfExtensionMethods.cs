@@ -39,7 +39,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
 				       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null && EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request )
-				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfApp.SupportsSecureConnections;
+				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
 		}
 
 		/// <summary>

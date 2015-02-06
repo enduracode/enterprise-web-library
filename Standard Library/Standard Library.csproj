@@ -135,6 +135,7 @@
     <Compile Include="Collections\Cache.cs" />
     <Compile Include="Collections\OneToOneMap.cs" />
     <Compile Include="Configuration\ConfigurationStatics.cs" />
+    <Compile Include="Configuration\DefaultCookieAttributes.cs" />
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
@@ -191,6 +192,7 @@
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\CookieStatics.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
@@ -213,6 +215,7 @@
     <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\ErrorMessageControlListBlockStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\EwfConfigurationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
@@ -351,8 +354,8 @@
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticCssInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\StaticCssHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticFileInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />
@@ -378,6 +381,7 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />

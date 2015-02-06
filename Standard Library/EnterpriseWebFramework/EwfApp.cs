@@ -18,7 +18,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private static bool ewlInitialized;
 		private static bool initialized;
 		private static Timer initFailureUnloadTimer;
-		private static WebApplication webAppConfiguration;
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
@@ -79,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !AppTools.SecondaryInitFailed ) {
 				executeWithBasicExceptionHandling(
 					() => {
-						webAppConfiguration = ConfigurationStatics.InstallationConfiguration.WebApplications.Single( a => a.Name == ConfigurationStatics.AppName );
+						EwfConfigurationStatics.Init();
 
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
@@ -137,16 +136,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract void initializeWebApp();
 
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public static bool SupportsSecureConnections { get { return webAppConfiguration.SupportsSecureConnections || AppTools.IsIntermediateInstallation; } }
-
 		internal static string GetDefaultBaseUrl( bool secure ) {
 			if( BaseUrlOverrideGetter != null )
-				return BaseUrlOverrideGetter().CompleteWithDefaults( webAppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
+				return BaseUrlOverrideGetter().CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
 
-			return webAppConfiguration.DefaultBaseUrl.GetUrlString( secure );
+			return EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( secure );
 		}
 
 		private void handleBeginRequest( object sender, EventArgs e ) {
@@ -244,17 +238,28 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void rewritePathIfShortcutUrl() {
+			var ewfResolvers = new[]
+				{
+					new ShortcutUrlResolver(
+						"ewf",
+						ConnectionSecurity.SecureIfPossible,
+						() => {
+							var page = MetaLogicFactory.CreateBasicTestsPageInfo();
+							return page.UserCanAccessResource ? page : null;
+						} ),
+					new ShortcutUrlResolver(
+						"ewf/impersonate",
+						ConnectionSecurity.SecureIfPossible,
+						() => {
+							if( !UserManagementStatics.UserManagementEnabled )
+								return null;
+							var page = MetaLogicFactory.CreateSelectUserPageInfo( "" );
+							return page.UserCanAccessResource ? page : null;
+						} )
+				};
+
 			var url = GetRequestAppRelativeUrl( Request );
-
-			var ewfResolver = new ShortcutUrlResolver(
-				"ewf",
-				ConnectionSecurity.SecureIfPossible,
-				() => {
-					var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-					return page.UserCanAccessResource ? page : null;
-				} );
-
-			foreach( var resolver in ewfResolver.ToSingleElementArray().Concat( GetShortcutUrlResolvers() ) ) {
+			foreach( var resolver in ewfResolvers.Concat( GetShortcutUrlResolvers() ) ) {
 				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
 					continue;
 
@@ -331,10 +336,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public virtual string GoogleAnalyticsWebPropertyId { get { return ""; } }
 
 		/// <summary>
-		/// Creates and returns a list of URLs for JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
+		/// Creates and returns a list of JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
 		/// </summary>
-		public virtual List<string> GetJavaScriptFileUrls() {
-			return new List<string>();
+		protected internal virtual List<ResourceInfo> GetJavaScriptFiles() {
+			return new List<ResourceInfo>();
 		}
 
 		/// <summary>
@@ -438,9 +443,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						var pageDisabledException = exception.GetBaseException() as PageDisabledException;
 						if( accessDeniedException != null ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( MetaLogicFactory.GetIntermediateLogInPageInfo( RequestState.Url ), true );
+								transferRequest( MetaLogicFactory.CreateIntermediateLogInPageInfo( RequestState.Url ), true );
 							else {
-								if( RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
+								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
+								if( userNotYetAuthenticated && !AppTools.IsLiveInstallation && !RequestState.ImpersonatorExists )
+									transferRequest( MetaLogicFactory.CreateSelectUserPageInfo( RequestState.Url ), true );
+								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled ) {
 									if( accessDeniedException.LogInPage != null ) {
 										// We pass false here to avoid complicating things with ThreadAbortExceptions.
 										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
@@ -448,7 +456,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 										CompleteRequest();
 									}
 									else
-										transferRequest( MetaLogicFactory.GetLogInPageInfo( RequestState.Url ), true );
+										transferRequest( MetaLogicFactory.CreateLogInPageInfo( RequestState.Url ), true );
 								}
 								else
 									transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );

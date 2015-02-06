@@ -186,7 +186,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
-							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
+							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
+							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
@@ -463,16 +464,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addStyleSheetLinks() {
 			var styleSheetLinks = new List<HtmlLink>();
-
-			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
-			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
-			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
+			foreach( var info in EwfApp.MetaLogicFactory.CreateDisplayMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-
 			foreach( var info in EwfApp.Instance.GetStyleSheets() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-
-			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
+			foreach( var info in EwfApp.MetaLogicFactory.CreatePrintMediaCssInfos() )
 				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
 
 			foreach( var i in styleSheetLinks )
@@ -489,7 +485,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addModernizrLogic() {
-			Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\" src=\"" + this.GetClientUrl( "~/Ewf/Modernizr.js" ) + "\"></script>" } );
+			Header.Controls.Add(
+				new Literal
+					{
+						Text =
+							"<script type=\"text/javascript\" src=\"" + this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) +
+							"\"></script>"
+					} );
 		}
 
 		private void addGoogleAnalyticsLogicIfNecessary() {
@@ -509,23 +511,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptIncludes() {
-			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
-			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
-
-			ClientScript.RegisterClientScriptInclude(
-				GetType(),
-				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "spin.js", this.GetClientUrl( "~/Ewf/ThirdParty/SpinJs/spin.min.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "Chart.js", this.GetClientUrl( "~/Ewf/ThirdParty/ChartJs/Chart.min.js?v=1" ) );
+			foreach( var url in from i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos() select i.GetUrl( false, false, false ) )
+				ClientScript.RegisterClientScriptInclude( GetType(), "ewf" + url, this.GetClientUrl( url ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
-			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
+			foreach( var url in from i in EwfApp.Instance.GetJavaScriptFiles() select i.GetUrl( false, false, false ) )
 				ClientScript.RegisterClientScriptInclude( GetType(), "systemSpecificFile" + url, this.GetClientUrl( url ) );
 		}
 
@@ -865,7 +854,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
 			if( destination.IsIdenticalToCurrent() ) {
-				AppRequestState.Instance.ClearUser();
+				AppRequestState.Instance.ClearUserAndImpersonator();
 				resetPage();
 			}
 
@@ -906,8 +895,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			try {
 				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
 					EwfApp.Instance.ExecuteInitialRequestDataModifications();
-					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
-						updateLastPageRequestTimeForUser();
+					if( AppRequestState.Instance.UserAccessible ) {
+						if( AppTools.User != null )
+							updateLastPageRequestTimeForUser( AppTools.User );
+						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+							updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
+					}
 					executeInitialRequestDataModifications();
 				}
 				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
@@ -923,11 +916,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
 		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 		/// </summary>
-		private void updateLastPageRequestTimeForUser() {
+		private void updateLastPageRequestTimeForUser( User user ) {
 			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
 			// rapidly assigning tasks to one another in RSIS or similar situations.
 			// NOTE: This makes the comment on line 688 much less important.
-			if( ( DateTime.Now - AppTools.User.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
 				return;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
@@ -937,8 +930,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// another transaction has modified its value during this transaction.
 			var newlyQueriedUser =
 				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( AppTools.User.UserId, false ) ) );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
 				return;
 
 			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -946,18 +939,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					try {
 						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
 						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+							var formsAuthCapableUser = (FormsAuthCapableUser)user;
 							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								AppTools.User.UserId,
-								AppTools.User.Email,
-								AppTools.User.Role.RoleId,
+								user.UserId,
+								user.Email,
+								user.Role.RoleId,
 								DateTime.Now,
 								formsAuthCapableUser.Salt,
 								formsAuthCapableUser.SaltedPassword,
 								formsAuthCapableUser.MustChangePassword );
 						}
 						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
+							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
 					}
 					catch( DbConcurrencyException ) {
 						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and

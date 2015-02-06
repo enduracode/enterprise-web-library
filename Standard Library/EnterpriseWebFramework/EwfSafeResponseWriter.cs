@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,17 +10,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// An object that writes a response to a safe HTTP request (e.g. GET, HEAD).
 	/// </summary>
 	public class EwfSafeResponseWriter {
-		internal const string MinuteResolutionUrlVersionStringFormat = "yyyyMMddHHmm";
-
-		internal static string GetMinuteResolutionUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( MinuteResolutionUrlVersionStringFormat );
-		}
+		internal const string UrlVersionStringFormat = "yyyyMMddHHmmssfff";
 
 		/// <summary>
 		/// Returns the URL resource-version string for the specified date/time.
 		/// </summary>
 		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( MinuteResolutionUrlVersionStringFormat + "ssfff" );
+			return dateAndTime.ToString( UrlVersionStringFormat, DateTimeFormatInfo.InvariantInfo );
 		}
 
 		private static Action<HttpRequest, HttpResponse> createWriter(
@@ -74,7 +71,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				// Strong ETags must vary by content coding. Since we don't know yet how this response will be encoded (gzip or otherwise), the best thing we can do is
 				// use the Accept-Encoding header value in the ETag.
 				var acceptEncoding = aspNetRequest.Headers[ "Accept-Encoding" ]; // returns null if field missing
-				eTag += acceptEncoding ?? "";
+				if( acceptEncoding != null )
+					eTag += acceptEncoding.Replace( ", ", "" ); // On 4 Feb 2015 we saw the comma/space cause Chrome to incorrectly split the ETag apart.
 
 				aspNetResponse.Cache.SetETag( eTag );
 

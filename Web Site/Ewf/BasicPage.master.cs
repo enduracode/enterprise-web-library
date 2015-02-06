@@ -2,14 +2,18 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
 using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
 		// Some of these are used by the Standard Library JavaScript file.
+		private const string topWarningBlockCssClass = "ewfTopWarning";
 		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
 		private const string clickBlockerActiveClass = "ewfClickBlockerA";
 		private const string processingDialogBlockInactiveClass = "ewfProcessingDialogI";
@@ -27,6 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		internal class CssElementCreator: ControlCssElementCreator {
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
 				var elements = new List<CssElement>();
+				elements.Add( new CssElement( "TopWarningBlock", "div.{0}".FormatWith( topWarningBlockCssClass ) ) );
 
 				const string clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass;
 				const string clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass;
@@ -110,9 +115,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			if( EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification() )
 				ph.AddControlsReturnThis( new Block { CssClass = notificationSpacerClass } );
 
+			var warningControls = new List<Control>();
 			if( !AppTools.IsLiveInstallation ) {
 				var children = new List<Control>();
-				children.Add( "This is not the live installation of the system. All changes made here will be lost and are not recoverable. ".GetLiteralControl() );
+				children.Add( "This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
@@ -120,19 +126,37 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 								id: "ewfIntermediateLogOut",
 								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
 								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
-							new ButtonActionControlStyle( "Log Out" ),
+							new ButtonActionControlStyle( "Log Out", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
 							false ) );
 				}
-
-				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
-				ph.AddControlsReturnThis( new Block( children.ToArray() ) { CssClass = "ewfNonLiveWarning" } );
+				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
 			}
 			else if( ConfigurationStatics.MachineIsStandbyServer ) {
-				// We can't use CssClasses here even though it looks like we can. It compiles here but not in client systems because the namespaces are wrong, or something.
-				ph.AddControlsReturnThis(
-					new Block(
-						"This is a standby version of the system. This operates off a read-only database, and any attempt to make a modification will result in an error."
-							.GetLiteralControl() ) { CssClass = "ewfNonLiveWarning" } );
+				warningControls.Add(
+					"This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() );
+			}
+
+			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
+			    ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
+				warningControls.Add(
+					new PlaceHolder().AddControlsReturnThis(
+						"User impersonation is in effect. ".GetLiteralControl(),
+						EwfLink.Create(
+							SelectUser.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ),
+							new ButtonActionControlStyle( "Change User", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ),
+						" ".GetLiteralControl(),
+						new PostBackButton(
+							PostBack.CreateFull(
+								id: "ewfEndImpersonation",
+								firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
+							new ButtonActionControlStyle( "End Impersonation", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							usesSubmitBehavior: false ) ) );
+			}
+
+			if( warningControls.Any() ) {
+				var warningControl = warningControls.Count() > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
+				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = topWarningBlockCssClass } );
 			}
 
 			// This is used by the Standard Library JavaScript file.
