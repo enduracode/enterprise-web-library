@@ -27,7 +27,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private ResourceInfo imageInfo;
 
 		[ Obsolete( "Guaranteed through 30 April 2015. Please use the constructor instead." ) ]
-		public string ImageUrl { get { return imageInfo.GetUrl(); } set { imageInfo = new ExternalResourceInfo( value ); } }
+		public string ImageUrl { get { return imageInfo.GetUrl( false, false, false ); } set { imageInfo = new ExternalResourceInfo( value ); } }
 
 		/// <summary>
 		/// Alternate text to be placed in the alt tag of the image.
@@ -69,7 +69,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		void ControlTreeDataLoader.LoadData() {
 			if( !SizesToAvailableWidth ) {
-				Attributes.Add( "src", this.GetClientUrl( imageInfo.GetUrl() ) );
+				Attributes.Add( "src", this.GetClientUrl( imageInfo.GetUrl( true, true, false ) ) );
 				Attributes.Add( "alt", AlternateText ?? "" );
 			}
 			else
