@@ -421,6 +421,8 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates {
 	transition-property: font-size, box-shadow, border-width, border-radius, padding;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	overflow: hidden;
+
 	/* See http://stackoverflow.com/a/4407335/35349. */
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -431,26 +433,28 @@ ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSe
 }
 ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	height: 0;
-	visibility: hidden;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	-webkit-animation-name: notificationSectionDisplay;
-	animation-name: notificationSectionDisplay;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1em;
 	margin-top: -.2rem;
 	margin-left: -1em;
 	margin-right: -1em;
+	background-color: rgba( 0, 0, 0, .05 );
 	padding: .2rem 1em;
+	-webkit-animation-name: notificationSectionDisplay;
+	animation-name: notificationSectionDisplay;
 }
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
 	margin-bottom: -.2rem;
 }
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: .2rem;
 }
-/* As of 31 Jan 2015, "overflow: hidden" causes premature line wrapping in Chrome and Firefox when the container is in the notification state. */
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1em;
+	margin: 0;
+	padding: 0;
+	background-image: none;
+}
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
 	display: block;
 	overflow: hidden;
@@ -476,9 +480,16 @@ ewfWarningMessageContainer > ewfIcon {
 ewfWarningMessageContainer > ewfStatusMessageText {
 	font-weight: bold;
 }
-ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+ewfNotificationSectionContainerDockedState {
 	-webkit-animation-duration: 800ms;
 	animation-duration: 800ms;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
+	transition-delay: 400ms;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	-webkit-animation-duration: 400ms;
+	animation-duration: 400ms;
 }
 @keyframes notificationSectionPosition {
 	0% {
@@ -512,19 +523,16 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 /* As of 31 Jan 2015, Firefox and IE didn't animate correctly without max-height. */
 @keyframes notificationSectionDisplay {
 	0% {
+		margin: 0;
+		padding: 0;
 		height: 0;
 		max-height: 0;
-		visibility: hidden;
 	}
-	50% {
+	99.9% {
+		margin: 0;
+		padding: 0;
 		height: 0;
 		max-height: 0;
-		visibility: hidden;
-	}
-	50.1% {
-		height: auto;
-		max-height: 100em;
-		visibility: visible;
 	}
 	100% {
 		max-height: 100em;
@@ -532,20 +540,15 @@ ewfNotificationSectionContainerDockedState, ewfNotificationSectionContainerDocke
 }
 @-webkit-keyframes notificationSectionDisplay {
 	0% {
+		margin: 0;
+		padding: 0;
 		height: 0;
-		visibility: hidden;
 	}
-	50% {
+	99.9% {
+		margin: 0;
+		padding: 0;
 		height: 0;
-		visibility: hidden;
 	}
-	50.1% {
-		height: auto;
-		visibility: visible;
-	}
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
-	transition-delay: 400ms;
 }
 .profiler-results {
 	opacity: .4;
