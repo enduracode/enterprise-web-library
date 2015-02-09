@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			this.style = style;
 			this.heading = heading;
 			this.postHeadingControls = postHeadingControls != null ? postHeadingControls.ToArray() : new Control[ 0 ];
-			this.contentControls = contentControls.ToArray();
+			this.contentControls = contentControls != null ? contentControls.ToArray() : new Control[ 0 ];
 			this.expanded = expanded;
 			this.disableStatePersistence = disableStatePersistence;
 		}
@@ -116,7 +116,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					this.AddControlsReturnThis( new Block( headingContainer ) );
 				}
 			}
-			this.AddControlsReturnThis( new Block( contentControls.ToArray() ) { CssClass = contentClass } );
+			if( contentControls.Any() )
+				this.AddControlsReturnThis( new Block( contentControls.ToArray() ) { CssClass = contentClass } );
 		}
 
 		private string getSectionClass( string closedClass, string expandedClass ) {
