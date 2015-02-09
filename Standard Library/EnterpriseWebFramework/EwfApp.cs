@@ -309,14 +309,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected internal abstract IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers();
 
 		/// <summary>
-		/// Gets the URL to be used for Chrome Application shortcuts. Never returns null.
+		/// Gets the favicon to be used for Chrome Application shortcuts.
 		/// </summary>
-		public virtual string FaviconPng48X48Url { get { return ""; } }
+		public virtual ResourceInfo FaviconPng48X48 { get { return null; } }
 
 		/// <summary>
-		/// Gets the favicon URL. Never returns null. See http://en.wikipedia.org/wiki/Favicon.
+		/// Gets the favicon. See http://en.wikipedia.org/wiki/Favicon.
 		/// </summary>
-		public virtual string FaviconUrl { get { return ""; } }
+		public virtual ResourceInfo Favicon { get { return null; } }
 
 		/// <summary>
 		/// Gets the Typekit Kit ID. Never returns null.

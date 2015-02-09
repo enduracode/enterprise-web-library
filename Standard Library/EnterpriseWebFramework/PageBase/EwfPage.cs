@@ -434,17 +434,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// IE9 start URL
 			Header.Controls.Add( new HtmlMeta { Name = "msapplication-starturl", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
 
-			if( EwfApp.Instance.FaviconPng48X48Url.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconPng48X48Url ) };
+			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
+			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ) };
 				link.Attributes.Add( "rel", "icon" );
 				link.Attributes.Add( "sizes", "48x48" );
 				Header.Controls.Add( link );
 			}
 
-			// rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-			if( EwfApp.Instance.FaviconUrl.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconUrl ) };
-				link.Attributes.Add( "rel", "shortcut icon" );
+			var favicon = EwfApp.Instance.Favicon;
+			if( favicon != null && favicon.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( favicon.GetUrl( true, true, false ) ) };
+				link.Attributes.Add( "rel", "shortcut icon" ); // rel="shortcut icon" is deprecated and will be replaced with rel="icon".
 				Header.Controls.Add( link );
 			}
 		}
