@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	internal class MetaLogicFactory: AppMetaLogicFactory {
@@ -39,7 +38,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return Admin.BasicTests.GetInfo();
 		}
 
-		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateDisplayMediaCssInfos() {
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateBasicCssInfos() {
 			var infos = new List<ResourceInfo>();
 			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
 			infos.Add( new ExternalResourceInfo( "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" ) );
@@ -48,11 +47,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css" ) );
 			infos.Add( new Styles.BasicCss.Info() );
-			if( EwfUiStatics.AppMasterPage != null ) {
-				infos.Add( new Styles.EwfUi.ColorsCss.Info() );
-				infos.Add( new Styles.EwfUi.FontsCss.Info() );
-				infos.Add( new Styles.EwfUi.LayoutCss.Info() );
-			}
 			infos.Add( new Styles.ToDeleteOrMoveCss.Info() );
 
 			if( AppRequestState.Instance.Browser.IsFirefox35OrBelow() )
@@ -63,8 +57,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			return infos;
 		}
 
-		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreatePrintMediaCssInfos() {
-			return new Styles.PrintCss.Info().ToSingleElementArray();
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateEwfUiCssInfos() {
+			return new ResourceInfo[] { new Styles.EwfUi.ColorsCss.Info(), new Styles.EwfUi.FontsCss.Info(), new Styles.EwfUi.LayoutCss.Info() };
 		}
 
 		ResourceInfo AppMetaLogicFactory.CreateModernizrJavaScriptInfo() {

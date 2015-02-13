@@ -25,6 +25,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal const string ButtonElementName = "ewfButton";
 
+		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
+
+		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			EwfPage.cssInfoCreator = cssInfoCreator;
+		}
+
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
 		/// </summary>
@@ -362,7 +368,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
-			addStyleSheetLinks();
+			Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
 			addModernizrLogic();
 			addGoogleAnalyticsLogicIfNecessary();
 			addJavaScriptIncludes();
@@ -463,26 +469,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void addStyleSheetLinks() {
-			var styleSheetLinks = new List<HtmlLink>();
-			foreach( var info in EwfApp.MetaLogicFactory.CreateDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-			foreach( var info in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-			foreach( var info in EwfApp.MetaLogicFactory.CreatePrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
-
-			foreach( var i in styleSheetLinks )
-				Header.Controls.Add( i );
-		}
-
-		private void addStyleSheetLink( List<HtmlLink> styleSheetLinks, string url, string mediaType ) {
+		private Control getStyleSheetLink( string url ) {
 			var l = new HtmlLink { Href = url };
 			l.Attributes.Add( "rel", "stylesheet" );
 			l.Attributes.Add( "type", "text/css" );
-			if( mediaType.Any() )
-				l.Attributes.Add( "media", mediaType );
-			styleSheetLinks.Add( l );
+			return l;
 		}
 
 		private void addModernizrLogic() {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -60,6 +61,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							throw new ApplicationException( "Meta logic factory not found." );
 						EwfApp.Init( globalType, metaLogicFactory );
 
+						EwfPage.Init(
+							() => {
+								var cssInfos = new List<ResourceInfo>();
+								cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateBasicCssInfos() );
+								if( EwfUiStatics.AppMasterPage != null )
+									cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateEwfUiCssInfos() );
+								cssInfos.AddRange( EwfApp.Instance.GetStyleSheets() );
+								if( EwfUiStatics.AppMasterPage != null )
+									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
+								return cssInfos;
+							} );
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						EwfUiStatics.Init( globalType );
 

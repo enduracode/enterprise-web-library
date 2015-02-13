@@ -53,12 +53,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<ResourceInfo> CreateDisplayMediaCssInfos();
+		IEnumerable<ResourceInfo> CreateBasicCssInfos();
 
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<ResourceInfo> CreatePrintMediaCssInfos();
+		IEnumerable<ResourceInfo> CreateEwfUiCssInfos();
 
 		/// <summary>
 		/// Standard Library use only.
