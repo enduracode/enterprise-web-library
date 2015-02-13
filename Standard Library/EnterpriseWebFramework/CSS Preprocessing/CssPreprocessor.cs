@@ -6,15 +6,13 @@ using System.Text.RegularExpressions;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// Allows custom elements, constants, and other feature extensions to CSS.
+	/// Supports custom elements in CSS selectors.
 	/// </summary>
-	internal class CssPreprocessor {
+	internal static class CssPreprocessor {
 		private const string reservedCustomElementPrefix = "ewf";
 		private const string customElementPattern = @"(?<!\.|#)" + reservedCustomElementPrefix + @"\w+";
 
-		/// <summary>
-		/// Processes the source text and returns the processed text. Use a different overload if you want the source or output to be a file.
-		/// </summary>
+		// The parsing logic is based on http://www.w3.org/TR/CSS2/syndata.html.
 		internal static string TransformCssFile( string sourceCssText ) {
 			sourceCssText = RegularExpressions.RemoveMultiLineCStyleComments( sourceCssText );
 
@@ -28,30 +26,47 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			using( var writer = new StringWriter() ) {
+				var buffer = new StringBuilder();
 				using( var reader = new StringReader( sourceCssText ) ) {
-					int cAsInt;
-					var braceNestingLevel = 0;
-					var selectorBuffer = new StringBuilder();
-					while( ( cAsInt = reader.Read() ) != -1 ) {
-						var c = (char)cAsInt;
-						if( braceNestingLevel == 0 ) {
-							if( c == '{' || c == ',' ) {
-								writer.Write( getTransformedSelector( selectorBuffer.ToString() ) );
-								selectorBuffer = new StringBuilder();
-								writer.Write( c );
-							}
-							else
-								selectorBuffer.Append( c );
-						}
-						else
-							writer.Write( c );
+					char? stringDelimiter = null;
+					while( reader.Peek() != -1 ) {
+						var c = (char)reader.Read();
 
-						if( c == '{' )
-							braceNestingLevel += 1;
-						else if( c == '}' )
-							braceNestingLevel -= 1;
+						// escaped quote, brace, or other character
+						if( c == '\\' ) {
+							buffer.Append( c );
+							if( reader.Peek() != -1 )
+								buffer.Append( (char)reader.Read() );
+						}
+
+						// string delimiter
+						else if( !stringDelimiter.HasValue && ( c == '\'' || c == '"' ) ) {
+							buffer.Append( c );
+							stringDelimiter = c;
+						}
+						else if( stringDelimiter.HasValue && c == stringDelimiter ) {
+							buffer.Append( c );
+							stringDelimiter = null;
+						}
+
+						// selector delimiter
+						else if( !stringDelimiter.HasValue && ( c == ',' || c == '{' ) ) {
+							writer.Write( getTransformedSelector( buffer.ToString() ) );
+							writer.Write( c );
+							buffer = new StringBuilder();
+						}
+						else if( !stringDelimiter.HasValue && c == '}' ) {
+							writer.Write( buffer.ToString() );
+							writer.Write( c );
+							buffer = new StringBuilder();
+						}
+
+						// other character
+						else
+							buffer.Append( c );
 					}
 				}
+				writer.Write( buffer.ToString() );
 				return writer.ToString();
 			}
 		}
