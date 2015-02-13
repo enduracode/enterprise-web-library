@@ -1,6 +1,4 @@
-﻿/* To override any of these styles in a system, prefix your rules with ewfUiBody (if they don't include an element starting with ewfUi) to ensure that they only apply to the EWF UI. */
-
-body {
+﻿body {
 	background-color: white;
 	color: black;
 }
