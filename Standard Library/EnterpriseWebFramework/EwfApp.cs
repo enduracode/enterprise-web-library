@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
 
@@ -15,14 +12,45 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
-		private static bool ewlInitialized;
-		private static bool initialized;
-		private static Timer initFailureUnloadTimer;
 		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
+		/// <summary>
+		/// EwfInitializationOps and private use only.
+		/// </summary>
+		internal static bool FrameworkInitialized { get; set; }
+
 		// This is a hack that can be removed when goal 448 (Clean URLs) is complete. At that point resources will be able to have their own base URLs.
 		public static Func<BaseUrl> BaseUrlOverrideGetter;
+
+		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool setErrorInRequestState, bool set500StatusCode ) {
+			try {
+				handler();
+			}
+			catch( Exception e ) {
+				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
+				try {
+					StandardLibraryMethods.CallEveryMethod(
+						delegate {
+							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
+							if( setErrorInRequestState )
+								Instance.RequestState.SetError( prefix, e );
+							else
+								AppTools.EmailAndLogError( prefix, e );
+						},
+						delegate {
+							if( set500StatusCode )
+								Instance.set500StatusCode( "Exception" );
+						} );
+				}
+				catch {}
+			}
+		}
+
+		internal static void Init( Type globalType, AppMetaLogicFactory metaLogicFactory ) {
+			GlobalType = globalType;
+			MetaLogicFactory = metaLogicFactory;
+		}
 
 		// This member is per web user (request). We must be careful to never accidentally use values from a previous request.
 		internal AppRequestState RequestState { get; private set; }
@@ -43,99 +71,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Error += handleError;
 		}
 
-		/// <summary>
-		/// Call this from Application_Start in your Global.asax.cs file. Besides this call, there should be no other code in the method.
-		/// </summary>
-		// We could save people the effort of calling this by using trick #1 in
-		// http://www.paraesthesia.com/archive/2011/02/08/dynamic-httpmodule-registration-in-asp-net-4-0.aspx, but that would probably require making this a static
-		// method and would probably also cause this method to run at start up time in *all* web applications that reference the Standard Library, even the ones
-		// that don't want to use EWF.
-		protected void ewfApplicationStart( SystemLogic systemLogic ) {
-			// This is a hack to support data-access state in WCF services.
-			var wcfDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
-
-			// Initialize system.
-			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
-			try {
-				AppTools.Init(
-					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
-					false,
-					systemLogic,
-					mainDataAccessStateGetter: () => {
-						// We must use the Instance property here to prevent this logic from always returning the request state of the *first* EwfApp instance.
-						return Instance != null
-							       ? Instance.RequestState != null ? Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
-							       : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
-					} );
-			}
-			catch {
-				// Suppress all exceptions since there is no way to report them.
-				return;
-			}
-			ewlInitialized = true;
-
-			// Initialize web application.
-			if( !AppTools.SecondaryInitFailed ) {
-				executeWithBasicExceptionHandling(
-					() => {
-						EwfConfigurationStatics.Init();
-
-						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
-						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
-
-						GlobalType = GetType().BaseType;
-						MetaLogicFactory =
-							GlobalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + GlobalType.Namespace + ".MetaLogicFactory" ) as
-							AppMetaLogicFactory;
-						if( MetaLogicFactory == null )
-							throw new ApplicationException( "Meta logic factory not found." );
-
-						// This initialization could be performed using reflection. There is no need for EwfApp to have a dependency on these classes.
-						if( systemLogic != null )
-							CssPreprocessingStatics.Init( systemLogic.GetType().Assembly, GlobalType.Assembly );
-						else
-							CssPreprocessingStatics.Init( GlobalType.Assembly );
-						EwfUiStatics.Init( GlobalType );
-
-						initializeWebApp();
-
-						initTimeDataAccessState = null;
-						initialized = true;
-					},
-					false,
-					false );
-			}
-
-			// If initialization failed, unload and restart the application after a reasonable delay.
-			if( !initialized ) {
-				const int unloadDelay = 60000; // milliseconds
-				initFailureUnloadTimer = new Timer(
-					state => executeWithBasicExceptionHandling(
-						() => {
-							if( AppTools.IsDevelopmentInstallation )
-								return;
-							HttpRuntime.UnloadAppDomain();
-
-							// Restart the application by making a request. Idea from Rick Strahl:
-							// http://weblog.west-wind.com/posts/2013/Oct/02/Use-IIS-Application-Initialization-for-keeping-ASPNET-Apps-alive.
-							//
-							// Disable server certificate validation so that this request gets through even for web sites that don't use a certificate that is trusted by
-							// default. There is no security risk since we're not sending any sensitive information and we're not using the response.
-							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => { }, disableCertificateValidation: true );
-						},
-						false,
-						false ),
-					null,
-					unloadDelay,
-					Timeout.Infinite );
-			}
-		}
-
-		/// <summary>
-		/// Performs web-site specific initialization. Called at the end of ewfApplicationStart.
-		/// </summary>
-		protected abstract void initializeWebApp();
-
 		internal static string GetDefaultBaseUrl( bool secure ) {
 			if( BaseUrlOverrideGetter != null )
 				return BaseUrlOverrideGetter().CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
@@ -144,7 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void handleBeginRequest( object sender, EventArgs e ) {
-			if( !initialized ) {
+			if( !FrameworkInitialized ) {
 				// We can't redirect to a normal page to communicate this information because since initialization failed, the request for that page will trigger
 				// another BeginRequest event that puts us in an infinite loop. We can't rely on anything except an HTTP return code. Suppress exceptions; there is no
 				// way to report them since even our basic exception handling may not work if the application isn't initialized.
@@ -155,7 +90,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				return;
 			}
 
-			executeWithBasicExceptionHandling(
+			ExecuteWithBasicExceptionHandling(
 				delegate {
 					if( RequestState != null ) {
 						RequestState = null;
@@ -370,10 +305,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public virtual bool UseSpanishLanguage { get { return false; } }
 
 		private void handleEndRequest( object sender, EventArgs e ) {
-			if( !initialized || RequestState == null )
+			if( !FrameworkInitialized || RequestState == null )
 				return;
 
-			executeWithBasicExceptionHandling(
+			ExecuteWithBasicExceptionHandling(
 				delegate {
 					try {
 						// This 404 condition covers two types of requests:
@@ -397,7 +332,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				true );
 
 			// Do not set a status code since we may have already set one or set a redirect page.
-			executeWithBasicExceptionHandling( delegate { RequestState.CleanUp(); }, false, false );
+			ExecuteWithBasicExceptionHandling( delegate { RequestState.CleanUp(); }, false, false );
 			RequestState = null;
 		}
 
@@ -411,7 +346,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Redirecting works, but has the drawback of not being able to send proper HTTP error codes in the response since the redirects themselves require a
 			// particular code. TransferRequest seems to be the only method that gives us everything we want.
 
-			executeWithBasicExceptionHandling(
+			ExecuteWithBasicExceptionHandling(
 				delegate {
 					// This code should happen first to prevent errors from going to the Windows event log.
 					var exception = Server.GetLastError();
@@ -472,30 +407,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				},
 				true,
 				true );
-		}
-
-		private void executeWithBasicExceptionHandling( Action handler, bool setErrorInRequestState, bool set500StatusCode ) {
-			try {
-				handler();
-			}
-			catch( Exception e ) {
-				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
-				try {
-					StandardLibraryMethods.CallEveryMethod(
-						delegate {
-							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
-							if( setErrorInRequestState )
-								RequestState.SetError( prefix, e );
-							else
-								AppTools.EmailAndLogError( prefix, e );
-						},
-						delegate {
-							if( set500StatusCode )
-								this.set500StatusCode( "Exception" );
-						} );
-				}
-				catch {}
-			}
 		}
 
 		private bool onErrorProneAspNetHandler {
@@ -569,20 +480,5 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Gets the page that users will be redirected to when errors occur in the application.
 		/// </summary>
 		protected virtual PageInfo errorPage { get { return null; } }
-
-		/// <summary>
-		/// Call this from Application_End in your Global.asax.cs file. Besides this call, there should be no other code in the method.
-		/// </summary>
-		protected void ewfApplicationEnd() {
-			if( !ewlInitialized )
-				return;
-			AppTools.CleanUp();
-
-			if( !initialized ) {
-				var waitHandle = new ManualResetEvent( false );
-				initFailureUnloadTimer.Dispose( waitHandle );
-				waitHandle.WaitOne();
-			}
-		}
 	}
 }
