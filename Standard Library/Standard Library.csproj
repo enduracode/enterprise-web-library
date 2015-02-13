@@ -446,6 +446,7 @@
     <Compile Include="Randomness.cs" />
     <Compile Include="StructuralEqualityComparer.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
+    <Compile Include="SystemInitializer.cs" />
     <Compile Include="TestStatics.cs" />
     <Compile Include="Tools\AssemblyTools.cs" />
     <Compile Include="Tools\ObjectTools.cs" />
@@ -522,7 +523,6 @@
     <Compile Include="NetTools.cs" />
     <Compile Include="StreamMethod.cs" />
     <Compile Include="Tools\StringTools.cs" />
-    <Compile Include="SystemLogic.cs" />
     <Compile Include="Validation\Error.cs" />
     <Compile Include="Validation\ErrorCondition.cs" />
     <Compile Include="Validation\PhoneNumber.cs" />

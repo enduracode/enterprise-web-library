@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				foreach( var fileName in GlobalLogic.ConfigurationXsdFileNames ) {
+				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
 						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", "Configuration", fileName + FileExtensions.Xsd ),
 						StandardLibraryMethods.CombinePaths(
@@ -445,14 +445,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal static void InitAppTools() {" );
-				writer.WriteLine( "SystemLogic globalLogic = null;" );
-				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
+				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"AppTools.Init( \"" + service.Name + "\" + \" Executable\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					"AppTools.Init( globalInitializer, \"" + service.Name + "\" + \" Executable\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 
 				writer.WriteLine( "}" );
 
@@ -506,10 +506,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "SystemLogic globalLogic = null;" );
-				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
+				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine( "AppTools.Init( \"" + project.Name + "\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+				writer.WriteLine( "AppTools.Init( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return AppTools.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
 				writer.WriteLine( "}" );
@@ -518,7 +518,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 				writer.WriteLine( "static partial void ewlMain( string[] args );" );
 
 				writer.WriteLine( "}" );
