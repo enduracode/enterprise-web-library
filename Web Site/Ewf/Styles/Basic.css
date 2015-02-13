@@ -274,6 +274,11 @@ ewfTopWarningBlock {
 	color: white;
 	font-weight: bold;
 }
+@media print {
+	ewfTopWarningBlock {
+		display: none;
+	}
+}
 ewfClickBlockerBothStates {
 	position: fixed;
 	top: 0;

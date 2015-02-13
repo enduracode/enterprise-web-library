@@ -10,6 +10,11 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfU
 	background-color: #e7edf3;
 	color: black;
 }
+@media print {
+	ewfUiContentCell {
+		background-color: inherit;
+	}
+}
 
 /* borders */
 ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfSectionBoxStyleBothStates {

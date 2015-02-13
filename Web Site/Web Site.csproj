@@ -601,7 +601,6 @@
     <Content Include="Ewf\ContactUs\EntitySetup.ascx" />
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\Styles\InternetExplorer.css" />
-    <Content Include="Ewf\Styles\Print.css" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx" />
