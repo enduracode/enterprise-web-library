@@ -112,8 +112,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 
-			if( EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification() )
-				ph.AddControlsReturnThis( new Block { CssClass = notificationSpacerClass } );
+			ph.AddControlsReturnThis(
+				new NamingPlaceholder(
+					EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+						? new Block { CssClass = notificationSpacerClass }.ToSingleElementArray()
+						: new Control[ 0 ] ) );
 
 			var warningControls = new List<Control>();
 			if( !AppTools.IsLiveInstallation ) {
