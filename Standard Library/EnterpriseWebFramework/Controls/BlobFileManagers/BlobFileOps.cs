@@ -185,18 +185,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the content type of the given HttpPostedFile.
 		/// </summary>
-		/// There is no such thing as an official mapping of file extentions to content types or vice versa.
-		/// Windows has a one-one mapping in the registry, which is how the client's (Windows) computer determines the file type.
-		/// Windows determines the content type through no other means than the file extension. This also means that
-		/// different clients can have different content types and are even able to spoof the content-type. HttpPostedFile does nothing more
-		/// than determine the content-type given by the client headers. Because of this, I think that would should
-		/// first be consulting our official mappings of file extensions to content types, and then fall back on the .NET provided method.
-		/// Maybe we should never be trusting the client's content-type, since it's conceivable it could lead to a buffer-overflow attack.
-		/// We could fall back to consulting the server's content-type mappings instead of trusting the client at all, but this is flawed too
-		/// since all it takes to make us determine the file to be another content-type is to change the extension.
+		// This implementation simply returns the media type provided by the client, which makes it vulnerable to spoofing. The only way around this is to determine
+		// the media type by looking at the contents of the file.
 		internal static string GetContentTypeForPostedFile( RsFile file ) {
-			var type = ContentTypes.GetContentType( file.FileName );
-			return type != String.Empty ? type : file.ContentType;
+			return file.ContentType;
 		}
 
 		internal static IEnumerable<BlobFile> OrderByName( this IEnumerable<BlobFile> rows ) {
