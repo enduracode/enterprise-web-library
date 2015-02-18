@@ -240,6 +240,7 @@ ewfUiEntitySummaryBlock {
 	margin: .3em 0;
 }
 ewfUiTopTabControlList {
+	display: block;
 	margin-top: 1.2em; /*NOTE: I want to eliminate this entirely when entity summary and friends share a background color that isn't white.*/
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates {
