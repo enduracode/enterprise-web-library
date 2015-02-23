@@ -154,6 +154,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Allows overriding the default file-extension-to-content-type transformations. Your file extensions must include the dot.
+		/// </summary>
+		protected internal virtual Dictionary<string,string> ContentTypeOverrides {
+			get
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
 		/// Returns the base path for the specified request. Override this if you are using a reverse proxy and are changing the base path. Never return null.
 		/// Return the empty string to represent the root path. Remember that your implementation should support not just live installations, but also development
 		/// and intermediate installations.
