@@ -28,7 +28,7 @@ ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionCont
 ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	background-color: #d4e0ec; /* hack for IE8 */
 	background-color: rgba( 0, 0, 0, 0 ); /* cancels out IE8 hack for all other browsers */
-	background-image: url( '../../VersionedStaticFiles/Backgrounds/Darker.svg' );
+	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Darker.svg' );
 }
 
 /* text style action controls */
@@ -54,7 +54,7 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates
 	border-color: transparent;
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithHover, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithHover, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithFocus, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithFocus {
-	background-image: url( '../../VersionedStaticFiles/Backgrounds/Lighter.svg' );
+	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Lighter.svg' );
 }
 
 /* table rows with action */

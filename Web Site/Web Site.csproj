@@ -477,8 +477,8 @@
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
     <Content Include="Ewf\UserManagement\SelectUser.aspx" />
-    <Content Include="Ewf\VersionedStaticFiles\Backgrounds\Darker.svg" />
-    <Content Include="Ewf\VersionedStaticFiles\Backgrounds\Lighter.svg" />
+    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Darker.svg" />
+    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Lighter.svg" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\animated-overlay.gif" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_carbon-fiber_0_aaaaaa_8x9.png" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
