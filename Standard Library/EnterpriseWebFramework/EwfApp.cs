@@ -154,16 +154,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Allows overriding the default file-extension-to-content-type transformations. Your file extensions must include the dot.
-		/// </summary>
-		protected internal virtual Dictionary<string,string> ContentTypeOverrides {
-			get
-			{
-				return null;
-			}
-		}
-
-		/// <summary>
 		/// Returns the base path for the specified request. Override this if you are using a reverse proxy and are changing the base path. Never return null.
 		/// Return the empty string to represent the root path. Remember that your implementation should support not just live installations, but also development
 		/// and intermediate installations.
@@ -308,6 +298,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
 		/// </summary>
 		public virtual void ExecuteInitialRequestDataModifications() {}
+
+		/// <summary>
+		/// Gets the Internet media type overrides for the application, which are used when serving static files. Do not return null.
+		/// </summary>
+		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() {
+			return new MediaTypeOverride[ 0 ];
+		}
 
 		/// <summary>
 		/// Returns true if Spanish should be used. Default is false.

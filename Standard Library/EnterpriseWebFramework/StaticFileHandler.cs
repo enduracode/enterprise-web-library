@@ -88,9 +88,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 
-			string contentType;
-			if( EwfApp.Instance.ContentTypeOverrides == null || !EwfApp.Instance.ContentTypeOverrides.TryGetValue( extension, out contentType ) )
-				contentType = MimeTypeMap.MimeTypeMap.GetMimeType( extension );
+			var mediaTypeOverride = EwfApp.Instance.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
+			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.MimeTypeMap.GetMimeType( extension );
 
 			Func<string> cacheKeyGetter = () => staticFileInfo.GetUrl( false, false, false );
 			EwfSafeResponseWriter responseWriter;

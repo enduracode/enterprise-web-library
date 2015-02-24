@@ -249,6 +249,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />
