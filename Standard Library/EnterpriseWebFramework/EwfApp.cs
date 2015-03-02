@@ -300,6 +300,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public virtual void ExecuteInitialRequestDataModifications() {}
 
 		/// <summary>
+		/// Gets the Internet media type overrides for the application, which are used when serving static files. Do not return null.
+		/// </summary>
+		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() {
+			return new MediaTypeOverride[ 0 ];
+		}
+
+		/// <summary>
 		/// Returns true if Spanish should be used. Default is false.
 		/// </summary>
 		public virtual bool UseSpanishLanguage { get { return false; } }

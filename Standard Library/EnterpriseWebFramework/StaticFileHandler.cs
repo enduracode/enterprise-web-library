@@ -77,17 +77,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			if( versionStringOrFileExtensionIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the extension in the URL.", null );
+			var extension = url.Substring( extensionIndex );
 			var staticFileInfo =
 				EwfApp.GlobalType.Assembly.CreateInstance(
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
-						( url.Remove( versionStringOrFileExtensionIndex ) + url.Substring( extensionIndex ).CapitalizeString() ).Separate( "/", false )
+						( url.Remove( versionStringOrFileExtensionIndex ) + extension.CapitalizeString() ).Separate( "/", false )
 							.Select( StandardLibraryMethods.GetCSharpIdentifier )
 							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 
-			var contentType = MimeTypeMap.MimeTypeMap.GetMimeType( url.Substring( extensionIndex ) );
+			var mediaTypeOverride = EwfApp.Instance.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
+			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.MimeTypeMap.GetMimeType( extension );
+
 			Func<string> cacheKeyGetter = () => staticFileInfo.GetUrl( false, false, false );
 			EwfSafeResponseWriter responseWriter;
 			if( contentType == ContentTypes.Css ) {
