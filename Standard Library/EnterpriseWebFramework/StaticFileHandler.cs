@@ -87,7 +87,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 
-			var contentType = ContentTypes.GetContentType( "dummy" + url.Substring( extensionIndex ) );
+			var contentType = MimeTypeMap.MimeTypeMap.GetMimeType( url.Substring( extensionIndex ) );
 			Func<string> cacheKeyGetter = () => staticFileInfo.GetUrl( false, false, false );
 			EwfSafeResponseWriter responseWriter;
 			if( contentType == ContentTypes.Css ) {
@@ -103,14 +103,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						                   memoryCacheKeyGetter: cacheKeyGetter );
 			}
 			else {
-				Func<EwfResponse> responseCreator =
-					() => new EwfResponse(
-						      contentType.Any() ? contentType : "application/octet-stream",
-						      new EwfResponseBodyCreator(
-						      responseStream => {
-							      using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
-								      IoMethods.CopyStream( fileStream, responseStream );
-						      } ) );
+				Func<EwfResponse> responseCreator = () => new EwfResponse(
+					                                          contentType,
+					                                          new EwfResponseBodyCreator(
+					                                          responseStream => {
+						                                          using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
+							                                          IoMethods.CopyStream( fileStream, responseStream );
+					                                          } ) );
 				responseWriter = urlVersionString.Any()
 					                 ? new EwfSafeResponseWriter(
 						                   responseCreator,

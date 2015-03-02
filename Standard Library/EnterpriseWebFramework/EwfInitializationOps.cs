@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Web;
+using System.Web.Compilation;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using StackExchange.Profiling;
@@ -46,7 +46,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Initialize web application.
 			if( !AppTools.SecondaryInitFailed ) {
-				var globalType = new StackFrame( 1 ).GetMethod().DeclaringType;
 				EwfApp.ExecuteWithBasicExceptionHandling(
 					() => {
 						EwfConfigurationStatics.Init();
@@ -54,6 +53,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
+						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
 						var metaLogicFactory =
 							globalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as
 							AppMetaLogicFactory;
