@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {
 		[ MTAThread ]
 		private static int Main( string[] args ) {
-			AppTools.Init( "Development Utility", true, new GlobalLogic() );
+			AppTools.Init( new GlobalInitializer(), "Development Utility", true );
 			try {
 				return AppTools.ExecuteAppWithStandardExceptionHandling(
 					() => {

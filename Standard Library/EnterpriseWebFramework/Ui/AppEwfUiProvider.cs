@@ -8,6 +8,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 	/// </summary>
 	public abstract class AppEwfUiProvider {
 		/// <summary>
+		/// Creates and returns a list of custom style sheets that should be used on EWF UI pages.
+		/// </summary>
+		public virtual List<ResourceInfo> GetStyleSheets() {
+			return new List<ResourceInfo>();
+		}
+
+		/// <summary>
 		/// Gets the logo control to be shown at the top of the EWF user interface.
 		/// </summary>
 		public virtual WebControl GetLogoControl() {

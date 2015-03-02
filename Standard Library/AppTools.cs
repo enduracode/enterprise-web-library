@@ -21,6 +21,7 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static partial class AppTools {
 		private static bool initialized;
+		private static SystemInitializer globalInitializer;
 		private static bool secondaryInitFailed;
 
 		/// <summary>
@@ -30,24 +31,25 @@ namespace RedStapler.StandardLibrary {
 		/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
 		/// it got in init.
 		/// </summary>
+		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
 		/// <param name="appName"></param>
 		/// <param name="isClientSideProgram"></param>
-		/// <param name="systemLogic"></param>
 		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
 		/// AppTools.Init call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 		/// available in the application.</param>
-		public static void Init( string appName, bool isClientSideProgram, SystemLogic systemLogic, Func<DataAccessState> mainDataAccessStateGetter = null ) {
+		public static void Init(
+			SystemInitializer globalInitializer, string appName, bool isClientSideProgram, Func<DataAccessState> mainDataAccessStateGetter = null ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
 					throw new ApplicationException( "This class can only be initialized once." );
 
-				if( systemLogic == null )
-					throw new ApplicationException( "The system must have a global logic class and you must pass an instance of it to AppTools.Init." );
+				if( globalInitializer == null )
+					throw new ApplicationException( "The system must have a global initializer and you must pass an instance of it to AppTools.Init." );
 
 				// Initialize ConfigurationStatics, including the general provider, before the exception handling block below because it's reasonable for the exception
 				// handling to depend on this.
-				ConfigurationStatics.Init( systemLogic.GetType(), appName, isClientSideProgram, ref initializationLog );
+				ConfigurationStatics.Init( globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
 
 				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
 				initialized = true;
@@ -76,7 +78,8 @@ namespace RedStapler.StandardLibrary {
 				InstallationSupportUtility.ConfigurationLogic.Init1();
 				UserManagementStatics.Init();
 
-				systemLogic.InitSystem();
+				AppTools.globalInitializer = globalInitializer;
+				globalInitializer.InitStatics();
 			}
 			catch( Exception e ) {
 				secondaryInitFailed = true;
@@ -104,6 +107,8 @@ namespace RedStapler.StandardLibrary {
 			assertClassInitialized();
 
 			try {
+				globalInitializer.CleanUpStatics();
+
 				AppMemoryCache.CleanUp();
 			}
 			catch( Exception e ) {

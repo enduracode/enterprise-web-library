@@ -16,8 +16,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	//       4. Should modal windows gray out the rest of the page?
 	//       5. Should modal windows be able to contain post back buttons that require [modal] confirmation?
 	//       6. Should modal windows be able to contain action controls that don't open another modal, such as EwfLink?
-	//       7. Can we reimplement info/warning status message boxes to use modal windows? For info messages, we'd need a way to make a modal window close
-	//          automatically on a timer.
 	public class ModalWindow: EtherealControl {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfModalConfirmation";
@@ -33,16 +31,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly WebControl control;
 		private readonly string title;
 		private readonly PostBack postBack;
+		private readonly bool open;
 
 		/// <summary>
 		/// Creates a modal window.
 		/// </summary>
-		public ModalWindow( Control content, string title = "" ): this( content, title: title, postBack: null ) {}
+		public ModalWindow( Control content, string title = "", bool open = false ): this( content, title: title, postBack: null, open: open ) {}
 
-		internal ModalWindow( Control content, string title = "", PostBack postBack = null ) {
+		internal ModalWindow( Control content, string title = "", PostBack postBack = null, bool open = false ) {
 			control = new Block( content ) { CssClass = CssElementCreator.CssClass };
 			this.title = title;
 			this.postBack = postBack;
+			this.open = open;
 
 			EwfPage.Instance.AddEtherealControl( this );
 		}
@@ -50,7 +50,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		WebControl EtherealControl.Control { get { return control; } }
 
 		string EtherealControl.GetJsInitStatements() {
-			return "$( '#" + control.ClientID + "' ).dialog( { autoOpen: false, width: 600, hide: 'fade', show: 'fade', " +
+			return "$( '#" + control.ClientID + "' ).dialog( { autoOpen: " + open.ToString().ToLower() + ", width: 600, hide: 'fade', show: 'fade', " +
 			       ( postBack != null
 				         ? "buttons: { 'Cancel': function() { $( this ).dialog( 'close' ) }, 'Continue': function() { " + PostBackButton.GetPostBackScript( postBack ) +
 				           "; } }, "

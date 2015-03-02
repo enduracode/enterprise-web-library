@@ -11,7 +11,7 @@ namespace RedStapler.StandardLibraryTester {
 	internal class RsLibraryTester {
 		[ MTAThread ]
 		public static void Main() {
-			AppTools.Init( "Tester", false, new GlobalLogic() );
+			AppTools.Init( new GlobalInitializer(), "Tester", false );
 
 			StandardLibraryMethods.RunStandardLibraryTests();
 
@@ -187,8 +187,8 @@ namespace RedStapler.StandardLibraryTester {
 			Assert.IsFalse( vp.LastResult == ErrorCondition.NoError );
 
 			vp = new ValidationErrorHandler( errorWriter );
-			Console.WriteLine( "With extension and no delimeters, should succeed since allowGarbage is on. " +
-			                   validator.GetPhoneNumber( vp, "585455647612345", true, true, true ) );
+			Console.WriteLine(
+				"With extension and no delimeters, should succeed since allowGarbage is on. " + validator.GetPhoneNumber( vp, "585455647612345", true, true, true ) );
 			Assert.IsFalse( vp.LastResult != ErrorCondition.NoError );
 
 			vp = new ValidationErrorHandler( errorWriter );

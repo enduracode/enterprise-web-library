@@ -31,7 +31,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 
 		internal static Assembly AppAssembly { get; private set; }
 		internal static InstallationConfiguration InstallationConfiguration { get; private set; }
-		private static Type systemLogicType { get; set; }
+		private static Type globalInitializerType { get; set; }
 
 		/// <summary>
 		/// Standard Library use only.
@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		internal static string AppName { get; private set; }
 		internal static bool IsClientSideProgram { get; private set; }
 
-		internal static void Init( Type systemLogicType, string appName, bool isClientSideProgram, ref string initializationLog ) {
+		internal static void Init( Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
 			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
 			MachineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
 
@@ -88,7 +88,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			InstallationConfiguration = new InstallationConfiguration( MachineIsStandbyServer, installationPath, isDevelopmentInstallation );
 			initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
-			ConfigurationStatics.systemLogicType = systemLogicType;
+			ConfigurationStatics.globalInitializerType = globalInitializerType;
 			SystemGeneralProvider = GetSystemLibraryProvider( "General" ) as SystemGeneralProvider;
 			if( SystemGeneralProvider == null )
 				throw new ApplicationException( "General provider not found in system" );
@@ -120,8 +120,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 		}
 
 		internal static object GetSystemLibraryProvider( string providerName ) {
-			var systemLibraryAssembly = systemLogicType.Assembly;
-			var typeName = systemLogicType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
+			var systemLibraryAssembly = globalInitializerType.Assembly;
+			var typeName = globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
 			return systemLibraryAssembly.GetType( typeName ) != null ? systemLibraryAssembly.CreateInstance( typeName ) : null;
 		}
 

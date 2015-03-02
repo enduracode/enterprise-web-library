@@ -12,6 +12,7 @@ using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
@@ -120,7 +121,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
-				foreach( var fileName in GlobalLogic.ConfigurationXsdFileNames ) {
+				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
 						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", "Configuration", fileName + FileExtensions.Xsd ),
 						StandardLibraryMethods.CombinePaths(
@@ -156,9 +157,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// Copy Ewf folder and customize namespaces in .aspx, .ascx, .master, and .cs files.
-			var webProjectEwfFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.EwfFolderName );
+			var webProjectEwfFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
 			IoMethods.DeleteFolder( webProjectEwfFolderPath );
-			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.EwfFolderName ), webProjectEwfFolderPath, false );
+			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
 			var matchingFiles = new List<string>();
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
@@ -444,14 +445,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "internal static void InitAppTools() {" );
-				writer.WriteLine( "SystemLogic globalLogic = null;" );
-				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
+				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"AppTools.Init( \"" + service.Name + "\" + \" Executable\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					"AppTools.Init( globalInitializer, \"" + service.Name + "\" + \" Executable\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 
 				writer.WriteLine( "}" );
 
@@ -505,10 +506,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "SystemLogic globalLogic = null;" );
-				writer.WriteLine( "initGlobalLogic( ref globalLogic );" );
+				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine( "AppTools.Init( \"" + project.Name + "\", false, globalLogic, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+				writer.WriteLine( "AppTools.Init( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return AppTools.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
 				writer.WriteLine( "}" );
@@ -517,7 +518,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalLogic( ref SystemLogic globalLogic );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 				writer.WriteLine( "static partial void ewlMain( string[] args );" );
 
 				writer.WriteLine( "}" );
@@ -646,7 +647,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine();
 					writer.WriteLine( webProject.name + "/bin/" );
 					writer.WriteLine( webProject.name + "/obj/" );
-					writer.WriteLine( webProject.name + "/" + AppStatics.EwfFolderName + "/" );
+					writer.WriteLine( webProject.name + "/" + StaticFileHandler.EwfFolderName + "/" );
 					writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
 					writer.WriteLine( webProject.name + "/Generated Code/" );
 				}

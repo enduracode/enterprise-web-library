@@ -61,7 +61,8 @@
     <Compile Include="Configuration\Providers\Isu.cs" />
     <Compile Include="Configuration\Providers\UserManagement.cs" />
     <Compile Include="Generated Code\ISU.cs" />
-    <Compile Include="GlobalLogic.cs" />
+    <Compile Include="GlobalInitializer.cs" />
+    <Compile Include="GlobalStatics.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />

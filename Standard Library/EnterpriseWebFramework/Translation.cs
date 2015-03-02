@@ -83,7 +83,7 @@
 		/// <summary>
 		/// BasicPage.master use only.
 		/// </summary>
-		public static string Processing { get { return getCorrectTranslation( "Processing...", "Procesando..." ); } }
+		public static string Processing { get { return getCorrectTranslation( "Processing", "Procesando" ); } }
 
 		/// <summary>
 		/// BasicPage.master use only.

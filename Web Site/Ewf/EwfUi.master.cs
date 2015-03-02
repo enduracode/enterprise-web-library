@@ -13,8 +13,6 @@ using RedStapler.StandardLibrary.WebSessionState;
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
 		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string BodyCssClass = "ewf";
-
 			internal const string GlobalBlockId = "ewfUiGlobal";
 			internal const string AppLogoAndUserInfoBlockCssClass = "ewfUiAppLogoAndUserInfo";
 			internal const string AppLogoBlockCssClass = "ewfUiAppLogo";
@@ -61,10 +59,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			// we protect against this by incorporating an ID into the selectors here. A selector with an ID should always trump a selector without any IDs.
 
 			CssElement[] ControlCssElementCreator.CreateCssElements() {
-				// NOTE: Remove this when applications can have CSS files that are only loaded when the EWF UI is being used.
-				var bodyElement = new CssElement( "UiBody", "body." + BodyCssClass ).ToSingleElementArray();
-
-				return bodyElement.Concat( getGlobalElements() ).Concat( getEntityAndTabAndContentElements() ).Concat( getGlobalFootElements() ).ToArray();
+				return getGlobalElements().Concat( getEntityAndTabAndContentElements() ).Concat( getGlobalFootElements() ).ToArray();
 			}
 
 			private IEnumerable<CssElement> getGlobalElements() {
@@ -203,8 +198,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var globalFootBlock = getGlobalFootBlock();
 			if( globalFootBlock != null )
 				globalFootPlace.AddControlsReturnThis( globalFootBlock );
-
-			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.BodyCssClass;
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {

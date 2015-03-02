@@ -8,12 +8,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		PageInfo GetIntermediateLogInPageInfo( string returnUrl );
+		PageInfo CreateIntermediateLogInPageInfo( string returnUrl );
 
 		/// <summary>
 		/// Standard Library use only.
 		/// </summary>
-		PageInfo GetLogInPageInfo( string returnUrl );
+		PageInfo CreateLogInPageInfo( string returnUrl );
 
 		/// <summary>
 		/// Standard Library use only.
@@ -53,11 +53,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<ResourceInfo> GetDisplayMediaCssInfos();
+		IEnumerable<ResourceInfo> CreateBasicCssInfos();
 
 		/// <summary>
 		/// Standard Library use only. Returns applicable CSS info objects, in the correct order.
 		/// </summary>
-		IEnumerable<ResourceInfo> GetPrintMediaCssInfos();
+		IEnumerable<ResourceInfo> CreateEwfUiCssInfos();
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		ResourceInfo CreateModernizrJavaScriptInfo();
+
+		/// <summary>
+		/// Standard Library use only. Returns applicable JavaScript info objects, in the correct order.
+		/// </summary>
+		IEnumerable<ResourceInfo> CreateJavaScriptInfos();
 	}
 }

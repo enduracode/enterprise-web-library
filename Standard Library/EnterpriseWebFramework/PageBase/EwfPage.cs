@@ -25,6 +25,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal const string ButtonElementName = "ewfButton";
 
+		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
+
+		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			EwfPage.cssInfoCreator = cssInfoCreator;
+		}
+
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
 		/// </summary>
@@ -357,14 +363,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void onLoadData() {
 			// This can go anywhere in the lifecycle.
 
-			// We need this header for two reasons. The most important reason is that without it, certain sites (such as MIT sites) will be forced into compatibility
-			// mode due to the Compatibility View Blacklist maintained by Microsoft. Also, this prevents future versions of IE from rendering things differently
-			// before we get a chance to check it and update the UI.
-			Response.AppendHeader( "X-UA-Compatible", "IE=10" );
+			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
-			addStyleSheetLinks();
+			Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
 			addModernizrLogic();
 			addGoogleAnalyticsLogicIfNecessary();
 			addJavaScriptIncludes();
@@ -436,17 +440,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// IE9 start URL
 			Header.Controls.Add( new HtmlMeta { Name = "msapplication-starturl", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
 
-			if( EwfApp.Instance.FaviconPng48X48Url.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconPng48X48Url ) };
+			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
+			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ) };
 				link.Attributes.Add( "rel", "icon" );
 				link.Attributes.Add( "sizes", "48x48" );
 				Header.Controls.Add( link );
 			}
 
-			// rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-			if( EwfApp.Instance.FaviconUrl.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconUrl ) };
-				link.Attributes.Add( "rel", "shortcut icon" );
+			var favicon = EwfApp.Instance.Favicon;
+			if( favicon != null && favicon.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( favicon.GetUrl( true, true, false ) ) };
+				link.Attributes.Add( "rel", "shortcut icon" ); // rel="shortcut icon" is deprecated and will be replaced with rel="icon".
 				Header.Controls.Add( link );
 			}
 		}
@@ -464,36 +469,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void addStyleSheetLinks() {
-			var styleSheetLinks = new List<HtmlLink>();
-
-			addStyleSheetLink( styleSheetLinks, "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic", "" );
-			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
-			addStyleSheetLink( styleSheetLinks, "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css", "" );
-			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-
-			foreach( var info in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "" );
-
-			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl( false, false, false ) ), "print" );
-
-			foreach( var i in styleSheetLinks )
-				Header.Controls.Add( i );
-		}
-
-		private void addStyleSheetLink( List<HtmlLink> styleSheetLinks, string url, string mediaType ) {
+		private Control getStyleSheetLink( string url ) {
 			var l = new HtmlLink { Href = url };
 			l.Attributes.Add( "rel", "stylesheet" );
 			l.Attributes.Add( "type", "text/css" );
-			if( mediaType.Any() )
-				l.Attributes.Add( "media", mediaType );
-			styleSheetLinks.Add( l );
+			return l;
 		}
 
 		private void addModernizrLogic() {
-			Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\" src=\"" + this.GetClientUrl( "~/Ewf/Modernizr.js" ) + "\"></script>" } );
+			Header.Controls.Add(
+				new Literal
+					{
+						Text =
+							"<script type=\"text/javascript\" src=\"" + this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) +
+							"\"></script>"
+					} );
 		}
 
 		private void addGoogleAnalyticsLogicIfNecessary() {
@@ -513,22 +503,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptIncludes() {
-			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
-			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" );
-
-			ClientScript.RegisterClientScriptInclude(
-				GetType(),
-				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor", "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ChartJs", this.GetClientUrl( "~/Ewf/ThirdParty/ChartJs/Chart.min.js?v=1" ) );
+			foreach( var url in from i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos() select i.GetUrl( false, false, false ) )
+				ClientScript.RegisterClientScriptInclude( GetType(), "ewf" + url, this.GetClientUrl( url ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
-			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
+			foreach( var url in from i in EwfApp.Instance.GetJavaScriptFiles() select i.GetUrl( false, false, false ) )
 				ClientScript.RegisterClientScriptInclude( GetType(), "systemSpecificFile" + url, this.GetClientUrl( url ) );
 		}
 
@@ -641,10 +619,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
 					.Aggregate( ( a, b ) => a + b );
 
-			var statusMessageDialogFadeOutStatement = "";
-			if( StatusMessages.Any() && StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
-				statusMessageDialogFadeOutStatement = "setTimeout( 'fadeOutStatusMessageDialog( 400 );', " + StatusMessages.Count() * 1000 + " );";
-
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
@@ -686,7 +660,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					" ",
 					"OnDocumentReady();",
 					controlInitStatements,
-					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
