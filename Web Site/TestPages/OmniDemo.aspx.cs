@@ -3,7 +3,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class OmniDemo: EwfPage {
+	partial class OmniDemo: EwfPage {
 		protected override void loadData() {
 			var omni = FormItemBlock.CreateFormItemList( numberOfColumns: 7 );
 			var complexLabel = new Panel();
@@ -19,5 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create( "Bill Number", new EwfLabel() ) );
 			ph.AddControlsReturnThis( omni );
 		}
+
+		public override bool IsAutoDataUpdater { get { return true; } }
 	}
 }
