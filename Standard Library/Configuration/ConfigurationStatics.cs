@@ -41,7 +41,8 @@ namespace RedStapler.StandardLibrary.Configuration {
 		internal static string AppName { get; private set; }
 		internal static bool IsClientSideProgram { get; private set; }
 
-		internal static void Init( Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
+		internal static void Init(
+			bool useRelativeInstallationPath, Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
 			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
 			MachineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
 
@@ -75,14 +76,17 @@ namespace RedStapler.StandardLibrary.Configuration {
 			else {
 				initializationLog += Environment.NewLine + "Is not a web app";
 
-				// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation.
-				// We use the assembly folder path here so we're not relying on the working directory of the application.
-				// Installed executables are one level below the installation folder.
-				var assemblyFolderPath = Path.GetDirectoryName( AppAssembly.Location );
-				installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, ".." );
+				// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
+				// one level below the installation folder.
+				if( useRelativeInstallationPath )
+					installationPath = "..";
+				else {
+					var assemblyFolderPath = Path.GetDirectoryName( AppAssembly.Location );
+					installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, ".." );
+				}
 				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 				if( isDevelopmentInstallation )
-					installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, "..", "..", ".." ); // Visual Studio puts executables inside bin\Debug.
+					installationPath = StandardLibraryMethods.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 			}
 			initializationLog += Environment.NewLine + "Successfully determined installation path";
 			InstallationConfiguration = new InstallationConfiguration( MachineIsStandbyServer, installationPath, isDevelopmentInstallation );

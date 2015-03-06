@@ -489,6 +489,7 @@
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
     <Compile Include="UnexpectedValueException.cs" />
+    <Compile Include="UnitTestingInitializationOps.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />
     <Compile Include="InitializationAwareValue.cs" />
