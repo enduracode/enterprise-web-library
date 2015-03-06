@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Standard Library", "Standard Library\Standard Library.csproj", "{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web Site", "Web Site\Web Site.csproj", "{1FEF500E-B420-42D6-8702-D998CDF65C23}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Red Stapler Library Tester", "Red Stapler Library Tester\Red Stapler Library Tester.csproj", "{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solution Files", "Solution Files\Solution Files.csproj", "{D1934BF3-2370-49BD-8FE7-3781E575C448}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{3398B3A5-8445-410E-A69B-33EE3E914A03}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Development Utility", "Development Utility\Development Utility.csproj", "{621E8A1E-19BC-4734-BBF5-D322312044A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{69B7A268-9BC0-4416-8966-479BC35FFB39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,9 +29,6 @@ Global
 		{1FEF500E-B420-42D6-8702-D998CDF65C23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FEF500E-B420-42D6-8702-D998CDF65C23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FEF500E-B420-42D6-8702-D998CDF65C23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{19980628-FB8A-42EA-9FB3-B9F511DF3D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1934BF3-2370-49BD-8FE7-3781E575C448}.Debug|Any CPU.ActiveCfg = Main|Any CPU
 		{D1934BF3-2370-49BD-8FE7-3781E575C448}.Release|Any CPU.ActiveCfg = Main|Any CPU
 		{3398B3A5-8445-410E-A69B-33EE3E914A03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -42,6 +39,9 @@ Global
 		{621E8A1E-19BC-4734-BBF5-D322312044A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{621E8A1E-19BC-4734-BBF5-D322312044A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{621E8A1E-19BC-4734-BBF5-D322312044A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

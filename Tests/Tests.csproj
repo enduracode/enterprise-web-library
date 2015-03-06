@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{69B7A268-9BC0-4416-8966-479BC35FFB39}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EnterpriseWebLibrary.Tests</RootNamespace>
+    <AssemblyName>EnterpriseWebLibrary.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Humanizer">
+      <HintPath>..\packages\Humanizer.1.28.0\lib\portable-win+net40+sl50+wp8+wpa81\Humanizer.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CollectionTools\TakeLast.cs" />
+    <Compile Include="DateTimeTools\DateRangesOverlap.cs" />
+    <Compile Include="DateTimeTools\DateTimeRangeOverlapsDateRange.cs" />
+    <Compile Include="DoubleTools\ToMoneyString.cs" />
+    <Compile Include="IO\ExcelFileWriterTester.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PhysicianDataStructure\PhysicianMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeManagerDataStructure\PracticeManagerMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\PracticeDocumentDataStructure\PracticeMockData.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\MergeTestData.cs" />
+    <Compile Include="MailMerging\DataStructure\TestFileDataStructure\TheValue.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\FirstName.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\LastName.cs" />
+    <Compile Include="MailMerging\MergeFields\PhysicianMergeFields\PhysicianEmail.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeDocumentMergeFields\PracticeName.cs" />
+    <Compile Include="MailMerging\MergeFields\PracticeManagerMergeFields\Email.cs" />
+    <Compile Include="MailMerging\MergeFields\TestFileMergeFields\FullName.cs" />
+    <Compile Include="MailMerging\MergeOpsTester.cs" />
+    <Compile Include="NUnitInitializer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RsLibraryTester.cs" />
+    <Compile Include="Validation\UrlValidatorTester.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="TestFiles\MergeOps\pdf.pdf" />
+    <None Include="TestFiles\MergeOps\PracticesUserAccess.docx" />
+    <None Include="TestFiles\MergeOps\word.docx" />
+    <None Include="TestFiles\PdfOps\onepage.pdf" />
+    <None Include="TestFiles\PdfOps\threepage.pdf" />
+    <None Include="TestFiles\PdfOps\twopage.pdf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{3398b3a5-8445-410e-a69b-33ee3e914a03}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Standard Library\Standard Library.csproj">
+      <Project>{7eed5926-9fe0-44db-9b5f-5a6856ce392e}</Project>
+      <Name>Standard Library</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
