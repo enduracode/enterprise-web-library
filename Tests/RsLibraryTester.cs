@@ -54,8 +54,8 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( "body.ewf div.ewfIeWarningBanner table a { font-size:1.5em; }".RemoveTextBetweenStrings( "{", "}" ) );
 
 			Console.WriteLine( "one".ConcatenateWithSpace( "two" ) );
-			Console.WriteLine( StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
-			Console.WriteLine( StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
+			Console.WriteLine( RedStapler.StandardLibrary.StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
+			Console.WriteLine( RedStapler.StandardLibrary.StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
 
 			Console.WriteLine( "abcde".Truncate( 4 ) );
 			Console.WriteLine( "abcde".TruncateStart( 4 ) );
@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"Inetpub", @"Files" ) );
 			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
-			Console.WriteLine( StringTools.CamelToEnglish( null ) );
+			Console.WriteLine( RedStapler.StandardLibrary.StringTools.CamelToEnglish( null ) );
 			Console.WriteLine( "".CamelToEnglish() );
 			Console.WriteLine( "L".CamelToEnglish() );
 			Console.WriteLine( "l".CamelToEnglish() );

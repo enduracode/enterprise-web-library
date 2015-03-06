@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using RedStapler.StandardLibrary;
 
-namespace RedStapler.StandardLibraryTester.StringTools {
+namespace EnterpriseWebLibrary.Tests.StringTools {
 	[ TestFixture ]
 	internal class RemoveCommonNonAlphaNumericCharacters {
 		[ Test ]
