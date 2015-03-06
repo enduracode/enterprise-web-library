@@ -67,6 +67,7 @@
     <Compile Include="NUnitInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RsLibraryTester.cs" />
+    <Compile Include="StringTools\RemoveCommonNonAlphaNumericCharacters.cs" />
     <Compile Include="Validation\UrlValidatorTester.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -155,7 +155,9 @@ namespace RedStapler.StandardLibrary {
 
 		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
 		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
-			return RemoveCharacters( line, nonAlphaNumericCharacters );
+			if (line == null)
+				return null;
+			return Regex.Replace( line,"[^a-z0-9\\s]","", RegexOptions.IgnoreCase );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphaCharactersWithWhiteSpace instead." ) ]
