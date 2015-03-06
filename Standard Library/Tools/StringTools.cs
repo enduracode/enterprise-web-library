@@ -95,11 +95,11 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Removes all of the non-alphanumeric characters, including white space, from this string.
+		/// Removes all of the non-alphanumeric characters from this string.
 		/// </summary>
-		public static string RemoveNonAlphanumericCharacters( this string text ) {
+		public static string RemoveNonAlphanumericCharacters( this string text, bool preserveWhiteSpace = false ) {
 			// See http://stackoverflow.com/a/8779277/35349.
-			return Regex.Replace( text, @"[^A-Za-z0-9]+", "" );
+			return Regex.Replace( text, preserveWhiteSpace ? @"[^A-Za-z0-9\s]+" : @"[^A-Za-z0-9]+", "" );
 		}
 
 		/// <summary>
@@ -155,9 +155,9 @@ namespace RedStapler.StandardLibrary {
 
 		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
 		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
-			if (line == null)
+			if( line == null )
 				return null;
-			return Regex.Replace( line,"[^a-z0-9\\s]","", RegexOptions.IgnoreCase );
+			return Regex.Replace( line, "[^a-z0-9\\s]", "", RegexOptions.IgnoreCase );
 		}
 
 		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphaCharactersWithWhiteSpace instead." ) ]
