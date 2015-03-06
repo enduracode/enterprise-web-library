@@ -55,6 +55,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Humanizer, Version=1.28.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Humanizer.1.28.0\lib\portable-win+net40+sl50+wp8+wpa81\Humanizer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
@@ -105,6 +109,7 @@
     <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
       <DependentUpon>SystemUsers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\CssElementCreator.cs" />
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -134,6 +139,20 @@
       <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\MetaLogicFactory.cs" />
+    <Compile Include="Ewf\PreBuiltResponse.aspx.cs">
+      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\PreBuiltResponse.aspx.designer.cs">
+      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Ewf\UserManagement\SelectUser.aspx.cs">
+      <DependentUpon>SelectUser.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\UserManagement\SelectUser.aspx.designer.cs">
+      <DependentUpon>SelectUser.aspx</DependentUpon>
+    </Compile>
     <Compile Include="GetSchema.aspx.cs">
       <DependentUpon>GetSchema.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -159,6 +178,13 @@
     </Compile>
     <Compile Include="TestPages\BoxDemo.aspx.designer.cs">
       <DependentUpon>BoxDemo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TestPages\Charts.aspx.cs">
+      <DependentUpon>Charts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\Charts.aspx.designer.cs">
+      <DependentUpon>Charts.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\CheckBox.aspx.cs">
       <DependentUpon>CheckBox.aspx</DependentUpon>
@@ -314,13 +340,6 @@
     <Compile Include="Ewf\ErrorPages\UnhandledException.aspx.designer.cs">
       <DependentUpon>UnhandledException.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\GetFile.aspx.cs">
-      <DependentUpon>GetFile.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\GetFile.aspx.designer.cs">
-      <DependentUpon>GetFile.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\UserManagement\ChangePassword\Page.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>Page.aspx</DependentUpon>
@@ -445,285 +464,95 @@
     <Content Include="Ewf\FileUploader\progressbar.gif" />
     <Content Include="Ewf\FileUploader\progressbg_orange.gif" />
     <Content Include="Ewf\FileUploader\Upload.aspx" />
-    <Content Include="Ewf\Images\ajax-loader.gif" />
     <Content Include="Ewf\Modernizr.js" />
-    <Content Include="Ewf\Styles\Backgrounds\Darker.svg" />
-    <Content Include="Ewf\Styles\Backgrounds\Lighter.svg" />
+    <Content Include="Ewf\PreBuiltResponse.aspx" />
     <Content Include="Ewf\Styles\Basic.css" />
     <Content Include="Ewf\Styles\EwfUi\Colors.css" />
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
     <Content Include="Ewf\Styles\ToDeleteOrMove.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\build-config.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\ckeditor.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\config.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\contents.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\lang\en.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\a11yhelp.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ar.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\bg.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ca.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\cs.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\cy.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\da.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\de.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\el.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\en.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\eo.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\es.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\et.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\fa.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\fi.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\fr-ca.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\fr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\gl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\gu.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\he.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\hi.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\hr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\hu.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\it.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ja.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\km.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ku.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\lt.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\lv.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\mk.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\mn.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\nb.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\nl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\no.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\pl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\pt-br.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\pt.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ro.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ru.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\si.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\sk.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\sl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\sq.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\sv.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\th.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\tr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\ug.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\uk.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\vi.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\zh-cn.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\a11yhelp\dialogs\lang\_translationstatus.txt" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\about\dialogs\about.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\about\dialogs\logo_ckeditor.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\clipboard\dialogs\paste.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\colordialog\dialogs\colordialog.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\dialog\dialogDefinition.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\div\dialogs\div.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\fakeobjects\images\spacer.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\find\dialogs\find.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\flash\dialogs\flash.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\flash\images\placeholder.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\button.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\checkbox.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\form.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\hiddenfield.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\radio.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\select.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\textarea.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\dialogs\textfield.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\forms\images\hiddenfield.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\icons.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\iframe\dialogs\iframe.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\iframe\images\placeholder.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\image\dialogs\image.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\image\images\noimage.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\link\dialogs\anchor.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\link\dialogs\link.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\link\images\anchor.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\liststyle\dialogs\liststyle.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\magicline\images\icon.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\pagebreak\images\pagebreak.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\pastefromword\filter\default.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\preview\preview.html" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\dialogs\options.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\dialogs\toolbar.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_address.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_blockquote.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_div.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h1.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h2.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h3.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h4.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h5.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_h6.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_p.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\showblocks\images\block_pre.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\dialogs\smiley.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\angel_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\angry_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\broken_heart.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\confused_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\cry_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\devil_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\embaressed_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\embarrassed_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\envelope.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\heart.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\kiss.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\lightbulb.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\omg_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\regular_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\sad_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\shades_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\teeth_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\thumbs_down.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\thumbs_up.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\tongue_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\tounge_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\whatchutalkingabout_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\smiley\images\wink_smile.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\bg.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\ca.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\cs.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\cy.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\de.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\el.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\en.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\eo.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\es.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\et.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\fa.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\fi.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\fr-ca.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\fr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\gl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\he.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\hr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\hu.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\it.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\ku.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\lv.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\nb.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\nl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\no.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\pl.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\pt-br.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\ru.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\si.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\sk.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\sq.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\sv.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\th.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\tr.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\ug.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\zh-cn.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\lang\_translationstatus.txt" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\specialchar\dialogs\specialchar.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\tabletools\dialogs\tableCell.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\table\dialogs\table.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\dialogs\templates.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\dialogs\templates.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\templates\default.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\templates\images\template1.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\templates\images\template2.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\templates\templates\images\template3.gif" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\ciframe.html" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\tmp.html" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\tmpFrameset.html" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\wsc.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\wsc.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\dialogs\wsc_ie.js" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog_ie.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog_ie7.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog_ie8.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog_iequirks.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\dialog_opera.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor_gecko.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor_ie.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor_ie7.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor_ie8.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\editor_iequirks.css" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\icons.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\images\arrow.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\images\close.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\images\mini.png" />
-    <Content Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\styles.js" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\animated-overlay.gif" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_carbon-fiber_0_aaaaaa_8x9.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_flat_55_fbf9ee_40x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_flat_75_e7edf3_40x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_highlight-hard_65_a0a0a0_1x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_highlight-hard_75_000000_1x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_highlight-hard_75_78a0c3_1x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_highlight-hard_75_7c13b8_1x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-bg_inset-soft_95_fef1ec_1x100.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_222222_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_454545_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_eceaea_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\images\ui-icons_ffffff_256x240.png" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\css\custom-theme\jquery-ui-1.10.3.custom.min.css" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\jquery-ui-1.10.3.custom\js\jquery-ui-1.10.3.custom.min.js" />
-    <Content Include="Ewf\ThirdParty\JQueryUi\ReadMe.txt" />
-    <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.css" />
-    <Content Include="Ewf\ThirdParty\QTip2\jquery.qtip.min.js" />
-    <Content Include="Ewf\ThirdParty\ReadMe.txt" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2-spinner.gif" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2.css" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2.min.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2.png" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2x2.png" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ar.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_bg.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ca.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_cs.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_da.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_de.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_el.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_es.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_et.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_eu.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_fa.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_fi.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_fr.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_gl.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_he.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_hr.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_hu.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_id.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_is.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_it.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ja.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ko.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_lt.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_lv.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_mk.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ms.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_nl.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_no.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_pl.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_pt-BR.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_pt-PT.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ro.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ru.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_sk.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_sv.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_th.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_tr.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_ua.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_vi.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-CN.js" />
-    <Content Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-TW.js" />
+    <Content Include="Ewf\ThirdParty\ChartJs\Chart.min.js" />
+    <Content Include="Ewf\ThirdParty\ChartJs\ReadMe.txt" />
+    <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
+    <Content Include="Ewf\UserManagement\SelectUser.aspx" />
+    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Darker.svg" />
+    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Lighter.svg" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\animated-overlay.gif" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_carbon-fiber_0_aaaaaa_8x9.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_flat_55_fbf9ee_40x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_flat_75_e7edf3_40x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_highlight-hard_65_a0a0a0_1x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_highlight-hard_75_000000_1x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_highlight-hard_75_78a0c3_1x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_highlight-hard_75_7c13b8_1x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-bg_inset-soft_95_fef1ec_1x100.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_222222_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_454545_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_eceaea_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\css\custom-theme\jquery-ui-1.10.4.custom.min.css" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.10.4.custom\js\jquery-ui-1.10.4.custom.min.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\ReadMe.txt" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\ReadMe.txt" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2-spinner.gif" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.css" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.min.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2x2.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ar.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_bg.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ca.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_cs.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_da.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_de.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_el.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_es.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_et.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_eu.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_fa.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_fi.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_fr.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_gl.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_he.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_hr.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_hu.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_id.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_is.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_it.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ja.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ko.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_lt.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_lv.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_mk.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ms.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_nl.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_no.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_pl.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_pt-BR.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_pt-PT.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ro.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ru.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_sk.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_sv.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_th.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_tr.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_ua.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_vi.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-CN.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_zh-TW.js" />
     <Content Include="GetSchema.aspx" />
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
     <Content Include="TestPages\BoxDemo.aspx" />
+    <Content Include="TestPages\Charts.aspx" />
     <Content Include="TestPages\CheckBox.aspx" />
     <Content Include="TestPages\CheckBoxList.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
@@ -743,27 +572,20 @@
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
     <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
     <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
-    <Content Include="Ewf\GetFile.aspx" />
     <Content Include="Ewf\Images\Calendar\button_currentmonth.gif" />
     <Content Include="Ewf\Images\Calendar\button_next.gif" />
     <Content Include="Ewf\Images\Calendar\button_previous.gif" />
-    <Content Include="Ewf\Images\Progress.gif" />
     <Content Include="Ewf\ErrorPages\ErrorPage.master" />
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\LICENSE.md" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\LICENSE.md" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\scayt\README.md" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\LICENSE.md" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\plugins\wsc\README.md" />
-    <None Include="Ewf\ThirdParty\CkEditor\ckeditor-4.1.2\skins\moono\readme.md" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\bower.json" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\LICENSE" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\README.md" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\release.sh" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2.jquery.json" />
-    <None Include="Ewf\ThirdParty\Select2\select2-3.4.3\select2_locale_en.js.template" />
+    <Content Include="packages.config" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\bower.json" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\LICENSE" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\README.md" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\release.sh" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.jquery.json" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_en.js.template" />
     <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
@@ -779,7 +601,6 @@
     <Content Include="Ewf\ContactUs\EntitySetup.ascx" />
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\Styles\InternetExplorer.css" />
-    <Content Include="Ewf\Styles\Print.css" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx" />
@@ -826,16 +647,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
-          <AutoAssignPort>False</AutoAssignPort>
-          <DevelopmentServerPort>10040</DevelopmentServerPort>
-          <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:8080/Ewl</IISUrl>
-          <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>
-          </CustomServerUrl>
-          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>

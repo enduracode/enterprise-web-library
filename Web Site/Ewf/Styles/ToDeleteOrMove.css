@@ -57,7 +57,7 @@ tr.queuedFile > td {
 	margin: 0;
 	padding: 4px;
 	background-color: transparent; /* This file cannot be moved without updating this url */
-	background-image: url("Backgrounds/Darker.svg");
+	background-image: url( "../VersionedStaticFiles/Backgrounds-v2/Darker.svg" );
 }
 
 .fileError {

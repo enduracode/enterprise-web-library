@@ -8,12 +8,10 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.AlternativePageModes;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 using StackExchange.Profiling;
 
@@ -26,6 +24,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private const string postBackHiddenFieldName = "ewfPostBack";
 
 		internal const string ButtonElementName = "ewfButton";
+
+		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
+
+		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			EwfPage.cssInfoCreator = cssInfoCreator;
+		}
 
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
@@ -105,8 +109,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 				// If the request doesn't match the page's specified security level, redirect with the proper level. Do this before ensuring that the user can access the
 				// page since in certificate authentication systems this can be affected by the connection security level.
-				// NOTE: Also redirect if the domain isn't correct. Probably only do this on GET requests since we don't want to wipe out post backs.
-				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != Request.IsSecureConnection )
+				//
+				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs. We probably
+				// should only do this on GET requests since we don't want to wipe out post backs.
+				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request ) )
 					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
 			}
 			finally {
@@ -114,18 +120,25 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			// This logic depends on the authenticated user and on page and entity setup info objects.
-			if( !InfoAsBaseType.UserCanAccessPageAndAllControls ) {
+			if( !InfoAsBaseType.UserCanAccessResource ) {
 				throw new AccessDeniedException(
-					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicPage && !AppRequestState.Instance.IntermediateUserExists,
+					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
 			}
 
-			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledPageMode;
+			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( fileCreator != null )
-				fileCreator.CreateFile().WriteToResponse( sendsFileInline );
+			if( responseWriter != null ) {
+				Response.ClearHeaders();
+				Response.ClearContent();
+				responseWriter.WriteResponse();
+
+				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
+				// EWF from Web Forms. This is EnduraCode goal 790.
+				Response.End();
+			}
 		}
 
 		/// <summary>
@@ -139,14 +152,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
-		/// Gets the FileCreator for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
+		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
 		/// </summary>
-		protected virtual FileCreator fileCreator { get { return null; } }
-
-		/// <summary>
-		/// Gets whether the page sends its file inline or as an attachment. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
-		/// </summary>
-		protected virtual bool sendsFileInline { get { return true; } }
+		protected virtual EwfSafeResponseWriter responseWriter { get { return null; } }
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
@@ -184,7 +192,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
-							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist."
+							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
+							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
@@ -221,7 +230,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						}
 					} );
 				if( navigationNeeded )
-					navigate( null );
+					navigate( null, null );
 			}
 		}
 
@@ -259,7 +268,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			PageInfo redirectInfo = null;
+			ResourceInfo redirectInfo = null;
+			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
 					validateFormSubmission( formValueHash );
@@ -304,9 +314,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 								postBackAction => {
 									if( postBackAction == null )
 										return;
-									redirectInfo = postBackAction.Page;
-									if( postBackAction.File != null )
-										StandardLibrarySessionState.Instance.FileToBeDownloaded = postBackAction.File.CreateFile();
+									redirectInfo = postBackAction.Resource;
+									if( postBackAction.SecondaryResponse != null )
+										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
 								} );
 						}
 						catch {
@@ -320,9 +330,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						try {
 							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 						}
-						catch {
+						finally {
 							DataAccessState.Current.ResetCache();
-							throw;
 						}
 					}
 
@@ -344,7 +353,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						requestState.PostBackValues = null;
 				} );
 
-			navigate( redirectInfo );
+			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 			return null;
 		}
 
@@ -354,14 +363,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void onLoadData() {
 			// This can go anywhere in the lifecycle.
 
-			// We need this header for two reasons. The most important reason is that without it, certain sites (such as MIT sites) will be forced into compatibility
-			// mode due to the Compatibility View Blacklist maintained by Microsoft. Also, this prevents future versions of IE from rendering things differently
-			// before we get a chance to check it and update the UI.
-			Response.AppendHeader( "X-UA-Compatible", "IE=10" );
+			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
-			addStyleSheetLinks();
+			Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
 			addModernizrLogic();
 			addGoogleAnalyticsLogicIfNecessary();
 			addJavaScriptIncludes();
@@ -371,7 +378,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Title = StringTools.ConcatenateWithDelimiter(
 				" - ",
 				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
-				PageInfo.CombinePagePathStrings( PageInfo.PagePathSeparator, InfoAsBaseType.ParentPageEntityPathString, InfoAsBaseType.PageFullName ) );
+				ResourceInfo.CombineResourcePathStrings(
+					ResourceInfo.ResourcePathSeparator,
+					InfoAsBaseType.ParentResourceEntityPathString,
+					InfoAsBaseType.ResourceFullName ) );
 
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData();
@@ -430,17 +440,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// IE9 start URL
 			Header.Controls.Add( new HtmlMeta { Name = "msapplication-starturl", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
 
-			if( EwfApp.Instance.FaviconPng48X48Url.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconPng48X48Url ) };
+			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
+			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ) };
 				link.Attributes.Add( "rel", "icon" );
 				link.Attributes.Add( "sizes", "48x48" );
 				Header.Controls.Add( link );
 			}
 
-			// rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-			if( EwfApp.Instance.FaviconUrl.Length > 0 ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( EwfApp.Instance.FaviconUrl ) };
-				link.Attributes.Add( "rel", "shortcut icon" );
+			var favicon = EwfApp.Instance.Favicon;
+			if( favicon != null && favicon.UserCanAccessResource ) {
+				var link = new HtmlLink { Href = this.GetClientUrl( favicon.GetUrl( true, true, false ) ) };
+				link.Attributes.Add( "rel", "shortcut icon" ); // rel="shortcut icon" is deprecated and will be replaced with rel="icon".
 				Header.Controls.Add( link );
 			}
 		}
@@ -451,93 +462,51 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					new Literal
 						{
 							Text =
-								"<script type=\"text/javascript\" src=\"http" + ( Request.IsSecureConnection ? "s" : "" ) + "://use.typekit.com/" + EwfApp.Instance.TypekitId +
-								".js\"></script>"
+								"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( Request ) ? "s" : "" ) + "://use.typekit.com/" +
+								EwfApp.Instance.TypekitId + ".js\"></script>"
 						} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
 		}
 
-		private void addStyleSheetLinks() {
-			var styleSheetLinks = new List<HtmlLink>();
-
-			addStyleSheetLink( styleSheetLinks, "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css", "" );
-			foreach( var info in EwfApp.MetaLogicFactory.GetDisplayMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
-
-			foreach( var info in EwfApp.Instance.GetStyleSheets() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "" );
-
-			foreach( var info in EwfApp.MetaLogicFactory.GetPrintMediaCssInfos() )
-				addStyleSheetLink( styleSheetLinks, this.GetClientUrl( info.GetUrl() ), "print" );
-
-			foreach( var i in styleSheetLinks )
-				Header.Controls.Add( i );
-		}
-
-		private void addStyleSheetLink( List<HtmlLink> styleSheetLinks, string url, string mediaType ) {
+		private Control getStyleSheetLink( string url ) {
 			var l = new HtmlLink { Href = url };
 			l.Attributes.Add( "rel", "stylesheet" );
 			l.Attributes.Add( "type", "text/css" );
-			if( mediaType.Any() )
-				l.Attributes.Add( "media", mediaType );
-			styleSheetLinks.Add( l );
+			return l;
 		}
 
 		private void addModernizrLogic() {
-			Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\" src=\"" + this.GetClientUrl( "~/Ewf/Modernizr.js" ) + "\"></script>" } );
+			Header.Controls.Add(
+				new Literal
+					{
+						Text =
+							"<script type=\"text/javascript\" src=\"" + this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) +
+							"\"></script>"
+					} );
 		}
 
 		private void addGoogleAnalyticsLogicIfNecessary() {
 			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
 				return;
 			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "<script type=\"text/javascript\">" );
-				sw.WriteLine( "var _gaq = _gaq || [];" );
-				sw.WriteLine( "_gaq.push(['_setAccount', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "']);" );
-				sw.WriteLine( "_gaq.push(['_trackPageview']);" );
-				sw.WriteLine( "(function() {" );
-				sw.WriteLine( "var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;" );
-				sw.WriteLine( "ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';" );
-				sw.WriteLine( "var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);" );
-				sw.WriteLine( "})();" );
+				sw.WriteLine( "<script>" );
+				sw.WriteLine( "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" );
+				sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
+				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
+				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
+				sw.WriteLine( "ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto');" );
+				sw.WriteLine( "ga('send', 'pageview');" );
 				sw.WriteLine( "</script>" );
 				Header.Controls.Add( new Literal { Text = sw.ToString() } );
 			}
 		}
 
 		private void addJavaScriptIncludes() {
-			// See https://developers.google.com/speed/libraries/devguide. Keep in mind that we can't use a CDN for some of the other files since they are customized
-			// versions.
-			ClientScript.RegisterClientScriptInclude( GetType(), "jQuery", "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" );
-
-			ClientScript.RegisterClientScriptInclude(
-				GetType(),
-				"jQuery UI",
-				this.GetClientUrl( "~/Ewf/ThirdParty/JQueryUi/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "Select2", this.GetClientUrl( "~/Ewf/ThirdParty/Select2/select2-3.4.3/select2.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "timePicker", this.GetClientUrl( "~/Ewf/ThirdParty/TimePicker/JavaScript.js" ) );
-			ClientScript.RegisterClientScriptInclude( GetType(), "qTip2", this.GetClientUrl( "~/Ewf/ThirdParty/QTip2/jquery.qtip.min.js" ) );
-
-			// From http://stackoverflow.com/a/2548133/35349.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"endsWith",
-				"function endsWith( str, suffix ) { return str.indexOf( suffix, str.length - suffix.length ) !== -1; }",
-				true );
-
-			// The second condition in the If statement was necessary because we observed this function being called with a string that had already been transformed.
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"CKEditor GetUrl",
-				"function CKEDITOR_GETURL( resource ) {{ if( endsWith( resource, '.css' ) && !endsWith( resource, '{0}.css' ) ) return resource.substring( 0, resource.length - 4 ) + '{0}.css'; }}"
-					.FormatWith( CssHandler.GetFileVersionString( DateTime.MinValue ) ),
-				true );
-
-			ClientScript.RegisterClientScriptInclude( GetType(), "CKEditor Main", this.GetClientUrl( "~/" + WysiwygHtmlEditor.CkEditorFolderUrl + "/ckeditor.js" ) );
+			foreach( var url in from i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos() select i.GetUrl( false, false, false ) )
+				ClientScript.RegisterClientScriptInclude( GetType(), "ewf" + url, this.GetClientUrl( url ) );
 			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
-			ClientScript.RegisterClientScriptInclude( GetType(), "ewfJsFile", this.GetClientUrl( "~/Ewf/JavaScript.js" ) );
-			foreach( var url in EwfApp.Instance.GetJavaScriptFileUrls() )
+			foreach( var url in from i in EwfApp.Instance.GetJavaScriptFiles() select i.GetUrl( false, false, false ) )
 				ClientScript.RegisterClientScriptInclude( GetType(), "systemSpecificFile" + url, this.GetClientUrl( url ) );
 		}
 
@@ -650,10 +619,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
 					.Aggregate( ( a, b ) => a + b );
 
-			var statusMessageDialogFadeOutStatement = "";
-			if( StatusMessages.Any() && StatusMessages.All( i => i.Item1 != StatusMessageType.Warning ) )
-				statusMessageDialogFadeOutStatement = "setTimeout( 'fadeOutStatusMessageDialog( 400 );', " + StatusMessages.Count() * 1000 + " );";
-
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
@@ -669,14 +634,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideRedirectUrl;
-			int? clientSideRedirectDelay;
-			StandardLibrarySessionState.Instance.GetClientSideRedirectUrlAndDelay( out clientSideRedirectUrl, out clientSideRedirectDelay );
-			var locationReplaceStatement = "";
-			if( clientSideRedirectUrl.Length > 0 ) {
-				locationReplaceStatement = "location.replace( '" + this.GetClientUrl( clientSideRedirectUrl ) + "' );";
-				if( clientSideRedirectDelay.HasValue )
-					locationReplaceStatement = "setTimeout( \"" + locationReplaceStatement + "\", " + clientSideRedirectDelay.Value * 1000 + " );";
+			string clientSideNavigationUrl;
+			bool clientSideNavigationInNewWindow;
+			int? clientSideNavigationDelay;
+			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+				out clientSideNavigationUrl,
+				out clientSideNavigationInNewWindow,
+				out clientSideNavigationDelay );
+			var clientSideNavigationStatements = "";
+			if( clientSideNavigationUrl.Any() ) {
+				var url = this.GetClientUrl( clientSideNavigationUrl );
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				if( clientSideNavigationDelay.HasValue )
+					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
 			ClientScript.RegisterClientScriptBlock(
@@ -687,10 +660,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					" ",
 					"OnDocumentReady();",
 					controlInitStatements,
-					statusMessageDialogFadeOutStatement,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, locationReplaceStatement )
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) ) + " } );",
 				true );
@@ -736,15 +708,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual Control controlWithInitialFocus { get { return contentContainer.GetDescendants().FirstOrDefault( i => i is FormControl ); } }
 
-		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence ) {
-			var sentences = new[]
-				{
-					"Possible developer mistake.", messageSentence,
-					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
-		}
-
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
 				method();
@@ -763,7 +726,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void validateFormSubmission( string formValueHash ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			var webFormsHiddenFields = new[] { "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY" };
+			var webFormsHiddenFields = new[]
+				{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
@@ -840,34 +804,49 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
 		}
 
-		private void navigate( PageInfo destination ) {
+		private void navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-			// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
-			// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
-			// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
-			// scenario:
-			// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
-			//    would throw an exception from init if it were re-created.
-			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-				destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
-			else if( destination != null )
-				destination = destination.CloneAndReplaceDefaultsIfPossible( false );
-			else
-				destination = createInfoFromNewParameterValues();
+			string destinationUrl;
+			try {
+				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
+				// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
+				// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
+				// scenario:
+				// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
+				//    would throw an exception from init if it were re-created.
+				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+				if( requestState.ModificationErrorsExist ||
+				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
+					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
+				else if( destination != null )
+					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
+				else
+					destination = createInfoFromNewParameterValues();
+
+				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
+				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
+				// page as the redirect destination. The resulting transfer would lead the user to an error page.
+				destinationUrl = destination.GetUrl();
+			}
+			catch( Exception e ) {
+				throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
+			}
+
+			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
+			if( secondaryResponse != null ) {
+				// It's important that we put the response in session state first since it's used by the Info.init method of the pre-built-response page.
+				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
+				StandardLibrarySessionState.Instance.SetClientSideNavigation(
+					EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
+					!secondaryResponse.FileName.Any(),
+					null );
+			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
 			if( destination.IsIdenticalToCurrent() ) {
-				// Force developers to get an error email if a page modifies data to invalidate itself without specifying a different page as the redirect
-				// destination. The resulting transfer would lead the user to an error page.
-				// An alternative to this GetUrl call is to detect in initEntitySetupAndCreateInfoObjects if we are on the back side of a transfer and make all
-				// exceptions unhandled. This would be harder to implement and has no benefits over the approach here.
-				destination.GetUrl();
-
-				AppRequestState.Instance.ClearUser();
+				AppRequestState.Instance.ClearUserAndImpersonator();
 				resetPage();
 			}
 
@@ -875,13 +854,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( destination.GetType() == InfoAsBaseType.GetType() )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-			NetTools.Redirect( destination.GetUrl() );
+			NetTools.Redirect( destinationUrl );
 		}
 
 		/// <summary>
 		/// Creates a page info object using the new parameter value fields in this page.
 		/// </summary>
 		protected abstract PageInfo createInfoFromNewParameterValues();
+
+		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+			var sentences = new[]
+				{
+					"Possible developer mistake.", messageSentence,
+					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
+				};
+			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+		}
 
 		private void resetPage() {
 			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
@@ -894,13 +882,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
 			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideRedirectUrlAndDelay();
+			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 			DataAccessState.Current.DisableCache();
 			try {
-				if( !Configuration.Machine.MachineConfiguration.GetIsStandbyServer() ) {
+				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
 					EwfApp.Instance.ExecuteInitialRequestDataModifications();
-					if( AppRequestState.Instance.UserAccessible && AppTools.User != null )
-						updateLastPageRequestTimeForUser();
+					if( AppRequestState.Instance.UserAccessible ) {
+						if( AppTools.User != null )
+							updateLastPageRequestTimeForUser( AppTools.User );
+						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+							updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
+					}
 					executeInitialRequestDataModifications();
 				}
 				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
@@ -916,11 +908,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
 		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 		/// </summary>
-		private void updateLastPageRequestTimeForUser() {
+		private void updateLastPageRequestTimeForUser( User user ) {
 			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
 			// rapidly assigning tasks to one another in RSIS or similar situations.
 			// NOTE: This makes the comment on line 688 much less important.
-			if( ( DateTime.Now - AppTools.User.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
 				return;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
@@ -930,8 +922,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// another transaction has modified its value during this transaction.
 			var newlyQueriedUser =
 				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( AppTools.User.UserId, false ) ) );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > AppTools.User.LastRequestDateTime )
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
 				return;
 
 			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -939,18 +931,18 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					try {
 						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
 						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = AppTools.User as FormsAuthCapableUser;
+							var formsAuthCapableUser = (FormsAuthCapableUser)user;
 							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								AppTools.User.UserId,
-								AppTools.User.Email,
-								AppTools.User.Role.RoleId,
+								user.UserId,
+								user.Email,
+								user.Role.RoleId,
 								DateTime.Now,
 								formsAuthCapableUser.Salt,
 								formsAuthCapableUser.SaltedPassword,
 								formsAuthCapableUser.MustChangePassword );
 						}
 						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( AppTools.User.UserId, AppTools.User.Email, AppTools.User.Role.RoleId, DateTime.Now );
+							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
 					}
 					catch( DbConcurrencyException ) {
 						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
@@ -996,7 +988,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				formValueString.Append( formValue.GetDurableValueAsString() );
 			}
 
-			var hash = new MD5CryptoServiceProvider().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
 			var hashString = "";
 			foreach( var b in hash )
 				hashString += b.ToString( "x2" );

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
+using System.Web.Script.Serialization;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -492,14 +492,6 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Allows for extension method syntax for string.Format.
-		/// </summary>
-		[ StringFormatMethod( "s" ) ]
-		public static string FormatWith( this string s, params object[] objects ) {
-			return String.Format( s, objects );
-		}
-
-		/// <summary>
 		/// Returns a new string in which the last instance of the specified string in the current instance is replaced by another specified string.
 		/// </summary>
 		public static string ReplaceLast( this string s, string oldValue, string newValue ) {
@@ -640,6 +632,20 @@ namespace RedStapler.StandardLibrary {
 		/// C# doesn't allow constraining the value to an Enum
 		public static T ToEnum<T>( this string s ) {
 			return (T)Enum.Parse( typeof( T ), s );
+		}
+
+		/// <summary>
+		/// Serializes the given object into json.
+		/// </summary>
+		public static string ToJson( this object o ) {
+			return new JavaScriptSerializer().Serialize( o );
+		}
+
+		/// <summary>
+		/// Converts the given json into the given type.
+		/// </summary>
+		public static T FromJson<T>( this string json ) {
+			return new JavaScriptSerializer().Deserialize<T>( json );
 		}
 	}
 }

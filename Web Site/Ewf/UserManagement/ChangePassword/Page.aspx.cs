@@ -5,16 +5,16 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
-	public partial class Page: EwfPage {
+	partial class Page: EwfPage {
 		partial class Info {
-			public override string PageName { get { return ""; } }
-			protected override bool userCanAccessPage { get { return AppTools.User != null; } }
+			public override string ResourceName { get { return ""; } }
+			protected override bool userCanAccessResource { get { return AppTools.User != null; } }
 		}
 
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalPageInfo( es.info.ReturnAndDestinationUrl ) ) );
+			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) );
 			var fib = FormItemBlock.CreateFormItemTable();
 
 			newPassword = new DataValue<string>();

@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -54,14 +52,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns true if this control will not display any content.
 		/// </summary>
-		public bool IsEmpty { get { return EwfPage.Instance.InfoAsBaseType.PagePath.Count() == 1 && ( pageName == null || pageName.IsEmpty ); } }
+		public bool IsEmpty { get { return EwfPage.Instance.InfoAsBaseType.ResourcePath.Count() == 1 && ( pageName == null || pageName.IsEmpty ); } }
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-			var pagePath = EwfPage.Instance.InfoAsBaseType.PagePath;
-			foreach( var page in pagePath.Take( pagePath.Count - 1 ) ) {
-				Controls.Add( EwfLink.Create( page, new ButtonActionControlStyle( page.PageFullName, buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) );
-				Controls.Add( PageInfo.PagePathSeparator.GetLiteralControl() );
+			var pagePath = EwfPage.Instance.InfoAsBaseType.ResourcePath;
+			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
+				Controls.Add(
+					EwfLink.Create( resource, new ButtonActionControlStyle( resource.ResourceFullName, buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) );
+				Controls.Add( ResourceInfo.ResourcePathSeparator.GetLiteralControl() );
 			}
 			if( pageName != null )
 				Controls.Add( pageName );

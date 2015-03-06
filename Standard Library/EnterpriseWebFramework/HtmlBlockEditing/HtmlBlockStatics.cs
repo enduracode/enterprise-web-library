@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -13,34 +14,32 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private static SystemHtmlBlockEditingProvider provider;
 
-		internal static void Init( Type systemLogicType ) {
-			provider = StandardLibraryMethods.GetSystemLibraryProvider( systemLogicType, providerName ) as SystemHtmlBlockEditingProvider;
+		internal static void Init() {
+			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemHtmlBlockEditingProvider;
 		}
 
 		internal static SystemHtmlBlockEditingProvider SystemProvider {
 			get {
 				if( provider == null )
-					throw StandardLibraryMethods.CreateProviderNotFoundException( providerName );
+					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
 				return provider;
 			}
 		}
 
 		/// <summary>
 		/// Gets the HTML from the specified HTML block, after decoding intra site URIs.
-		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
-		public static string GetHtml( int htmlBlockId, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
+		public static string GetHtml( int htmlBlockId ) {
 			var html = SystemProvider.GetHtml( htmlBlockId );
-			return GetDecodedHtml( html, nonSecureBaseUrl: nonSecureBaseUrl, secureBaseUrl: secureBaseUrl );
+			return GetDecodedHtml( html );
 		}
 
 		/// <summary>
 		/// Decodes intra site URIs in the specified HTML and returns the result. Use this if you have retrieved HTML from the HTML blocks table without using
 		/// GetHtml.
-		/// NOTE: Do not use the nonSecureBaseUrl or secureBaseUrl parameters until you read the NOTE on decodeIntraSiteUris in this class.
 		/// </summary>
-		public static string GetDecodedHtml( string encodedHtml, string nonSecureBaseUrl = "", string secureBaseUrl = "" ) {
-			return decodeIntraSiteUris( encodedHtml, nonSecureBaseUrl, secureBaseUrl );
+		public static string GetDecodedHtml( string encodedHtml ) {
+			return decodeIntraSiteUris( encodedHtml );
 		}
 
 		/// <summary>
@@ -96,23 +95,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Convert absolute URLs to connection-security-specific application relative URLs
 			foreach( var secure in new[] { true, false } ) {
-				var baseUrl = AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( secure );
+				// Later, we may handle URLs for all web applications in the system rather than just the current one. See the comments in decodeIntraSiteUris.
+				var baseUrl =
+					ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => i.Name == ConfigurationStatics.AppName ).DefaultBaseUrl.GetUrlString( secure );
+
 				html = html.Replace( baseUrl, secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix );
 			}
 
 			return html;
 		}
 
-		// NOTE: The nonSecureBaseUrl and secureBaseUrl parameters are a hack. See https://info.redstapler.biz/Pages/Goal/EditGoal.aspx?GoalId=567.
-		private static string decodeIntraSiteUris( string html, string nonSecureBaseUrl, string secureBaseUrl ) {
+		private static string decodeIntraSiteUris( string html ) {
 			foreach( var secure in new[] { true, false } ) {
 				// Any kind of relative URL could be a problem in an email message since there is no context. This is one reason we decode to absolute URLs.
+				//
+				// Our intra-site URI coding does not currently support multiple web applications in a system. If we want to support this, we should probably include
+				// the web app name or something in the prefix.
 				html = Regex.Replace(
 					html,
 					secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
-					secure
-						? secureBaseUrl.Any() ? secureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( true )
-						: nonSecureBaseUrl.Any() ? nonSecureBaseUrl : AppRequestState.Instance.GetBaseUrlWithSpecificSecurity( false ) );
+					ConfigurationStatics.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.GetUrlString( secure ) );
 			}
 			return html;
 		}

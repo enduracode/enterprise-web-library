@@ -25,6 +25,20 @@ div.ewfControlList > div > table {
 	table-layout: fixed;
 }
 
+/* sections */
+ewfSectionAllStylesBothStates {
+	clear: both;
+}
+ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
+	float: right;
+}
+ewfSectionAllStylesClosedState > ewfSectionHeadingContainer > ewfSectionCloseLabel, ewfSectionAllStylesExpandedState > ewfSectionHeadingContainer > ewfSectionExpandLabel {
+	display: none;
+}
+ewfSectionAllStylesClosedState > ewfSectionContentContainer {
+	display: none;
+}
+
 /* tables */
 table {
 	border-width: 0;
@@ -137,7 +151,7 @@ ewfDateAndTimePicker {
 	font-size: 1.4em;
 }
 .datetimepickerIcon {
-	font-size: .8em
+	font-size: .8em;
 }
 
 /* action controls */
@@ -172,13 +186,13 @@ ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundIma
 ewfActionControlAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none; /*-moz-box-shadow: 2px 2px 2px Black;*/
-	background: transparent url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuMTUiLz4KICAgIDxzdG9wIG9mZnNldD0iNTElIiBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuMDEiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InVybCgjZ3JhZC11Y2dnLWdlbmVyYXRlZCkiIC8+Cjwvc3ZnPg==);
-	background: transparent -moz-linear-gradient(top,  rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.01) 51%); /* FF3.6+ */
-	background: transparent -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,0.6)), color-stop(50%,rgba(255,255,255,0.15)), color-stop(51%,rgba(255,255,255,0.01))); /* Chrome,Safari4+ */
-	background: transparent -webkit-linear-gradient(top,  rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.01) 51%); /* Chrome10+,Safari5.1+ */
-	background: transparent -o-linear-gradient(top,  rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.01) 51%); /* Opera 11.10+ */
-	background: transparent -ms-linear-gradient(top,  rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.01) 51%); /* IE10+ */
-	background: transparent linear-gradient(to bottom,  rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.01) 51%); /* W3C */
+	background: transparent url( data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuMTUiLz4KICAgIDxzdG9wIG9mZnNldD0iNTElIiBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuMDEiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InVybCgjZ3JhZC11Y2dnLWdlbmVyYXRlZCkiIC8+Cjwvc3ZnPg== );
+	background: transparent -moz-linear-gradient( top, rgba( 255, 255, 255, 0.6 ) 0%, rgba( 255, 255, 255, 0.15 ) 50%, rgba( 255, 255, 255, 0.01 ) 51% ); /* FF3.6+ */
+	background: transparent -webkit-gradient( linear, left top, left bottom, color-stop( 0%, rgba( 255, 255, 255, 0.6 ) ), color-stop( 50%, rgba( 255, 255, 255, 0.15 ) ), color-stop( 51%, rgba( 255, 255, 255, 0.01 ) ) ); /* Chrome,Safari4+ */
+	background: transparent -webkit-linear-gradient( top, rgba( 255, 255, 255, 0.6 ) 0%, rgba( 255, 255, 255, 0.15 ) 50%, rgba( 255, 255, 255, 0.01 ) 51% ); /* Chrome10+,Safari5.1+ */
+	background: transparent -o-linear-gradient( top, rgba( 255, 255, 255, 0.6 ) 0%, rgba( 255, 255, 255, 0.15 ) 50%, rgba( 255, 255, 255, 0.01 ) 51% ); /* Opera 11.10+ */
+	background: transparent -ms-linear-gradient( top, rgba( 255, 255, 255, 0.6 ) 0%, rgba( 255, 255, 255, 0.15 ) 50%, rgba( 255, 255, 255, 0.01 ) 51% ); /* IE10+ */
+	background: transparent linear-gradient( to bottom, rgba( 255, 255, 255, 0.6 ) 0%, rgba( 255, 255, 255, 0.15 ) 50%, rgba( 255, 255, 255, 0.01 ) 51% ); /* W3C */
 	background-color: #7C13B8;
 	color: white;
 }
@@ -236,73 +250,334 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 }
 
 /* EwfPage and master page */
-div.ewfNonLiveWarning {
-	margin-bottom: 4px;
-	border: solid #464646 1px;
-	background-color: Red;
-	padding: 4px;
-	text-align: center;
-	color: White;
-	font-size: 1.2em;
-	font-weight: bold;
+ewfTopWarningBlock {
+	z-index: 9998;
 }
-ewfClickBlockingBlock {
+ewfNotificationSectionContainerBothStates {
+	z-index: 9999;
+}
+ewfClickBlockerBothStates {
 	z-index: 10000;
 }
-ewfProcessingDialogBlock, ewfStatusMessageDialogBlock {
+ewfProcessingDialogBlockAllStates {
 	z-index: 10001;
 }
-ewfClickBlockingBlock, ewfProcessingDialogBlock {
-	display: none;
+ewfTopWarningBlock {
+	position: relative;
+	font-size: 1rem;
+	margin-bottom: .5em;
+	border: 1px solid #464646;
+	border-radius: .5em;
+	background-color: hsla( 0, 100%, 50%, 0.75 );
+	padding: .5em;
+	text-align: center;
+	color: white;
+	font-weight: bold;
 }
-ewfClickBlockingBlock {
+@media print {
+	ewfTopWarningBlock {
+		display: none;
+	}
+}
+ewfClickBlockerBothStates {
 	position: fixed;
 	top: 0;
 	right: 0;
 	bottom: 0;
 	left: 0;
-	background-color: Gray;
-	opacity: 0.3;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
-	filter: alpha(opacity=30);
+	background-color: gray;
 }
-ewfProcessingDialogBlock {
+ewfClickBlockerInactiveState {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 400ms, opacity 400ms;
+}
+ewfClickBlockerActiveState {
+	opacity: 0.3;
+	transition: opacity 400ms;
+}
+ewfProcessingDialogBlockAllStates {
 	position: fixed;
+	font-size: .8rem;
 	top: 50%;
 	left: 50%;
-	margin-top: -5em;
-	margin-left: -13em;
-	border: 1px solid black;
-	background-color: #cccccc;
-	padding: 1em;
-	height: 8em;
-	width: 26em;
-	color: black;
-}
-ewfProcessingDialogParagraph {
-	text-align: center;
-}
-ewfStatusMessageDialogBlock {
-	position: fixed;
-	top: 30%;
-	left: 50%;
-	font-size: 1.5em;
-	margin-left: -15.1em;
-	border: .1em solid black;
+	margin-top: -4rem;
+	margin-left: -9rem;
+	box-shadow: 0 0 15px black;
+	border-radius: 15px;
 	background-color: white;
-	padding: 1em;
-	width: 28em;
-}
-ewfStatusMessageDialogControlListInfoItem {
+	padding: 0 .5rem;
+	width: 17rem;
+	text-align: center;
 	color: black;
 }
-ewfStatusMessageDialogControlListWarningItem {
+ewfProcessingDialogBlockInactiveState, ewfProcessingDialogBlockActiveState {
+	height: 4rem;
+}
+ewfProcessingDialogBlockInactiveState {
+	visibility: hidden;
+	opacity: 0;
+	transition: height 0 400ms, visibility 400ms, opacity 400ms;
+}
+ewfProcessingDialogBlockActiveState {
+	transition: opacity 400ms;
+}
+ewfProcessingDialogBlockTimeOutState {
+	height: 8rem;
+	transition: height 200ms;
+}
+ewfProcessingDialogProcessingParagraph {
+	font-size: 2em;
+	display: flex;
+	margin: 0;
+	height: 4rem;
+	justify-content: center;
+	align-items: center;
+	cursor: default;
+}
+#ewfEllipsis1, #ewfEllipsis2, #ewfEllipsis3 {
+	-webkit-animation: pulse 2s infinite;
+	animation: pulse 2s infinite;
+}
+@keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+@-webkit-keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+#ewfEllipsis1 {
+	-webkit-animation-delay: 0;
+	animation-delay: 0;
+}
+#ewfEllipsis2 {
+	-webkit-animation-delay: 200ms;
+	animation-delay: 200ms;
+}
+#ewfEllipsis3 {
+	-webkit-animation-delay: 300ms;
+	animation-delay: 300ms;
+}
+ewfProcessingDialogTimeOutParagraphBothStates {
+	display: flex;
+	margin: 0;
+	height: 4rem;
+	justify-content: center;
+	align-items: center;
+}
+ewfProcessingDialogTimeOutParagraphInactiveState {
+	visibility: hidden;
+	transition: visibility 400ms;
+}
+ewfProcessingDialogTimeOutParagraphActiveState {
+	transition: visibility 0 200ms;
+}
+ewfNotificationSectionContainerBothStates {
+	position: fixed;
+	font-size: 1rem;
+	top: 0;
+	left: 50%;
+	width: 80%;
+	min-width: 10rem;
+	max-width: 40rem;
+}
+ewfNotificationSectionContainerNotificationState {
+	-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
+	transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
+}
+ewfNotificationSectionContainerDockedState {
+	-webkit-transform: translateX( -50% );
+	transform: translateX( -50% );
+	-webkit-animation-name: notificationSectionPosition;
+	animation-name: notificationSectionPosition;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates {
+	border-style: solid;
+	border-color: rgba( 0, 0, 0, .5 );
+	background-color: white;
+	color: black;
+}
+ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates {
+	font-size: 1.2em;
+	box-shadow: 0 0 15px black;
+	border-width: .1em;
+	border-radius: 1em;
+	padding: 2em;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates {
+	font-size: 1rem;
+	border-width: .1rem;
+	border-top-width: 0;
+	border-radius: 0 0 .5em .5em;
+	padding: .2rem 1em;
+	transition-property: font-size, box-shadow, border-width, border-radius, padding;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	overflow: hidden;
+
+	/* See http://stackoverflow.com/a/4407335/35349. */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	height: 0;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	margin-top: -.2rem;
+	margin-left: -1em;
+	margin-right: -1em;
+	background-color: rgba( 0, 0, 0, .05 );
+	padding: .2rem 1em;
+	-webkit-animation-name: notificationSectionDisplay;
+	animation-name: notificationSectionDisplay;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
+	margin-bottom: -.2rem;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
+	margin-bottom: .2rem;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1em;
+	margin: 0;
+	padding: 0;
+	background-image: none;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
+	display: block;
+	overflow: hidden;
+}
+/* Using max-height in these two rules is a hack. We'd like to remove the first rule and use height in the second, but height doesn't transition properly when
+	"auto" is involved. */
+ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
+	max-height: 100em;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
+	max-height: 0;
+	transition-property: max-height;
+}
+ewfNotificationSpacer {
+	height: 1.7rem;
+}
+ewfInfoMessageContainer > ewfIcon {
+	color: rgb( 120, 160, 195 );
+}
+ewfWarningMessageContainer > ewfIcon {
+	color: #E69017;
+}
+ewfWarningMessageContainer > ewfStatusMessageText {
 	font-weight: bold;
-	color: orange;
+}
+ewfNotificationSectionContainerDockedState {
+	-webkit-animation-duration: 800ms;
+	animation-duration: 800ms;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
+	transition-delay: 400ms;
+}
+ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	-webkit-animation-duration: 400ms;
+	animation-duration: 400ms;
+}
+@keyframes notificationSectionPosition {
+	0% {
+		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
+		animation-timing-function: ease-in;
+	}
+	50% {
+		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
+	}
+	75% {
+		transform: translateX( -50% ) translateY( -1.7em );
+		animation-timing-function: ease-out;
+	}
+}
+@-webkit-keyframes notificationSectionPosition {
+	0% {
+		-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
+		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
+		-webkit-animation-timing-function: ease-in;
+	}
+	50% {
+		-webkit-transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
+		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
+	}
+	75% {
+		-webkit-transform: translateX( -50% ) translateY( -1.7em );
+		transform: translateX( -50% ) translateY( -1.7em );
+		-webkit-animation-timing-function: ease-out;
+	}
+}
+/* As of 31 Jan 2015, Firefox and IE didn't animate correctly without max-height. */
+@keyframes notificationSectionDisplay {
+	0% {
+		margin: 0;
+		padding: 0;
+		height: 0;
+		max-height: 0;
+	}
+	99.9% {
+		margin: 0;
+		padding: 0;
+		height: 0;
+		max-height: 0;
+	}
+	100% {
+		max-height: 100em;
+	}
+}
+@-webkit-keyframes notificationSectionDisplay {
+	0% {
+		margin: 0;
+		padding: 0;
+		height: 0;
+	}
+	99.9% {
+		margin: 0;
+		padding: 0;
+		height: 0;
+	}
 }
 .profiler-results {
 	opacity: .4;
 }
 .profiler-results:hover {
 	opacity: 1;
+}
+
+/* SelectUser and error pages */
+ewfSelectUserPageBody, ewfErrorPageBody {
+	font-size: 1rem;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	max-width: 60em;
+	color: black;
+}
+
+/* fonts */
+ewfTopWarningBlock, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
+	font-family: 'Open Sans', sans-serif;
+}
+ewfSelectUserPageBody h1, ewfErrorPageBody h1 {
+	font-family: 'Droid Serif', serif;
 }

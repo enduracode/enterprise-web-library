@@ -52,30 +52,43 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aspose.Cells, Version=7.7.2.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Pdf, Version=9.3.0.0, Culture=neutral, PublicKeyToken=6947866647e416ec, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Cells.7.7.2\lib\net40-client\Aspose.Cells.dll</HintPath>
+      <HintPath>..\packages\Aspose.Pdf.9.3.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Pdf, Version=9.0.0.0, Culture=neutral, PublicKeyToken=47b2d0fcacdd3eb6, processorArchitecture=MSIL">
+    <Reference Include="Aspose.Words, Version=14.5.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Pdf.9.0.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
+      <HintPath>..\packages\Aspose.Words.14.5.0\lib\net3.5-client\Aspose.Words.dll</HintPath>
     </Reference>
-    <Reference Include="Aspose.Words, Version=14.2.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+    <Reference Include="ClosedXML, Version=0.72.3.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClosedXML.0.72.3\lib\net40-client\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Aspose.Words.14.2.0\lib\net3.5-client\Aspose.Words.dll</HintPath>
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="Humanizer">
+      <HintPath>..\packages\Humanizer.1.28.0\lib\portable-win+net40+sl50+wp8+wpa81\Humanizer.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ImageResizer">
+      <HintPath>..\packages\ImageResizer.3.4.3\lib\ImageResizer.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=6.1.0.0, Culture=neutral, PublicKeyToken=3f033448d4bb5376, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JetBrains.Annotations.7.0\lib\net45\JetBrains.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="MiniProfiler, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+    <Reference Include="MimeTypeMap, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
+      <HintPath>..\packages\MediaTypeMap.1.0.1.0\lib\net40\MimeTypeMap.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniProfiler, Version=3.0.11.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MiniProfiler.3.1\lib\net40\MiniProfiler.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -110,23 +123,29 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.40.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ThoughtWorks.Selenium.Core, Version=2.42.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Selenium.RC.2.40.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
+      <HintPath>..\packages\Selenium.RC.2.42.0\lib\net40\ThoughtWorks.Selenium.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppMemoryCache.cs" />
+    <Compile Include="BaseUrl.cs" />
+    <Compile Include="Caching\AppMemoryCache.cs" />
     <Compile Include="AppTools.cs" />
+    <Compile Include="Caching\DateAndTimeVersionedCache.cs" />
+    <Compile Include="Caching\PeriodicEvictionCompositeCacheEntry.cs" />
     <Compile Include="CertificateAuthenticationModule.cs" />
     <Compile Include="Chronometer.cs" />
     <Compile Include="Collections\Cache.cs" />
     <Compile Include="Collections\OneToOneMap.cs" />
+    <Compile Include="Configuration\ConfigurationStatics.cs" />
+    <Compile Include="Configuration\DefaultCookieAttributes.cs" />
     <Compile Include="Configuration\InstallationConfiguration.cs" />
     <Compile Include="Configuration\InstallationType.cs" />
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
     <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
+    <Compile Include="Configuration\WebApplication.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />
@@ -142,6 +161,7 @@
     <Compile Include="DataAccess\RetrievalCaching\ParameterlessQueryCache.cs" />
     <Compile Include="DataAccess\RetrievalCaching\QueryRetrievalQueryCache.cs" />
     <Compile Include="DataAccess\RetrievalCaching\TableRetrievalQueryCache.cs" />
+    <Compile Include="DataAccess\RetrievalCaching\VersionedRowDataCache.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionHistoryProvider.cs" />
     <Compile Include="DataAccess\SystemDataAccessProvider.cs" />
     <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
@@ -170,7 +190,17 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemLabel.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\Chart.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\ChartSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
+    <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\CookieStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
@@ -180,9 +210,6 @@
     <Compile Include="Email\EmailSendingException.cs" />
     <Compile Include="Encryption\EncryptionOps.cs" />
     <Compile Include="EnterpriseWebFramework\ActionButtonSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageMode.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageModes\DisabledPageMode.cs" />
-    <Compile Include="EnterpriseWebFramework\AlternativePageModes\NewContentPageMode.cs" />
     <Compile Include="EnterpriseWebFramework\AppMetaLogicFactory.cs" />
     <Compile Include="EnterpriseWebFramework\AppRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
@@ -192,6 +219,10 @@
     <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\ErrorMessageControlListBlockStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\EwfConfigurationStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\EwfInitializationOps.cs" />
+    <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
+    <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />
@@ -199,8 +230,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\EwfListItem.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
@@ -208,9 +238,18 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\BlobFileResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\EwfResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\EwfResponseBodyCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\FullResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\HTTP\ResponseMemoryCachingSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\TailUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\ConnectionSecurity.cs" />
@@ -262,7 +301,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\Heading.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\HeadingLevel.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Box.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LineBreak.cs" />
@@ -301,12 +339,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandler.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssElement.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\ControlCssElementCreator.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssHandlingStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\CssInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\CssHandling\CssPreprocessor.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
@@ -316,17 +348,28 @@
     <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\SecondaryPostBackOperation.cs" />
+    <Compile Include="EnterpriseWebFramework\PageBase\SecondaryResponse.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndPage.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\AlternativeResourceMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\EntitySetupInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ExternalResourceInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\PageInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceGroup.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\ResourceInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Resource Meta Logic\StaticFileInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Entity\TabModeOverrider.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EntitySetupBase.cs" />
-    <Compile Include="EnterpriseWebFramework\EntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
@@ -336,10 +379,8 @@
     <Compile Include="EnterpriseWebFramework\Data Modification\DataModificationException.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPageRequestState.cs" />
-    <Compile Include="EnterpriseWebFramework\ExternalPageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\IntermediateAuthenticationMethods.cs" />
     <Compile Include="EnterpriseWebFramework\PageDisabledException.cs" />
-    <Compile Include="EnterpriseWebFramework\PageGroup.cs" />
     <Compile Include="EnterpriseWebFramework\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Translation.cs" />
@@ -347,6 +388,7 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
@@ -355,6 +397,7 @@
     <Compile Include="Generated Code\System Development Configuration.cs" />
     <Compile Include="Generated Code\System General Configuration.cs" />
     <Compile Include="Generated Code\System List Message.cs" />
+    <Compile Include="IisConfigurationStatics.cs" />
     <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\DatabaseOps.cs" />
@@ -363,6 +406,7 @@
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\Oracle.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\SqlServer.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ProcedureParameter.cs" />
+    <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ValueContainer.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\DevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedDevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\ExistingInstallation.cs" />
@@ -408,6 +452,7 @@
     <Compile Include="Randomness.cs" />
     <Compile Include="StructuralEqualityComparer.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
+    <Compile Include="SystemInitializer.cs" />
     <Compile Include="TestStatics.cs" />
     <Compile Include="Tools\AssemblyTools.cs" />
     <Compile Include="Tools\ObjectTools.cs" />
@@ -443,21 +488,18 @@
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
+    <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
-    <Compile Include="WebFileSending\FileInfoToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\AccessDeniedException.cs" />
     <Compile Include="InitializationAwareValue.cs" />
     <Compile Include="IO\TabDelimitedFileWriter.cs" />
     <Compile Include="IO\TabularDataFileWriter.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
-    <Compile Include="WebFileSending\FileCreator.cs" />
-    <Compile Include="WebFileSending\FileToBeSent.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\EwfPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\PageBase\ScrollPosition.cs" />
-    <Compile Include="EnterpriseWebFramework\PageInfo.cs" />
     <Compile Include="Encryption\Password.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUser.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUserManagementProvider.cs" />
@@ -487,7 +529,6 @@
     <Compile Include="NetTools.cs" />
     <Compile Include="StreamMethod.cs" />
     <Compile Include="Tools\StringTools.cs" />
-    <Compile Include="SystemLogic.cs" />
     <Compile Include="Validation\Error.cs" />
     <Compile Include="Validation\ErrorCondition.cs" />
     <Compile Include="Validation\PhoneNumber.cs" />
@@ -504,8 +545,6 @@
     <Compile Include="MultiColumnForms\MultiColumnValidator.cs" />
     <Compile Include="EnterpriseWebFramework\ResourceNotAvailableException.cs" />
     <Compile Include="StandardLibraryMethods.cs" />
-    <Compile Include="WebFileSending\ImageFileCreator.cs" />
-    <Compile Include="WebFileSending\ImageToBeSent.cs" />
     <Compile Include="WebSessionState\StandardLibrarySessionState.cs" />
     <Compile Include="WebSessionState\StatusMessageType.cs" />
     <Compile Include="IO\ZipOps.cs" />

@@ -224,6 +224,7 @@ namespace RedStapler.StandardLibrary.Validation {
 		/// <summary>
 		/// Returns the validated int type from the given string and validation package.
 		/// Passing an empty string or null will result in ErrorCondition.Empty.
+		/// <paramref name="min"/> and <paramref name="max"/> are inclusive.
 		/// </summary>
 		public int GetInt( ValidationErrorHandler errorHandler, string intAsString, int min, int max ) {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid<int>(
@@ -319,7 +320,6 @@ namespace RedStapler.StandardLibrary.Validation {
 
 			return floatValue;
 		}
-
 
 		/// <summary>
 		/// Returns a validated decimal type from the given string and validation package.
@@ -462,8 +462,7 @@ namespace RedStapler.StandardLibrary.Validation {
 			return GetUrl( errorHandler, url, allowEmpty, MaxUrlLength );
 		}
 
-
-		private static readonly string[] validSchemes = new[] { "http", "https", "ftp" };
+		private static readonly string[] validSchemes = { "http", "https", "ftp" };
 
 		/// <summary>
 		/// Returns a validated URL. Note that you may run into problems with certain browsers if you pass a length longer than 2048.
@@ -474,16 +473,39 @@ namespace RedStapler.StandardLibrary.Validation {
 				url,
 				allowEmpty,
 				delegate {
+					/* If the string is just a number, reject it right out. */
+					int numberTesting;
+					double doubleTesting;
+					if( int.TryParse( url, out numberTesting ) || double.TryParse( url, out doubleTesting ) ) {
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it's an email, it's not an URL. */
+					var testingValidator = new Validator();
+					testingValidator.GetEmailAddress( new ValidationErrorHandler( "" ), url, allowEmpty );
+					if( !testingValidator.ErrorsOccurred ) {
+						errorHandler.SetValidationResult( ValidationResult.Invalid() );
+						return url;
+					}
+
+					/* If it doesn't start with one of our whitelisted schemes, add in the best guess. */
 					url = GetString( errorHandler, validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url, true, maxUrlLength );
+
+					/* If the getstring didn't fail, keep on keepin keepin on. */
 					if( errorHandler.LastResult == ErrorCondition.NoError ) {
 						try {
+							if( !Uri.IsWellFormedUriString( url, UriKind.Absolute ) )
+								throw new UriFormatException();
+
 							// Don't allow relative URLs
 							var uri = new Uri( url, UriKind.Absolute );
+
 							// Must be a valid DNS-style hostname or IP address
 							// Must contain at least one '.', to prevent just host names
 							// Must be one of the common web browser-accessible schemes
 							if( uri.HostNameType != UriHostNameType.Dns && uri.HostNameType != UriHostNameType.IPv4 && uri.HostNameType != UriHostNameType.IPv6 ||
-							    !uri.Host.Any( c => c == '.' ) || !validSchemes.Any( s => s == uri.Scheme ) )
+							    uri.Host.All( c => c != '.' ) || validSchemes.All( s => s != uri.Scheme ) )
 								throw new UriFormatException();
 						}
 						catch( UriFormatException ) {
@@ -651,7 +673,6 @@ namespace RedStapler.StandardLibrary.Validation {
 				delegate { return ZipCode.CreateUsZipCode( errorHandler, zipCode ); },
 				new ZipCode() );
 		}
-
 
 		/// <summary>
 		/// Gets a validated US or Canadian zip code.

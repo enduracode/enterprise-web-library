@@ -7,8 +7,7 @@ using RedStapler.StandardLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal class TableColumns {
-		private readonly IEnumerable<Column> allColumns;
-		internal IEnumerable<Column> AllColumns { get { return allColumns; } }
+		internal readonly IEnumerable<Column> AllColumns;
 
 		private readonly List<Column> keyColumns = new List<Column>();
 
@@ -20,8 +19,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private readonly Column identityColumn;
 		internal Column IdentityColumn { get { return identityColumn; } }
 
-		private readonly List<Column> nonIdentityColumns = new List<Column>();
-		internal IEnumerable<Column> NonIdentityColumns { get { return nonIdentityColumns; } }
+		internal readonly Column RowVersionColumn;
+		internal readonly IEnumerable<Column> AllColumnsExceptRowVersion;
+		internal readonly IEnumerable<Column> AllNonIdentityColumnsExceptRowVersion;
 
 		private readonly Column primaryKeyAndRevisionIdColumn;
 		internal Column PrimaryKeyAndRevisionIdColumn { get { return primaryKeyAndRevisionIdColumn; } }
@@ -29,16 +29,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private readonly IEnumerable<Column> dataColumns;
 
 		/// <summary>
-		/// Gets all columns that are not the identity column or the primary key and revision ID column.
+		/// Gets all columns that are not the identity column, the row version column, or the primary key and revision ID column.
 		/// </summary>
 		internal IEnumerable<Column> DataColumns { get { return dataColumns; } }
 
 		internal TableColumns( DBConnection cn, string table, bool forRevisionHistoryLogic ) {
 			try {
 				// NOTE: Cache this result.
-				allColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true );
+				AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true );
 
-				foreach( var col in allColumns ) {
+				foreach( var col in AllColumns ) {
 					// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
 					var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
 
@@ -47,7 +47,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				}
 
 				// Identify key, identity, and non identity columns.
-				foreach( var col in allColumns ) {
+				var nonIdentityColumns = new List<Column>();
+				foreach( var col in AllColumns ) {
 					if( col.IsKey )
 						keyColumns.Add( col );
 					if( col.IsIdentity ) {
@@ -67,6 +68,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					keyColumns.Add( identityColumn );
 				}
 
+				RowVersionColumn = AllColumns.SingleOrDefault( i => i.IsRowVersion );
+				AllColumnsExceptRowVersion = AllColumns.Where( i => !i.IsRowVersion ).ToArray();
+				AllNonIdentityColumnsExceptRowVersion = nonIdentityColumns.Where( i => !i.IsRowVersion ).ToArray();
+
 				if( forRevisionHistoryLogic ) {
 					if( keyColumns.Count != 1 ) {
 						throw new UserCorrectableException(
@@ -77,7 +82,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						throw new UserCorrectableException( "The revision ID column of a revision history table must not be an identity." );
 				}
 
-				dataColumns = allColumns.Where( col => !col.IsIdentity && col != primaryKeyAndRevisionIdColumn ).ToArray();
+				dataColumns = AllColumns.Where( col => !col.IsIdentity && !col.IsRowVersion && col != primaryKeyAndRevisionIdColumn ).ToArray();
 			}
 			catch( Exception e ) {
 				throw UserCorrectableException.CreateSecondaryException( "An exception occurred while getting columns for table " + table + ".", e );

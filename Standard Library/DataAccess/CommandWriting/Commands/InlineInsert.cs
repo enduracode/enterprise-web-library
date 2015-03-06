@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
@@ -25,10 +26,10 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 		}
 
 		/// <summary>
-		/// Executes this command against the specified database connection and returns the
-		/// autonumber ID of the inserted row, or 0 if it is not an autonumber table.
+		/// Executes this command against the specified database connection and returns the auto-increment value of the inserted row, or null if it is not an
+		/// auto-increment table.
 		/// </summary>
-		public int Execute( DBConnection cn ) {
+		public object Execute( DBConnection cn ) {
 			var cmd = cn.DatabaseInfo.CreateCommand();
 			cmd.CommandText = "INSERT INTO " + table;
 			if( columnModifications.Count == 0 )
@@ -39,29 +40,22 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 					cmd.CommandText += columnMod.ColumnName + ", ";
 				cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 				cmd.CommandText += " ) VALUES( ";
-				foreach( var columnMod in columnModifications )
-					cmd.CommandText += columnMod.Parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+				foreach( var columnMod in columnModifications ) {
+					var parameter = columnMod.GetParameter();
+					cmd.CommandText += parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+					cmd.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
+				}
 				cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 				cmd.CommandText += " )";
-
-				// setup parameters
-				foreach( var columnMod in columnModifications )
-					cmd.Parameters.Add( columnMod.Parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
 			}
 			cn.ExecuteNonQueryCommand( cmd );
 
-			object identity = null;
-			if( cn.DatabaseInfo.LastAutoIncrementValueExpression.Any() ) {
-				var identityRetriever = cn.DatabaseInfo.CreateCommand();
-				identityRetriever.CommandText = "SELECT {0}".FormatWith( cn.DatabaseInfo.LastAutoIncrementValueExpression );
-				identity = cn.ExecuteScalarCommand( identityRetriever );
-			}
-
-			// NOTE: We should return identity as an object rather than forcing it to be an int. This will eliminate resharper redundant cast warnings in generated
-			// mod classes. It will also allow us to return null if there is no value.
-			if( identity != null && identity != DBNull.Value )
-				return Convert.ToInt32( identity );
-			return 0;
+			if( !cn.DatabaseInfo.LastAutoIncrementValueExpression.Any() )
+				return null;
+			var autoIncrementRetriever = cn.DatabaseInfo.CreateCommand();
+			autoIncrementRetriever.CommandText = "SELECT {0}".FormatWith( cn.DatabaseInfo.LastAutoIncrementValueExpression );
+			var autoIncrementValue = cn.ExecuteScalarCommand( autoIncrementRetriever );
+			return autoIncrementValue != DBNull.Value ? autoIncrementValue : null;
 		}
 	}
 }

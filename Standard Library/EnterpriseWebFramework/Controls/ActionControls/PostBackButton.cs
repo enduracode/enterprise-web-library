@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -91,7 +92,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				() => {
 					if( !this.IsOnPage() || !this.usesSubmitBehavior )
 						return;
-					var submitButtons = EwfPage.Instance.GetDescendants( i => i is PostBackButton && ( i as PostBackButton ).usesSubmitBehavior );
+					var submitButtons = EwfPage.Instance.GetDescendants().OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
 					if( submitButtons.Count() > 1 ) {
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel;
-using RedStapler.StandardLibrary.IO;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 	/// <summary>
@@ -17,11 +18,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		public static void RefreshSystemList() {
 			// When deserializing the system list below, do not perform schema validation since we don't want to be forced into redeploying Program Runner after every
 			// schema change. We also don't have access to the schema on non-development machines.
-			var cachedSystemListFilePath = StandardLibraryMethods.CombinePaths( AppTools.RedStaplerFolderPath, "RSIS System List.xml" );
+			var cachedSystemListFilePath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS System List.xml" );
 			try {
 				var serializedSystemList =
-					ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod( channel => channel.GetSystemList( ConfigurationLogic.AuthenticationKey ),
-					                                                                "system list download" );
+					ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod(
+						channel => channel.GetSystemList( ConfigurationLogic.AuthenticationKey ),
+						"system list download" );
 				RsisSystemList = XmlOps.DeserializeFromString<SystemList>( serializedSystemList, false );
 
 				// Cache the system list so something is available in the future if the machine is offline.

@@ -142,7 +142,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private void buildNavigationBox() {
 			var jumpList =
 				SelectList.CreateDropDown(
-					from i in Enumerable.Range( -3, 7 ) select EwfListItem.Create( i, formatDateTimeForJumpList( adjustDateByNumberOfIntervals( date, i ) ) ),
+					from i in Enumerable.Range( -3, 7 ) select SelectListItem.Create( i, formatDateTimeForJumpList( adjustDateByNumberOfIntervals( date, i ) ) ),
 					0,
 					autoPostBack: true );
 			jumpList.Width = JumpListWidth;
@@ -171,7 +171,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			foreach( var postBackButton in new List<PostBackButton> { previousLink, todayLink, nextLink } )
 				navControls.Controls.Add( postBackButton );
 
-			table.AddRow( new EwfTableCell( jumpList ), new EwfTableCell( navControls ) { CssClass = "calendarViewNavButtons" } );
+			table.AddRow( jumpList, navControls.ToCell( new TableCellSetup( classes: "calendarViewNavButtons".ToSingleElementArray() ) ) );
 			Controls.Add( table );
 		}
 

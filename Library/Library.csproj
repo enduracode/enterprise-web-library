@@ -61,10 +61,12 @@
     <Compile Include="Configuration\Providers\Isu.cs" />
     <Compile Include="Configuration\Providers\UserManagement.cs" />
     <Compile Include="Generated Code\ISU.cs" />
-    <Compile Include="GlobalLogic.cs" />
+    <Compile Include="GlobalInitializer.cs" />
+    <Compile Include="GlobalStatics.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />
+    <Content Include="Configuration\EWL Package ID.txt" />
     <Content Include="Configuration\General.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -80,7 +82,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\Aspose.Total.lic" />
-    <None Include="Configuration\Update All Dependent Logic.bat" />
     <None Include="Files\Template.config" />
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,11 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification {
 		string LastAutoIncrementValueExpression { get; }
 
 		/// <summary>
+		/// Returns the hint used in SELECT statements to instruct the database to cache the results.
+		/// </summary>
+		string QueryCacheHint { get; }
+
+		/// <summary>
 		/// Creates an ADO.NET database connection to the database.
 		/// </summary>
 		DbConnection CreateConnection( string connectionString );

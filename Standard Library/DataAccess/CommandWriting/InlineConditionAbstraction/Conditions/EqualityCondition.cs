@@ -21,13 +21,13 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 		}
 
 		void InlineDbCommandCondition.AddToCommand( IDbCommand command, DatabaseInfo databaseInfo, string parameterName ) {
-			columnValue.Parameter.Name = parameterName;
+			var parameter = columnValue.GetParameter( name: parameterName );
 
-			if( columnValue.Parameter.ValueIsNull )
+			if( parameter.ValueIsNull )
 				command.CommandText += columnValue.ColumnName + " IS NULL";
 			else {
-				command.CommandText += columnValue.ColumnName + " = " + columnValue.Parameter.GetNameForCommandText( databaseInfo );
-				command.Parameters.Add( columnValue.Parameter.GetAdoDotNetParameter( databaseInfo ) );
+				command.CommandText += columnValue.ColumnName + " = " + parameter.GetNameForCommandText( databaseInfo );
+				command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 			}
 		}
 

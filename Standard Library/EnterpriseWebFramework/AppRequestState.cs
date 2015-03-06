@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -24,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly DateTime beginTime;
-		private readonly Uri url;
+		private readonly string url;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
 		private readonly DataAccessState dataAccessState;
@@ -40,8 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private bool userEnabled;
 		internal bool UserDisabledByPage { get; set; }
-		private User user;
-		private bool userLoaded;
+		private Tuple<User, Tuple<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
 		private Exception errorException;
@@ -53,25 +53,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public HttpBrowserCapabilities Browser { get; private set; }
 
-		internal AppRequestState( string hostHeader ) {
+		internal AppRequestState( string url ) {
 			beginTime = DateTime.Now;
 			MiniProfiler.Start();
-
-			// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer will
-			// bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances running this
-			// web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on someIp:81 and someIp:82.
-			// For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of using the host and port from
-			// the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url returns http://someIp:81?something=1
-			// instead of http://mydomain.com?something=1. See
-			// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
-			try {
-				url = new Uri( HttpContext.Current.Request.Url.Scheme + "://" + hostHeader + HttpContext.Current.Request.Url.PathAndQuery );
-			}
-			catch( Exception e ) {
-				throw new ApplicationException(
-					"Failed to initialize URL. Host header was \"" + hostHeader + "\". User agent was \"" + HttpContext.Current.Request.GetUserAgent() + "\".",
-					e );
-			}
+			this.url = url;
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
@@ -83,25 +68,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			Browser = HttpContext.Current.Request.Browser;
 		}
 
-		internal string Url { get { return url.AbsoluteUri; } }
-
-		internal string GetBaseUrlWithSpecificSecurity( bool secure ) {
-			// NOTE: Make this method decisive about a domain to use instead of just using the current one.
-			return
-				NetTools.CombineUrls(
-					( secure ? "https" : "http" ) + "://" + url.Host +
-					( url.IsDefaultPort
-						  ? ""
-						  : ( ":" +
-						      ( AppTools.IsDevelopmentInstallation && url.Port == getIisExpressPort( HttpContext.Current.Request.IsSecureConnection )
-							        ? getIisExpressPort( secure )
-							        : url.Port ) ) ),
-					HttpRuntime.AppDomainAppVirtualPath );
-		}
-
-		private int getIisExpressPort( bool secure ) {
-			return secure ? 44300 : 8080;
-		}
+		/// <summary>
+		/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
+		/// </summary>
+		internal string Url { get { return url; } }
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 
@@ -160,15 +130,35 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Abandon the profiling session if it's not needed. The boolean expressions are in this order because we don't want to short circuit the user check if
 			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
-			var userIsProfiling = UserAccessible && AppTools.User != null && AppMemoryCache.UserIsProfilingRequests( AppTools.User.UserId );
+			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && AppTools.IsLiveInstallation )
 				MiniProfiler.Stop( discardResults: true );
 		}
 
 		/// <summary>
-		/// AppTools.User use only.
+		/// Standard Library use only.
 		/// </summary>
-		internal User User {
+		public bool ImpersonatorExists { get { return UserAndImpersonator.Item2 != null; } }
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public User ImpersonatorUser { get { return UserAndImpersonator.Item2.Item1; } }
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public int? ProfilingUserId {
+			get {
+				var profilingUser = ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1;
+				return profilingUser != null ? (int?)profilingUser.UserId : null;
+			}
+		}
+
+		/// <summary>
+		/// AppTools.User and private use only.
+		/// </summary>
+		internal Tuple<User, Tuple<User>> UserAndImpersonator {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -176,27 +166,42 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( !userLoaded ) {
-					user = UserManagementStatics.UserManagementEnabled ? UserManagementStatics.GetUserFromRequest() : null;
-					userLoaded = true;
+				if( userAndImpersonator == null ) {
+					userAndImpersonator = UserManagementStatics.UserManagementEnabled
+						                      ? UserManagementStatics.GetUserAndImpersonatorFromRequest()
+						                      : Tuple.Create<User, Tuple<User>>( null, null );
 				}
-				return user;
+				return userAndImpersonator;
 			}
 		}
 
-		internal bool UserAccessible { get { return !EwfApp.SupportsSecureConnections || HttpContext.Current.Request.IsSecureConnection; } }
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public bool UserAccessible {
+			get { return !EwfConfigurationStatics.AppSupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); }
+		}
 
-		internal void ClearUser() {
-			user = null;
-			userLoaded = false;
+		internal void ClearUserAndImpersonator() {
+			userAndImpersonator = null;
 		}
 
 		/// <summary>
-		/// For use by log in and log out post back logic only.
+		/// For use by user-management post back logic only. Assumes the user and impersonator (if one exists) are loaded.
 		/// </summary>
-		public void SetUser( FormsAuthCapableUser user ) {
-			this.user = user;
-			userLoaded = true;
+		internal void SetUser( User user ) {
+			userAndImpersonator = Tuple.Create( user, userAndImpersonator.Item2 );
+		}
+
+		/// <summary>
+		/// For use by impersonation post back logic only. Assumes the user and impersonator (if one exists) are loaded.
+		/// </summary>
+		/// <param name="user">Pass null to end impersonation. Pass a tuple to begin impersonation for the specified user or an anonymous user.</param>
+		internal void SetUserAndImpersonator( Tuple<User> user ) {
+			var impersonator = userAndImpersonator.Item2;
+			userAndImpersonator = user != null
+				                      ? Tuple.Create( user.Item1, impersonator ?? Tuple.Create( userAndImpersonator.Item1 ) )
+				                      : Tuple.Create( impersonator.Item1, (Tuple<User>)null );
 		}
 
 		internal void SetError( string prefix, Exception exception ) {
@@ -231,23 +236,24 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				var databaseNameCopy = databaseName;
 				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
 			}
-			methods.Add( () => {
-				try {
-					if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
-						DataAccessState.Current.DisableCache();
-						try {
-							foreach( var i in nonTransactionalModificationMethods )
-								i();
-						}
-						finally {
-							DataAccessState.Current.ResetCache();
+			methods.Add(
+				() => {
+					try {
+						if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
+							DataAccessState.Current.DisableCache();
+							try {
+								foreach( var i in nonTransactionalModificationMethods )
+									i();
+							}
+							finally {
+								DataAccessState.Current.ResetCache();
+							}
 						}
 					}
-				}
-				finally {
-					nonTransactionalModificationMethods.Clear();
-				}
-			} );
+					finally {
+						nonTransactionalModificationMethods.Clear();
+					}
+				} );
 			StandardLibraryMethods.CallEveryMethod( methods.ToArray() );
 			transactionMarkedForRollback = false;
 		}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Aspose.Pdf.Facades;
+using Humanizer;
 using RedStapler.StandardLibrary;
 
 namespace RedStapler.StandardLibrary.IO {

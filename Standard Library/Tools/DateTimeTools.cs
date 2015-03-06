@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// Provides helpful DateTime methods.
 	/// </summary>
 	public static class DateTimeTools {
-		internal static readonly string[] DayMonthYearFormats = new[] { dayMonthYearFormatLz, dayMonthYearFormat };
-		internal static readonly string[] MonthDayYearFormats = new[] { monthDayYearFormat, "MM/dd/yy" };
+		internal static readonly string[] DayMonthYearFormats = { dayMonthYearFormatLz, dayMonthYearFormat };
+		internal static readonly string[] MonthDayYearFormats = { monthDayYearFormat, "MM/dd/yy" };
 		internal const string HourAndMinuteFormat = "h:mmt";
 
 		private const string dayMonthYearFormatLz = "dd MMM yyyy";
@@ -125,6 +126,52 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
+		/// Returns true if the two given DateTime ranges overlap. Passing null for any date/time means infinity in that direction.
+		/// </summary>
+		public static bool DateTimeRangesOverlap( DateTime? rangeOneBegin, DateTime? rangeOneEnd, DateTime? rangeTwoBegin, DateTime? rangeTwoEnd ) {
+			// It is important to call IsBetweenDateTimes on the endings here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			if( rangeOneEnd.HasValue && !rangeOneEnd.Value.IsBetweenDateTimes( rangeOneBegin, null ) )
+				throw new ApplicationException( "Range one ends before it begins." );
+			if( rangeTwoEnd.HasValue && !rangeTwoEnd.Value.IsBetweenDateTimes( rangeTwoBegin, null ) )
+				throw new ApplicationException( "Range two ends before it begins." );
+
+			// It is important to call IsBetweenDateTimes on the beginnings here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			var oneBeginsBeforeTwoEnds = !rangeOneBegin.HasValue || rangeOneBegin.Value.IsBetweenDateTimes( null, rangeTwoEnd );
+			var twoBeginsBeforeOneEnds = !rangeTwoBegin.HasValue || rangeTwoBegin.Value.IsBetweenDateTimes( null, rangeOneEnd );
+
+			return oneBeginsBeforeTwoEnds && twoBeginsBeforeOneEnds;
+		}
+
+		/// <summary>
+		/// Returns true if the specified date/time range overlaps the specified date range. Passing null for any date means infinity in that direction.
+		/// Throws an exception if the date range contains time information. Use .Date if you have to.
+		/// See documentation for IsBetweenDates for more information on the date range.
+		/// </summary>
+		public static bool DateTimeRangeOverlapsDateRange(
+			DateTime? dateTimeRangeBegin, DateTime? dateTimeRangeEnd, DateTime? dateRangeBegin, DateTime? dateRangeEnd ) {
+			assertDateTimeHasNoTime( dateRangeBegin, "date range begin" );
+			assertDateTimeHasNoTime( dateRangeEnd, "date range end" );
+
+			// It is important to call IsBetweenDateTimes on the ending here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			if( dateTimeRangeEnd.HasValue && !dateTimeRangeEnd.Value.IsBetweenDateTimes( dateTimeRangeBegin, null ) )
+				throw new ApplicationException( "Date/time range ends before it begins." );
+
+			if( dateRangeBegin.HasValue && !dateRangeBegin.Value.IsBetweenDates( null, dateRangeEnd ) )
+				throw new ApplicationException( "Date range ends before it begins." );
+
+			var dateTimeRangeBeginsBeforeDateRangeEnds = !dateTimeRangeBegin.HasValue || dateTimeRangeBegin.Value.IsBetweenDates( null, dateRangeEnd );
+
+			// It is important to call IsBetweenDateTimes on the beginning here because of the way IsBetweenDateTimes handles the beginning and end of the range
+			// differently.
+			var dateRangeBeginsBeforeDateTimeRangeEnds = !dateRangeBegin.HasValue || dateRangeBegin.Value.IsBetweenDateTimes( null, dateTimeRangeEnd );
+
+			return dateTimeRangeBeginsBeforeDateRangeEnds && dateRangeBeginsBeforeDateTimeRangeEnds;
+		}
+
+		/// <summary>
 		/// Returns true if the two given date ranges overlap. Passing null for any date means infinity in that direction.
 		/// Throws an exception if any of the given dates contains time information. Use .Date if you have to.
 		/// See documentation for IsBetweenDates for more information on the date ranges.
@@ -147,25 +194,6 @@ namespace RedStapler.StandardLibrary {
 		private static void assertDateTimeHasNoTime( DateTime? dateTime, string name ) {
 			if( dateTime.HasTime() )
 				throw new ApplicationException( "{0} contains time information.".FormatWith( name.CapitalizeString() ) );
-		}
-
-		/// <summary>
-		/// Returns true if the two given DateTime ranges overlap. Passing null for any date/time means infinity in that direction.
-		/// </summary>
-		public static bool DateTimeRangesOverlap( DateTime? rangeOneBegin, DateTime? rangeOneEnd, DateTime? rangeTwoBegin, DateTime? rangeTwoEnd ) {
-			// It is important to call IsBetweenDateTimes on the endings here because of the way IsBetweenDateTimes handles the beginning and end of the range
-			// differently.
-			if( rangeOneEnd.HasValue && !rangeOneEnd.Value.IsBetweenDateTimes( rangeOneBegin, null ) )
-				throw new ApplicationException( "Range one ends before it begins." );
-			if( rangeTwoEnd.HasValue && !rangeTwoEnd.Value.IsBetweenDateTimes( rangeTwoBegin, null ) )
-				throw new ApplicationException( "Range two ends before it begins." );
-
-			// It is important to call IsBetweenDateTimes on the beginnings here because of the way IsBetweenDateTimes handles the beginning and end of the range
-			// differently.
-			var oneBeginsBeforeTwoEnds = !rangeOneBegin.HasValue || rangeOneBegin.Value.IsBetweenDateTimes( null, rangeTwoEnd );
-			var twoBeginsBeforeOneEnds = !rangeTwoBegin.HasValue || rangeTwoBegin.Value.IsBetweenDateTimes( null, rangeOneEnd );
-
-			return oneBeginsBeforeTwoEnds && twoBeginsBeforeOneEnds;
 		}
 
 		/// <summary>

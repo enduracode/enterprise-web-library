@@ -3,9 +3,9 @@
 // Parameter: bool showHomeLink
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
-	public partial class AccessDenied: EwfPage {
+	partial class AccessDenied: EwfPage {
 		partial class Info {
-			protected override bool IsIntermediateInstallationPublicPage { get { return true; } }
+			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
 			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.MatchingCurrentRequest; } }
 		}
 
@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			if( info.ShowHomeLink ) {
 				ph.AddControlsReturnThis(
-					new Paragraph( EwfLink.Create( new ExternalPageInfo( NetTools.HomeUrl ), new TextActionControlStyle( Translation.ClickHereToGoToHomePage ) ) ) );
+					new Paragraph( EwfLink.Create( new ExternalResourceInfo( NetTools.HomeUrl ), new TextActionControlStyle( Translation.ClickHereToGoToHomePage ) ) ) );
 			}
 
 			Response.StatusCode = 403;

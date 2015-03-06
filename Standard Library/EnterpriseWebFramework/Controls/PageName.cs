@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -25,7 +24,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private string getPageName() {
 			var es = EwfPage.Instance.EsAsBaseType;
 			var info = EwfPage.Instance.InfoAsBaseType;
-			return ExcludesPageNameIfEntitySetupExists && es != null && info.ParentPage == null ? es.InfoAsBaseType.EntitySetupName : info.PageFullName;
+			return ExcludesPageNameIfEntitySetupExists && es != null && info.ParentResource == null ? es.InfoAsBaseType.EntitySetupName : info.ResourceFullName;
 		}
 
 		/// <summary>

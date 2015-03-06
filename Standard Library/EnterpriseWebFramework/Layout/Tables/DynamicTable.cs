@@ -240,14 +240,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Adds a text-only row to this table.
 		/// </summary>
 		public void AddTextRow( RowSetup rowSetup, params string[] cellText ) {
-			AddRow( rowSetup, cellText.Select( ct => new EwfTableCell( ct ) ).ToArray() );
+			AddRow( rowSetup, cellText.Select( ct => (EwfTableCell)ct ).ToArray() );
 		}
 
 		/// <summary>
 		/// Adds a row of controls to this table.
 		/// </summary>
 		public void AddRow( RowSetup rowSetup, params Control[] controls ) {
-			AddRow( rowSetup, controls.Select( c => new EwfTableCell( c ) ).ToArray() );
+			AddRow( rowSetup, controls.Select( c => (EwfTableCell)c ).ToArray() );
 		}
 
 		/// <summary>
@@ -435,14 +435,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// an external button rather than an action on this table.
 		/// </summary>
 		public PostBackAction ExportToExcel() {
-			var workbook = new ExcelFileWriter { UseLegacyExcelFormat = true };
-			foreach( var rowSetup in rowSetups ) {
-				if( rowSetup.IsHeader )
-					workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
-				else
-					workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
-			}
-			return new PostBackAction( workbook.GetExcelFileCreator( caption.Length > 0 ? caption : "Excel export" ) );
+			return new PostBackAction(
+				new SecondaryResponse(
+					() => new EwfResponse(
+						      () => caption.Any() ? caption : "Excel export",
+						      () => {
+							      var workbook = new ExcelFileWriter();
+							      foreach( var rowSetup in rowSetups ) {
+								      if( rowSetup.IsHeader )
+									      workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
+								      else
+									      workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
+							      }
+							      return workbook;
+						      } ) ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {

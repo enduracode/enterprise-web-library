@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -49,7 +50,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private readonly FormValue<string> formValue;
 		private PostBack postBack;
 		private readonly bool autoPostBack;
-		private PageInfo autoCompleteService;
+		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
 		private string watermarkText = "";
 
@@ -76,7 +77,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// </param>
 		/// <param name="maxLength">The maximum number of characters that can be entered in this text box.</param>
 		/// <param name="readOnly">Pass true to prevent the contents of the text box from being changed.</param>
-		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered.</param>
+		/// <param name="disableBrowserAutoComplete">If true, prevents the browser from displaying values the user previously entered. Keep in mind that there is
+		/// currently an "arms race" taking place over forms auto-complete. Banks and other "high-security" organizations keep looking for ways to disable
+		/// auto-complete on their login forms while browsers and password managers are always trying to preserve this functionality for their users. Because of
+		/// this war, it's possible that your request to disable auto-complete will be ignored. See http://stackoverflow.com/a/23234498/35349 for more information.
+		/// </param>
 		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox does spell check multi-line text
 		/// boxes. Setting this parameter to a value will set the spellcheck attribute on the text box to enable/disable spell checking, if the user agent supports
 		/// it.</param>
@@ -108,7 +113,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Sets this text box up for AJAX auto-complete.
 		/// </summary>
-		public void SetupAutoComplete( PageInfo service, AutoCompleteOption option ) {
+		public void SetupAutoComplete( ResourceInfo service, AutoCompleteOption option ) {
 			autoCompleteService = service;
 			autoCompleteOption = option;
 		}
