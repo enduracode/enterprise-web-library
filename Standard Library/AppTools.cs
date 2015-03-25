@@ -34,11 +34,14 @@ namespace RedStapler.StandardLibrary {
 		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
 		/// <param name="appName"></param>
 		/// <param name="isClientSideProgram"></param>
+		/// <param name="useRelativeInstallationPath">Pass true to use a relative path for the installation folder. This means that the folder will be located using
+		/// the working directory rather than the assembly path. Use with caution.</param>
 		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
 		/// AppTools.Init call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 		/// available in the application.</param>
 		public static void Init(
-			SystemInitializer globalInitializer, string appName, bool isClientSideProgram, Func<DataAccessState> mainDataAccessStateGetter = null ) {
+			SystemInitializer globalInitializer, string appName, bool isClientSideProgram, bool useRelativeInstallationPath = false,
+			Func<DataAccessState> mainDataAccessStateGetter = null ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
@@ -49,7 +52,7 @@ namespace RedStapler.StandardLibrary {
 
 				// Initialize ConfigurationStatics, including the general provider, before the exception handling block below because it's reasonable for the exception
 				// handling to depend on this.
-				ConfigurationStatics.Init( globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
+				ConfigurationStatics.Init( useRelativeInstallationPath, globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
 
 				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
 				initialized = true;

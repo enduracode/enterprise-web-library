@@ -19,9 +19,6 @@ Library/obj/
 Library/Files/*.xsd
 Library/Generated Code/
 
-Red Stapler Library Tester/bin/
-Red Stapler Library Tester/obj/
-
 Solution Files/bin/
 Solution Files/obj/
 
@@ -29,6 +26,9 @@ Standard Library/bin/
 Standard Library/obj/
 Standard Library/Generated Code/
 Standard Library/EnterpriseWebLibrary.xml
+
+Tests/bin/
+Tests/obj/
 
 Web Site/bin/
 Web Site/obj/
