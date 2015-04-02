@@ -454,6 +454,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				link.Attributes.Add( "rel", "shortcut icon" ); // rel="shortcut icon" is deprecated and will be replaced with rel="icon".
 				Header.Controls.Add( link );
 			}
+
+			Header.Controls.Add( new HtmlMeta { Name = "viewport", Content = "initial-scale=1" } );
 		}
 
 		private void addTypekitLogicIfNecessary() {
