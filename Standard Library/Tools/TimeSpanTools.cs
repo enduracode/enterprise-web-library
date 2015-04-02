@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using Humanizer;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -29,21 +28,10 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Returns a string such as "52 seconds" or "1 minute 3 seconds" or "4 days, 6 hours".
+		/// Returns a string such as "52 seconds" or "1 minute, 3 seconds" or "4 days, 6 hours".
 		/// </summary>
 		public static string ToConciseString( this TimeSpan timeSpan ) {
-			var results = new List<string>();
-
-			if( timeSpan.TotalDays > 1 )
-				results.Add( timeSpan.Days + " days" );
-			if( timeSpan.TotalHours > 1 )
-				results.Add( timeSpan.Hours + " hours" );
-			if( timeSpan.TotalMinutes > 1 )
-				results.Add( timeSpan.Minutes + " minutes" );
-
-			results.Add( timeSpan.Seconds + " seconds" );
-
-			return StringTools.ConcatenateWithDelimiter( ", ", results.Take( 2 ).ToArray() );
+			return timeSpan.Humanize( precision: 2 );
 		}
 
 		/// <summary>
@@ -51,8 +39,8 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static string ToTimeOfDayHourAndMinuteString( this TimeSpan timeSpan ) {
 			return
-				new DateTime( DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds ).
-					ToHourAndMinuteString();
+				new DateTime( DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds )
+					.ToHourAndMinuteString();
 		}
 	}
 }

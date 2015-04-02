@@ -12,8 +12,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			generateCodeForWebItemsInFolder( writer, webProjectPath, "", configuration );
 		}
 
-		private static void generateCodeForWebItemsInFolder( TextWriter writer, string webProjectPath, string folderPathRelativeToProject,
-		                                                     WebProject webProjectConfiguration ) {
+		private static void generateCodeForWebItemsInFolder(
+			TextWriter writer, string webProjectPath, string folderPathRelativeToProject, WebProject webProjectConfiguration ) {
 			var folderPath = StandardLibraryMethods.CombinePaths( webProjectPath, folderPathRelativeToProject );
 
 			// Generate code for the entity setup if one exists in this folder.
@@ -27,39 +27,41 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			EntitySetup entitySetup = null;
 			if( entitySetupFileName.Length > 0 ) {
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
-				entitySetup = new EntitySetup( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) );
+				entitySetup = new EntitySetup( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) );
 				entitySetup.GenerateCode( writer );
 			}
 
-			// Generate code for pages and user controls in the current folder.
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.aspx" ) ) {
-				// NOTE: This is a hack. What we really need to do is not generate code for pages that don't inherit from EwfPage.
-				if( fileName == "Kiosk.aspx" )
+			// Generate code for files in the current folder.
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) ) {
+				if( !folderPathRelativeToProject.Any() && ( fileName.Contains( ".csproj" ) || fileName == AppStatics.StandardLibraryFilesFileName ) )
+					continue;
+				var fileExtension = Path.GetExtension( fileName ).ToLowerInvariant();
+				if( new[] { ".cs", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
 					continue;
 
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-				new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
-			}
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.ascx" ) ) {
-				if( fileName != entitySetupFileName ) {
-					var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-					new UserControl( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) ).GenerateCode( writer );
+				if( fileExtension == ".aspx" )
+					new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
+				else if( fileExtension == ".ascx" ) {
+					if( fileName != entitySetupFileName )
+						new UserControl( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) ).GenerateCode( writer );
 				}
-			}
-
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, "*.css" ) ) {
-				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-				new CssFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, webProjectConfiguration ) ).GenerateCode( writer );
+				else
+					new StaticFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, true, webProjectConfiguration ) ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.
-			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ) )
-				generateCodeForWebItemsInFolder( writer, webProjectPath, Path.Combine( folderPathRelativeToProject, subFolderName ), webProjectConfiguration );
+			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ) ) {
+				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
+				if( subFolderPath == "bin" || subFolderPath == "obj" )
+					continue;
+				generateCodeForWebItemsInFolder( writer, webProjectPath, subFolderPath, webProjectConfiguration );
+			}
 		}
 
-		internal static void WriteCreateInfoFromQueryStringMethod( TextWriter writer, List<VariableSpecification> requiredParameters,
-		                                                           List<VariableSpecification> optionalParameters, string methodNamePrefix,
-		                                                           string infoConstructorArgPrefix ) {
+		internal static void WriteCreateInfoFromQueryStringMethod(
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
+			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromQueryString() {" );
 
 			writer.WriteLine( "try {" );
@@ -68,14 +70,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			// Create a local variable for all query parameters to hold their raw query value.
 			foreach( var parameter in allParameters ) {
 				// If a query parameter is not specified, Request.QueryString[it] returns null. If it is specified as blank (&it=), Request.QueryString[it] returns the empty string.
-				writer.WriteLine( "var " + getLocalQueryValueVariableName( parameter ) + " = HttpContext.Current.Request.QueryString[ \"" + parameter.PropertyName + "\" ];" );
+				writer.WriteLine(
+					"var " + getLocalQueryValueVariableName( parameter ) + " = HttpContext.Current.Request.QueryString[ \"" + parameter.PropertyName + "\" ];" );
 			}
 
 			// Enforce specification of all required parameters.
 			foreach( var parameter in requiredParameters ) {
 				// Blow up if a required parameter was not specified.
-				writer.WriteLine( "if( " + getLocalQueryValueVariableName( parameter ) +
-				                  " == null ) throw new ApplicationException( \"Required parameter not included in query string: " + parameter.Name + "\" );" );
+				writer.WriteLine(
+					"if( " + getLocalQueryValueVariableName( parameter ) + " == null ) throw new ApplicationException( \"Required parameter not included in query string: " +
+					parameter.Name + "\" );" );
 			}
 
 			// Build up the call to the info constructor.
@@ -88,8 +92,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "var optionalParameterPackage = new OptionalParameterPackage();" );
 				foreach( var parameter in optionalParameters ) {
 					// If the optional parameter was not specified, do not set its value (let it remain its default value).
-					writer.WriteLine( "if( " + getLocalQueryValueVariableName( parameter ) + " != null ) optionalParameterPackage." + parameter.PropertyName + " = " +
-					                  getChangeTypeExpression( parameter ) + ";" );
+					writer.WriteLine(
+						"if( " + getLocalQueryValueVariableName( parameter ) + " != null ) optionalParameterPackage." + parameter.PropertyName + " = " +
+						getChangeTypeExpression( parameter ) + ";" );
 				}
 			}
 
@@ -130,20 +135,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			return text;
 		}
 
-		internal static void WriteCreateInfoFromNewParameterValuesMethod( TextWriter writer, List<VariableSpecification> requiredParameters,
-		                                                                  List<VariableSpecification> optionalParameters, string methodNamePrefix,
-		                                                                  string infoConstructorArgPrefix ) {
+		internal static void WriteCreateInfoFromNewParameterValuesMethod(
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
+			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromNewParameterValues() {" );
-			writer.WriteLine( "return new Info( " +
-			                  StringTools.ConcatenateWithDelimiter( ", ",
-			                                                        infoConstructorArgPrefix,
-			                                                        InfoStatics.GetInfoConstructorArguments( requiredParameters,
-			                                                                                                 optionalParameters,
-			                                                                                                 parameter =>
-			                                                                                                 "parametersModification." + parameter.PropertyName,
-			                                                                                                 parameter =>
-			                                                                                                 "parametersModification." + parameter.PropertyName ) ) +
-			                  " );" );
+			writer.WriteLine(
+				"return new Info( " +
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					infoConstructorArgPrefix,
+					InfoStatics.GetInfoConstructorArguments(
+						requiredParameters,
+						optionalParameters,
+						parameter => "parametersModification." + parameter.PropertyName,
+						parameter => "parametersModification." + parameter.PropertyName ) ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}

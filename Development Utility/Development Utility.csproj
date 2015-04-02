@@ -40,6 +40,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Humanizer">
+      <HintPath>..\packages\Humanizer.1.28.0\lib\portable-win+net40+sl50+wp8+wpa81\Humanizer.dll</HintPath>
+    </Reference>
     <Reference Include="NDepend.API">
       <HintPath>..\Solution Files\Referenced Files\NDepend.API.dll</HintPath>
       <Private>False</Private>
@@ -82,9 +85,9 @@
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\ParametersModificationStatics.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\VariableSpecification.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItemGeneralData.cs" />
-    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\CssFile.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\EntitySetup.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\Page.cs" />
+    <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\StaticFile.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebItems\UserControl.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\CodeGeneration\WebMetaLogic\WebMetaLogicStatics.cs" />
     <Compile Include="Operations\UpdateAllDependentLogic\UpdateAllDependentLogic.cs" />
@@ -103,6 +106,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Package Manager Console Commands.ps1" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

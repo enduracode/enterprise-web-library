@@ -19,6 +19,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public const string ConfigurationFolderName = "Configuration";
 
 		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public const string SystemDevelopmentConfigurationFileName = "Development.xml";
+
+		/// <summary>
 		/// Red Stapler Information System use only.
 		/// </summary>
 		public const string InstallationConfigurationFolderName = "Installation";
@@ -63,14 +68,15 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private readonly string installationPath;
 		private readonly string configurationFolderPath;
 		private readonly SystemGeneralConfiguration systemGeneralConfiguration;
+		private readonly SystemDevelopment.SystemDevelopmentConfiguration systemDevelopmentConfiguration;
 		private readonly InstallationStandardConfiguration installationStandardConfiguration;
+		private readonly IEnumerable<WebApplication> webApplications;
 		private readonly string installationCustomConfigurationFilePath;
-		private readonly bool isDevelopmentInstallation;
 
 		/// <summary>
 		/// Creates a new installation configuration.
 		/// </summary>
-		public InstallationConfiguration( string installationPath, bool isDevelopmentInstallation ) {
+		public InstallationConfiguration( bool machineIsStandbyServer, string installationPath, bool isDevelopmentInstallation ) {
 			this.installationPath = installationPath;
 
 			// The EWL configuration folder is not inside any particular app's folder the way that Web.config and app.config are. This is for two reasons. First, EWL
@@ -78,40 +84,69 @@ namespace RedStapler.StandardLibrary.Configuration {
 			// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
 			// could potentially be served up to users.
 			configurationFolderPath =
-				StandardLibraryMethods.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
-				                                     ConfigurationFolderName );
+				StandardLibraryMethods.CombinePaths(
+					InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
+					ConfigurationFolderName );
 
 
-			// Do not perform schema validation for non-development installations because the schema files won't be available on non-development machines. For
-			// development installations, also do not perform schema validation since the schema files on disk may not match this version of the Standard Library.
-			// This can happen, for example, when you are trying to run a system using the released or last built version of the library at the same time that you
-			// are making changes to one of the schema files.
-			//
-			// Another reason to not perform schema validation for development installations is that we may create sample solutions and send them to tech support
-			// people for troubleshooting. These people may not have the Standard Library solution in the right location on their machines, or they may not have it at
-			// all. In either of these cases we would not have access to the schema files.
+			// Do not perform schema validation for non-development installations because the schema files may not be available. For development installations, also
+			// do not perform schema validation since the schema files may not match this version of the library. This can happen, for example, when you are trying to
+			// run a system using an unreleased version of the library that contains schema changes.
 
 			// system general configuration
 			var systemGeneralConfigurationFilePath = StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, "General.xml" );
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
+			// system development configuration
+			if( isDevelopmentInstallation ) {
+				systemDevelopmentConfiguration =
+					XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
+						StandardLibraryMethods.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
+						false );
+			}
+
 			var installationConfigurationFolderPath = isDevelopmentInstallation
-				                                          ? StandardLibraryMethods.CombinePaths( ConfigurationFolderPath,
-				                                                                                 InstallationConfigurationFolderName,
-				                                                                                 InstallationsFolderName,
-				                                                                                 DevelopmentInstallationFolderName )
+				                                          ? StandardLibraryMethods.CombinePaths(
+					                                          ConfigurationFolderPath,
+					                                          InstallationConfigurationFolderName,
+					                                          InstallationsFolderName,
+					                                          DevelopmentInstallationFolderName )
 				                                          : StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
 
 			// installation standard configuration
-			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath,
-			                                                                                     InstallationStandardConfigurationFileName );
+			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths(
+				installationConfigurationFolderPath,
+				InstallationStandardConfigurationFileName );
 			installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
 
 
+			var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ];
+			webApplications = from systemElement in systemWebApplicationElements
+			                  let name = systemElement.Name
+			                  let supportsSecureConnections = systemElement.SupportsSecureConnections
+			                  select
+				                  isDevelopmentInstallation
+					                  ? new WebApplication(
+						                    name,
+						                    supportsSecureConnections,
+						                    installationPath,
+						                    SystemShortName,
+						                    systemWebApplicationElements.Skip( 1 ).Any(),
+						                    systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
+					                  : InstallationType == InstallationType.Live
+						                    ? new WebApplication(
+							                      name,
+							                      supportsSecureConnections,
+							                      machineIsStandbyServer,
+							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
+						                    : new WebApplication(
+							                      name,
+							                      supportsSecureConnections,
+							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) );
+			webApplications = webApplications.ToArray();
+
 			// installation custom configuration
 			installationCustomConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
-
-			this.isDevelopmentInstallation = isDevelopmentInstallation;
 		}
 
 		/// <summary>
@@ -137,9 +172,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// Gets a list of the web applications in the system.
 		/// </summary>
-		public SystemGeneralConfigurationApplication[] WebApplications {
-			get { return systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ]; }
-		}
+		public IEnumerable<WebApplication> WebApplications { get { return webApplications; } }
 
 		/// <summary>
 		/// Gets a list of the services in the system.
@@ -211,13 +244,14 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, Database database ) {
 			if( database is SqlServerDatabase ) {
 				var sqlServerDatabase = database as SqlServerDatabase;
-				return new SqlServerInfo( secondaryDatabaseName,
-				                          sqlServerDatabase.server,
-				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
-				                          sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
-				                          sqlServerDatabase.database ?? FullShortName,
-				                          true,
-				                          sqlServerDatabase.FullTextCatalog );
+				return new SqlServerInfo(
+					secondaryDatabaseName,
+					sqlServerDatabase.server,
+					sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
+					sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
+					sqlServerDatabase.database ?? FullShortName,
+					true,
+					sqlServerDatabase.FullTextCatalog );
 			}
 			if( database is MySqlDatabase ) {
 				var mySqlDatabase = database as MySqlDatabase;
@@ -225,12 +259,13 @@ namespace RedStapler.StandardLibrary.Configuration {
 			}
 			if( database is OracleDatabase ) {
 				var oracleDatabase = database as OracleDatabase;
-				return new OracleInfo( secondaryDatabaseName,
-				                       oracleDatabase.tnsName,
-				                       oracleDatabase.userAndSchema,
-				                       oracleDatabase.password,
-				                       !oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
-				                       !oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
+				return new OracleInfo(
+					secondaryDatabaseName,
+					oracleDatabase.tnsName,
+					oracleDatabase.userAndSchema,
+					oracleDatabase.password,
+					!oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
+					!oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
 			}
 			throw new ApplicationException( "Unknown database type." );
 		}
@@ -262,6 +297,10 @@ namespace RedStapler.StandardLibrary.Configuration {
 				return isLive ? InstallationType.Live : InstallationType.Intermediate;
 			}
 		}
+
+		private bool isDevelopmentInstallation { get { return systemDevelopmentConfiguration != null; } }
+
+		public SystemDevelopment.SystemDevelopmentConfiguration SystemDevelopmentConfiguration { get { return systemDevelopmentConfiguration; } }
 
 		internal LiveInstallationConfiguration LiveInstallationConfiguration {
 			get { return (LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }

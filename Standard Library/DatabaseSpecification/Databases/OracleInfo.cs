@@ -21,8 +21,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 		/// <summary>
 		/// Creates a new Oracle database information object. Specify the empty string for the secondary database name if this represents the primary database.
 		/// </summary>
-		public OracleInfo( string secondaryDatabaseName, string dataSource, string userAndSchema, string password, bool supportsConnectionPooling,
-		                   bool supportsLinguisticIndexes ) {
+		public OracleInfo(
+			string secondaryDatabaseName, string dataSource, string userAndSchema, string password, bool supportsConnectionPooling, bool supportsLinguisticIndexes ) {
 			this.secondaryDatabaseName = secondaryDatabaseName;
 			this.dataSource = dataSource;
 			this.userAndSchema = userAndSchema;
@@ -41,6 +41,8 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 				return "";
 			}
 		}
+
+		string DatabaseInfo.QueryCacheHint { get { return "/*+ RESULT_CACHE */"; } }
 
 		/// <summary>
 		/// Gets the data source.
@@ -78,7 +80,14 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 
 			// This property would be important if we screwed up the order of parameter adding later on.
 			var bindByNameProperty = c.GetType().GetProperty( "BindByName" );
-			bindByNameProperty.SetValue( c, true, null );
+			bindByNameProperty.SetValue( c, true );
+
+			// Tell the data reader to retrieve LOB data along with the rest of the row rather than making a separate request when GetValue is called.
+			// Unfortunately, as of 17 July 2014 there is an Oracle bug that prevents us from setting the property to -1. See
+			// http://stackoverflow.com/q/9006773/35349, https://community.oracle.com/thread/3548124, and Oracle bugs 14279177 and 17869834.
+			var initialLobFetchSizeProperty = c.GetType().GetProperty( "InitialLOBFetchSize" );
+			//initialLobFetchSizeProperty.SetValue( c, -1 );
+			initialLobFetchSizeProperty.SetValue( c, 1024 );
 
 			return new ProfiledDbCommand( c, null, MiniProfiler.Current );
 		}

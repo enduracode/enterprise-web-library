@@ -2,7 +2,7 @@
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
-using RedStapler.StandardLibrary.Configuration.Machine;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -13,7 +13,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 
 		private DateTime lastHealthCheckDateAndTime;
 		private readonly WindowsServiceBase service;
-		private readonly Timer timer;
+		private Timer timer;
 
 		/// <summary>
 		/// Creates a ServiceBase adapter. Generated code use only.
@@ -23,58 +23,69 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 			AutoLog = false;
 
 			this.service = service;
-			timer = new Timer( tick, null, Timeout.Infinite, Timeout.Infinite );
 		}
 
 		/// <summary>
 		/// Private use only.
 		/// </summary>
 		protected override void OnStart( string[] args ) {
-			Action method = delegate {
+			if( AppTools.SecondaryInitFailed ) {
+				ExitCode = 0x425; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
+				Stop();
+				return;
+			}
+
+			Action method = () => {
 				lastHealthCheckDateAndTime = DateTime.Now;
 				service.Init();
 
-				timer.Change( tickInterval, Timeout.Infinite );
+				timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
 			};
-			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) )
+			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) ) {
+				ExitCode = 0x428; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
 				Stop();
+			}
 		}
 
 		/// <summary>
 		/// Private use only.
 		/// </summary>
 		protected override void OnStop() {
-			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				var waitHandle = new ManualResetEvent( false );
-				timer.Dispose( waitHandle );
-				waitHandle.WaitOne();
+			AppTools.ExecuteBlockWithStandardExceptionHandling(
+				() => {
+					if( timer != null ) {
+						var waitHandle = new ManualResetEvent( false );
+						timer.Dispose( waitHandle );
+						waitHandle.WaitOne();
+					}
 
-				service.CleanUp();
-			} );
+					service.CleanUp();
+				} );
 		}
 
 		private void tick( object state ) {
-			AppTools.ExecuteBlockWithStandardExceptionHandling( delegate {
-				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
-				// exception stack traces.
-				try {
-					var now = DateTime.Now;
-					if( AppTools.IsLiveInstallation && !MachineConfiguration.GetIsStandbyServer() &&
-					    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
-						StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
-					lastHealthCheckDateAndTime = now;
-
-					service.Tick();
-				}
-				finally {
+			AppTools.ExecuteBlockWithStandardExceptionHandling(
+				() => {
+					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
+					// exception stack traces.
 					try {
-						timer.Change( tickInterval, Timeout.Infinite );
+						var now = DateTime.Now;
+						if( AppTools.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
+						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
+							StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
+						lastHealthCheckDateAndTime = now;
+
+						service.Tick();
 					}
-					catch( ObjectDisposedException ) {
-						// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
+					finally {
+						try {
+							timer.Change( tickInterval, Timeout.Infinite );
+						}
+						catch( ObjectDisposedException ) {
+							// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
+						}
 					}
-				}
-			} );
+				} );
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using Humanizer;
 using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
@@ -9,16 +10,20 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 	/// A SELECT query that can be executed against a database.
 	/// </summary>
 	public class InlineSelect: InlineDbCommandWithConditions {
-		private readonly string selectFromClause;
+		private readonly IEnumerable<string> selectExpressions;
+		private readonly string fromClause;
 		private readonly string orderByClause;
+		private readonly bool cacheQueryInDatabase;
 		private readonly List<InlineDbCommandCondition> conditions = new List<InlineDbCommandCondition>();
 
 		/// <summary>
 		/// Creates a new inline SELECT command.
 		/// </summary>
-		public InlineSelect( string selectFromClause, string orderByClause = "" ) {
-			this.selectFromClause = selectFromClause;
+		public InlineSelect( IEnumerable<string> selectExpressions, string fromClause, bool cacheQueryInDatabase, string orderByClause = "" ) {
+			this.selectExpressions = selectExpressions;
+			this.fromClause = fromClause;
 			this.orderByClause = orderByClause;
+			this.cacheQueryInDatabase = cacheQueryInDatabase;
 		}
 
 		/// <summary>
@@ -33,7 +38,10 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 		/// </summary>
 		public void Execute( DBConnection cn, Action<DbDataReader> readerMethod ) {
 			var command = cn.DatabaseInfo.CreateCommand();
-			command.CommandText = selectFromClause;
+			command.CommandText =
+				"SELECT{0} {1} ".FormatWith(
+					cacheQueryInDatabase && cn.DatabaseInfo.QueryCacheHint.Any() ? " {0}".FormatWith( cn.DatabaseInfo.QueryCacheHint ) : "",
+					StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.ToArray() ) ) + fromClause;
 
 			if( conditions.Any() ) {
 				command.CommandText += " WHERE ";

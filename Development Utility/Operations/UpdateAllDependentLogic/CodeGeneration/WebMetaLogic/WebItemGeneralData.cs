@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using RedStapler.StandardLibrary;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
+using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private readonly string code;
 		private readonly WebProject webProjectConfiguration;
 
-		internal WebItemGeneralData( string webProjectPath, string pathRelativeToProject, WebProject webProjectConfiguration ) {
+		internal WebItemGeneralData( string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
 			this.pathRelativeToProject = pathRelativeToProject;
 
 			// Get the URL for this item. "Plain old class" entity setups do not have URLs.
@@ -35,17 +35,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( itemNamespace == null )
 				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
 
-			className = StandardLibraryMethods.GetCSharpIdentifier( System.IO.Path.GetFileNameWithoutExtension( path ) );
+			className =
+				StandardLibraryMethods.GetCSharpIdentifier(
+					System.IO.Path.GetFileNameWithoutExtension( path ) + ( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
 
 		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
 			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
-			return CssHandler.CombineNamespacesAndProcessEwfIfNecessary( projectNamespace,
-			                                                             StringTools.ConcatenateWithDelimiter( ".",
-			                                                                                                   tokens.Select( StandardLibraryMethods.GetCSharpIdentifier )
-			                                                                                                         .ToArray() ) );
+			return StaticFileHandler.CombineNamespacesAndProcessEwfIfNecessary(
+				projectNamespace,
+				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( StandardLibraryMethods.GetCSharpIdentifier ).ToArray() ) );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }

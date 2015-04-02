@@ -5,16 +5,14 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	public partial class EntitySetup: UserControl, EntityDisplaySetup {
-		public partial class Info {
-			protected override void init() {}
-
-			protected override PageInfo createParentPageInfo() {
+	partial class EntitySetup: UserControl, EntityDisplaySetup {
+		partial class Info {
+			protected override ResourceInfo createParentResourceInfo() {
 				return null;
 			}
 
-			protected override List<PageGroup> createPageInfos() {
-				return new List<PageGroup> { new PageGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ) };
+			protected override List<ResourceGroup> createResourceInfos() {
+				return new List<ResourceGroup> { new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ) };
 			}
 
 			public override string EntitySetupName { get { return "EWF Admin"; } }

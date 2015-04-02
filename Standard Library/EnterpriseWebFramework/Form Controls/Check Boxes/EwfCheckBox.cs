@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.CssHandling;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
@@ -36,14 +35,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal static FormValue<bool> GetFormValue( bool isChecked, Control checkBox ) {
 			return new FormValue<bool>( () => isChecked,
-			                            () => checkBox.IsOnPage() ? checkBox.UniqueID : "",
-			                            v => v.ToString(),
-			                            rawValue =>
-			                            rawValue == null
-				                            ? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
-				                            : rawValue == "on"
-					                              ? PostBackValueValidationResult<bool>.CreateValidWithValue( true )
-					                              : PostBackValueValidationResult<bool>.CreateInvalid() );
+				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
+				v => v.ToString(),
+				rawValue =>
+				rawValue == null
+					? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
+					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValidWithValue( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
 		internal static void AddCheckBoxAttributes( WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue,
@@ -58,8 +55,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			if( postBack != null )
-				PostBackButton.MakeControlPostBackOnEnter( checkBoxElement, postBack );
+			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton

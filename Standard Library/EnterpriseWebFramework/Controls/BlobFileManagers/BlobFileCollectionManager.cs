@@ -6,7 +6,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using RedStapler.StandardLibrary.IO;
 using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebFileSending;
 using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -49,9 +48,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public NewFileNotificationMethod NewFileNotificationMethod { private get; set; }
 
 		/// <summary>
-		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a page info object.
+		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a resource info object.
 		/// </summary>
-		public Func<decimal, PageInfo> ThumbnailPageInfoCreator { private get; set; }
+		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
 		/// <summary>
 		/// Creates a file collection manager.
@@ -86,15 +85,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
 
 			if( AppRequestState.Instance.Browser.IsInternetExplorer() ) {
-				base.Controls.Add( new HtmlGenericControl( "p" )
-					{
-						InnerText =
-							"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
-					} );
+				base.Controls.Add(
+					new HtmlGenericControl( "p" )
+						{
+							InnerText =
+								"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
+						} );
 			}
 
 			var columnSetups = new List<ColumnSetup>();
-			if( ThumbnailPageInfoCreator != null )
+			if( ThumbnailResourceInfoCreator != null )
 				columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 10 ) } );
 			columnSetups.Add( new ColumnSetup { CssClassOnAllCells = "ewfOverflowedCell" } );
 			columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 13 ) } );
@@ -106,20 +106,21 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
-			var deleteDm = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "delete" ) );
+			var deletePb = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "delete" ) );
 			var deleteModMethods = new List<Func<bool>>();
 			foreach( var file in files )
-				addFileRow( table, file, deleteDm, deleteModMethods );
+				addFileRow( table, file, deletePb, deleteModMethods );
 			if( !ReadOnly ) {
-				table.AddRow( new EwfTableCell( getUploadControlList() ) { FieldSpan = ThumbnailPageInfoCreator != null ? 3 : 2 },
-				              new EwfTableCell( files.Any()
-					                                ? new PostBackButton( deleteDm, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false )
-					                                : null ) { FieldSpan = 2, CssClass = "ewfRightAlignCell" } );
+				table.AddRow(
+					getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
+					( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
+						new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 			}
-			deleteDm.AddModificationMethod( () => {
-				if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
-					EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
-			} );
+			deletePb.AddModificationMethod(
+				() => {
+					if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
+						EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+				} );
 
 			Controls.Add( table );
 
@@ -127,41 +128,44 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				Visible = false;
 		}
 
-		private void addFileRow( DynamicTable table, BlobFile file, DataModification deleteDm, List<Func<bool>> deleteModMethods ) {
+		private void addFileRow( DynamicTable table, BlobFile file, ActionPostBack deletePb, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailPageInfoCreator );
+			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
 			if( thumbnailControl != null )
-				cells.Add( new EwfTableCell( thumbnailControl ) );
+				cells.Add( thumbnailControl );
 
 			var fileIsUnread = fileIdsMarkedAsRead != null && !fileIdsMarkedAsRead.Contains( file.FileId );
 
 			cells.Add(
-				new EwfTableCell(
-					new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
-					                                         firstModificationMethod: () => {
-						                                         if( fileIsUnread && markFileAsReadMethod != null )
-							                                         markFileAsReadMethod( file.FileId );
-					                                         },
-					                                         actionGetter: () => new PostBackAction( new FileCreator( () => file.FileId ) ) ),
-					                    new TextActionControlStyle( file.FileName ),
-					                    false ) { ToolTip = file.FileName } ) );
+				new PostBackButton(
+					PostBack.CreateFull(
+						id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
+						firstModificationMethod: () => {
+							if( fileIsUnread && markFileAsReadMethod != null )
+								markFileAsReadMethod( file.FileId );
+						},
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ),
+					new TextActionControlStyle( file.FileName ),
+					false ) { ToolTip = file.FileName } );
 
-			cells.Add( new EwfTableCell( file.UploadedDate.ToDayMonthYearString( false ) ) );
-			cells.Add( new EwfTableCell( fileIsUnread ? "New!" : "" ) { CssClass = "ewfNewness" } );
+			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
+			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToSingleElementArray() ) ) );
 
 			var delete = false;
 			var deleteCheckBox =
-				FormItem.Create( "",
-				                 new EwfCheckBox( false ),
-				                 validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deleteDm ) ).ToControl();
-			cells.Add( new EwfTableCell( ReadOnly ? null : deleteCheckBox ) );
-			deleteModMethods.Add( () => {
-				if( !delete )
-					return false;
-				BlobFileOps.SystemProvider.DeleteFile( file.FileId );
-				return true;
-			} );
+				FormItem.Create(
+					"",
+					new EwfCheckBox( false, postBack: deletePb ),
+					validationGetter: control => new Validation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deletePb ) ).ToControl();
+			cells.Add( ReadOnly ? null : deleteCheckBox );
+			deleteModMethods.Add(
+				() => {
+					if( !delete )
+						return false;
+					BlobFileOps.SystemProvider.DeleteFile( file.FileId );
+					return true;
+				} );
 
 			table.AddRow( cells.ToArray() );
 		}
@@ -170,36 +174,40 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			var dm = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "add" ) );
 
 			RsFile file = null;
-			var fi = FormItem.Create( "",
-			                          new EwfFileUpload(),
-			                          validationGetter: control => new Validation( ( pbv, validator ) => {
-				                          BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
-				                          file = control.GetPostBackValue( pbv );
-			                          },
-			                                                                       dm ) );
+			var fi = FormItem.Create(
+				"",
+				new EwfFileUpload(),
+				validationGetter: control => new Validation(
+					                             ( pbv, validator ) => {
+						                             BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
+						                             file = control.GetPostBackValue( pbv );
+					                             },
+					                             dm ) );
 
-			dm.AddModificationMethod( () => {
-				if( file == null )
-					return;
+			dm.AddModificationMethod(
+				() => {
+					if( file == null )
+						return;
 
-				var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
-				int newFileId;
-				if( existingFile != null ) {
-					BlobFileOps.SystemProvider.UpdateFile( existingFile.FileId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
-					newFileId = existingFile.FileId;
-				}
-				else
-					newFileId = BlobFileOps.SystemProvider.InsertFile( fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+					var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
+					int newFileId;
+					if( existingFile != null ) {
+						BlobFileOps.SystemProvider.UpdateFile( existingFile.FileId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+						newFileId = existingFile.FileId;
+					}
+					else
+						newFileId = BlobFileOps.SystemProvider.InsertFile( fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
 
-				if( NewFileNotificationMethod != null )
-					NewFileNotificationMethod( newFileId );
-				EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
-			} );
+					if( NewFileNotificationMethod != null )
+						NewFileNotificationMethod( newFileId );
+					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
+				} );
 
-			return ControlList.CreateWithControls( true,
-			                                       new EwfTableCell( "Select and upload a new file:".GetLiteralControl() ),
-			                                       new EwfTableCell( fi.ToControl() ),
-			                                       new EwfTableCell( new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) ) );
+			return ControlList.CreateWithControls(
+				true,
+				"Select and upload a new file:",
+				fi.ToControl(),
+				new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) );
 		}
 
 		/// <summary>

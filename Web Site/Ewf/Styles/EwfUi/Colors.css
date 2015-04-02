@@ -1,6 +1,4 @@
-﻿/* To override any of these styles in a system, prefix your rules with ewfUiBody (if they don't include an element starting with ewfUi) to ensure that they only apply to the EWF UI. */
-
-body {
+﻿body {
 	background-color: white;
 	color: black;
 }
@@ -10,9 +8,14 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfU
 	background-color: #e7edf3;
 	color: black;
 }
+@media print {
+	ewfUiContentCell {
+		background-color: inherit;
+	}
+}
 
 /* borders */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfBoxBothStates {
+ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfSectionBoxStyleBothStates {
 	border-color: #78a0c3;
 }
 ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, div.ewfButtonsBottomBorder {
@@ -20,10 +23,10 @@ ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionCont
 }
 
 /* contrast */
-ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfBoxBothStates > ewfBoxHeadingAllLevels {
+ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	background-color: #d4e0ec; /* hack for IE8 */
 	background-color: rgba( 0, 0, 0, 0 ); /* cancels out IE8 hack for all other browsers */
-	background-image: url('../Backgrounds/Darker.svg');
+	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Darker.svg' );
 }
 
 /* text style action controls */
@@ -43,13 +46,13 @@ ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewf
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTabActionControl, ewfUiSideTabCell > ewfUiDisabledTabActionControl {
 	opacity: .2; /* Standard */
-	filter: alpha(opacity=20); /* IE */
+	filter: alpha( opacity=20 ); /* IE */
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
 	border-color: transparent;
 }
 ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithHover, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithHover, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithFocus, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithFocus {
-	background-image: url('../Backgrounds/Lighter.svg');
+	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Lighter.svg' );
 }
 
 /* table rows with action */
@@ -75,7 +78,7 @@ ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates 
 }
 
 /* UI hints */
-ewfBoxBothStates > ewfBoxExpandLabel, ewfBoxBothStates > ewfBoxCloseLabel {
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
 	opacity: .5;
 }
 

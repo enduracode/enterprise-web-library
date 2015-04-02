@@ -1,14 +1,17 @@
 ﻿<%@ Master Language="C#" CodeBehind="BasicPage.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.BasicPage" %>
+
 <!DOCTYPE html>
 <html>
 <head runat="server">
     <meta name="viewport" content="initial-scale=1">
 	<asp:ContentPlaceHolder ID="head" runat="server" />
 </head>
-<body runat="server" id="basicBody">
+<body runat="server" clientidmode="Static" id="basicBody">
 	<form runat="server" id="form">
 		<asp:PlaceHolder runat="server" ID="ph" />
-		<div runat="server" class="containingDiv"><asp:ContentPlaceHolder ID="main" runat="server" /></div>
+		<div runat="server" class="containingDiv">
+			<asp:ContentPlaceHolder ID="main" runat="server" />
+		</div>
 		<asp:PlaceHolder runat="server" ID="ph2" />
 	</form>
 </body>

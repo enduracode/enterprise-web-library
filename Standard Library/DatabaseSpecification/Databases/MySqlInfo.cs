@@ -28,6 +28,7 @@ namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
 
 		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
 		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "LAST_INSERT_ID()"; } }
+		string DatabaseInfo.QueryCacheHint { get { return "SQL_CACHE"; } }
 
 		/// <summary>
 		/// Gets the database.

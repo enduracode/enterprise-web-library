@@ -14,9 +14,8 @@ function toggleElementDisplay( id ) {
 }
 
 function getClientUtcOffset( id ) {
-	var utcOffset = $get( id );
 	var timeString = new Date().toUTCString();
-	utcOffset.value = timeString;
+	$( "#" + id ).val( timeString );
 }
 
 // Supports DurationPicker
@@ -76,6 +75,26 @@ function NumericalOnly( evt, field ) {
 function OnDocumentReady() {
 	SetupTextBoxFocus();
 	RemoveClickScriptBinding();
+
+	var opts = {
+		lines: 13, // The number of lines to draw
+		length: 8, // The length of each line
+		width: 5, // The line thickness
+		radius: 9, // The radius of the inner circle
+		corners: 1, // Corner roundness (0..1)
+		rotate: 0, // The rotation offset
+		direction: 1, // 1: clockwise, -1: counterclockwise
+		color: '#000', // #rgb or #rrggbb or array of colors
+		speed: 1.2, // Rounds per second
+		trail: 71, // Afterglow percentage
+		shadow: false, // Whether to render a shadow
+		hwaccel: true, // Whether to use hardware acceleration
+		className: 'spinner', // The CSS class to assign to the spinner
+		zIndex: 2e9, // The z-index (defaults to 2000000000)
+		top: '50%', // Top position relative to parent
+		left: '50%' // Left position relative to parent
+	};
+	new Spinner( opts ).spin( document.getElementById( "ewfSpinner" ) );
 }
 
 //Finds all EwfTextBoxes and appends onfocus and onblur events to apply focus CSS styles to their parent.
@@ -113,7 +132,7 @@ function RemoveClickScriptBinding() {
 			//Unbind it from the row
 			$( this ).removeAttr( "onclick" );
 			//For each td
-			$( this ).children( ":not(.ewfNotClickable)" ).click( clickScript );
+			$( this ).children( ":not( .ewfNotClickable )" ).click( clickScript );
 		}
 	);
 }
@@ -131,25 +150,27 @@ function postBackRequestStarted() {
 	for( var i in CKEDITOR.instances )
 		CKEDITOR.instances[i].updateElement();
 
-	$( ".ewfTimeOut" ).hide();
-	$( ".ewfClickBlocker, .ewfProcessingDialog" ).fadeIn( 0 );
-	setTimeout( '$(".ewfTimeOut").fadeIn(0);', 10000 );
+	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerA" );
+	$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogA" );
+
+	setTimeout( '$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogTo" );', 10000 );
 }
 
 function stopPostBackRequest() {
-	hideProcessingDialog();
+	deactivateProcessingDialog();
 	if( window.stop )
 		window.stop(); // Firefox
 	else
 		document.execCommand( 'Stop' ); // IE
 }
 
-function hideProcessingDialog() {
-	$( ".ewfClickBlocker, .ewfProcessingDialog" ).hide();
+function deactivateProcessingDialog() {
+	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerI" );
+	$( "#ewfProcessingDialog" ).removeClass().addClass( "ewfProcessingDialogI" );
 }
 
-function fadeOutStatusMessageDialog( duration ) {
-	$( ".ewfStatusMessageDialog" ).fadeOut( duration );
+function dockNotificationSection() {
+	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
 }
 
 

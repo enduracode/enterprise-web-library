@@ -12,30 +12,30 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			var navButtonSetups = new List<ActionButtonSetup>();
 
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
-			navButtonSetups.Add( new ActionButtonSetup( "Contact us",
-			                                            new EwfLink(
-				                                            RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo(
-					                                            EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
+			navButtonSetups.Add(
+				new ActionButtonSetup(
+					"Contact us",
+					new EwfLink(
+						RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
 
 			var menu = EwfTable.Create();
 			menu.AddItem(
 				() =>
 				new EwfTableItem(
 					new EwfTableItemSetup(
-						clickScript:
-							ClickScript.CreatePostBackScript( PostBack.CreateFull( id: "testMethod",
-							                                                       firstModificationMethod:
-								                                                       () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ),
-					"Test method".ToCell() ) );
+					clickScript:
+					ClickScript.CreatePostBackScript(
+						PostBack.CreateFull( id: "testMethod", firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ),
+					"Test method" ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipButton( menu ) ) );
 
-			navButtonSetups.Add( new ActionButtonSetup( "Calendar",
-			                                            new EwfLink( CalendarDemo.GetInfo( new EntitySetup.OptionalParameterPackage(),
-			                                                                               new CalendarDemo.OptionalParameterPackage
-				                                                                               {
-					                                                                               ReturnUrl = EwfPage.Instance.InfoAsBaseType.GetUrl(),
-					                                                                               Date = DateTime.Now
-				                                                                               } ) ) ) );
+			navButtonSetups.Add(
+				new ActionButtonSetup(
+					"Calendar",
+					new EwfLink(
+						CalendarDemo.GetInfo(
+							new EntitySetup.OptionalParameterPackage(),
+							new CalendarDemo.OptionalParameterPackage { ReturnUrl = EwfPage.Instance.InfoAsBaseType.GetUrl(), Date = DateTime.Now } ) ) ) );
 			return navButtonSetups;
 		}
 

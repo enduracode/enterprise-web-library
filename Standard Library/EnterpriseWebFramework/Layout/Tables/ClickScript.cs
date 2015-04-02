@@ -9,10 +9,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class ClickScript {
 		/// <summary>
-		/// Creates a script that redirects to the specified page. Passing null for pageInfo will result in no script being added.
+		/// Creates a script that redirects to the specified resource. Passing null for resourceInfo will result in no script being added.
 		/// </summary>
-		public static ClickScript CreateRedirectScript( PageInfo page ) {
-			return new ClickScript { page = page };
+		public static ClickScript CreateRedirectScript( ResourceInfo resource ) {
+			return new ClickScript { resource = resource };
 		}
 
 		/// <summary>
@@ -30,26 +30,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			return new ClickScript { script = script };
 		}
 
-		private PageInfo page;
+		private ResourceInfo resource;
 		private PostBack postBack;
 		private string script = "";
 
 		private ClickScript() {}
 
 		internal void SetUpClickableControl( WebControl clickableControl ) {
-			if( page == null && postBack == null && script == "" )
+			if( resource == null && postBack == null && script == "" )
 				return;
 
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
-			if( page != null && EwfPage.Instance.IsAutoDataUpdater ) {
-				postBack = EwfLink.GetLinkPostBack( page );
-				page = null;
+			if( resource != null && EwfPage.Instance.IsAutoDataUpdater ) {
+				postBack = EwfLink.GetLinkPostBack( resource );
+				resource = null;
 			}
 
 			Func<string> scriptGetter;
-			if( page != null )
-				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( page.GetUrl() ) + "'; return false";
+			if( resource != null )
+				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( resource.GetUrl() ) + "'; return false";
 			else if( postBack != null ) {
 				EwfPage.Instance.AddPostBack( postBack );
 				scriptGetter = () => PostBackButton.GetPostBackScript( postBack );

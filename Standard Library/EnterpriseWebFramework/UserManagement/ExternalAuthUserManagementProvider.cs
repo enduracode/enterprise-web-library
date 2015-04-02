@@ -17,7 +17,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		ExternalAuthUser GetUser( int userId );
 
 		/// <summary>
-		/// Returns the user with the specified email address, or null if a user with that email address does not exist.
+		/// Returns the user with the specified email address, or null if a user with that email address does not exist. We recommend that you use case-insensitive
+		/// comparison.
 		/// </summary>
 		ExternalAuthUser GetUser( string email );
 

@@ -8,6 +8,7 @@ namespace RedStapler.StandardLibrary.IO {
 	/// <summary>
 	/// Contains methods that zip and unzip data.
 	/// </summary>
+	// As of July 2014, it looks like SharpZipLib is still easier to work with than System.IO.Compression.
 	public static class ZipOps {
 		internal static void Test() {
 			// NOTE: This path is probably wrong, and should not be hard-coded.
