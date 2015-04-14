@@ -8,6 +8,11 @@ using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 
 namespace RedStapler.StandardLibrary.Email {
 	public static class EmailStatics {
+		/// <summary>
+		/// System Manager and private use only.
+		/// </summary>
+		public const string InstallationIdHeaderFieldName = "X-EWL-Installation-ID";
+
 		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
 			message.From = defaultFromEmailAddress;
 			message.ToAddresses.AddRange( GetDeveloperEmailAddresses() );
@@ -65,24 +70,31 @@ namespace RedStapler.StandardLibrary.Email {
 		}
 
 		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
-			m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
-
 			var recipients = m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection();
-			m.BodyHtml =
-				( "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-					m.From.ToMailAddress().ToString(),
-					recipients ) + Environment.NewLine + Environment.NewLine ).GetTextAsEncodedHtml() + m.BodyHtml;
 
 			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
 			// bad idea to mix testing and demo mail into deliverability reports for live mail.
 			var config = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
 			m.From = new EmailAddress( config.EmailFromAddress, config.EmailFromName );
 
-			// Don't actually send email to recipients (they may be real people). Instead, send to the developers.
+			// Don't actually send email to recipients (they may be real people).
 			m.ToAddresses.Clear();
 			m.CcAddresses.Clear();
 			m.BccAddresses.Clear();
-			m.ToAddresses.AddRange( GetDeveloperEmailAddresses() );
+
+			if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
+				m.ToAddresses.Add( new EmailAddress( "system-manager@enterpriseweblibrary.com", "EWL System Manager" ) );
+				m.CustomHeaders.Add( Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
+			}
+			else {
+				m.ToAddresses.AddRange( GetDeveloperEmailAddresses() );
+				m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
+			}
+
+			m.BodyHtml =
+				( "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
+					m.From.ToMailAddress().ToString(),
+					recipients ) + Environment.NewLine + Environment.NewLine ).GetTextAsEncodedHtml() + m.BodyHtml;
 		}
 
 		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {

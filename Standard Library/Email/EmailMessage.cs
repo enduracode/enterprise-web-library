@@ -43,6 +43,8 @@ namespace RedStapler.StandardLibrary.Email {
 		/// </summary>
 		public string Subject { get; set; }
 
+		internal List<Tuple<string, string>> CustomHeaders { get; set; }
+
 		/// <summary>
 		/// The body of the email. This will always be HTML. The HTML should not contain a body tag, doctype tag, or similar page-level tags.
 		/// If you know this will be plain text, call NetTools.GetTextAsEncodedHtml on the text entering this property.
@@ -64,6 +66,7 @@ namespace RedStapler.StandardLibrary.Email {
 			CcAddresses = new List<EmailAddress>();
 			BccAddresses = new List<EmailAddress>();
 			ReplyToAddresses = new List<EmailAddress>();
+			CustomHeaders = new List<Tuple<string, string>>();
 		}
 
 		internal void ConfigureMailMessage( MailMessage message ) {
@@ -71,8 +74,12 @@ namespace RedStapler.StandardLibrary.Email {
 			addAddressesToMailAddressCollection( ToAddresses, message.To );
 			addAddressesToMailAddressCollection( CcAddresses, message.CC );
 			addAddressesToMailAddressCollection( BccAddresses, message.Bcc );
-
+			foreach( var address in ReplyToAddresses )
+				message.ReplyToList.Add( address.ToMailAddress() );
 			message.Subject = Subject;
+			foreach( var i in CustomHeaders )
+				message.Headers.Add( i.Item1, i.Item2 );
+
 			message.Body = htmlToPlainText( BodyHtml );
 
 			// Add an alternate view for the HTML part.
@@ -80,8 +87,6 @@ namespace RedStapler.StandardLibrary.Email {
 
 			foreach( var attachment in attachments )
 				message.Attachments.Add( attachment.ToAttachment() );
-			foreach( var address in ReplyToAddresses )
-				message.ReplyToList.Add( address.ToMailAddress() );
 		}
 
 		private static void addAddressesToMailAddressCollection( IEnumerable<EmailAddress> emailAddressCollection, MailAddressCollection mailAddressCollection ) {
@@ -95,48 +100,47 @@ namespace RedStapler.StandardLibrary.Email {
 
 			// Maintains insert-order. Sadly, is not generic.
 			var regexToReplacements = new OrderedDictionary
-			                          	{
-			                          		{ "(\r\n|\r|\n)+", singleSpace },
-			                          		{ "\t", emptyString },
-			                          		{ @"/\*.*\*/", emptyString },
-			                          		{ @"<!--.*-->", emptyString },
-			                          		{ @"\s+", singleSpace },
-			                          		{ @"<\s*head([^>])*>.*(<\s*(/)\s*head\s*>)", emptyString },
-			                          		{ @"<\s*script([^>])*>.*(<\s*(/)\s*script\s*>)", emptyString },
-			                          		{ @"<\s*style([^>])*>.*(<\s*(/)\s*style\s*>)", emptyString },
-			                          		{ @"<\s*td([^>])*>", "\t" },
-			                          		{ @"<\s*br\s*/?>", Environment.NewLine },
-			                          		{ @"<\s*li\s*>", Environment.NewLine },
-			                          		{ @"<\s*div([^>])*>", Environment.NewLine + Environment.NewLine },
-			                          		{ @"<\s*tr([^>])*>", Environment.NewLine + Environment.NewLine },
-			                          		{ @"<\s*p([^>])*>", Environment.NewLine + Environment.NewLine },
-			                          		{ RegularExpressions.HtmlTag, emptyString },
-			                          		{ @"<![^>]*>", emptyString },
-			                          		{ @"&bull;", " * " },
-			                          		{ @"&lsaquo;", "<" },
-			                          		{ @"&rsaquo;", ">" },
-			                          		{ @"&trade;", "(tm)" },
-			                          		{ @"&frasl;", "/" },
-			                          		{ @"&lt;", "<" },
-			                          		{ @"&gt;", ">" },
-			                          		{ @"&copy;", "(c)" },
-			                          		{ @"&reg;", "(r)" },
-			                          		{ @"&(.{2,6});", emptyString },
-			                          		{ Environment.NewLine + @"\s+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
-			                          		{ @"\t\s+\t", "\t\t" },
-			                          		{ @"\t\s+" + Environment.NewLine, "\t" + Environment.NewLine },
-			                          		{ Environment.NewLine + @"\s+\t", Environment.NewLine + "\t" },
-			                          		{ Environment.NewLine + @"\t+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
-			                          		{ Environment.NewLine + @"\t+", Environment.NewLine + "\t" }
-			                          	};
+				{
+					{ "(\r\n|\r|\n)+", singleSpace },
+					{ "\t", emptyString },
+					{ @"/\*.*\*/", emptyString },
+					{ @"<!--.*-->", emptyString },
+					{ @"\s+", singleSpace },
+					{ @"<\s*head([^>])*>.*(<\s*(/)\s*head\s*>)", emptyString },
+					{ @"<\s*script([^>])*>.*(<\s*(/)\s*script\s*>)", emptyString },
+					{ @"<\s*style([^>])*>.*(<\s*(/)\s*style\s*>)", emptyString },
+					{ @"<\s*td([^>])*>", "\t" },
+					{ @"<\s*br\s*/?>", Environment.NewLine },
+					{ @"<\s*li\s*>", Environment.NewLine },
+					{ @"<\s*div([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ @"<\s*tr([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ @"<\s*p([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ RegularExpressions.HtmlTag, emptyString },
+					{ @"<![^>]*>", emptyString },
+					{ @"&bull;", " * " },
+					{ @"&lsaquo;", "<" },
+					{ @"&rsaquo;", ">" },
+					{ @"&trade;", "(tm)" },
+					{ @"&frasl;", "/" },
+					{ @"&lt;", "<" },
+					{ @"&gt;", ">" },
+					{ @"&copy;", "(c)" },
+					{ @"&reg;", "(r)" },
+					{ @"&(.{2,6});", emptyString },
+					{ Environment.NewLine + @"\s+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
+					{ @"\t\s+\t", "\t\t" },
+					{ @"\t\s+" + Environment.NewLine, "\t" + Environment.NewLine },
+					{ Environment.NewLine + @"\s+\t", Environment.NewLine + "\t" },
+					{ Environment.NewLine + @"\t+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
+					{ Environment.NewLine + @"\t+", Environment.NewLine + "\t" }
+				};
 
 			return
-				regexToReplacements.Cast<DictionaryEntry>().Aggregate( html,
-				                                                       ( current, regexToReplacement ) =>
-				                                                       Regex.Replace( current,
-				                                                                      (string)regexToReplacement.Key,
-				                                                                      (string)regexToReplacement.Value,
-				                                                                      RegexOptions.IgnoreCase ) ).Trim();
+				regexToReplacements.Cast<DictionaryEntry>()
+					.Aggregate(
+						html,
+						( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+					.Trim();
 		}
 	}
 }
