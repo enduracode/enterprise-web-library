@@ -246,46 +246,39 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Sends an error email message to the developer addresses specified in the config file using the SMTP server specified in the config file.
+		/// Sends an error email message to the system developers.
 		/// </summary>
 		private static void sendErrorEmail( string body ) {
 			assertClassInitialized();
 
-			var m = new EmailMessage();
-			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
-				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + ConfigurationStatics.InstallationConfiguration.SystemName;
-			if( ConfigurationStatics.IsClientSideProgram )
-				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
-			m.BodyHtml = body.GetTextAsEncodedHtml();
-			SendEmailWithDefaultFromAddress( m );
+			EmailStatics.SendDeveloperNotificationEmail(
+				new EmailMessage
+					{
+						Subject =
+							"Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
+							( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( StandardLibraryMethods.GetLocalHostName() ) : "" ),
+						BodyHtml = body.GetTextAsEncodedHtml()
+					} );
 		}
 
 		/// <summary>
-		/// Sends a warning email message to the developer addresses specified in the config file using the SMTP server specified in the config file.
+		/// Sends a warning email message to the system developers.
 		/// </summary>
 		internal static void SendWarningEmail( string subject, string body ) {
 			assertClassInitialized();
 
-			var m = new EmailMessage();
-			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
-				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Warning: {0} - {1}".FormatWith( subject, ConfigurationStatics.InstallationConfiguration.FullName );
-			m.BodyHtml = body.GetTextAsEncodedHtml();
-			SendEmailWithDefaultFromAddress( m );
+			EmailStatics.SendDeveloperNotificationEmail(
+				new EmailMessage
+					{
+						Subject = "Warning: {0} - {1}".FormatWith( subject, ConfigurationStatics.InstallationConfiguration.FullName ),
+						BodyHtml = body.GetTextAsEncodedHtml()
+					} );
 		}
 
-		/// <summary>
-		/// After setting the From property to the from address specified in the config file, sends the specified mail message using the SMTP server specified in
-		/// the config file.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 July 2015. Please use EmailStatics.SendEmailWithDefaultFromAddress instead." ) ]
 		public static void SendEmailWithDefaultFromAddress( EmailMessage m ) {
 			assertClassInitialized();
-
-			m.From = new EmailAddress(
-				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
-				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
-			EmailStatics.SendEmail( m );
+			EmailStatics.SendEmailWithDefaultFromAddress( m );
 		}
 
 		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.SendEmail instead." ) ]
@@ -425,14 +418,6 @@ namespace RedStapler.StandardLibrary {
 			var chrono = new Chronometer();
 			method();
 			return chrono.Elapsed;
-		}
-
-		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.GetDeveloperEmailAddresses instead." ) ]
-		public static List<EmailAddress> DeveloperEmailAddresses {
-			get {
-				assertClassInitialized();
-				return EmailStatics.GetDeveloperEmailAddresses().ToList();
-			}
 		}
 
 		/// <summary>

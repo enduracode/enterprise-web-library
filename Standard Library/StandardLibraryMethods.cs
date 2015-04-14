@@ -351,7 +351,6 @@ namespace RedStapler.StandardLibrary {
 
 		internal static void SendHealthCheckEmail( string appFullName ) {
 			var message = new EmailMessage();
-			message.ToAddresses.AddRange( EmailStatics.GetDeveloperEmailAddresses() );
 
 			var body = new StringBuilder();
 			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
@@ -364,7 +363,7 @@ namespace RedStapler.StandardLibrary {
 
 			message.Subject = StringTools.ConcatenateWithDelimiter( " ", "Health check", freeSpaceIsLow ? "and WARNING" : "", "from " + appFullName );
 			message.BodyHtml = body.ToString().GetTextAsEncodedHtml();
-			AppTools.SendEmailWithDefaultFromAddress( message );
+			EmailStatics.SendDeveloperNotificationEmail( message );
 		}
 
 		/// <summary>

@@ -7,11 +7,38 @@ using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.InstallationStandard;
 
 namespace RedStapler.StandardLibrary.Email {
-	public class EmailStatics {
+	public static class EmailStatics {
+		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
+			message.From = defaultFromEmailAddress;
+			message.ToAddresses.AddRange( GetDeveloperEmailAddresses() );
+			sendEmail( message, true );
+		}
+
+		/// <summary>
+		/// After setting the From property to the from address specified in the config file, sends the specified mail message using the SMTP server specified in
+		/// the config file.
+		/// </summary>
+		public static void SendEmailWithDefaultFromAddress( EmailMessage message ) {
+			message.From = defaultFromEmailAddress;
+			SendEmail( message );
+		}
+
+		private static EmailAddress defaultFromEmailAddress {
+			get {
+				return new EmailAddress(
+					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
+					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
+			}
+		}
+
 		/// <summary>
 		/// Sends the specified mail message using the SMTP server specified in the config file.
 		/// </summary>
 		public static void SendEmail( EmailMessage message ) {
+			sendEmail( message, false );
+		}
+
+		private static void sendEmail( EmailMessage message, bool isDeveloperNotificationEmail ) {
 			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
 				sendEmailWithSmtpServer( null, message );
 			else {
@@ -21,7 +48,8 @@ namespace RedStapler.StandardLibrary.Email {
 					service = liveConfig.EmailSendingService;
 				}
 				else {
-					alterMessageForIntermediateInstallation( message );
+					if( !isDeveloperNotificationEmail )
+						alterMessageForIntermediateInstallation( message );
 
 					var intermediateConfig = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
 					service = intermediateConfig.EmailSendingService;
