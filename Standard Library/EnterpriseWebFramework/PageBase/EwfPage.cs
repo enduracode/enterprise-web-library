@@ -174,9 +174,35 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			else
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+
+			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
+			// happen once per request, and prior to LoadData so that the modified data can be used in the page if necessary.
+			if( requestState.StaticRegionContents == null ||
+			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
+			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
+				DataAccessState.Current.DisableCache();
+				try {
+					if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
+						EwfApp.Instance.ExecuteInitialRequestDataModifications();
+						if( AppRequestState.Instance.UserAccessible ) {
+							if( AppTools.User != null )
+								updateLastPageRequestTimeForUser( AppTools.User );
+							if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+								updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
+						}
+						executeInitialRequestDataModifications();
+					}
+					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+				}
+				finally {
+					DataAccessState.Current.ResetCache();
+				}
+			}
+
 			onLoadData();
 
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			if( requestState.StaticRegionContents != null ) {
 				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
 				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
@@ -194,13 +220,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						requestState.ModificationErrorsExist
 							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
 							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
+							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 				}
 			}
 
-			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
 				var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
 				if( secondaryDm == null )
@@ -878,30 +903,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected override sealed void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
-			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
-			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
-			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
-			DataAccessState.Current.DisableCache();
-			try {
-				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
-					EwfApp.Instance.ExecuteInitialRequestDataModifications();
-					if( AppRequestState.Instance.UserAccessible ) {
-						if( AppTools.User != null )
-							updateLastPageRequestTimeForUser( AppTools.User );
-						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
-							updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
-					}
-					executeInitialRequestDataModifications();
-				}
-				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
-
-				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-			}
-			finally {
-				DataAccessState.Current.ResetCache();
-			}
+			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 		}
 
 		/// <summary>
