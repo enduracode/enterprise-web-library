@@ -244,6 +244,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected internal abstract IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers();
 
 		/// <summary>
+		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// </summary>
+		public virtual void ExecuteInitialRequestDataModifications() {}
+
+		/// <summary>
 		/// Gets the favicon to be used for Chrome Application shortcuts.
 		/// </summary>
 		public virtual ResourceInfo FaviconPng48X48 { get { return null; } }
@@ -293,11 +298,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public void SendHealthCheck() {
 			StandardLibraryMethods.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
 		}
-
-		/// <summary>
-		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
-		/// </summary>
-		public virtual void ExecuteInitialRequestDataModifications() {}
 
 		/// <summary>
 		/// Gets the Internet media type overrides for the application, which are used when serving static files. Do not return null.

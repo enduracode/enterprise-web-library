@@ -260,6 +260,59 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
+		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
+		/// </summary>
+		private void updateLastPageRequestTimeForUser( User user ) {
+			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
+			// rapidly assigning tasks to one another in the System Manager or similar situations.
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+				return;
+
+			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
+			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
+			// in another browser window while the first one is still running.
+			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
+			// another transaction has modified its value during this transaction.
+			var newlyQueriedUser =
+				new DataAccessState().ExecuteWithThis(
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
+				return;
+
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+				() => {
+					try {
+						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+						if( FormsAuthStatics.FormsAuthEnabled ) {
+							var formsAuthCapableUser = (FormsAuthCapableUser)user;
+							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+								user.UserId,
+								user.Email,
+								user.Role.RoleId,
+								DateTime.Now,
+								formsAuthCapableUser.Salt,
+								formsAuthCapableUser.SaltedPassword,
+								formsAuthCapableUser.MustChangePassword );
+						}
+						else if( externalAuthProvider != null )
+							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+					}
+					catch( DbConcurrencyException ) {
+						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
+						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
+						// get an error email if the update fails.
+						throw new DoNotCommitException();
+					}
+				} );
+		}
+
+		/// <summary>
+		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// </summary>
+		protected virtual void executeInitialRequestDataModifications() {}
+
+		/// <summary>
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
 		/// changes.
 		/// </summary>
@@ -907,60 +960,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 		}
-
-		/// <summary>
-		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
-		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
-		/// </summary>
-		private void updateLastPageRequestTimeForUser( User user ) {
-			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
-			// rapidly assigning tasks to one another in RSIS or similar situations.
-			// NOTE: This makes the comment on line 688 much less important.
-			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
-				return;
-
-			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
-			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
-			// in another browser window while the first one is still running.
-			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
-			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser =
-				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
-				return;
-
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-				() => {
-					try {
-						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = (FormsAuthCapableUser)user;
-							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								user.UserId,
-								user.Email,
-								user.Role.RoleId,
-								DateTime.Now,
-								formsAuthCapableUser.Salt,
-								formsAuthCapableUser.SaltedPassword,
-								formsAuthCapableUser.MustChangePassword );
-						}
-						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
-					}
-					catch( DbConcurrencyException ) {
-						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
-						// get an error email if the update fails.
-						throw new DoNotCommitException();
-					}
-				} );
-		}
-
-		/// <summary>
-		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
-		/// </summary>
-		protected virtual void executeInitialRequestDataModifications() {}
 
 		/// <summary>
 		/// Saves view state.
