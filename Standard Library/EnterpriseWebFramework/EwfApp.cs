@@ -246,7 +246,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
 		/// </summary>
-		public virtual void ExecuteInitialRequestDataModifications() {}
+		public virtual void ExecutePageViewDataModifications() {}
 
 		/// <summary>
 		/// Gets the favicon to be used for Chrome Application shortcuts.

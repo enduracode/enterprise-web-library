@@ -177,22 +177,27 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
-			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
-			// happen once per request, and prior to LoadData so that the modified data can be used in the page if necessary.
+			// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
+			// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
+			//
+			// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+			// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
+			// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+			// concurrency errors by modifying data that affects the rendering of the page.
 			if( requestState.StaticRegionContents == null ||
 			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
 			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
 				DataAccessState.Current.DisableCache();
 				try {
 					if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
-						EwfApp.Instance.ExecuteInitialRequestDataModifications();
+						EwfApp.Instance.ExecutePageViewDataModifications();
 						if( AppRequestState.Instance.UserAccessible ) {
 							if( AppTools.User != null )
 								updateLastPageRequestTimeForUser( AppTools.User );
 							if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
 								updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
 						}
-						executeInitialRequestDataModifications();
+						executePageViewDataModifications();
 					}
 					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 				}
@@ -310,7 +315,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
 		/// </summary>
-		protected virtual void executeInitialRequestDataModifications() {}
+		protected virtual void executePageViewDataModifications() {}
 
 		/// <summary>
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
