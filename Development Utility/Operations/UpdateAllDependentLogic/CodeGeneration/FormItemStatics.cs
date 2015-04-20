@@ -412,7 +412,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				"new EwfCheckBox( v.Value" + toBoolSuffix + ", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack ) { AutoPostBack = autoPostBack }",
 				"control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
-				"( putLabelOnCheckBox ? \"\" : null )" );
+				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 			writeFormItemGetters(
 				writer,
 				field,
@@ -436,7 +436,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"c.NestedControls.AddRange( nestedControls );",
 					"return c;" ) + " }",
 				"control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
-				"( putLabelOnCheckBox ? \"\" : null )" );
+				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}
 
 		private static void writeDateFormItemGetters( TextWriter writer, ModificationField field ) {
