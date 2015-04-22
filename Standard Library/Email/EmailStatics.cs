@@ -70,7 +70,10 @@ namespace RedStapler.StandardLibrary.Email {
 		}
 
 		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
-			var recipients = m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection();
+			var originalInfoParagraph =
+				"Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
+					m.From.ToMailAddress().ToString(),
+					m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine + Environment.NewLine;
 
 			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
 			// bad idea to mix testing and demo mail into deliverability reports for live mail.
@@ -91,10 +94,7 @@ namespace RedStapler.StandardLibrary.Email {
 				m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
 			}
 
-			m.BodyHtml =
-				( "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-					m.From.ToMailAddress().ToString(),
-					recipients ) + Environment.NewLine + Environment.NewLine ).GetTextAsEncodedHtml() + m.BodyHtml;
+			m.BodyHtml = originalInfoParagraph.GetTextAsEncodedHtml() + m.BodyHtml;
 		}
 
 		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {
