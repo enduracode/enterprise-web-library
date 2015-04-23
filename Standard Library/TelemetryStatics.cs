@@ -20,7 +20,7 @@ namespace RedStapler.StandardLibrary {
 		/// Reports an error to the developers. The report includes the specified exception and additional information about the running program. The prefix
 		/// provides additional information before the standard exception and page information.
 		/// </summary>
-		internal static void ReportError( string prefix, Exception exception ) {
+		public static void ReportError( string prefix, Exception exception ) {
 			using( var sw = new StringWriter() ) {
 				if( prefix.Length > 0 ) {
 					sw.WriteLine( prefix );
