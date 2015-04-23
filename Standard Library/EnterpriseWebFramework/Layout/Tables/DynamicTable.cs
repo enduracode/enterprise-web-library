@@ -280,7 +280,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			}
 			catch( ApplicationException e ) {
 				if( !AppTools.IsDevelopmentInstallation )
-					AppTools.EmailAndLogError( "", e );
+					TelemetryStatics.ReportError( e );
 				else
 					throw;
 			}

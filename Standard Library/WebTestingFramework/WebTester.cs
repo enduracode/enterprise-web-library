@@ -38,7 +38,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			}
 			catch( Exception e ) {
 				// NOTE: After we eliminate environment.exit code setting, try to wrap this method in standard exception handling instead.
-				AppTools.EmailAndLogError( e );
+				TelemetryStatics.ReportError( e );
 			}
 			finally {
 				if( webTester != null )

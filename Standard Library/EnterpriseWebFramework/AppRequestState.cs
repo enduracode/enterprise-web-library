@@ -213,8 +213,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
-			if( errorException != null ) {
-				AppTools.EmailAndLogError( errorPrefix, errorException );
+			if( errorPrefix.Any() || errorException != null ) {
+				TelemetryStatics.ReportError( errorPrefix, errorException );
 				MiniProfiler.Stop();
 			}
 			else {
@@ -224,7 +224,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					duration = TimeSpan.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 				const int thresholdInSeconds = 30;
 				if( duration > new TimeSpan( 0, 0, thresholdInSeconds ) && !AppTools.IsDevelopmentInstallation )
-					AppTools.EmailAndLogError( "Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.", null );
+					TelemetryStatics.ReportError( "Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.", null );
 			}
 		}
 

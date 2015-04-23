@@ -167,5 +167,12 @@ namespace RedStapler.StandardLibrary.Email {
 		private static IEnumerable<EmailAddress> getDeveloperEmailAddresses() {
 			return ConfigurationStatics.InstallationConfiguration.Developers.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
 		}
+
+		/// <summary>
+		/// Returns a list of administrator email addresses.
+		/// </summary>
+		public static IEnumerable<EmailAddress> GetAdministratorEmailAddresses() {
+			return ConfigurationStatics.InstallationConfiguration.Administrators.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
+		}
 	}
 }
