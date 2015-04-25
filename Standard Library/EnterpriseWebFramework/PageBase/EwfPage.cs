@@ -446,9 +446,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private void onLoadData() {
 			// This can go anywhere in the lifecycle.
 
-			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
-			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
-
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
 			Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
@@ -963,7 +960,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+
+
+			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
+
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+
+			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 		}
 
 		/// <summary>
