@@ -201,7 +201,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
-				setFormsAuthCookie( ticket );
+				AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
 			}
 			AppRequestState.Instance.SetUser( user );
 		}
@@ -211,8 +211,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void setCookie( string name, string value ) {
-			AppRequestState.AddNonTransactionalModificationMethod(
-				() => CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true ) );
+			CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true );
 		}
 
 		private static string[] verifyTestCookie() {
@@ -272,12 +271,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			if( AppRequestState.Instance.ImpersonatorExists )
 				UserImpersonationStatics.SetCookie( null );
 			else
-				clearFormsAuthCookie();
+				AppRequestState.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
 			AppRequestState.Instance.SetUser( null );
 		}
 
 		private static void clearFormsAuthCookie() {
-			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( FormsAuthCookieName ) );
+			CookieStatics.ClearCookie( FormsAuthCookieName );
 		}
 
 		internal static string FormsAuthCookieName { get { return "User"; } }
