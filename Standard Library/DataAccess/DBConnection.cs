@@ -410,12 +410,16 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 		private Exception createCommandException( DbCommand command, Exception innerException ) {
 			if( databaseInfo is SqlServerInfo && innerException is SqlException ) {
-				var errorNumber = ( innerException as SqlException ).Number;
+				var errorNumber = ( (SqlException)innerException ).Number;
 
 				// 1205 is the code for deadlock; 3960 is the code for a snapshot optimistic concurrency error; 3961 is the code for a snapshot concurrency error due to
 				// a DDL statement in another transaction.
 				if( errorNumber == 1205 || errorNumber == 3960 || errorNumber == 3961 )
 					return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
+
+				// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
+				if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
+					return DataAccessMethods.CreateStandbyServerModificationException();
 
 				// -2 is the code for a timeout.
 				if( errorNumber == -2 )

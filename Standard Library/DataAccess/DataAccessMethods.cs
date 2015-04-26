@@ -60,9 +60,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 				if( errorNumber.HasValue ) {
 					// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
-					// NOTE: We may want to use a different type of exception. It's important that this gets displayed in the GUI for standby web apps.
+					// A nested BeginTransaction call can trigger this since it translates to a SAVE TRANSACTION statement, which fails for read-only databases.
 					if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
-						return new DataModificationException( "You cannot make changes to standby versions of a system." );
+						return CreateStandbyServerModificationException();
 
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
@@ -137,6 +137,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			return customMessage.Length > 0
 				       ? new DbConnectionFailureException( generalMessage + " " + customMessage, innerException )
 				       : new ApplicationException( generalMessage, innerException );
+		}
+
+		internal static Exception CreateStandbyServerModificationException() {
+			return new DataModificationException( "You cannot make changes to standby versions of a system." );
 		}
 
 		internal static string GetDbName( DatabaseInfo databaseInfo ) {
