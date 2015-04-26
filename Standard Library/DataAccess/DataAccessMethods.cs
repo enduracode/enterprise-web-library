@@ -42,10 +42,12 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			var generalMessage = "An exception occurred while " + action + " the " + GetDbName( databaseInfo ) + " database.";
 			var customMessage = "";
 
-			if( databaseInfo is SqlServerInfo ) {
+			var sqlServerInfo = databaseInfo as SqlServerInfo;
+			if( sqlServerInfo != null ) {
+				var sqlException = innerException as SqlException;
 				int? errorNumber = null;
-				if( innerException is SqlException )
-					errorNumber = ( innerException as SqlException ).Number;
+				if( sqlException != null )
+					errorNumber = sqlException.Number;
 				else {
 					if( innerException.Message.Contains( "Could not open a connection to SQL Server [2]" ) )
 						errorNumber = 2;
@@ -77,7 +79,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					}
 
 					if( errorNumber.Value == 4060 )
-						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
+						customMessage = "The " + sqlServerInfo.Database + " database does not exist. You may need to execute an Update Data operation.";
 
 					// We also handle this error at the command level.
 					if( errorNumber.Value == 233 ) {
@@ -101,7 +103,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
 
-			if( databaseInfo is OracleInfo ) {
+			var oracleInfo = databaseInfo as OracleInfo;
+			if( oracleInfo != null ) {
 				if( innerException.Message.Contains( "ORA-12154" ) )
 					customMessage = "Failed to connect to Oracle. There may be a problem with your network connection to the server.";
 				if( innerException.Message.Contains( "ORA-12541" ) )
@@ -120,7 +123,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					// There are many causes of this error and it is difficult to be more specific in the message.
 					customMessage = "Failed to connect to Oracle because of a connection timeout. Check the Oracle configuration on the machine and in this system.";
 				if( new[] { "ORA-01017", "ORA-1017" }.Any( i => innerException.Message.Contains( i ) ) )
-					customMessage = "Failed to connect to Oracle as " + ( databaseInfo as OracleInfo ).UserAndSchema + ". You may need to execute an Update Data operation.";
+					customMessage = "Failed to connect to Oracle as " + oracleInfo.UserAndSchema + ". You may need to execute an Update Data operation.";
 				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) ) {
 					customMessage =
 						"Failed to connect to Oracle or connection to Oracle was lost. This should not happen often and may be caused by a bug in the data access components or the database.";
