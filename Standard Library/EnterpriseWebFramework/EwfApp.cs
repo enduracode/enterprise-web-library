@@ -448,17 +448,26 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private bool handleErrorIfOnHandledErrorPage( string errorEvent, Exception exception ) {
-			var handledErrorPages = new List<PageInfo>
-				{
-					MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ),
-					MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
-					MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
-				};
-			if( handledErrorPages.All( p => getErrorPage( p ).GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ) )
+			var handledErrorPages =
+				new[]
+					{
+						MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ), MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
+						MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
+					}.Select( getErrorPage );
+			var requestParameters = new HashSet<string>( getQueryParameters( RequestState.Url ) );
+			if(
+				handledErrorPages.All(
+					page =>
+					page.GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ||
+					getQueryParameters( page.GetUrl() ).Any( i => !requestParameters.Contains( i ) ) ) )
 				return false;
 			RequestState.SetError( errorEvent + " during a request for a handled error page" + ( exception != null ? ":" : "." ), exception );
 			transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );
 			return true;
+		}
+
+		private IEnumerable<string> getQueryParameters( string url ) {
+			return HttpUtility.ParseQueryString( url.Separate( "?", false ).Skip( 1 ).FirstOrDefault() ?? "" ).Cast<string>();
 		}
 
 		private void transferRequest( PageInfo page, bool completeRequest ) {
