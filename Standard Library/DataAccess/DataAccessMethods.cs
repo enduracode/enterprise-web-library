@@ -42,10 +42,12 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			var generalMessage = "An exception occurred while " + action + " the " + GetDbName( databaseInfo ) + " database.";
 			var customMessage = "";
 
-			if( databaseInfo is SqlServerInfo ) {
+			var sqlServerInfo = databaseInfo as SqlServerInfo;
+			if( sqlServerInfo != null ) {
+				var sqlException = innerException as SqlException;
 				int? errorNumber = null;
-				if( innerException is SqlException )
-					errorNumber = ( innerException as SqlException ).Number;
+				if( sqlException != null )
+					errorNumber = sqlException.Number;
 				else {
 					if( innerException.Message.Contains( "Could not open a connection to SQL Server [2]" ) )
 						errorNumber = 2;
@@ -58,9 +60,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 
 				if( errorNumber.HasValue ) {
 					// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
-					// NOTE: We may want to use a different type of exception. It's important that this gets displayed in the GUI for standby web apps.
+					// A nested BeginTransaction call can trigger this since it translates to a SAVE TRANSACTION statement, which fails for read-only databases.
 					if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
-						return new DataModificationException( "You cannot make changes to standby versions of a system." );
+						return CreateStandbyServerModificationException();
 
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
@@ -77,7 +79,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					}
 
 					if( errorNumber.Value == 4060 )
-						customMessage = "The " + ( databaseInfo as SqlServerInfo ).Database + " database does not exist. You may need to execute an Update Data operation.";
+						customMessage = "The " + sqlServerInfo.Database + " database does not exist. You may need to execute an Update Data operation.";
 
 					// We also handle this error at the command level.
 					if( errorNumber.Value == 233 ) {
@@ -101,7 +103,8 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
 
-			if( databaseInfo is OracleInfo ) {
+			var oracleInfo = databaseInfo as OracleInfo;
+			if( oracleInfo != null ) {
 				if( innerException.Message.Contains( "ORA-12154" ) )
 					customMessage = "Failed to connect to Oracle. There may be a problem with your network connection to the server.";
 				if( innerException.Message.Contains( "ORA-12541" ) )
@@ -120,7 +123,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 					// There are many causes of this error and it is difficult to be more specific in the message.
 					customMessage = "Failed to connect to Oracle because of a connection timeout. Check the Oracle configuration on the machine and in this system.";
 				if( new[] { "ORA-01017", "ORA-1017" }.Any( i => innerException.Message.Contains( i ) ) )
-					customMessage = "Failed to connect to Oracle as " + ( databaseInfo as OracleInfo ).UserAndSchema + ". You may need to execute an Update Data operation.";
+					customMessage = "Failed to connect to Oracle as " + oracleInfo.UserAndSchema + ". You may need to execute an Update Data operation.";
 				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) ) {
 					customMessage =
 						"Failed to connect to Oracle or connection to Oracle was lost. This should not happen often and may be caused by a bug in the data access components or the database.";
@@ -134,6 +137,10 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			return customMessage.Length > 0
 				       ? new DbConnectionFailureException( generalMessage + " " + customMessage, innerException )
 				       : new ApplicationException( generalMessage, innerException );
+		}
+
+		internal static Exception CreateStandbyServerModificationException() {
+			return new DataModificationException( "You cannot make changes to standby versions of a system." );
 		}
 
 		internal static string GetDbName( DatabaseInfo databaseInfo ) {
