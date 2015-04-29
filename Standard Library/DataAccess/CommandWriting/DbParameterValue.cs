@@ -38,7 +38,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		}
 
 		public override int GetHashCode() {
-			return value.GetHashCode();
+			return value != null ? value.GetHashCode() : -1;
 		}
 
 		int IComparable.CompareTo( object obj ) {
