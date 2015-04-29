@@ -22,6 +22,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private TimeSpan? value;
 		private bool autoPostBack;
 		private readonly int minuteInterval;
+		private readonly PostBack postBack;
 
 		private EwfTextBox textBox;
 		private SelectList<TimeSpan?> selectList;
@@ -30,9 +31,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a time picker. The minute interval allows the user to select values only in the given increments. 
 		/// Be aware that other values can still be sent from the browser via a crafted request.
 		/// </summary>
-		public TimePicker( TimeSpan? value, int minuteInterval = 15 ) {
+		/// <param name="value"></param>
+		/// <param name="minuteInterval"></param>
+		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the time picker.</param>
+		public TimePicker( TimeSpan? value, int minuteInterval = 15, PostBack postBack = null ) {
 			this.value = value;
 			this.minuteInterval = minuteInterval;
+			this.postBack = postBack;
 		}
 
 		/// <summary>
@@ -54,7 +59,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			if( minuteInterval < 30 ) {
-				textBox = new EwfTextBox( value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "", disableBrowserAutoComplete: true, autoPostBack: autoPostBack );
+				textBox = new EwfTextBox(
+					value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "",
+					disableBrowserAutoComplete: true,
+					postBack: postBack,
+					autoPostBack: autoPostBack );
 				Controls.Add( new ControlLine( textBox, getIconButton() ) );
 			}
 			else {
@@ -70,6 +79,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					width: Unit.Percentage( 100 ),
 					placeholderIsValid: true,
 					placeholderText: "",
+					postBack: postBack,
 					autoPostBack: autoPostBack );
 				Controls.Add( selectList );
 			}
