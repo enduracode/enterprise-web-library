@@ -244,7 +244,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private Control getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToSingleElementArray() );
 
-			var appLogoBlock = EwfUiStatics.AppProvider.GetLogoControl() ??
+			var appLogoBlock = ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
+				                     ? EwfUiStatics.AppProvider.GetLogoControl()
+				                     : null ) ??
 			                   new Panel().AddControlsReturnThis(
 				                   ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName ).GetLiteralControl() );
 			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
