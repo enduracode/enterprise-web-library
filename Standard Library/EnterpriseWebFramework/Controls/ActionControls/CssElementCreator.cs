@@ -28,13 +28,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		public static readonly string[] Selectors = getElementsForAllStates( "", "." + AllStylesClass ).Single( i => i.Name == "AllStates" ).Selectors.ToArray();
 
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
-			// NOTE: Uncomment the things below when we no longer support IE7/IE8.
-			const string actionless = "" /*+ ":not([href]):not([" + JsWritingMethods.onclick + "])"*/;
-			var normal = Tuple.Create( "" /*+ ":not(:focus):not(:hover):not(:active)"*/, "" /*+ ":not(:visited)"*/ );
-			var visited = Tuple.Create( ":visited" /*+ ":not(:focus):not(:hover):not(:active)"*/, "" );
-			var focus = Tuple.Create( ":focus" /*+ ":not(:active)"*/, "" );
-			var focusNoHover = Tuple.Create( ":focus" /*+ ":not(:hover):not(:active)"*/, "" );
-			var hover = Tuple.Create( ":hover" /*+ ":not(:active)"*/, "" );
+			const string actionless = ":not([href]):not([" + JsWritingMethods.onclick + "])";
+			var normal = Tuple.Create( ":not(:focus):not(:hover):not(:active)", ":not(:visited)" );
+			var visited = Tuple.Create( ":visited:not(:focus):not(:hover):not(:active)", "" );
+			var focus = Tuple.Create( ":focus:not(:active)", "" );
+			var focusNoHover = Tuple.Create( ":focus:not(:hover):not(:active)", "" );
+			var hover = Tuple.Create( ":hover:not(:active)", "" );
 			var active = Tuple.Create( ":active", "" );
 
 			yield return getStateElement( baseName, "AllStates", "", "", styleSelectors, null, actionless, normal, visited, focus, focusNoHover, hover, active );
@@ -42,100 +41,104 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 			foreach( var newContent in new bool?[] { null, false, true } ) {
 				yield return
-					getStateElement( baseName,
-					                 "AllActionStates",
-					                 "AllNormalContentActionStates",
-					                 "AllNewContentActionStates",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 normal,
-					                 visited,
-					                 focus,
-					                 focusNoHover,
-					                 hover,
-					                 active );
+					getStateElement(
+						baseName,
+						"AllActionStates",
+						"AllNormalContentActionStates",
+						"AllNewContentActionStates",
+						styleSelectors,
+						newContent,
+						null,
+						normal,
+						visited,
+						focus,
+						focusNoHover,
+						hover,
+						active );
 				yield return getStateElement( baseName, "AllNormalStates", "NormalContentNormalState", "NewContentNormalState", styleSelectors, newContent, null, normal );
 				yield return
 					getStateElement( baseName, "AllVisitedStates", "NormalContentVisitedState", "NewContentVisitedState", styleSelectors, newContent, null, visited );
 
 				// focus with or without hover
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithFocus",
-					                 "StatesWithNormalContentAndWithFocus",
-					                 "StatesWithNewContentAndWithFocus",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 focus,
-					                 focusNoHover,
-					                 active );
+					getStateElement(
+						baseName,
+						"StatesWithFocus",
+						"StatesWithNormalContentAndWithFocus",
+						"StatesWithNewContentAndWithFocus",
+						styleSelectors,
+						newContent,
+						null,
+						focus,
+						focusNoHover,
+						active );
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithFocusAndWithoutActive",
-					                 "StatesWithNormalContentAndWithFocusAndWithoutActive",
-					                 "StatesWithNewContentAndWithFocusAndWithoutActive",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 focus,
-					                 focusNoHover );
+					getStateElement(
+						baseName,
+						"StatesWithFocusAndWithoutActive",
+						"StatesWithNormalContentAndWithFocusAndWithoutActive",
+						"StatesWithNewContentAndWithFocusAndWithoutActive",
+						styleSelectors,
+						newContent,
+						null,
+						focus,
+						focusNoHover );
 
 				// Focus without hover. Hover should trump focus according to http://meyerweb.com/eric/thoughts/2007/06/04/ordering-the-link-states/.
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithFocusAndWithoutHover",
-					                 "StatesWithNormalContentAndWithFocusAndWithoutHover",
-					                 "StatesWithNewContentAndWithFocusAndWithoutHover",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 focusNoHover,
-					                 active );
+					getStateElement(
+						baseName,
+						"StatesWithFocusAndWithoutHover",
+						"StatesWithNormalContentAndWithFocusAndWithoutHover",
+						"StatesWithNewContentAndWithFocusAndWithoutHover",
+						styleSelectors,
+						newContent,
+						null,
+						focusNoHover,
+						active );
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithFocusAndWithoutHoverAndWithoutActive",
-					                 "NormalContentFocusNoHoverState",
-					                 "NewContentFocusNoHoverState",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 focusNoHover );
+					getStateElement(
+						baseName,
+						"StatesWithFocusAndWithoutHoverAndWithoutActive",
+						"NormalContentFocusNoHoverState",
+						"NewContentFocusNoHoverState",
+						styleSelectors,
+						newContent,
+						null,
+						focusNoHover );
 
 				// hover with or without focus
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithHover",
-					                 "StatesWithNormalContentAndWithHover",
-					                 "StatesWithNewContentAndWithHover",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 hover,
-					                 active );
+					getStateElement(
+						baseName,
+						"StatesWithHover",
+						"StatesWithNormalContentAndWithHover",
+						"StatesWithNewContentAndWithHover",
+						styleSelectors,
+						newContent,
+						null,
+						hover,
+						active );
 				yield return
-					getStateElement( baseName,
-					                 "StatesWithHoverAndWithoutActive",
-					                 "StatesWithNormalContentAndWithHoverAndWithoutActive",
-					                 "StatesWithNewContentAndWithHoverAndWithoutActive",
-					                 styleSelectors,
-					                 newContent,
-					                 null,
-					                 hover );
+					getStateElement(
+						baseName,
+						"StatesWithHoverAndWithoutActive",
+						"StatesWithNormalContentAndWithHoverAndWithoutActive",
+						"StatesWithNewContentAndWithHoverAndWithoutActive",
+						styleSelectors,
+						newContent,
+						null,
+						hover );
 
 				yield return getStateElement( baseName, "AllActiveStates", "NormalContentActiveState", "NewContentActiveState", styleSelectors, newContent, null, active );
 			}
 		}
 
-		private static CssElement getStateElement( string baseName, string allContentName, string normalContentName, string newContentName,
-		                                           IEnumerable<string> styleSelectors, bool? newContent, string actionlessSelector,
-		                                           params Tuple<string, string>[] actionStateSelectors ) {
+		private static CssElement getStateElement(
+			string baseName, string allContentName, string normalContentName, string newContentName, IEnumerable<string> styleSelectors, bool? newContent,
+			string actionlessSelector, params Tuple<string, string>[] actionStateSelectors ) {
 			const string newContentSelector = "." + NewContentClass;
-
-			// NOTE: Uncomment this when we no longer support IE7/IE8.
-			const string normalContentSelector = "" /*+ ":not(" + newContentSelector + ")"*/;
-
+			const string normalContentSelector = ":not(" + newContentSelector + ")";
 			var contentSelectors = newContent.HasValue
 				                       ? newContent.Value ? newContentSelector.ToSingleElementArray() : normalContentSelector.ToSingleElementArray()
 				                       : new[] { normalContentSelector, newContentSelector };
