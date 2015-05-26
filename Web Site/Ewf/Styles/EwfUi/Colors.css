@@ -57,7 +57,7 @@ ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWit
 
 /* table rows with action */
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover {
-	background-color: #CFA8E5 !important /* Remove "important" when we drop IE7/8 support and enable the :not pseudo class in table row selectors. */;
+	background-color: #CFA8E5;
 	background-image: none;
 }
 
