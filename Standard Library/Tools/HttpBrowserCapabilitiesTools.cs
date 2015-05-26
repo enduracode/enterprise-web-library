@@ -10,7 +10,7 @@ namespace RedStapler.StandardLibrary {
 		/// probably know what they are doing.
 		/// </summary>
 		public static bool IsOldVersionOfMajorBrowser( this HttpBrowserCapabilities browser ) {
-			const int latestIeVersion = 8;
+			const int latestIeVersion = 9;
 			const int latestFirefoxVersion = 4;
 			return ( browser.IsInternetExplorer() && browser.MajorVersion < latestIeVersion ) || ( browser.isFirefox() && browser.MajorVersion < latestFirefoxVersion );
 		}
@@ -31,13 +31,6 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static bool IsInternetExplorer( this HttpBrowserCapabilities browser ) {
 			return browser.Browser == "IE";
-		}
-
-		/// <summary>
-		/// Returns true if the browser being used is IE7.
-		/// </summary>
-		public static bool IsInternetExplorer7( this HttpBrowserCapabilities browser ) {
-			return browser.IsInternetExplorer() && browser.Version.StartsWith( "7" );
 		}
 	}
 }
