@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading;
-using System.Web;
-using Humanizer;
 using RedStapler.StandardLibrary.Caching;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
@@ -90,7 +87,7 @@ namespace RedStapler.StandardLibrary {
 				// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
 				// automatically restart themselves. Other apps could find this knowledge useful as well.
 				try {
-					EmailAndLogError( "An exception occurred during application initialization:", e );
+					TelemetryStatics.ReportError( "An exception occurred during application initialization:", e );
 				}
 				catch {}
 			}
@@ -115,7 +112,7 @@ namespace RedStapler.StandardLibrary {
 				AppMemoryCache.CleanUp();
 			}
 			catch( Exception e ) {
-				EmailAndLogError( "An exception occurred during application cleanup:", e );
+				TelemetryStatics.ReportError( "An exception occurred during application cleanup:", e );
 			}
 		}
 
@@ -180,112 +177,20 @@ namespace RedStapler.StandardLibrary {
 			}
 		}
 
-		/// <summary>
-		/// Sends an email from the default address to the developers with the given exception information and additional information about
-		/// the running program.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 July 2015. Please use TelemetryStatics.ReportError instead." ) ]
 		public static void EmailAndLogError( Exception e ) {
-			EmailAndLogError( "", e );
+			TelemetryStatics.ReportError( e );
 		}
 
-		/// <summary>
-		/// Sends an email from the default address to the developers with the given exception information and additional information about
-		/// the running program.  Prefix provides additional information before the standard exception and page information.
-		/// The exception may be null.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 July 2015. Please use TelemetryStatics.ReportError instead." ) ]
 		public static void EmailAndLogError( string prefix, Exception exception ) {
-			using( var sw = new StringWriter() ) {
-				if( prefix.Length > 0 ) {
-					sw.WriteLine( prefix );
-					sw.WriteLine();
-				}
-				if( exception != null ) {
-					sw.WriteLine( exception.ToString() );
-					sw.WriteLine();
-				}
-
-				if( NetTools.IsWebApp() ) {
-					// This check ensures that there is an actual request, which is not the case during application initialization.
-					if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
-						sw.WriteLine( "URL: " + AppRequestState.Instance.Url );
-
-						sw.WriteLine();
-						foreach( string fieldName in HttpContext.Current.Request.Form )
-							sw.WriteLine( "Form field " + fieldName + ": " + HttpContext.Current.Request.Form[ fieldName ] );
-
-						sw.WriteLine();
-						foreach( string cookieName in HttpContext.Current.Request.Cookies )
-							sw.WriteLine( "Cookie " + cookieName + ": " + HttpContext.Current.Request.Cookies[ cookieName ].Value );
-
-						sw.WriteLine();
-						sw.WriteLine( "User agent: " + HttpContext.Current.Request.GetUserAgent() );
-						sw.WriteLine( "Referrer: " + NetTools.ReferringUrl );
-
-						User user = null;
-						User impersonator = null;
-
-						// exception-prone code
-						try {
-							user = User;
-							impersonator = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : null;
-						}
-						catch {}
-
-						if( user != null )
-							sw.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
-					}
-				}
-				else {
-					sw.WriteLine( "Program: " + ConfigurationStatics.AppName );
-					sw.WriteLine( "Version: " + ConfigurationStatics.AppAssembly.GetName().Version );
-					sw.WriteLine( "Machine: " + StandardLibraryMethods.GetLocalHostName() );
-				}
-
-				StandardLibraryMethods.CallEveryMethod( delegate { sendErrorEmail( sw.ToString() ); }, delegate { logError( sw.ToString() ); } );
-			}
+			TelemetryStatics.ReportError( prefix, exception );
 		}
 
-		/// <summary>
-		/// Sends an error email message to the developer addresses specified in the config file using the SMTP server specified in the config file.
-		/// </summary>
-		private static void sendErrorEmail( string body ) {
-			assertClassInitialized();
-
-			var m = new EmailMessage();
-			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
-				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Error in " + ConfigurationStatics.InstallationConfiguration.SystemName;
-			if( ConfigurationStatics.IsClientSideProgram )
-				m.Subject += " on " + StandardLibraryMethods.GetLocalHostName();
-			m.BodyHtml = body.GetTextAsEncodedHtml();
-			SendEmailWithDefaultFromAddress( m );
-		}
-
-		/// <summary>
-		/// Sends a warning email message to the developer addresses specified in the config file using the SMTP server specified in the config file.
-		/// </summary>
-		internal static void SendWarningEmail( string subject, string body ) {
-			assertClassInitialized();
-
-			var m = new EmailMessage();
-			foreach( var developer in ConfigurationStatics.InstallationConfiguration.Developers )
-				m.ToAddresses.Add( new EmailAddress( developer.EmailAddress, developer.Name ) );
-			m.Subject = "Warning: {0} - {1}".FormatWith( subject, ConfigurationStatics.InstallationConfiguration.FullName );
-			m.BodyHtml = body.GetTextAsEncodedHtml();
-			SendEmailWithDefaultFromAddress( m );
-		}
-
-		/// <summary>
-		/// After setting the From property to the from address specified in the config file, sends the specified mail message using the SMTP server specified in
-		/// the config file.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 July 2015. Please use EmailStatics.SendEmailWithDefaultFromAddress instead." ) ]
 		public static void SendEmailWithDefaultFromAddress( EmailMessage m ) {
 			assertClassInitialized();
-
-			m.From = new EmailAddress(
-				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
-				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
-			EmailStatics.SendEmail( m );
+			EmailStatics.SendEmailWithDefaultFromAddress( m );
 		}
 
 		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.SendEmail instead." ) ]
@@ -310,7 +215,7 @@ namespace RedStapler.StandardLibrary {
 			}
 			catch( Exception e ) {
 				if( !( e is DoNotEmailOrLogException ) )
-					EmailAndLogError( e );
+					TelemetryStatics.ReportError( e );
 				return 1;
 			}
 			return 0;
@@ -332,7 +237,7 @@ namespace RedStapler.StandardLibrary {
 				return true;
 			}
 			catch( Exception e ) {
-				EmailAndLogError( e );
+				TelemetryStatics.ReportError( e );
 				return false;
 			}
 		}
@@ -369,7 +274,7 @@ namespace RedStapler.StandardLibrary {
 
 		private static Exception createWebServiceException( Exception e ) {
 			if( !( e is Wcf.AccessDeniedException ) )
-				EmailAndLogError( e );
+				TelemetryStatics.ReportError( e );
 			return new FaultException( e.ToString() );
 		}
 
@@ -427,42 +332,8 @@ namespace RedStapler.StandardLibrary {
 			return chrono.Elapsed;
 		}
 
-		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.GetDeveloperEmailAddresses instead." ) ]
-		public static List<EmailAddress> DeveloperEmailAddresses {
-			get {
-				assertClassInitialized();
-				return EmailStatics.GetDeveloperEmailAddresses().ToList();
-			}
-		}
-
-		/// <summary>
-		/// A list of system administrator email addresses.
-		/// </summary>
-		public static List<EmailAddress> AdministratorEmailAddresses {
-			get {
-				assertClassInitialized();
-				// NOTE: Why is Administrator a different type than Developer?
-				return
-					ConfigurationStatics.InstallationConfiguration.Administrators.Select( administrator => new EmailAddress( administrator.EmailAddress, administrator.Name ) )
-						.ToList();
-			}
-		}
-
-		private static readonly object key = new object();
-
-		private static void logError( string errorText ) {
-			assertClassInitialized();
-
-			lock( key ) {
-				using( var writer = new StreamWriter( File.Open( ConfigurationStatics.InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) ) ) {
-					writer.WriteLine( DateTime.Now + ":" );
-					writer.WriteLine();
-					writer.Write( errorText );
-					writer.WriteLine();
-					writer.WriteLine();
-				}
-			}
-		}
+		[ Obsolete( "Guaranteed through 31 July 2015. Please use EmailStatics.GetAdministratorEmailAddresses instead." ) ]
+		public static List<EmailAddress> AdministratorEmailAddresses { get { return EmailStatics.GetAdministratorEmailAddresses().ToList(); } }
 
 		internal static string CertificateEmailAddressOverride {
 			get {

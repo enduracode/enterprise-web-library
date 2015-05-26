@@ -36,7 +36,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 							if( setErrorInRequestState )
 								Instance.RequestState.SetError( prefix, e );
 							else
-								AppTools.EmailAndLogError( prefix, e );
+								TelemetryStatics.ReportError( prefix, e );
 						},
 						delegate {
 							if( set500StatusCode )

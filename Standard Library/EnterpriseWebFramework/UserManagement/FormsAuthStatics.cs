@@ -317,7 +317,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			SystemProvider.GetPasswordResetParams( emailAddress, password, out subject, out bodyHtml );
 			var m = new EmailMessage { Subject = subject, BodyHtml = bodyHtml };
 			m.ToAddresses.Add( new EmailAddress( emailAddress ) );
-			AppTools.SendEmailWithDefaultFromAddress( m );
+			EmailStatics.SendEmailWithDefaultFromAddress( m );
 		}
 	}
 }

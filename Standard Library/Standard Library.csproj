@@ -453,6 +453,7 @@
     <Compile Include="StructuralEqualityComparer.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
     <Compile Include="SystemInitializer.cs" />
+    <Compile Include="TelemetryStatics.cs" />
     <Compile Include="TestStatics.cs" />
     <Compile Include="Tools\AssemblyTools.cs" />
     <Compile Include="Tools\ObjectTools.cs" />

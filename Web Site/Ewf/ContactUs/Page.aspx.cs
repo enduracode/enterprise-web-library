@@ -39,9 +39,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					Subject = "Contact from " + AppTools.SystemName,
 					BodyHtml = ( "Contact from " + AppTools.User.Email + Environment.NewLine + Environment.NewLine + emailText ).GetTextAsEncodedHtml()
 				};
-			message.ToAddresses.AddRange( AppTools.AdministratorEmailAddresses );
+			message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );
 			message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email ) );
-			AppTools.SendEmailWithDefaultFromAddress( message );
+			EmailStatics.SendEmailWithDefaultFromAddress( message );
 			AddStatusMessage( StatusMessageType.Info, "Your feedback has been sent." );
 		}
 	}
