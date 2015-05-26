@@ -31,8 +31,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			/// <summary>
 			/// Standard Library use only.
 			/// </summary>
-			public static readonly string[] Selectors = new[]
-				{ "table", "table." + StandardLayoutOnlyStyleClass, "table." + StandardExceptLayoutStyleClass, "table." + StandardStyleClass };
+			public static readonly string[] Selectors =
+				{
+					"table", "table." + StandardLayoutOnlyStyleClass, "table." + StandardExceptLayoutStyleClass,
+					"table." + StandardStyleClass
+				};
 
 			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass ).ToArray();
 
@@ -52,9 +55,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				// Add row elements.
 
 				const string tr = "tr";
-				const string noActionSelector = ""; // NOTE: Uncomment when we no longer support IE7/IE8. ":not(." + actionClass + ")";
+				const string noActionSelector = ":not(." + actionClass + ")";
 				const string actionSelector = "." + actionClass;
-				const string noHoverSelector = ""; // NOTE: Uncomment when we no longer support IE7/IE8. ":not(:hover)";
+				const string noHoverSelector = ":not(:hover)";
 				const string hoverSelector = ":hover";
 				const string contrastSelector = "." + ContrastClass;
 
@@ -95,10 +98,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 
 		internal static void SetUpTableAndCaption( WebControl table, EwfTableStyle style, ReadOnlyCollection<string> classes, string caption, string subCaption ) {
 			table.CssClass = StringTools.ConcatenateWithDelimiter( " ", new[] { getTableStyleClass( style ) }.Concat( classes ).ToArray() );
-
-			// NOTE: Axe this when we cut support for IE7.
-			table.Attributes.Add( "cellspacing", "0" );
-
 			addCaptionIfNecessary( table, caption, subCaption );
 		}
 
