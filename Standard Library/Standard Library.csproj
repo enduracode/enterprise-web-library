@@ -190,6 +190,8 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlIcon.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlIconPlacement.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\CssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\CustomButton.cs" />

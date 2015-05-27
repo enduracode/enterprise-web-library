@@ -171,6 +171,16 @@ ewfActionControlAllStylesAllStates::-moz-focus-inner {
 	border-style: none;
 	padding: 0;
 }
+ewfActionControlAllStylesAllStates > ewfIcon {
+	padding-left: .4em;
+	padding-right: .4em;
+}
+ewfActionControlAllStylesAllStates > ewfIcon:first-child {
+	padding-left: 0;
+}
+ewfActionControlAllStylesAllStates > ewfIcon:last-child {
+	padding-right: 0;
+}
 ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox {
 	display: block;
 	background-repeat: repeat-x;

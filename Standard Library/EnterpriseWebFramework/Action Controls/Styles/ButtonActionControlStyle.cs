@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -26,15 +27,20 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			Large
 		}
 
-		private readonly string text;
 		private readonly ButtonSize buttonSize;
+		private readonly ActionControlIcon icon;
+		private readonly string text;
 
 		/// <summary>
-		/// Creates a button action control style. Do not pass null for text.
+		/// Creates a button action control style.
 		/// </summary>
-		public ButtonActionControlStyle( string text, ButtonSize buttonSize = ButtonSize.Normal ) {
-			this.text = text;
+		/// <param name="text">Do not pass null.</param>
+		/// <param name="buttonSize"></param>
+		/// <param name="icon">The icon.</param>
+		public ButtonActionControlStyle( string text, ButtonSize buttonSize = ButtonSize.Normal, ActionControlIcon icon = null ) {
 			this.buttonSize = buttonSize;
+			this.icon = icon;
+			this.text = text;
 		}
 
 		string ActionControlStyle.Text { get { return text; } }
@@ -49,7 +55,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				cssElement = CssElementCreator.LargeButtonStyleClass;
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + cssElement );
 
-			return control.AddControlsReturnThis( ( text.Length > 0 ? text : defaultText ).GetLiteralControl() );
+			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextControls( icon, text.Any() ? text : defaultText ) );
 		}
 
 		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
