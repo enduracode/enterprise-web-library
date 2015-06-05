@@ -14,8 +14,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a free-form radio button list.
 		/// </summary>
-		/// <param name="allowNoSelection">Pass true to cause a selected item ID of null (or empty string when the item ID type is string) to represent the state in
-		/// which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
+		/// <param name="allowNoSelection">Pass true to cause a selected item ID with the default value (or the empty string when the item ID type is string) to
+		/// represent the state in which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
 		/// http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
 		/// <param name="selectedItemId"></param>
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
