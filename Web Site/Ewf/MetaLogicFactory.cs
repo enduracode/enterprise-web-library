@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateBasicCssInfos() {
 			var infos = new List<ResourceInfo>();
 			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
-			infos.Add( new ExternalResourceInfo( "//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" ) );
+			infos.Add( new ExternalResourceInfo( "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Css.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
