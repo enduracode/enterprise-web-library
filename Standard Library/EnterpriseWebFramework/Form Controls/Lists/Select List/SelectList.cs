@@ -121,7 +121,15 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			}
 
 			internal SelectListItem<ItemIdType> Item { get { return item; } }
-			internal string StringId { get { return item.Id.ObjectToString( true ); } }
+
+			internal string StringId {
+				get {
+					// Represent the default value with the empty string to support drop-down list placeholders. The HTML spec states that the "placeholder label option"
+					// must have a value of the empty string. See https://html.spec.whatwg.org/multipage/forms.html#the-select-element.
+					return StandardLibraryMethods.AreEqual( item.Id, StandardLibraryMethods.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
+				}
+			}
+
 			internal bool IsValid { get { return isValid; } }
 			internal bool IsPlaceholder { get { return isPlaceholder; } }
 		}

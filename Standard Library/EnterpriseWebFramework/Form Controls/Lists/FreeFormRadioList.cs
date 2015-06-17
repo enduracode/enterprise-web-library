@@ -14,8 +14,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a free-form radio button list.
 		/// </summary>
-		/// <param name="allowNoSelection">Pass true to cause a selected item ID of null (or empty string when the item ID type is string) to represent the state in
-		/// which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
+		/// <param name="allowNoSelection">Pass true to cause a selected item ID with the default value (or the empty string when the item ID type is string) to
+		/// represent the state in which none of the radio buttons are selected. Note that this is not recommended by the Nielsen Norman Group; see
 		/// http://www.nngroup.com/articles/checkboxes-vs-radio-buttons/ for more information.</param>
 		/// <param name="selectedItemId"></param>
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
@@ -38,22 +38,23 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal FreeFormRadioList( bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId ) {
 			this.allowNoSelection = allowNoSelection;
-			formValue = RadioButtonGroup.GetFormValue( allowNoSelection,
-			                                           () => from i in itemIdsAndCheckBoxes select i.Item2,
-			                                           () =>
-			                                           from i in itemIdsAndCheckBoxes where StandardLibraryMethods.AreEqual( i.Item1, selectedItemId ) select i.Item2,
-			                                           v => getStringId( v != null ? itemIdsAndCheckBoxes.Single( i => i.Item2 == v ).Item1 : getNoSelectionItemId() ),
-			                                           rawValue => from itemIdAndCheckBox in itemIdsAndCheckBoxes
-			                                                       let control = (Control)itemIdAndCheckBox.Item2
-			                                                       where control.IsOnPage() && getStringId( itemIdAndCheckBox.Item1 ) == rawValue
-			                                                       select itemIdAndCheckBox.Item2 );
+			formValue = RadioButtonGroup.GetFormValue(
+				allowNoSelection,
+				() => from i in itemIdsAndCheckBoxes select i.Item2,
+				() => from i in itemIdsAndCheckBoxes where StandardLibraryMethods.AreEqual( i.Item1, selectedItemId ) select i.Item2,
+				v => getStringId( v != null ? itemIdsAndCheckBoxes.Single( i => i.Item2 == v ).Item1 : getNoSelectionItemId() ),
+				rawValue => from itemIdAndCheckBox in itemIdsAndCheckBoxes
+				            let control = (Control)itemIdAndCheckBox.Item2
+				            where control.IsOnPage() && getStringId( itemIdAndCheckBox.Item1 ) == rawValue
+				            select itemIdAndCheckBox.Item2 );
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() =>
-				RadioButtonGroup.ValidateControls( allowNoSelection,
-				                                   StandardLibraryMethods.AreEqual( getNoSelectionItemId(), selectedItemId ),
-				                                   itemIdsAndCheckBoxes.Select( i => i.Item2 ),
-				                                   disableSingleButtonDetection ) );
+				RadioButtonGroup.ValidateControls(
+					allowNoSelection,
+					StandardLibraryMethods.AreEqual( getNoSelectionItemId(), selectedItemId ),
+					itemIdsAndCheckBoxes.Select( i => i.Item2 ),
+					disableSingleButtonDetection ) );
 
 			EwfPage.Instance.AddDisplayLink( this );
 		}
@@ -61,19 +62,22 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<WebControl> controls ) {
 			itemIds = itemIds.ToArray();
 			controls = controls.ToArray();
-			displayLinkingSetInitialDisplayMethods.Add( formControlValues => {
-				var match = itemIds.Contains( GetSelectedItemIdInPostBack( formControlValues ) );
-				var visible = ( controlsVisibleOnMatch && match ) || ( !controlsVisibleOnMatch && !match );
-				foreach( var i in controls )
-					DisplayLinkingOps.SetControlDisplay( i, visible );
-			} );
-			displayLinkingAddJavaScriptMethods.Add( () => {
-				foreach( var pair in itemIdsAndCheckBoxes ) {
-					DisplayLinkingOps.AddDisplayJavaScriptToCheckBox( pair.Item2,
-					                                                  itemIds.Contains( pair.Item1 ) ? controlsVisibleOnMatch : !controlsVisibleOnMatch,
-					                                                  controls.ToArray() );
-				}
-			} );
+			displayLinkingSetInitialDisplayMethods.Add(
+				formControlValues => {
+					var match = itemIds.Contains( GetSelectedItemIdInPostBack( formControlValues ) );
+					var visible = ( controlsVisibleOnMatch && match ) || ( !controlsVisibleOnMatch && !match );
+					foreach( var i in controls )
+						DisplayLinkingOps.SetControlDisplay( i, visible );
+				} );
+			displayLinkingAddJavaScriptMethods.Add(
+				() => {
+					foreach( var pair in itemIdsAndCheckBoxes ) {
+						DisplayLinkingOps.AddDisplayJavaScriptToCheckBox(
+							pair.Item2,
+							itemIds.Contains( pair.Item1 ) ? controlsVisibleOnMatch : !controlsVisibleOnMatch,
+							controls.ToArray() );
+					}
+				} );
 		}
 
 		/// <summary>
