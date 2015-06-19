@@ -53,7 +53,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private ModalWindow three;
 		private ModalWindow four;
 
-		void EntitySetupBase.LoadData() {}
+		void EntitySetupBase.LoadData() {
+			ph.AddControlsReturnThis(
+				new Paragraph( "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
+		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			var navButtonSetups = new List<ActionButtonSetup>();

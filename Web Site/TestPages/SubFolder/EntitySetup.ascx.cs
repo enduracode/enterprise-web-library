@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Web.UI;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
@@ -16,14 +17,16 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 				return new List<ResourceGroup> { new ResourceGroup( new General.Info( this ), new Details.Info( this ), new Disabled.Info( this ), new New.Info( this ) ) };
 			}
 
-			public override string EntitySetupName { get { return ""; } }
+			public override string EntitySetupName { get { return "Nested"; } }
 
 			public override TabMode GetTabMode() {
 				return TabMode.Horizontal;
 			}
 		}
 
-		void EntitySetupBase.LoadData() {}
+		void EntitySetupBase.LoadData() {
+			ph.AddControlsReturnThis( new Paragraph( "Awesome content goes here." ) );
+		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
 			return new List<ActionButtonSetup>();
