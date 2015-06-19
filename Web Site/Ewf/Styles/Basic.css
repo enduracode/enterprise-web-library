@@ -252,10 +252,9 @@ ewfTopWarningBlock {
 	margin-bottom: .5em;
 	border: 1px solid #464646;
 	border-radius: .5em;
-	background-color: hsla( 0, 100%, 50%, 0.75 );
+	background-color: hsla( 43, 100%, 54%, 0.75 );
 	padding: .5em;
 	text-align: center;
-	color: white;
 	font-weight: bold;
 }
 @media print {

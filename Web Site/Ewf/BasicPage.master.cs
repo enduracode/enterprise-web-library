@@ -121,7 +121,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var warningControls = new List<Control>();
 			if( !AppTools.IsLiveInstallation ) {
 				var children = new List<Control>();
-				children.Add( "This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
+				children.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
+				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
@@ -136,7 +137,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 			else if( ConfigurationStatics.MachineIsStandbyServer ) {
 				warningControls.Add(
-					"This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() );
+					new PlaceHolder().AddControlsReturnThis(
+						new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ),
+						" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() ) );
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
