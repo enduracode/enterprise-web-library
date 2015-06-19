@@ -1,5 +1,5 @@
 ﻿body {
-	font-family: Verdana, Geneva, sans-serif;
+	font-family: 'Open Sans', sans-serif;
 }
 
 ewfPagePath,
@@ -11,5 +11,5 @@ ewfH4,
 ewfTableStandardAndStandardExceptLayoutStyles > caption,
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh,
 ewfActionControlLargeButtonStyleAllStates {
-	font-family: Georgia, serif;
+	font-family: 'Droid Serif', serif;
 }

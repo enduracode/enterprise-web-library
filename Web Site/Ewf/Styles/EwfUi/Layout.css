@@ -1,14 +1,13 @@
 ﻿body {
-	font-size: .75em;
-	margin: 1em auto;
+	font-size: 1rem;
+	margin: 1rem auto;
 	border: 0;
 	padding: 0;
-	width: 999px;
+	max-width: 75em;
 }
 @media print {
 	body {
 		margin: 0;
-		width: auto;
 	}
 }
 
@@ -25,12 +24,6 @@ ewfPagePath > h1 {
 	font-size: 1em;
 	margin: 0;
 	font-weight: inherit;
-}
-@media print {
-	ewfPagePath > h1 {
-		margin-top: 2em;
-		margin-bottom: 1em;
-	}
 }
 ewfSectionNormalStyleBothStates, ewfH2 {
 	margin-top: 2em;
@@ -69,78 +62,54 @@ ul {
 	list-style-type: circle;
 }
 li {
-	margin-top: 4px;
+	margin-top: .25em;
 }
 li:first-child {
 	margin-top: 0;
 }
 .ewfControlList tr td {
-	padding-top: 4px;
+	padding-top: .25em;
 }
 .ewfControlList tr:first-child td {
 	padding-top: 0;
 }
 ewfCheckBoxList table.ewfBlockCheckBox {
-	padding-top: 2px;
-	padding-bottom: 2px;
+	padding-top: .25em;
+	padding-bottom: .25em;
 }
 
 /* boxes */
 ewfSectionBoxStyleBothStates {
-	border-width: 1px;
-	border-style: solid;
-	border-radius: 5px;
-	padding: 4px;
+	padding: .5em;
 }
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
-	margin-top: -4px;
-	margin-right: -4px;
-	margin-left: -4px;
-	padding: 4px;
+	margin-top: -.5em;
+	margin-right: -.5em;
+	margin-left: -.5em;
+	padding: .5em;
 }
 ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
-	margin-bottom: -4px;
+	margin-bottom: -.5em;
 }
 ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
-	margin-bottom: 4px;
+	margin-bottom: .5em;
 }
 
 /* tables */
 ewfTableStandardAndStandardExceptLayoutStyles > caption {
-	padding-bottom: 4px;
+	padding-bottom: .5em;
 	text-align: left;
 	font-weight: bold;
-}
-ewfTableStandardAndStandardExceptLayoutStyles {
-	border-style: solid;
-	border-width: 1px;
 }
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th:not( .ewfTcTop ):not( .ewfTcMiddle ):not( .ewfTcBottom ):not( .ewfTcBaseLine ), ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td:not( .ewfTcTop ):not( .ewfTcMiddle ):not( .ewfTcBottom ):not( .ewfTcBaseLine ) {
 	vertical-align: top;
 }
-/* hack for IE8 */
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td {
-	vertical-align: top;
-}
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcTop, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcTop {
-	vertical-align: top;
-}
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcMiddle, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcMiddle {
-	vertical-align: middle;
-}
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcBottom, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcBottom {
-	vertical-align: bottom;
-}
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th.ewfTcBaseLine, ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td.ewfTcBaseLine {
-	vertical-align: baseline;
-}
-/* end hack */
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
-	padding: 4px 4px 4px 4px;
+	padding: .5em;
 }
 table.ewfStandardDynamicTableCaption {
-	margin-bottom: 4px;
+	margin-bottom: .5em;
 	width: 100%;
 	table-layout: fixed;
 }
@@ -148,7 +117,7 @@ table.ewfStandardDynamicTableCaption span.ewfCaption {
 	font-weight: bold;
 }
 table.ewfStandardDynamicTableCaption ewfControlLine {
-	margin-top: 2px;
+	margin-top: .25em;
 }
 table.ewfStandardDynamicTableCaption td.ewfAddItemLink {
 	vertical-align: bottom;
@@ -165,23 +134,26 @@ img {
 
 /* text style action controls */
 ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 /* block element vertical spacing */
-p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiGlobalFootBlock {
-	margin-top: 1.5em;
+p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock {
+	margin-top: 1em;
 }
-p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child {
+p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child {
 	margin-top: 0;
+}
+ewfUiPageActionAndContentAndContentFootCell {
+	padding-top: 1em;
 }
 p, ul {
 	margin-bottom: 0;
 }
 
-/* This rule is a workaround for drop downs in IE showing up too narrow to show their own content. */
-ewfControlLine > ewfControlLineItem div.ewfListControlWrapper.unspecifiedWidth > select {
-	width: auto;
+/* corner rounding */
+ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
+	border-radius: .5em;
 }
 
 /* modal confirmation blocks */
@@ -198,110 +170,86 @@ ewfModalConfirmationBlock > tbody > tr td {
 
 /* master page */
 ewfUiAppLogoBlock {
-	margin-bottom: .2em;
+	margin-bottom: .5rem;
 }
 ewfUiUserInfoControlList > ewfControlStackItem {
 	text-align: right;
 }
-ewfUiGlobalNavControlList {
-	margin-top: 0;
-	padding: .1em 0;
+ewfUiGlobalNavBlock,
+ewfUiTopErrorMessageControlListBlock,
+ewfUiEntityBlock,
+ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
+ewfUiSideTabBlock ewfUiSideTabGroupHead,
+ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+	padding-left: .5rem;
+	padding-right: .5rem;
 }
-ewfUiGlobalNavControlList > ewfControlLineItem, ewfUiEntityNavControlList > ewfControlLineItem, ewfUiEntityActionControlList ewfControlLineItem {
-	padding-left: .2em;
+ewfUiGlobalNavBlock,
+ewfUiTopErrorMessageControlListBlock,
+ewfUiEntityBlock,
+ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
+ewfUiSideTabBlock {
+	padding-top: .5rem;
+	padding-bottom: .5rem;
 }
-ewfUiGlobalNavControlList > ewfControlLineItem:first-child, ewfUiEntityNavControlList > ewfControlLineItem:first-child {
-	padding-left: 0;
-}
-ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllStates {
-	padding: 0 .4em;
-	border-radius: .3em;
+ewfUiGlobalNavBlock ewfActionControlAllStylesAllNormalStates,
+ewfUiGlobalNavBlock ewfActionControlAllStylesAllVisitedStates,
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalStates,
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllVisitedStates {
 	text-decoration: none;
 }
+ewfUiTopErrorMessageControlListBlock {
+	font-size: 1.4em;
+	margin: 1rem 0;
+}
+ewfUiEntityBlock ewfPagePath {
+	margin: 0;
+}
 ewfUiEntityNavAndActionBlock {
-	margin: .3em 0;
+	margin-top: .5rem;
 	width: 100%;
 }
 ewfUiEntityActionControlList {
 	display: inline-block;
 }
-ewfUiTopErrorMessageControlListBlock {
-	margin: .4em 0;
-	border: solid #ff5500;
-	border-width: 0 0 0 1.5em;
-	padding-left: .2em;
-}
-ewfUiEntityNavControlList {
-	margin: 0;
-}
-ewfUiEntitySummaryBlock {
-	margin: .3em 0;
-}
-ewfUiTopTabControlList {
+ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	display: block;
-	margin-top: 1.2em; /*NOTE: I want to eliminate this entirely when entity summary and friends share a background color that isn't white.*/
-}
-ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates {
-	display: block;
-	margin-bottom: -1px; /*NOTE: This really needs to be the same as whatever the border width of the content area is. Another use for constants.*/
-	border-width: 1px 1px 0 1px;
-	border-style: solid;
-	border-top-left-radius: .5em;
-	border-top-right-radius: .5em;
-	padding: 4px;
-	position: relative;
 	text-decoration: none;
+}
+ewfUiTopTabBlock > ewfControlLine {
+	display: block;
+}
+ewfUiTopTabBlock > ewfControlLine > ewfControlLineItem {
+	padding-left: 0;
 }
 ewfUiSideTabAndContentBlock {
 	width: 100%;
 	table-layout: fixed;
 }
-ewfUiSideTabCell {
-	vertical-align: top;
-	width: 150px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-}
-ewfUiSideTabCell > ewfUiSideTabGroupHead {
-	padding: 5px 4px 0 0;
-	font-weight: bold;
-}
-ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
-	display: block;
-	margin: .25em 0;
-	padding: .3em;
-	text-decoration: none;
-	border-top-left-radius: .5em;
-	border-bottom-left-radius: 1em;
-	border-style: solid;
-	border-width: .1em 0 .1em .1em;
-	position: relative; /*It is weird that we need this without using the top/left/etc. properties. But we do, for the negative margin to work.*/
-	margin-right: -1px; /*The negative margin makes the current tab flow right into the content area. It also makes newness tabs look better.*/
-}
-ewfUiContentCell {
-	border-style: solid;
-	border-width: 1px;
-	border-bottom-width: 0;
-	padding: 10px 10px 10px 10px;
+ewfUiSideTabBlockCell, ewfUiPageActionAndContentAndContentFootCell {
 	vertical-align: top;
 }
-@media print {
-	ewfUiContentCell {
-		border-width: 0;
-		padding: 0;
-	}
+ewfUiSideTabBlockCell {
+	padding-right: 1rem;
+	width: 12.5em;
+}
+ewfUiSideTabBlock ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+	padding-top: .2rem;
+	padding-bottom: .2rem;
+}
+ewfUiSideTabBlock ewfUiSideTabGroupHead {
+	font-size: .8em;
+}
+ewfUiSideTabBlock ewfUiSideTabGroupHead:not( :first-child ) {
+	padding-top: .5rem;
+}
+ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+	font-size: .9em;
 }
 ewfUiPageActionControlList {
 	float: right;
 	margin-bottom: 1em;
 	margin-left: 1em;
-}
-ewfUiContentFootCell {
-	border-style: solid;
-	border-width: 1px;
-	border-top-width: 0;
-	border-bottom-width: 0;
-	vertical-align: bottom;
 }
 ewfUiContentFootActionControlList {
 	line-height: 0;
@@ -310,18 +258,17 @@ ewfUiContentFootActionControlList > table {
 	display: inline-block;
 	line-height: normal;
 }
-ewfUiContentFootBlock {
-	padding: 4px 10px;
-}
-div.ewfButtonsBottomBorder {
-	height: 1px;
-}
 ewfUiPoweredByEwlFooterBlock {
 	font-size: .9em;
-	text-align: right;
+	text-align: center;
 }
 @media print {
-	ewfUiUserInfoControlList, ewfUiGlobalNavBlock, ewfUiTopErrorMessageControlListBlock, ewfUiEntityNavAndActionBlock, ewfUiSideTabCell, ewfUiContentFootCell {
+	ewfUiUserInfoControlList,
+	ewfUiGlobalNavBlock,
+	ewfUiTopErrorMessageControlListBlock,
+	ewfUiEntityNavAndActionBlock,
+	ewfUiSideTabBlockCell,
+	ewfUiContentFootBlock {
 		display: none;
 	}
 }

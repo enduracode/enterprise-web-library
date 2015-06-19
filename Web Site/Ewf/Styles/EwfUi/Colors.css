@@ -3,91 +3,87 @@
 	color: black;
 }
 
-/* content block */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell {
-	background-color: #e7edf3;
-	color: black;
-}
-@media print {
-	ewfUiContentCell {
-		background-color: inherit;
-	}
-}
-
-/* borders */
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiCurrentTabActionControl, ewfUiSideTabCell > ewfUiCurrentTabActionControl, ewfUiContentCell, ewfUiContentFootCell, ewfTableStandardAndStandardExceptLayoutStyles, ewfSectionBoxStyleBothStates {
-	border-color: #78a0c3;
-}
-ewfUiGlobalNavBlock, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates, div.ewfButtonsBottomBorder {
-	background-color: #78a0c3;
-}
-
 /* contrast */
-ewfUiContentFootBlock, ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	background-color: #d4e0ec; /* hack for IE8 */
-	background-color: rgba( 0, 0, 0, 0 ); /* cancels out IE8 hack for all other browsers */
+ewfSectionBoxStyleBothStates,
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfTableStandardAndStandardExceptLayoutStyles,
+ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
+.checkedChecklistCheckboxDiv {
 	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Darker.svg' );
 }
 
-/* text style action controls */
-ewfActionControlTextStyleAllNormalStates, ewfActionControlTextStyleAllVisitedStates, ewfActionControlAllStylesAllNormalStates.icon, ewfActionControlAllStylesAllVisitedStates.icon, ewfHtmlBlock a {
-	color: #7C13B8;
-}
-ewfActionControlTextStyleStatesWithHoverAndWithoutActive, ewfActionControlAllStylesStatesWithHoverAndWithoutActive.icon {
-	color: #A75DD1;
-}
-ewfActionControlTextStyleAllActiveStates, ewfActionControlAllStylesAllActiveStates.icon {
-	color: #7C13B8;
-}
-
-/* global nav block, top tabs, and side tabs */
-ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
-	color: white;
-}
-ewfUiTopTabControlList > ewfControlLineItem > ewfUiDisabledTabActionControl, ewfUiSideTabCell > ewfUiDisabledTabActionControl {
-	opacity: .2; /* Standard */
-	filter: alpha( opacity=20 ); /* IE */
-}
-ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllStates, ewfUiSideTabCell > ewfActionControlAllStylesAllStates {
-	border-color: transparent;
-}
-ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithHover, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithHover, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesStatesWithFocus, ewfUiSideTabCell > ewfActionControlAllStylesStatesWithFocus {
-	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Lighter.svg' );
-}
-
-/* table rows with action */
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover {
-	background-color: #CFA8E5;
+/* block highlighting */
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover,
+ewfUiTopTabBlock ewfUiCurrentTabActionControl,
+ewfUiSideTabBlock ewfUiCurrentTabActionControl {
+	background-color: #81989E;
 	background-image: none;
 }
 
-/* check box list checked boxes */
-.checkedChecklistCheckboxDiv {
-	background-color: #b3ffb2;
+/* action controls */
+ewfActionControlTextStyleAllNormalStates,
+ewfActionControlTextStyleAllVisitedStates,
+ewfActionControlAllStylesAllNormalStates.icon,
+ewfActionControlAllStylesAllVisitedStates.icon,
+ewfHtmlBlock a {
+	color: hsla( 4, 100%, 32%, 1 );
+}
+ewfActionControlAllButtonStylesAllNormalStates, ewfActionControlAllButtonStylesAllVisitedStates {
+	background-color: hsla( 4, 100%, 32%, 1 );
+}
+ewfActionControlTextStyleStatesWithHover,
+ewfActionControlTextStyleStatesWithFocus,
+ewfActionControlAllStylesStatesWithHover.icon,
+ewfActionControlAllStylesStatesWithFocus.icon {
+	color: hsla( 4, 100%, 45%, 1 );
+}
+ewfActionControlAllButtonStylesStatesWithHover, ewfActionControlAllButtonStylesStatesWithFocus {
+	background-color: hsla( 4, 100%, 45%, 1 );
+}
+ewfActionControlAllButtonStylesAllStates {
+	color: white;
+}
+
+/* global nav block, top tabs, and side tabs */
+ewfUiGlobalNavBlock {
+	background-color: #005675;
+}
+ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates {
+	color: hsla( 193, 27%, 90%, 1 );
+}
+ewfUiTopErrorMessageControlListBlock {
+	background-color: hsla( 350, 98%, 42%, 1 );
+	color: white;
+}
+ewfUiEntityBlock {
+	background-color: hsla( 192, 39%, 90%, 1 );
+}
+ewfUiTopTabBlock, ewfUiSideTabBlock {
+	background-color: #9DBEC7;
+}
+ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+	color: black;
+}
+ewfUiTopTabBlock ewfUiDisabledTabActionControl, ewfUiSideTabBlock ewfUiDisabledTabActionControl {
+	opacity: .2;
+}
+ewfUiTopTabBlock ewfActionControlAllStylesStatesWithHover,
+ewfUiTopTabBlock ewfActionControlAllStylesStatesWithFocus,
+ewfUiSideTabBlock ewfActionControlAllStylesStatesWithHover,
+ewfUiSideTabBlock ewfActionControlAllStylesStatesWithFocus {
+	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Lighter.svg' );
 }
 
 /* new content */
-ewfUiGlobalNavBlock ewfActionControlAllStylesAllNewContentActionStates, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates, ewfUiTopTabControlList > ewfControlLineItem > ewfActionControlAllStylesAllNewContentActionStates, ewfUiSideTabCell > ewfActionControlAllStylesAllNewContentActionStates {
-	background-color: #ff5500;
-}
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates {
-	color: white;
-}
-.ewfNewness {
-	color: #ff5500;
+ewfUiGlobalNavBlock ewfActionControlAllStylesAllNewContentActionStates,
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates,
+ewfUiTopTabBlock ewfActionControlAllStylesAllNewContentActionStates,
+ewfUiSideTabBlock ewfActionControlAllStylesAllNewContentActionStates {
+	font-weight: bold;
 }
 
 /* UI hints */
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel,
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
 	opacity: .5;
-}
-
-/* entity nav and action block */
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalContentActionStates {
-	color: #336699;
-}
-
-/* shadows */
-ewfUiGlobalNavBlock ewfActionControlAllStylesStatesWithHover, ewfUiEntityNavAndActionBlock ewfActionControlAllStylesStatesWithHover {
-	box-shadow: 0 0 1em #336699;
 }
