@@ -6,10 +6,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class EwfUiEntitySetupInfo: EntitySetupInfo {
 		/// <summary>
-		/// Gets the tab mode. The default is Automatic. NOTE: The default is Vertical right now in this kick-off period.
+		/// Gets the tab mode. The default is Automatic.
 		/// </summary>
 		public virtual TabMode GetTabMode() {
-			return TabMode.Vertical;
+			return TabMode.Automatic;
 		}
 	}
 }
