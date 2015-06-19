@@ -152,8 +152,14 @@ p, ul {
 }
 
 /* corner rounding */
-ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
+ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfActionControlLargeButtonStyleAllStates {
 	border-radius: .5em;
+}
+ewfActionControlShrinkWrapButtonStyleAllStates {
+	border-radius: .25em;
+}
+ewfActionControlNormalButtonStyleAllStates {
+	border-radius: .4em;
 }
 
 /* modal confirmation blocks */

@@ -199,16 +199,13 @@ ewfActionControlAllButtonStylesAllStates {
 }
 ewfActionControlShrinkWrapButtonStyleAllStates {
 	padding: .01em .2em;
-	border-radius: .2em;
 }
 ewfActionControlNormalButtonStyleAllStates {
 	padding: .4em;
-	border-radius: .3em;
 }
 ewfActionControlLargeButtonStyleAllStates {
 	font-size: 1.4em;
 	padding: 1em;
-	border-radius: .3em;
 }
 
 /* Text alignment. NOTE: The classes ewfCurrencyCell, ewfRightAlignCell, and ewfCenterCell are deprecated. Eliminate them from all systems and then remove them from these rules. */
