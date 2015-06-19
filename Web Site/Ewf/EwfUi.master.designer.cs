@@ -31,13 +31,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
         protected global::System.Web.UI.WebControls.PlaceHolder entityAndTopTabPlace;
         
         /// <summary>
-        /// tabCell control.
+        /// sideTabCell control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableCell tabCell;
+        protected global::System.Web.UI.HtmlControls.HtmlTableCell sideTabCell;
         
         /// <summary>
         /// contentCell control.
@@ -67,13 +67,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
         protected global::System.Web.UI.WebControls.ContentPlaceHolder contentPlace;
         
         /// <summary>
-        /// contentFootCell control.
+        /// contentFootPlace control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTableCell contentFootCell;
+        protected global::System.Web.UI.WebControls.PlaceHolder contentFootPlace;
         
         /// <summary>
         /// globalFootPlace control.

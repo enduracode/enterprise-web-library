@@ -34,9 +34,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// EwfUiMaster use only. Returns the tab mode, or null for no tabs. NOTE: Doesn't return null for no tabs yet.
+		/// EwfUiMaster use only. Returns the tab mode, or null for no tabs.
 		/// </summary>
 		public static TabMode? GetTabMode( this EntitySetupInfo esInfo ) {
+			if( !esInfo.Resources.Any() )
+				return null;
 			var mode = ( (EwfUiEntitySetupInfo)esInfo ).GetTabMode();
 			if( mode == TabMode.Automatic )
 				return ( esInfo.Resources.Count == 1 && esInfo.Resources.Single().Resources.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
