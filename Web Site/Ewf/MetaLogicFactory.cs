@@ -48,12 +48,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.0/jquery.qtip.min.css" ) );
 			infos.Add( new Styles.BasicCss.Info() );
 			infos.Add( new Styles.ToDeleteOrMoveCss.Info() );
-
-			if( AppRequestState.Instance.Browser.IsFirefox35OrBelow() )
-				infos.Add( new Styles.FirefoxCss.Info() );
-			if( AppRequestState.Instance.Browser.IsInternetExplorer() )
-				infos.Add( new Styles.InternetExplorerCss.Info() );
-
 			return infos;
 		}
 

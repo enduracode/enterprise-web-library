@@ -15,13 +15,6 @@ namespace RedStapler.StandardLibrary {
 			return ( browser.IsInternetExplorer() && browser.MajorVersion < latestIeVersion ) || ( browser.isFirefox() && browser.MajorVersion < latestFirefoxVersion );
 		}
 
-		/// <summary>
-		/// Returns true if the browser being used is Firefox 3.5 or below.
-		/// </summary>
-		public static bool IsFirefox35OrBelow( this HttpBrowserCapabilities browser ) {
-			return browser.isFirefox() && browser.MajorVersion + browser.MinorVersion < 3.6;
-		}
-
 		private static bool isFirefox( this HttpBrowserCapabilities browser ) {
 			return browser.Browser == "Firefox";
 		}

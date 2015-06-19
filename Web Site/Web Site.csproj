@@ -600,7 +600,6 @@
     <Content Include="Ewf\ContactUs\Page.aspx" />
     <Content Include="Ewf\ContactUs\EntitySetup.ascx" />
     <Content Include="Ewf\JavaScript.js" />
-    <Content Include="Ewf\Styles\InternetExplorer.css" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx" />
@@ -621,7 +620,6 @@
   <ItemGroup>
     <Content Include="Ewf\Images\Calendar\button_currentweek.gif" />
     <Content Include="Ewf\IntermediateLogIn.aspx" />
-    <Content Include="Ewf\Styles\Firefox.css" />
     <Content Include="Service\Service.svc" />
     <Content Include="TestPages\GetImage.aspx" />
     <Content Include="TestPages\TwoWeekCalendarTest.aspx" />

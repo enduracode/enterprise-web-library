@@ -1,5 +1,0 @@
-/* Check boxes and radio buttons seem to have built-in margins in IE that can't be removed and must be negated. */
-table.ewfCheckBox > tbody > tr > td:first-child input {
-	margin-top: -4px;
-	margin-bottom: -3px;
-}
