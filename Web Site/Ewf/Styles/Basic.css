@@ -262,6 +262,23 @@ ewfTopWarningBlock {
 		display: none;
 	}
 }
+ewfTopWarningBlock ewfActionControlAllButtonStylesAllStates {
+	display: inline-block;
+	text-decoration: none;
+	color: white;
+}
+ewfTopWarningBlock ewfActionControlAllButtonStylesAllNormalStates,
+ewfTopWarningBlock ewfActionControlAllButtonStylesAllVisitedStates {
+	background-color: hsla( 4, 100%, 32%, 1 );
+}
+ewfTopWarningBlock ewfActionControlAllButtonStylesStatesWithHover,
+ewfTopWarningBlock ewfActionControlAllButtonStylesStatesWithFocus {
+	background-color: hsla( 4, 100%, 45%, 1 );
+}
+ewfTopWarningBlock ewfActionControlShrinkWrapButtonStyleAllStates {
+	padding: .1em .2em;
+	border-radius: .5em;
+}
 ewfClickBlockerBothStates {
 	position: fixed;
 	top: 0;
@@ -555,6 +572,22 @@ ewfSelectUserPageBody, ewfErrorPageBody {
 	background-color: white;
 	max-width: 60em;
 	color: black;
+}
+ewfSelectUserPageBody ewfActionControlTextStyleAllStates,
+ewfErrorPageBody ewfActionControlTextStyleAllStates {
+	text-decoration: underline;
+}
+ewfSelectUserPageBody ewfActionControlTextStyleAllNormalStates,
+ewfSelectUserPageBody ewfActionControlTextStyleAllVisitedStates,
+ewfErrorPageBody ewfActionControlTextStyleAllNormalStates,
+ewfErrorPageBody ewfActionControlTextStyleAllVisitedStates {
+	color: hsla( 4, 100%, 32%, 1 );
+}
+ewfSelectUserPageBody ewfActionControlTextStyleStatesWithHover,
+ewfSelectUserPageBody ewfActionControlTextStyleStatesWithFocus,
+ewfErrorPageBody ewfActionControlTextStyleStatesWithHover,
+ewfErrorPageBody ewfActionControlTextStyleStatesWithFocus {
+	color: hsla( 4, 100%, 45%, 1 );
 }
 
 /* fonts */
