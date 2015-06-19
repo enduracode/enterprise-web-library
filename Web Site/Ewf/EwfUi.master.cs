@@ -364,7 +364,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private Control getEntitySummaryBlock() {
 			// If the entity setup is a nonempty control, display it as an entity summary.
 			var entitySummary = EwfPage.Instance.EsAsBaseType as Control;
-			if( entitySummary != null && entitySummary.Controls.Count > 0 )
+			if( entitySummary != null && entitySummary.GetDescendants().Any( i => !( i is PlaceHolder ) ) )
 				return new Block( entitySummary ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass };
 
 			return null;

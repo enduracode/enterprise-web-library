@@ -35,7 +35,10 @@ namespace RedStapler.StandardLibrary {
 			return control.Page != null;
 		}
 
-		internal static IEnumerable<Control> GetDescendants( this Control control, Func<Control, bool> predicate = null ) {
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public static IEnumerable<Control> GetDescendants( this Control control, Func<Control, bool> predicate = null ) {
 			predicate = predicate ?? ( i => true );
 
 			var descendants = new List<Control>();
