@@ -178,7 +178,7 @@ ewfModalConfirmationBlock > tbody > tr td {
 }
 
 /* master page */
-ewfUiAppLogoBlock {
+ewfUiAppLogoAndUserInfoBlock {
 	margin-bottom: .5rem;
 }
 ewfUiUserInfoControlList > ewfControlStackItem {
