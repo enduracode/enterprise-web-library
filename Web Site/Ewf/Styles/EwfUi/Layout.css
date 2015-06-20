@@ -152,6 +152,9 @@ p, ul {
 }
 
 /* corner rounding */
+ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfActionControlAllButtonStylesAllStates {
+	overflow: hidden;
+}
 ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfActionControlLargeButtonStyleAllStates {
 	border-radius: .5em;
 }
