@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			var infos = new List<ResourceInfo>();
 			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
 			infos.Add( new ExternalResourceInfo( "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" ) );
-			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Css.Custom_theme.Jquery_ui_1104CustomminCss.Info() );
+			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1114Custom.Jquery_uiminCss.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Css.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
@@ -66,7 +66,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			// versions.
 			infos.Add( new ExternalResourceInfo( "//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" ) );
 
-			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1104Custom.Js.Jquery_ui_1104CustomminJs.Info() );
+			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryUi.Jquery_ui_1114Custom.Jquery_uiminJs.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Js.Info() );
 			infos.Add( new ThirdParty.TimePicker.JavaScriptJs.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
