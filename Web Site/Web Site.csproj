@@ -479,6 +479,10 @@
     <Content Include="Ewf\UserManagement\SelectUser.aspx" />
     <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Darker.svg" />
     <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Lighter.svg" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryModal-v1\close.png" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryModal-v1\jquery.modal.css" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryModal-v1\jquery.modal.js" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryModal-v1\spinner.gif" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom\images\ui-bg_glass_55_fbf9ee_1x400.png" />
@@ -583,6 +587,7 @@
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\release.sh" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2.jquery.json" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Select2\select2-3.4.3\select2_locale_en.js.template" />
+    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryModal-v1\LICENSE" />
     <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />

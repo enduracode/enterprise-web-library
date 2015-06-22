@@ -145,11 +145,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			if( ConfirmationWindowContentControl != null ) {
-				this.AddJavaScriptEventScript(
-					JsWritingMethods.onclick,
-					"$( '#" + ( confirmationWindow as EtherealControl ).Control.ClientID + "' ).dialog( 'open' ); return false" );
-			}
+			if( ConfirmationWindowContentControl != null )
+				this.AddJavaScriptEventScript( JsWritingMethods.onclick, confirmationWindow.GetJsOpenStatement() + " return false" );
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
 

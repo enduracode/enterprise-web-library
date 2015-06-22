@@ -46,6 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Css.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
+			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryModal_v1.JquerymodalCss.Info() );
 			infos.Add( new Styles.BasicCss.Info() );
 			infos.Add( new Styles.ToDeleteOrMoveCss.Info() );
 			return infos;
@@ -70,6 +71,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			infos.Add( new VersionedStaticFiles.ThirdParty.Select2.Select2_343.Select2Js.Info() );
 			infos.Add( new ThirdParty.TimePicker.JavaScriptJs.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
+			infos.Add( new VersionedStaticFiles.ThirdParty.JqueryModal_v1.JquerymodalJs.Info() );
 			infos.Add( new ThirdParty.SpinJs.SpinminJs.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.ckeditor.com/4.4.2/full/ckeditor.js" ) );
 			infos.Add( new ThirdParty.ChartJs.ChartminJs.Info() );

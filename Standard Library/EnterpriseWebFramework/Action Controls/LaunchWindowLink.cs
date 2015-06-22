@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
@@ -55,8 +54,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			this.AddJavaScriptEventScript( JsWritingMethods.onclick,
-			                               "$( '#" + ( windowToLaunch as EtherealControl ).Control.ClientID + "' ).dialog( 'open' ); return false" );
+			this.AddJavaScriptEventScript( JsWritingMethods.onclick, windowToLaunch.GetJsOpenStatement() + " return false" );
 			return ActionControlStyle.GetJsInitStatements( this );
 		}
 
