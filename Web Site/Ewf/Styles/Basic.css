@@ -604,6 +604,12 @@ ewfErrorPageBody ewfActionControlAllButtonStylesAllStates {
 	text-decoration: none;
 	color: white;
 }
+ewfSelectUserPageBody ewfActionControlLargeButtonStyleAllStates,
+ewfErrorPageBody ewfActionControlLargeButtonStyleAllStates {
+	font-size: 1.4em;
+	border-radius: .5em;
+	padding: 1em;
+}
 
 /* fonts */
 ewfTopWarningBlock, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
