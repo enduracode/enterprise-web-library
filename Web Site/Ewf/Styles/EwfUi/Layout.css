@@ -174,6 +174,11 @@ ewfModalSectionContainer > ewfSectionNormalStyleBothStates > ewfSectionContentCo
 	margin-top: 0;
 }
 
+/* error messages */
+ewfErrorMessageControlListBlock {
+	font-weight: bold;
+}
+
 /* master page */
 ewfUiAppLogoAndUserInfoBlock {
 	margin-bottom: .5rem;
@@ -185,7 +190,7 @@ ewfUiGlobalNavBlock,
 ewfUiTopErrorMessageControlListBlock,
 ewfUiEntityBlock,
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
-ewfUiSideTabBlock ewfUiSideTabGroupHead,
+ewfUiSideTabGroupHead,
 ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	padding-left: .5rem;
 	padding-right: .5rem;
@@ -239,14 +244,14 @@ ewfUiSideTabBlockCell {
 	padding-right: 1rem;
 	width: 12.5em;
 }
-ewfUiSideTabBlock ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	padding-top: .2rem;
 	padding-bottom: .2rem;
 }
-ewfUiSideTabBlock ewfUiSideTabGroupHead {
+ewfUiSideTabGroupHead {
 	font-size: .8em;
 }
-ewfUiSideTabBlock ewfUiSideTabGroupHead:not( :first-child ) {
+ewfUiSideTabGroupHead:not( :first-child ) {
 	padding-top: .5rem;
 }
 ewfUiSideTabBlock ewfActionControlAllStylesAllStates {

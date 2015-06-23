@@ -44,6 +44,14 @@ ewfActionControlAllButtonStylesAllStates {
 	color: white;
 }
 
+/* error messages */
+ewfErrorMessageControlListBlock {
+	color: hsla( 0, 100%, 47%, 1 );
+}
+ewfUiTopErrorMessageControlListBlock {
+	background-color: hsla( 0, 100%, 47%, 1 );
+}
+
 /* global nav block, top tabs, and side tabs */
 ewfUiGlobalNavBlock {
 	background-color: #005675;
@@ -52,7 +60,6 @@ ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates {
 	color: hsla( 193, 27%, 90%, 1 );
 }
 ewfUiTopErrorMessageControlListBlock {
-	background-color: hsla( 350, 98%, 42%, 1 );
 	color: white;
 }
 ewfUiEntityBlock {
@@ -62,7 +69,7 @@ ewfUiTopTabBlock, ewfUiSideTabBlock {
 	background-color: #9DBEC7;
 }
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
-	color: black;
+	color: inherit;
 }
 ewfUiTopTabBlock ewfUiDisabledTabActionControl, ewfUiSideTabBlock ewfUiDisabledTabActionControl {
 	opacity: .2;

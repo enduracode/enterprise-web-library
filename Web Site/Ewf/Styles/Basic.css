@@ -253,6 +253,7 @@ ewfTopWarningBlock {
 	padding: .5em;
 	text-align: center;
 	font-weight: bold;
+	color: black;
 }
 @media print {
 	ewfTopWarningBlock {

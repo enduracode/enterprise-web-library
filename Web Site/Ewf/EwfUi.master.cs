@@ -125,7 +125,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
-						new CssElement( "UiSideTabGroupHead", "div." + SideTabGroupHeadCssClass ),
+						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadCssClass ),
 						new CssElement( "UiPageActionAndContentAndContentFootCell", pageActionAndContentAndContentFootCellSelector ),
 						new CssElement(
 							"UiPageActionControlList",
