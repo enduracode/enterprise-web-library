@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.DataAccess.Ranking;
 using RedStapler.StandardLibrary.IO;
 
@@ -366,7 +365,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 							if( rowSetup.UniqueIdentifier != null &&
 							    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
 								    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
-								method( DataAccessState.Current.PrimaryDatabaseConnection, rowSetup.UniqueIdentifier );
+								method( rowSetup.UniqueIdentifier );
 						}
 					} );
 			}

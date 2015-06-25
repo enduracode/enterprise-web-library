@@ -1,4 +1,3 @@
-using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
@@ -32,9 +31,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					"Three with Tip".ToCell( new TableCellSetup( toolTip: "Cell tool tip" ) ),
 					"Four with TipControl".ToCell( new TableCellSetup( toolTipControl: new DatePicker( null ) ) ) );
 			}
-			table2.AddSelectedRowsAction(
-				"Selected Rows Action",
-				delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 
 			//Clickable Rows
 			for( var i = 0; i < 7; i++ ) {
@@ -58,9 +55,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 
 			//Mixed
-			table4.AddSelectedRowsAction(
-				"Selected Rows Action",
-				delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table4.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 10; i += 3 )
 				table4.AddTextRow( new RowSetup { UniqueIdentifier = 2 }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
@@ -99,9 +94,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table5.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
 			//Mixed - Single Cell
-			table6.AddSelectedRowsAction(
-				"Selected Rows Action",
-				delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table6.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 10; i += 3 )
 				table6.AddTextRow( new RowSetup { UniqueIdentifier = 2 }, i.ToString() );
 
@@ -139,9 +132,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 
 			//Recorderable, Clickable, Selectable
-			table8.AddSelectedRowsAction(
-				"Selected Rows Action",
-				delegate( DBConnection cn1, object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
+			table8.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 7; i++ ) {
 				ClickScript clickScript;
 				string[] cells;
