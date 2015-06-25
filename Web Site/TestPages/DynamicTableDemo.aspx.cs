@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			//Reorderable
 			for( var i = 0; i < 20; i += 3 )
-				table5.AddTextRow( new RowSetup { UniqueIdentifier = "6", RankId = 0 }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
+				table5.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
 			//Mixed - Single Cell
 			table6.AddSelectedRowsAction(
@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table7.AddTextRow( new RowSetup { UniqueIdentifier = "6", RankId = 0, ClickScript = clickScript }, cells );
+				table7.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ClickScript = clickScript }, cells );
 			}
 
 			//Recorderable, Clickable, Selectable
@@ -159,7 +159,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table8.AddTextRow( new RowSetup { UniqueIdentifier = "6", RankId = 0, ClickScript = clickScript }, cells );
+				table8.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ClickScript = clickScript }, cells );
 			}
 
 			// Rowspan test
@@ -183,5 +183,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			// Wrong number of cells
 			//table9.AddTextRow( "","" );
 		}
+
+		public override bool IsAutoDataUpdater { get { return true; } }
 	}
 }
