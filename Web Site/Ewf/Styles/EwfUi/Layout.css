@@ -97,6 +97,10 @@ ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading
 }
 
 /* tables */
+ewfThAndTd {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 ewfTableStandardAndStandardExceptLayoutStyles > caption {
 	padding-top: .125em; /* prevents text from being cropped by rounded corners in Chrome */
 	padding-bottom: .5em;
