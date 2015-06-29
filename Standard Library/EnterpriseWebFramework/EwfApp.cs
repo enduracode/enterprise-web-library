@@ -243,8 +243,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected internal abstract IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers();
 
+		// The warning below also appears on EwfPage.executePageViewDataModifications.
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// 
+		/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+		/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
+		/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+		/// concurrency errors by modifying data that affects the rendering of the page.
 		/// </summary>
 		public virtual void ExecutePageViewDataModifications() {}
 

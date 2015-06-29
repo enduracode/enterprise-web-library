@@ -179,11 +179,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
 			// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
-			//
-			// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
-			// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
-			// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
-			// concurrency errors by modifying data that affects the rendering of the page.
 			if( requestState.StaticRegionContents == null ||
 			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
 			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
@@ -312,8 +307,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				} );
 		}
 
+		// The warning below also appears on EwfApp.ExecutePageViewDataModifications.
 		/// <summary>
 		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// 
+		/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+		/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
+		/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+		/// concurrency errors by modifying data that affects the rendering of the page.
 		/// </summary>
 		protected virtual void executePageViewDataModifications() {}
 
