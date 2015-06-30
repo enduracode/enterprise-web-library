@@ -174,9 +174,35 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			else
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+
+			// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
+			// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
+			if( requestState.StaticRegionContents == null ||
+			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
+			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
+				DataAccessState.Current.DisableCache();
+				try {
+					if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
+						EwfApp.Instance.ExecutePageViewDataModifications();
+						if( AppRequestState.Instance.UserAccessible ) {
+							if( AppTools.User != null )
+								updateLastPageRequestTimeForUser( AppTools.User );
+							if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+								updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
+						}
+						executePageViewDataModifications();
+					}
+					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+				}
+				finally {
+					DataAccessState.Current.ResetCache();
+				}
+			}
+
 			onLoadData();
 
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			if( requestState.StaticRegionContents != null ) {
 				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
 				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
@@ -194,13 +220,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						requestState.ModificationErrorsExist
 							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
 							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( requestState.DmIdAndSecondaryOp.Item2 )
+							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 				}
 			}
 
-			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
 				var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
 				if( secondaryDm == null )
@@ -233,6 +258,65 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					navigate( null, null );
 			}
 		}
+
+		/// <summary>
+		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
+		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
+		/// </summary>
+		private void updateLastPageRequestTimeForUser( User user ) {
+			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
+			// rapidly assigning tasks to one another in the System Manager or similar situations.
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+				return;
+
+			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
+			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
+			// in another browser window while the first one is still running.
+			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
+			// another transaction has modified its value during this transaction.
+			var newlyQueriedUser =
+				new DataAccessState().ExecuteWithThis(
+					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
+				return;
+
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+				() => {
+					try {
+						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+						if( FormsAuthStatics.FormsAuthEnabled ) {
+							var formsAuthCapableUser = (FormsAuthCapableUser)user;
+							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+								user.UserId,
+								user.Email,
+								user.Role.RoleId,
+								DateTime.Now,
+								formsAuthCapableUser.Salt,
+								formsAuthCapableUser.SaltedPassword,
+								formsAuthCapableUser.MustChangePassword );
+						}
+						else if( externalAuthProvider != null )
+							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+					}
+					catch( DbConcurrencyException ) {
+						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
+						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
+						// get an error email if the update fails.
+						throw new DoNotCommitException();
+					}
+				} );
+		}
+
+		// The warning below also appears on EwfApp.ExecutePageViewDataModifications.
+		/// <summary>
+		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// 
+		/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+		/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
+		/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+		/// concurrency errors by modifying data that affects the rendering of the page.
+		/// </summary>
+		protected virtual void executePageViewDataModifications() {}
 
 		/// <summary>
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
@@ -362,9 +446,6 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		private void onLoadData() {
 			// This can go anywhere in the lifecycle.
-
-			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
-			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
 			addMetadataAndFaviconLinks();
 			addTypekitLogicIfNecessary();
@@ -880,85 +961,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected override sealed void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
-			// Initial request data modifications. All data modifications that happen simply because of a request and require no other action by the user should
-			// happen at the end of the life cycle. This prevents modifications from being executed twice when transfers happen. It also prevents any of the modified
-			// data from being used accidentally, or intentionally, in LoadData or any other part of the life cycle.
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
-			DataAccessState.Current.DisableCache();
-			try {
-				if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
-					EwfApp.Instance.ExecuteInitialRequestDataModifications();
-					if( AppRequestState.Instance.UserAccessible ) {
-						if( AppTools.User != null )
-							updateLastPageRequestTimeForUser( AppTools.User );
-						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
-							updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
-					}
-					executeInitialRequestDataModifications();
-				}
-				FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 
-				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-			}
-			finally {
-				DataAccessState.Current.ResetCache();
-			}
+
+			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
+
+			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+
+			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 		}
-
-		/// <summary>
-		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
-		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
-		/// </summary>
-		private void updateLastPageRequestTimeForUser( User user ) {
-			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
-			// rapidly assigning tasks to one another in RSIS or similar situations.
-			// NOTE: This makes the comment on line 688 much less important.
-			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
-				return;
-
-			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
-			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
-			// in another browser window while the first one is still running.
-			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
-			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser =
-				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
-				return;
-
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-				() => {
-					try {
-						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = (FormsAuthCapableUser)user;
-							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								user.UserId,
-								user.Email,
-								user.Role.RoleId,
-								DateTime.Now,
-								formsAuthCapableUser.Salt,
-								formsAuthCapableUser.SaltedPassword,
-								formsAuthCapableUser.MustChangePassword );
-						}
-						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
-					}
-					catch( DbConcurrencyException ) {
-						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
-						// get an error email if the update fails.
-						throw new DoNotCommitException();
-					}
-				} );
-		}
-
-		/// <summary>
-		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
-		/// </summary>
-		protected virtual void executeInitialRequestDataModifications() {}
 
 		/// <summary>
 		/// Saves view state.
