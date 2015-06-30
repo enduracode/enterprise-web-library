@@ -71,11 +71,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			// hands of the page, maybe by making ToggleButton sort of like a form control such that it takes a boolean value in its constructor and allows access to
 			// its post back value.
 			var controlsToggled = false;
-			EwfHiddenField.Create( EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString(),
-			                       postBackValue => controlsToggled = getControlsToggled( postBackValue ),
-			                       EwfPage.Instance.DataUpdate,
-			                       out controlsToggledHiddenFieldValueGetter,
-			                       out controlsToggledHiddenFieldClientIdGetter );
+			EwfHiddenField.Create(
+				this,
+				EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString(),
+				postBackValue => controlsToggled = getControlsToggled( postBackValue ),
+				EwfPage.Instance.DataUpdate,
+				out controlsToggledHiddenFieldValueGetter,
+				out controlsToggledHiddenFieldClientIdGetter );
 			EwfPage.Instance.DataUpdate.AddModificationMethod(
 				() => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
 

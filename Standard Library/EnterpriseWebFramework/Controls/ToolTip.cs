@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			this.title = title;
 			this.sticky = sticky;
 
-			EwfPage.Instance.AddEtherealControl( this );
+			EwfPage.Instance.AddEtherealControl( targetControl, this );
 		}
 
 		WebControl EtherealControl.Control { get { return control; } }

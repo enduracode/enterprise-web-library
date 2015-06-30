@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var complexLabel = new Panel();
 			complexLabel.AddControlsReturnThis( "Model number".GetLiteralControl() );
 			complexLabel.AddControlsReturnThis(
-				new LaunchWindowLink( new ModalWindow( "More information...".GetLiteralControl() ) ) { ActionControlStyle = new TextActionControlStyle( " (popup)" ) } );
+				new LaunchWindowLink( new ModalWindow( this, "More information...".GetLiteralControl() ) ) { ActionControlStyle = new TextActionControlStyle( " (popup)" ) } );
 			omni.AddFormItems(
 				FormItem.Create( complexLabel, new EwfTextBox( "" ), cellSpan: 2 ),
 				FormItem.Create( "Normal price", new EwfLabel() ),

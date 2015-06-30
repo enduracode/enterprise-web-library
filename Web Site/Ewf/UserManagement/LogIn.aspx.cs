@@ -61,6 +61,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
 
 			var logInMethod = FormsAuthStatics.GetLogInMethod(
+				this,
 				emailAddress,
 				password,
 				getUnregisteredEmailMessage(),

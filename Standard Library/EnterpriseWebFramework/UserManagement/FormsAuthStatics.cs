@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
+using System.Web.UI;
 using Humanizer;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.Encryption;
@@ -96,9 +97,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// forms-authentication-capable user-management provider.
 		/// </summary>
 		public static Func<FormsAuthCapableUser> GetLogInMethod(
-			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage, ValidationList vl ) {
+			Control etherealControlParent, DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage,
+			ValidationList vl ) {
 			var utcOffset = new DataValue<string>();
-			setUpClientSideLogicForLogIn( utcOffset, vl );
+			setUpClientSideLogicForLogIn( etherealControlParent, utcOffset, vl );
 
 			return () => {
 				var errors = new List<string>();
@@ -153,9 +155,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		/// implement the forms-authentication-capable user-management provider.
 		/// This method should be called in LoadData. The method returned should be called in an event handler.
 		/// </summary>
-		public static Action<int> GetSpecifiedUserLogInMethod( ValidationList vl ) {
+		public static Action<int> GetSpecifiedUserLogInMethod( Control etherealControlParent, ValidationList vl ) {
 			var utcOffset = new DataValue<string>();
-			setUpClientSideLogicForLogIn( utcOffset, vl );
+			setUpClientSideLogicForLogIn( etherealControlParent, utcOffset, vl );
 
 			return userId => {
 				var user = SystemProvider.GetUser( userId );
@@ -169,12 +171,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 			};
 		}
 
-		private static void setUpClientSideLogicForLogIn( DataValue<string> utcOffset, ValidationList vl ) {
+		private static void setUpClientSideLogicForLogIn( Control etherealControlParent, DataValue<string> utcOffset, ValidationList vl ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
 			Func<PostBackValueDictionary, string> utcOffsetHiddenFieldValueGetter; // unused
 			Func<string> utcOffsetHiddenFieldClientIdGetter;
 			EwfHiddenField.Create(
+				etherealControlParent,
 				"",
 				postBackValue => utcOffset.Value = postBackValue,
 				vl,

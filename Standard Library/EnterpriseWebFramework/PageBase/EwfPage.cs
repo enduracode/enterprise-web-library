@@ -45,9 +45,10 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private Control contentContainer;
+		private Control etherealPlace;
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
-		private readonly Queue<EtherealControl> etherealControls = new Queue<EtherealControl>();
+		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
@@ -243,7 +244,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						}
 						else {
 							var formValuesChanged =
-								contentContainer.GetDescendants()
+								GetDescendants( contentContainer )
 									.OfType<FormControl>()
 									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
@@ -388,7 +389,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					var actionPostBack = postBack as ActionPostBack;
 					if( actionPostBack != null ) {
 						var formValuesChanged =
-							contentContainer.GetDescendants()
+							GetDescendants( contentContainer )
 								.OfType<FormControl>()
 								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						try {
@@ -464,23 +465,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					InfoAsBaseType.ParentResourceEntityPathString,
 					InfoAsBaseType.ResourceFullName ) );
 
+			Form.Controls.Add( etherealPlace = new PlaceHolder() );
 			if( EsAsBaseType != null )
 				EsAsBaseType.LoadData();
 			loadData();
 			loadDataForControlAndChildren( this );
-
-			// It's important to handle new ethereal controls getting added during this loop.
-			var etherealControlsForJsStartUpLogic = new List<EtherealControl>();
-			while( etherealControls.Any() ) {
-				var etherealControl = etherealControls.Dequeue();
-
-				// This is kind of a hack, but it's an easy way to make sure ethereal controls are initially hidden.
-				etherealControl.Control.Style.Add( HtmlTextWriterStyle.Display, "none" );
-
-				Form.Controls.Add( etherealControl.Control );
-				loadDataForControlAndChildren( etherealControl.Control );
-				etherealControlsForJsStartUpLogic.Add( etherealControl );
-			}
 
 			foreach( var i in controlTreeValidations )
 				i();
@@ -505,7 +494,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				displayLink.AddJavaScript();
 
 			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
-			addJavaScriptStartUpLogic( etherealControlsForJsStartUpLogic );
+			addJavaScriptStartUpLogic();
 
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
@@ -599,10 +588,30 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		protected virtual void loadData() {}
 
 		private void loadDataForControlAndChildren( Control control ) {
-			if( control is ControlTreeDataLoader )
-				( control as ControlTreeDataLoader ).LoadData();
-			foreach( Control child in control.Controls )
+			var controlTreeDataLoader = control as ControlTreeDataLoader;
+			if( controlTreeDataLoader != null )
+				controlTreeDataLoader.LoadData();
+
+			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
 				loadDataForControlAndChildren( child );
+
+			List<EtherealControl> etherealControls;
+			if( !etherealControlsByControl.TryGetValue( control, out etherealControls ) )
+				etherealControls = new List<EtherealControl>();
+			if( etherealControls.Any() ) {
+				var np = new NamingPlaceholder(
+					etherealControls.Select(
+						i => {
+							// This is kind of a hack, but it's an easy way to make sure ethereal controls are initially hidden.
+							i.Control.Style.Add( HtmlTextWriterStyle.Display, "none" );
+
+							return i.Control;
+						} ) ) { ID = "ethereal{0}".FormatWith( control.UniqueID.Replace( "$", "" ) ) };
+				etherealPlace.AddControlsReturnThis( np );
+				( (ControlTreeDataLoader)np ).LoadData();
+			}
+			foreach( var child in etherealControls )
+				loadDataForControlAndChildren( child.Control );
 		}
 
 		/// <summary>
@@ -624,8 +633,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public virtual bool IsAutoDataUpdater { get { return false; } }
 
-		internal void AddEtherealControl( EtherealControl etherealControl ) {
-			etherealControls.Enqueue( etherealControl );
+		internal void AddEtherealControl( Control parent, EtherealControl etherealControl ) {
+			List<EtherealControl> etherealControls;
+			if( !etherealControlsByControl.TryGetValue( parent, out etherealControls ) ) {
+				etherealControls = new List<EtherealControl>();
+				etherealControlsByControl.Add( parent, etherealControls );
+			}
+			etherealControls.Add( etherealControl );
 		}
 
 		internal void AddPostBack( PostBack postBack ) {
@@ -694,13 +708,34 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); }
 		}
 
-		private void addJavaScriptStartUpLogic( IEnumerable<EtherealControl> etherealControls ) {
-			var controlInitStatements =
-				this.GetDescendants()
-					.OfType<ControlWithJsInitLogic>()
-					.Select( i => i.GetJsInitStatements() )
-					.Concat( etherealControls.Select( i => i.GetJsInitStatements() ) )
-					.Aggregate( ( a, b ) => a + b );
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public IEnumerable<Control> GetDescendants( Control control, Func<Control, bool> predicate = null ) {
+			return from i in getDescendants( control, predicate ?? ( i => true ) ) select i.Item1;
+		}
+
+		private IEnumerable<Tuple<Control, Func<string>>> getDescendants( Control control, Func<Control, bool> predicate ) {
+			var normalChildren = from i in control.Controls.Cast<Control>()
+			                     where i != etherealPlace
+			                     let jsControl = i as ControlWithJsInitLogic
+			                     select Tuple.Create( i, jsControl != null ? new Func<string>( jsControl.GetJsInitStatements ) : null );
+
+			List<EtherealControl> etherealControls;
+			if( !etherealControlsByControl.TryGetValue( control, out etherealControls ) )
+				etherealControls = new List<EtherealControl>();
+			var etherealChildren = etherealControls.Select( i => Tuple.Create( (Control)i.Control, new Func<string>( i.GetJsInitStatements ) ) );
+
+			var descendants = new List<Tuple<Control, Func<string>>>();
+			foreach( var child in normalChildren.Concat( etherealChildren ).Where( i => predicate( i.Item1 ) ) ) {
+				descendants.Add( child );
+				descendants.AddRange( getDescendants( child.Item1, predicate ) );
+			}
+			return descendants;
+		}
+
+		private void addJavaScriptStartUpLogic() {
+			var controlInitStatements = getDescendants( this, i => true ).Where( i => i.Item2 != null ).Select( i => i.Item2() ).Aggregate( ( a, b ) => a + b );
 
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
@@ -789,7 +824,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
-		protected virtual Control controlWithInitialFocus { get { return contentContainer.GetDescendants().FirstOrDefault( i => i is FormControl ); } }
+		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormControl ); } }
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -856,7 +891,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
 			var staticFormValues =
-				this.GetDescendants( i => !updateRegionControls.Contains( i ) )
+				GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
 					.OfType<FormControl>()
 					.Select( i => i.FormValue )
 					.Where( i => i != null )

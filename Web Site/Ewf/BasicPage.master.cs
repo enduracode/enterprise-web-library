@@ -226,6 +226,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private IEnumerable<Control> getStatusMessageControl() {
 			var messagesExist = EwfPage.Instance.StatusMessages.Any();
 			new ModalWindow(
+				this,
 				new NamingPlaceholder( messagesExist && !statusMessagesDisplayAsNotification() ? getStatusMessageControlList() : new Control[ 0 ] ),
 				title: "Messages",
 				open: messagesExist && !statusMessagesDisplayAsNotification() );

@@ -92,7 +92,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 				() => {
 					if( !this.IsOnPage() || !this.usesSubmitBehavior )
 						return;
-					var submitButtons = EwfPage.Instance.GetDescendants().OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
+					var submitButtons = EwfPage.Instance.GetDescendants( EwfPage.Instance ).OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
 					if( submitButtons.Count() > 1 ) {
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
@@ -131,7 +131,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			if( ConfirmationWindowContentControl != null ) {
 				if( usesSubmitBehavior )
 					throw new ApplicationException( "PostBackButton cannot be the submit button and also have a confirmation message." );
-				confirmationWindow = new ModalWindow( ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
+				confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
 			}
 			else if( !usesSubmitBehavior )
 				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
