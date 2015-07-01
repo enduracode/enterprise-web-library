@@ -69,9 +69,9 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
+		/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
 		/// </summary>
-		internal string Url { get { return url; } }
+		public string Url { get { return url; } }
 
 		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
 

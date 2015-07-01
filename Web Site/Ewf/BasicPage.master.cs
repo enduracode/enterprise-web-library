@@ -148,7 +148,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),
 						EwfLink.Create(
-							SelectUser.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ),
+							SelectUser.GetInfo( AppRequestState.Instance.Url ),
 							new ButtonActionControlStyle( "Change User", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ),
 						" ".GetLiteralControl(),
 						new PostBackButton(
