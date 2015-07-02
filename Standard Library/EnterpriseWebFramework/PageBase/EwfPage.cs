@@ -194,6 +194,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						}
 						executePageViewDataModifications();
 					}
+					AppRequestState.AddNonTransactionalModificationMethod(
+						() => {
+							StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
+							statusMessages.Clear();
+						} );
 					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 				}
 				finally {
