@@ -8,7 +8,7 @@ using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
-	/// ISU and Standard Library use only.
+	/// EWL Core and Development Utility use only.
 	/// </summary>
 	public class LikeCondition: InlineDbCommandCondition {
 		/// <summary>

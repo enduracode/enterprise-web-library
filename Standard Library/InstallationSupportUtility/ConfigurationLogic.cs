@@ -58,12 +58,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		}
 
 		/// <summary>
-		/// Standard Library and Development Utility use only.
+		/// EWL Core and Development Utility use only.
 		/// </summary>
 		public static bool SystemProviderExists { get { return provider != null; } }
 
 		/// <summary>
-		/// Standard Library and Development Utility use only.
+		/// EWL Core and Development Utility use only.
 		/// </summary>
 		public static SystemIsuProvider SystemProvider {
 			get {
@@ -74,7 +74,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		}
 
 		/// <summary>
-		/// Standard Library and Development Utility use only.
+		/// EWL Core and Development Utility use only.
 		/// </summary>
 		public static bool NDependIsPresent {
 			get {

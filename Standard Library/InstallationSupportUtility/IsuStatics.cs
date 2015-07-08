@@ -3,7 +3,7 @@
 namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 	public class IsuStatics {
 		/// <summary>
-		/// Standard Library and RSIS use only.
+		/// EWL Core and ISU use only.
 		/// </summary>
 		public static void ConfigureIis( bool iisExpress ) {
 			// Overlapping commitment of changes to server manager do not end well.

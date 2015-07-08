@@ -46,7 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// Gets the current EWF UI master page. Standard Library use only.
+		/// Gets the current EWF UI master page. EWL use only.
 		/// </summary>
 		public static AppEwfUiMasterPage AppMasterPage {
 			get { return EwfPage.Instance.Master.Master != null ? getSecondLevelMaster( EwfPage.Instance.Master ) as AppEwfUiMasterPage : null; }

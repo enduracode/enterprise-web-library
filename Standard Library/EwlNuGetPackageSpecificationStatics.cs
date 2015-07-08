@@ -2,7 +2,7 @@
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
-	/// Standard Library and RSIS use only.
+	/// EWL and System Manager use only.
 	/// </summary>
 	public class EwlNuGetPackageSpecificationStatics {
 		/// <summary>

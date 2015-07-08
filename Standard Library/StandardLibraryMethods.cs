@@ -27,12 +27,12 @@ namespace RedStapler.StandardLibrary {
 		public const string EwlInitialism = "EWL";
 
 		/// <summary>
-		/// Standard Library and Development Utility use only.
+		/// EWL Core and Development Utility use only.
 		/// </summary>
 		public const string EwfFolderBaseNamespace = "RedStapler.StandardLibrary.EnterpriseWebFramework";
 
 		/// <summary>
-		/// Standard Library and RSIS use only.
+		/// EWL Core and ISU use only.
 		/// </summary>
 		public const string TestRunnerProjectName = "Test Runner";
 
@@ -238,7 +238,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Runs tests of Standard Library functionality.
+		/// Runs tests of EWL functionality.
 		/// </summary>
 		public static void RunStandardLibraryTests() {
 			TestStatics.RunTests();

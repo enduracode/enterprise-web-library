@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library and auto-generated code use only.
+		/// EWL Core and auto-generated code use only.
 		/// </summary>
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
 		protected string uriFragmentIdentifier {

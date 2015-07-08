@@ -10,7 +10,7 @@ using RedStapler.StandardLibrary.IO;
 namespace RedStapler.StandardLibrary.Configuration {
 	public static class ConfigurationStatics {
 		/// <summary>
-		/// Standard Library and RSIS use only.
+		/// EWL Core and Development Utility use only.
 		/// </summary>
 		public const string ProvidersFolderAndNamespaceName = "Providers";
 
@@ -20,12 +20,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		public static string RedStaplerFolderPath { get; private set; }
 
 		/// <summary>
-		/// RSIS use only. The path to the machine configuration XML file.
-		/// </summary>
-		public static string MachineConfigXmlFilePath { get; private set; }
-
-		/// <summary>
-		/// Standard Library and ISU use only.
+		/// EWL Core and ISU use only.
 		/// </summary>
 		public static MachineConfiguration MachineConfiguration { get; private set; }
 
@@ -44,14 +39,14 @@ namespace RedStapler.StandardLibrary.Configuration {
 		internal static void Init(
 			bool useRelativeInstallationPath, Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
 			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
-			MachineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
 
 			initializationLog += Environment.NewLine + "About to load machine config";
 
 			// Load machine configuration.
-			if( File.Exists( MachineConfigXmlFilePath ) ) {
+			var machineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
+			if( File.Exists( machineConfigXmlFilePath ) ) {
 				// Do not perform schema validation since the schema file won't be available on non-development machines.
-				MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( MachineConfigXmlFilePath, false );
+				MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( machineConfigXmlFilePath, false );
 			}
 
 			initializationLog += Environment.NewLine + "About to initialize stack trace";

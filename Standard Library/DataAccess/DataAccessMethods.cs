@@ -35,10 +35,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 			}
 		}
 
-		/// <summary>
-		/// Standard Library and Red Stapler Information System use only.
-		/// </summary>
-		public static Exception CreateDbConnectionException( DatabaseInfo databaseInfo, string action, Exception innerException ) {
+		internal static Exception CreateDbConnectionException( DatabaseInfo databaseInfo, string action, Exception innerException ) {
 			var generalMessage = "An exception occurred while " + action + " the " + GetDbName( databaseInfo ) + " database.";
 			var customMessage = "";
 

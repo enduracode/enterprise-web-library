@@ -20,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			internal const string StandardExceptLayoutStyleClass = "ewfTblSel";
 			internal const string StandardStyleClass = "ewfStandard";
 
-			// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWL CSS files.
+			// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
 			internal const string AllCellAlignmentsClass = "ewfTc";
 
 			// NOTE: Rename ewfClickable to ewfAction and try to restrict its use to table rows since action controls have CSS elements that we can use for styling.

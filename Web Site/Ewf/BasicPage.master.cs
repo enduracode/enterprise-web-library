@@ -12,7 +12,7 @@ using RedStapler.StandardLibrary.WebSessionState;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
-		// Some of these are used by the Standard Library JavaScript file.
+		// Some of these are used by the EWF JavaScript file.
 		private const string topWarningBlockCssClass = "ewfTopWarning";
 		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
 		private const string clickBlockerActiveClass = "ewfClickBlockerA";
@@ -165,7 +165,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = topWarningBlockCssClass } );
 			}
 
-			// This is used by the Standard Library JavaScript file.
+			// This is used by the EWF JavaScript file.
 			const string clickBlockerId = "ewfClickBlocker";
 
 			ph2.AddControlsReturnThis(
@@ -191,7 +191,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			 * Spin.js also has the benefit of being fully compatible with all browsers across the board.
 			 */
 
-			// These are used by the Standard Library JavaScript file.
+			// These are used by the EWF JavaScript file.
 			const string dialogId = "ewfProcessingDialog";
 			const string spinnerId = "ewfSpinner";
 
@@ -230,7 +230,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				title: "Messages",
 				open: messagesExist && !statusMessagesDisplayAsNotification() );
 
-			// This is used by the Standard Library JavaScript file.
+			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()

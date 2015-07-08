@@ -30,7 +30,7 @@
 	}
 
 	internal static class TextAlignmentStatics {
-		// These are used by Standard Library CSS files for alignment rules.
+		// These are used by EWF CSS files for alignment rules.
 		private const string leftCssClass = "ewfTaL";
 		private const string rightCssClass = "ewfTaR";
 		private const string centerCssClass = "ewfTaC";

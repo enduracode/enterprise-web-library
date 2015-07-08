@@ -32,7 +32,7 @@
 	}
 
 	internal static class TableCellVerticalAlignmentOps {
-		// These are used by Standard Library CSS files for alignment rules.
+		// These are used by EWF CSS files for alignment rules.
 		private const string topCssClass = "ewfTcTop";
 		private const string middleCssClass = "ewfTcMiddle";
 		private const string bottomCssClass = "ewfTcBottom";

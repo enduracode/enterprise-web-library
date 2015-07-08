@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.DatabaseSpecification;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
-	/// ISU and Standard Library use only.
+	/// EWL Core and Development Utility use only.
 	/// </summary>
 	public class InequalityCondition: InlineDbCommandCondition {
 		/// <summary>
