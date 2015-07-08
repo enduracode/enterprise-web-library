@@ -17,6 +17,16 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static class StandardLibraryMethods {
 		/// <summary>
+		/// EWL use only.
+		/// </summary>
+		public const string EwlName = "Enterprise Web Library";
+
+		/// <summary>
+		/// EWL use only.
+		/// </summary>
+		public const string EwlInitialism = "EWL";
+
+		/// <summary>
 		/// Standard Library and Development Utility use only.
 		/// </summary>
 		public const string EwfFolderBaseNamespace = "RedStapler.StandardLibrary.EnterpriseWebFramework";

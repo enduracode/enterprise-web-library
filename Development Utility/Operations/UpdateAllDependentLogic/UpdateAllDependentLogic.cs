@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				copyInEwlFiles( installation );
 			}
 			catch( Exception e ) {
-				const string message = "Failed to copy Standard Library files into the installation. Please try the operation again.";
+				var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( StandardLibraryMethods.EwlName );
 				if( e is UnauthorizedAccessException || e is IOException )
 					throw new UserCorrectableException( message, e );
 				throw new ApplicationException( message, e );
