@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				generateCodeForProject(
 					installation,
-					"Standard Library",
+					AppStatics.CoreProjectName,
 					writer => {
 						writer.WriteLine( "using System;" );
 						writer.WriteLine( "using System.Globalization;" );
@@ -123,7 +123,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
-						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Standard Library", "Configuration", fileName + FileExtensions.Xsd ),
+						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
 						StandardLibraryMethods.CombinePaths(
 							InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 							InstallationFileStatics.FilesFolderName,

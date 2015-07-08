@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				folderPath => {
 					var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths(
 						installation.GeneralLogic.Path,
-						"Standard Library",
+						AppStatics.CoreProjectName,
 						StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
 					var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net451-full" );
 					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
@@ -130,10 +130,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
-			var lines = from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Standard Library\packages.config" ) )
-			            let trimmedLine = line.Trim()
-			            where trimmedLine.StartsWith( "<package " )
-			            select trimmedLine;
+			var lines =
+				from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
+				let trimmedLine = line.Trim()
+				where trimmedLine.StartsWith( "<package " )
+				select trimmedLine;
 			foreach( var line in lines )
 				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net451\"", "" ) );
 
