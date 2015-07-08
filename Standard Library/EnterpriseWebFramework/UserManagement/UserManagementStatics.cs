@@ -23,12 +23,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static bool UserManagementEnabled { get { return provider != null; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static SystemUserManagementProvider SystemProvider {
 			get {
@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		// NOTE: It seems like we could cache a collection of Roles and have users just take a roleId, and look up the object ourselves. This would save the apps
 		// creating the role object, and all save the extra database query.  But where would we do this?
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static IEnumerable<User> GetUsers() {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static User GetUser( int userId, bool ensureUserExists ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )
@@ -67,7 +67,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static User GetUser( string emailAddress ) {
 			if( SystemProvider is FormsAuthCapableUserManagementProvider )

@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.Collections;
 
 namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class QueryRetrievalQueryCache<RowType> {
 		private readonly Cache<object[], IEnumerable<RowType>> cache;

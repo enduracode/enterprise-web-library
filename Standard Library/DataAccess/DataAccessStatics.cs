@@ -21,7 +21,7 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static SystemDataAccessProvider SystemProvider {
 			get {

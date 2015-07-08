@@ -16,24 +16,24 @@
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public override EntitySetupInfo EsInfoAsBaseType { get { return null; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public override string ResourceName { get { return name; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		protected override string buildUrl() {
 			return url;
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {
 			var info = infoAsBaseType as ExternalResourceInfo;
@@ -41,7 +41,7 @@
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		protected internal override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
 			return new ExternalResourceInfo( url, uriFragmentIdentifier: uriFragmentIdentifier, name: name );

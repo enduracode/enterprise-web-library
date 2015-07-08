@@ -33,7 +33,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public void AddCondition( InlineDbCommandCondition condition ) {
 			conditions.Add( condition );

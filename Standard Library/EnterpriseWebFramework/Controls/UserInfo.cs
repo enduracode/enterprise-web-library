@@ -7,7 +7,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class UserInfo: Control, INamingContainer {
 		/// <summary>
-		/// Standard Library use only. Do not call if there is no authenticated user.
+		/// EWL use only. Do not call if there is no authenticated user.
 		/// </summary>
 		public void LoadData( PageInfo changePasswordPage ) {
 			this.AddControlsReturnThis( ( "Logged in as " + AppTools.User.Email ).GetLiteralControl() );

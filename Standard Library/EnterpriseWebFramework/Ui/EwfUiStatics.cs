@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public static class EwfUiStatics {
 		private const string providerName = "EwfUi";
@@ -20,7 +20,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static AppEwfUiProvider AppProvider {
 			get {

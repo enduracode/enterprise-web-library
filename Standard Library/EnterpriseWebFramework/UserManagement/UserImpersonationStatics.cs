@@ -2,11 +2,11 @@
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public static class UserImpersonationStatics {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static void BeginImpersonation( User userBeingImpersonated ) {
 			SetCookie( userBeingImpersonated );
@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static void EndImpersonation() {
 			clearCookie();

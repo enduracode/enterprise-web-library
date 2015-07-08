@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		private static Type globalInitializerType { get; set; }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static SystemGeneralProvider SystemGeneralProvider { get; private set; }
 

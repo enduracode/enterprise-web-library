@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary {
 	/// </summary>
 	public static class NetTools {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public const string HomeUrl = "~/";
 

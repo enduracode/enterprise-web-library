@@ -4,12 +4,12 @@ namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
 	/// </summary>
 	public enum ModificationType {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		Insert,
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		Update
 	}

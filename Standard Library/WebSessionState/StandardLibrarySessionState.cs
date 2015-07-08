@@ -70,7 +70,7 @@ namespace RedStapler.StandardLibrary.WebSessionState {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public bool HideBrowserWarningForRemainderOfSession { get; set; }
 	}

@@ -4,14 +4,14 @@ using RedStapler.StandardLibrary.DatabaseSpecification;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class InCondition: InlineDbCommandCondition {
 		private readonly string columnName;
 		private readonly string subQuery;
 
 		/// <summary>
-		/// Standard Library use only. Nothing in the sub-query is escaped, so do not base any part of it on user input.
+		/// EWL use only. Nothing in the sub-query is escaped, so do not base any part of it on user input.
 		/// </summary>
 		public InCondition( string columnName, string subQuery ) {
 			this.columnName = columnName;

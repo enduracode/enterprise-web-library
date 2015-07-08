@@ -36,7 +36,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static IEnumerable<Control> GetDescendants( this Control control, Func<Control, bool> predicate = null ) {
 			predicate = predicate ?? ( i => true );

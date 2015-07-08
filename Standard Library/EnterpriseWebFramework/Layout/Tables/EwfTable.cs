@@ -13,7 +13,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		private const string itemLimitPageStateKey = "itemLimit";
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
 			internal const string StandardLayoutOnlyStyleClass = "ewfStandardLayoutOnly";
@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 			internal const string ContrastClass = "ewfContrast";
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors =
 				{

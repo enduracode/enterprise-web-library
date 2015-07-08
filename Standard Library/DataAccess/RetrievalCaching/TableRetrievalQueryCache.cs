@@ -7,7 +7,7 @@ using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstra
 
 namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class TableRetrievalQueryCache<RowType> {
 		private readonly Cache<InlineDbCommandCondition[], IEnumerable<RowType>> cache;

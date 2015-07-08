@@ -10,19 +10,19 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class ControlStack: WebControl, ControlTreeDataLoader {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfControlStack";
 			internal const string ItemCssClass = "ewfControlStackItem";
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors = { "div." + CssClass, "div." + CssClass + ".ewfStandard" };
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public const string ItemSelector = "div." + ItemCssClass;
 

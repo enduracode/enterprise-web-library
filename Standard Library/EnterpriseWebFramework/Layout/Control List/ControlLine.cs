@@ -10,14 +10,14 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "MarkupControls" ) ]
 	public class ControlLine: WebControl, ControlTreeDataLoader {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfControlLine";
 			internal const string ItemCssClass = "ewfControlLineItem";
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
 

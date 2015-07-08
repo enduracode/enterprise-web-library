@@ -17,7 +17,7 @@ namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public void Execute() {
 			method( rowCollection );

@@ -6,17 +6,17 @@ using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public static class ErrorMessageControlListBlockStatics {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfErrorMessageListBlock";
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
 
@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static Block CreateErrorMessageListBlock( IEnumerable<string> errors ) {
 			// Client code that uses NetTools.BuildBasicLink depends on us not HTML encoding error messages here. If raw or stored user input is ever used in error

@@ -9,13 +9,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class EwfImage: WebControl, ControlTreeDataLoader {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfImage";
 
 			/// <summary>
-			/// Standard Library use only.
+			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors = { "img." + CssClass, "div." + CssClass };
 

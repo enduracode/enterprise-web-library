@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		/// <param name="styleSelector">Passes the text of this ActionButtonSetup, returns an ActionControlStyle</param>
 		/// <param name="usesSubmitBehavior"></param>

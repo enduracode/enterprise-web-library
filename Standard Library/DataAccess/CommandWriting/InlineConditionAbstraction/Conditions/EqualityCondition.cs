@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.DatabaseSpecification;
 
 namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class EqualityCondition: InlineDbCommandCondition {
 		private readonly InlineDbCommandColumnValue columnValue;
@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 		// to initialize mod object data.
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public EqualityCondition( InlineDbCommandColumnValue columnValue ) {
 			this.columnValue = columnValue;

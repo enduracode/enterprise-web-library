@@ -35,7 +35,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private bool transactionMarkedForRollback;
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public bool IntermediateUserExists { get; set; }
 
@@ -136,17 +136,17 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public bool ImpersonatorExists { get { return UserAndImpersonator.Item2 != null; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public User ImpersonatorUser { get { return UserAndImpersonator.Item2.Item1; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public int? ProfilingUserId {
 			get {
@@ -176,7 +176,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public bool UserAccessible {
 			get { return !EwfConfigurationStatics.AppSupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); }

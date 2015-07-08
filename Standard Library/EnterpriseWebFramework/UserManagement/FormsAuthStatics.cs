@@ -29,12 +29,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static bool FormsAuthEnabled { get { return providerGetter() is FormsAuthCapableUserManagementProvider; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static FormsAuthCapableUserManagementProvider SystemProvider { get { return (FormsAuthCapableUserManagementProvider)providerGetter(); } }
 

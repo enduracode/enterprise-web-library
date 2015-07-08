@@ -6,7 +6,7 @@ using RedStapler.StandardLibrary.Collections;
 
 namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class VersionedRowDataCache<RowPkType, RowPkAndVersionType, RowType>: PeriodicEvictionCompositeCacheEntry {
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]

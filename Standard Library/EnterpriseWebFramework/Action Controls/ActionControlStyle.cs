@@ -7,7 +7,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public interface ActionControlStyle {
 		/// <summary>
-		/// Standard Library use only. Gets the text. Returns the empty string if the style does not support text.
+		/// EWL use only. Gets the text. Returns the empty string if the style does not support text.
 		/// </summary>
 		string Text { get; }
 
@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		WebControl SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter );
 
 		/// <summary>
-		/// Standard Library use only. Gets the JavaScript init statements for the style.
+		/// EWL use only. Gets the JavaScript init statements for the style.
 		/// </summary>
 		string GetJsInitStatements( WebControl controlForGetClientUrl );
 	}

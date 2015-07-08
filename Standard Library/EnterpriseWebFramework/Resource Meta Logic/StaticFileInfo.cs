@@ -8,12 +8,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class StaticFileInfo: ResourceInfo {
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public override EntitySetupInfo EsInfoAsBaseType { get { return null; } }
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public override string ResourceName { get { return ""; } }
 

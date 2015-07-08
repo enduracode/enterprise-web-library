@@ -693,7 +693,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Standard Library use only. Gets the status messages.
+		/// EWL use only. Gets the status messages.
 		/// </summary>
 		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages {
 			get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); }

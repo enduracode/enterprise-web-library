@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary.JavaScriptWriting;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class CssElementCreator: ControlCssElementCreator {
 		// This class allows us to cut the number of selectors in the ActionControlAllStyles... elements by an order of magnitude.
@@ -23,7 +23,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		internal const string NewContentClass = "ewfNc";
 
 		/// <summary>
-		/// Standard Library use only.
+		/// EWL use only.
 		/// </summary>
 		public static readonly string[] Selectors = getElementsForAllStates( "", "." + AllStylesClass ).Single( i => i.Name == "AllStates" ).Selectors.ToArray();
 

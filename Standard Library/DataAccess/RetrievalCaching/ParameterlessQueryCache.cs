@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
-	/// Standard Library use only.
+	/// EWL use only.
 	/// </summary>
 	public class ParameterlessQueryCache<RowType> {
 		private IEnumerable<RowType> resultSet;
