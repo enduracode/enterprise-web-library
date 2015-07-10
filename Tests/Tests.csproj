@@ -84,9 +84,9 @@
       <Project>{3398b3a5-8445-410e-a69b-33ee3e914a03}</Project>
       <Name>Library</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Standard Library\Standard Library.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{7eed5926-9fe0-44db-9b5f-5a6856ce392e}</Project>
-      <Name>Standard Library</Name>
+      <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

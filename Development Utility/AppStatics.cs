@@ -5,7 +5,7 @@ using RedStapler.StandardLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
-		internal const string CoreProjectName = "Standard Library";
+		internal const string CoreProjectName = "Core";
 
 		internal const string WebProjectFilesFolderName = "Web Project Files";
 		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
