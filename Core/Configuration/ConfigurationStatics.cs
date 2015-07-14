@@ -43,7 +43,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			initializationLog += Environment.NewLine + "About to load machine config";
 
 			// Load machine configuration.
-			var machineConfigXmlFilePath = StandardLibraryMethods.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
+			var machineConfigXmlFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
 			if( File.Exists( machineConfigXmlFilePath ) ) {
 				// Do not perform schema validation since the schema file won't be available on non-development machines.
 				MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( machineConfigXmlFilePath, false );
@@ -65,7 +65,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			if( NetTools.IsWebApp() ) {
 				initializationLog += Environment.NewLine + "Is a web app";
 
-				installationPath = StandardLibraryMethods.CombinePaths( HttpRuntime.AppDomainAppPath, ".." );
+				installationPath = EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, ".." );
 				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 			}
 			else {
@@ -77,11 +77,11 @@ namespace RedStapler.StandardLibrary.Configuration {
 					installationPath = "..";
 				else {
 					var assemblyFolderPath = Path.GetDirectoryName( AppAssembly.Location );
-					installationPath = StandardLibraryMethods.CombinePaths( assemblyFolderPath, ".." );
+					installationPath = EwlStatics.CombinePaths( assemblyFolderPath, ".." );
 				}
 				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 				if( isDevelopmentInstallation )
-					installationPath = StandardLibraryMethods.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
+					installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 			}
 			initializationLog += Environment.NewLine + "Successfully determined installation path";
 			InstallationConfiguration = new InstallationConfiguration( MachineIsStandbyServer, installationPath, isDevelopmentInstallation );

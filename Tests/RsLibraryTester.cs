@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.Tests {
 		public static void Main() {
 			GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Tester", false );
 
-			StandardLibraryMethods.RunStandardLibraryTests();
+			EwlStatics.RunStandardLibraryTests();
 
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteSecondString() );
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteString() );
@@ -64,12 +64,12 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( NetTools.CombineUrls( @"///http://www.redstapler.biz//", "/Files/", "Carriers/", "Hancock/", "/blabla.pdf/" ) );
 			Console.WriteLine( NetTools.CombineUrls( @"http://localhost/ToddPublicWebSite/", "Carriers", "UP", "ComparisonLogo.jpg" ) );
 
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "anotherFolder", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", @"orgs\" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub", @"\Files\", @"\orgs", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"Inetpub", @"Files" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "anotherFolder", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", @"orgs\" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub", @"\Files\", @"\orgs", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"Inetpub", @"Files" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
 			Console.WriteLine( RedStapler.StandardLibrary.StringTools.CamelToEnglish( null ) );
 			Console.WriteLine( "".CamelToEnglish() );

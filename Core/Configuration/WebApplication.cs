@@ -22,7 +22,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			SupportsSecureConnections = supportsSecureConnections;
 
 			var iisExpress =
-				File.ReadAllText( StandardLibraryMethods.CombinePaths( installationPath, name, name + ".csproj" ) ).Contains( "<UseIISExpress>true</UseIISExpress>" );
+				File.ReadAllText( EwlStatics.CombinePaths( installationPath, name, name + ".csproj" ) ).Contains( "<UseIISExpress>true</UseIISExpress>" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(

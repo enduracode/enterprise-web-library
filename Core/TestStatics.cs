@@ -9,12 +9,12 @@ using RedStapler.StandardLibrary.Validation;
 
 namespace RedStapler.StandardLibrary {
 	internal static class TestStatics {
-		public static readonly string OutputFolderPath = StandardLibraryMethods.CombinePaths(
+		public static readonly string OutputFolderPath = EwlStatics.CombinePaths(
 			Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ),
 			"StdLib Test Outputs" );
 
 		internal static readonly string InputTestFilesFolderPath =
-			StandardLibraryMethods.CombinePaths( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "..", "..", "TestFiles" );
+			EwlStatics.CombinePaths( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "..", "..", "TestFiles" );
 
 		public static void RunTests() {
 			ZipOps.Test();
@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary {
 		/// Outputs a ReadMe file, with each iteration being a line in a item1: item2 format.
 		/// </summary>
 		internal static void OutputReadme( string outputFolder, IEnumerable<Tuple<string, string>> explanations ) {
-			using( var readme = new StreamWriter( StandardLibraryMethods.CombinePaths( outputFolder, "ReadMe.txt" ) ) ) {
+			using( var readme = new StreamWriter( EwlStatics.CombinePaths( outputFolder, "ReadMe.txt" ) ) ) {
 				readme.WriteLine( "What to look for" );
 				readme.WriteLine();
 

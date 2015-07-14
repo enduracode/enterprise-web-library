@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		public static void RefreshSystemList() {
 			// When deserializing the system list below, do not perform schema validation since we don't want to be forced into redeploying Program Runner after every
 			// schema change. We also don't have access to the schema on non-development machines.
-			var cachedSystemListFilePath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS System List.xml" );
+			var cachedSystemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS System List.xml" );
 			try {
 				var serializedSystemList =
 					ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod(

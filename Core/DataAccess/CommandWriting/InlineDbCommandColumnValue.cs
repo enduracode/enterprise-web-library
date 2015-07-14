@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		}
 
 		public bool Equals( InlineDbCommandColumnValue other ) {
-			return other != null && columnName == other.columnName && StandardLibraryMethods.AreEqual( value, other.value );
+			return other != null && columnName == other.columnName && EwlStatics.AreEqual( value, other.value );
 		}
 
 		public override int GetHashCode() {

@@ -28,9 +28,9 @@
 
 		// NOTE: This is a total duplication of InstallationsRetrieval. ISU can't get an InstallationsRetrieval object and the web site can't get an ISU Installation object.
 		// It's crap, but I'm not going to let it stop me from doing this for a third time.
-		public string TransactionLogBackupsPath { get { return StandardLibraryMethods.CombinePaths( ConfigurationLogic.TransactionLogBackupsPath, LatestFullShortName ); } }
+		public string TransactionLogBackupsPath { get { return EwlStatics.CombinePaths( ConfigurationLogic.TransactionLogBackupsPath, LatestFullShortName ); } }
 
-		public string DownloadedTransactionLogsFolderPath { get { return StandardLibraryMethods.CombinePaths( ConfigurationLogic.DownloadedTransactionLogsFolderPath, LatestFullShortName ); } }
+		public string DownloadedTransactionLogsFolderPath { get { return EwlStatics.CombinePaths( ConfigurationLogic.DownloadedTransactionLogsFolderPath, LatestFullShortName ); } }
 
 		public GeneralInstallationLogic GeneralLogic { get { return generalInstallationLogic; } }
 

@@ -12,25 +12,25 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedDataPackagesFolderPath = StandardLibraryMethods.CombinePaths(
+		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths(
 			ConfigurationStatics.RedStaplerFolderPath,
 			"Downloaded Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Web Site.
 		/// </summary>
-		public static string DataPackageRepositoryPath = StandardLibraryMethods.CombinePaths(
+		public static string DataPackageRepositoryPath = EwlStatics.CombinePaths(
 			ConfigurationStatics.RedStaplerFolderPath,
 			"RSIS Web Site Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedTransactionLogsFolderPath = StandardLibraryMethods.CombinePaths(
+		public static string DownloadedTransactionLogsFolderPath = EwlStatics.CombinePaths(
 			ConfigurationStatics.RedStaplerFolderPath,
 			"Downloaded Transaction Logs" );
 
-		public static string TransactionLogBackupsPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Transaction Log Backups" );
+		public static string TransactionLogBackupsPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Transaction Log Backups" );
 
 		private static SystemIsuProvider provider;
 
@@ -48,7 +48,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 						return null;
 					return
 						Assembly.LoadFrom(
-							StandardLibraryMethods.CombinePaths(
+							EwlStatics.CombinePaths(
 								Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
 								provider.NDependFolderPathInUserProfileFolder,
 								"Lib",
@@ -80,7 +80,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			get {
 				return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
 				       Directory.Exists(
-					       StandardLibraryMethods.CombinePaths(
+					       EwlStatics.CombinePaths(
 						       Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
 						       provider.NDependFolderPathInUserProfileFolder ) );
 			}
@@ -234,7 +234,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			get {
 				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.InstallationsFolderPath != null )
 					return ConfigurationStatics.MachineConfiguration.InstallationsFolderPath;
-				return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Installations" );
+				return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Installations" );
 			}
 		}
 
@@ -242,12 +242,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 			get {
 				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath != null )
 					return ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath;
-				return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
+				return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
 			}
 		}
 
 		public static string GetBuildFilePath( int systemId ) {
-			return StandardLibraryMethods.CombinePaths(
+			return EwlStatics.CombinePaths(
 				DataPackageRepositoryPath
 				/*NOTE: Make this the generic web-site-accessible folder and change this and DataPackageRepositoryPath to be a subfolder of that.*/,
 				"Latest Builds",

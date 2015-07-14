@@ -196,7 +196,7 @@ namespace RedStapler.StandardLibrary.IO {
 			// http://stackoverflow.com/a/217198/35349. We believe this is unlikely and is an acceptable risk.
 			string folderPath;
 			do {
-				folderPath = StandardLibraryMethods.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
+				folderPath = EwlStatics.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
 			}
 			while( File.Exists( folderPath ) || Directory.Exists( folderPath ) );
 			Directory.CreateDirectory( folderPath );

@@ -18,34 +18,34 @@ namespace RedStapler.StandardLibrary.IO {
 			IoMethods.DeleteFolder( outputFolderPath );
 
 			// Create and extract empty zip file
-			var emptyFolderPath = StandardLibraryMethods.CombinePaths( outputFolderPath, "Empty" );
+			var emptyFolderPath = EwlStatics.CombinePaths( outputFolderPath, "Empty" );
 			Directory.CreateDirectory( emptyFolderPath );
-			var emptyZipPath = StandardLibraryMethods.CombinePaths( outputFolderPath, "empty.zip" );
+			var emptyZipPath = EwlStatics.CombinePaths( outputFolderPath, "empty.zip" );
 			ZipFolderAsFile( emptyFolderPath, emptyZipPath );
 			using( var memoryStream = new MemoryStream() ) {
 				ZipFolderAsStream( emptyFolderPath, memoryStream );
 				memoryStream.Reset();
-				UnZipStreamIntoFolder( memoryStream, StandardLibraryMethods.CombinePaths( outputFolderPath, "Empty from stream" ) );
+				UnZipStreamIntoFolder( memoryStream, EwlStatics.CombinePaths( outputFolderPath, "Empty from stream" ) );
 			}
 
 			// File-based
-			var zipFilePath = StandardLibraryMethods.CombinePaths( outputFolderPath, "file.zip" );
-			var extractedPath = StandardLibraryMethods.CombinePaths( outputFolderPath, "Extracted from File" );
+			var zipFilePath = EwlStatics.CombinePaths( outputFolderPath, "file.zip" );
+			var extractedPath = EwlStatics.CombinePaths( outputFolderPath, "Extracted from File" );
 			ZipFolderAsFile( sourceFolderPath, zipFilePath );
 			UnZipFileAsFolder( zipFilePath, extractedPath );
 
 			// Byte-array-based
 			var bytes = ZipFolderAsByteArray( sourceFolderPath );
-			var byteZipFilePath = StandardLibraryMethods.CombinePaths( outputFolderPath, "fileFromBytes.zip" );
+			var byteZipFilePath = EwlStatics.CombinePaths( outputFolderPath, "fileFromBytes.zip" );
 			File.WriteAllBytes( byteZipFilePath, bytes );
-			UnZipByteArrayAsFolder( File.ReadAllBytes( byteZipFilePath ), StandardLibraryMethods.CombinePaths( outputFolderPath, "Extracted from Byte Array" ) );
+			UnZipByteArrayAsFolder( File.ReadAllBytes( byteZipFilePath ), EwlStatics.CombinePaths( outputFolderPath, "Extracted from Byte Array" ) );
 
 			// Stream-based
-			var streamedFilePath = StandardLibraryMethods.CombinePaths( outputFolderPath, "fileFromStream.zip" );
+			var streamedFilePath = EwlStatics.CombinePaths( outputFolderPath, "fileFromStream.zip" );
 			using( var fs = new FileStream( streamedFilePath, FileMode.Create ) )
 				ZipFolderAsStream( sourceFolderPath, fs );
 
-			var streamedExtractedPath = StandardLibraryMethods.CombinePaths( outputFolderPath, "Extracted from Stream" );
+			var streamedExtractedPath = EwlStatics.CombinePaths( outputFolderPath, "Extracted from Stream" );
 			using( var memoryStream = new MemoryStream() ) {
 				ZipFolderAsStream( sourceFolderPath, memoryStream );
 				memoryStream.Reset();
@@ -54,7 +54,7 @@ namespace RedStapler.StandardLibrary.IO {
 
 			using( var fs = File.OpenRead( streamedFilePath ) ) {
 				var files = UnZipStreamAsFileObjects( fs );
-				ZipFileObjectsAsStream( files, File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolderPath, "fileFromStreamedFileObjects.zip" ) ) );
+				ZipFileObjectsAsStream( files, File.OpenWrite( EwlStatics.CombinePaths( outputFolderPath, "fileFromStreamedFileObjects.zip" ) ) );
 			}
 		}
 
@@ -153,9 +153,9 @@ namespace RedStapler.StandardLibrary.IO {
 				ZipEntry entry;
 				while( ( entry = zipInputStream.GetNextEntry() ) != null ) {
 					if( entry.IsDirectory )
-						Directory.CreateDirectory( StandardLibraryMethods.CombinePaths( destinationFolderPath, entry.Name ) );
+						Directory.CreateDirectory( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) );
 					else {
-						using( var outputStream = IoMethods.GetFileStreamForWrite( StandardLibraryMethods.CombinePaths( destinationFolderPath, entry.Name ) ) )
+						using( var outputStream = IoMethods.GetFileStreamForWrite( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) ) )
 							IoMethods.CopyStream( zipInputStream, outputStream );
 					}
 				}

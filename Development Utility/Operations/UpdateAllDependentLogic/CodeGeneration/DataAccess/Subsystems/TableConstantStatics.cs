@@ -9,14 +9,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
 			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );
-				writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "Table {" );
+				writer.WriteLine( "public class " + EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "Table {" );
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this table." );
 				writer.WriteLine( "public const string Name = \"" + table + "\";" );
 
 				foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Contains schema information about this column." );
-					writer.WriteLine( "public class " + StandardLibraryMethods.GetCSharpSafeClassName( column.PascalCasedNameExceptForOracle ) + "Column {" );
+					writer.WriteLine( "public class " + EwlStatics.GetCSharpSafeClassName( column.PascalCasedNameExceptForOracle ) + "Column {" );
 
 					CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this column." );
 					writer.WriteLine( "public const string Name = \"" + column.Name + "\";" );

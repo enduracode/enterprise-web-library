@@ -37,7 +37,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		public bool Equals( InitializationAwareValue<T> other ) {
-			return other != null && Initialized && other.Initialized && StandardLibraryMethods.AreEqual( value, other.value );
+			return other != null && Initialized && other.Initialized && EwlStatics.AreEqual( value, other.value );
 		}
 
 		public override int GetHashCode() {

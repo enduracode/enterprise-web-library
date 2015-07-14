@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				copyInEwlFiles( installation );
 			}
 			catch( Exception e ) {
-				var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( StandardLibraryMethods.EwlName );
+				var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( EwlStatics.EwlName );
 				if( e is UnauthorizedAccessException || e is IOException )
 					throw new UserCorrectableException( message, e );
 				throw new ApplicationException( message, e );
@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();
 						writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
-						writer.WriteLine( "partial class StandardLibraryMethods {" );
+						writer.WriteLine( "partial class EwlStatics {" );
 						CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
 						writer.WriteLine(
 							"public static readonly DateTimeOffset EwlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
@@ -115,7 +115,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
 
 			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
-			    Directory.Exists( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
+			    Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
 				updateMercurialIgnoreFile( installation );
 		}
 
@@ -123,8 +123,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
-						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
-						StandardLibraryMethods.CombinePaths(
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
+						EwlStatics.CombinePaths(
 							InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 							InstallationFileStatics.FilesFolderName,
 							fileName + FileExtensions.Xsd ) );
@@ -133,11 +133,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			else {
 				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) {
-					var asposeLicenseFilePath = StandardLibraryMethods.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
+					var asposeLicenseFilePath = EwlStatics.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
 					if( File.Exists( asposeLicenseFilePath ) ) {
 						IoMethods.CopyFile(
 							asposeLicenseFilePath,
-							StandardLibraryMethods.CombinePaths(
+							EwlStatics.CombinePaths(
 								InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 								InstallationFileStatics.FilesFolderName,
 								asposeLicenseFileName ) );
@@ -153,13 +153,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyInWebProjectFiles( Installation installation, WebProject webProject ) {
-			var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, AppStatics.WebProjectFilesFolderName );
-			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
+			var webProjectFilesFolderPath = EwlStatics.CombinePaths( AppTools.InstallationPath, AppStatics.WebProjectFilesFolderName );
+			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// Copy Ewf folder and customize namespaces in .aspx, .ascx, .master, and .cs files.
-			var webProjectEwfFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
+			var webProjectEwfFolderPath = EwlStatics.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
 			IoMethods.DeleteFolder( webProjectEwfFolderPath );
-			IoMethods.CopyFolder( StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
+			IoMethods.CopyFolder( EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
 			var matchingFiles = new List<string>();
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
@@ -170,9 +170,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				File.WriteAllText( filePath, customizeNamespace( File.ReadAllText( filePath ), webProject ) );
 
 			IoMethods.CopyFile(
-				StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ),
-				StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
-			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( StandardLibraryMethods.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
+				EwlStatics.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ),
+				EwlStatics.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
+			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( EwlStatics.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
 		}
 
 		private string customizeNamespace( string text, WebProject webProject ) {
@@ -180,9 +180,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
-			var libraryGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Generated Code" );
+			var libraryGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Generated Code" );
 			Directory.CreateDirectory( libraryGeneratedCodeFolderPath );
-			var isuFilePath = StandardLibraryMethods.CombinePaths( libraryGeneratedCodeFolderPath, "ISU.cs" );
+			var isuFilePath = EwlStatics.CombinePaths( libraryGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
@@ -223,7 +223,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "public static class WebApplicationNames {" );
 					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
 						writer.WriteLine(
-							"public const string {0} = \"{1}\";".FormatWith( StandardLibraryMethods.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
+							"public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
 					}
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
@@ -257,9 +257,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
 				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
 
-				var programPath = "StandardLibraryMethods.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
+				var programPath = "EwlStatics.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
 				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
-				var runProgramExpression = "StandardLibraryMethods.RunProgram( " + programPath + ", arguments, input, false )";
+				var runProgramExpression = "EwlStatics.RunProgram( " + programPath + ", arguments, input, false )";
 
 				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
 				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
@@ -378,14 +378,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
-			var webProjectPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name );
+			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
 			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath );
 
-			var webProjectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( webProjectPath, "Generated Code" );
+			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( webProjectPath, "Generated Code" );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
-			var webProjectIsuFilePath = StandardLibraryMethods.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
+			var webProjectIsuFilePath = EwlStatics.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( webProjectIsuFilePath );
 			using( TextWriter writer = new StreamWriter( webProjectIsuFilePath ) ) {
 				writer.WriteLine( "using System;" );
@@ -411,9 +411,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
-			var serviceProjectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, service.Name, "Generated Code" );
+			var serviceProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name, "Generated Code" );
 			Directory.CreateDirectory( serviceProjectGeneratedCodeFolderPath );
-			var isuFilePath = StandardLibraryMethods.CombinePaths( serviceProjectGeneratedCodeFolderPath, "ISU.cs" );
+			var isuFilePath = EwlStatics.CombinePaths( serviceProjectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				writer.WriteLine( "using System;" );
@@ -487,9 +487,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
-			var projectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, project.Name, "Generated Code" );
+			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name, "Generated Code" );
 			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
-			var isuFilePath = StandardLibraryMethods.CombinePaths( projectGeneratedCodeFolderPath, "ISU.cs" );
+			var isuFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				writer.WriteLine( "using System;" );
@@ -527,9 +527,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
-			var generatedCodeFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
+			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
 			Directory.CreateDirectory( generatedCodeFolderPath );
-			var isuFilePath = StandardLibraryMethods.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
+			var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) )
 				codeWriter( writer );
@@ -551,7 +551,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( DevelopmentInstallation installation ) {
 			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
-			if( File.Exists( StandardLibraryMethods.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) ) {
+			if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) ) {
 				generateXmlSchemaLogic(
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					customInstallationConfigSchemaPathInProject,
@@ -565,7 +565,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null ) {
 				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
 					generateXmlSchemaLogic(
-						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),
 						xmlSchema.pathInProject,
 						xmlSchema.@namespace,
 						xmlSchema.codeFileName,
@@ -575,12 +575,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateXmlSchemaLogic( string projectPath, string schemaPathInProject, string nameSpace, string codeFileName, bool useSvcUtil ) {
-			var projectGeneratedCodeFolderPath = StandardLibraryMethods.CombinePaths( projectPath, "Generated Code" );
+			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( projectPath, "Generated Code" );
 			if( useSvcUtil ) {
 				try {
-					StandardLibraryMethods.RunProgram(
-						StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
-						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
+					EwlStatics.RunProgram(
+						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
+						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
 						codeFileName + "\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
 						"",
 						true );
@@ -592,9 +592,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			else {
 				Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 				try {
-					StandardLibraryMethods.RunProgram(
-						StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
-						"/nologo \"" + StandardLibraryMethods.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" +
+					EwlStatics.RunProgram(
+						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
+						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" +
 						projectGeneratedCodeFolderPath + "\"",
 						"",
 						true );
@@ -602,10 +602,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to generate XML schema logic using xsd.", e );
 				}
-				var outputCodeFilePath = StandardLibraryMethods.CombinePaths(
+				var outputCodeFilePath = EwlStatics.CombinePaths(
 					projectGeneratedCodeFolderPath,
 					Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
-				var desiredCodeFilePath = StandardLibraryMethods.CombinePaths( projectGeneratedCodeFolderPath, codeFileName );
+				var desiredCodeFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, codeFileName );
 				if( outputCodeFilePath != desiredCodeFilePath ) {
 					try {
 						IoMethods.MoveFile( outputCodeFilePath, desiredCodeFilePath );
@@ -618,7 +618,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void updateMercurialIgnoreFile( DevelopmentInstallation installation ) {
-			var filePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
+			var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
 			var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : new string[ 0 ];
 			IoMethods.DeleteFile( filePath );
 			using( TextWriter writer = new StreamWriter( filePath ) ) {

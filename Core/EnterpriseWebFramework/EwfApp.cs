@@ -31,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			catch( Exception e ) {
 				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
 				try {
-					StandardLibraryMethods.CallEveryMethod(
+					EwlStatics.CallEveryMethod(
 						delegate {
 							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
 							if( setErrorInRequestState )

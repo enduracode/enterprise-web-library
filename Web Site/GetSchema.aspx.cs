@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			internal string FilePath { get; private set; }
 
 			protected override void init() {
-				FilePath = StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, FileName + FileExtensions.Xsd );
+				FilePath = EwlStatics.CombinePaths( AppTools.FilesFolderPath, FileName + FileExtensions.Xsd );
 				if( !File.Exists( FilePath ) )
 					throw new ApplicationException( "File does not exist." );
 			}
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			get {
 				return new EwfSafeResponseWriter(
 					() => new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
-					StandardLibraryMethods.EwlBuildDateTime,
+					EwlStatics.EwlBuildDateTime,
 					() => "getSchema" + info.FileName );
 			}
 		}

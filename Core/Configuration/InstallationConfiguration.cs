@@ -48,7 +48,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// </summary> 
 		public static bool InstalledInstallationExists( string installationPath ) {
 			// Consider this installation "installed" if a Configuration folder exists at the root of the installation folder.
-			return Directory.Exists( StandardLibraryMethods.CombinePaths( installationPath, ConfigurationFolderName ) );
+			return Directory.Exists( EwlStatics.CombinePaths( installationPath, ConfigurationFolderName ) );
 		}
 
 		/// <summary>
@@ -84,7 +84,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
 			// could potentially be served up to users.
 			configurationFolderPath =
-				StandardLibraryMethods.CombinePaths(
+				EwlStatics.CombinePaths(
 					InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
 					ConfigurationFolderName );
 
@@ -94,27 +94,27 @@ namespace RedStapler.StandardLibrary.Configuration {
 			// run a system using an unreleased version of the library that contains schema changes.
 
 			// system general configuration
-			var systemGeneralConfigurationFilePath = StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, "General.xml" );
+			var systemGeneralConfigurationFilePath = EwlStatics.CombinePaths( ConfigurationFolderPath, "General.xml" );
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
 			// system development configuration
 			if( isDevelopmentInstallation ) {
 				systemDevelopmentConfiguration =
 					XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
-						StandardLibraryMethods.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
+						EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
 						false );
 			}
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
-				                                          ? StandardLibraryMethods.CombinePaths(
+				                                          ? EwlStatics.CombinePaths(
 					                                          ConfigurationFolderPath,
 					                                          InstallationConfigurationFolderName,
 					                                          InstallationsFolderName,
 					                                          DevelopmentInstallationFolderName )
-				                                          : StandardLibraryMethods.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
+				                                          : EwlStatics.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
 
 			// installation standard configuration
-			var installationStandardConfigurationFilePath = StandardLibraryMethods.CombinePaths(
+			var installationStandardConfigurationFilePath = EwlStatics.CombinePaths(
 				installationConfigurationFolderPath,
 				InstallationStandardConfigurationFileName );
 			installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
@@ -146,7 +146,7 @@ namespace RedStapler.StandardLibrary.Configuration {
 			webApplications = webApplications.ToArray();
 
 			// installation custom configuration
-			installationCustomConfigurationFilePath = StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
+			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
 		}
 
 		/// <summary>
@@ -322,6 +322,6 @@ namespace RedStapler.StandardLibrary.Configuration {
 		/// <summary>
 		/// The file path for the error log file for this installation. ("Error Log.txt" in the root of the installation folder).
 		/// </summary>
-		public string ErrorLogFilePath { get { return StandardLibraryMethods.CombinePaths( installationPath, "Error Log.txt" ); } }
+		public string ErrorLogFilePath { get { return EwlStatics.CombinePaths( installationPath, "Error Log.txt" ); } }
 	}
 }

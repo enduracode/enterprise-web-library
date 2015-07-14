@@ -13,7 +13,7 @@
 		/// </summary>
 		public static string GetGeneralFilesFolderPath( string installationPath, bool isDevelopmentInstallation ) {
 			if( isDevelopmentInstallation )
-				return StandardLibraryMethods.CombinePaths( installationPath, "Library" );
+				return EwlStatics.CombinePaths( installationPath, "Library" );
 			return installationPath;
 		}
 	}

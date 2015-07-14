@@ -392,6 +392,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
+    <Compile Include="EwlStatics.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
     <Compile Include="Generated Code\ISU.cs" />
@@ -549,7 +550,6 @@
     <Compile Include="MultiColumnForms\MultiColumnLoader.cs" />
     <Compile Include="MultiColumnForms\MultiColumnValidator.cs" />
     <Compile Include="EnterpriseWebFramework\ResourceNotAvailableException.cs" />
-    <Compile Include="StandardLibraryMethods.cs" />
     <Compile Include="WebSessionState\StandardLibrarySessionState.cs" />
     <Compile Include="WebSessionState\StatusMessageType.cs" />
     <Compile Include="IO\ZipOps.cs" />

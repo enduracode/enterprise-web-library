@@ -15,7 +15,7 @@ using RedStapler.StandardLibrary.IO;
 
 namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
-		private static readonly string sqlServerFilesFolderPath = StandardLibraryMethods.CombinePaths(
+		private static readonly string sqlServerFilesFolderPath = EwlStatics.CombinePaths(
 			ConfigurationStatics.RedStaplerFolderPath,
 			"SQL Server Databases" );
 
@@ -55,7 +55,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			executeMethodWithDbExceptionHandling(
 				delegate {
 					try {
-						StandardLibraryMethods.RunProgram(
+						EwlStatics.RunProgram(
 							"sqlcmd",
 							( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
 							"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine + "EXIT" +
@@ -124,8 +124,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
 					// without their physical files colliding.
 					var restoreCommand = "RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
-					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
-					                     StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
+					                     EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
+					                     EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'";
 
 					if( keepDbInStandbyMode )
 						restoreCommand += ", STANDBY = '" + getStandbyFilePath() + "'";
@@ -142,14 +142,14 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
-		private string backupFilePath { get { return StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, info.Database + ".bak" ); } }
+		private string backupFilePath { get { return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, info.Database + ".bak" ); } }
 
 		void Database.BackupTransactionLog( string folderPath ) {
 			Directory.CreateDirectory( folderPath );
 			ExecuteDbMethod(
 				cn => {
 					var newId = new InlineInsert( "MainSequence" ).Execute( cn );
-					var newTransactionLogBackupFileName = newId + " " + StandardLibraryMethods.GetLocalHostName();
+					var newTransactionLogBackupFileName = newId + " " + EwlStatics.GetLocalHostName();
 
 
 					// We definitely do not want the following statements in a transaction because we want to be sure that the insert is included in the backup. Also, if
@@ -162,7 +162,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 						new InlineDbCommandColumnValue( "TransactionLogFileName", new DbParameterValue( newTransactionLogBackupFileName, "VarChar" ) ) );
 					insert.Execute( cn );
 
-					var filePath = StandardLibraryMethods.CombinePaths( folderPath, newTransactionLogBackupFileName );
+					var filePath = EwlStatics.CombinePaths( folderPath, newTransactionLogBackupFileName );
 					executeLongRunningCommand( cn, "BACKUP LOG " + info.Database + " TO DISK = '" + filePath + "'" );
 				} );
 		}
@@ -195,7 +195,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 						executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" );
 
 						foreach( var logFileName in newLogFileNames.Reverse() ) {
-							var filePath = StandardLibraryMethods.CombinePaths( folderPath, logFileName );
+							var filePath = EwlStatics.CombinePaths( folderPath, logFileName );
 
 							// We do not want this to be in a transaction (it probably wouldn't even work because having a transaction writes to the transaction log, and we can't write anything to a
 							// SQL Server database in standby mode.
@@ -226,7 +226,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					}
 					finally {
 						// Sometimes the database isn't ready to go yet and this command will fail. So, we retry.
-						StandardLibraryMethods.Retry(
+						EwlStatics.Retry(
 							() => executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET MULTI_USER" ),
 							"Database is in Restoring state and is not recovering." );
 					}
@@ -234,7 +234,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		private string getStandbyFilePath() {
-			return StandardLibraryMethods.CombinePaths( sqlServerFilesFolderPath, info.Database + "Standby.ldf" );
+			return EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + "Standby.ldf" );
 		}
 
 		public string GetLogSummary( string folderPath ) {

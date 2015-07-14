@@ -127,7 +127,7 @@ namespace RedStapler.StandardLibrary.IO {
 		}
 
 		//internal static void Test() {
-		//  var localPath = StandardLibraryMethods.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Salesforce.csv" );
+		//  var localPath = EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Salesforce.csv" );
 		//  var csvParser = CreateForCsvFile( localPath, true );
 		//  var validationErrors = new List<ValidationError>();
 		//  // GMS: Can't actually test this because MiniProfiler blows up with a blank database connection.

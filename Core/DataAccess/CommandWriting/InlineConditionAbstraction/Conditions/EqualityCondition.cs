@@ -37,7 +37,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAb
 
 		public bool Equals( InlineDbCommandCondition other ) {
 			var otherEqualityCondition = other as EqualityCondition;
-			return otherEqualityCondition != null && StandardLibraryMethods.AreEqual( columnValue, otherEqualityCondition.columnValue );
+			return otherEqualityCondition != null && EwlStatics.AreEqual( columnValue, otherEqualityCondition.columnValue );
 		}
 
 		public override int GetHashCode() {

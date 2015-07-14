@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {
-			return StandardLibraryMethods.CombinePaths(
+			return EwlStatics.CombinePaths(
 				dataPackageFolderPath,
 				( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
 		}
@@ -90,7 +90,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			if( database is NoDatabase )
 				return;
 			StatusStatics.SetStatus( "Waiting for database to be ready..." );
-			StandardLibraryMethods.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
+			EwlStatics.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
 			StatusStatics.SetStatus( "Database is ready." );
 		}
 

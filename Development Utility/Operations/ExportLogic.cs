@@ -22,56 +22,56 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			IoMethods.ExecuteWithTempFolder(
 				folderPath => {
-					var ewlOutputFolderPath = StandardLibraryMethods.CombinePaths(
+					var ewlOutputFolderPath = EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						AppStatics.CoreProjectName,
-						StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) );
-					var libFolderPath = StandardLibraryMethods.CombinePaths( folderPath, @"lib\net451-full" );
+						EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
+					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net451-full" );
 					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
-						IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( ewlOutputFolderPath, fileName ), StandardLibraryMethods.CombinePaths( libFolderPath, fileName ) );
+						IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
 					IoMethods.CopyFile(
-						StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-						StandardLibraryMethods.CombinePaths( folderPath, @"tools\init.ps1" ) );
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+						EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
 
-					var webSitePath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
-					var webProjectFilesFolderPath = StandardLibraryMethods.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
+					var webSitePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
+					var webProjectFilesFolderPath = EwlStatics.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
 					IoMethods.CopyFolder(
-						StandardLibraryMethods.CombinePaths( webSitePath, StaticFileHandler.EwfFolderName ),
-						StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ),
+						EwlStatics.CombinePaths( webSitePath, StaticFileHandler.EwfFolderName ),
+						EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ),
 						false );
 					IoMethods.CopyFile(
-						StandardLibraryMethods.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
-						StandardLibraryMethods.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
+						EwlStatics.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
+						EwlStatics.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
 
 					const string duProjectAndFolderName = "Development Utility";
 					IoMethods.CopyFolder(
-						StandardLibraryMethods.CombinePaths(
+						EwlStatics.CombinePaths(
 							installation.GeneralLogic.Path,
 							duProjectAndFolderName,
-							StandardLibraryMethods.GetProjectOutputFolderPath( useDebugAssembly ) ),
-						StandardLibraryMethods.CombinePaths( folderPath, duProjectAndFolderName ),
+							EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
+						EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
 						false );
 					packageGeneralFiles( installation, folderPath, false );
 					IoMethods.CopyFolder(
-						StandardLibraryMethods.CombinePaths(
+						EwlStatics.CombinePaths(
 							installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 							InstallationConfiguration.InstallationConfigurationFolderName,
 							InstallationConfiguration.InstallationsFolderName,
 							( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
-						StandardLibraryMethods.CombinePaths(
+						EwlStatics.CombinePaths(
 							folderPath,
 							InstallationConfiguration.ConfigurationFolderName,
 							InstallationConfiguration.InstallationConfigurationFolderName ),
 						false );
 
-					var manifestPath = StandardLibraryMethods.CombinePaths( folderPath, "Package.nuspec" );
+					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
 						writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
 
 					StatusStatics.SetStatus(
-						StandardLibraryMethods.RunProgram(
-							StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+						EwlStatics.RunProgram(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 							"",
 							true ) );
@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			return
 				File.ReadAllBytes(
-					StandardLibraryMethods.CombinePaths(
+					EwlStatics.CombinePaths(
 						outputFolderPath,
 						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 							installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
@@ -90,24 +90,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
 			// configuration files
-			var configurationFolderPath = StandardLibraryMethods.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
+			var configurationFolderPath = EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
 			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ConfigurationStatics.ProvidersFolderAndNamespaceName ) );
+			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
+			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, ConfigurationStatics.ProvidersFolderAndNamespaceName ) );
 			if( !includeDatabaseUpdates )
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
-			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
-			IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
-			IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
+			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
+			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
+			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
 
 			// other files
 			var filesFolderInInstallationPath =
-				StandardLibraryMethods.CombinePaths(
+				EwlStatics.CombinePaths(
 					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 					InstallationFileStatics.FilesFolderName );
 			if( Directory.Exists( filesFolderInInstallationPath ) )
-				IoMethods.CopyFolder( filesFolderInInstallationPath, StandardLibraryMethods.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
+				IoMethods.CopyFolder( filesFolderInInstallationPath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
 		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime, TextWriter writer ) {
@@ -126,14 +126,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
 				"<description>The {0} ({1}) is an extremely opinionated library for web applications that trades off performance, scalability, and development flexibility for an ease of maintenance you won't find anywhere else.</description>"
-					.FormatWith( StandardLibraryMethods.EwlName, StandardLibraryMethods.EwlInitialism ) );
+					.FormatWith( EwlStatics.EwlName, EwlStatics.EwlInitialism ) );
 			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
 			writer.WriteLine( "<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
 			var lines =
-				from line in File.ReadAllLines( StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
+				from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
 				let trimmedLine = line.Trim()
 				where trimmedLine.StartsWith( "<package " )
 				select trimmedLine;
@@ -156,7 +156,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
 
-			var logicPackagesFolderPath = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );
+			var logicPackagesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );
 			IoMethods.DeleteFolder( logicPackagesFolderPath );
 
 			// Set up the main (build) object in the build message.
@@ -168,7 +168,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.LogicSize = ConfigurationLogic.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
 				                  ? GetLogicSize.GetNDependLocCount( installation, false ) as int?
 				                  : null;
-			var serverSideLogicFolderPath = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
+			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
 			packageServerSideConsoleApps( installation, serverSideLogicFolderPath );
@@ -181,7 +181,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				build.ClientSideApp = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.ClientSideAppType();
 				build.ClientSideApp.Name = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name;
 				build.ClientSideApp.AssemblyName = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName;
-				var clientSideAppFolder = StandardLibraryMethods.CombinePaths( logicPackagesFolderPath, "Client Side Application" );
+				var clientSideAppFolder = EwlStatics.CombinePaths( logicPackagesFolderPath, "Client Side Application" );
 				packageClientSideApp( installation, clientSideAppFolder );
 				packageGeneralFiles( installation, clientSideAppFolder, false );
 				build.ClientSideApp.Package = ZipOps.ZipFolderAsByteArray( clientSideAppFolder );
@@ -192,7 +192,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.Installations = new RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.InstallationsType();
 			foreach( var installationConfigurationFolderPath in
 				Directory.GetDirectories(
-					StandardLibraryMethods.CombinePaths(
+					EwlStatics.CombinePaths(
 						installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 						InstallationConfiguration.InstallationConfigurationFolderName,
 						InstallationConfiguration.InstallationsFolderName ) ) ) {
@@ -202,7 +202,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
 					var installationConfigurationFile =
 						XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
-							StandardLibraryMethods.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+							EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
 							false );
 
 					buildMessageInstallation.Id = installationConfigurationFile.rsisInstallationId;
@@ -245,13 +245,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// NOTE: When packaging web apps, try to find a way to exclude data files. Apparently web deployment projects include these in their output even though
 			// they aren't part of the source web projects. NOTE ON NOTE: We don't use WDPs anymore, so maybe we can eliminate this note.
 			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
-				var webAppPath = StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, webProject.name );
+				var webAppPath = EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name );
 
 				// Pre-compile the web project.
 				try {
-					StandardLibraryMethods.RunProgram(
-						StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
-						"-v \"/" + webProject.name + ".csproj\" -p \"" + StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
+					EwlStatics.RunProgram(
+						EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
+						"-v \"/" + webProject.name + ".csproj\" -p \"" + EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
 						( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" + webAppPath + "\"",
 						"",
 						true );
@@ -260,8 +260,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
 				}
 				try {
-					StandardLibraryMethods.RunProgram(
-						StandardLibraryMethods.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
+					EwlStatics.RunProgram(
+						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
 						"\"" + webAppPath + "\" -o " + webProject.NamespaceAndAssemblyName + ".Package -a -copyattrs",
 						"",
 						true );
@@ -271,14 +271,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 
 				// Delete files and folders that aren't necessary for installed installations.
-				IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "Generated Code" ) );
-				IoMethods.DeleteFolder( StandardLibraryMethods.CombinePaths( webAppPath, "obj" ) );
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-				IoMethods.DeleteFile( StandardLibraryMethods.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
+				IoMethods.DeleteFolder( EwlStatics.CombinePaths( webAppPath, "Generated Code" ) );
+				IoMethods.DeleteFolder( EwlStatics.CombinePaths( webAppPath, "obj" ) );
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
 
-				var webConfigPath = StandardLibraryMethods.CombinePaths( webAppPath, "Web.config" );
+				var webConfigPath = EwlStatics.CombinePaths( webAppPath, "Web.config" );
 				File.WriteAllText(
 					webConfigPath,
 					File.ReadAllText( webConfigPath )
@@ -291,7 +291,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
 				IoMethods.CopyFolder(
 					installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
-					StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, service.Name ),
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ),
 					false );
 			}
 		}
@@ -301,25 +301,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				copyServerSideProject( installation, serverSideLogicFolderPath, project.Name );
 
 			// Always copy special projects.
-			var testRunnerFolder = StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, StandardLibraryMethods.TestRunnerProjectName );
+			var testRunnerFolder = EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.TestRunnerProjectName );
 			if( Directory.Exists( testRunnerFolder ) )
-				copyServerSideProject( installation, serverSideLogicFolderPath, StandardLibraryMethods.TestRunnerProjectName );
+				copyServerSideProject( installation, serverSideLogicFolderPath, EwlStatics.TestRunnerProjectName );
 		}
 
 		private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
 			IoMethods.CopyFolder(
-				StandardLibraryMethods.CombinePaths( installation.GeneralLogic.Path, project, StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-				StandardLibraryMethods.CombinePaths( serverSideLogicFolderPath, project ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, project, EwlStatics.GetProjectOutputFolderPath( false ) ),
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, project ),
 				false );
 		}
 
 		private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
 			IoMethods.CopyFolder(
-				StandardLibraryMethods.CombinePaths(
+				EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-					StandardLibraryMethods.GetProjectOutputFolderPath( false ) ),
-				StandardLibraryMethods.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
+					EwlStatics.GetProjectOutputFolderPath( false ) ),
+				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
 				false );
 		}
 

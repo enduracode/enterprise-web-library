@@ -15,7 +15,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 		private const int serviceFailureResetPeriod = 3600; // seconds
 
-		private static readonly string appCmdPath = StandardLibraryMethods.CombinePaths(
+		private static readonly string appCmdPath = EwlStatics.CombinePaths(
 			Environment.GetEnvironmentVariable( "windir" ),
 			@"system32\inetsrv\AppCmd.exe" );
 
@@ -30,7 +30,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		public InstallationConfiguration RuntimeConfiguration { get { return runtimeConfiguration; } }
 
 		public string DatabaseUpdateFilePath {
-			get { return StandardLibraryMethods.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); }
+			get { return EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); }
 		}
 
 		/// <summary>
@@ -73,7 +73,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
 			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) ) ) {
 				// Clear failure actions.
-				StandardLibraryMethods.RunProgram( "sc", "failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ), "", true );
+				EwlStatics.RunProgram( "sc", "failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ), "", true );
 
 				if( service.Status == ServiceControllerStatus.Stopped )
 					continue;
@@ -113,12 +113,12 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 				// Set failure actions.
 				const int restartDelay = 60000; // milliseconds
-				StandardLibraryMethods.RunProgram(
+				EwlStatics.RunProgram(
 					"sc",
 					"failure \"{0}\" reset= {1} actions= restart/{2}".FormatWith( service.ServiceName, serviceFailureResetPeriod, restartDelay ),
 					"",
 					true );
-				StandardLibraryMethods.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( service.ServiceName ), "", true );
+				EwlStatics.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( service.ServiceName ), "", true );
 			}
 			if( runtimeConfiguration.InstallationType != InstallationType.Development ) {
 				foreach( var site in runtimeConfiguration.WebSiteNames )
@@ -136,10 +136,10 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
 			try {
-				StandardLibraryMethods.RunProgram(
-					StandardLibraryMethods.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
+				EwlStatics.RunProgram(
+					EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
 					( uninstall ? "/u " : "" ) + "\"" +
-					StandardLibraryMethods.CombinePaths(
+					EwlStatics.CombinePaths(
 						GetWindowsServiceFolderPath( service, true ),
 						service.NamespaceAndAssemblyName + ".exe"
 						/* file extension is required */ ) + "\"",
@@ -155,9 +155,9 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		}
 
 		public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
-			var path = StandardLibraryMethods.CombinePaths( generalInstallationLogic.Path, service.Name );
+			var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );
 			if( runtimeConfiguration.InstallationType == InstallationType.Development )
-				path = StandardLibraryMethods.CombinePaths( path, StandardLibraryMethods.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation ) );
+				path = EwlStatics.CombinePaths( path, EwlStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation ) );
 			return path;
 		}
 
@@ -166,17 +166,17 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 		private bool siteExistsInIis( string webSiteName ) {
 			if( !File.Exists( appCmdPath ) )
 				return false;
-			return StandardLibraryMethods.RunProgram( appCmdPath, "list sites", "", true ).Contains( "\"" + webSiteName + "\"" );
+			return EwlStatics.RunProgram( appCmdPath, "list sites", "", true ).Contains( "\"" + webSiteName + "\"" );
 		}
 
 		private void stopWebSite( string webSiteName ) {
 			if( siteExistsInIis( webSiteName ) )
-				StandardLibraryMethods.RunProgram( appCmdPath, "Stop Site \"" + webSiteName + "\"", "", true );
+				EwlStatics.RunProgram( appCmdPath, "Stop Site \"" + webSiteName + "\"", "", true );
 		}
 
 		private void startWebSite( string webSiteName ) {
 			if( siteExistsInIis( webSiteName ) )
-				StandardLibraryMethods.RunProgram( appCmdPath, "Start Site \"" + webSiteName + "\"", "", true );
+				EwlStatics.RunProgram( appCmdPath, "Start Site \"" + webSiteName + "\"", "", true );
 		}
 	}
 }

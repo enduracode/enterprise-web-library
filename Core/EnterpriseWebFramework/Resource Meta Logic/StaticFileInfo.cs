@@ -46,7 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the path of the file.
 		/// </summary>
-		internal string FilePath { get { return StandardLibraryMethods.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath ); } }
+		internal string FilePath { get { return EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath ); } }
 
 		/// <summary>
 		/// Gets the app relative path of the file.

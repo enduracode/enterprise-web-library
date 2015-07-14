@@ -18,7 +18,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
 		private const string databaseFileDumpFileName = "Dump File.dmp";
 		private const string databaseFileSchemaNameFileName = "Schema.txt";
-		private static readonly string dataPumpFolderPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Data Pump" );
+		private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Data Pump" );
 
 		private readonly OracleInfo info;
 		private readonly List<string> latestTableSpaces;
@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					delegate {
 						try {
 							// -L option stops it from prompting on failed logon.
-							StandardLibraryMethods.RunProgram( "sqlplus", "-L " + getLogonString(), sw.ToString(), true );
+							EwlStatics.RunProgram( "sqlplus", "-L " + getLogonString(), sw.ToString(), true );
 						}
 						catch( Exception e ) {
 							throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
@@ -78,7 +78,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 					delegate {
 						try {
 							// We pass an enter keystroke as input in an attempt to kill the program if it gets stuck on a username prompt because of a bad logon string.
-							StandardLibraryMethods.RunProgram(
+							EwlStatics.RunProgram(
 								"expdp",
 								getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y VERSION=12.1",
 								Environment.NewLine,
@@ -92,8 +92,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 				IoMethods.ExecuteWithTempFolder(
 					folderPath => {
-						IoMethods.CopyFile( getDumpFilePath(), StandardLibraryMethods.CombinePaths( folderPath, databaseFileDumpFileName ) );
-						File.WriteAllText( StandardLibraryMethods.CombinePaths( folderPath, databaseFileSchemaNameFileName ), info.UserAndSchema );
+						IoMethods.CopyFile( getDumpFilePath(), EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ) );
+						File.WriteAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ), info.UserAndSchema );
 						ZipOps.ZipFolderAsFile( folderPath, filePath );
 					} );
 			}
@@ -119,18 +119,18 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 			try {
 				IoMethods.ExecuteWithTempFolder(
 					tempFolderPath => {
-						var folderPath = StandardLibraryMethods.CombinePaths( tempFolderPath, "Database File" );
+						var folderPath = EwlStatics.CombinePaths( tempFolderPath, "Database File" );
 						ZipOps.UnZipFileAsFolder( filePath, folderPath );
 						try {
-							IoMethods.CopyFile( StandardLibraryMethods.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
+							IoMethods.CopyFile( EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
 
 							executeMethodWithDbExceptionHandling(
 								delegate {
 									try {
-										StandardLibraryMethods.RunProgram(
+										EwlStatics.RunProgram(
 											"impdp",
 											getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y REMAP_SCHEMA=" +
-											File.ReadAllText( StandardLibraryMethods.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" + info.UserAndSchema,
+											File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" + info.UserAndSchema,
 											"",
 											true );
 									}
@@ -199,11 +199,11 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 
 			// Create necessary tablespaces that don't already exist.
 			foreach( var nonExistentTs in latestTableSpaces.Select( s => s.ToLower() ).Except( currentTableSpaces ) ) {
-				var tableSpaceFolderPath = StandardLibraryMethods.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Tablespaces" );
+				var tableSpaceFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Tablespaces" );
 				Directory.CreateDirectory( tableSpaceFolderPath );
 				executeLongRunningCommand(
 					cn,
-					"CREATE TABLESPACE " + nonExistentTs + " DATAFILE '" + StandardLibraryMethods.CombinePaths( tableSpaceFolderPath, nonExistentTs + ".dbf" ) + "' SIZE 100M" );
+					"CREATE TABLESPACE " + nonExistentTs + " DATAFILE '" + EwlStatics.CombinePaths( tableSpaceFolderPath, nonExistentTs + ".dbf" ) + "' SIZE 100M" );
 			}
 		}
 
@@ -220,7 +220,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 		}
 
 		private string getDumpFilePath() {
-			return StandardLibraryMethods.CombinePaths( dataPumpFolderPath, getDumpFileName() );
+			return EwlStatics.CombinePaths( dataPumpFolderPath, getDumpFileName() );
 		}
 
 		private string getDumpFileName() {

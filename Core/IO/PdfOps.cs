@@ -85,14 +85,14 @@ namespace RedStapler.StandardLibrary.IO {
 
 		internal static void Test() {
 			const string outputFolderName = "PdfOpsTests";
-			var outputFolder = StandardLibraryMethods.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
+			var outputFolder = EwlStatics.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
 			IoMethods.DeleteFolder( outputFolder );
 			Directory.CreateDirectory( outputFolder );
 
-			var inputTestFiles = StandardLibraryMethods.CombinePaths( TestStatics.InputTestFilesFolderPath, "PdfOps" );
-			var onePagePdfPath = StandardLibraryMethods.CombinePaths( inputTestFiles, "onepage.pdf" );
-			var twoPagePdfPath = StandardLibraryMethods.CombinePaths( inputTestFiles, "twopage.pdf" );
-			var threePagePdfPath = StandardLibraryMethods.CombinePaths( inputTestFiles, "threepage.pdf" );
+			var inputTestFiles = EwlStatics.CombinePaths( TestStatics.InputTestFilesFolderPath, "PdfOps" );
+			var onePagePdfPath = EwlStatics.CombinePaths( inputTestFiles, "onepage.pdf" );
+			var twoPagePdfPath = EwlStatics.CombinePaths( inputTestFiles, "twopage.pdf" );
+			var threePagePdfPath = EwlStatics.CombinePaths( inputTestFiles, "threepage.pdf" );
 
 			var explanations = new List<Tuple<String, String>>();
 
@@ -100,21 +100,21 @@ namespace RedStapler.StandardLibrary.IO {
 
 			using( var onePage = File.OpenRead( onePagePdfPath ) ) {
 				const string concatOnePdf = "ConcatOne.pdf";
-				using( var concatFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, concatOnePdf ) ) )
+				using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatOnePdf ) ) )
 					ConcatPdfs( onePage.ToSingleElementArray(), concatFile );
 				explanations.Add( Tuple.Create( concatOnePdf, "This file should be exactly the same as {0}.".FormatWith( onePagePdfPath ) ) );
 
 				resetFileStream( onePage );
 				using( var twoPage = File.OpenRead( twoPagePdfPath ) ) {
 					const string concatTwoPdfs = "ConcatTwo.pdf";
-					using( var concatFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, concatTwoPdfs ) ) )
+					using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatTwoPdfs ) ) )
 						ConcatPdfs( new[] { onePage, twoPage }, concatFile );
 					explanations.Add( Tuple.Create( concatTwoPdfs, "This file should look like {0} immediately followed by {1}.".FormatWith( onePagePdfPath, twoPagePdfPath ) ) );
 
 					resetFileStream( onePage, twoPage );
 					using( var threePage = File.OpenRead( threePagePdfPath ) ) {
 						const string concatThreePdfs = "ConcatThree.pdf";
-						using( var concatFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, concatThreePdfs ) ) )
+						using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatThreePdfs ) ) )
 							ConcatPdfs( new[] { onePage, twoPage, threePage }, concatFile );
 						explanations.Add( Tuple.Create( concatThreePdfs,
 						                                "This file should look like {0} immediately followed by {1} immediately followed by {2}.".FormatWith( onePagePdfPath,
@@ -130,7 +130,7 @@ namespace RedStapler.StandardLibrary.IO {
 				IoMethods.CopyStream( File.OpenRead( onePagePdfPath ), onePage );
 				const string bookmarkOnePdf = "BookmarkOne.pdf";
 				const string bookmarkTitle = "Bookmark 1";
-				using( var bookmarkFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, bookmarkOnePdf ) ) )
+				using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkOnePdf ) ) )
 					CreateBookmarkedPdf( Tuple.Create( bookmarkTitle, onePage ).ToSingleElementArray(), bookmarkFile );
 				explanations.Add( Tuple.Create( bookmarkOnePdf, "This should be {0} labeled with one bookmark named {1}.".FormatWith( onePagePdfPath, bookmarkTitle ) ) );
 
@@ -139,7 +139,7 @@ namespace RedStapler.StandardLibrary.IO {
 					const string bookmarkTwoPdf = "BookmarkTwo.pdf";
 					const string firstBookmarkTitle = "First bookmark";
 					const string secondBookmarkTitle = "Second bookmark";
-					using( var bookmarkFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, bookmarkTwoPdf ) ) )
+					using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkTwoPdf ) ) )
 						CreateBookmarkedPdf( new[] { Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ) }, bookmarkFile );
 					explanations.Add( Tuple.Create( bookmarkTwoPdf,
 					                                "This should be {0} labeled with bookmark named {1} followed by {2} with the title of {3}.".FormatWith( onePagePdfPath,
@@ -151,7 +151,7 @@ namespace RedStapler.StandardLibrary.IO {
 						IoMethods.CopyStream( File.OpenRead( threePagePdfPath ), threePage );
 						const string bookmarkThreePdf = "BookmarkThree.pdf";
 						const string thirdBookmarkTItle = "Third bookmark";
-						using( var bookmarkFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, bookmarkThreePdf ) ) ) {
+						using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkThreePdf ) ) ) {
 							CreateBookmarkedPdf(
 								new[] { Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ), Tuple.Create( thirdBookmarkTItle, threePage ) },
 								bookmarkFile );

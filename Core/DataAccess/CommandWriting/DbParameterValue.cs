@@ -34,7 +34,7 @@ namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
 		}
 
 		public bool Equals( DbParameterValue other ) {
-			return other != null && StandardLibraryMethods.AreEqual( value, other.value ) && dbTypeString == other.dbTypeString;
+			return other != null && EwlStatics.AreEqual( value, other.value ) && dbTypeString == other.dbTypeString;
 		}
 
 		public override int GetHashCode() {

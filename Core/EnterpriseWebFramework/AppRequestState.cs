@@ -254,7 +254,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 						nonTransactionalModificationMethods.Clear();
 					}
 				} );
-			StandardLibraryMethods.CallEveryMethod( methods.ToArray() );
+			EwlStatics.CallEveryMethod( methods.ToArray() );
 			transactionMarkedForRollback = false;
 		}
 

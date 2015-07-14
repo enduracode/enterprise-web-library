@@ -12,7 +12,7 @@ namespace RedStapler.StandardLibrary {
 		public T Value {
 			get { return val.Value; }
 			set {
-				if( val.Initialized && StandardLibraryMethods.AreEqual( val.Value, value ) )
+				if( val.Initialized && EwlStatics.AreEqual( val.Value, value ) )
 					return;
 				val.Value = value;
 				Changed = true;
@@ -28,7 +28,7 @@ namespace RedStapler.StandardLibrary {
 		}
 
 		public bool Equals( DataValue<T> other ) {
-			return other != null && StandardLibraryMethods.AreEqual( val, other.val );
+			return other != null && EwlStatics.AreEqual( val, other.val );
 		}
 
 		public override int GetHashCode() {

@@ -65,10 +65,10 @@ namespace RedStapler.StandardLibrary {
 				else {
 					sw.WriteLine( "Program: " + ConfigurationStatics.AppName );
 					sw.WriteLine( "Version: " + ConfigurationStatics.AppAssembly.GetName().Version );
-					sw.WriteLine( "Machine: " + StandardLibraryMethods.GetLocalHostName() );
+					sw.WriteLine( "Machine: " + EwlStatics.GetLocalHostName() );
 				}
 
-				StandardLibraryMethods.CallEveryMethod(
+				EwlStatics.CallEveryMethod(
 					delegate { EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ); },
 					delegate { logError( sw.ToString() ); } );
 			}
@@ -150,7 +150,7 @@ namespace RedStapler.StandardLibrary {
 				{
 					Subject =
 						"Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
-						( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( StandardLibraryMethods.GetLocalHostName() ) : "" ),
+						( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
 					BodyHtml = body.GetTextAsEncodedHtml()
 				};
 		}

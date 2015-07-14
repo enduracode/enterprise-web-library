@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationMode
 			get { return existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration; }
 		}
 
-		public string LibraryPath { get { return StandardLibraryMethods.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
+		public string LibraryPath { get { return EwlStatics.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
 
 		public DatabaseAbstraction.Database Database { get { return database; } }
 

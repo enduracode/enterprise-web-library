@@ -41,7 +41,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			formValue = RadioButtonGroup.GetFormValue(
 				allowNoSelection,
 				() => from i in itemIdsAndCheckBoxes select i.Item2,
-				() => from i in itemIdsAndCheckBoxes where StandardLibraryMethods.AreEqual( i.Item1, selectedItemId ) select i.Item2,
+				() => from i in itemIdsAndCheckBoxes where EwlStatics.AreEqual( i.Item1, selectedItemId ) select i.Item2,
 				v => getStringId( v != null ? itemIdsAndCheckBoxes.Single( i => i.Item2 == v ).Item1 : getNoSelectionItemId() ),
 				rawValue => from itemIdAndCheckBox in itemIdsAndCheckBoxes
 				            let control = (Control)itemIdAndCheckBox.Item2
@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				() =>
 				RadioButtonGroup.ValidateControls(
 					allowNoSelection,
-					StandardLibraryMethods.AreEqual( getNoSelectionItemId(), selectedItemId ),
+					EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
 					itemIdsAndCheckBoxes.Select( i => i.Item2 ),
 					disableSingleButtonDetection ) );
 
@@ -101,7 +101,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private void validateListItem( ItemIdType listItemId ) {
-			if( allowNoSelection && StandardLibraryMethods.AreEqual( listItemId, getNoSelectionItemId() ) )
+			if( allowNoSelection && EwlStatics.AreEqual( listItemId, getNoSelectionItemId() ) )
 				throw new ApplicationException( "You cannot create a radio button with the ID that represents no selection." );
 			if( itemIdsAndCheckBoxes.Any( i => getStringId( i.Item1 ) == getStringId( listItemId ) ) )
 				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
@@ -130,7 +130,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		private ItemIdType getNoSelectionItemId() {
-			return StandardLibraryMethods.GetDefaultValue<ItemIdType>( true );
+			return EwlStatics.GetDefaultValue<ItemIdType>( true );
 		}
 
 		/// <summary>

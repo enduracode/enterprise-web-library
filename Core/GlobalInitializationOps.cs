@@ -50,7 +50,7 @@ namespace RedStapler.StandardLibrary {
 			}
 			catch( Exception e ) {
 				initializationLog += Environment.NewLine + e;
-				StandardLibraryMethods.EmergencyLog( "Initialization log", initializationLog );
+				EwlStatics.EmergencyLog( "Initialization log", initializationLog );
 				throw;
 			}
 

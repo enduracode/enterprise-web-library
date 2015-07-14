@@ -13,17 +13,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			using( var reader = new StringReader( getSectionString( webProject ) ) )
 				sections.Load( reader );
 
-			if( !File.Exists( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) ) )
+			if( !File.Exists( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) ) )
 				throw new UserCorrectableException( "The Web.config file is missing." );
 			var webConfig = new XmlDocument { PreserveWhitespace = true };
-			webConfig.Load( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) );
+			webConfig.Load( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
 
 			replaceSection( sections, webConfig, "appSettings" );
 			replaceSection( sections, webConfig, "system.web" );
 			replaceSection( sections, webConfig, "system.webServer" );
 
 			try {
-				webConfig.Save( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) );
+				webConfig.Save( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
 			}
 			catch( Exception e ) {
 				const string message = "Failed to write web configuration file.";
@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 		}
 
 		private static string getSectionString( WebProject webProject ) {
-			var sections = File.ReadAllText( StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
+			var sections = File.ReadAllText( EwlStatics.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 

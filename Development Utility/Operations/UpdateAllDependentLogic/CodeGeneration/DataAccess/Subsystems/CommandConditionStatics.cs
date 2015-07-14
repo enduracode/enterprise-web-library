@@ -40,12 +40,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetTableEqualityConditionsClassName( DBConnection cn, string table ) {
-			return StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableEqualityConditions" );
+			return EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableEqualityConditions" );
 		}
 
 		private static void writeInequalityConditionClasses( DBConnection cn, TextWriter writer, string table ) {
 			// NOTE: This kind of sucks. It seems like we could use generics to not have to write N of these methods into ISU.cs.
-			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableInequalityConditions {" );
+			writer.WriteLine( "public static class " + EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableInequalityConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeInConditionClasses( DBConnection cn, TextWriter writer, string table ) {
-			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableInConditions {" );
+			writer.WriteLine( "public static class " + EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableInConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
@@ -87,7 +87,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeLikeConditionClasses( DBConnection cn, TextWriter writer, string table ) {
-			writer.WriteLine( "public static class " + StandardLibraryMethods.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableLikeConditions {" );
+			writer.WriteLine( "public static class " + EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) ) + "TableLikeConditions {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 				writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table ) + " {" );
@@ -113,7 +113,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetConditionClassName( Column column ) {
-			return StandardLibraryMethods.GetCSharpSafeClassName( column.PascalCasedNameExceptForOracle == "Value" ? "_Value" : column.PascalCasedNameExceptForOracle );
+			return EwlStatics.GetCSharpSafeClassName( column.PascalCasedNameExceptForOracle == "Value" ? "_Value" : column.PascalCasedNameExceptForOracle );
 		}
 	}
 }

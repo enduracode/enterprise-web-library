@@ -31,8 +31,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							StandardLibraryMethods.RunProgram(
-								StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
+							EwlStatics.RunProgram(
+								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
 								getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
 								sw.ToString(),
 								true );
@@ -70,8 +70,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				delegate {
 					try {
 						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
-						StandardLibraryMethods.RunProgram(
-							StandardLibraryMethods.CombinePaths( binFolderPath, "mysqldump" ),
+						EwlStatics.RunProgram(
+							EwlStatics.CombinePaths( binFolderPath, "mysqldump" ),
 							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
 							"",
 							true );
@@ -93,8 +93,8 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstract
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							StandardLibraryMethods.RunProgram(
-								StandardLibraryMethods.CombinePaths( binFolderPath, "mysql" ),
+							EwlStatics.RunProgram(
+								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
 								getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
 								sw.ToString(),
 								true );

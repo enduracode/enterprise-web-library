@@ -46,7 +46,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					() => {
 						var contents = BlobFileOps.SystemProvider.GetFileContents( file.FileId );
 						if( forcedImageWidth.Value.HasValue )
-							contents = StandardLibraryMethods.ResizeImage( contents, forcedImageWidth.Value.Value );
+							contents = EwlStatics.ResizeImage( contents, forcedImageWidth.Value.Value );
 						return contents;
 					} ),
 				fileNameCreator: () => processAsAttachment.Value ? file.FileName : "" );

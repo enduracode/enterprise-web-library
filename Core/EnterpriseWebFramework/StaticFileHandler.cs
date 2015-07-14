@@ -33,7 +33,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// ISU and internal use only.
 		/// </summary>
 		public static string CombineNamespacesAndProcessEwfIfNecessary( string appNamespace, string appRelativeNamespace ) {
-			var ewfNamespace = StandardLibraryMethods.EwfFolderBaseNamespace + "." + appNamespace;
+			var ewfNamespace = EwlStatics.EwfFolderBaseNamespace + "." + appNamespace;
 			if( appRelativeNamespace == EwfFolderName )
 				return ewfNamespace;
 			if( appRelativeNamespace.StartsWith( EwfFolderName + "." ) )
@@ -83,7 +83,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
 						( url.Remove( versionStringOrFileExtensionIndex ) + extension.CapitalizeString() ).Separate( "/", false )
-							.Select( StandardLibraryMethods.GetCSharpIdentifier )
+							.Select( EwlStatics.GetCSharpIdentifier )
 							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );

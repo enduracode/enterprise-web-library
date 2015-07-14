@@ -116,13 +116,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				return valueExpression;
 
 			if( IsEnumerable ) {
-				return valueExpression + ".Separate( \",\", true ).Select( i => (" + normalizedElementTypeName + ")StandardLibraryMethods.ChangeType( i, typeof( " +
+				return valueExpression + ".Separate( \",\", true ).Select( i => (" + normalizedElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
 				       normalizedElementTypeName + " ) ) ).ToArray()";
 			}
 
 			// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
 			var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
-			return "(" + TypeName + ")StandardLibraryMethods.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
+			return "(" + TypeName + ")EwlStatics.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
 		}
 
 		internal ModificationField GetModificationField() {

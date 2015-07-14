@@ -97,7 +97,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return !StandardLibraryMethods.AreEqual( GetValue( postBackValues ), durableValueGetter() );
+			return !EwlStatics.AreEqual( GetValue( postBackValues ), durableValueGetter() );
 		}
 
 		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {

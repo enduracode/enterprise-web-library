@@ -331,13 +331,13 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 		internal static void Test() {
 			const string outputFolderName = "MergeOps";
-			var outputFolder = StandardLibraryMethods.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
+			var outputFolder = EwlStatics.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
 			IoMethods.DeleteFolder( outputFolder );
 			Directory.CreateDirectory( outputFolder );
 
-			var inputTestFiles = StandardLibraryMethods.CombinePaths( TestStatics.InputTestFilesFolderPath, outputFolderName );
-			var wordDocx = StandardLibraryMethods.CombinePaths( inputTestFiles, "word.docx" );
-			var pdf = StandardLibraryMethods.CombinePaths( inputTestFiles, "pdf.pdf" );
+			var inputTestFiles = EwlStatics.CombinePaths( TestStatics.InputTestFilesFolderPath, outputFolderName );
+			var wordDocx = EwlStatics.CombinePaths( inputTestFiles, "word.docx" );
+			var pdf = EwlStatics.CombinePaths( inputTestFiles, "pdf.pdf" );
 
 			MergeStatics.Init();
 			var singleTestRow = new PseudoTableRow( 1 ).ToSingleElementArray();
@@ -352,21 +352,21 @@ namespace RedStapler.StandardLibrary.MailMerging {
 			// Word files
 
 			const string singleRowWordDoc = "SingleRowMsWordDoc" + FileExtensions.WordDocx;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowWordDoc ) ) ) {
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDoc ) ) ) {
 				using( var word = File.OpenRead( wordDocx ) )
 					CreateMsWordDoc( singleRowTree, false, word, outputFile );
 				explanations.Add( Tuple.Create( singleRowWordDoc, "Should be {0} with only one page, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
 			}
 
 			const string singleRowWordDocAsPdf = "SingleRowMsWordDoc" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowWordDocAsPdf ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDocAsPdf ) ) )
 				CreatePdfFromMsWordDoc( singleRowTree, false, wordDocx, outputFile );
 			explanations.Add(
 				Tuple.Create( singleRowWordDocAsPdf, "Should be {0} with only one page, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
 
 			//Excel
 			const string singleRowExcel = "SingleRowExcel" + FileExtensions.ExcelXlsx;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowExcel ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowExcel ) ) )
 				CreateExcelWorkbook( singleRowTree, GetExcelSupportedMergeFields( singleRowTree ), outputFile );
 			explanations.Add(
 				Tuple.Create(
@@ -375,7 +375,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 			// Pdf
 			const string singleRowPdf = "SingleRowPdf" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, singleRowPdf ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowPdf ) ) )
 				CreatePdf( singleRowTree, false, pdf, outputFile );
 			explanations.Add( Tuple.Create( singleRowPdf, "Should be {0} with only one page, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
 
@@ -383,21 +383,21 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 			// Word files
 			const string multipleRowsWordDoc = "MultipleRowMsWordDoc" + FileExtensions.WordDocx;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowsWordDoc ) ) ) {
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDoc ) ) ) {
 				using( var word = File.OpenRead( wordDocx ) )
 					CreateMsWordDoc( pseudoTableRowTree, false, word, outputFile );
 				explanations.Add( Tuple.Create( multipleRowsWordDoc, "Should be {0} with three pages, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
 			}
 
 			const string multipleRowsWordDocAsPdf = "MultipleRowMsWordDoc" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowsWordDocAsPdf ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDocAsPdf ) ) )
 				CreatePdfFromMsWordDoc( pseudoTableRowTree, false, wordDocx, outputFile );
 			explanations.Add(
 				Tuple.Create( multipleRowsWordDocAsPdf, "Should be {0} with three pages, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
 
 			// Excel
 			const string multipleRowExcel = "MultipleRowExcel" + FileExtensions.ExcelXlsx;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowExcel ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowExcel ) ) )
 				CreateExcelWorkbook( pseudoTableRowTree, GetExcelSupportedMergeFields( pseudoTableRowTree ), outputFile );
 			explanations.Add(
 				Tuple.Create(
@@ -406,7 +406,7 @@ namespace RedStapler.StandardLibrary.MailMerging {
 
 			// Pdf
 			const string multipleRowPdf = "MultipleRowPdf" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( StandardLibraryMethods.CombinePaths( outputFolder, multipleRowPdf ) ) )
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowPdf ) ) )
 				CreatePdf( pseudoTableRowTree, false, pdf, outputFile );
 			explanations.Add( Tuple.Create( multipleRowPdf, "Should be {0} with three pages, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
 

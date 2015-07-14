@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -10,9 +10,9 @@ using ImageResizer;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
-	/// A collection of miscellaneous static methods that may be useful in different projects.
+	/// A collection of miscellaneous statics that may be useful.
 	/// </summary>
-	public static partial class StandardLibraryMethods {
+	public static partial class EwlStatics {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>

@@ -126,7 +126,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				get {
 					// Represent the default value with the empty string to support drop-down list placeholders. The HTML spec states that the "placeholder label option"
 					// must have a value of the empty string. See https://html.spec.whatwg.org/multipage/forms.html#the-select-element.
-					return StandardLibraryMethods.AreEqual( item.Id, StandardLibraryMethods.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
+					return EwlStatics.AreEqual( item.Id, EwlStatics.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
 				}
 			}
 
@@ -178,16 +178,16 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private IEnumerable<ListItem> getInitialItems(
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
-			var itemIdDefaultValue = StandardLibraryMethods.GetDefaultValue<ItemIdType>( true );
-			var selectedItemIdHasDefaultValue = StandardLibraryMethods.AreEqual( selectedItemId, itemIdDefaultValue );
+			var itemIdDefaultValue = EwlStatics.GetDefaultValue<ItemIdType>( true );
+			var selectedItemIdHasDefaultValue = EwlStatics.AreEqual( selectedItemId, itemIdDefaultValue );
 
-			if( !items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemId ) ) && !selectedItemIdHasDefaultValue ) {
+			if( !items.Any( i => EwlStatics.AreEqual( i.Item.Id, selectedItemId ) ) && !selectedItemIdHasDefaultValue ) {
 				if( unlistedSelectedItemLabelGetter == null )
 					throw new ApplicationException( "The selected item ID must either match a list item or be the default value of the type." );
 				yield return new ListItem( SelectListItem.Create( selectedItemId, unlistedSelectedItemLabelGetter( selectedItemId ) + " (invalid)" ), true, false );
 			}
 
-			if( items.Any( i => StandardLibraryMethods.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
+			if( items.Any( i => EwlStatics.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
 				yield break;
 
 			var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( !useHorizontalRadioLayout.HasValue && placeholderIsValid.Value );
@@ -270,7 +270,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				{
 					Text =
 						"<option value=\"" + value + "\"" +
-						( StandardLibraryMethods.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
+						( EwlStatics.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
 						label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
 				};
 		}
@@ -332,7 +332,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				                               ? radioList.GetSelectedItemIdInPostBack( postBackValues )
 				                               : formValue != null ? formValue.GetValue( postBackValues ) : selectedItemId;
 
-			if( !items.Single( i => StandardLibraryMethods.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
+			if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
 				validator.NoteErrorAndAddMessage( "Please make a selection." );
 			return selectedItemIdInPostBack;
 		}

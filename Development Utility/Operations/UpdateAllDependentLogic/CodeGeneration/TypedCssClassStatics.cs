@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					writer.WriteLine( "/// <summary>" );
 					writer.WriteLine( "/// Constant for the '{0}' class.".FormatWith( cssClass ) );
 					writer.WriteLine( "/// </summary>" );
-					var identifier = StandardLibraryMethods.GetCSharpIdentifierSimple( cssClass ).CapitalizeString();
+					var identifier = EwlStatics.GetCSharpIdentifierSimple( cssClass ).CapitalizeString();
 					if( identifiers.Contains( identifier ) ) {
 						var uniqueIdentifier = identifier;
 						var i = 0;

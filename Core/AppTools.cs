@@ -183,7 +183,7 @@ namespace RedStapler.StandardLibrary {
 		public static string FilesFolderPath {
 			get {
 				return
-					StandardLibraryMethods.CombinePaths(
+					EwlStatics.CombinePaths(
 						InstallationFileStatics.GetGeneralFilesFolderPath(
 							ConfigurationStatics.InstallationConfiguration.InstallationPath,
 							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development ),
@@ -207,7 +207,7 @@ namespace RedStapler.StandardLibrary {
 		public static string ServerSideConsoleAppRelativeFolderPath {
 			get {
 				return ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
-					       ? StandardLibraryMethods.GetProjectOutputFolderPath( true )
+					       ? EwlStatics.GetProjectOutputFolderPath( true )
 					       : "";
 			}
 		}
