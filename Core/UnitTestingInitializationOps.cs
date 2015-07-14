@@ -11,9 +11,9 @@ namespace RedStapler.StandardLibrary {
 		/// <param name="appInitializer">The application initializer, which performs unit-testing-specific initialization and cleanup. If you have one of these you
 		/// should name the class AppInitializer.</param>
 		public static void InitStatics( SystemInitializer globalInitializer, SystemInitializer appInitializer = null ) {
-			AppTools.Init( globalInitializer, "Tests", false, useRelativeInstallationPath: true );
+			GlobalInitializationOps.InitStatics( globalInitializer, "Tests", false, useRelativeInstallationPath: true );
 			try {
-				if( AppTools.SecondaryInitFailed ) {
+				if( GlobalInitializationOps.SecondaryInitFailed ) {
 					throw new ApplicationException(
 						"An exception occurred during application initialization. Details should be available in an error email and the installation's error log." );
 				}
@@ -35,7 +35,7 @@ namespace RedStapler.StandardLibrary {
 			if( appInitializer != null )
 				appInitializer.CleanUpStatics();
 
-			AppTools.CleanUp();
+			GlobalInitializationOps.CleanUpStatics();
 		}
 	}
 }

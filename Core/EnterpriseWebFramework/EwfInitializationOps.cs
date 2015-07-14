@@ -27,7 +27,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Initialize system.
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 			try {
-				AppTools.Init(
+				GlobalInitializationOps.InitStatics(
 					globalInitializer,
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 					false,
@@ -45,7 +45,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			ewlInitialized = true;
 
 			// Initialize web application.
-			if( !AppTools.SecondaryInitFailed ) {
+			if( !GlobalInitializationOps.SecondaryInitFailed ) {
 				EwfApp.ExecuteWithBasicExceptionHandling(
 					() => {
 						EwfConfigurationStatics.Init();
@@ -118,7 +118,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			if( !ewlInitialized )
 				return;
 
-			if( !AppTools.SecondaryInitFailed ) {
+			if( !GlobalInitializationOps.SecondaryInitFailed ) {
 				EwfApp.ExecuteWithBasicExceptionHandling(
 					() => {
 						if( appInitializer != null )
@@ -128,7 +128,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					false );
 			}
 
-			AppTools.CleanUp();
+			GlobalInitializationOps.CleanUpStatics();
 
 			if( !EwfApp.FrameworkInitialized ) {
 				var waitHandle = new ManualResetEvent( false );

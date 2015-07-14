@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			get {
 				return new EwfSafeResponseWriter(
 					() => new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
-					AppTools.EwlBuildDateTime,
+					StandardLibraryMethods.EwlBuildDateTime,
 					() => "getSchema" + info.FileName );
 			}
 		}

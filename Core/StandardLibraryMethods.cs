@@ -15,7 +15,7 @@ namespace RedStapler.StandardLibrary {
 	/// <summary>
 	/// A collection of miscellaneous static methods that may be useful in different projects.
 	/// </summary>
-	public static class StandardLibraryMethods {
+	public static partial class StandardLibraryMethods {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>

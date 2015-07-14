@@ -467,7 +467,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					new Paragraph(
 						"Powered by the ".GetLiteralControl(),
 						EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( StandardLibraryMethods.EwlName ) ),
-						( " (" + TimeZoneInfo.ConvertTime( AppTools.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).GetLiteralControl() )
+						( " (" + TimeZoneInfo.ConvertTime( StandardLibraryMethods.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).GetLiteralControl() )
 						{
 							CssClass = CssElementCreator.PoweredByEwlFooterCssClass
 						} );

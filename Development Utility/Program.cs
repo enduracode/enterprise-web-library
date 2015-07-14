@@ -11,9 +11,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {
 		[ MTAThread ]
 		private static int Main( string[] args ) {
-			AppTools.Init( new GlobalInitializer(), "Development Utility", true );
+			GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Development Utility", true );
 			try {
-				return AppTools.ExecuteAppWithStandardExceptionHandling(
+				return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
 					() => {
 						try {
 							if( args.Count() < 2 )
@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 					} );
 			}
 			finally {
-				AppTools.CleanUp();
+				GlobalInitializationOps.CleanUpStatics();
 			}
 		}
 

@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// Private use only.
 		/// </summary>
 		protected override void OnStart( string[] args ) {
-			if( AppTools.SecondaryInitFailed ) {
+			if( GlobalInitializationOps.SecondaryInitFailed ) {
 				ExitCode = 0x425; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
 				Stop();
 				return;

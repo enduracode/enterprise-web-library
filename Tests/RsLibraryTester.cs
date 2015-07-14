@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
 		[ MTAThread ]
 		public static void Main() {
-			AppTools.Init( new GlobalInitializer(), "Tester", false );
+			GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Tester", false );
 
 			StandardLibraryMethods.RunStandardLibraryTests();
 

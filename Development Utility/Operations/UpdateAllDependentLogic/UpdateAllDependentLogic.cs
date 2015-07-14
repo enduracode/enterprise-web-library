@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();
 						writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
-						writer.WriteLine( "partial class AppTools {" );
+						writer.WriteLine( "partial class StandardLibraryMethods {" );
 						CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
 						writer.WriteLine(
 							"public static readonly DateTimeOffset EwlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );

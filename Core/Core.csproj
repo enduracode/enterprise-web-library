@@ -399,6 +399,7 @@
     <Compile Include="Generated Code\System Development Configuration.cs" />
     <Compile Include="Generated Code\System General Configuration.cs" />
     <Compile Include="Generated Code\System List Message.cs" />
+    <Compile Include="GlobalInitializationOps.cs" />
     <Compile Include="IisConfigurationStatics.cs" />
     <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
