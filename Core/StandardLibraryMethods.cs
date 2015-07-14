@@ -5,11 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using Humanizer;
 using ImageResizer;
-using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -357,23 +354,6 @@ namespace RedStapler.StandardLibrary {
 		/// </summary>
 		public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {
 			return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T );
-		}
-
-		internal static void SendHealthCheckEmail( string appFullName ) {
-			var message = new EmailMessage();
-
-			var body = new StringBuilder();
-			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
-			var freeSpaceIsLow = false;
-			foreach( var driveInfo in DriveInfo.GetDrives().Where( d => d.DriveType == DriveType.Fixed ) ) {
-				var bytesFree = driveInfo.TotalFreeSpace;
-				freeSpaceIsLow = freeSpaceIsLow || bytesFree < tenGibibytes;
-				body.AppendLine( "{0} free on {1} drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFree ), driveInfo.Name ) );
-			}
-
-			message.Subject = StringTools.ConcatenateWithDelimiter( " ", "Health check", freeSpaceIsLow ? "and WARNING" : "", "from " + appFullName );
-			message.BodyHtml = body.ToString().GetTextAsEncodedHtml();
-			EmailStatics.SendDeveloperNotificationEmail( message );
 		}
 
 		/// <summary>

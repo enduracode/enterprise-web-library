@@ -3,6 +3,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using RedStapler.StandardLibrary.Configuration;
+using RedStapler.StandardLibrary.Email;
 
 namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -72,7 +73,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 						var now = DateTime.Now;
 						if( AppTools.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
 						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
-							StandardLibraryMethods.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
+							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 						lastHealthCheckDateAndTime = now;
 
 						service.Tick();

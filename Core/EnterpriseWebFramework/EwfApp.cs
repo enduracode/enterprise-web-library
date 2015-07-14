@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
+using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
 
@@ -302,7 +303,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Standard library use only.
 		/// </summary>
 		public void SendHealthCheck() {
-			StandardLibraryMethods.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
+			EmailStatics.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
 		}
 
 		/// <summary>
