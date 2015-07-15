@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// A value used in a database command parameter.
 	/// </summary>

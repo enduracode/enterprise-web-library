@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity {
 	/// <summary>
 	/// A class that provides an EWF master page with the information it needs to display entity navigation buttons, action buttons, tabs, etc.
 	/// </summary>

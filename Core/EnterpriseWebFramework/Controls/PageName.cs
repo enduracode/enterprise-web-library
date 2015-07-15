@@ -2,7 +2,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A first-level heading that displays the page's name.
 	/// </summary>

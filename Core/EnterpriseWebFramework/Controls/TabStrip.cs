@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Provides a way to show content only for the selected tab while hiding the content for other tabs.
 	/// </summary>

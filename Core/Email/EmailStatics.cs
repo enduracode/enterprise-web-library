@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Configuration.InstallationStandard;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
 
-namespace RedStapler.StandardLibrary.Email {
+namespace EnterpriseWebLibrary.Email {
 	public static class EmailStatics {
 		/// <summary>
 		/// System Manager and private use only.

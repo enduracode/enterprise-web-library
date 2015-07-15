@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.DataAccess.RevisionHistory {
+namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
 	/// Defines how revision history operations will be carried out against the database for a particular system.
 	/// </summary>

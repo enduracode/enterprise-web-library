@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

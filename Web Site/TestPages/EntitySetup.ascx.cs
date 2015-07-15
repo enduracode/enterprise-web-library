@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.WebSessionState;
 
 // OptionalParameter: string someText
 

@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class TypedCssClassStatics {

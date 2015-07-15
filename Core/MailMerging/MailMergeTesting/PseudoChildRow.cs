@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting {
+﻿namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
 	public class PseudoChildRow {
 		private readonly int num;
 		public int Num { get { return num; } }

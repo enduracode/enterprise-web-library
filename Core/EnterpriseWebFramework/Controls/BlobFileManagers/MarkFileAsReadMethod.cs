@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Method that marks the file with the given ID as read.
 	/// </summary>

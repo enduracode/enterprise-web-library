@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using RedStapler.StandardLibrary.MailMerging.DataTree;
-using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
-using RedStapler.StandardLibrary.MailMerging.Fields;
-using RedStapler.StandardLibrary.MailMerging.MailMergeTesting.PseudoTableFields;
-using RedStapler.StandardLibrary.MailMerging.MailMergeTesting.PsuedoChildFields;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.DataTree;
+using EnterpriseWebLibrary.MailMerging.FieldImplementation;
+using EnterpriseWebLibrary.MailMerging.Fields;
+using EnterpriseWebLibrary.MailMerging.MailMergeTesting.PseudoTableFields;
+using EnterpriseWebLibrary.MailMerging.MailMergeTesting.PsuedoChildFields;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting {
+namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
 	/// <summary>
 	/// A mock MergeStatics class as we have it in many systems.
 	/// </summary>

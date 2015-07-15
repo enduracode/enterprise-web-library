@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class StatusMessageAndDestination {
 		private readonly string message;
 		private readonly ResourceInfo destination;

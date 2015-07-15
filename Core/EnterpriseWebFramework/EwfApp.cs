@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>

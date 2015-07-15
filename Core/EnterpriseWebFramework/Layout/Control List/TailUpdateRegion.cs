@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class TailUpdateRegion {
 		internal readonly UpdateRegionSet Set;
 		internal readonly int UpdatingItemCount;

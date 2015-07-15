@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a chart.
 	/// </summary>

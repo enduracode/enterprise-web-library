@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	internal class FixedWidthParser: Parser {
 		private int charactersToSkip;
 		private int[] columnWidths; // Maps column indices to column widths

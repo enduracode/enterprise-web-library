@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An item for the list form controls that contains a change handler.
 	/// </summary>

@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.JavaScriptWriting {
+﻿namespace EnterpriseWebLibrary.JavaScriptWriting {
 	/// <summary>
 	/// Describes how a pop up window should open.
 	/// </summary>

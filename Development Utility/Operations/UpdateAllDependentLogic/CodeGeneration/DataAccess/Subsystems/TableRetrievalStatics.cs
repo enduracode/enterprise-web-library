@@ -2,12 +2,12 @@
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableRetrievalStatics {
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void Generate(
 			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );

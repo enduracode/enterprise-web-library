@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public static class UnitTestingInitializationOps {
 		private static SystemInitializer appInitializer;
 

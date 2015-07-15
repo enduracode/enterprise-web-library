@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity {
 	/// <summary>
 	/// Affects how tabs (if any) are displayed.
 	/// </summary>

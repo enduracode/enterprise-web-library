@@ -1,7 +1,7 @@
 ﻿using System;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Provides helpful TimeSpan methods.
 	/// </summary>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The state for a page in an EWF application.
 	/// </summary>

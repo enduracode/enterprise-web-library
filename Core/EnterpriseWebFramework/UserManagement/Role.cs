@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Represents an authorization role in the system.
 	/// </summary>

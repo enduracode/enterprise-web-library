@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.MailMerging.DataTree {
+namespace EnterpriseWebLibrary.MailMerging.DataTree {
 	/// <summary>
 	/// A remapping configuration for a merge data tree.
 	/// </summary>

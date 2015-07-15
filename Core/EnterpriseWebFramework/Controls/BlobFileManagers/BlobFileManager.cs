@@ -1,9 +1,9 @@
 using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control for managing a single file stored in a database.
 	/// </summary>
@@ -31,7 +31,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Prevents the user from uploading a file of a type other than those provided. File type constants found in RedStapler.StandardLibrary.FileExtensions.
+		/// Prevents the user from uploading a file of a type other than those provided. File type constants found in EnterpriseWebLibrary.FileExtensions.
 		/// </summary>
 		public void SetFileTypeFilter( params string[] acceptableFileExtensions ) {
 			this.acceptableFileExtensions = acceptableFileExtensions;

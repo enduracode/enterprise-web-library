@@ -4,7 +4,7 @@ using System.Runtime.Caching;
 using System.Threading;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.Caching {
+namespace EnterpriseWebLibrary.Caching {
 	/// <summary>
 	/// An intra-app memory cache.
 	/// </summary>

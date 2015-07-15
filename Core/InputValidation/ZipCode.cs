@@ -1,7 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// A zip code.
 	/// </summary>

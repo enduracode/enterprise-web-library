@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	internal class NoDatabase: Database {
 		string Database.SecondaryDatabaseName { get { throw new NotSupportedException(); } }
 

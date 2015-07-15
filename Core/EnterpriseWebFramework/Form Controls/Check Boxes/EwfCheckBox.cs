@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/* NOTE: This should be named InlineCheckBox. When we do this, rename CommonCheckBox to EwfCheckBox.
 	 * 
 	 * InlineCheckBox is a check box that can be centered with text-align or used within a paragraph of text. This cannot be done with BlockCheckBox for two reasons:

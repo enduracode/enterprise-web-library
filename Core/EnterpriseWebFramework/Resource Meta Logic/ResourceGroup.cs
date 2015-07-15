@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A group of resources.
 	/// </summary>

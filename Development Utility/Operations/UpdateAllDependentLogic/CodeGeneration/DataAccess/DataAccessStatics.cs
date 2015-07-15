@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Collections;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal static class DataAccessStatics {
@@ -152,7 +152,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		internal static bool IsRevisionHistoryTable( string table, RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static bool IsRevisionHistoryTable( string table, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			return configuration.revisionHistoryTables != null &&
 			       configuration.revisionHistoryTables.Any( revisionHistoryTable => revisionHistoryTable.EqualsIgnoreCase( table ) );
 		}

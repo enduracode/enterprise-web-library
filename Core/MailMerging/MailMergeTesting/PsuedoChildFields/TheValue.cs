@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting.PsuedoChildFields {
+namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting.PsuedoChildFields {
 	public class TheValue: BasicMergeFieldImplementation<PseudoChildRow, string> {
 		public string GetDescription() {
 			return "The value";

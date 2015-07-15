@@ -1,7 +1,7 @@
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that displays the email address of the currently logged-in user as well as log out and change password links.
 	/// </summary>

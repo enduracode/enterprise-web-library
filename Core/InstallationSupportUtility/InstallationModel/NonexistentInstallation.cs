@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
+﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class NonexistentInstallation: KnownInstalledInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly KnownSystemLogic knownSystemLogic;

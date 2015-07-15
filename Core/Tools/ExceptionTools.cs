@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Helpful System.Exception methods.
 	/// </summary>

@@ -1,4 +1,4 @@
-using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PhysicianMergeFields {

@@ -1,7 +1,7 @@
 using System;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	partial class PreBuiltResponse: EwfPage {
 		partial class Info {
 			protected override void init() {

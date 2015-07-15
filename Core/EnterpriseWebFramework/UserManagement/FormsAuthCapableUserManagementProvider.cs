@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Defines how user management operations will be carried out against the database for a particular application. Supports ASP.NET Forms Authentication.
 	/// </summary>

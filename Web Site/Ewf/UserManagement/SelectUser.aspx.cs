@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.InputValidation;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class SelectUser: EwfPage {
 		partial class Info {

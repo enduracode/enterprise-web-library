@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Provides a way to write tabular data to files.
 	/// </summary>

@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Contains common regular expression strings.
 	/// </summary>

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Web;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal interface FormValue {
 		/// <summary>
 		/// Returns the empty string if this form value is inactive.

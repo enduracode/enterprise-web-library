@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A method that performs an operation on the row with the given unique identifier.
 	/// </summary>

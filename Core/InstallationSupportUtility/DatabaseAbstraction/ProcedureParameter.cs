@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using RedStapler.StandardLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	/// <summary>
 	/// Internal and Development Utility use only.
 	/// </summary>

@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Represents either a cell or the space taken up be a spanning cell.
 	/// </summary>

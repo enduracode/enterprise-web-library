@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig {
 	internal class WebConfigStatics {
@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			sections = sections.Replace(
 				"@@CertificateAuthenticationModulePlace",
 				useCertificateAuth
-					? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
+					? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
 					: "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours

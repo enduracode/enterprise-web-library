@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ItemInsertionUpdateRegion {
 		internal readonly UpdateRegionSet Set;
 		internal readonly Func<IEnumerable<string>> NewItemIdGetter;

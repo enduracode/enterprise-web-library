@@ -6,9 +6,9 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Options for the AutoFill feature that will modify the behavior of the EwfTextBox to post-back when different events occur.
 	/// </summary>

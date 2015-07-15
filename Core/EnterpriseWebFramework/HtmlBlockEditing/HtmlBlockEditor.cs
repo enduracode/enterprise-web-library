@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for editing an HTML block.
 	/// </summary>

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RedStapler.StandardLibrary.Configuration.InstallationStandard;
-using RedStapler.StandardLibrary.Configuration.SystemGeneral;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using EnterpriseWebLibrary.Configuration.SystemGeneral;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.Configuration {
+namespace EnterpriseWebLibrary.Configuration {
 	/// <summary>
 	/// The elements of installation configuration that the standard library understands.
 	/// </summary>

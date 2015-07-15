@@ -1,8 +1,8 @@
 ﻿using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A block with no special meaning.
 	/// </summary>

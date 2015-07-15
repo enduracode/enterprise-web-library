@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary {
+﻿namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// General system-specific logic.
 	/// </summary>

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Collections;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	public class DataAccessState {
 		private static Func<DataAccessState> mainStateGetter;
 		private static ThreadLocal<Stack<DataAccessState>> mainStateOverrideStack;

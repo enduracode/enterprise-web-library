@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.Collections {
+namespace EnterpriseWebLibrary.Collections {
 	/// <summary>
 	/// A collection of value pairs that provides bidirectional lookup.  Preserves order.
 	/// All left values must be unique.

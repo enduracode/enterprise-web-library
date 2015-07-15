@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Provides useful constants and methods pertaining to user management.
 	/// </summary>

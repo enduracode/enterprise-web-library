@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
 	/// EWL Core and Development Utility use only.
 	/// </summary>

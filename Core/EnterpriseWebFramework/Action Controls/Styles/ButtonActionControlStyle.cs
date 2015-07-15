@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A style that renders an action control as a button with rounded corners.
 	/// </summary>

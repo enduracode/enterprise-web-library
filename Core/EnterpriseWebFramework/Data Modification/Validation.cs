@@ -1,7 +1,7 @@
 ﻿using System;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A validation.
 	/// </summary>

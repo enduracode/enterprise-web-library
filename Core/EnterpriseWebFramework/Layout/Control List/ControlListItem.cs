@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An item for the control list.
 	/// </summary>

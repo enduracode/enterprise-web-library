@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Displays a clickable link to the user that will display a ModalWindow.
 	/// NOTE: Think about renaming this. At the least, the term Link should be replaced with Button to be consistent with other action controls.

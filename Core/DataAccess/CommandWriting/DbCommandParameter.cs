@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data.Common;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// A parameter for a database command.
 	/// </summary>

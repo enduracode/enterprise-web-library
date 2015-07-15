@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop down list whose visible options depend upon the selected value in another drop down list.
 	/// </summary>

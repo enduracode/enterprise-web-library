@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A function that can resolve a particular shortcut URL into a resource.
 	/// </summary>

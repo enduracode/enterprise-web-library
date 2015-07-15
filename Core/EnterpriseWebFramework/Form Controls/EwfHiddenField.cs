@@ -2,7 +2,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A hidden field.
 	/// </summary>

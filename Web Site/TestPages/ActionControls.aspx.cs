@@ -1,7 +1,7 @@
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class ActionControls: EwfPage {

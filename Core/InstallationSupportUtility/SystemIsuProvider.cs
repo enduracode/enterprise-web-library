@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	/// <summary>
 	/// System-specific installation support utility logic.
 	/// </summary>

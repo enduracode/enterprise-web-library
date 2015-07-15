@@ -3,9 +3,9 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that, when clicked, causes a post back and executes code.
 	/// </summary>

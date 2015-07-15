@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A merge field tree display.
 	/// </summary>

@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Linq;
 using System.ServiceProcess;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.WebTestingFramework {
+namespace EnterpriseWebLibrary.WebTestingFramework {
 	internal class OneTimeInstall {
 		/// <summary>
 		/// This is the code to install and start the SeleniumRC service.

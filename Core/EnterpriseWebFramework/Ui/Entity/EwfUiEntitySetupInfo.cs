@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about an EWF-UI entity setup before requesting a resource that uses it.
 	/// </summary>

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // OptionalParameter: string term
 

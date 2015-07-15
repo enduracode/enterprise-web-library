@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class DevelopmentInstallationLogic {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;

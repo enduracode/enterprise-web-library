@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {

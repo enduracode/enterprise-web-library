@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Provides helpful DateTime methods.
 	/// </summary>

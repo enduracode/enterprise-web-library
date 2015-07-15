@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Helpful System.Reflection.Assembly methods.
 	/// </summary>

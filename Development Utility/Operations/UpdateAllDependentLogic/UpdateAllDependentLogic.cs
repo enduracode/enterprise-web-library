@@ -7,17 +7,17 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAcce
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.Configuration.SystemGeneral;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.Configuration.SystemGeneral;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// NOTE: Rename this, and the containing folder, to UpdateDependentLogic. Also rename the batch file in Solution Files and the batch file in each person's EWL
@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine();
 						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();
-						writer.WriteLine( "namespace RedStapler.StandardLibrary {" );
+						writer.WriteLine( "namespace EnterpriseWebLibrary {" );
 						writer.WriteLine( "partial class EwlStatics {" );
 						CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of EWL was built." );
 						writer.WriteLine(
@@ -195,20 +195,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Web.UI;" );
 				writer.WriteLine( "using System.Web.UI.WebControls;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.Caching;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.Collections;" ); // Necessary for row constants
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.RetrievalCaching;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.RevisionHistory;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess.StandardModification;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
+				writer.WriteLine( "using EnterpriseWebLibrary;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
@@ -302,8 +302,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateDataAccessCodeForDatabase(
-			RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			// Ensure that all tables specified in the configuration file actually exist.
 			var tableNames = DatabaseOps.GetDatabaseTables( database );
 			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
@@ -396,11 +396,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Web;" );
 				writer.WriteLine( "using System.Web.UI;" );
 				writer.WriteLine( "using System.Web.UI.WebControls;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.Validation;" );
+				writer.WriteLine( "using EnterpriseWebLibrary;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, webProject.name );
 				writer.WriteLine();
@@ -420,9 +420,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.ServiceProcess;" );
 				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.WindowsServiceFramework;" );
+				writer.WriteLine( "using EnterpriseWebLibrary;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.WindowsServiceFramework;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, service.Name );
 				writer.WriteLine();
@@ -496,8 +496,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary;" );
-				writer.WriteLine( "using RedStapler.StandardLibrary.DataAccess;" );
+				writer.WriteLine( "using EnterpriseWebLibrary;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.Name );
 				writer.WriteLine();

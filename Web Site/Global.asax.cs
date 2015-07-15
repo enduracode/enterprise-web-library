@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.WebSite.TestPages;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.WebSite {
 	public class Global: EwfApp {

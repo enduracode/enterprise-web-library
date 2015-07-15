@@ -4,11 +4,11 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control for managing a collection of files stored in a database.
 	/// </summary>
@@ -211,7 +211,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Prevents the user from uploading a file of a type other than those provided. File type constants found in RedStapler.StandardLibrary.FileExtensions.
+		/// Prevents the user from uploading a file of a type other than those provided. File type constants found in EnterpriseWebLibrary.FileExtensions.
 		/// Do not use this to force the file to be a specific type of file, such as an image (which consists of several file extensions).
 		/// Instead, use AcceptOnlyImages.
 		/// </summary>

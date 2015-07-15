@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
+﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public interface DevelopmentInstallation: ExistingInstallation {
 		DevelopmentInstallationLogic DevelopmentInstallationLogic { get; }
 		int CurrentMajorVersion { get; }

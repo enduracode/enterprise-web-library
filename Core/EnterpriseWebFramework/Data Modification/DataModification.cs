@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A collection of validation methods and a collection of modification methods.
 	/// </summary>

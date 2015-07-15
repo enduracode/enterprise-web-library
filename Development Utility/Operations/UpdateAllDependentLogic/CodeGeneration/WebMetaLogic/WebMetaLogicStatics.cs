@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {

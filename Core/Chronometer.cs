@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Provides a way to measure duration. The timer begins as soon as the object is created. Elapsed reports how much time has elasped since creation.
 	/// The timer never stops.

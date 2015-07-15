@@ -1,12 +1,12 @@
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	public partial class LogIn: EwfPage {
 		private DataValue<string> emailAddress;
 		private FormsAuthCapableUser user;

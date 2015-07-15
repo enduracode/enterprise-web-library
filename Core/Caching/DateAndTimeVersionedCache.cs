@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using RedStapler.StandardLibrary.Collections;
+using EnterpriseWebLibrary.Collections;
 
-namespace RedStapler.StandardLibrary.Caching {
+namespace EnterpriseWebLibrary.Caching {
 	internal class DateAndTimeVersionedCache<T>: PeriodicEvictionCompositeCacheEntry {
 		public readonly Cache<DateTimeOffset, T> ValuesByDateAndTime = new Cache<DateTimeOffset, T>( true );
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
 	/// Allows simple inserting of rows into a table without the use of any stored procedures.
 	/// </summary>

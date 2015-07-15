@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using Humanizer;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class StaticFile {

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using RedStapler.StandardLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	public interface Database {
 		/// <summary>
 		/// Returns the empty string if this is the primary database.

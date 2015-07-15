@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using Aspose.Pdf.Facades;
 using Humanizer;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Contains methods related to PDF documents.
 	/// </summary>

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using Humanizer;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class MySql: Database {
 		private const string binFolderPath = @"C:\Program Files\MySQL\MySQL Server 5.5\bin";
 

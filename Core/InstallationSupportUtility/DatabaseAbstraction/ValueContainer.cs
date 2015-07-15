@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	/// <summary>
 	/// Internal and Development Utility use only.
 	/// </summary>

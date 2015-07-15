@@ -1,6 +1,6 @@
 ﻿using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// EWL use only. One big reason for this interface is that ReSharper gets confused when code in a web app contains calls to the copy of the master page in
 	/// that web app.

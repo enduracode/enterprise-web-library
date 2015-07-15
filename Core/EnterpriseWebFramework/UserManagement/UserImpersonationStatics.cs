@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

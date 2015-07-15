@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Configuration {
+﻿namespace EnterpriseWebLibrary.Configuration {
 	/// <summary>
 	/// A type of installation.
 	/// </summary>

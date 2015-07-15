@@ -2,7 +2,7 @@
 using System.IO;
 using System.Web;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that creates an HTTP response body.
 	/// </summary>

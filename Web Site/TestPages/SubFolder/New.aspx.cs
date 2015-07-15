@@ -1,4 +1,4 @@
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class New: EwfPage {

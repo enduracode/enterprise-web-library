@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Email {
+﻿namespace EnterpriseWebLibrary.Email {
 	/// <summary>
 	/// An email address.
 	/// </summary>

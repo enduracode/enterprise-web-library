@@ -1,6 +1,6 @@
 ﻿using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal interface EtherealControl {
 		WebControl Control { get; }
 		string GetJsInitStatements();

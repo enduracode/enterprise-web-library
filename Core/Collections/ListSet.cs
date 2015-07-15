@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.Collections {
+namespace EnterpriseWebLibrary.Collections {
 	/// <summary>
 	/// A collection that does not allow duplicates, and keeps items in the order they are added.
 	/// </summary>

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

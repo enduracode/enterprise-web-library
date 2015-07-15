@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Cultures supported by our framework.
 	/// </summary>

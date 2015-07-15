@@ -1,8 +1,8 @@
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InputValidation;
 using System;
 
-namespace RedStapler.StandardLibrary.MultiColumnForms {
+namespace EnterpriseWebLibrary.MultiColumnForms {
 
 	/// <summary>
 	/// A method used to load data into a single cell on a multiple column form.

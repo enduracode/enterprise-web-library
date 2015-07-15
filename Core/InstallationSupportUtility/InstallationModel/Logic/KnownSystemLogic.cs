@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+﻿using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class KnownSystemLogic {
 		private readonly SoftwareSystem rsisSystem;
 

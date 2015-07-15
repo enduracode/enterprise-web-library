@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class SecondaryResponse {
 		private readonly Func<FullResponse> fullResponseGetter;
 

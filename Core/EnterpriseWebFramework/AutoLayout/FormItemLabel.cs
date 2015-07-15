@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A label for a form item.
 	/// </summary>

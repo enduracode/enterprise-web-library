@@ -1,6 +1,6 @@
 using System.Net.Mime;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// String constants for the content types for common file types.
 	/// </summary>

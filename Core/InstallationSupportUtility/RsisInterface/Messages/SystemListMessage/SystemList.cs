@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage {
 	public partial class SystemList {
 		public RsisInstallation GetInstallationById( int installationId ) {
 			foreach( var system in Systems ) {

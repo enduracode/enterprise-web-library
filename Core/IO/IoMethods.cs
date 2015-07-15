@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// A collection of IO-related static methods.
 	/// </summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// A column name and a value for use by an inline database command.
 	/// </summary>

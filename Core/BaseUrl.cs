@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public class BaseUrl {
 		internal static string GetUrlString( bool secure, string host, string path ) {
 			// Creating the URI allows us to remove explicit default ports from the URL.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	/// <summary>
 	/// Contains useful information about the execution of an operation. Created by the caller of the operation.
 	/// All properties are set by the operation itself.

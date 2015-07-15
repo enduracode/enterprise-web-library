@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.ServiceModel;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages {
 	[ MessageContract ]
 	public class DataPackageUploadMessage {
 		[ MessageHeader ]

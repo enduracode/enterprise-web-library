@@ -1,5 +1,5 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public class DoNotEmailOrLogException: ApplicationException {}
 }

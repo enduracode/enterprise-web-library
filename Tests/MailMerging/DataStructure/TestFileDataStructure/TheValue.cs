@@ -1,4 +1,4 @@
-using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging.DataStructure.TestFileDataStructure {
 	public class TheValue: BasicMergeFieldImplementation<MergeTestData.Thing, string> {

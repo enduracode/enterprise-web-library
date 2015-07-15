@@ -2,10 +2,10 @@ using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // PageState: string test1
 // PageState: string test2

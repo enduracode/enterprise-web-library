@@ -2,7 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace RedStapler.StandardLibrary.Encryption {
+namespace EnterpriseWebLibrary.Encryption {
 	/// <summary>
 	/// Class for generating and hashing passwords.
 	/// Code from http://www.aspheute.com/english/20040105.asp.

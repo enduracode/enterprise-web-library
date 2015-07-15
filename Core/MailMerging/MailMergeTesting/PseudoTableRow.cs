@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting {
+﻿namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
 	/// <summary>
 	/// Has fields in it like a table row would.
 	/// </summary>

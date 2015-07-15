@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.ServiceProcess;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.WindowsServiceFramework {
+namespace EnterpriseWebLibrary.WindowsServiceFramework {
 	/// <summary>
 	/// A collection of service-related static methods.
 	/// </summary>

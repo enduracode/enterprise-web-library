@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.WebSessionState;
 using Stripe;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Methods for processing payments with Stripe.
 	/// </summary>

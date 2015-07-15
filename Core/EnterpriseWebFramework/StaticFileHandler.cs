@@ -3,9 +3,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// ISU and internal use only.
 	/// </summary>

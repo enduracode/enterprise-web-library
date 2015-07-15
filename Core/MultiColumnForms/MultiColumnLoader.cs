@@ -1,7 +1,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.MultiColumnForms {
+namespace EnterpriseWebLibrary.MultiColumnForms {
 	/// <summary>
 	/// Makes it easier to load data on pages with multiple columns containing identical fields.
 	/// </summary>

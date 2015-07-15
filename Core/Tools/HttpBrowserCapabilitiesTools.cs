@@ -1,6 +1,6 @@
 ﻿using System.Web;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Helpful System.Web.HttpBrowserCapabilities methods.
 	/// </summary>

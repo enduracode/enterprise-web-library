@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal class TableColumns {

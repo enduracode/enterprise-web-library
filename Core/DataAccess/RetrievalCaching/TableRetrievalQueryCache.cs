@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using EnterpriseWebLibrary.Collections;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
-namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

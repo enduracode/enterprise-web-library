@@ -6,7 +6,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Contains methods that serialize objects to and deserialize objects from XML. Object types should be auto-generated using SvcUtil or Xsd.
 	/// </summary>

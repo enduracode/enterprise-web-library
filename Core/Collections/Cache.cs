@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary.Collections {
+namespace EnterpriseWebLibrary.Collections {
 	/// <summary>
 	/// A cache of values.
 	/// </summary>

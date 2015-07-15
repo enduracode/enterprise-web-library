@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.MailMerging;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.MailMerging;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An HTTP response, minus any caching information.
 	/// </summary>

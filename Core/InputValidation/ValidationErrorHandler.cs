@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// This class allows you to control what happens when a validation method generates an error. Every validation method takes a ValidationErrorHandler object
 	/// as the first parameter. Currently you can't re-use these objects for more than one validation call since most validation methods don't reset LastResult.

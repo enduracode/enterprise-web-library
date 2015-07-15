@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.DataAccess.RevisionHistory {
+namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
 	/// Represents a revision of a data entity.
 	/// </summary>

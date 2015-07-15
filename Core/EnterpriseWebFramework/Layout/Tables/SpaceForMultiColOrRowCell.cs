@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	internal class SpaceForMultiColOrRowCell: CellPlaceholder {
 		string CellPlaceholder.SimpleText { get { return ""; } }
 	}

@@ -1,6 +1,6 @@
 using System;
 
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// Represents a phone number consiting of area code, number, and optional extension.
 	/// Also supports international numbers.  If IsInternational is true, area code, number, and extension are irrelevant.

@@ -1,7 +1,7 @@
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.InputValidation;
 
 // OptionalParameter: string field1
 // OptionalParameter: string field2

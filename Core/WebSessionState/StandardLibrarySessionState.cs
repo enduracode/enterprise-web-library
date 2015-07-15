@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Web;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace RedStapler.StandardLibrary.WebSessionState {
+namespace EnterpriseWebLibrary.WebSessionState {
 	/// <summary>
 	/// Contains and allows access to all data stored in ASP.NET session state.
 	/// Do NOT add anything new to this class since we no longer support session state. See Deliberate Omissions: https://enduracode.fogbugz.com/default.asp?W6.

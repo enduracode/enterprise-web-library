@@ -4,13 +4,13 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
 		// Some of these are used by the EWF JavaScript file.
 		private const string topWarningBlockCssClass = "ewfTopWarning";

@@ -2,10 +2,10 @@
 using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Email;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email;
 
-namespace RedStapler.StandardLibrary.WindowsServiceFramework {
+namespace EnterpriseWebLibrary.WindowsServiceFramework {
 	/// <summary>
 	/// A .NET Framework service that uses an EWL service for its implementation.
 	/// </summary>

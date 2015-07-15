@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage {
 	public partial class RsisInstallation {
 		public string FullName { get { return InstallationConfiguration.GetFullNameFromSystemAndInstallationNames( SystemListStatics.RsisSystemList.GetSystemByInstallationId( Id ).Name, Name ); } }
 

@@ -1,6 +1,6 @@
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Defines a column in an EWF table. Every cell in this column will share the given width.
 	/// </summary>

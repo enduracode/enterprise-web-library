@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// A collection of Stream-related static methods.
 	/// </summary>

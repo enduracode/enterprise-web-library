@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string destinationUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public {
 	partial class EntitySetup: UserControl, EntityDisplaySetup {
 		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {

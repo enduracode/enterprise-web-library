@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Configuration {
+﻿namespace EnterpriseWebLibrary.Configuration {
 	internal class DefaultCookieAttributes {
 		internal readonly string Domain;
 		internal readonly string Path;

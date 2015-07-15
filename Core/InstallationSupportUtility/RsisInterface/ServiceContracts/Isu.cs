@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.ServiceModel;
-using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages;
+using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
 	[ ServiceContract ]
 	public interface Isu {
 		[ OperationContract ]

@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
 	[ ServiceContract ]
 	public interface ProgramRunnerUnstreamed {
 		[ OperationContract ]

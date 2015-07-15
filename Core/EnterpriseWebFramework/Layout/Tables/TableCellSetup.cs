@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a table cell.
 	/// </summary>

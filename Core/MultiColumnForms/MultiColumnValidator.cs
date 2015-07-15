@@ -1,10 +1,10 @@
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InputValidation;
 using System;
 using System.Collections.Generic;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.MultiColumnForms {
+namespace EnterpriseWebLibrary.MultiColumnForms {
 
 	/// <summary>
 	/// Makes it easier to validate form values on pages with multiple columns containing identical fields.

@@ -1,3 +1,3 @@
-﻿namespace RedStapler.StandardLibrary.Configuration.Machine {
+﻿namespace EnterpriseWebLibrary.Configuration.Machine {
 	partial class MachineConfiguration {}
 }

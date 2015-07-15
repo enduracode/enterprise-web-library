@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.DataAccess.Ranking {
+﻿namespace EnterpriseWebLibrary.DataAccess.Ranking {
 	/// <summary>
 	/// Defines how ranking operations will be carried out against the database for a particular system.
 	/// </summary>

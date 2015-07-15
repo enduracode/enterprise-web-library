@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.IO {
+﻿namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Represents a file, including its contents.
 	/// NOTE: Do not use. We want this class to become the only way we deal with files in memory, but we are trying to make it use a stream instead of a byte

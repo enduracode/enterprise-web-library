@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// An exception caused by a database concurrency error.
 	/// </summary>

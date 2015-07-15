@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using RedStapler.StandardLibrary.Configuration.InstallationStandard;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 
-namespace RedStapler.StandardLibrary.Configuration {
+namespace EnterpriseWebLibrary.Configuration {
 	/// <summary>
 	/// A web application.
 	/// </summary>

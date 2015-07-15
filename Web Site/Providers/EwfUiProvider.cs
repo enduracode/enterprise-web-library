@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.WebSite.TestPages;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 				new ActionButtonSetup(
 					"Contact us",
 					new EwfLink(
-						RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
+						EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
 
 			var menu = EwfTable.Create();
 			menu.AddItem(

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Creates Info objects for EWF items.
 	/// </summary>

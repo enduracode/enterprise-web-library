@@ -1,7 +1,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking {
 	/// <summary>
 	/// A link between a check box (or radio button) and an array of dependent controls.
 	/// </summary>

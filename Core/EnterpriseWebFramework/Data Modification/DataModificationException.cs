@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An exception that is thrown during data modification.
 	/// </summary>

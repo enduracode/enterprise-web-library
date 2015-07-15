@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A placeholder control that is a naming container.
 	/// </summary>

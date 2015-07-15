@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.Encryption {
+namespace EnterpriseWebLibrary.Encryption {
 	/// <summary>
 	/// Provides a suite of static methods to simplify symmetric encryption. Designed for systems that use a single, global encryption key.
 	/// </summary>

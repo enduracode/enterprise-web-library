@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	/// <summary>
 	/// RSIS System List logic.
 	/// </summary>

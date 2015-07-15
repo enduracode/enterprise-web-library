@@ -7,10 +7,10 @@ using NDepend.Analysis;
 using NDepend.CodeModel;
 using NDepend.Path;
 using NDepend.Project;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class GetLogicSize: Operation {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.WebTestingFramework {
+namespace EnterpriseWebLibrary.WebTestingFramework {
 	/// <summary>
 	/// A person's name.
 	/// </summary>

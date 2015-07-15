@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.DataAccess.Ranking {
+﻿namespace EnterpriseWebLibrary.DataAccess.Ranking {
 	/// <summary>
 	/// A collection of static methods related to ranking.
 	/// </summary>

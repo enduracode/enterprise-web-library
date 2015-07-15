@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportEwlToLocalFeed: Operation {

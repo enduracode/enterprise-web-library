@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Represents a line of text from a CSV file that has been parsed into fields that
 	/// are accessible through the indexers of this object.

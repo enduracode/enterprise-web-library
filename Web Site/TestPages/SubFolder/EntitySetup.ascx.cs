@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class EntitySetup: UserControl, EntityDisplaySetup {

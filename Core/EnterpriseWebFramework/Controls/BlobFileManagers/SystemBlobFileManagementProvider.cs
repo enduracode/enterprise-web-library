@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Defines how file management operations will be carried out against a database.
 	/// </summary>

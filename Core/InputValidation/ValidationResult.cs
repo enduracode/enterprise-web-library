@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	internal class ValidationResult {
 		private ErrorCondition errorCondition = ErrorCondition.NoError;
 		private string errorMessage = "";

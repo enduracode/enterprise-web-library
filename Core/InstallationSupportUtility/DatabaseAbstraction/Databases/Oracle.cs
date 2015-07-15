@@ -4,16 +4,16 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class Oracle: Database {
 		private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
 		private const string databaseFileDumpFileName = "Dump File.dmp";

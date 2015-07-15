@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A radio button group. Use this when you want access to the individual selection state of each radio button and do not need the concept of a selected item
 	/// ID for the group. Otherwise use FreeFormRadioList.

@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+﻿using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// A database command condition associated with a particular table.
 	/// </summary>

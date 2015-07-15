@@ -1,7 +1,7 @@
 ﻿using System;
-using RedStapler.StandardLibrary.Caching;
+using EnterpriseWebLibrary.Caching;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// EWF use only.
 	/// </summary>

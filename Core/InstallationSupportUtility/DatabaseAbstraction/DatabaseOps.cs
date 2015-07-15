@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	public static class DatabaseOps {
 		internal static Database CreateDatabase( DatabaseInfo databaseInfo, List<string> oracleTableSpaces ) {
 			if( databaseInfo == null )

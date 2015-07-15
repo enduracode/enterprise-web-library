@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class AutoCompleteItem {
 		// Javascript is case-sensitive. These must be lowercase.
 		// ReSharper disable InconsistentNaming

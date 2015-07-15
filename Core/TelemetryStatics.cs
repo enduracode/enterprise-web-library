@@ -3,12 +3,12 @@ using System.IO;
 using System.ServiceModel;
 using System.Web;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public static class TelemetryStatics {
 		/// <summary>
 		/// Reports an error to the developers. The report includes the specified exception and additional information about the running program.

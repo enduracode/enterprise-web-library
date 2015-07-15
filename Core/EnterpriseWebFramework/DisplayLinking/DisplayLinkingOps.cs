@@ -1,7 +1,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking {
 	internal static class DisplayLinkingOps {
 		internal static void SetControlDisplay( WebControl control, bool visible ) {
 			var c = control;

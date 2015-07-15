@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Holds informations about a validation error generated as a result of processing a parsed line.
 	/// </summary>

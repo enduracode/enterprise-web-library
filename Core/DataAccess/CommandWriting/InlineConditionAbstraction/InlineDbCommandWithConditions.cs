@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

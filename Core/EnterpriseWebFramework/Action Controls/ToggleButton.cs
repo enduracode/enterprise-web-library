@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that, when clicked, toggles the display of other controls.
 	/// </summary>

@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using Aspose.Pdf.Facades;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Contains methods for working with BLOB files.
 	/// </summary>

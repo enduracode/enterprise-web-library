@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using RedStapler.StandardLibrary.MailMerging.Fields;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.Fields;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging.DataTree {
+namespace EnterpriseWebLibrary.MailMerging.DataTree {
 	/// <summary>
 	/// A child node in a merge data tree, which is a tree of merge fields and data rows.
 	/// </summary>

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class Charts: EwfPage {

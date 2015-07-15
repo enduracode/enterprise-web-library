@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfConfigurationStatics {
 		internal static WebApplication AppConfiguration { get; private set; }
 

@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Hosting;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	internal static class IisConfigurationStatics {
 		internal static void ConfigureIis( bool iisExpress ) {
 			var assembly = getAssembly( iisExpress );

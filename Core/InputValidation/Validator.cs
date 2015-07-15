@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// Contains high-level validation methods. Each validation method returns an object that is the value of the validated result. This value is meaningless if
 	/// ValidationErrorHandler.LastResult is anything other than ErrorCondition.NoError. This property or the ErrorsOccurred property on this class should be

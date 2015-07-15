@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.DataAccess {
+﻿namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// System-specific data-access logic.
 	/// </summary>

@@ -1,6 +1,6 @@
 using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Contains basic attributes of a file stored in a database, including the ID and the name.
 	/// </summary>

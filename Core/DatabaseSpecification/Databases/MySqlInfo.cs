@@ -3,7 +3,7 @@ using System.Data.Common;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
-namespace RedStapler.StandardLibrary.DatabaseSpecification.Databases {
+namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 	/// <summary>
 	/// Contains information about a MySQL database.
 	/// </summary>

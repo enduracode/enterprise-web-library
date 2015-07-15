@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Extension methods for decimals.
 	/// </summary>

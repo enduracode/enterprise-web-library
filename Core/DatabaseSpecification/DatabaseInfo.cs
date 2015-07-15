@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace RedStapler.StandardLibrary.DatabaseSpecification {
+namespace EnterpriseWebLibrary.DatabaseSpecification {
 	/// <summary>
 	/// Contains information about a database.
 	/// </summary>

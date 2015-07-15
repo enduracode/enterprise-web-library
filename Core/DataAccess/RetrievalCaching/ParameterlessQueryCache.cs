@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking {
 	/// <summary>
 	/// A mapping between all check boxes in the third column of a form and all subsequent cells to the right of those checkboxes. When a check box is checked, the cells will be visible.
 	/// </summary>

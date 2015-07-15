@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public static class ObjectTools {
 		/// <summary>
 		/// Returns o.ToString() unless o is null. In this case, returns either null (if nullToEmptyString is false) or the empty string (if nullToEmptyString is true).

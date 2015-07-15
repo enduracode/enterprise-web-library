@@ -1,6 +1,6 @@
-using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public interface Operation {
 		bool IsValid( Installation installation );
 

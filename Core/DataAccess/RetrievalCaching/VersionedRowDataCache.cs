@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using RedStapler.StandardLibrary.Caching;
-using RedStapler.StandardLibrary.Collections;
+using EnterpriseWebLibrary.Caching;
+using EnterpriseWebLibrary.Collections;
 
-namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

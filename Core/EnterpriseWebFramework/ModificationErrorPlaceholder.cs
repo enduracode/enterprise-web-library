@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.UI;
-using RedStapler.StandardLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A placeholder control for modification error messages.
 	/// </summary>

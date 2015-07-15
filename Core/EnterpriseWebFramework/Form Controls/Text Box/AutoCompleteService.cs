@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Web.Script.Serialization;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class AutoCompleteService: EwfPage {
 		protected override EwfSafeResponseWriter responseWriter {
 			get {

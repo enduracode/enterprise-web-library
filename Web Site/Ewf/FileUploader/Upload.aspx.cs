@@ -1,10 +1,10 @@
 using System.IO;
 using System.Reflection;
 using Humanizer;
-using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader {
 	partial class Upload: EwfPage {
 		protected override EwfSafeResponseWriter responseWriter {
 			get {

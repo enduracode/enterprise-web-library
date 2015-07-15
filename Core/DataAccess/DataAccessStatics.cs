@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DatabaseSpecification;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	public class DataAccessStatics {
 		private const string providerName = "DataAccess";
 		private static SystemDataAccessProvider provider;

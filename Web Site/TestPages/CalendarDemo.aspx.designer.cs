@@ -20,6 +20,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.MonthViewCalendar calendar;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.MonthViewCalendar calendar;
     }
 }

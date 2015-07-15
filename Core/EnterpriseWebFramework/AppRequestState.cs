@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using RedStapler.StandardLibrary.Caching;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Caching;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The state for a request in an EWF application.
 	/// </summary>

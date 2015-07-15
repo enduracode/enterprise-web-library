@@ -8,10 +8,10 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
 using JetBrains.Annotations;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control capable of displaying chart data. Currently implemented with Chart.js.
 	/// </summary>

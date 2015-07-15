@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using RedStapler.StandardLibrary.Collections;
+using EnterpriseWebLibrary.Collections;
 
-namespace RedStapler.StandardLibrary.DataAccess.RetrievalCaching {
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

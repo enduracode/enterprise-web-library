@@ -1,2 +1,2 @@
-<%@ Control Language="C#" CodeBehind="EntitySetup.ascx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.EntitySetup" %>
+<%@ Control Language="C#" CodeBehind="EntitySetup.ascx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.EntitySetup" %>
 

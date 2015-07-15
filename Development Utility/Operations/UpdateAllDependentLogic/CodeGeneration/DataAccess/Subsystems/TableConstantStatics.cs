@@ -1,7 +1,7 @@
 using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableConstantStatics {

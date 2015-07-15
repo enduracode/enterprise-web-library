@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace RedStapler.StandardLibrary.MailMerging.Fields {
+namespace EnterpriseWebLibrary.MailMerging.Fields {
 	/// <summary>
 	/// Methods that create merge fields.
 	/// </summary>

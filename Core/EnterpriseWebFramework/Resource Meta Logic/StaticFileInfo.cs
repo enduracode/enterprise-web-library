@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about a static file before actually requesting it.
 	/// </summary>

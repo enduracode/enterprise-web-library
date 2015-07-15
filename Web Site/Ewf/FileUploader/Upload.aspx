@@ -1,1 +1,1 @@
-<%@ Page Language="C#" CodeBehind="Upload.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader.Upload" %>
+<%@ Page Language="C#" CodeBehind="Upload.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader.Upload" %>

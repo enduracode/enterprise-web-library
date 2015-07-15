@@ -1,6 +1,6 @@
 ﻿using System.Web;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	internal static class HttpRequestTools {
 		/// <summary>
 		/// Gets the user agent for the request.

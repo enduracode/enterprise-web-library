@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
 using Humanizer;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.MailMerging.MailMergeTesting;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging {
+namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
 	/// Contains methods that perform mail merging operations.
 	/// </summary>

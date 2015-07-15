@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Encryption {
+﻿namespace EnterpriseWebLibrary.Encryption {
 	/// <summary>
 	/// System-specific encryption logic.
 	/// </summary>

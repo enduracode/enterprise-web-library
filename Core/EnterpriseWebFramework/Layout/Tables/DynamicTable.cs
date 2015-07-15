@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess.Ranking;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess.Ranking;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A wrapper built around System.Web.UI.WebControls.Table that makes it easier to manipulate from code.
 	/// </summary>

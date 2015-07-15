@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using ClosedXML.Excel;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Respresents a worksheet inside an Excel workbook (file).
 	/// </summary>

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal class WebItemGeneralData {

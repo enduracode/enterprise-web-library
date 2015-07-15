@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Used to transparently read from a file given its path, stream, etc.
 	/// </summary>

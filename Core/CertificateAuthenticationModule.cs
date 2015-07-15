@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Security.Principal;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// An HTTP Module that authenticates users based on client certificates.
 	/// </summary>

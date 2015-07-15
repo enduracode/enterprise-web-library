@@ -1,9 +1,9 @@
 ﻿using System.Text.RegularExpressions;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EmailSendingFormItems {
 		public static FormItem<EwfTextBox> GetSubjectFormItem( this EmailMessage emailMessage, ValidationList vl, string value = "" ) {
 			return FormItem.Create(

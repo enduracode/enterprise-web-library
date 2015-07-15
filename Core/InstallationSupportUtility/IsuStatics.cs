@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public class IsuStatics {
 		/// <summary>
 		/// EWL Core and ISU use only.

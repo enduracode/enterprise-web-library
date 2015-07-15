@@ -8,7 +8,7 @@ using System.Net;
 using System.Threading;
 using ImageResizer;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// A collection of miscellaneous statics that may be useful.
 	/// </summary>
@@ -26,7 +26,7 @@ namespace RedStapler.StandardLibrary {
 		/// <summary>
 		/// EWL Core and Development Utility use only.
 		/// </summary>
-		public const string EwfFolderBaseNamespace = "RedStapler.StandardLibrary.EnterpriseWebFramework";
+		public const string EwfFolderBaseNamespace = "EnterpriseWebLibrary.EnterpriseWebFramework";
 
 		/// <summary>
 		/// EWL Core and ISU use only.

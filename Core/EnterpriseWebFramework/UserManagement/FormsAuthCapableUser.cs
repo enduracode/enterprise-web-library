@@ -1,6 +1,6 @@
 using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Represents a user of the system who can be authenticated using ASP.NET Forms Authentication.
 	/// </summary>

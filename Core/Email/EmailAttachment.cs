@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RedStapler.StandardLibrary.Email {
+namespace EnterpriseWebLibrary.Email {
 	/// <summary>
 	/// An email attachment.
 	/// </summary>

@@ -9,14 +9,14 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.WebSessionState;
 using StackExchange.Profiling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A System.Web.UI.Page that contains special Red Stapler Enterprise Web Framework logic. Requires that view state and session state be enabled.
 	/// </summary>

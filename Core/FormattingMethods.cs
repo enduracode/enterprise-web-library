@@ -1,7 +1,7 @@
 using System;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// Contains methods that prepare data for display. Data is assumed to be valid.
 	/// </summary>

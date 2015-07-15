@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using ICSharpCode.SharpZipLib.Zip;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Contains methods that zip and unzip data.
 	/// </summary>

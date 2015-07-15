@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// Defines a row in an EWF dynamic table. Options specified on individual cells take precedence over equivalent options specified here.
 	/// You cannot pass the same row setup object to multiple rows in the same table or to rows in different tables.

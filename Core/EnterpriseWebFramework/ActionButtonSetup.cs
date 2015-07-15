@@ -1,8 +1,8 @@
 using System;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Represents a button that appears in the EWF user interface that performs an action or simply navigates to a URL when clicked.
 	/// </summary>

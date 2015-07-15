@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.Validation;
+﻿using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// System-specific user management logic. Do not use unless the system absolutely requires micromanagement of authentication behavior.
 	/// </summary>

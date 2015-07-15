@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Contains metadata about a control, such as what it is called, ways in which it can be displayed, how it should be validated, etc.
 	/// </summary>

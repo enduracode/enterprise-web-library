@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.MailMerging {
+﻿namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
 	/// An exception that is thrown during a mail merging operation and that is caused by a template problem.
 	/// </summary>

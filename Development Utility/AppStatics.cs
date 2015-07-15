@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {

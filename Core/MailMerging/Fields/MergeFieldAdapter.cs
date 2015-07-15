@@ -1,8 +1,8 @@
 ﻿using System;
-using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.FieldImplementation;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging.Fields {
+namespace EnterpriseWebLibrary.MailMerging.Fields {
 	/// <summary>
 	/// A merge field adapter, which allows a merge field to be used with other fields that have a different row type.
 	/// </summary>

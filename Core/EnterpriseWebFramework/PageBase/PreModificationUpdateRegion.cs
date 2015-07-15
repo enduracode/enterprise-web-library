@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class PreModificationUpdateRegion {
 		private readonly UpdateRegionSet set;
 		private readonly Func<IEnumerable<Control>> controlGetter;

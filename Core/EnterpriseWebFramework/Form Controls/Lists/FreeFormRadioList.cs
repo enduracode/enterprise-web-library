@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A radio button list that allows you to arrange the buttons on the page however you wish. If you want access to the individual selection state of each
 	/// radio button and do not need the concept of a selected item ID for the group, use RadioButtonGroup instead.

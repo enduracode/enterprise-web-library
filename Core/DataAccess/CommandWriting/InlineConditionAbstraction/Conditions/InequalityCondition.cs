@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using RedStapler.StandardLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
 	/// EWL Core and Development Utility use only.
 	/// </summary>

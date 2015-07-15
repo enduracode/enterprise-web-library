@@ -6,14 +6,14 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary.DataAccess.RevisionHistory;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.DataAccess.RevisionHistory;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// Provides a connection to a database.  Capable of nested transactions.
 	/// </summary>

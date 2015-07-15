@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 
-namespace RedStapler.StandardLibrary.Email {
+namespace EnterpriseWebLibrary.Email {
 	/// <summary>
 	/// An email message.
 	/// </summary>

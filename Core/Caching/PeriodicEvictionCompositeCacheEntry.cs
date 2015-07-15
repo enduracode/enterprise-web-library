@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.Caching {
+﻿namespace EnterpriseWebLibrary.Caching {
 	internal interface PeriodicEvictionCompositeCacheEntry {
 		void EvictOldEntries();
 	}

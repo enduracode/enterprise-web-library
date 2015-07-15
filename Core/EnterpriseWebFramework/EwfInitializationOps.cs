@@ -4,12 +4,12 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Compilation;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using StackExchange.Profiling;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfInitializationOps {
 		private static bool ewlInitialized;
 		private static SystemInitializer appInitializer;
@@ -56,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
 						var metaLogicFactory =
-							globalType.Assembly.CreateInstance( "RedStapler.StandardLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as
+							globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as
 							AppMetaLogicFactory;
 						if( metaLogicFactory == null )
 							throw new ApplicationException( "Meta logic factory not found." );

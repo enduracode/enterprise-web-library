@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.Tests.Validation {
 	[ TestFixture ]

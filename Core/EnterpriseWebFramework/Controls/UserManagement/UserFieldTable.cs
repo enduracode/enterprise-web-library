@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A table that contains fields to enable editing of a user's generic properties.
 	/// NOTE: Convert this to use FormItems and take additional FormItems to allow customization of this control?

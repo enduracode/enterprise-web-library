@@ -2,7 +2,7 @@
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A style that renders action controls as rectangular boxes.
 	/// </summary>

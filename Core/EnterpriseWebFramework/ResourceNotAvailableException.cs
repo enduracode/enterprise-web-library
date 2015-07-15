@@ -1,6 +1,6 @@
 using System;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An exception caused by an invalid URL query string.
 	/// </summary>

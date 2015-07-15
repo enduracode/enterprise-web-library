@@ -2,7 +2,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// Application-specific configuration for the EWF UI.
 	/// </summary>

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using RedStapler.StandardLibrary.MailMerging.Fields;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.Fields;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging.DataTree {
+namespace EnterpriseWebLibrary.MailMerging.DataTree {
 	/// <summary>
 	/// Contains methods that perform data tree operations.
 	/// </summary>

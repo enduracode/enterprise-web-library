@@ -1,7 +1,7 @@
 ﻿using System;
-using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace RedStapler.StandardLibrary.MailMerging.RowTree {
+namespace EnterpriseWebLibrary.MailMerging.RowTree {
 	/// <summary>
 	/// A combination of a merge field and a data row.
 	/// </summary>

@@ -1,6 +1,6 @@
-﻿using RedStapler.StandardLibrary.MailMerging.FieldImplementation;
+﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace RedStapler.StandardLibrary.MailMerging.MailMergeTesting.PseudoTableFields {
+namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting.PseudoTableFields {
 	internal class Test: BasicMergeFieldImplementation<PseudoTableRow, string> {
 		public string GetDescription() {
 			return "Just a test.";

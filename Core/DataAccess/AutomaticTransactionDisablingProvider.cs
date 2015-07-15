@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// System-specific automatic-transaction disabling logic.
 	/// </summary>

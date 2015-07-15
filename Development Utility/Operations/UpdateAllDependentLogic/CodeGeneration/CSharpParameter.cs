@@ -1,4 +1,4 @@
-﻿using RedStapler.StandardLibrary;
+﻿using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal class CSharpParameter {

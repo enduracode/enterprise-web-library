@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ConfirmPasswordReset.aspx.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public.ConfirmPasswordReset"
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ConfirmPasswordReset.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public.ConfirmPasswordReset"
 	MasterPageFile="~/Ewf/EwfUi.master" %>
 
 <asp:Content runat="server" ID="content" ContentPlaceHolderID="contentPlace">

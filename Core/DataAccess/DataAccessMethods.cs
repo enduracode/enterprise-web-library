@@ -3,12 +3,12 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using Humanizer;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace RedStapler.StandardLibrary.DataAccess {
+namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
 	/// A collection of static methods related to data access.
 	/// </summary>

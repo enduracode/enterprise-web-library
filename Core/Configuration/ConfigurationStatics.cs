@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using RedStapler.StandardLibrary.Configuration.Machine;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration.Machine;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.Configuration {
+namespace EnterpriseWebLibrary.Configuration {
 	public static class ConfigurationStatics {
 		/// <summary>
 		/// EWL Core and Development Utility use only.

@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // Parameter: string fileName
 

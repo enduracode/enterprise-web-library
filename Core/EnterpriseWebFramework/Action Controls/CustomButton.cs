@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that, when clicked, executes custom JavaScript.
 	/// </summary>

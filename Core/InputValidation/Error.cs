@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// Represents a validation error.
 	/// </summary>

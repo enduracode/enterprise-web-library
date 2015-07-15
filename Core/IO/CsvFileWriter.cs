@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Helps in writing data to a file in CSV format.
 	/// </summary>

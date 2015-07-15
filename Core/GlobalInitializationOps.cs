@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
-using RedStapler.StandardLibrary.Caching;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Caching;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public static class GlobalInitializationOps {
 		private static bool initialized;
 		private static SystemInitializer globalInitializer;

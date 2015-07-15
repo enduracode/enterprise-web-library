@@ -2,10 +2,10 @@
 using System.Text.RegularExpressions;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.JavaScriptWriting;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.JavaScriptWriting;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A time duration picker.
 	/// </summary>

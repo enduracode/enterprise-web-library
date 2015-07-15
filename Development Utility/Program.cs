@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {

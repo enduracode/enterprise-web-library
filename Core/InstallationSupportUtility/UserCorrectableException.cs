@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public class UserCorrectableException: ApplicationException {
 		public static Exception CreateSecondaryException( string message, Exception innerException ) {
 			if( innerException is UserCorrectableException )

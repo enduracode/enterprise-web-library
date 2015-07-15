@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
+namespace EnterpriseWebLibrary.DataAccess.StandardModification {
 	/// <summary>
 	/// A type of database modification object. EWL use only.
 	/// </summary>

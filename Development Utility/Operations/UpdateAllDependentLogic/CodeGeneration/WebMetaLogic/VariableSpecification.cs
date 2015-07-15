@@ -6,8 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.CSharp;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	/// <summary>

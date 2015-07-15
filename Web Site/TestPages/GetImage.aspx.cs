@@ -1,5 +1,5 @@
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // Parameter: string text
 

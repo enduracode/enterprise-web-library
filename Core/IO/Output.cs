@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Helps communicate with standard out, standard error, and files.
 	/// </summary>

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CookieStatics {
 		internal static HttpCookie GetCookie( string name, bool omitNamePrefix = false ) {
 			var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// This control should never support custom-text scenarios. An essential element of SelectList is that each item has both a label and an ID, and custom text
 	// cannot meet this requirement. EwfTextBox would be a more appropriate place to implement custom-text "combo boxes".
 

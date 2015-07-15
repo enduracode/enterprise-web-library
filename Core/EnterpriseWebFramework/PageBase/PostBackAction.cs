@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class PostBackAction {
 		private readonly ResourceInfo resource;
 		private readonly SecondaryResponse secondaryResponse;

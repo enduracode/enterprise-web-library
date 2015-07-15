@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.MailMerging.RowTree {
+namespace EnterpriseWebLibrary.MailMerging.RowTree {
 	/// <summary>
 	/// A tree of merge rows.
 	/// </summary>

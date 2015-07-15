@@ -2,7 +2,7 @@ using System;
 using System.Web.UI;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.JavaScriptWriting {
+namespace EnterpriseWebLibrary.JavaScriptWriting {
 	/// <summary>
 	/// A collection of methods that create JavaScript and/or add it to web controls.
 	/// </summary>

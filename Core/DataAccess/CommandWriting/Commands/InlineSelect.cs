@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
 	/// A SELECT query that can be executed against a database.
 	/// </summary>

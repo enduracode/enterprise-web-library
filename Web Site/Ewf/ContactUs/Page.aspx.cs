@@ -1,14 +1,14 @@
 using System;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.WebSessionState;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	partial class Page: EwfPage {
 		partial class Info {
 			public override string ResourceName { get { return ""; } }

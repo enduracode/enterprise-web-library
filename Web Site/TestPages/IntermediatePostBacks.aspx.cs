@@ -3,10 +3,10 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.WebSessionState;
 
 // OptionalParameter: bool toggled
 // OptionalParameter: IEnumerable<int> nonIdItemStates

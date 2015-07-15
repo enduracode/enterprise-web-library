@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.WebSessionState {
+namespace EnterpriseWebLibrary.WebSessionState {
 	/// <summary>
 	/// Defines whether a status message shows information or a warning.
 	/// </summary>

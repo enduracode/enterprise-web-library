@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.DataAccess.StandardModification {
+namespace EnterpriseWebLibrary.DataAccess.StandardModification {
 	/// <summary>
 	/// A post delete method and the required table retrieval row collection.
 	/// </summary>

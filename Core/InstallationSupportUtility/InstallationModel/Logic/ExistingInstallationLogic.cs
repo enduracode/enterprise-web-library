@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.ServiceProcess;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.Configuration.SystemGeneral;
-using RedStapler.StandardLibrary.Email;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.SystemGeneral;
+using EnterpriseWebLibrary.Email;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.InstallationModel {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 		private const int serviceFailureResetPeriod = 3600; // seconds

@@ -1,6 +1,6 @@
 using System;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// A value that knows whether it has been initialized and whether it has changed.
 	/// </summary>

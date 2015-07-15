@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.Email {
+namespace EnterpriseWebLibrary.Email {
 	/// <summary>
 	/// An exception caused by a failure to send an email message.
 	/// </summary>

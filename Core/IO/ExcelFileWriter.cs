@@ -4,7 +4,7 @@ using System.Linq;
 using ClosedXML.Excel;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Represents an Excel workbook (file).
 	/// </summary>

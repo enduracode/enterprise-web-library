@@ -4,16 +4,16 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
 		private static readonly string sqlServerFilesFolderPath = EwlStatics.CombinePaths(
 			ConfigurationStatics.RedStaplerFolderPath,

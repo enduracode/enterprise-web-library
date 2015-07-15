@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using Humanizer;
 using NUnit.Framework;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.Tests.IO {
 	[ TestFixture ]

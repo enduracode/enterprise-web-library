@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace RedStapler.StandardLibrary.IO {
+namespace EnterpriseWebLibrary.IO {
 	/// <summary>
 	/// Parses a line of a Microsoft Excel CSV file using the definition of CSV at http://en.wikipedia.org/wiki/Comma-separated_values.
 	/// </summary>

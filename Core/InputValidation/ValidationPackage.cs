@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace RedStapler.StandardLibrary.Validation {
+namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
 	/// Common data required to validate and build an error message for a piece of data.
 	/// </summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ActionControlIcon {
 		internal static IEnumerable<Control> GetIconAndTextControls( ActionControlIcon icon, string text ) {
 			// Use a label because our CSS selectors for icons include first-child and last-child and these do not take into account "text nodes", i.e. text that is

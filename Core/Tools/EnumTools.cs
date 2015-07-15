@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	public static class EnumTools {
 		/// <summary>
 		/// Gets the values of the specified enumeration type.

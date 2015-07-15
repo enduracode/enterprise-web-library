@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RedStapler.StandardLibrary.MailMerging {
+namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
 	/// A tree of merge field names.
 	/// </summary>

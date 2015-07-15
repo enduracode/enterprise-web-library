@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.DataAccess.CommandWriting {
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// Not yet documented.
 	/// </summary>

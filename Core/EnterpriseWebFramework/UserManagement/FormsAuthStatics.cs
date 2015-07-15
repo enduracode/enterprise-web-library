@@ -4,13 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using Humanizer;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// Statics related to forms authentication.
 	/// </summary>

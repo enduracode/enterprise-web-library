@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.MailMerging.FieldImplementation {
+﻿namespace EnterpriseWebLibrary.MailMerging.FieldImplementation {
 	/// <summary>
 	/// An implementation for a merge field adapter.
 	/// </summary>

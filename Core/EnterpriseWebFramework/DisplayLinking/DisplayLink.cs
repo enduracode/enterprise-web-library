@@ -1,4 +1,4 @@
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking {
 	/// <summary>
 	/// A mapping that uses JavaScript and CSS to allow one control to affect the display of other controls.
 	/// </summary>

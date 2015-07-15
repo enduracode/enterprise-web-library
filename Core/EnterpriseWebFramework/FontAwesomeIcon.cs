@@ -4,7 +4,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FontAwesomeIcon: WebControl, ControlTreeDataLoader {
 		internal class CssElementCreator: ControlCssElementCreator {
 			CssElement[] ControlCssElementCreator.CreateCssElements() {

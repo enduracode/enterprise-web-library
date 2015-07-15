@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control that loads data when it is part of the control tree of an EWF page. The page calls LoadData on these controls in top-down, depth-first order.
 	/// </summary>

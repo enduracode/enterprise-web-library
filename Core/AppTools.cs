@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	// Do NOT add anything new to this class; we will delete it after we figure out where to move the User property.
 	public static class AppTools {
 		/// <summary>

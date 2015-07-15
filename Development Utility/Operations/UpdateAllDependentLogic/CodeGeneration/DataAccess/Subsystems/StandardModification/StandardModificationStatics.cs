@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void Generate(
 			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			StandardModificationStatics.writer = writer;
 			StandardModificationStatics.database = database;
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class BasicDataModification: DataModification, ValidationListInternal {
 		private readonly List<Validation> validations = new List<Validation>();
 		private readonly List<Validation> topValidations = new List<Validation>();

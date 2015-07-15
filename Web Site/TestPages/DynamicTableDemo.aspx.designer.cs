@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table;
         
         /// <summary>
         /// table2 control.
@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table2;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table2;
         
         /// <summary>
         /// table3 control.
@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table3;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table3;
         
         /// <summary>
         /// table4 control.
@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table4;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table4;
         
         /// <summary>
         /// table5 control.
@@ -55,7 +55,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table5;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table5;
         
         /// <summary>
         /// table6 control.
@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table6;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table6;
         
         /// <summary>
         /// table7 control.
@@ -73,7 +73,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table7;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table7;
         
         /// <summary>
         /// table8 control.
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table8;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table8;
         
         /// <summary>
         /// table9 control.
@@ -91,6 +91,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::RedStapler.StandardLibrary.EnterpriseWebFramework.Controls.DynamicTable table9;
+        protected global::EnterpriseWebLibrary.EnterpriseWebFramework.Controls.DynamicTable table9;
     }
 }

@@ -1,8 +1,8 @@
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.WebSessionState;
 
 // Parameter: bool showHomeLink
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class PageNotAvailable: EwfPage {
 		partial class Info {
 			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }

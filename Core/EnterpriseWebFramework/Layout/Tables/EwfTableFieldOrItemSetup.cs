@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	internal class EwfTableFieldOrItemSetup {
 		internal readonly List<string> Classes;
 		internal readonly Unit Size;

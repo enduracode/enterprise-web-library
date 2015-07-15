@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Humanizer;
-using RedStapler.StandardLibrary.IO;
-using RedStapler.StandardLibrary.MailMerging;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.MailMerging;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	internal static class TestStatics {
 		public static readonly string OutputFolderPath = EwlStatics.CombinePaths(
 			Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ),

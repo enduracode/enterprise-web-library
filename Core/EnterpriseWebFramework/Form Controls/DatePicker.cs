@@ -2,9 +2,9 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.InputValidation;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A date picker.
 	/// </summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Humanizer;
 
-namespace RedStapler.StandardLibrary {
+namespace EnterpriseWebLibrary {
 	/// <summary>
 	/// An exception that is thrown when an unexpected value is encountered, usually in a switch statement.
 	/// </summary>

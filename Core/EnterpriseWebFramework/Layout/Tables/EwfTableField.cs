@@ -2,7 +2,7 @@
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	///  A field in a table. Options specified on individual cells take precedence over equivalent options specified here.
 	/// </summary>

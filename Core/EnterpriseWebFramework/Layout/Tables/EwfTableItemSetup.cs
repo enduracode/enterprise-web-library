@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	///  The configuration for an item in a table. Options specified on individual cells take precedence over equivalent options specified here.
 	/// </summary>

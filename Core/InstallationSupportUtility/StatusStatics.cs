@@ -1,7 +1,7 @@
 ﻿using System;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.IO;
 
-namespace RedStapler.StandardLibrary.InstallationSupportUtility {
+namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class StatusStatics {
 		public static event Action<string> StatusChanged;
 

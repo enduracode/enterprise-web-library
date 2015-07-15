@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RedStapler.StandardLibrary.Wcf {
+namespace EnterpriseWebLibrary.Wcf {
 	/// <summary>
 	/// An exception caused by a failed authorization check.
 	/// </summary>

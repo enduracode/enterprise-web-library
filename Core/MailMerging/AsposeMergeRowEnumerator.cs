@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Aspose.Words.Reporting;
-using RedStapler.StandardLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace RedStapler.StandardLibrary.MailMerging {
+namespace EnterpriseWebLibrary.MailMerging {
 	internal class AsposeMergeRowEnumerator: IMailMergeDataSource {
 		private readonly string tableName;
 		private readonly IEnumerator<MergeRow> enumerator;

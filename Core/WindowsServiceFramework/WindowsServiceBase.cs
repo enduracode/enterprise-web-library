@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.WindowsServiceFramework {
+﻿namespace EnterpriseWebLibrary.WindowsServiceFramework {
 	/// <summary>
 	/// A Windows service.
 	/// </summary>

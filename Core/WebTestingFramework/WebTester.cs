@@ -3,11 +3,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Selenium;
 
-namespace RedStapler.StandardLibrary.WebTestingFramework {
+namespace EnterpriseWebLibrary.WebTestingFramework {
 	/// <summary>
 	/// Used to run web tests against a system.
 	/// </summary>

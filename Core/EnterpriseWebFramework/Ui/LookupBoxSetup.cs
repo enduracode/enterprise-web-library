@@ -1,8 +1,8 @@
 using System;
 using System.Web.UI.WebControls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Ui {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// Represents a textbox that appears in the navigation bar allowing users to lookup a record by number.
 	/// </summary>
