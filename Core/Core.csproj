@@ -8,7 +8,7 @@
     <ProjectGuid>{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RedStapler.StandardLibrary</RootNamespace>
+    <RootNamespace>EnterpriseWebLibrary</RootNamespace>
     <AssemblyName>EnterpriseWebLibrary</AssemblyName>
     <SccProjectName>
     </SccProjectName>
