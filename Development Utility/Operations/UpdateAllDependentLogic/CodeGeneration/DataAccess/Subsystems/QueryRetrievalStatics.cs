@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
@@ -13,8 +12,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static DatabaseInfo info;
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.queries == null )
 				return;
 
@@ -46,7 +44,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" ); // namespace
 		}
 
-		private static List<Column> validateQueryAndGetColumns( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+		private static List<Column> validateQueryAndGetColumns( DBConnection cn, Configuration.SystemDevelopment.Query query ) {
 			// Attempt to query with every postSelectFromClause to ensure validity.
 			foreach( var postSelectFromClause in query.postSelectFromClauses ) {
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
@@ -57,7 +55,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
 		}
 
-		private static void writeCacheClass( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+		private static void writeCacheClass( TextWriter writer, Database database, Configuration.SystemDevelopment.Query query ) {
 			writer.WriteLine( "private partial class Cache {" );
 			writer.WriteLine(
 				"internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + database.SecondaryDatabaseName + query.name +
@@ -75,16 +73,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getQueryCacheType(
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+			Configuration.SystemDevelopment.Query query, Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
 			return DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any()
 				       ? "QueryRetrievalQueryCache<Row>"
 				       : "ParameterlessQueryCache<Row>";
 		}
 
 		private static void writeQueryMethod(
-			TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+			TextWriter writer, Database database, Configuration.SystemDevelopment.Query query,
+			Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Queries the database and returns the full results collection immediately." );
 			writer.WriteLine(
@@ -117,8 +114,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getQueryCacheName(
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause, bool getFieldName ) {
+			Configuration.SystemDevelopment.Query query, Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause, bool getFieldName ) {
 			return ( getFieldName ? "rows" : "Rows" ) + postSelectFromClause.name +
 			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any() ? "Queries" : "Query" );
 		}

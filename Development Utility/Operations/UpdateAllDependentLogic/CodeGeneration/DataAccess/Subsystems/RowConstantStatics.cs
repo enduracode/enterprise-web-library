@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class RowConstantStatics {
 		private const string dictionaryName = "valuesAndNames";
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.rowConstantTables == null )
 				return;
 

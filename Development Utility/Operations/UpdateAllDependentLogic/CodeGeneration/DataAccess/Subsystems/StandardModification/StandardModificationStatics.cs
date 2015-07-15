@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -18,8 +17,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			StandardModificationStatics.writer = writer;
 			StandardModificationStatics.database = database;
 
@@ -241,9 +239,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer,
 				"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 				" column. Throws an exception if the value has not been initialized. " + getComment( column ) );
-			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " +
-			                                   EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " { get { return " +
-			                                   getColumnFieldName( column ) + ".Value; } ";
+			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) +
+			                                   " { get { return " + getColumnFieldName( column ) + ".Value; } ";
 			if( columnIsReadOnly )
 				writer.WriteLine( propertyDeclarationBeginning + "}" );
 			else {
@@ -393,10 +390,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
-			foreach( var column in columns ) {
-				writer.WriteLine(
-					modObjectName + "." + getColumnFieldName( column ) + ".Value = @" + EwlStatics.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
-			}
+			foreach( var column in columns )
+				writer.WriteLine( modObjectName + "." + getColumnFieldName( column ) + ".Value = @" + EwlStatics.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
 		}
 
 		private static void writeExecuteMethod( string tableName ) {
@@ -517,8 +512,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
-				var columnValueExpression =
-					column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) );
+				var columnValueExpression = column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) );
 				writer.WriteLine( "cmd.AddColumnModification( " + columnValueExpression + " );" );
 			}
 			writer.WriteLine( "}" );

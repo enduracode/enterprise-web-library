@@ -1,13 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableRetrievalStatics {
@@ -18,8 +17,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
@@ -44,8 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
 							StringTools.ConcatenateWithDelimiter(
 								", ",
-								columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) +
-							" );" );
+								columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 						writer.WriteLine( "}" );
 					} );
 				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
@@ -342,8 +339,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 			writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
 			writer.WriteLine(
-				"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) +
-				" );" );
+				"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}
