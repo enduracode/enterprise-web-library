@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Principal;
 using System.Web;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary {
 	/// <summary>
@@ -26,9 +27,9 @@ namespace RedStapler.StandardLibrary {
 		/// over secure connections.
 		/// </summary>
 		private static string getEmailAddressFromClientCertificate() {
-			return AppTools.CertificateEmailAddressOverride.Length > 0
-			       	? ( HttpContext.Current.Request.IsSecureConnection ? AppTools.CertificateEmailAddressOverride : "" )
-			       	: getValueFromClientCertificate( "SUBJECTEMAIL" );
+			return ConfigurationStatics.CertificateEmailAddressOverride.Length > 0
+				       ? ( HttpContext.Current.Request.IsSecureConnection ? ConfigurationStatics.CertificateEmailAddressOverride : "" )
+				       : getValueFromClientCertificate( "SUBJECTEMAIL" );
 		}
 
 		/// <summary>

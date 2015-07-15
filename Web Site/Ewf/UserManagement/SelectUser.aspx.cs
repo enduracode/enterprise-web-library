@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.Validation;
@@ -18,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			protected override bool userCanAccessResource {
 				get {
 					var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
-					return ( user != null && user.Role.CanManageUsers ) || !AppTools.IsLiveInstallation;
+					return ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
 				}
 			}
 		}
@@ -28,7 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			ph.AddControlsReturnThis( new PageName() );
 
-			if( AppTools.IsLiveInstallation ) {
+			if( ConfigurationStatics.IsLiveInstallation ) {
 				ph.AddControlsReturnThis(
 					new Paragraph(
 						new Strong( "Warning:" ),

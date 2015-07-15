@@ -1,4 +1,5 @@
 using System;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Email;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -36,7 +37,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private void modifyData() {
 			var message = new EmailMessage
 				{
-					Subject = "Contact from " + AppTools.SystemName,
+					Subject = "Contact from " + ConfigurationStatics.SystemName,
 					BodyHtml = ( "Contact from " + AppTools.User.Email + Environment.NewLine + Environment.NewLine + emailText ).GetTextAsEncodedHtml()
 				};
 			message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );

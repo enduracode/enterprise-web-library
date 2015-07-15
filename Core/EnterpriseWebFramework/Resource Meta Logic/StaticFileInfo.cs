@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Web;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -33,7 +34,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// The build date/time is an important factor here. Exclusively using the last write time of the file would prevent re-downloading when we change the
 			// expansion of a CSS element without changing the source file. And for non-development installations, we don't use the last write time at all because
 			// it's probably much slower (the build date/time is just a literal) and also because we don't expect files to be modified on servers.
-			if( AppTools.IsDevelopmentInstallation ) {
+			if( ConfigurationStatics.IsDevelopmentInstallation ) {
 				var lastWriteTime = File.GetLastWriteTimeUtc( FilePath );
 				if( lastWriteTime > getBuildDateAndTime() )
 					return lastWriteTime;

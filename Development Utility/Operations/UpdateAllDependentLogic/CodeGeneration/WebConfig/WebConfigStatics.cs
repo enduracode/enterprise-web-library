@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using RedStapler.StandardLibrary;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using RedStapler.StandardLibrary.InstallationSupportUtility;
@@ -34,15 +35,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 		}
 
 		private static string getSectionString( WebProject webProject ) {
-			var sections = File.ReadAllText( EwlStatics.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
+			var sections = File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Template.config" ) );
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
-			sections = sections.Replace( "@@CertificateAuthenticationModulePlace",
-			                             useCertificateAuth
-				                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
-				                             : "" );
+			sections = sections.Replace(
+				"@@CertificateAuthenticationModulePlace",
+				useCertificateAuth
+					? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
+					: "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
 			sections = sections.Replace( "@@CacheTimeout", cacheTimeoutTimeSpan );

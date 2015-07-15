@@ -14,7 +14,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						new EwfResponseBodyCreator(
 							() => {
 								string responseString = null;
-								AppTools.ExecuteWebServiceWithStandardExceptionHandling(
+								TelemetryStatics.ExecuteWebServiceWithStandardExceptionHandling(
 									delegate {
 										var file = Request.InputStream;
 										using( var memory = new MemoryStream() ) {

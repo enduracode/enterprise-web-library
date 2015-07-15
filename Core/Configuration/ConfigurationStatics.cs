@@ -101,10 +101,63 @@ namespace RedStapler.StandardLibrary.Configuration {
 		}
 
 		/// <summary>
+		/// Gets the name of the system.
+		/// </summary>
+		public static string SystemName { get { return InstallationConfiguration.SystemName; } }
+
+		/// <summary>
 		/// Returns the default base URL for the specified web application. This will never have a trailing slash.
 		/// </summary>
 		public static string GetWebApplicationDefaultBaseUrl( string applicationName, bool secure ) {
 			return InstallationConfiguration.WebApplications.Single( i => i.Name == applicationName ).DefaultBaseUrl.GetUrlString( secure );
+		}
+
+		internal static bool DatabaseExists { get { return InstallationConfiguration.PrimaryDatabaseInfo != null; } }
+
+		internal static string CertificateEmailAddressOverride { get { return InstallationConfiguration.CertificateEmailAddressOverride; } }
+
+		internal static bool IsDevelopmentInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Development; } }
+
+		/// <summary>
+		/// Gets whether this is a live installation. Use with caution. If you do not deliberately test code that only runs in live installations, you may not
+		/// discover problems with it until it is live.
+		/// </summary>
+		public static bool IsLiveInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Live; } }
+
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		public static bool IsIntermediateInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Intermediate; } }
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string InstallationPath { get { return InstallationConfiguration.InstallationPath; } }
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ConfigurationFolderPath { get { return InstallationConfiguration.ConfigurationFolderPath; } }
+
+		/// <summary>
+		/// Gets the path of the Files folder for the system.
+		/// </summary>
+		public static string FilesFolderPath {
+			get {
+				return
+					EwlStatics.CombinePaths(
+						InstallationFileStatics.GetGeneralFilesFolderPath(
+							InstallationConfiguration.InstallationPath,
+							InstallationConfiguration.InstallationType == InstallationType.Development ),
+						InstallationFileStatics.FilesFolderName );
+			}
+		}
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public static string ServerSideConsoleAppRelativeFolderPath {
+			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? EwlStatics.GetProjectOutputFolderPath( true ) : ""; }
 		}
 
 		/// <summary>

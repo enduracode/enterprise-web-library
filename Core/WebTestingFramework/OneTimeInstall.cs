@@ -39,15 +39,16 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 				// Create c:\Red Stapler\Selenium Support
 				Directory.CreateDirectory( supportFilesDestinationPath );
 				IoMethods.CopyFile( EwlStatics.CombinePaths( supportFilesSourcePath, srvany ), srvanyDestinationPath );
-				IoMethods.CopyFile( EwlStatics.CombinePaths( supportFilesSourcePath, seleniumJarFile ),
-				                    EwlStatics.CombinePaths( supportFilesDestinationPath, seleniumJarFile ) );
+				IoMethods.CopyFile(
+					EwlStatics.CombinePaths( supportFilesSourcePath, seleniumJarFile ),
+					EwlStatics.CombinePaths( supportFilesDestinationPath, seleniumJarFile ) );
 
 
 				const string serviceRegCmd = @"ADD HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\" + serviceName + "\\Parameters  /v ";
 				const string regDataType = " /t REG_SZ /d ";
 				const string javaFolder = @"C:\Program Files\Java\jre6\bin";
 				var parametersToSeleniumServer = "";
-				if( AppTools.IsDevelopmentInstallation ) {
+				if( ConfigurationStatics.IsDevelopmentInstallation ) {
 					var firefoxProfileFolderPath = EwlStatics.CombinePaths( supportFilesDestinationPath, "Firefox" );
 					Directory.CreateDirectory( firefoxProfileFolderPath );
 					parametersToSeleniumServer = " -firefoxProfileTemplate \\\"" + firefoxProfileFolderPath + "\\\"";
@@ -55,15 +56,13 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 
 				// This is the code to add the registry parameters to the Selenium Server.  This only needs to be run once.
 				EwlStatics.RunProgram( "sc", "create " + serviceName + " binPath= \"" + srvanyDestinationPath + "\" start= auto", "", true );
-				EwlStatics.RunProgram( "REG",
-				                                   serviceRegCmd + "Application" + regDataType + "\"" + EwlStatics.CombinePaths( javaFolder, "java.exe" ) + "\"",
-				                                   "",
-				                                   true );
+				EwlStatics.RunProgram( "REG", serviceRegCmd + "Application" + regDataType + "\"" + EwlStatics.CombinePaths( javaFolder, "java.exe" ) + "\"", "", true );
 				EwlStatics.RunProgram( "REG", serviceRegCmd + "AppDirectory" + regDataType + "\"" + supportFilesDestinationPath + "\" ", "", true );
-				EwlStatics.RunProgram( "REG",
-				                                   serviceRegCmd + "AppParameters" + regDataType + "\"-Xrs -jar " + seleniumJarFile + parametersToSeleniumServer + "\"",
-				                                   "",
-				                                   true );
+				EwlStatics.RunProgram(
+					"REG",
+					serviceRegCmd + "AppParameters" + regDataType + "\"-Xrs -jar " + seleniumJarFile + parametersToSeleniumServer + "\"",
+					"",
+					true );
 
 				// Wait for the service to be created
 				while( seleniumServerService == null )

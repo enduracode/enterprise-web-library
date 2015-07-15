@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using RedStapler.StandardLibrary;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework;
 
 // Parameter: string fileName
@@ -11,7 +12,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			internal string FilePath { get; private set; }
 
 			protected override void init() {
-				FilePath = EwlStatics.CombinePaths( AppTools.FilesFolderPath, FileName + FileExtensions.Xsd );
+				FilePath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, FileName + FileExtensions.Xsd );
 				if( !File.Exists( FilePath ) )
 					throw new ApplicationException( "File does not exist." );
 			}

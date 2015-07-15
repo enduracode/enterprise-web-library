@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.IO;
 
@@ -34,7 +35,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		internal static bool ShouldBeSecureGivenCurrentRequest( this ConnectionSecurity connectionSecurity, bool isIntermediateInstallationPublicPage ) {
 			// Intermediate installations must be secure because the intermediate user cookie is secure.
-			if( AppTools.IsIntermediateInstallation && !isIntermediateInstallationPublicPage )
+			if( ConfigurationStatics.IsIntermediateInstallation && !isIntermediateInstallationPublicPage )
 				return true;
 
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest

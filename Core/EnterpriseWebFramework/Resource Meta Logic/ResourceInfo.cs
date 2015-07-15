@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using RedStapler.StandardLibrary.Configuration;
 
 namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -145,7 +146,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool UserCanAccessResource {
 			get {
-				if( AppTools.IsIntermediateInstallation ) {
+				if( ConfigurationStatics.IsIntermediateInstallation ) {
 					if( IsIntermediateInstallationPublicResource )
 						return true;
 					if( !AppRequestState.Instance.IntermediateUserExists )

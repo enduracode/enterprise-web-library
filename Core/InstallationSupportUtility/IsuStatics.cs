@@ -7,7 +7,7 @@ namespace RedStapler.StandardLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static void ConfigureIis( bool iisExpress ) {
 			// Overlapping commitment of changes to server manager do not end well.
-			AppTools.ExecuteAsCriticalRegion(
+			EwlStatics.ExecuteAsCriticalRegion(
 				"{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
 				false,
 				delegate {

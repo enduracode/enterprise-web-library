@@ -42,7 +42,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 
 				timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
 			};
-			if( !AppTools.ExecuteBlockWithStandardExceptionHandling( method ) ) {
+			if( !TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( method ) ) {
 				ExitCode = 0x428; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
 				Stop();
 			}
@@ -52,7 +52,7 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		/// Private use only.
 		/// </summary>
 		protected override void OnStop() {
-			AppTools.ExecuteBlockWithStandardExceptionHandling(
+			TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
 				() => {
 					if( timer != null ) {
 						var waitHandle = new ManualResetEvent( false );
@@ -65,13 +65,13 @@ namespace RedStapler.StandardLibrary.WindowsServiceFramework {
 		}
 
 		private void tick( object state ) {
-			AppTools.ExecuteBlockWithStandardExceptionHandling(
+			TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
 				() => {
 					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
 					// exception stack traces.
 					try {
 						var now = DateTime.Now;
-						if( AppTools.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
+						if( ConfigurationStatics.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
 						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
 							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 						lastHealthCheckDateAndTime = now;

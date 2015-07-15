@@ -206,7 +206,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( canonicalAbsoluteUrl != RequestState.Url )
 					NetTools.Redirect( canonicalAbsoluteUrl );
 
-				if( AppTools.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
+				if( ConfigurationStatics.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );
 
 				var resource = resolver.Function();
@@ -395,7 +395,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 								transferRequest( MetaLogicFactory.CreateIntermediateLogInPageInfo( RequestState.Url ), true );
 							else {
 								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
-								if( userNotYetAuthenticated && !AppTools.IsLiveInstallation && !RequestState.ImpersonatorExists )
+								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
 									transferRequest( MetaLogicFactory.CreateSelectUserPageInfo( RequestState.Url ), true );
 								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled ) {
 									if( accessDeniedException.LogInPage != null ) {

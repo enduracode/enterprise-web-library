@@ -29,7 +29,7 @@ namespace RedStapler.StandardLibrary.Caching {
 		}
 
 		private static void tick( object state ) {
-			AppTools.ExecuteBlockWithStandardExceptionHandling(
+			TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
 				delegate {
 					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
 					// exception stack traces.

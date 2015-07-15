@@ -377,5 +377,59 @@ namespace RedStapler.StandardLibrary {
 				}
 			}
 		}
+
+		/// <summary>
+		/// Executes the given block of code as a critical region synchronized on the given GUID. The GUID should be passed with surrounding {}.
+		/// The GUID is automatically prefixed with Global\ so that the mutex has machine scope. The GUID will usually be one to one with a program.
+		/// Pass true for SkipExecutionIfMutexAlreadyOwned to return if something already has the mutex.  This is useful for killing a program when
+		/// you only want one instance to run at a time. Pass false if you want to wait until the mutex is released to run your code.
+		/// Returns false if execution was skipped.  Otherwise, returns true.
+		/// If using this along with a WithStandardExceptionHandling method, this should go inside.
+		/// </summary>
+		public static bool ExecuteAsCriticalRegion( string guid, bool skipExecutionIfMutexAlreadyOwned, Action method ) {
+			// The Global\ prefix makes the mutex visible across terminal services sessions. The double backslash is convention.
+			// NOTE: What double backslash? Isn't it a single backslash as the comment states?
+			guid = "Global\\" + guid;
+
+			using( var mutex = new Mutex( false /*Do not try to immediately acquire the mutex*/, guid ) ) {
+				if( skipExecutionIfMutexAlreadyOwned ) {
+					try {
+						if( !mutex.WaitOne( 0 ) )
+							return false;
+					}
+					catch( AbandonedMutexException ) {}
+				}
+
+				try {
+					// AbandonedMutexException exists to warn us that data might be corrupt because another thread didn't properly release the mutex. We ignore it because
+					// in our case, we only use the mutex in one thread per process (NOTE: This is true, but only by coincidence) and therefore don't need to worry about data corruption.
+					// AbandonedMutexExceptions are thrown when the mutex is acquired, not when it is abandoned. Therefore, only the one thread that acquires the mutex
+					// next will have to deal with the exception. For this reason, we are OK here in terms of only letting one thread execute its method at a time.
+					try {
+						// Acquire the mutex, waiting if necessary.
+						mutex.WaitOne();
+					}
+					catch( AbandonedMutexException ) {}
+
+					method();
+				}
+				finally {
+					// We release the mutex manually since, yet again, nobody can agree on whether the Dispose() method called at the end of the using block always properly
+					// does this for us.  Some have reported you need to do what we are doing here, so for safety's sake, we have our own finally block.
+
+					mutex.ReleaseMutex();
+				}
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Executes the given block of code and returns the time it took to execute.
+		/// </summary>
+		public static TimeSpan ExecuteTimedRegion( Action method ) {
+			var chrono = new Chronometer();
+			method();
+			return chrono.Elapsed;
+		}
 	}
 }

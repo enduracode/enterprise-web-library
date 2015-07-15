@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.ServiceModel;
 using System.Web;
 using Humanizer;
 using RedStapler.StandardLibrary.Configuration;
@@ -169,6 +170,57 @@ namespace RedStapler.StandardLibrary {
 					Subject = "Notification from {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ),
 					BodyHtml = message.GetTextAsEncodedHtml()
 				};
+		}
+
+		/// <summary>
+		/// Executes the specified method. Returns true if it is successful. If an exception occurs, this method returns false and details about the exception are emailed
+		/// to the developers and logged. This should not be necessary in web applications, as they have their own error handling.
+		/// Prior to calling this, you should be sure that system logic initialization has succeeded.  This almost always means that ExecuteAppWithStandardExceptionHandling
+		/// has been called somewhere up the stack.
+		/// This method has no side effects other than those of the given method and the email/logging that occurs in the event of an error.  This can be used
+		/// repeatedly inside any application as an alternative to a try catch block.
+		/// </summary>
+		public static bool ExecuteBlockWithStandardExceptionHandling( Action method ) {
+			try {
+				method();
+				return true;
+			}
+			catch( Exception e ) {
+				ReportError( e );
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Use this to email errors from web service methods and turn normal exceptions into FaultExceptions.
+		/// </summary>
+		public static void ExecuteWebServiceWithStandardExceptionHandling( Action method ) {
+			// NOTE: Do we need to check whether the system logic was initialized properly or will EwfApp_BeginRequest take care of it?
+			try {
+				method();
+			}
+			catch( Exception e ) {
+				throw createWebServiceException( e );
+			}
+		}
+
+		/// <summary>
+		/// Use this to email errors from web service methods and turn normal exceptions into FaultExceptions.
+		/// </summary>
+		public static T ExecuteWebServiceWithStandardExceptionHandling<T>( Func<T> method ) {
+			// NOTE: Do we need to check whether the system logic was initialized properly or will EwfApp_BeginRequest take care of it?
+			try {
+				return method();
+			}
+			catch( Exception e ) {
+				throw createWebServiceException( e );
+			}
+		}
+
+		private static Exception createWebServiceException( Exception e ) {
+			if( !( e is Wcf.AccessDeniedException ) )
+				ReportError( e );
+			return new FaultException( e.ToString() );
 		}
 	}
 }

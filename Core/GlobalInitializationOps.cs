@@ -38,7 +38,7 @@ namespace RedStapler.StandardLibrary {
 					throw new ApplicationException( "This class can only be initialized once." );
 
 				if( globalInitializer == null )
-					throw new ApplicationException( "The system must have a global initializer and you must pass an instance of it to AppTools.Init." );
+					throw new ApplicationException( "The system must have a global initializer." );
 
 				// Initialize ConfigurationStatics, including the general provider, before the exception handling block below because it's reasonable for the exception
 				// handling to depend on this.
@@ -61,7 +61,6 @@ namespace RedStapler.StandardLibrary {
 					new Aspose.Words.License().SetLicense( asposeLicense );
 				}
 
-				// This initialization could be performed using reflection. There is no need for AppTools to have a dependency on these classes.
 				AppMemoryCache.Init();
 				BlobFileOps.Init();
 				DataAccessStatics.Init();

@@ -46,10 +46,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 					const string duProjectAndFolderName = "Development Utility";
 					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths(
-							installation.GeneralLogic.Path,
-							duProjectAndFolderName,
-							EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
 						EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
 						false );
 					packageGeneralFiles( installation, folderPath, false );
@@ -59,10 +56,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							InstallationConfiguration.InstallationConfigurationFolderName,
 							InstallationConfiguration.InstallationsFolderName,
 							( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
-						EwlStatics.CombinePaths(
-							folderPath,
-							InstallationConfiguration.ConfigurationFolderName,
-							InstallationConfiguration.InstallationConfigurationFolderName ),
+						EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName, InstallationConfiguration.InstallationConfigurationFolderName ),
 						false );
 
 					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
@@ -102,10 +96,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
 
 			// other files
-			var filesFolderInInstallationPath =
-				EwlStatics.CombinePaths(
-					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-					InstallationFileStatics.FilesFolderName );
+			var filesFolderInInstallationPath = EwlStatics.CombinePaths(
+				InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+				InstallationFileStatics.FilesFolderName );
 			if( Directory.Exists( filesFolderInInstallationPath ) )
 				IoMethods.CopyFolder( filesFolderInInstallationPath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
@@ -132,11 +125,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
-			var lines =
-				from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
-				let trimmedLine = line.Trim()
-				where trimmedLine.StartsWith( "<package " )
-				select trimmedLine;
+			var lines = from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
+			            let trimmedLine = line.Trim()
+			            where trimmedLine.StartsWith( "<package " )
+			            select trimmedLine;
 			foreach( var line in lines )
 				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net451\"", "" ) );
 
@@ -227,7 +219,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			build.SystemId = recognizedInstallation.KnownSystemLogic.RsisSystem.Id;
 
-			operationResult.TimeSpentWaitingForNetwork = AppTools.ExecuteTimedRegion(
+			operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion(
 				delegate {
 					using( var memoryStream = new MemoryStream() ) {
 						// Understand that by doing this, we are not really taking advantage of streaming, but at least it will be easier to do it the right way some day (probably by implementing our own BuildMessageStream)

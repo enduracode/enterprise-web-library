@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAcce
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
 using Humanizer;
 using RedStapler.StandardLibrary;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
 using RedStapler.StandardLibrary.Configuration.SystemGeneral;
 using RedStapler.StandardLibrary.DataAccess;
@@ -114,8 +115,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
 
-			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
-			    Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl && Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
 				updateMercurialIgnoreFile( installation );
 		}
 
@@ -133,7 +133,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			else {
 				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) {
-					var asposeLicenseFilePath = EwlStatics.CombinePaths( AppTools.ConfigurationFolderPath, asposeLicenseFileName );
+					var asposeLicenseFilePath = EwlStatics.CombinePaths( ConfigurationStatics.ConfigurationFolderPath, asposeLicenseFileName );
 					if( File.Exists( asposeLicenseFilePath ) ) {
 						IoMethods.CopyFile(
 							asposeLicenseFilePath,
@@ -153,7 +153,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyInWebProjectFiles( Installation installation, WebProject webProject ) {
-			var webProjectFilesFolderPath = EwlStatics.CombinePaths( AppTools.InstallationPath, AppStatics.WebProjectFilesFolderName );
+			var webProjectFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, AppStatics.WebProjectFilesFolderName );
 			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
 			// Copy Ewf folder and customize namespaces in .aspx, .ascx, .master, and .cs files.
@@ -221,10 +221,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine();
 					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
 					writer.WriteLine( "public static class WebApplicationNames {" );
-					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
-						writer.WriteLine(
-							"public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
-					}
+					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications )
+						writer.WriteLine( "public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}
@@ -257,8 +255,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
 				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
 
-				var programPath = "EwlStatics.CombinePaths( AppTools.InstallationPath, \"" + project.Name +
-				                  "\", AppTools.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
+				var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, \"" + project.Name +
+				                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
 				var runProgramExpression = "EwlStatics.RunProgram( " + programPath + ", arguments, input, false )";
 
 				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
@@ -434,22 +432,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static void Main() {" );
-				writer.WriteLine( "InitAppTools();" );
+				writer.WriteLine( "InitStatics();" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine(
-					"AppTools.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() + "() ) ) );" );
+					"TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
+					"() ) ) );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
-				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "internal static void InitAppTools() {" );
+				writer.WriteLine( "internal static void InitStatics() {" );
 				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"AppTools.Init( globalInitializer, \"" + service.Name + "\" + \" Executable\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + service.Name +
+					"\" + \" Executable\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
@@ -460,9 +460,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "public class Installer: System.Configuration.Install.Installer {" );
 
 				writer.WriteLine( "public Installer() {" );
-				writer.WriteLine( "Program.InitAppTools();" );
+				writer.WriteLine( "Program.InitStatics();" );
 				writer.WriteLine( "try {" );
-				writer.WriteLine( "var code = AppTools.ExecuteAppWithStandardExceptionHandling( delegate {" );
+				writer.WriteLine( "var code = GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( delegate {" );
 				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceProcessInstaller() );" );
 				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceInstaller( new " + service.Name.EnglishToPascal() + "() ) );" );
 				writer.WriteLine( "} );" );
@@ -471,7 +471,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					"throw new ApplicationException( \"Service installer objects could not be created. More information should be available in a separate error email from the service executable.\" );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
-				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
@@ -509,12 +509,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine( "AppTools.Init( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+				writer.WriteLine(
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "try {" );
-				writer.WriteLine( "return AppTools.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
+				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
-				writer.WriteLine( "AppTools.CleanUp();" );
+				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
@@ -580,8 +581,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				try {
 					EwlStatics.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
-						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
-						codeFileName + "\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
+						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" + codeFileName +
+						"\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
 						"",
 						true );
 				}
@@ -594,17 +595,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				try {
 					EwlStatics.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
-						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" +
-						projectGeneratedCodeFolderPath + "\"",
+						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath + "\"",
 						"",
 						true );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to generate XML schema logic using xsd.", e );
 				}
-				var outputCodeFilePath = EwlStatics.CombinePaths(
-					projectGeneratedCodeFolderPath,
-					Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
+				var outputCodeFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
 				var desiredCodeFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, codeFileName );
 				if( outputCodeFilePath != desiredCodeFilePath ) {
 					try {

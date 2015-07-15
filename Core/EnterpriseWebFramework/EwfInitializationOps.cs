@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Compilation;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 using StackExchange.Profiling;
@@ -92,7 +93,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				initFailureUnloadTimer = new Timer(
 					state => EwfApp.ExecuteWithBasicExceptionHandling(
 						() => {
-							if( AppTools.IsDevelopmentInstallation )
+							if( ConfigurationStatics.IsDevelopmentInstallation )
 								return;
 							HttpRuntime.UnloadAppDomain();
 

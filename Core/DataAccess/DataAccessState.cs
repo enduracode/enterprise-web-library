@@ -43,8 +43,9 @@ namespace RedStapler.StandardLibrary.DataAccess {
 		private Cache<string, object> cache;
 
 		/// <summary>
-		/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of AppTools.Init.
-		/// Second, to create supplemental data-access state objects, which you may need if you want to communicate with a database outside of the main transaction.
+		/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of
+		/// GlobalInitializationOps.InitStatics. Second, to create supplemental data-access state objects, which you may need if you want to communicate with a
+		/// database outside of the main transaction.
 		/// </summary>
 		/// <param name="databaseConnectionInitializer">A method that is called whenever a database connection is requested. Can be used to initialize the
 		/// connection.</param>

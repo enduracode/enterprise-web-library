@@ -12,6 +12,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard library use only.
 		/// </summary>
-		public static bool AppSupportsSecureConnections { get { return AppConfiguration.SupportsSecureConnections || AppTools.IsIntermediateInstallation; } }
+		public static bool AppSupportsSecureConnections {
+			get { return AppConfiguration.SupportsSecureConnections || ConfigurationStatics.IsIntermediateInstallation; }
+		}
 	}
 }

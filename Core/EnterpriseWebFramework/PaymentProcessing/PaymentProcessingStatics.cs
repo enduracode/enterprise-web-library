@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 using Stripe;
@@ -55,7 +56,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 					if( !amountInDollars.HasValue )
 						throw new ApplicationException( "Only simple charges are supported at this time." );
 
-					var apiKey = AppTools.IsLiveInstallation ? liveSecretKey : testSecretKey;
+					var apiKey = ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey;
 					dynamic response = new StripeClient( apiKey ).CreateCharge(
 						amountInDollars.Value,
 						"usd",
@@ -82,7 +83,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			return () => {
 				var jsTokenHandler = "function( res ) { $( '#" + tokenHiddenFieldClientIdGetter() + "' ).val( res.id ); " +
 				                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
-				return "StripeCheckout.open( { key: '" + ( AppTools.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
+				return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 				       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
 				       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
 			};

@@ -119,11 +119,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						: new Control[ 0 ] ) );
 
 			var warningControls = new List<Control>();
-			if( !AppTools.IsLiveInstallation ) {
+			if( !ConfigurationStatics.IsLiveInstallation ) {
 				var children = new List<Control>();
 				children.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
 				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
-				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
+				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
 							PostBack.CreateFull(
@@ -143,7 +143,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
-			    ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
+			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),

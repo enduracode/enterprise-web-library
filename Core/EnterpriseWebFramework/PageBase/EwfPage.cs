@@ -9,6 +9,7 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayLinking;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
@@ -122,7 +123,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// This logic depends on the authenticated user and on page and entity setup info objects.
 			if( !InfoAsBaseType.UserCanAccessResource ) {
 				throw new AccessDeniedException(
-					AppTools.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
+					ConfigurationStatics.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource &&
+					!AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
 			}
 
@@ -463,7 +465,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
 			Title = StringTools.ConcatenateWithDelimiter(
 				" - ",
-				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName,
+				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName,
 				ResourceInfo.CombineResourcePathStrings(
 					ResourceInfo.ResourcePathSeparator,
 					InfoAsBaseType.ParentResourceEntityPathString,
@@ -518,7 +520,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 		private void addMetadataAndFaviconLinks() {
 			Header.Controls.Add(
-				new HtmlMeta { Name = "application-name", Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName } );
+				new HtmlMeta
+					{
+						Name = "application-name",
+						Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName
+					} );
 
 			// Chrome start URL
 			Header.Controls.Add( new HtmlMeta { Name = "application-url", Content = this.GetClientUrl( NetTools.HomeUrl ) } );

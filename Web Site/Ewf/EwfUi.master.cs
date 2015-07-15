@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
@@ -238,11 +239,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private Control getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToSingleElementArray() );
 
-			var appLogoBlock = ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
+			var appLogoBlock = ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
 				                     ? EwfUiStatics.AppProvider.GetLogoControl()
 				                     : null ) ??
 			                   new Panel().AddControlsReturnThis(
-				                   ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : AppTools.SystemName ).GetLiteralControl() );
+				                   ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).GetLiteralControl() );
 			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
 
 			ControlStack userInfoList = null;
@@ -264,7 +265,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
-			if( AppTools.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
+			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
 				return null;
 
 			var controls =
@@ -458,7 +459,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
 			// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
-			if( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
+			if( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
 				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
 			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );

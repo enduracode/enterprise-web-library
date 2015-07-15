@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess.Ranking;
 using RedStapler.StandardLibrary.IO;
 
@@ -278,7 +279,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 					throw new ApplicationException( "Cell may not take up all columns and span multiple rows." );
 			}
 			catch( ApplicationException e ) {
-				if( !AppTools.IsDevelopmentInstallation )
+				if( !ConfigurationStatics.IsDevelopmentInstallation )
 					TelemetryStatics.ReportError( e );
 				else
 					throw;

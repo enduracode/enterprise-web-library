@@ -100,7 +100,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement {
 				}.Select( i => new Lazy<User>( i ) ).FirstOrDefault( i => i.Value != null );
 			var user = userLazy != null ? userLazy.Value : null;
 
-			if( ( user != null && user.Role.CanManageUsers ) || !AppTools.IsLiveInstallation ) {
+			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation ) {
 				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
 				if( cookie != null )
 					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, Tuple.Create( user ) );

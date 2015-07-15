@@ -63,7 +63,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			// NOTE: This should not be hard-coded.
 			var baseUrl = "https://integration.redstapler.biz/";
 
-			if( AppTools.IsDevelopmentInstallation ) {
+			if( ConfigurationStatics.IsDevelopmentInstallation ) {
 				if( ConfigurationStatics.InstallationConfiguration.WebApplications.Any( wa => wa.SupportsSecureConnections ) )
 					baseUrl = "https://localhost/";
 				else
@@ -74,7 +74,7 @@ namespace RedStapler.StandardLibrary.WebTestingFramework {
 			selenium = new DefaultSelenium( "localhost" /*location of Selenium server*/, 4444, @"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe", baseUrl );
 			selenium.Start();
 
-			if( AppTools.IsIntermediateInstallation ) {
+			if( ConfigurationStatics.IsIntermediateInstallation ) {
 				executeSeleniumBlock(
 					"Intermediate log on",
 					delegate {

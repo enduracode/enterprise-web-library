@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using RedStapler.StandardLibrary.Caching;
+using RedStapler.StandardLibrary.Configuration;
 using RedStapler.StandardLibrary.DataAccess;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
@@ -131,7 +132,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 			// Abandon the profiling session if it's not needed. The boolean expressions are in this order because we don't want to short circuit the user check if
 			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
 			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
-			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && AppTools.IsLiveInstallation )
+			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && ConfigurationStatics.IsLiveInstallation )
 				MiniProfiler.Stop( discardResults: true );
 		}
 
@@ -223,7 +224,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 				if( MiniProfiler.Current != null )
 					duration = TimeSpan.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 				const int thresholdInSeconds = 30;
-				if( duration > new TimeSpan( 0, 0, thresholdInSeconds ) && !AppTools.IsDevelopmentInstallation )
+				if( duration > new TimeSpan( 0, 0, thresholdInSeconds ) && !ConfigurationStatics.IsDevelopmentInstallation )
 					TelemetryStatics.ReportError( "Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.", null );
 			}
 		}
