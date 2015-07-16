@@ -197,6 +197,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
+				writer.WriteLine( "using EnterpriseWebLibrary.Configuration;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
