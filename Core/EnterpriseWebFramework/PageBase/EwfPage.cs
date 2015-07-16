@@ -8,12 +8,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<UpdateRegionLinker> updateRegionLinkers = new List<UpdateRegionLinker>();
-		private readonly Dictionary<Validation, List<string>> modErrorDisplaysByValidation = new Dictionary<Validation, List<string>>();
+		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
@@ -186,7 +186,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
 				DataAccessState.Current.DisableCache();
 				try {
-					if( !Configuration.ConfigurationStatics.MachineIsStandbyServer ) {
+					if( !ConfigurationStatics.MachineIsStandbyServer ) {
 						EwfApp.Instance.ExecutePageViewDataModifications();
 						if( AppRequestState.Instance.UserAccessible ) {
 							if( AppTools.User != null )
@@ -671,7 +671,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// If you are using the results of this method to create controls, put them in a naming container so that when the controls differ before and after a
 		/// transfer, other parts of the page such as form control IDs do not get affected.
 		/// </summary>
-		internal IEnumerable<string> AddModificationErrorDisplayAndGetErrors( Control control, string keySuffix, Validation validation ) {
+		internal IEnumerable<string> AddModificationErrorDisplayAndGetErrors( Control control, string keySuffix, EwfValidation validation ) {
 			var key = control.UniqueID + keySuffix;
 			if( modErrorDisplaysByValidation.ContainsKey( validation ) )
 				modErrorDisplaysByValidation[ validation ].Add( key );
@@ -844,7 +844,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private void handleValidationErrors( Validation validation, IEnumerable<string> errorMessages ) {
+		private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
 			if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
 				return;
 			foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {

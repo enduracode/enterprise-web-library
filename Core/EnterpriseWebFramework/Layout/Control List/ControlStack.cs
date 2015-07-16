@@ -42,8 +42,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="isStandard">Sets whether or not this control stack will have standard styling.</param>
 		/// <param name="tailUpdateRegions"></param>
 		/// <param name="itemInsertionUpdateRegions"></param>
-		public static ControlStack Create( bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions = null,
-		                                   IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
+		public static ControlStack Create(
+			bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
 			return new ControlStack( isStandard, tailUpdateRegions, itemInsertionUpdateRegions );
 		}
 
@@ -105,12 +105,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Adds an item for the error messages from the specified validation. If there aren't any error messages, the control getter is not called and no item is
 		/// added.
 		/// </summary>
-		public void AddModificationErrorItem( Validation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
-			items.Add( Tuple.Create( new Func<ControlListItem>( () => {
-				var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
-				return new ControlListItem( errors.Any() ? controlGetter( errors ) : new Control[ 0 ] );
-			} ),
-			                         true ) );
+		public void AddModificationErrorItem( EwfValidation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
+			items.Add(
+				Tuple.Create(
+					new Func<ControlListItem>(
+						() => {
+							var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
+							return new ControlListItem( errors.Any() ? controlGetter( errors ) : new Control[ 0 ] );
+						} ),
+					true ) );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -121,57 +124,52 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var visibleItems = items.Select( i => Tuple.Create( i.Item1(), i.Item2 ) );
 			visibleItems = visibleItems.ToArray();
 
-			var itemControls = visibleItems.Select( i => {
-				var np = new NamingPlaceholder( getItemControl( i ), updateRegionSet: i.Item1.UpdateRegionSet );
-				if( i.Item1.Id != null )
-					np.ID = i.Item1.Id;
-				return np;
-			} );
+			var itemControls = visibleItems.Select(
+				i => {
+					var np = new NamingPlaceholder( getItemControl( i ), updateRegionSet: i.Item1.UpdateRegionSet );
+					if( i.Item1.Id != null )
+						np.ID = i.Item1.Id;
+					return np;
+				} );
 			itemControls = itemControls.ToArray();
 
 			Controls.Add( new NamingPlaceholder( itemControls ) );
 
-			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
-			                                                                "tail",
-			                                                                from region in tailUpdateRegions
-			                                                                let staticItemCount = items.Count() - region.UpdatingItemCount
-			                                                                select
-				                                                                new PreModificationUpdateRegion( region.Set,
-				                                                                                                 () => itemControls.Skip( staticItemCount ),
-				                                                                                                 staticItemCount.ToString ),
-			                                                                arg => itemControls.Skip( int.Parse( arg ) ) ) );
+			EwfPage.Instance.AddUpdateRegionLinker(
+				new UpdateRegionLinker(
+					this,
+					"tail",
+					from region in tailUpdateRegions
+					let staticItemCount = items.Count() - region.UpdatingItemCount
+					select new PreModificationUpdateRegion( region.Set, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
+					arg => itemControls.Skip( int.Parse( arg ) ) ) );
 
 			var itemControlsById =
 				itemControls.Select( ( control, index ) => new { visibleItems.ElementAt( index ).Item1.Id, control } )
-				            .Where( i => i.Id != null )
-				            .ToDictionary( i => i.Id, i => i.control );
-			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
-			                                                                "add",
-			                                                                from region in itemInsertionUpdateRegions
-			                                                                select
-				                                                                new PreModificationUpdateRegion( region.Set,
-				                                                                                                 () => new Control[ 0 ],
-				                                                                                                 () =>
-				                                                                                                 StringTools.ConcatenateWithDelimiter( ",",
-				                                                                                                                                       region
-					                                                                                                                                       .NewItemIdGetter()
-					                                                                                                                                       .ToArray() ) ),
-			                                                                arg =>
-			                                                                arg.Separate( ",", false )
-			                                                                   .Where( itemControlsById.ContainsKey )
-			                                                                   .Select( i => itemControlsById[ i ] as Control ) ) );
+					.Where( i => i.Id != null )
+					.ToDictionary( i => i.Id, i => i.control );
+			EwfPage.Instance.AddUpdateRegionLinker(
+				new UpdateRegionLinker(
+					this,
+					"add",
+					from region in itemInsertionUpdateRegions
+					select
+						new PreModificationUpdateRegion(
+						region.Set,
+						() => new Control[ 0 ],
+						() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
+					arg => arg.Separate( ",", false ).Where( itemControlsById.ContainsKey ).Select( i => itemControlsById[ i ] as Control ) ) );
 
-			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
-			                                                                "remove",
-			                                                                visibleItems.Select(
-				                                                                ( item, index ) =>
-				                                                                item.Item1.RemovalUpdateRegionSet != null
-					                                                                ? new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSet,
-					                                                                                                   () =>
-					                                                                                                   itemControls.ElementAt( index ).ToSingleElementArray(),
-					                                                                                                   () => "" )
-					                                                                : null ).Where( i => i != null ),
-			                                                                arg => new Control[ 0 ] ) );
+			EwfPage.Instance.AddUpdateRegionLinker(
+				new UpdateRegionLinker(
+					this,
+					"remove",
+					visibleItems.Select(
+						( item, index ) =>
+						item.Item1.RemovalUpdateRegionSet != null
+							? new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSet, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" )
+							: null ).Where( i => i != null ),
+					arg => new Control[ 0 ] ) );
 		}
 
 		private IEnumerable<Control> getItemControl( Tuple<ControlListItem, bool> item ) {

@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		                           out Func<string> clientIdGetter ) {
 			var control = new EwfHiddenField( value );
 			EwfPage.Instance.AddEtherealControl( control );
-			new Validation( ( postBackValues, validator ) => postBackValueHandler( control.getPostBackValue( postBackValues ) ), vl );
+			new EwfValidation( ( postBackValues, validator ) => postBackValueHandler( control.getPostBackValue( postBackValues ) ), vl );
 			valueGetter = control.getPostBackValue;
 			clientIdGetter = () => control.ClientID;
 		}

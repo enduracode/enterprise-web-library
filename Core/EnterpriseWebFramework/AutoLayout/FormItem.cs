@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// making them bold.
 		public static FormItem<ControlType> Create<ControlType>(
 			FormItemLabel label, ControlType control, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-			Func<ControlType, Validation> validationGetter = null ) where ControlType: Control {
+			Func<ControlType, EwfValidation> validationGetter = null ) where ControlType: Control {
 			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter != null ? validationGetter( control ) : null );
 		}
 
@@ -26,12 +26,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly int? cellSpan;
 		private readonly TextAlignment textAlignment;
 
-		private readonly Validation validation;
+		private readonly EwfValidation validation;
 
 		/// <summary>
 		/// Creates a form item.
 		/// </summary>
-		protected FormItem( FormItemLabel label, Control control, int? cellSpan, TextAlignment textAlignment, Validation validation ) {
+		protected FormItem( FormItemLabel label, Control control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation ) {
 			if( label == null )
 				throw new ApplicationException( "The label cannot be a null FormItemLabel reference." );
 			this.label = label;
@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the validation.
 		/// </summary>
-		public virtual Validation Validation { get { return validation; } }
+		public virtual EwfValidation Validation { get { return validation; } }
 
 		/// <summary>
 		/// Creates a labeled control for this form item.
@@ -75,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FormItem<ControlType>: FormItem where ControlType: Control {
 		private readonly ControlType control;
 
-		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, Validation validation )
+		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation )
 			: base( label, control, cellSpan, textAlignment, validation ) {
 			this.control = control;
 		}

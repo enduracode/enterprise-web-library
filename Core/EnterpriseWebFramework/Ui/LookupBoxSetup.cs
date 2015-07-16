@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 			var textBox = FormItem.Create(
 				"",
 				new EwfTextBox( "", postBack: postBack ) { Width = new Unit( pixelWidth ) },
-				validationGetter: control => new Validation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ), postBack ) );
+				validationGetter: control => new EwfValidation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ), postBack ) );
 			textBox.Control.SetWatermarkText( defaultText );
 			if( autoCompleteService != null )
 				textBox.Control.SetupAutoComplete( autoCompleteService, AutoCompleteOption.PostBackOnItemSelect );

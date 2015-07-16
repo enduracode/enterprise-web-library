@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormItem.Create(
 				"Subject",
 				new EwfTextBox( value ),
-				validationGetter: control => new Validation(
+				validationGetter: control => new EwfValidation(
 					                             ( pbv, validator ) => {
 						                             emailMessage.Subject = validator.GetString( new ValidationErrorHandler( "subject" ), control.GetPostBackValue( pbv ), false );
 						                             if( Regex.Match( emailMessage.Subject, RegularExpressions.HtmlTag, RegexOptions.IgnoreCase ).Success )
@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormItem.Create(
 				"Body",
 				new WysiwygHtmlEditor( value ),
-				validationGetter: control => new Validation( ( pbv, validator ) => emailMessage.BodyHtml = control.GetPostBackValue( pbv ), vl ) );
+				validationGetter: control => new EwfValidation( ( pbv, validator ) => emailMessage.BodyHtml = control.GetPostBackValue( pbv ), vl ) );
 		}
 	}
 }

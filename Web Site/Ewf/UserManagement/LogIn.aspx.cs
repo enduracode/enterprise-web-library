@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					FormItem.Create(
 						"",
 						new EwfTextBox( "", masksCharacters: true ),
-						validationGetter: control => new Validation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
+						validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
 
 			registeredTable.AddItem(
 				new EwfTableItem(

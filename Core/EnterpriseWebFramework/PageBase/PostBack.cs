@@ -119,7 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal IEnumerable<UpdateRegionSet> UpdateRegions { get { return updateRegions; } }
 
-		void ValidationListInternal.AddValidation( Validation validation ) {
+		void ValidationListInternal.AddValidation( EwfValidation validation ) {
 			( (ValidationListInternal)dataModification ).AddValidation( validation );
 		}
 
@@ -151,7 +151,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			dataModification.AddModificationMethods( modificationMethods );
 		}
 
-		internal bool Execute( bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
+		internal bool Execute( bool formValuesChanged, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
 			PostBackAction action = null;
 			return dataModification.Execute(
 				skipModificationIfNoChanges,

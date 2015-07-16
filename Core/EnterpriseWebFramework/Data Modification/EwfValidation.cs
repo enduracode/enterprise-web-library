@@ -5,7 +5,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A validation.
 	/// </summary>
-	public class Validation {
+	// We renamed this from just Validation because it conflicted with the Validation namespace in the System.Collections.Immutable package.
+	public class EwfValidation {
 		private readonly Action<PostBackValueDictionary, Validator> method;
 
 		/// <summary>
@@ -15,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// modification methods to outside lists; this adds confusion and commonly leads to modification methods being skipped or executing in the wrong order.
 		/// </param>
 		/// <param name="validationList">The DataModification or BasicValidationList to which this validation will be added.</param>
-		public Validation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList ) {
+		public EwfValidation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList ) {
 			this.method = method;
 			( (ValidationListInternal)validationList ).AddValidation( this );
 		}

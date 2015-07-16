@@ -6,9 +6,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// modifications or if you want to defer the adding of validations to a data modification.
 	/// </summary>
 	public class BasicValidationList: ValidationList, ValidationListInternal {
-		private readonly List<Validation> validations = new List<Validation>();
+		private readonly List<EwfValidation> validations = new List<EwfValidation>();
 
-		void ValidationListInternal.AddValidation( Validation validation ) {
+		void ValidationListInternal.AddValidation( EwfValidation validation ) {
 			validations.Add( validation );
 		}
 
@@ -19,6 +19,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			validations.AddRange( validationList.validations );
 		}
 
-		internal IEnumerable<Validation> Validations { get { return validations; } }
+		internal IEnumerable<EwfValidation> Validations { get { return validations; } }
 	}
 }

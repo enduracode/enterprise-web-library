@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 // OptionalParameter: bool toggled
 // OptionalParameter: IEnumerable<int> nonIdItemStates
@@ -31,7 +30,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"Static Field",
 					new EwfTextBox( "Edit this one to get a validation error" ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( control.ValueChangedOnPostBack( pbv ) )
 								                             validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
@@ -66,7 +65,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					FormItem.Create(
 						"Dynamic Field",
 						new EwfTextBox( "This was just added!" ),
-						validationGetter: control => new Validation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
+						validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
 			}
 			else
 				regionControls.Add( new Paragraph( "Nothing here yet." ) );

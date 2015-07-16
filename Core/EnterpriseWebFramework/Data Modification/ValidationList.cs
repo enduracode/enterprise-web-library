@@ -10,6 +10,6 @@
 	}
 
 	internal interface ValidationListInternal {
-		void AddValidation( Validation validation );
+		void AddValidation( EwfValidation validation );
 	}
 }

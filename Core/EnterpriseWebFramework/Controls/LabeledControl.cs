@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private readonly List<Control> wrappedControls = new List<Control>();
 		private readonly Control label;
-		private readonly Validation validation;
+		private readonly EwfValidation validation;
 
 		/// <summary>
 		/// Creates a new instance of a LabeledControl with the specified control and label.
@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.label = label;
 		}
 
-		internal LabeledControl( Control label, Control control, Validation validation ) {
+		internal LabeledControl( Control label, Control control, EwfValidation validation ) {
 			this.label = label;
 			wrappedControls.Add( control );
 			this.validation = validation;

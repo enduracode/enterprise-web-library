@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				FormItem.Create(
 					"Email address",
 					new EwfTextBox( user != null ? user.Email : "" ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )
 								                             Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var keepPassword = FormItem.Create(
 					"",
 					group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 								                             return;
@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var generatePassword = FormItem.Create(
 					"",
 					group.CreateInlineRadioButton( false, label: "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
 								                             genPassword( true );
@@ -87,21 +87,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						FormItem.Create(
 							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
+							validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 				newPasswordTable.AddItem(
 					new EwfTableItem(
 						"Password again",
 						FormItem.Create(
 							"",
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new Validation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
+							validationGetter: control => new EwfValidation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
 
 				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
 				providePasswordRadio.NestedControls.Add( newPasswordTable );
 				var providePassword = FormItem.Create(
 					"",
 					providePasswordRadio,
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
 								                             return;
@@ -123,10 +123,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					SelectList.CreateDropDown(
 						from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ),
 						user != null ? user.Role.RoleId as int? : null ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )
-								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
+								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default ( int );
 						                             },
 						                             vl ) ) );
 

@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new HtmlBlockEditor( null, id => { }, out mod ),
-					validationGetter: c => new Validation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
+					validationGetter: c => new EwfValidation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
 		}
 	}
 }

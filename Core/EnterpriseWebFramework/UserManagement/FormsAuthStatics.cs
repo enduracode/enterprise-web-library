@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using Humanizer;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -84,7 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				new EwfTextBox( "" ),
 				validationGetter:
 					control =>
-					new Validation(
+					new EwfValidation(
 						( pbv, validator ) =>
 						emailAddress.Value =
 						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ),

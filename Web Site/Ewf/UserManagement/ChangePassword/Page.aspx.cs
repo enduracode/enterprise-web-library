@@ -22,13 +22,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				FormItem.Create(
 					"New password",
 					new EwfTextBox( "", masksCharacters: true ),
-					validationGetter: control => new Validation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
+					validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			var newPasswordConfirm = new DataValue<string>();
 			fib.AddFormItems(
 				FormItem.Create(
 					"Re-type new password",
 					new EwfTextBox( "", masksCharacters: true ),
-					validationGetter: control => new Validation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
+					validationGetter: control => new EwfValidation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
 			pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
 			ph.AddControlsReturnThis( fib );

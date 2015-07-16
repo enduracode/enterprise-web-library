@@ -6,11 +6,11 @@ using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class BasicDataModification: DataModification, ValidationListInternal {
-		private readonly List<Validation> validations = new List<Validation>();
-		private readonly List<Validation> topValidations = new List<Validation>();
+		private readonly List<EwfValidation> validations = new List<EwfValidation>();
+		private readonly List<EwfValidation> topValidations = new List<EwfValidation>();
 		private readonly List<Action> modificationMethods = new List<Action>();
 
-		void ValidationListInternal.AddValidation( Validation validation ) {
+		void ValidationListInternal.AddValidation( EwfValidation validation ) {
 			validations.Add( validation );
 		}
 
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		public void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod ) {
-			var validation = new Validation( validationMethod, this );
+			var validation = new EwfValidation( validationMethod, this );
 			topValidations.Add( validation );
 		}
 
@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool Execute(
-			bool skipIfNoChanges, bool formValuesChanged, Action<Validation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
+			bool skipIfNoChanges, bool formValuesChanged, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
 			Tuple<Action, Action> actionMethodAndPostModificationMethod = null ) {
 			var validationNeeded = validations.Any() && ( !skipIfNoChanges || formValuesChanged );
 			if( validationNeeded ) {
