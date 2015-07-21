@@ -109,12 +109,12 @@
     <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
       <DependentUpon>SystemUsers.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\ContactUs.aspx.cs">
-      <DependentUpon>ContactUs.aspx</DependentUpon>
+    <Compile Include="Ewf\ContactSupport.aspx.cs">
+      <DependentUpon>ContactSupport.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Ewf\ContactUs.aspx.designer.cs">
-      <DependentUpon>ContactUs.aspx</DependentUpon>
+    <Compile Include="Ewf\ContactSupport.aspx.designer.cs">
+      <DependentUpon>ContactSupport.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\CssElementCreator.cs" />
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
@@ -451,7 +451,7 @@
     <Content Include="Ewf\Admin\EntitySetup.ascx" />
     <Content Include="Ewf\Admin\RequestProfiling.aspx" />
     <Content Include="Ewf\Admin\SystemUsers.aspx" />
-    <Content Include="Ewf\ContactUs.aspx" />
+    <Content Include="Ewf\ContactSupport.aspx" />
     <Content Include="Ewf\ErrorPages\PageDisabled.aspx" />
     <Content Include="Ewf\FileUploader\ClientSide.js" />
     <Content Include="Ewf\FileUploader\jquery.progressbar.min.js" />

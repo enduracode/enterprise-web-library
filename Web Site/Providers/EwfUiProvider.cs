@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			var navButtonSetups = new List<ActionButtonSetup>();
 
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
-			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactSupport.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
 			navButtonSetups.Add( new ActionButtonSetup( contactPage.ResourceName, new EwfLink( contactPage ) ) );
 
 			var menu = EwfTable.Create();

@@ -10,7 +10,7 @@
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
     
     
-    public partial class ContactUs {
+    public partial class ContactSupport {
         
         /// <summary>
         /// ph control.
