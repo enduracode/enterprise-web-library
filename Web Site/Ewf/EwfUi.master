@@ -1,4 +1,4 @@
-﻿<%@ Master MasterPageFile="~/Ewf/BasicPage.master" Language="C#" AutoEventWireup="true" CodeBehind="EwfUi.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.EwfUi" %>
+﻿<%@ Master MasterPageFile="~/Ewf/BasicPage.master" Language="C#" AutoEventWireup="true" CodeBehind="EwfUi.master.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.EwfUi" %>
 <asp:Content runat="server" ContentPlaceHolderID="head">
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="main">

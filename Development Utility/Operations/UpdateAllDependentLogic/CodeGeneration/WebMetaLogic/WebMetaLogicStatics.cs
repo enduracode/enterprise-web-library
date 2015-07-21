@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
@@ -14,12 +14,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		private static void generateCodeForWebItemsInFolder(
 			TextWriter writer, string webProjectPath, string folderPathRelativeToProject, WebProject webProjectConfiguration ) {
-			var folderPath = StandardLibraryMethods.CombinePaths( webProjectPath, folderPathRelativeToProject );
+			var folderPath = EwlStatics.CombinePaths( webProjectPath, folderPathRelativeToProject );
 
 			// Generate code for the entity setup if one exists in this folder.
 			var entitySetupFileName = "";
 			foreach( var fileName in new[] { "EntitySetup.ascx", "EntitySetup.cs" } ) {
-				if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, fileName ) ) ) {
+				if( File.Exists( EwlStatics.CombinePaths( folderPath, fileName ) ) ) {
 					entitySetupFileName = fileName;
 					break;
 				}

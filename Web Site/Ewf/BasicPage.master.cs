@@ -4,15 +4,15 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using Humanizer;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
-		// Some of these are used by the Standard Library JavaScript file.
+		// Some of these are used by the EWF JavaScript file.
 		private const string topWarningBlockCssClass = "ewfTopWarning";
 		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
 		private const string clickBlockerActiveClass = "ewfClickBlockerA";
@@ -119,11 +119,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						: new Control[ 0 ] ) );
 
 			var warningControls = new List<Control>();
-			if( !AppTools.IsLiveInstallation ) {
+			if( !ConfigurationStatics.IsLiveInstallation ) {
 				var children = new List<Control>();
 				children.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
 				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
-				if( AppTools.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
+				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					children.Add(
 						new PostBackButton(
 							PostBack.CreateFull(
@@ -143,7 +143,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
-			    ( !AppTools.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
+			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),
@@ -165,7 +165,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = topWarningBlockCssClass } );
 			}
 
-			// This is used by the Standard Library JavaScript file.
+			// This is used by the EWF JavaScript file.
 			const string clickBlockerId = "ewfClickBlocker";
 
 			ph2.AddControlsReturnThis(
@@ -191,7 +191,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			 * Spin.js also has the benefit of being fully compatible with all browsers across the board.
 			 */
 
-			// These are used by the Standard Library JavaScript file.
+			// These are used by the EWF JavaScript file.
 			const string dialogId = "ewfProcessingDialog";
 			const string spinnerId = "ewfSpinner";
 
@@ -231,7 +231,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				title: "Messages",
 				open: messagesExist && !statusMessagesDisplayAsNotification() );
 
-			// This is used by the Standard Library JavaScript file.
+			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()

@@ -10,6 +10,11 @@ Logic Packages/
 Error Log.txt
 *.csproj.user
 
+Core/bin/
+Core/obj/
+Core/Generated Code/
+Core/EnterpriseWebLibrary.xml
+
 Development Utility/bin/
 Development Utility/obj/
 Development Utility/Generated Code/
@@ -21,11 +26,6 @@ Library/Generated Code/
 
 Solution Files/bin/
 Solution Files/obj/
-
-Standard Library/bin/
-Standard Library/obj/
-Standard Library/Generated Code/
-Standard Library/EnterpriseWebLibrary.xml
 
 Tests/bin/
 Tests/obj/

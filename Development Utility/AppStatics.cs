@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
+		internal const string CoreProjectName = "Core";
+
 		internal const string WebProjectFilesFolderName = "Web Project Files";
 		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
 

@@ -1,4 +1,4 @@
-﻿namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	internal class CssElementCreator: ControlCssElementCreator {
 		internal const string SelectUserPageBodyCssClass = "ewfSelectUser";
 		internal const string ErrorPageBodyCssClass = "ewfError";

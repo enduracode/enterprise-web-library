@@ -1,18 +1,17 @@
 using System;
 using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DatabaseSpecification;
-using RedStapler.StandardLibrary.DatabaseSpecification.Databases;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class CustomModificationStatics {
 		private static DatabaseInfo info;
 
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-		                               RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		internal static void Generate(
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			info = cn.DatabaseInfo;
 			if( configuration.customModifications != null ) {
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
@@ -30,7 +29,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static void testQueries( DBConnection cn, RedStapler.StandardLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) {
+		private static void testQueries( DBConnection cn, Configuration.SystemDevelopment.CustomModification[] mods ) {
 			// We don't test commands in Oracle because:
 			// 1. There's no good junk value to pass in.
 			// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that unless absolutely necessary.
@@ -51,9 +50,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static void writeMethod( TextWriter writer, Database database, RedStapler.StandardLibrary.Configuration.SystemDevelopment.CustomModification mod ) {
-			writer.WriteLine( "public static void " + mod.name + "( " +
-			                  DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );
+		private static void writeMethod( TextWriter writer, Database database, Configuration.SystemDevelopment.CustomModification mod ) {
+			writer.WriteLine(
+				"public static void " + mod.name + "( " +
+				DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );
 
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
 			var cnt = 0;

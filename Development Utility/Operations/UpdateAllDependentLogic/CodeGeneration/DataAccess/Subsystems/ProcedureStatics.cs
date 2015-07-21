@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class ProcedureStatics {
@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						"{0}Local = {1};".FormatWith(
 							parameter.Name,
 							parameter.GetIncomingValueConversionExpression(
-								"StandardLibraryMethods.ChangeType( {0}.ToString(), typeof( {1} ) )".FormatWith( adoDotNetParameterValueExpression, parameter.UnconvertedDataTypeName ) ) ) );
+								"EwlStatics.ChangeType( {0}.ToString(), typeof( {1} ) )".FormatWith( adoDotNetParameterValueExpression, parameter.UnconvertedDataTypeName ) ) ) );
 					//writer.WriteLine( "{0}Local = {1};".FormatWith( parameter.Name, parameter.GetIncomingValueConversionExpression( adoDotNetParameterValueExpression ) ) );
 				}
 				writer.WriteLine( "} );" );

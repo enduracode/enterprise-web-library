@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.IO;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using RedStapler.StandardLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -18,8 +17,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			StandardModificationStatics.writer = writer;
 			StandardModificationStatics.database = database;
 
@@ -37,14 +35,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		internal static void WritePartialClass(
 			DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName, bool isRevisionHistoryTable ) {
 			// We do not create templates for direct modification classes.
-			var folderPath = StandardLibraryMethods.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
-			var templateFilePath = StandardLibraryMethods.CombinePaths(
+			var folderPath = EwlStatics.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
+			var templateFilePath = EwlStatics.CombinePaths(
 				folderPath,
 				GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + DataAccessStatics.CSharpTemplateFileExtension );
 			IoMethods.DeleteFile( templateFilePath );
 
 			// If a real file exists, don't create a template.
-			if( File.Exists( StandardLibraryMethods.CombinePaths( folderPath, GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
+			if( File.Exists( EwlStatics.CombinePaths( folderPath, GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
 				return;
 
 			using( var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath ) ) {
@@ -241,9 +239,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer,
 				"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 				" column. Throws an exception if the value has not been initialized. " + getComment( column ) );
-			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " +
-			                                   StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " { get { return " +
-			                                   getColumnFieldName( column ) + ".Value; } ";
+			var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) +
+			                                   " { get { return " + getColumnFieldName( column ) + ".Value; } ";
 			if( columnIsReadOnly )
 				writer.WriteLine( propertyDeclarationBeginning + "}" );
 			else {
@@ -253,7 +250,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					writer,
 					"Indicates whether or not the value for the " + column.Name + " has been set since object creation or the last call to Execute, whichever was latest." );
 				writer.WriteLine(
-					"public bool " + StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + "HasChanged { get { return " +
+					"public bool " + EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + "HasChanged { get { return " +
 					getColumnFieldName( column ) + ".Changed; } }" );
 			}
 		}
@@ -327,7 +324,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			foreach( var column in columns.KeyColumns ) {
 				writer.WriteLine(
 					"mod.conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " + "@" +
-					StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + " ) );" );
+					EwlStatics.GetCSharpIdentifierSimple( column.CamelCasedName ) + " ) );" );
 			}
 
 			writeColumnValueAssignmentsFromParameters( columns.AllColumnsExceptRowVersion, "mod" );
@@ -355,7 +352,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static string GetClassName( DBConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			return
-				StandardLibraryMethods.GetCSharpSafeClassName(
+				EwlStatics.GetCSharpSafeClassName(
 					isRevisionHistoryTable && !isRevisionHistoryClass
 						? "Direct" + table.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"
 						: table.TableNameToPascal( cn ) + "Modification" );
@@ -389,14 +386,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.Write(
 				StringTools.ConcatenateWithDelimiter(
 					", ",
-					columns.Select( i => i.DataTypeName + " @" + StandardLibraryMethods.GetCSharpIdentifierSimple( i.CamelCasedName ) ).ToArray() ) );
+					columns.Select( i => i.DataTypeName + " @" + EwlStatics.GetCSharpIdentifierSimple( i.CamelCasedName ) ).ToArray() ) );
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
-			foreach( var column in columns ) {
-				writer.WriteLine(
-					modObjectName + "." + getColumnFieldName( column ) + ".Value = @" + StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
-			}
+			foreach( var column in columns )
+				writer.WriteLine( modObjectName + "." + getColumnFieldName( column ) + ".Value = @" + EwlStatics.GetCSharpIdentifierSimple( column.CamelCasedName ) + ";" );
 		}
 
 		private static void writeExecuteMethod( string tableName ) {
@@ -470,7 +465,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					"{0}.Value = {1};".FormatWith(
 						getColumnFieldName( identityColumn ),
 						identityColumn.GetIncomingValueConversionExpression(
-							"StandardLibraryMethods.ChangeType( insert.Execute( {0} ), typeof( {1} ) )".FormatWith(
+							"EwlStatics.ChangeType( insert.Execute( {0} ), typeof( {1} ) )".FormatWith(
 								DataAccessStatics.GetConnectionExpression( database ),
 								identityColumn.UnconvertedDataTypeName ) ) ) );
 			}
@@ -483,7 +478,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			foreach( var column in keyColumns ) {
 				writer.WriteLine(
 					"conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
-					StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " ) );" );
+					EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) + " ) );" );
 			}
 
 			writer.WriteLine( "}" ); // if insert
@@ -517,8 +512,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private void addColumnModifications( InlineDbModificationCommand cmd ) {" );
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
-				var columnValueExpression =
-					column.GetCommandColumnValueExpression( StandardLibraryMethods.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) );
+				var columnValueExpression = column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifierSimple( column.PascalCasedNameExceptForOracle ) );
 				writer.WriteLine( "cmd.AddColumnModification( " + columnValueExpression + " );" );
 			}
 			writer.WriteLine( "}" );
@@ -601,7 +595,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getColumnFieldName( Column column ) {
-			return StandardLibraryMethods.GetCSharpIdentifierSimple( column.CamelCasedName + "ColumnValue" );
+			return EwlStatics.GetCSharpIdentifierSimple( column.CamelCasedName + "ColumnValue" );
 		}
 	}
 }

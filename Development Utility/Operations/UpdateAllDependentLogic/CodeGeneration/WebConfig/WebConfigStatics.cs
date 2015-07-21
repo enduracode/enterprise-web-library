@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig {
 	internal class WebConfigStatics {
@@ -13,17 +14,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			using( var reader = new StringReader( getSectionString( webProject ) ) )
 				sections.Load( reader );
 
-			if( !File.Exists( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) ) )
+			if( !File.Exists( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) ) )
 				throw new UserCorrectableException( "The Web.config file is missing." );
 			var webConfig = new XmlDocument { PreserveWhitespace = true };
-			webConfig.Load( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) );
+			webConfig.Load( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
 
 			replaceSection( sections, webConfig, "appSettings" );
 			replaceSection( sections, webConfig, "system.web" );
 			replaceSection( sections, webConfig, "system.webServer" );
 
 			try {
-				webConfig.Save( StandardLibraryMethods.CombinePaths( webProjectPath, "Web.config" ) );
+				webConfig.Save( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
 			}
 			catch( Exception e ) {
 				const string message = "Failed to write web configuration file.";
@@ -34,15 +35,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 		}
 
 		private static string getSectionString( WebProject webProject ) {
-			var sections = File.ReadAllText( StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, "Template.config" ) );
+			var sections = File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Template.config" ) );
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
-			sections = sections.Replace( "@@CertificateAuthenticationModulePlace",
-			                             useCertificateAuth
-				                             ? "<add name=\"CertificateAuthentication\" type=\"RedStapler.StandardLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
-				                             : "" );
+			sections = sections.Replace(
+				"@@CertificateAuthenticationModulePlace",
+				useCertificateAuth
+					? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
+					: "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
 			sections = sections.Replace( "@@CacheTimeout", cacheTimeoutTimeSpan );

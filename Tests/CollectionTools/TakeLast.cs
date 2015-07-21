@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.Tests.CollectionTools {
 	[ TestFixture ]

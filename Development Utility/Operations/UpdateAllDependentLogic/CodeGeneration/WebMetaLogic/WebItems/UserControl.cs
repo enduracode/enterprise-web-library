@@ -1,5 +1,5 @@
 using System.IO;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class UserControl {

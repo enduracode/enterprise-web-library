@@ -75,9 +75,9 @@
     <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Standard Library\Standard Library.csproj">
+    <ProjectReference Include="..\Core\Core.csproj">
       <Project>{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}</Project>
-      <Name>Standard Library</Name>
+      <Name>Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

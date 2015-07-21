@@ -1,5 +1,5 @@
 using System.Linq;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class CheckBoxList: EwfPage {

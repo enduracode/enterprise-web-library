@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.DataAccess;
-using RedStapler.StandardLibrary.DataAccess.CommandWriting.Commands;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
-using RedStapler.StandardLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class RowConstantStatics {
 		private const string dictionaryName = "valuesAndNames";
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.rowConstantTables == null )
 				return;
 
@@ -63,7 +61,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				for( var i = 0; i < values.Count; i++ ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
 					// It's important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
-					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + StandardLibraryMethods.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
+					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
 				}
 
 				// one to one map

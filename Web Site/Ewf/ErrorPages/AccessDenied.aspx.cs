@@ -1,8 +1,8 @@
-﻿using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 // Parameter: bool showHomeLink
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class AccessDenied: EwfPage {
 		partial class Info {
 			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }

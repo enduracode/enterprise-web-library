@@ -1,11 +1,11 @@
 using System;
-using RedStapler.StandardLibrary.Configuration;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	partial class IntermediateLogIn: EwfPage {
 		partial class Info {
 			protected override void init() {
@@ -27,7 +27,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 						FormItem.Create(
 							"Enter your password for this non-live installation",
 							new EwfTextBox( "", masksCharacters: true ),
-							validationGetter: control => new Validation(
+							validationGetter: control => new EwfValidation(
 								                             ( pbv, validator ) => {
 									                             // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
 									                             var passwordMatch = control.GetPostBackValue( pbv ) ==

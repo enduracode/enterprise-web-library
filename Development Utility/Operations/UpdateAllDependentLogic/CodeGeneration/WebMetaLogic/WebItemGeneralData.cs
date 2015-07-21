@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Configuration.SystemDevelopment;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal class WebItemGeneralData {
@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			urlRelativeToProject = pathRelativeToProject.EndsWith( ".cs" ) ? "" : pathRelativeToProject.Replace( System.IO.Path.DirectorySeparatorChar, '/' );
 
 			// Load this item's code if it exists.
-			path = StandardLibraryMethods.CombinePaths( webProjectPath, pathRelativeToProject );
+			path = EwlStatics.CombinePaths( webProjectPath, pathRelativeToProject );
 			var codePath = path.EndsWith( ".cs" ) ? path : path + ".cs";
 			code = File.Exists( codePath ) ? File.ReadAllText( codePath ) : "";
 
@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
 
 			className =
-				StandardLibraryMethods.GetCSharpIdentifier(
+				EwlStatics.GetCSharpIdentifier(
 					System.IO.Path.GetFileNameWithoutExtension( path ) + ( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
 			return StaticFileHandler.CombineNamespacesAndProcessEwfIfNecessary(
 				projectNamespace,
-				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( StandardLibraryMethods.GetCSharpIdentifier ).ToArray() ) );
+				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( EwlStatics.GetCSharpIdentifier ).ToArray() ) );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }

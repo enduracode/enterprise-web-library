@@ -1,6 +1,6 @@
 // Parameter: string message
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class PageDisabled: EwfPage {
 		partial class Info {
 			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }

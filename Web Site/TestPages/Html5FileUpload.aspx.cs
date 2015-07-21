@@ -1,6 +1,6 @@
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.IO;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class Html5FileUpload: EwfPage {

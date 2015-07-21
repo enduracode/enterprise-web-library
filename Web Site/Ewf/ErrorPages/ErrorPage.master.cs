@@ -1,6 +1,6 @@
 using System.Web.UI;
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	public partial class ErrorPage: MasterPage, ControlTreeDataLoader {
 		protected ErrorPage() {}
 

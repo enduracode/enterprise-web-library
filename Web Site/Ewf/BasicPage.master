@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" CodeBehind="BasicPage.master.cs" Inherits="RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.BasicPage" %>
+﻿<%@ Master Language="C#" CodeBehind="BasicPage.master.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.BasicPage" %>
 
 <!DOCTYPE html>
 <html>

@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.UserManagement;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.InputValidation;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class SelectUser: EwfPage {
 		partial class Info {
@@ -18,7 +19,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 			protected override bool userCanAccessResource {
 				get {
 					var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
-					return ( user != null && user.Role.CanManageUsers ) || !AppTools.IsLiveInstallation;
+					return ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
 				}
 			}
 		}
@@ -28,7 +29,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 			ph.AddControlsReturnThis( new PageName() );
 
-			if( AppTools.IsLiveInstallation ) {
+			if( ConfigurationStatics.IsLiveInstallation ) {
 				ph.AddControlsReturnThis(
 					new Paragraph(
 						new Strong( "Warning:" ),
@@ -43,7 +44,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 				FormItem.Create(
 					"User's email address (leave blank for anonymous)",
 					new EwfTextBox( "" ),
-					validationGetter: control => new Validation(
+					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             var errorHandler = new ValidationErrorHandler( "user" );
 							                             var emailAddress = validator.GetEmailAddress( errorHandler, control.GetPostBackValue( pbv ), true );

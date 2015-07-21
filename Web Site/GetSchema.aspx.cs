@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // Parameter: string fileName
 
@@ -11,7 +12,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			internal string FilePath { get; private set; }
 
 			protected override void init() {
-				FilePath = StandardLibraryMethods.CombinePaths( AppTools.FilesFolderPath, FileName + FileExtensions.Xsd );
+				FilePath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, FileName + FileExtensions.Xsd );
 				if( !File.Exists( FilePath ) )
 					throw new ApplicationException( "File does not exist." );
 			}
@@ -23,7 +24,7 @@ namespace EnterpriseWebLibrary.WebSite {
 			get {
 				return new EwfSafeResponseWriter(
 					() => new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
-					AppTools.EwlBuildDateTime,
+					EwlStatics.EwlBuildDateTime,
 					() => "getSchema" + info.FileName );
 			}
 		}

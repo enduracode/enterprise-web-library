@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using NUnit.Framework;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.Collections;
-using RedStapler.StandardLibrary.Encryption;
-using RedStapler.StandardLibrary.Validation;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.Collections;
+using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
 		[ MTAThread ]
 		public static void Main() {
-			AppTools.Init( new GlobalInitializer(), "Tester", false );
+			GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Tester", false );
 
-			StandardLibraryMethods.RunStandardLibraryTests();
+			EwlStatics.RunStandardLibraryTests();
 
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteSecondString() );
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteString() );
@@ -54,8 +54,8 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( "body.ewf div.ewfIeWarningBanner table a { font-size:1.5em; }".RemoveTextBetweenStrings( "{", "}" ) );
 
 			Console.WriteLine( "one".ConcatenateWithSpace( "two" ) );
-			Console.WriteLine( RedStapler.StandardLibrary.StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
-			Console.WriteLine( RedStapler.StandardLibrary.StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
+			Console.WriteLine( EnterpriseWebLibrary.StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
+			Console.WriteLine( EnterpriseWebLibrary.StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
 
 			Console.WriteLine( "abcde".Truncate( 4 ) );
 			Console.WriteLine( "abcde".TruncateStart( 4 ) );
@@ -64,14 +64,14 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( NetTools.CombineUrls( @"///http://www.redstapler.biz//", "/Files/", "Carriers/", "Hancock/", "/blabla.pdf/" ) );
 			Console.WriteLine( NetTools.CombineUrls( @"http://localhost/ToddPublicWebSite/", "Carriers", "UP", "ComparisonLogo.jpg" ) );
 
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "anotherFolder", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub\", "Files", @"orgs\" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"C:\Inetpub", @"\Files\", @"\orgs", "box.txt" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"Inetpub", @"Files" ) );
-			Console.WriteLine( StandardLibraryMethods.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "anotherFolder", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", @"orgs\" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub", @"\Files\", @"\orgs", "box.txt" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"Inetpub", @"Files" ) );
+			Console.WriteLine( EwlStatics.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
-			Console.WriteLine( RedStapler.StandardLibrary.StringTools.CamelToEnglish( null ) );
+			Console.WriteLine( EnterpriseWebLibrary.StringTools.CamelToEnglish( null ) );
 			Console.WriteLine( "".CamelToEnglish() );
 			Console.WriteLine( "L".CamelToEnglish() );
 			Console.WriteLine( "l".CamelToEnglish() );

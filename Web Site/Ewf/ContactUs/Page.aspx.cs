@@ -1,13 +1,14 @@
 using System;
-using RedStapler.StandardLibrary.Email;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
-using RedStapler.StandardLibrary.Validation;
-using RedStapler.StandardLibrary.WebSessionState;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.WebSessionState;
 
 // Parameter: string returnUrl
 
-namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
 	partial class Page: EwfPage {
 		partial class Info {
 			public override string ResourceName { get { return ""; } }
@@ -24,7 +25,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 					new EwfTextBox( "", rows: 20 ),
 					validationGetter:
 						control =>
-						new Validation(
+						new EwfValidation(
 							( pbv, validator ) => emailText = validator.GetString( new ValidationErrorHandler( "text" ), control.GetPostBackValue( pbv ), false ),
 							pb ) ).ToControl() );
 
@@ -36,7 +37,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 		private void modifyData() {
 			var message = new EmailMessage
 				{
-					Subject = "Contact from " + AppTools.SystemName,
+					Subject = "Contact from " + ConfigurationStatics.SystemName,
 					BodyHtml = ( "Contact from " + AppTools.User.Email + Environment.NewLine + Environment.NewLine + emailText ).GetTextAsEncodedHtml()
 				};
 			message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );

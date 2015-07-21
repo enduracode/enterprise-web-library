@@ -2,10 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class SelectListDemo: EwfPage {
@@ -46,7 +45,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									selectedItemId.HasValue ? "One selected" : "default selected",
 									defaultValueItemLabel.Any() ? "default label" : "no default label" ),
 								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
-								validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
+								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
 					}
 				}
 			}
@@ -61,9 +60,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				"When a dropdown is focused with the options expanded, press enter. This should select the option and not submit the page. NOTE: Currently this isn't consistent. In FF this selects and submits, in Chrome this just selects." );
 			bullets.Add( "When a dropdown is focused with the options collapsed, press enter. This should submit the page." );
 
-			return new RedStapler.StandardLibrary.EnterpriseWebFramework.Box(
+			return new Section(
 				"What to look for after updating Select2",
-				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToSingleElementArray() );
+				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToSingleElementArray(),
+				style: SectionStyle.Box );
 		}
 
 		private IEnumerable<FormItem> getDropDownItems() {
@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 										defaultValueItemLabel.Any() ? "default label" : "no default label",
 										placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
 									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
-									validationGetter: control => new Validation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
+									validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
 						}
 					}
 				}

@@ -1,11 +1,10 @@
 using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using Humanizer;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
 
 // PageState: string test1
 // PageState: string test2
@@ -89,7 +88,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new EwfTextBox( "", postBack: pb ),
-					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
+					validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnItemSelect );
 			return
 				new Box(
@@ -103,7 +102,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new EwfTextBox( "", postBack: pb ),
-					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
+					validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
 			return
 				new Box(
@@ -118,7 +117,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new EwfTextBox( "", postBack: pb, autoPostBack: true ),
-					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
+					validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			return new Box( "Post-back on change.", box.ToSingleElementArray() );
 		}
 
@@ -128,7 +127,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new EwfTextBox( "", postBack: pb ),
-					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
+					validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			return new Box( "Post-back on enter.", box.ToSingleElementArray() );
 		}
 
@@ -138,7 +137,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				FormItem.Create(
 					"",
 					new EwfTextBox( "", postBack: pb ),
-					validationGetter: control => new Validation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
+					validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ), pb ) ).Control;
 			var button = new PostBackButton( pb, new ButtonActionControlStyle( "OK" ), usesSubmitBehavior: false );
 			return new Box(
 				"Post-back with non-default submit button. This post-back-value shouldn't show up when the page's submit button is submitted.",

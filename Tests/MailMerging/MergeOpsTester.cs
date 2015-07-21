@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using Humanizer;
 using NUnit.Framework;
-using RedStapler.StandardLibrary;
-using RedStapler.StandardLibrary.MailMerging;
-using RedStapler.StandardLibrary.MailMerging.DataTree;
-using RedStapler.StandardLibrary.MailMerging.Fields;
+using EnterpriseWebLibrary;
+using EnterpriseWebLibrary.MailMerging;
+using EnterpriseWebLibrary.MailMerging.DataTree;
+using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure;
 using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure;
 using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
@@ -15,7 +15,6 @@ using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.TestFileDataStructure
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PhysicianMergeFields;
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeDocumentMergeFields;
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.TestFileMergeFields;
-using Email = EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeManagerMergeFields.Email;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging {
 	[ TestFixture ]
@@ -88,7 +87,7 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 					} );
 
 			var practiceFields = new List<MergeField<PracticeMockData>>( MergeFieldOps.CreateBasicField( new PracticeName() ).ToSingleElementArray() );
-			var managerFields = new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new Email() ).ToSingleElementArray() );
+			var managerFields = new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new MergeFields.PracticeManagerMergeFields.Email() ).ToSingleElementArray() );
 			var physicianFields =
 				new List<MergeField<PhysicianMockData>>(
 					new[]

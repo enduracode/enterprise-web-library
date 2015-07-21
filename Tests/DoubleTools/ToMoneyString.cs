@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RedStapler.StandardLibrary;
+using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.Tests.DoubleTools {
 	[ TestFixture ]

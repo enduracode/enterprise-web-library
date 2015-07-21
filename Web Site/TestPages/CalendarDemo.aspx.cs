@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using RedStapler.StandardLibrary.EnterpriseWebFramework;
-using RedStapler.StandardLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // OptionalParameter: string returnUrl
 // OptionalParameter: DateTime date
