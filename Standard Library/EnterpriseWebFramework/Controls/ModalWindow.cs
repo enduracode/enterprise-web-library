@@ -30,13 +30,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a modal window.
 		/// </summary>
-		public ModalWindow( Control content, string title = "", bool open = false ): this( content, title: title, postBack: null, open: open ) {}
+		public ModalWindow( Control parent, Control content, string title = "", bool open = false ): this( parent, content, title: title, postBack: null, open: open ) {}
 
-		internal ModalWindow( Control content, string title = "", PostBack postBack = null, bool open = false ) {
+		internal ModalWindow( Control parent, Control content, string title = "", PostBack postBack = null, bool open = false ) {
 			control = new Block( new Section( title, content.ToSingleElementArray().Concat( getButtonTable( postBack ) ) ) ) { CssClass = CssElementCreator.CssClass };
 			this.open = open;
 
-			EwfPage.Instance.AddEtherealControl( this );
+			EwfPage.Instance.AddEtherealControl( parent, this );
 		}
 
 		private IEnumerable<Control> getButtonTable( PostBack postBack ) {

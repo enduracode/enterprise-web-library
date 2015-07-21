@@ -34,19 +34,5 @@ namespace RedStapler.StandardLibrary {
 		internal static bool IsOnPage( this Control control ) {
 			return control.Page != null;
 		}
-
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		public static IEnumerable<Control> GetDescendants( this Control control, Func<Control, bool> predicate = null ) {
-			predicate = predicate ?? ( i => true );
-
-			var descendants = new List<Control>();
-			foreach( var child in control.Controls.Cast<Control>().Where( predicate ) ) {
-				descendants.Add( child );
-				descendants.AddRange( child.GetDescendants( predicate: predicate ) );
-			}
-			return descendants;
-		}
 	}
 }

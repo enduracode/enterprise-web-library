@@ -10,10 +10,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a hidden field. Do not pass null for value.
 		/// </summary>
-		public static void Create( string value, Action<string> postBackValueHandler, ValidationList vl, out Func<PostBackValueDictionary, string> valueGetter,
-		                           out Func<string> clientIdGetter ) {
+		public static void Create(
+			Control parent, string value, Action<string> postBackValueHandler, ValidationList vl, out Func<PostBackValueDictionary, string> valueGetter,
+			out Func<string> clientIdGetter ) {
 			var control = new EwfHiddenField( value );
-			EwfPage.Instance.AddEtherealControl( control );
+			EwfPage.Instance.AddEtherealControl( parent, control );
 			new Validation( ( postBackValues, validator ) => postBackValueHandler( control.getPostBackValue( postBackValues ) ), vl );
 			valueGetter = control.getPostBackValue;
 			clientIdGetter = () => control.ClientID;
@@ -22,13 +23,12 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		private readonly FormValue<string> formValue;
 
 		private EwfHiddenField( string value ) {
-			formValue = new FormValue<string>( () => value,
-			                                   () => UniqueID,
-			                                   v => v,
-			                                   rawValue =>
-			                                   rawValue != null
-				                                   ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
-				                                   : PostBackValueValidationResult<string>.CreateInvalid() );
+			formValue = new FormValue<string>(
+				() => value,
+				() => UniqueID,
+				v => v,
+				rawValue =>
+				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
 		}
 
 		WebControl EtherealControl.Control { get { return this; } }

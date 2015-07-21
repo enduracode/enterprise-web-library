@@ -50,12 +50,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private ModalWindow one;
 		private ModalWindow two;
-		private ModalWindow three;
-		private ModalWindow four;
 
 		void EntitySetupBase.LoadData() {
 			ph.AddControlsReturnThis(
 				new Paragraph( "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
+
+			one = new ModalWindow( this, new Paragraph( "Test!" ) );
+			two = new ModalWindow(
+				this,
+				new EwfImage( new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) );
 		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
@@ -84,14 +87,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.google.com" ) ) ),
 											"Google" ),
 										() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script" ),
-										() =>
-										new EwfTableItem( new LaunchWindowLink( new ModalWindow( new Paragraph( "Test!" ) ) ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
+										() => new EwfTableItem( new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
 									} ) ) ) );
 
-			navButtonSetups.Add(
-				new ActionButtonSetup(
-					"Modal Window",
-					new LaunchWindowLink( new ModalWindow( new EwfImage( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) ) ) );
+			navButtonSetups.Add( new ActionButtonSetup( "Modal Window", new LaunchWindowLink( two ) ) );
 			return navButtonSetups;
 		}
 

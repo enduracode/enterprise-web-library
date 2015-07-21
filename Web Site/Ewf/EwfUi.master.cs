@@ -358,8 +358,11 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework.EnterpriseWebLibrary
 
 		private Control getEntitySummaryBlock() {
 			// If the entity setup is a nonempty control, display it as an entity summary.
+			//
+			// It's a hack to call GetDescendants this early in the life cycle, but we should be able to fix it when we separate EWF from Web Forms. This is
+			// EnduraCode goal 790. What we are essentially doing here is determining whether there is at least one "component" in the entity summary.
 			var entitySummary = EwfPage.Instance.EsAsBaseType as Control;
-			if( entitySummary != null && entitySummary.GetDescendants().Any( i => !( i is PlaceHolder ) ) )
+			if( entitySummary != null && EwfPage.Instance.GetDescendants( entitySummary ).Any( i => !( i is PlaceHolder ) ) )
 				return new Block( entitySummary ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass };
 
 			return null;

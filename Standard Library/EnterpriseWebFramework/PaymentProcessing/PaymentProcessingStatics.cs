@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
+using System.Web.UI;
 using RedStapler.StandardLibrary.EnterpriseWebFramework.Controls;
 using RedStapler.StandardLibrary.WebSessionState;
 using Stripe;
@@ -14,6 +15,7 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// Returns a JavaScript function call getter that opens a Stripe Checkout modal window. If the window's submit button is clicked, the credit card is
 		/// charged or otherwise used. Do not execute the getter before all controls have IDs.
 		/// </summary>
+		/// <param name="etherealControlParent">The control to which any necessary ethereal controls will be added.</param>
 		/// <param name="testPublishableKey">Your test publishable API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="livePublishableKey">Your live publishable API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="name">See https://stripe.com/docs/checkout. Do not pass null.</param>
@@ -27,8 +29,8 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
 		/// email address).</param>
 		public static Func<string> GetCreditCardCollectionJsFunctionCall(
-			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
-			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
+			Control etherealControlParent, string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars,
+			string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
@@ -47,7 +49,13 @@ namespace RedStapler.StandardLibrary.EnterpriseWebFramework {
 
 			Func<PostBackValueDictionary, string> tokenHiddenFieldValueGetter; // unused
 			Func<string> tokenHiddenFieldClientIdGetter;
-			EwfHiddenField.Create( "", postBackValue => token.Value = postBackValue, postBack, out tokenHiddenFieldValueGetter, out tokenHiddenFieldClientIdGetter );
+			EwfHiddenField.Create(
+				etherealControlParent,
+				"",
+				postBackValue => token.Value = postBackValue,
+				postBack,
+				out tokenHiddenFieldValueGetter,
+				out tokenHiddenFieldClientIdGetter );
 
 			postBack.AddModificationMethod(
 				() => {
