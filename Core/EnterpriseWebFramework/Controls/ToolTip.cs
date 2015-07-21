@@ -32,10 +32,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		WebControl EtherealControl.Control { get { return control; } }
 
 		string EtherealControl.GetJsInitStatements() {
+			// If changing this, note that the Basic style sheet may contain qTip2-specific rules.
 			return "$( '#" + targetControl.ClientID + "' ).qtip( { content: { text: $( '#" + control.ClientID + "' )" +
 			       ( title.Any() ? ", title: { text: '" + title + "' }" : "" ) + " }, position: { container: $( '#" + EwfPage.Instance.Form.ClientID +
-			       "' ), viewport: $( window ) }" + ( sticky ? ", show: { event: 'click', delay: 0 }, hide: { event: 'unfocus' }" : "" ) +
-			       ", style: { classes: 'qtip-bootstrap' } } );";
+			       "' ), viewport: $( window ), adjust: { method: 'flipinvert shift' } }" +
+			       ( sticky ? ", show: { event: 'click', delay: 0 }, hide: { event: 'unfocus' }" : "" ) + ", style: { classes: 'qtip-bootstrap' } } );";
 		}
 	}
 }

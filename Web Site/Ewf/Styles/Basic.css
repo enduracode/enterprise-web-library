@@ -230,6 +230,12 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 	cursor: default;
 }
 
+/* tool tips */
+.qtip-content {
+	max-height: 80vh;
+	overflow-y: auto;
+}
+
 /* EwfPage and master page */
 ewfTopWarningBlock {
 	z-index: 9998;
