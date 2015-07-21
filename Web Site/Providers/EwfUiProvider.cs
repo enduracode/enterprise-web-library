@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using EnterpriseWebLibrary.WebSite.TestPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
+using EnterpriseWebLibrary.WebSite.TestPages;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
@@ -15,8 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			navButtonSetups.Add(
 				new ActionButtonSetup(
 					"Contact us",
-					new EwfLink(
-						EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
+					new EwfLink( EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
 
 			var menu = EwfTable.Create();
 			menu.AddItem(

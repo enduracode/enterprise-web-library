@@ -8,10 +8,11 @@ using EnterpriseWebLibrary.WebSessionState;
 
 // Parameter: string returnUrl
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs {
-	partial class Page: EwfPage {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
+	partial class ContactUs: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return ""; } }
+			public override string ResourceName { get { return "Contact Us"; } }
+			protected override bool userCanAccessResource { get { return AppTools.User != null; } }
 		}
 
 		private string emailText;
