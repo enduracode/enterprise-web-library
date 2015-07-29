@@ -282,37 +282,46 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// in another browser window while the first one is still running.
 			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
 			// another transaction has modified its value during this transaction.
-			var newlyQueriedUser =
-				new DataAccessState().ExecuteWithThis(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () => UserManagementStatics.GetUser( user.UserId, false ) ) );
+			var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
+				() => {
+					Func<User> userGetter = () => UserManagementStatics.GetUser( user.UserId, false );
+					return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( userGetter ) : userGetter();
+				} );
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
 				return;
 
-			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-				() => {
-					try {
-						var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-						if( FormsAuthStatics.FormsAuthEnabled ) {
-							var formsAuthCapableUser = (FormsAuthCapableUser)user;
-							FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-								user.UserId,
-								user.Email,
-								user.Role.RoleId,
-								DateTime.Now,
-								formsAuthCapableUser.Salt,
-								formsAuthCapableUser.SaltedPassword,
-								formsAuthCapableUser.MustChangePassword );
+			Action userUpdater = () => {
+				var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+				if( FormsAuthStatics.FormsAuthEnabled ) {
+					var formsAuthCapableUser = (FormsAuthCapableUser)user;
+					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+						user.UserId,
+						user.Email,
+						user.Role.RoleId,
+						DateTime.Now,
+						formsAuthCapableUser.Salt,
+						formsAuthCapableUser.SaltedPassword,
+						formsAuthCapableUser.MustChangePassword );
+				}
+				else if( externalAuthProvider != null )
+					externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+			};
+			if( ConfigurationStatics.DatabaseExists ) {
+				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+					() => {
+						try {
+							userUpdater();
 						}
-						else if( externalAuthProvider != null )
-							externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
-					}
-					catch( DbConcurrencyException ) {
-						// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request and
-						// then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't need to
-						// get an error email if the update fails.
-						throw new DoNotCommitException();
-					}
-				} );
+						catch( DbConcurrencyException ) {
+							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
+							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
+							// need to get an error email if the update fails.
+							throw new DoNotCommitException();
+						}
+					} );
+			}
+			else
+				userUpdater();
 		}
 
 		// The warning below also appears on EwfApp.ExecutePageViewDataModifications.

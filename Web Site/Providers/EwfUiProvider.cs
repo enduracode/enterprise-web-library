@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using EnterpriseWebLibrary.WebSite.TestPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
+using EnterpriseWebLibrary.WebSite.TestPages;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
@@ -12,11 +12,8 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			var navButtonSetups = new List<ActionButtonSetup>();
 
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
-			navButtonSetups.Add(
-				new ActionButtonSetup(
-					"Contact us",
-					new EwfLink(
-						EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactUs.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() ) ) ) );
+			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactSupport.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+			navButtonSetups.Add( new ActionButtonSetup( contactPage.ResourceName, new EwfLink( contactPage ) ) );
 
 			var menu = EwfTable.Create();
 			menu.AddItem(

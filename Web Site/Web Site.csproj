@@ -109,6 +109,13 @@
     <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
       <DependentUpon>SystemUsers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\ContactSupport.aspx.cs">
+      <DependentUpon>ContactSupport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\ContactSupport.aspx.designer.cs">
+      <DependentUpon>ContactSupport.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\CssElementCreator.cs" />
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
@@ -298,20 +305,6 @@
     <Compile Include="Ewf\BasicPage.master.designer.cs">
       <DependentUpon>BasicPage.master</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\ContactUs\Page.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>Page.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ContactUs\Page.aspx.designer.cs">
-      <DependentUpon>Page.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ContactUs\EntitySetup.ascx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ContactUs\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\ErrorPages\AccessDenied.aspx.cs">
       <DependentUpon>AccessDenied.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -458,6 +451,7 @@
     <Content Include="Ewf\Admin\EntitySetup.ascx" />
     <Content Include="Ewf\Admin\RequestProfiling.aspx" />
     <Content Include="Ewf\Admin\SystemUsers.aspx" />
+    <Content Include="Ewf\ContactSupport.aspx" />
     <Content Include="Ewf\ErrorPages\PageDisabled.aspx" />
     <Content Include="Ewf\FileUploader\ClientSide.js" />
     <Content Include="Ewf\FileUploader\jquery.progressbar.min.js" />
@@ -599,8 +593,6 @@
     <Content Include="TestPages\SubFolder\New.aspx" />
     <Content Include="TestPages\TestService.aspx" />
     <Content Include="Web.config" />
-    <Content Include="Ewf\ContactUs\Page.aspx" />
-    <Content Include="Ewf\ContactUs\EntitySetup.ascx" />
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
