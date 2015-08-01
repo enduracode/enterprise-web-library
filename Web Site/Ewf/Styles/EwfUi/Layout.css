@@ -237,6 +237,12 @@ ewfUiTopErrorMessageControlListBlock {
 	font-size: 1.4em;
 	margin: 1rem 0;
 }
+@media print {
+	ewfUiEntityBlock {
+		border-top: 1pt solid black;
+		border-bottom: 1pt solid black;
+	}
+}
 ewfUiEntityBlock ewfPagePath {
 	margin: 0;
 }
