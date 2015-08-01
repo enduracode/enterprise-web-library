@@ -567,6 +567,11 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfS
 .profiler-results:hover {
 	opacity: 1;
 }
+@media print {
+	.profiler-results {
+		display: none;
+	}
+}
 
 /* SelectUser and error pages */
 ewfSelectUserPageBody, ewfErrorPageBody {
