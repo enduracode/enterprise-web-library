@@ -102,6 +102,12 @@ ewfThAndTd {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+@media print {
+	ewfTableStandardAndStandardExceptLayoutStyles {
+		border-left: 1pt solid black;
+		border-right: 1pt solid black;
+	}
+}
 ewfTableStandardAndStandardExceptLayoutStyles > caption {
 	padding-top: .125em; /* prevents text from being cropped by rounded corners in Chrome */
 	padding-bottom: .5em;
@@ -113,6 +119,14 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 }
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
 	padding: .5em;
+}
+@media print {
+	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
+		border-bottom: 1pt solid black;
+	}
+	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates:first-child > ewfThAndTd {
+		border-top: 1pt solid black;
+	}
 }
 table.ewfStandardDynamicTableCaption {
 	margin-bottom: .5em;
