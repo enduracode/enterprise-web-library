@@ -175,6 +175,11 @@ p, ul {
 ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfActionControlLargeButtonStyleAllStates {
 	border-radius: .5em;
 }
+@media print {
+	ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
+		border-radius: 0;
+	}
+}
 ewfActionControlShrinkWrapButtonStyleAllStates {
 	border-radius: .25em;
 }
