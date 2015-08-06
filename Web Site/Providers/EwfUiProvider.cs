@@ -10,6 +10,8 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
 		public override List<ActionButtonSetup> GetGlobalNavActionControls() {
 			var navButtonSetups = new List<ActionButtonSetup>();
+			if( CreateSystem.GetInfo().IsIdenticalToCurrent() )
+				return navButtonSetups;
 
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
 			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactSupport.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
@@ -38,6 +40,9 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 
 		public override List<LookupBoxSetup> GetGlobalNavLookupBoxSetups() {
 			var lookupBoxSetups = new List<LookupBoxSetup>();
+			if( CreateSystem.GetInfo().IsIdenticalToCurrent() )
+				return lookupBoxSetups;
+
 			lookupBoxSetups.Add( new LookupBoxSetup( 100, "test", "lookup1", delegate { return null; } ) );
 			lookupBoxSetups.Add( new LookupBoxSetup( 100, "test", "lookup2", delegate { return null; } ) );
 			return lookupBoxSetups;
