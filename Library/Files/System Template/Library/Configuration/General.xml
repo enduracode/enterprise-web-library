@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <systemGeneralConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                             xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemGeneral">
-	<systemName>SystemName</systemName>
-	<systemShortName>SystemShortName</systemShortName>
+	<systemName>@@SystemName</systemName>
+	<systemShortName>@@SystemShortName</systemShortName>
 	<WebApplications>
 		<Application>
 			<Name>Web Site</Name>

@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary;
 
-namespace BaseNamespace.Library.Configuration.Providers {
+namespace @@BaseNamespace.Library.Configuration.Providers {
 	internal class General: SystemGeneralProvider {
 		string SystemGeneralProvider.AsposeLicenseName { get { return ""; } }
 		string SystemGeneralProvider.IntermediateLogInPassword { get { return "your-password"; } }

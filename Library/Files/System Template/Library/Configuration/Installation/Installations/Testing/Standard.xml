@@ -22,7 +22,7 @@
 					<Name>Web Site</Name>
 					<DefaultBaseUrl>
 						<Host>intermediate.example.com</Host>
-						<Path>SystemShortNameTesting</Path>
+						<Path>@@SystemShortNameTesting</Path>
 					</DefaultBaseUrl>
 				</Application>
 			</WebApplications>

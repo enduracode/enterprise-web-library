@@ -7,8 +7,8 @@
     <ProjectGuid>{764387D3-728F-4CF5-B07D-B4C4CB927151}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BaseNamespace.Library</RootNamespace>
-    <AssemblyName>BaseNamespace.Library</AssemblyName>
+    <RootNamespace>@@BaseNamespace.Library</RootNamespace>
+    <AssemblyName>@@BaseNamespace.Library</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

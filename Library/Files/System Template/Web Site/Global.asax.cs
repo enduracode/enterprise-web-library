@@ -4,7 +4,7 @@ using BaseNamespace.Library;
 using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace BaseNamespace.WebSite {
+namespace @@BaseNamespace.WebSite {
 	public class Global: EwfApp {
 		// These methods exist because there is no way to hook into these events from within EWF.
 

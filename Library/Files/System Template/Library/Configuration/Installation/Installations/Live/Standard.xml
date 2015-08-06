@@ -22,7 +22,7 @@
 						<Host>example.com</Host>
 					</DefaultBaseUrl>
 					<StandbyDefaultBaseUrl>
-						<Host>systemshortnamelowercasestandby.example.com</Host>
+						<Host>@@SystemShortNameLowercasestandby.example.com</Host>
 					</StandbyDefaultBaseUrl>
 				</Application>
 			</WebApplications>

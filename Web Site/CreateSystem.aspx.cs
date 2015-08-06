@@ -83,7 +83,14 @@ namespace EnterpriseWebLibrary.WebSite {
 				var filePath = EwlStatics.CombinePaths( relativeFolderPath, fileName );
 				var destinationFilePath = EwlStatics.CombinePaths( tempFolderPath, filePath == "Solution.sln" ? "{0}.sln".FormatWith( systemName.Value ) : filePath );
 				Directory.CreateDirectory( Path.GetDirectoryName( destinationFilePath ) );
-				File.WriteAllText( destinationFilePath, File.ReadAllText( filePath, Encoding.UTF8 ), Encoding.UTF8 );
+				File.WriteAllText(
+					destinationFilePath,
+					File.ReadAllText( filePath, Encoding.UTF8 )
+						.Replace( "@@SystemName", systemName.Value )
+						.Replace( "@@SystemShortName", systemShortName.Value )
+						.Replace( "@@SystemShortNameLowercase", systemShortName.Value.ToLowerInvariant() )
+						.Replace( "@@BaseNamespace", baseNamespace.Value ),
+					Encoding.UTF8 );
 			}
 		}
 	}
