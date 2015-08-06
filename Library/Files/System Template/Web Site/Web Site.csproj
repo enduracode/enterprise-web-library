@@ -90,7 +90,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>56721</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:8080/SystemShortName</IISUrl>
+          <IISUrl>http://localhost:8080/@@SystemShortName</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using BaseNamespace.Library;
+using @@BaseNamespace.Library;
 using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 
