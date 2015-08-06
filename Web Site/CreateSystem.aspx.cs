@@ -85,13 +85,15 @@ namespace EnterpriseWebLibrary.WebSite {
 				Directory.CreateDirectory( Path.GetDirectoryName( destinationFilePath ) );
 				File.WriteAllText(
 					destinationFilePath,
-					File.ReadAllText( filePath, Encoding.UTF8 )
+					File.ReadAllText( EwlStatics.CombinePaths( templateFolderPath, filePath ), Encoding.UTF8 )
 						.Replace( "@@SystemName", systemName.Value )
 						.Replace( "@@SystemShortName", systemShortName.Value )
 						.Replace( "@@SystemShortNameLowercase", systemShortName.Value.ToLowerInvariant() )
 						.Replace( "@@BaseNamespace", baseNamespace.Value ),
 					Encoding.UTF8 );
 			}
+			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( sourceFolderPath ) )
+				createSystemFilesInFolder( templateFolderPath, tempFolderPath, Path.Combine( relativeFolderPath, subFolderName ) );
 		}
 	}
 }
