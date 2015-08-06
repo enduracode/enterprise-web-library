@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using EnterpriseWebLibrary.WebSite.TestPages;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.WebSite.TestPages;
 
 namespace EnterpriseWebLibrary.WebSite {
 	public class Global: EwfApp {
@@ -25,6 +24,8 @@ namespace EnterpriseWebLibrary.WebSite {
 					var page = ActionControls.GetInfo();
 					return page.UserCanAccessResource ? page : null;
 				} );
+
+			yield return new ShortcutUrlResolver( "create-system", ConnectionSecurity.SecureIfPossible, () => CreateSystem.GetInfo() );
 
 			foreach( var i in GlobalStatics.ConfigurationXsdFileNames ) {
 				var fileName = i;

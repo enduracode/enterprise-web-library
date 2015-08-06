@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<installationStandardConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                   xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/InstallationStandard">
+	<administrators>
+		<administrator>
+			<Name>Jane Doe</Name>
+			<EmailAddress>jane.doe@example.com</EmailAddress>
+		</administrator>
+	</administrators>
+	<installedInstallation>
+		<name>Testing</name>
+		<shortName>Testing</shortName>
+		<InstallationTypeConfiguration xsi:type="IntermediateInstallationConfiguration">
+			<EmailFromName>Your Organization</EmailFromName>
+			<EmailFromAddress>contact@example.com</EmailFromAddress>
+			<EmailSendingService xsi:type="SendGrid">
+				<UserName>your-send-grid-user-name</UserName>
+				<Password>your-send-grid-password</Password>
+			</EmailSendingService>
+			<WebApplications>
+				<Application>
+					<Name>Web Site</Name>
+					<DefaultBaseUrl>
+						<Host>intermediate.example.com</Host>
+						<Path>SystemShortNameTesting</Path>
+					</DefaultBaseUrl>
+				</Application>
+			</WebApplications>
+		</InstallationTypeConfiguration>
+	</installedInstallation>
+</installationStandardConfiguration>

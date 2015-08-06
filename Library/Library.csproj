@@ -73,6 +73,18 @@
     <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />
+    <Content Include="Files\System Template\Library\Configuration\Development.xml" />
+    <Content Include="Files\System Template\Library\Configuration\General.xml" />
+    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Development\Standard.xml" />
+    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Live\Standard.xml" />
+    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Testing\Standard.xml" />
+    <Content Include="Files\System Template\Library\Configuration\Providers\General.cs" />
+    <Content Include="Files\System Template\Library\GlobalInitializer.cs" />
+    <Content Include="Files\System Template\Library\Library.csproj" />
+    <Content Include="Files\System Template\Solution.sln" />
+    <Content Include="Files\System Template\Web Site\Global.asax" />
+    <Content Include="Files\System Template\Web Site\Global.asax.cs" />
+    <Content Include="Files\System Template\Web Site\Web Site.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
@@ -82,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Configuration\Aspose.Total.lic" />
+    <None Include="Files\System Template\Web Site\Web.config" />
     <None Include="Files\Template.config" />
   </ItemGroup>
   <ItemGroup>
