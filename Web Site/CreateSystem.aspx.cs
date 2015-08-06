@@ -87,8 +87,8 @@ namespace EnterpriseWebLibrary.WebSite {
 					destinationFilePath,
 					File.ReadAllText( EwlStatics.CombinePaths( templateFolderPath, filePath ), Encoding.UTF8 )
 						.Replace( "@@SystemName", systemName.Value )
-						.Replace( "@@SystemShortName", systemShortName.Value )
 						.Replace( "@@SystemShortNameLowercase", systemShortName.Value.ToLowerInvariant() )
+						.Replace( "@@SystemShortName", systemShortName.Value )
 						.Replace( "@@BaseNamespace", baseNamespace.Value ),
 					Encoding.UTF8 );
 			}
