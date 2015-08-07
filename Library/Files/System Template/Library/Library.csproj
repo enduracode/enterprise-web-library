@@ -43,6 +43,7 @@
     <Compile Include="Configuration\Providers\General.cs" />
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="GlobalInitializer.cs" />
+    <Compile Include="GlobalStatics.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />

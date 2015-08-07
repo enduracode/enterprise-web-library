@@ -80,8 +80,10 @@
     <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Testing\Standard.xml" />
     <Content Include="Files\System Template\Library\Configuration\Providers\General.cs" />
     <Content Include="Files\System Template\Library\GlobalInitializer.cs" />
+    <Content Include="Files\System Template\Library\GlobalStatics.cs" />
     <Content Include="Files\System Template\Library\Library.csproj" />
     <Content Include="Files\System Template\Solution.sln" />
+    <Content Include="Files\System Template\Web Site\AppStatics.cs" />
     <Content Include="Files\System Template\Web Site\Global.asax" />
     <Content Include="Files\System Template\Web Site\Global.asax.cs" />
     <Content Include="Files\System Template\Web Site\Web Site.csproj" />
