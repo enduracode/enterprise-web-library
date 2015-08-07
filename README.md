@@ -34,11 +34,17 @@ For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 
 1.	Visit http://ewl.enterpriseweblibrary.org/create-system to download a ZIP file containing your new starter system. Extract the files into a location of your choice.
 
-2.	Open the solution file in Visual Studio. Restore NuGet packages when prompted, and then restart Visual Studio to enable the EWL PowerShell commands.
+2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Get-Project -All | Install-Package Ewl`. Save all files in the solution (Ctrl-Shift-S).
 
-3.	In the Package Manager Console, run `Update-DependentLogic`. This will apply some IIS Express configuration, copy some files into the `Web Site` project, and generate a few pieces of code and a Web.config file.
+3.	Again in the Package Manager Console, run `Update-DependentLogic`. This will do the following:
 
-4.	Understand the elements in your new system:
+	*	Apply some IIS Express configuration
+
+	*	Copy some files into the `Web Site` project, and update the project file to reference them
+
+	*	Generate a few pieces of code in both projects, and update the Web.config file
+
+4.	Understand the elements of your new system:
 
 	*	The `Library` project, which contains configuration files, provider classes (which allow parts of EWL's behavior to be customized), and a `GlobalInitializer` class (which gives you a place to initialize static fields when your system starts up). `Library` should also be the home of most of your "business logic" and anything else that you would reuse across multiple applications in your system. Right now your system only contains a single web app, but as it grows, you may need another web app or a different type of application, e.g. a Windows service.
 
@@ -46,7 +52,7 @@ For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 
 	More information on this is available from our developers; please [ask for help in the forum](https://community.enterpriseweblibrary.org/).
 
-5.	Run the `Web Site` project and make sure you see the Hello World page.
+5.	Run the `Web Site` project. If you see a page that says "The page you requested is no longer available", everything is working and you can begin building your system.
 
 
 ## Contributing
