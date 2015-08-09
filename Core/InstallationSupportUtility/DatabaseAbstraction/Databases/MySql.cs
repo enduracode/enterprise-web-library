@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Humanizer;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class MySql: Database {
@@ -152,27 +152,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		void Database.PerformMaintenance() {}
 
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
-
-		/*
-		private void setupNewDatabase() {
-			var script = @"
-CREATE TABLE global_ints(
-	ParameterName VARCHAR( 50 )
-		PRIMARY KEY,
-	ParameterValue INT
-		NOT NULL
-);
-
-INSERT INTO global_ints VALUES( 'LineMarker', 0 );
-
-CREATE TABLE main_sequence(
-	MainSequenceId INT
-		AUTO_INCREMENT
-		PRIMARY KEY
-);
-";
-		}
-*/
 
 		public void ExecuteDbMethod( Action<DBConnection> method ) {
 			executeMethodWithDbExceptionHandling(

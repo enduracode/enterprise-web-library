@@ -26,6 +26,7 @@ The Enterprise Web Library (EWL) is an extremely-opinionated NuGet package desig
 
 *	Windows 8.1, .NET Framework 4.5.1, IIS Express 8.5 (.NET Core support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you're interested!)
 *	Visual Studio 2013 (recommended)
+* SQL Server 2012 or later, MySQL 5.5, or Oracle Database 12c (if you want a relational database)
 
 For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 
@@ -53,6 +54,50 @@ For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 	More information on this is available from our developers; please [ask for help in the forum](https://community.enterpriseweblibrary.org/).
 
 5.	Run the `Web Site` project. If you see a page that says "The page you requested is no longer available", everything is working and you can begin building your system.
+
+
+### Adding a Database
+
+1.	Create a SQL Server, MySQL, or Oracle database using your preferred tool. We recommend the following naming conventions:
+
+	*	For SQL Server, name your database `SystemShortNameDev`, replacing `SystemShortName` with the value from your `General.xml` configuration file.
+
+	*	For MySQL, name your schema `system_short_name_dev`, replacing `system_short_name` with a lowercased, underscore-separated version of the value from your `General.xml` configuration file.
+
+	*	For Oracle, name your schema whatever you like. We have no convention. The MySQL convention may work.
+
+	Additionally, for SQL Server, we suggest using this script to create the database (after replacing `DatabaseName` and `Path`):
+
+	```SQL
+	USE Master
+
+	CREATE DATABASE DatabaseName ON (
+	NAME = Data,
+			FILENAME = 'Path\DatabaseNameData.mdf',
+			SIZE = 100MB,
+			FILEGROWTH = 15% )
+	LOG ON
+	( NAME = Log,
+			FILENAME = 'Path\DatabaseNameLog.ldf',
+			SIZE = 10MB,
+			MAXSIZE = 1000MB,
+			FILEGROWTH = 100MB );
+	GO
+	```
+
+2.	Run one of the following scripts to initialize your database for EWL usage: [SQL Server](Documentation/ReadMeSupplements/DatabaseInitScripts.md#sql-server), [MySQL](Documentation/ReadMeSupplements/DatabaseInitScripts.md#mysql), [Oracle](Documentation/ReadMeSupplements/DatabaseInitScripts.md#oracle).
+
+3.	Add the `<database>` element to the installation configuration files (i.e. the `Standard.xml` files in `Library/Configuration/Installation/Installations`) after the `<administrators>` element:
+
+	* For SQL Server, use `<database xsi:type="SqlServerDatabase" />`. Use the `<database>` child element if you did not follow the naming convention above.
+
+	* For MySQL, use `<database xsi:type="MySqlDatabase" />`. Use the `<database>` child element if you did not follow the naming convention above.
+
+	* For Oracle, use `<database xsi:type="OracleDatabase">` with the `<tnsName>`, `<userAndSchema>`, and `<password>` child elements.
+
+4.	Add the `<database>` element to the development configuration file (i.e. `Library/Configuration/Development.xml`) after the `<webProjects>` element.
+
+Now, when you run `Update-DependentLogic`, data-access code will be generated for your database.
 
 
 ## Contributing

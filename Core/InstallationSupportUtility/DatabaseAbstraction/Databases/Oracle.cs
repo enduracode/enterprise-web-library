@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -12,6 +11,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class Oracle: Database {
@@ -342,23 +342,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		}
 
 		void Database.ShrinkAfterPostUpdateDataCommands() {}
-
-		/*
-	private static void setupNewDatabase() {
-		string script = @"
-
-CREATE TABLE global_numbers (
-	k VARCHAR2( 100 )
-		CONSTRAINT global_numbers_pk PRIMARY KEY,
-	v NUMBER
-);
-
-INSERT INTO global_numbers VALUES( 'LineMarker', 0 );
-
-CREATE SEQUENCE main_sequence;
-";
-	}
-*/
 
 		public void ExecuteDbMethod( Action<DBConnection> method ) {
 			executeDbMethodWithSpecifiedDatabaseInfo( info, method );

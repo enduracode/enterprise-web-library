@@ -15,9 +15,7 @@ using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
-		private static readonly string sqlServerFilesFolderPath = EwlStatics.CombinePaths(
-			ConfigurationStatics.RedStaplerFolderPath,
-			"SQL Server Databases" );
+		private static readonly string sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "SQL Server Databases" );
 
 		/// <summary>
 		/// Returns the list of file names in the given folder, ordered with the newest log file first (according to ID).
@@ -320,9 +318,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		}
 
 		/*
-		private static void setupNewDatabase() {
-			// The script that was here is now in the documentation wiki.
-		}
 		Make sure the data file and the log file as shrunken, then set the log autogrowth to 100MB (not 10%, or 1MB, or anything small). If you know it will
 		 *be large, set it large initially. The fewer times it autogrows, the faster log restores will be.
 		 *NOTE: Come up with guidelines for this. 100MB growth is too big for AFI. Also, some systems are setup with unrestricted growth. Others are set with some limit (2GB). We should
