@@ -100,6 +100,44 @@ For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 Now, when you run `Update-DependentLogic`, data-access code will be generated for your database.
 
 
+### Deploying Your System
+
+This section is more theoretical than practical since it's generally not a good practice to deploy enterprise software by hand, and without a continuous integration infrastructure.
+
+1.	In the Package Manager Console, run `ExportLogic`.
+
+2.	Somehow copy the exported logic and configuration to the server.
+
+3.	Create and initialize a database using the appropriate steps above. The database name should be slightly different; replace `Dev` or `_dev` with the short name of your installation from the configuration file. Also, for SQL Server, grant the `NETWORK SERVICE` account reader/writer access to the database.
+
+4.	Set up an IIS web site or virtual directory that points at the appropriate folder in the logic that you copied to the server in step 2. Run the application pool as `NETWORK SERVICE`.
+
+Some of the EWL developers use an internal product called the EWL System Manager, which builds, tests, and deploys EWL systems automatically. It's like an ultra-opinionated version of Heroku or AppHarbor. It can be run in the cloud or on-premises. [Let us know in the forum](https://community.enterpriseweblibrary.org/) if you are interested in using this.
+
+
+## Documentation
+
+Our documentation is included in this repository, in the Documentation directory. See the [table of contents](Documentation/TableOfContents.md).
+
+
+## Support
+
+
+###	Q & A
+
+We use the [enterprise-web-library tag](http://stackoverflow.com/questions/tagged/enterprise-web-library) on Stack Overflow for all Q&A. Please post your questions there.
+
+
+### Community Forum
+
+Visit our [Community Forum](https://community.enterpriseweblibrary.org/), a place for EWL developers to hang out and talk about whatever is on their mind.
+
+
+### Bug Reports and Feature Requests
+
+We currently use an internal task tracker, but please create an issue on GitHub if you encounter a bug or have a feature request.
+
+
 ## Contributing
 
 Code contributions are welcome! We will accept easily-mergeable changes as quickly as possible. We're working on writing up some detailed expectations, but for now, please refer to the opening section of the [excellent Roslyn contribution page](https://github.com/dotnet/roslyn/wiki/Contributing-Code) and read [Don't "Push" Your Pull Requests](http://www.igvita.com/2011/12/19/dont-push-your-pull-requests/).
