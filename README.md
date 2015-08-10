@@ -71,17 +71,20 @@ For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
 	```SQL
 	USE Master
 
-	CREATE DATABASE DatabaseName ON (
-	NAME = Data,
-			FILENAME = 'Path\DatabaseNameData.mdf',
-			SIZE = 100MB,
-			FILEGROWTH = 15% )
-	LOG ON
-	( NAME = Log,
-			FILENAME = 'Path\DatabaseNameLog.ldf',
-			SIZE = 10MB,
-			MAXSIZE = 1000MB,
-			FILEGROWTH = 100MB );
+	CREATE DATABASE DatabaseName
+	ON (
+		NAME = Data,
+		FILENAME = 'Path\DatabaseNameData.mdf',
+		SIZE = 100MB,
+		FILEGROWTH = 15%
+	)
+	LOG ON (
+		NAME = Log,
+		FILENAME = 'Path\DatabaseNameLog.ldf',
+		SIZE = 10MB,
+		MAXSIZE = 1000MB,
+		FILEGROWTH = 100MB
+	);
 	GO
 	```
 
