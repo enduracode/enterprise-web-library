@@ -166,7 +166,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void WriteGetLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
 			writer.WriteLine( "private static InlineDbCommandCondition getLatestRevisionsCondition() {" );
-			writer.WriteLine( "var provider = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
+			writer.WriteLine( "var provider = RevisionHistoryStatics.SystemProvider;" );
 			writer.WriteLine( "return new InCondition( \"" + revisionIdColumn + "\", provider.GetLatestRevisionsQuery() );" );
 			writer.WriteLine( "}" );
 		}

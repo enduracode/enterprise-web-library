@@ -449,7 +449,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 			if( isRevisionHistoryClass ) {
-				writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
+				writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 				writer.WriteLine( getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
 				writer.WriteLine(
 					"revisionHistorySetup.InsertRevision( System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn ) +
@@ -522,7 +522,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine(
 				"private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions ) {" );
 
-			writer.WriteLine( "var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;" );
+			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 
 			writer.WriteLine(
 				"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn.Name + "\".ToSingleElementArray(), \"FROM " + tableName + "\", false );" );

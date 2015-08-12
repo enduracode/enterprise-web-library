@@ -5,11 +5,11 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Humanizer;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -485,7 +485,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 				if( AppTools.User != null )
 					userId = AppTools.User.UserId;
 
-				var revisionHistorySetup = (RevisionHistoryProvider)DataAccessStatics.SystemProvider;
+				var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;
 				userTransactionId = revisionHistorySetup.GetNextMainSequenceValue();
 				revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, DateTime.Now, userId );
 			}
