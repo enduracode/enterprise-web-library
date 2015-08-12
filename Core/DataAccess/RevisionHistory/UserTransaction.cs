@@ -1,4 +1,5 @@
 ﻿using System;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
@@ -27,6 +28,13 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// Gets the transaction's date/time.
 		/// </summary>
 		public DateTime TransactionDateTime { get { return transactionDateTime; } }
+
+		public string LocalTransactionDateAndTimeString {
+			get {
+				var localDateAndTime = TransactionDateTime;
+				return "{0}, {1}".FormatWith( localDateAndTime.ToDayMonthYearString( false ), localDateAndTime.ToHourAndMinuteString() );
+			}
+		}
 
 		/// <summary>
 		/// Gets the transaction's user ID.
