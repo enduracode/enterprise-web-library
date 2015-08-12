@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.IO;
+using MimeTypes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -89,7 +90,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 
 			var mediaTypeOverride = EwfApp.Instance.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
-			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.MimeTypeMap.GetMimeType( extension );
+			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.GetMimeType( extension );
 
 			Func<string> cacheKeyGetter = () => staticFileInfo.GetUrl( false, false, false );
 			EwfSafeResponseWriter responseWriter;
