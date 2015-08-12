@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Retrieves the revision with the specified ID.
 		/// </summary>
-		Revision GetRevision( int revisionId );
+		RevisionRow GetRevision( int revisionId );
 
 		/// <summary>
 		/// Inserts a new revision with the specified parameters.

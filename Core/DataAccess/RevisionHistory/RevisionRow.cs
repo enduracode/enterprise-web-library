@@ -1,16 +1,16 @@
-namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
+﻿namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
-	/// Represents a revision of a data entity.
+	/// A revision of a data entity.
 	/// </summary>
-	public class Revision {
+	public class RevisionRow {
 		private readonly int revisionId;
 		private readonly int latestRevisionId;
 		private readonly int userTransactionId;
 
 		/// <summary>
-		/// Creates a revision object.
+		/// Creates a revision row object.
 		/// </summary>
-		public Revision( int revisionId, int latestRevisionId, int userTransactionId ) {
+		public RevisionRow( int revisionId, int latestRevisionId, int userTransactionId ) {
 			this.revisionId = revisionId;
 			this.latestRevisionId = latestRevisionId;
 			this.userTransactionId = userTransactionId;
