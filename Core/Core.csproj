@@ -169,6 +169,7 @@
     <Compile Include="DataAccess\RetrievalCaching\TableRetrievalQueryCache.cs" />
     <Compile Include="DataAccess\RetrievalCaching\VersionedRowDataCache.cs" />
     <Compile Include="DataAccess\RevisionHistory\Revision.cs" />
+    <Compile Include="DataAccess\RevisionHistory\RevisionDelta.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionHistoryProvider.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionHistoryStatics.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionRow.cs" />
