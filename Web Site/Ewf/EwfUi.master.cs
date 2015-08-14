@@ -422,7 +422,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
 			return from actionButtonSetup in actionButtonSetups
-			       let actionControl = actionButtonSetup.BuildButton( text => new TextActionControlStyle( text ), false )
+			       let actionControl = actionButtonSetup.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false )
 			       let asEwfLink = actionControl as EwfLink
 			       where asEwfLink == null || asEwfLink.UserCanNavigateToDestination()
 			       select actionControl;
@@ -433,9 +433,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() ) {
 					var first = from i in contentFootActions.Take( 1 )
-					            select i.BuildButton( text => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large ), true );
+					            select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large, icon: icon ), true );
 					var remaining = from i in contentFootActions.Skip( 1 )
-					                select i.BuildButton( text => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large ), false );
+					                select
+						                i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large, icon: icon ), false );
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
 				else if( EwfPage.Instance.IsAutoDataUpdater )

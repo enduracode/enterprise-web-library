@@ -10,29 +10,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// NOTE: This method will be deleted when RSIS Goal 925 is completed. But continue using it when necessary since there is no good alternative.
 		/// </summary>
-		public static ActionButtonSetup CreateWithUrl( string text, ResourceInfo resourceInfo ) {
-			return new ActionButtonSetup( text, new EwfLink( resourceInfo ) );
+		public static ActionButtonSetup CreateWithUrl( string text, ResourceInfo resourceInfo, ActionControlIcon icon = null ) {
+			return new ActionButtonSetup( text, new EwfLink( resourceInfo ), icon: icon );
 		}
 
 		private readonly ActionControl actionControl;
 		private readonly string text;
+		private readonly ActionControlIcon icon;
 
 		/// <summary>
 		/// Creates an action button with the given behavior (ActionControl). The ActionControlStyle of the given actionControl will be overwritten.
 		/// </summary>
-		public ActionButtonSetup( string text, ActionControl actionControl ) {
+		public ActionButtonSetup( string text, ActionControl actionControl, ActionControlIcon icon = null ) {
 			this.text = text;
+			this.icon = icon;
 			this.actionControl = actionControl;
 		}
 
 		/// <summary>
-		/// EWL use only.
+		/// EWF use only.
 		/// </summary>
-		/// <param name="styleSelector">Passes the text of this ActionButtonSetup, returns an ActionControlStyle</param>
-		/// <param name="usesSubmitBehavior"></param>
-		/// <returns></returns>
-		public Control BuildButton( Func<string, ActionControlStyle> styleSelector, bool usesSubmitBehavior ) {
-			actionControl.ActionControlStyle = styleSelector( text );
+		public Control BuildButton( Func<string, ActionControlIcon, ActionControlStyle> styleSelector, bool usesSubmitBehavior ) {
+			actionControl.ActionControlStyle = styleSelector( text, icon );
 
 			// NOTE: These control-type-specific blocks suck. We're basically admitting we have this factored wrong (still).
 			var asPostBackButton = actionControl as PostBackButton;

@@ -348,7 +348,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// Action links
 			foreach( var actionLink in actionLinks ) {
 				captionTable.Visible = true;
-				actionLinkStack.AddControls( actionLink.BuildButton( text => new TextActionControlStyle( text ), false ) );
+				actionLinkStack.AddControls( actionLink.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false ) );
 			}
 
 			// Selected row actions
