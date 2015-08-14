@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<systemDevelopmentConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemDevelopment">
+	<LibraryNamespaceAndAssemblyName>@@BaseNamespace.Library</LibraryNamespaceAndAssemblyName>
+	<webProjects>
+		<project>
+			<name>Web Site</name>
+			<NamespaceAndAssemblyName>@@BaseNamespace.WebSite</NamespaceAndAssemblyName>
+		</project>
+	</webProjects>
+</systemDevelopmentConfiguration>

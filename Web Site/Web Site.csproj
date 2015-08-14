@@ -74,6 +74,13 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateSystem.aspx.cs">
+      <DependentUpon>CreateSystem.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateSystem.aspx.designer.cs">
+      <DependentUpon>CreateSystem.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\Admin\BasicTests.aspx.cs">
       <DependentUpon>BasicTests.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -446,6 +453,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CreateSystem.aspx" />
     <Content Include="Ewf\Admin\BasicTests.aspx" />
     <Content Include="Ewf\Admin\EditUser.aspx" />
     <Content Include="Ewf\Admin\EntitySetup.ascx" />

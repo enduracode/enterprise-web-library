@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<systemGeneralConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemGeneral">
+	<systemName>@@SystemName</systemName>
+	<systemShortName>@@SystemShortName</systemShortName>
+	<WebApplications>
+		<Application>
+			<Name>Web Site</Name>
+			<SupportsSecureConnections>false</SupportsSecureConnections>
+		</Application>
+	</WebApplications>
+	<developers>
+		<developer>
+			<Name>John Doe</Name>
+			<EmailAddress>john.doe@example.com</EmailAddress>
+		</developer>
+	</developers>
+</systemGeneralConfiguration>
