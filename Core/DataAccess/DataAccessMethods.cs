@@ -2,11 +2,11 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
-using Humanizer;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
@@ -90,7 +90,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 			}
 
 			if( databaseInfo is MySqlInfo ) {
-				if( innerException.Message.Contains( "Unable to connect to any of the specified MySQL hosts" ) )
+				if( new[] { "ERROR 2003", "Unable to connect to any of the specified MySQL hosts" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
 				if( innerException.Message.Contains( "ERROR 2013" ) ) {
 					customMessage =
