@@ -2,11 +2,11 @@
 	/// <summary>
 	/// A revision and the previous revision, if one exists.
 	/// </summary>
-	public class RevisionDelta<UserType, EntityRevisionType> where UserType: class {
-		private readonly Revision<UserType, EntityRevisionType> newRevision;
-		private readonly Revision<UserType, EntityRevisionType> oldRevision;
+	public class RevisionDelta<RevisionDataType, UserType> where UserType: class {
+		private readonly Revision<RevisionDataType, UserType> newRevision;
+		private readonly Revision<RevisionDataType, UserType> oldRevision;
 
-		internal RevisionDelta( Revision<UserType, EntityRevisionType> newRevision, Revision<UserType, EntityRevisionType> oldRevision ) {
+		internal RevisionDelta( Revision<RevisionDataType, UserType> newRevision, Revision<RevisionDataType, UserType> oldRevision ) {
 			this.newRevision = newRevision;
 			this.oldRevision = oldRevision;
 		}
@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Gets the revision.
 		/// </summary>
-		public Revision<UserType, EntityRevisionType> New { get { return newRevision; } }
+		public Revision<RevisionDataType, UserType> New { get { return newRevision; } }
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
@@ -24,6 +24,6 @@
 		/// <summary>
 		/// Gets the previous revision, if one exists.
 		/// </summary>
-		public Revision<UserType, EntityRevisionType> Old { get { return oldRevision; } }
+		public Revision<RevisionDataType, UserType> Old { get { return oldRevision; } }
 	}
 }

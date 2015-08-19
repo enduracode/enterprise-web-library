@@ -1,24 +1,29 @@
 ﻿namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
-	/// A revision of a data entity, including its transaction and user.
+	/// A revision of a conceptual data entity, including its transaction and user.
 	/// </summary>
-	public class Revision<UserType, EntityRevisionType> where UserType: class {
-		private readonly RevisionRow revisionRow;
+	public class Revision<RevisionDataType, UserType> where UserType: class {
+		private readonly int entityId;
+		private readonly RevisionDataType revisionData;
 		private readonly UserTransaction transaction;
 		private readonly UserType user;
-		private readonly EntityRevisionType entityRevision;
 
-		internal Revision( RevisionRow revisionRow, UserTransaction transaction, UserType user, EntityRevisionType entityRevision ) {
-			this.revisionRow = revisionRow;
+		internal Revision( int entityId, RevisionDataType revisionData, UserTransaction transaction, UserType user ) {
+			this.entityId = entityId;
+			this.revisionData = revisionData;
 			this.transaction = transaction;
 			this.user = user;
-			this.entityRevision = entityRevision;
 		}
 
 		/// <summary>
-		/// Gets the revision row.
+		/// Gets the revision's conceptual entity ID, i.e. the latest-revision ID of the main entity.
 		/// </summary>
-		public RevisionRow RevisionRow { get { return revisionRow; } }
+		public int EntityId { get { return entityId; } }
+
+		/// <summary>
+		/// Gets the entity-specific revision data. This can be null you are using that to represent no data for this particular revision.
+		/// </summary>
+		public RevisionDataType RevisionData { get { return revisionData; } }
 
 		/// <summary>
 		/// Gets the transaction.
@@ -29,10 +34,5 @@
 		/// Gets the user.
 		/// </summary>
 		public UserType User { get { return user; } }
-
-		/// <summary>
-		/// Gets the entity-specific revision data. This can be null if the entity allows deletion but does not use a deleted flag.
-		/// </summary>
-		public EntityRevisionType EntityRevision { get { return entityRevision; } }
 	}
 }
