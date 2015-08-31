@@ -79,20 +79,22 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 				                         into grouping select Tuple.Create( grouping.Key, grouping.AsEnumerable() )
 			                         select new { entityId, revisionIdListAndRevisionSetPairs, transaction, user };
 
-			var lastConceptualRevisionsByEntityId = new Dictionary<int, ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>>();
 			var conceptualRevisions = new List<ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>>();
+			var lastConceptualRevisionsByEntityId = new Dictionary<int, ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>>();
 			foreach( var entityTransaction in entityTransactions ) {
-				ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> lastRevision;
-				lastConceptualRevisionsByEntityId.TryGetValue( entityTransaction.entityId, out lastRevision );
-				conceptualRevisions.Add(
-					new ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>(
-						entityTransaction.entityId,
-						entityTransaction.revisionIdListAndRevisionSetPairs,
-						conceptualEntityStateSelector,
-						conceptualEntityDeltaSelector,
-						entityTransaction.transaction,
-						entityTransaction.user,
-						lastRevision ) );
+				ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> lastConceptualRevision;
+				lastConceptualRevisionsByEntityId.TryGetValue( entityTransaction.entityId, out lastConceptualRevision );
+
+				var newConceptualRevision = new ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>(
+					entityTransaction.entityId,
+					entityTransaction.revisionIdListAndRevisionSetPairs,
+					conceptualEntityStateSelector,
+					conceptualEntityDeltaSelector,
+					entityTransaction.transaction,
+					entityTransaction.user,
+					lastConceptualRevision );
+				conceptualRevisions.Add( newConceptualRevision );
+				lastConceptualRevisionsByEntityId[ entityTransaction.entityId ] = newConceptualRevision;
 			}
 
 			return conceptualRevisions.AsEnumerable().Reverse();
