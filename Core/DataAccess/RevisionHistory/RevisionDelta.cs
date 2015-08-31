@@ -23,7 +23,7 @@
 		/// <summary>
 		/// Gets whether there is a previous revision.
 		/// </summary>
-		public bool HasOld { get { return EwlStatics.AreEqual( oldRevision, default( RevisionDataType ) ); } }
+		public bool HasOld { get { return !EwlStatics.AreEqual( oldRevision, default( RevisionDataType ) ); } }
 
 		/// <summary>
 		/// Gets the previous revision, if one exists.
