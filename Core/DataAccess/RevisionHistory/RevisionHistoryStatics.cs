@@ -106,11 +106,11 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			}
 		}
 
-		internal static Dictionary<int, RevisionRow> RevisionsById {
+		internal static Dictionary<int, Revision> RevisionsById {
 			get { return DataAccessState.Current.GetCacheValue( "ewl-revisionsById", () => SystemProvider.GetAllRevisions().ToDictionary( i => i.RevisionId ) ); }
 		}
 
-		internal static ILookup<int, RevisionRow> RevisionsByLatestRevisionId {
+		internal static ILookup<int, Revision> RevisionsByLatestRevisionId {
 			get {
 				return DataAccessState.Current.GetCacheValue(
 					"ewl-revisionsByLatestRevisionId",
@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			}
 		}
 
-		internal static ILookup<int, RevisionRow> RevisionsByUserTransactionId {
+		internal static ILookup<int, Revision> RevisionsByUserTransactionId {
 			get {
 				return DataAccessState.Current.GetCacheValue(
 					"ewl-revisionsByUserTransactionId",

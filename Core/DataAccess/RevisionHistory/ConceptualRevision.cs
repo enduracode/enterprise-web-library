@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	public class ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> {
 		private readonly int conceptualEntityId;
 
-		private readonly Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>>>
+		private readonly Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>
 			revisionDictionariesByEntityType;
 
 		private readonly Lazy<ConceptualEntityStateType> conceptualEntityState;
@@ -20,17 +20,17 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		private readonly ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> previous;
 
 		internal ConceptualRevision(
-			int conceptualEntityId, IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<RevisionRow>>> entityTypeAndRevisionSetPairs,
+			int conceptualEntityId, IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>> entityTypeAndRevisionSetPairs,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, ConceptualEntityDeltaType> conceptualEntityDeltaSelector,
 			UserTransaction transaction, UserType user, ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> previous ) {
 			this.conceptualEntityId = conceptualEntityId;
 
 			var cachedEntityTypeAndRevisionSetPairs =
-				new Lazy<IReadOnlyCollection<Tuple<IEnumerable<RevisionId>, IEnumerable<RevisionRow>>>>( () => entityTypeAndRevisionSetPairs.ToImmutableArray() );
+				new Lazy<IReadOnlyCollection<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>>>( () => entityTypeAndRevisionSetPairs.ToImmutableArray() );
 
 			revisionDictionariesByEntityType =
-				new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>>>(
+				new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
 					() => {
 						if( previous == null ) {
 							return cachedEntityTypeAndRevisionSetPairs.Value.ToImmutableDictionary(
@@ -39,18 +39,18 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 						}
 
 						var newEntityTypeAndRevisionDictionaryPairs =
-							new List<KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>>>(
+							new List<KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
 								cachedEntityTypeAndRevisionSetPairs.Value.Count );
 						foreach( var entityTypeAndRevisions in cachedEntityTypeAndRevisionSetPairs.Value ) {
 							var revisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault(
 								entityTypeAndRevisions.Item1,
-								ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>.Empty );
+								ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty );
 							newEntityTypeAndRevisionDictionaryPairs.Add(
-								new KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>>(
+								new KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>(
 									entityTypeAndRevisions.Item1,
 									revisionsByLatestRevisionId.SetItems(
 										entityTypeAndRevisions.Item2.Select(
-											i => new KeyValuePair<int, Tuple<RevisionRow, UserTransaction, UserType>>( i.LatestRevisionId, Tuple.Create( i, transaction, user ) ) ) ) ) );
+											i => new KeyValuePair<int, Tuple<Revision, UserTransaction, UserType>>( i.LatestRevisionId, Tuple.Create( i, transaction, user ) ) ) ) ) );
 						}
 						return previous.revisionDictionariesByEntityType.Value.SetItems( newEntityTypeAndRevisionDictionaryPairs );
 					} );
@@ -60,16 +60,16 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 					() =>
 					conceptualEntityStateSelector(
 						entityType =>
-						revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<RevisionRow, UserTransaction, UserType>>.Empty )
+						revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty )
 							.Values.Select( i => i.Item1.RevisionId ) ) );
 
 			conceptualEntityDelta = new Lazy<ConceptualEntityDeltaType>(
 				() => {
 					var revisionSetsByEntityType = cachedEntityTypeAndRevisionSetPairs.Value.ToImmutableDictionary( i => i.Item1, i => i.Item2 );
 					return conceptualEntityDeltaSelector(
-						entityType => revisionSetsByEntityType.GetValueOrDefault( entityType, new RevisionRow[ 0 ] ).Select(
+						entityType => revisionSetsByEntityType.GetValueOrDefault( entityType, new Revision[ 0 ] ).Select(
 							revision => {
-								Tuple<RevisionRow, UserTransaction, UserType> previousRevisionAndTransactionAndUser = null;
+								Tuple<Revision, UserTransaction, UserType> previousRevisionAndTransactionAndUser = null;
 								if( previous != null ) {
 									var previousRevisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType );
 									if( previousRevisionsByLatestRevisionId != null )

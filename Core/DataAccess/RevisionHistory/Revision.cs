@@ -2,7 +2,7 @@
 	/// <summary>
 	/// A revision of a data entity.
 	/// </summary>
-	public class RevisionRow {
+	public class Revision {
 		private readonly int revisionId;
 		private readonly int latestRevisionId;
 		private readonly int userTransactionId;
@@ -10,7 +10,7 @@
 		/// <summary>
 		/// Creates a revision row object.
 		/// </summary>
-		public RevisionRow( int revisionId, int latestRevisionId, int userTransactionId ) {
+		public Revision( int revisionId, int latestRevisionId, int userTransactionId ) {
 			this.revisionId = revisionId;
 			this.latestRevisionId = latestRevisionId;
 			this.userTransactionId = userTransactionId;

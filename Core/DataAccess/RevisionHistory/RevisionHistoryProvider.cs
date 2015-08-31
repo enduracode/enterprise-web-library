@@ -19,12 +19,12 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Retrieves all revisions.
 		/// </summary>
-		IEnumerable<RevisionRow> GetAllRevisions();
+		IEnumerable<Revision> GetAllRevisions();
 
 		/// <summary>
 		/// Retrieves the revision with the specified ID.
 		/// </summary>
-		RevisionRow GetRevision( int revisionId );
+		Revision GetRevision( int revisionId );
 
 		/// <summary>
 		/// Inserts a new revision with the specified parameters.
