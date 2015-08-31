@@ -8,7 +8,7 @@
 		private readonly int userTransactionId;
 
 		/// <summary>
-		/// Creates a revision row object.
+		/// Creates a revision object.
 		/// </summary>
 		public Revision( int revisionId, int latestRevisionId, int userTransactionId ) {
 			this.revisionId = revisionId;
