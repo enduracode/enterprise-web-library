@@ -2,28 +2,42 @@
 	/// <summary>
 	/// A revision and the previous revision, if one exists.
 	/// </summary>
-	public class RevisionDelta<RevisionDataType, UserType> where UserType: class {
-		private readonly Revision<RevisionDataType, UserType> newRevision;
-		private readonly Revision<RevisionDataType, UserType> oldRevision;
+	public class RevisionDelta<RevisionDataType, UserType> {
+		private readonly RevisionDataType newRevision;
+		private readonly RevisionDataType oldRevision;
+		private readonly UserTransaction oldTransaction;
+		private readonly UserType oldUser;
 
-		internal RevisionDelta( Revision<RevisionDataType, UserType> newRevision, Revision<RevisionDataType, UserType> oldRevision ) {
+		internal RevisionDelta( RevisionDataType newRevision, RevisionDataType oldRevision, UserTransaction oldTransaction, UserType oldUser ) {
 			this.newRevision = newRevision;
 			this.oldRevision = oldRevision;
+			this.oldTransaction = oldTransaction;
+			this.oldUser = oldUser;
 		}
 
 		/// <summary>
 		/// Gets the revision.
 		/// </summary>
-		public Revision<RevisionDataType, UserType> New { get { return newRevision; } }
+		public RevisionDataType New { get { return newRevision; } }
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
 		/// </summary>
-		public bool HasOld { get { return oldRevision != null; } }
+		public bool HasOld { get { return EwlStatics.AreEqual( oldRevision, default( RevisionDataType ) ); } }
 
 		/// <summary>
 		/// Gets the previous revision, if one exists.
 		/// </summary>
-		public Revision<RevisionDataType, UserType> Old { get { return oldRevision; } }
+		public RevisionDataType Old { get { return oldRevision; } }
+
+		/// <summary>
+		/// Gets the previous revision's transaction, if a previous revision exists.
+		/// </summary>
+		public UserTransaction OldTransaction { get { return oldTransaction; } }
+
+		/// <summary>
+		/// Gets the previous revision's user, if a previous revision exists.
+		/// </summary>
+		public UserType OldUser { get { return oldUser; } }
 	}
 }

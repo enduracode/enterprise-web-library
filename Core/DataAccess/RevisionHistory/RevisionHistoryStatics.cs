@@ -11,61 +11,91 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 
 		/// <summary>
 		/// Returns a list of the revisions that are related to the specified revision IDs. This includes those that match the IDs as well as all others that share
-		/// a latest revision ID. The list is ordered by transaction date/time, descending.
+		/// a latest revision ID. The revisions within a user transaction that have the same "conceptual entity" ID are grouped into a single "conceptual revision".
+		/// The list is ordered by transaction date/time, descending.
 		/// </summary>
-		/// <param name="revisionIds"></param>
-		/// <param name="conceptualRevisionSelector">A function that takes the revision rows linked to a user transaction and returns an unordered list of
-		/// conceptual revision objects. If all revision rows are for a single database entity, this can probably be a simple Select call that projects the rows
-		/// into conceptual revisions, using the latest-revision ID as the entity ID and an entity-specific row object as the revision data. On the other hand, if
-		/// multiple database entities are involved, you should declare and initialize a hash set of conceptual-entity IDs as well as a dictionary for each
-		/// entity-specific type, keyed by conceptual-entity ID. Iterate through the revisions, and for each, add the conceptual-entity ID to the hash set and the
-		/// entity-specific row object to the appropriate dictionary. Then project the conceptual-entity IDs into conceptual revisions, probably using an anonymous
-		/// class for the revision data such that all entity-specific row objects can be included, and return the result. Do not pass or return null.</param>
+		/// <param name="entityTypeRevisionIdLists">The revision-ID lists. Use a separate list for each database entity type that you would like to aggregate into
+		/// the conceptual revisions.</param>
+		/// <param name="conceptualEntityStateSelector">A function that uses a revision-ID lookup function to return a representation of the conceptual entity's
+		/// state at a particular revision. The lookup function takes one of the revision-ID-list references from the first parameter and returns the set of
+		/// revision IDs for that entity type that were effective at the revision. You can use this to create a conceptual-entity-specific object, maybe with an
+		/// anonymous class. If it's convenient, you may also return null if there is no data at the revision. Do not pass null.</param>
+		/// <param name="conceptualEntityDeltaSelector">A function that uses a revision-ID lookup function to return a representation of the conceptual entity's
+		/// changes in a particular revision. The lookup function takes one of the revision-ID-list references from the first parameter and returns a set of
+		/// revision-ID-delta objects for that entity type. You can use this to create a conceptual-entity-specific object, maybe with an anonymous class. If it's
+		/// convenient, you may also return null if there is no data for the revision. Do not pass null.</param>
 		/// <param name="userSelector">A function that takes a user ID and returns the corresponding user object. Do not pass null.</param>
-		public static IEnumerable<Revision<RevisionDataType, UserType>> GetAllRelatedRevisions<RevisionDataType, UserType>(
-			IEnumerable<int> revisionIds, Func<IEnumerable<RevisionRow>, IEnumerable<ConceptualRevision<RevisionDataType>>> conceptualRevisionSelector,
-			Func<int, UserType> userSelector ) where UserType: class {
+		public static IEnumerable<ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>> GetAllRelatedRevisions
+			<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>(
+			IEnumerable<IEnumerable<RevisionId>> entityTypeRevisionIdLists,
+			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
+			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, ConceptualEntityDeltaType> conceptualEntityDeltaSelector,
+			Func<int, UserType> userSelector ) {
 			var revisionsById = RevisionsById;
-			var latestRevisionIds = new HashSet<int>( revisionIds.Select( i => revisionsById[ i ].LatestRevisionId ) );
+			var entityIdsAndRevisionIdListsByLatestRevisionId = entityTypeRevisionIdLists.SelectMany(
+				i => i,
+				( list, revisionId ) => {
+					var revision = revisionsById[ revisionId.Id ];
+					return new { revision.LatestRevisionId, ConceptualEntityId = revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList = list };
+				} ).GroupBy( i => i.LatestRevisionId ).ToDictionary(
+					i => i.Key,
+					grouping => {
+						var cachedGrouping = grouping.ToArray();
+						return Tuple.Create(
+							new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
+							new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
+					} );
 
 			// Pre-filter user transactions to avoid having to sort the full list below.
 			var revisionsByLatestRevisionId = RevisionsByLatestRevisionId;
 			var userTransactionsById = UserTransactionsById;
 			var userTransactions =
-				latestRevisionIds.SelectMany( i => revisionsByLatestRevisionId[ i ] ).Select( i => userTransactionsById[ i.UserTransactionId ] ).Distinct();
+				entityIdsAndRevisionIdListsByLatestRevisionId.Keys.SelectMany( i => revisionsByLatestRevisionId[ i ] )
+					.Select( i => userTransactionsById[ i.UserTransactionId ] )
+					.Distinct();
 
 			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
-			return from userTransaction in from i in userTransactions orderby i.TransactionDateTime descending, i.UserTransactionId descending select i
-			       let user = userTransaction.UserId.HasValue ? userSelector( userTransaction.UserId.Value ) : null
-			       let revisionRows = revisionsByUserTransactionId[ userTransaction.UserTransactionId ].Where( i => latestRevisionIds.Contains( i.LatestRevisionId ) )
-			       from conceptualRevision in conceptualRevisionSelector( revisionRows ).OrderBy( i => i.EntityId )
-			       select new Revision<RevisionDataType, UserType>( conceptualRevision.EntityId, conceptualRevision.RevisionData, userTransaction, user );
-		}
+			var entityIdAndRevisionIdListGetter = new Func<int, Tuple<HashSet<int>, HashSet<IEnumerable<RevisionId>>>>(
+				latestRevisionId => {
+					Tuple<HashSet<int>, HashSet<IEnumerable<RevisionId>>> val;
+					entityIdsAndRevisionIdListsByLatestRevisionId.TryGetValue( latestRevisionId, out val );
+					return val;
+				} );
+			var entityTransactions = from transaction in from i in userTransactions orderby i.TransactionDateTime, i.UserTransactionId select i
+			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default( UserType )
+			                         from entityGrouping in from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
+			                                                let entityIdsAndRevisionIdLists = entityIdAndRevisionIdListGetter( revision.LatestRevisionId )
+			                                                where entityIdsAndRevisionIdLists != null
+			                                                from entityId in entityIdsAndRevisionIdLists.Item1
+			                                                from revisionIdList in entityIdsAndRevisionIdLists.Item2
+			                                                group new { revisionIdList, revision } by entityId
+			                                                into grouping
+			                                                orderby grouping.Key
+			                                                select grouping
+			                         let entityId = entityGrouping.Key
+			                         let revisionIdListAndRevisionSetPairs =
+				                         from i in entityGrouping
+				                         group i.revision by i.revisionIdList
+				                         into grouping select Tuple.Create( grouping.Key, grouping.AsEnumerable() )
+			                         select new { entityId, revisionIdListAndRevisionSetPairs, transaction, user };
 
-		/// <summary>
-		/// Returns a revision-delta object based on the specified revision and the previous revision, if one exists.
-		/// </summary>
-		/// <param name="revisionId"></param>
-		/// <param name="revisionDataSelector">A function that takes a revision ID and returns the entity-specific revision data. Do not pass null. Return null if
-		/// there is no entity-specific data, which can happen if the entity allows deletion but does not use a deleted flag.</param>
-		/// <param name="userSelector">A function that takes a user ID and returns the corresponding user object. Do not pass null.</param>
-		public static RevisionDelta<RevisionDataType, UserType> GetRevisionDelta<RevisionDataType, UserType>(
-			int revisionId, Func<int, RevisionDataType> revisionDataSelector, Func<int, UserType> userSelector ) where UserType: class {
-			var revisions =
-				GetAllRelatedRevisions(
-					revisionId.ToSingleElementArray(),
-					revisionRows => revisionRows.Select( i => ConceptualRevision.Create( i.LatestRevisionId, i.RevisionId ) ),
-					userSelector ).ToArray();
-			var revisionIndex =
-				revisions.Select( ( revision, index ) => new { revision, index } ).Where( i => i.revision.RevisionData == revisionId ).Select( i => i.index ).Single();
-			var newRev = revisions[ revisionIndex ];
-			var oldRev = revisionIndex + 1 < revisions.Count() ? revisions[ revisionIndex + 1 ] : null;
-			return
-				new RevisionDelta<RevisionDataType, UserType>(
-					new Revision<RevisionDataType, UserType>( newRev.EntityId, revisionDataSelector( newRev.RevisionData ), newRev.Transaction, newRev.User ),
-					oldRev != null
-						? new Revision<RevisionDataType, UserType>( oldRev.EntityId, revisionDataSelector( oldRev.RevisionData ), oldRev.Transaction, oldRev.User )
-						: null );
+			var lastConceptualRevisionsByEntityId = new Dictionary<int, ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>>();
+			var conceptualRevisions = new List<ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>>();
+			foreach( var entityTransaction in entityTransactions ) {
+				ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> lastRevision;
+				lastConceptualRevisionsByEntityId.TryGetValue( entityTransaction.entityId, out lastRevision );
+				conceptualRevisions.Add(
+					new ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>(
+						entityTransaction.entityId,
+						entityTransaction.revisionIdListAndRevisionSetPairs,
+						conceptualEntityStateSelector,
+						conceptualEntityDeltaSelector,
+						entityTransaction.transaction,
+						entityTransaction.user,
+						lastRevision ) );
+			}
+
+			return conceptualRevisions.AsEnumerable().Reverse();
 		}
 
 		internal static Dictionary<int, UserTransaction> UserTransactionsById {
