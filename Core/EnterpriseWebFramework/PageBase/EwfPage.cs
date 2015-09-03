@@ -180,27 +180,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( requestState.StaticRegionContents == null ||
 			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
 			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
-				DataAccessState.Current.DisableCache();
-				try {
-					if( !ConfigurationStatics.MachineIsStandbyServer ) {
-						EwfApp.Instance.ExecutePageViewDataModifications();
-						if( AppRequestState.Instance.UserAccessible ) {
-							if( AppTools.User != null )
-								updateLastPageRequestTimeForUser( AppTools.User );
-							if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
-								updateLastPageRequestTimeForUser( AppRequestState.Instance.ImpersonatorUser );
-						}
-						executePageViewDataModifications();
+				var modMethods = new List<Action>();
+				if( !ConfigurationStatics.MachineIsStandbyServer ) {
+					modMethods.Add( EwfApp.Instance.GetPageViewDataModificationMethod() );
+					if( AppRequestState.Instance.UserAccessible ) {
+						if( AppTools.User != null )
+							modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
+						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+							modMethods.Add( getLastPageRequestTimeUpdateMethod( AppRequestState.Instance.ImpersonatorUser ) );
 					}
-					AppRequestState.AddNonTransactionalModificationMethod(
-						() => {
-							StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
-							statusMessages.Clear();
-						} );
-					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+					modMethods.Add( getPageViewDataModificationMethod() );
 				}
-				finally {
-					DataAccessState.Current.ResetCache();
+				modMethods = modMethods.Where( i => i != null ).ToList();
+
+				if( modMethods.Any() ) {
+					DataAccessState.Current.DisableCache();
+					try {
+						foreach( var i in modMethods )
+							i();
+						AppRequestState.AddNonTransactionalModificationMethod(
+							() => {
+								StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
+								statusMessages.Clear();
+							} );
+						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+					}
+					finally {
+						DataAccessState.Current.ResetCache();
+					}
 				}
 
 				// Re-create info objects. A big reason to do this is that some info objects execute database queries or other code in order to prime the data-access
@@ -285,11 +292,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
 		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 		/// </summary>
-		private void updateLastPageRequestTimeForUser( User user ) {
+		private Action getLastPageRequestTimeUpdateMethod( User user ) {
 			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
 			// rapidly assigning tasks to one another in the System Manager or similar situations.
 			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
-				return;
+				return null;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
 			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
@@ -302,52 +309,57 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( userGetter ) : userGetter();
 				} );
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
-				return;
+				return null;
 
-			Action userUpdater = () => {
-				var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-				if( FormsAuthStatics.FormsAuthEnabled ) {
-					var formsAuthCapableUser = (FormsAuthCapableUser)user;
-					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-						user.UserId,
-						user.Email,
-						user.Role.RoleId,
-						DateTime.Now,
-						formsAuthCapableUser.Salt,
-						formsAuthCapableUser.SaltedPassword,
-						formsAuthCapableUser.MustChangePassword );
+			return () => {
+				Action userUpdater = () => {
+					var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+					if( FormsAuthStatics.FormsAuthEnabled ) {
+						var formsAuthCapableUser = (FormsAuthCapableUser)user;
+						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+							user.UserId,
+							user.Email,
+							user.Role.RoleId,
+							DateTime.Now,
+							formsAuthCapableUser.Salt,
+							formsAuthCapableUser.SaltedPassword,
+							formsAuthCapableUser.MustChangePassword );
+					}
+					else if( externalAuthProvider != null )
+						externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+				};
+				if( ConfigurationStatics.DatabaseExists ) {
+					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+						() => {
+							try {
+								userUpdater();
+							}
+							catch( DbConcurrencyException ) {
+								// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
+								// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
+								// need to get an error email if the update fails.
+								throw new DoNotCommitException();
+							}
+						} );
 				}
-				else if( externalAuthProvider != null )
-					externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+				else
+					userUpdater();
 			};
-			if( ConfigurationStatics.DatabaseExists ) {
-				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-					() => {
-						try {
-							userUpdater();
-						}
-						catch( DbConcurrencyException ) {
-							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
-							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
-							// need to get an error email if the update fails.
-							throw new DoNotCommitException();
-						}
-					} );
-			}
-			else
-				userUpdater();
 		}
 
-		// The warning below also appears on EwfApp.ExecutePageViewDataModifications.
+		// The warning below also appears on EwfApp.GetPageViewDataModificationMethod.
 		/// <summary>
-		/// Executes all data modifications that happen simply because of a request and require no other action by the user.
+		/// Returns a method that executes data modifications that happen simply because of a request and require no other action by the user. Returns null if there
+		/// are no modifications, which can improve page performance since the data-access cache does not need to be reset.
 		/// 
 		/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
 		/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
 		/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
 		/// concurrency errors by modifying data that affects the rendering of the page.
 		/// </summary>
-		protected virtual void executePageViewDataModifications() {}
+		protected virtual Action getPageViewDataModificationMethod() {
+			return null;
+		}
 
 		/// <summary>
 		/// EWF use only.
