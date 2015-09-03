@@ -33,6 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine(
 				"ParametersModificationBase EntitySetupBase.ParametersModificationAsBaseType { get { return " +
 				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
+			WebMetaLogicStatics.WriteClearInfoMethod( writer, "void EntitySetupBase." );
 			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod( writer, requiredParameters, optionalParameters, "void EntitySetupBase.", "" );
 			WebMetaLogicStatics.WriteCreateInfoFromNewParameterValuesMethod( writer, requiredParameters, optionalParameters, "internal Info ", "" );
 			writer.WriteLine( "}" );

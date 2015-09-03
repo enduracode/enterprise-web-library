@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
@@ -57,6 +56,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					continue;
 				generateCodeForWebItemsInFolder( writer, webProjectPath, subFolderPath, webProjectConfiguration );
 			}
+		}
+
+		internal static void WriteClearInfoMethod( TextWriter writer, string methodNamePrefix ) {
+			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "learInfo() {" );
+			writer.WriteLine( "info = null;" );
+			writer.WriteLine( "}" );
 		}
 
 		internal static void WriteCreateInfoFromQueryStringMethod(

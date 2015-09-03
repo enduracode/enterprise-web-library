@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class Page {
@@ -37,6 +36,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
 				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
 			writeInitEntitySetupMethod( writer );
+			WebMetaLogicStatics.WriteClearInfoMethod( writer, "protected override void " );
 			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod(
 				writer,
 				requiredParameters,

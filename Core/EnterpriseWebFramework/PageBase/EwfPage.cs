@@ -114,7 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				//
 				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs. We probably
 				// should only do this on GET requests since we don't want to wipe out post backs.
-				if( InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request ) )
+				if( connectionSecurityIncorrect )
 					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
 			}
 			finally {
@@ -148,11 +148,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Loads the entity display setup for the page, if one exists.
 		/// </summary>
 		protected abstract void initEntitySetup();
-
-		/// <summary>
-		/// Creates the info object for this page based on the query parameters of the request.
-		/// </summary>
-		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
 		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
@@ -207,6 +202,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				finally {
 					DataAccessState.Current.ResetCache();
 				}
+
+				// Re-create info objects. A big reason to do this is that some info objects execute database queries or other code in order to prime the data-access
+				// cache. The code above resets the cache and we want to re-prime it right away.
+				if( EsAsBaseType != null )
+					EsAsBaseType.ClearInfo();
+				clearInfo();
+				AppRequestState.Instance.UserDisabledByPage = true;
+				try {
+					if( EsAsBaseType != null )
+						EsAsBaseType.CreateInfoFromQueryString();
+					createInfoFromQueryString();
+					if( connectionSecurityIncorrect )
+						throw getPossibleDeveloperMistakeException( "The connection security of the page changed after page-view data modifications." );
+				}
+				finally {
+					AppRequestState.Instance.UserDisabledByPage = false;
+				}
+				if( !InfoAsBaseType.UserCanAccessResource || InfoAsBaseType.AlternativeMode is DisabledResourceMode )
+					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
 			}
 
 			onLoadData();
@@ -334,6 +348,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// concurrency errors by modifying data that affects the rendering of the page.
 		/// </summary>
 		protected virtual void executePageViewDataModifications() {}
+
+		/// <summary>
+		/// EWF use only.
+		/// </summary>
+		protected abstract void clearInfo();
+
+		/// <summary>
+		/// Creates the info object for this page based on the query parameters of the request.
+		/// </summary>
+		protected abstract void createInfoFromQueryString();
+
+		private bool connectionSecurityIncorrect { get { return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request ); } }
 
 		/// <summary>
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
