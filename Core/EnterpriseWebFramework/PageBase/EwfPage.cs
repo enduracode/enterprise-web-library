@@ -293,9 +293,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 		/// </summary>
 		private Action getLastPageRequestTimeUpdateMethod( User user ) {
-			// Only update the request time if it's been more than a minute since we did it last. This can dramatically reduce concurrency issues caused by people
-			// rapidly assigning tasks to one another in the System Manager or similar situations.
-			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 1 ) )
+			// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
+			// people rapidly assigning tasks to one another in the System Manager or similar situations.
+			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 60 ) )
 				return null;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
