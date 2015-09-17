@@ -38,6 +38,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal static void WriteConstructorAndHelperMethods(
 			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter, bool isEsInfo ) {
+			// It's important to force the cache to be enabled in the constructor since info objects are often created in post-back-action getters.
+
 			writeConstructorDocComments( writer, requiredParameters );
 			var constructorAndInitialParameterArguments = "( " +
 			                                              StringTools.ConcatenateWithDelimiter(
@@ -47,6 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				                                              optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
 				                                              !isEsInfo ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 			writer.WriteLine( "internal Info" + constructorAndInitialParameterArguments );
+			writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
 
 			// Initialize required parameter fields. We want to create and call this method even if there are no parameters so that non-generated Info constructors can still
 			// call it and remain resistant to changes.
@@ -62,6 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			// Call init.
 			writer.WriteLine( "init();" );
 
+			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
 
 			// Declare partial helper methods that will be called by the constructor.
