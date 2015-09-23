@@ -160,6 +160,13 @@
     <Compile Include="Ewf\PreBuiltResponse.aspx.designer.cs">
       <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Ewf\UserManagement\ConfirmPasswordReset.aspx.cs">
+      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Ewf\UserManagement\ConfirmPasswordReset.aspx.designer.cs">
+      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Ewf\UserManagement\SelectUser.aspx.cs">
       <DependentUpon>SelectUser.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -354,20 +361,6 @@
     <Compile Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx.designer.cs">
       <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx.designer.cs">
-      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\Public\EntitySetup.ascx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\Public\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\UserManagement\LogIn.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>LogIn.aspx</DependentUpon>
@@ -478,6 +471,7 @@
     <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
+    <Content Include="Ewf\UserManagement\ConfirmPasswordReset.aspx" />
     <Content Include="Ewf\UserManagement\SelectUser.aspx" />
     <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Darker.svg" />
     <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Lighter.svg" />
@@ -604,8 +598,6 @@
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
     <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
-    <Content Include="Ewf\UserManagement\Public\ConfirmPasswordReset.aspx" />
-    <Content Include="Ewf\UserManagement\Public\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\LogIn.aspx" />
     <Content Include="Test.css" />
   </ItemGroup>
