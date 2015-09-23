@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
@@ -6,9 +7,19 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// </summary>
 	public interface RevisionHistoryProvider: SystemDataAccessProvider {
 		/// <summary>
+		/// Retrieves all user transactions.
+		/// </summary>
+		IEnumerable<UserTransaction> GetAllUserTransactions();
+
+		/// <summary>
 		/// Inserts a new user transaction and returns the ID.
 		/// </summary>
 		void InsertUserTransaction( int userTransactionId, DateTime transactionDateTime, int? userId );
+
+		/// <summary>
+		/// Retrieves all revisions.
+		/// </summary>
+		IEnumerable<Revision> GetAllRevisions();
 
 		/// <summary>
 		/// Retrieves the revision with the specified ID.

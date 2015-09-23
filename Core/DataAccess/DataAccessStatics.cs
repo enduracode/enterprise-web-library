@@ -4,7 +4,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DatabaseSpecification;
 
 namespace EnterpriseWebLibrary.DataAccess {
-	public class DataAccessStatics {
+	internal static class DataAccessStatics {
 		private const string providerName = "DataAccess";
 		private static SystemDataAccessProvider provider;
 		private static IEnumerable<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases;
@@ -20,10 +20,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 				                                                 : new DatabaseInfo[ 0 ];
 		}
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static SystemDataAccessProvider SystemProvider {
+		internal static SystemDataAccessProvider SystemProvider {
 			get {
 				if( provider == null )
 					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );

@@ -1,6 +1,6 @@
-namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
+﻿namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
-	/// Represents a revision of a data entity.
+	/// A revision of a data entity.
 	/// </summary>
 	public class Revision {
 		private readonly int revisionId;
