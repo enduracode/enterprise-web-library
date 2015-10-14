@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Compilation;
+using System.Web.Http;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
@@ -51,13 +52,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => {
 						EwfConfigurationStatics.Init();
 
+						GlobalConfiguration.Configure( WebApiStatics.ConfigureWebApi );
+
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
 						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
 						var metaLogicFactory =
-							globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as
-							AppMetaLogicFactory;
+							globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as AppMetaLogicFactory;
 						if( metaLogicFactory == null )
 							throw new ApplicationException( "Meta logic factory not found." );
 						EwfApp.Init( globalType, metaLogicFactory );
