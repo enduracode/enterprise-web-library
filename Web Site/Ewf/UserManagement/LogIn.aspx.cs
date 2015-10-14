@@ -1,6 +1,5 @@
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.Public;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
@@ -74,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
 			if( userLocal == null )
 				throw new DataModificationException( getUnregisteredEmailMessage() );
-			return new PostBackAction( ConfirmPasswordReset.GetInfo( info.ReturnUrl, userLocal.UserId ) );
+			return new PostBackAction( ConfirmPasswordReset.GetInfo( userLocal.Email, info.ReturnUrl ) );
 		}
 
 		private string getUnregisteredEmailMessage() {
