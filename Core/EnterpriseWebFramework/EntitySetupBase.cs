@@ -14,6 +14,11 @@
 		ParametersModificationBase ParametersModificationAsBaseType { get; }
 
 		/// <summary>
+		/// EWF use only.
+		/// </summary>
+		void ClearInfo();
+
+		/// <summary>
 		/// Creates the info object for this entity setup based on the query parameters of the request.
 		/// </summary>
 		void CreateInfoFromQueryString();
