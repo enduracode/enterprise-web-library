@@ -92,7 +92,8 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static void CleanUpStatics() {
 			try {
-				globalInitializer.CleanUpStatics();
+				if( globalInitializer != null )
+					globalInitializer.CleanUpStatics();
 
 				AppMemoryCache.CleanUp();
 			}
