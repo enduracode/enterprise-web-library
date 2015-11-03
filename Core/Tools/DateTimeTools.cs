@@ -21,15 +21,15 @@ namespace EnterpriseWebLibrary {
 		/// Formats the date portion of the specified date/time in "day month year" style, e.g. 5 Apr 2008. Returns stringIfNull if the
 		/// specified date/time is null.
 		/// </summary>
-		public static string ToDayMonthYearString( this DateTime? dateTime, string stringIfNull, bool useLeadingZero ) {
-			return dateTime.HasValue ? ToDayMonthYearString( dateTime.Value, useLeadingZero ) : stringIfNull;
+		public static string ToDayMonthYearString( this DateTime? dateTime, string stringIfNull, bool useLeadingZero, bool includeDayOfWeek = false ) {
+			return dateTime.HasValue ? ToDayMonthYearString( dateTime.Value, useLeadingZero, includeDayOfWeek: includeDayOfWeek ) : stringIfNull;
 		}
 
 		/// <summary>
 		/// Formats the date portion of the specified date/time in "day month year" style, e.g. 5 Apr 2008.
 		/// </summary>
-		public static string ToDayMonthYearString( this DateTime dateTime, bool useLeadingZero ) {
-			return dateTime.ToString( useLeadingZero ? dayMonthYearFormatLz : dayMonthYearFormat );
+		public static string ToDayMonthYearString( this DateTime dateTime, bool useLeadingZero, bool includeDayOfWeek = false ) {
+			return dateTime.ToString( ( includeDayOfWeek ? "ddd, " : "" ) + ( useLeadingZero ? dayMonthYearFormatLz : dayMonthYearFormat ) );
 		}
 
 		/// <summary>
