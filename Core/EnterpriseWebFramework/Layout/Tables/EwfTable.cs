@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -362,87 +363,89 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
-				Visible = false;
-				return;
+			using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
+				if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
+					Visible = false;
+					return;
+				}
+
+				SetUpTableAndCaption( this, style, classes, caption, subCaption );
+
+				var visibleItemGroupsAndItems = new List<KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>>();
+				foreach( var itemGroup in itemGroups ) {
+					var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Value.Count ) ).Select( i => i() );
+					visibleItemGroupsAndItems.Add( new KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>( itemGroup, visibleItems.ToList() ) );
+					if( visibleItemGroupsAndItems.Sum( i => i.Value.Count ) == CurrentItemLimit )
+						break;
+				}
+
+				var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Value ) );
+				if( !fields.Any() )
+					fields = new EwfTableField().ToSingleElementArray();
+
+				addColumnSpecifications( fields );
+
+				var allVisibleItems = new List<EwfTableItem>();
+
+				var headRows =
+					buildRows(
+						getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
+						Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+						null,
+						false,
+						null,
+						null,
+						allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
+				if( headRows.Any() )
+					Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
+
+				for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
+					var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
+
+					var groupHeadItems = new List<EwfTableItem>();
+					// NOTE: Set up group-level general actions. EwfTableItemGroup.GetGroupHeadItem( int visibleItemsInGroup )
+					// NOTE: Set up group-level check box selection (if enabled) and group-level check box actions (if they exist). Make sure all items in the group have identical lists. EwfTableItemGroup.GetGroupItemActionsItem()
+					// NOTE: Check box actions should show an error if clicked and no items are selected; this caused confusion in M+Vision.
+					// NOTE: Combine the above into one method that returns a list of items.
+
+					var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Value.Count ) % 2 == 1;
+					Controls.Add(
+						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+							buildRows( groupHeadItems, Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(), null, true, null, null, allVisibleItems )
+								.Concat( buildRows( groupAndItems.Value, fields, useContrastForFirstRow, false, null, null, allVisibleItems ) ) ) );
+				}
+
+				var itemCount = itemGroups.Sum( i => i.Items.Count );
+				if( CurrentItemLimit < itemCount ) {
+					var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
+					var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
+					var button =
+						new PostBackButton(
+							PostBack.CreateFull(
+								id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+								firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
+							new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+							usesSubmitBehavior: false );
+					var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
+					var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
+					Controls.Add(
+						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+							buildRows(
+								item.ToSingleElementArray().ToList(),
+								Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+								useContrast,
+								false,
+								null,
+								null,
+								allVisibleItems ) ) );
+				}
+
+				// Assert that every visible item in the table has the same number of cells and store a data structure for below.
+				var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Length );
+
+				if( !disableEmptyFieldDetection )
+					AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 			}
-
-			SetUpTableAndCaption( this, style, classes, caption, subCaption );
-
-			var visibleItemGroupsAndItems = new List<KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>>();
-			foreach( var itemGroup in itemGroups ) {
-				var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Value.Count ) ).Select( i => i() );
-				visibleItemGroupsAndItems.Add( new KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>( itemGroup, visibleItems.ToList() ) );
-				if( visibleItemGroupsAndItems.Sum( i => i.Value.Count ) == CurrentItemLimit )
-					break;
-			}
-
-			var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Value ) );
-			if( !fields.Any() )
-				fields = new EwfTableField().ToSingleElementArray();
-
-			addColumnSpecifications( fields );
-
-			var allVisibleItems = new List<EwfTableItem>();
-
-			var headRows =
-				buildRows(
-					getItemLimitingAndGeneralActionsItem( fields.Length ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
-					Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-					null,
-					false,
-					null,
-					null,
-					allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
-			if( headRows.Any() )
-				Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
-
-			for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
-				var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
-
-				var groupHeadItems = new List<EwfTableItem>();
-				// NOTE: Set up group-level general actions. EwfTableItemGroup.GetGroupHeadItem( int visibleItemsInGroup )
-				// NOTE: Set up group-level check box selection (if enabled) and group-level check box actions (if they exist). Make sure all items in the group have identical lists. EwfTableItemGroup.GetGroupItemActionsItem()
-				// NOTE: Check box actions should show an error if clicked and no items are selected; this caused confusion in M+Vision.
-				// NOTE: Combine the above into one method that returns a list of items.
-
-				var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Value.Count ) % 2 == 1;
-				Controls.Add(
-					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-						buildRows( groupHeadItems, Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(), null, true, null, null, allVisibleItems )
-							.Concat( buildRows( groupAndItems.Value, fields, useContrastForFirstRow, false, null, null, allVisibleItems ) ) ) );
-			}
-
-			var itemCount = itemGroups.Sum( i => i.Items.Count );
-			if( CurrentItemLimit < itemCount ) {
-				var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
-				var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
-				var button =
-					new PostBackButton(
-						PostBack.CreateFull(
-							id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-							firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
-						new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-						usesSubmitBehavior: false );
-				var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
-				var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
-				Controls.Add(
-					new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-						buildRows(
-							item.ToSingleElementArray().ToList(),
-							Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-							useContrast,
-							false,
-							null,
-							null,
-							allVisibleItems ) ) );
-			}
-
-			// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-			var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Length );
-
-			if( !disableEmptyFieldDetection )
-				AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 		}
 
 		private void addColumnSpecifications( EwfTableField[] fields ) {

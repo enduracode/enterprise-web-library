@@ -520,10 +520,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					InfoAsBaseType.ResourceFullName ) );
 
 			Form.Controls.Add( etherealPlace = new PlaceHolder() );
-			if( EsAsBaseType != null )
-				EsAsBaseType.LoadData();
-			loadData();
-			loadDataForControlAndChildren( this );
+			if( EsAsBaseType != null ) {
+				using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
+					EsAsBaseType.LoadData();
+			}
+			using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
+				loadData();
+			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
+				loadDataForControlAndChildren( this );
 
 			foreach( var i in controlTreeValidations )
 				i();
