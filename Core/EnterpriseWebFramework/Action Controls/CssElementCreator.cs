@@ -30,13 +30,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
 			const string actionless = ":not([href]):not([" + JsWritingMethods.onclick + "])";
 			var normal = Tuple.Create( ":not(:focus):not(:hover):not(:active)", ":not(:visited)" );
+			var normalWithoutNotVisited = Tuple.Create( ":not(:focus):not(:hover):not(:active)", "" ); // seems to fix an issue in which IE 11 ignores background-color
 			var visited = Tuple.Create( ":visited:not(:focus):not(:hover):not(:active)", "" );
 			var focus = Tuple.Create( ":focus:not(:active)", "" );
 			var focusNoHover = Tuple.Create( ":focus:not(:hover):not(:active)", "" );
 			var hover = Tuple.Create( ":hover:not(:active)", "" );
 			var active = Tuple.Create( ":active", "" );
 
-			yield return getStateElement( baseName, "AllStates", "", "", styleSelectors, null, actionless, normal, visited, focus, focusNoHover, hover, active );
+			yield return
+				getStateElement(
+					baseName,
+					"AllStates",
+					"",
+					"",
+					styleSelectors,
+					null,
+					actionless,
+					normal,
+					normalWithoutNotVisited,
+					visited,
+					focus,
+					focusNoHover,
+					hover,
+					active );
 			yield return getStateElement( baseName, "ActionlessState", "", "", styleSelectors, null, actionless );
 
 			foreach( var newContent in new bool?[] { null, false, true } ) {
@@ -50,6 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						newContent,
 						null,
 						normal,
+						normalWithoutNotVisited,
 						visited,
 						focus,
 						focusNoHover,
