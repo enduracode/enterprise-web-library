@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
@@ -46,8 +45,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 		public int CompareTo( InlineDbCommandColumnValue other ) {
 			if( other == null )
 				return 1;
-			var nameResult = StringComparer.InvariantCulture.Compare( columnName, other.columnName );
-			return nameResult != 0 ? nameResult : Comparer<DbParameterValue>.Default.Compare( value, other.value );
+			var nameResult = EwlStatics.Compare( columnName, other.columnName, comparer: StringComparer.InvariantCulture );
+			return nameResult != 0 ? nameResult : EwlStatics.Compare( value, other.value );
 		}
 	}
 }

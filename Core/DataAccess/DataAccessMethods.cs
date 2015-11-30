@@ -145,7 +145,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 		}
 
 		internal static int CompareCommandConditionTypes( InlineDbCommandCondition x, InlineDbCommandCondition y ) {
-			return StringComparer.InvariantCulture.Compare( x.GetType().Name, y.GetType().Name );
+			return EwlStatics.Compare( x.GetType().Name, y.GetType().Name, comparer: StringComparer.InvariantCulture );
 		}
 	}
 }

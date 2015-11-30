@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
@@ -51,8 +50,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 		public int CompareTo( DbParameterValue other ) {
 			if( other == null )
 				return 1;
-			var valueResult = Comparer<object>.Default.Compare( value, other.value );
-			return valueResult != 0 ? valueResult : StringComparer.InvariantCulture.Compare( dbTypeString, other.dbTypeString );
+			var valueResult = EwlStatics.Compare( value, other.value );
+			return valueResult != 0 ? valueResult : EwlStatics.Compare( dbTypeString, other.dbTypeString, comparer: StringComparer.InvariantCulture );
 		}
 	}
 }

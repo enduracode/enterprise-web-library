@@ -49,8 +49,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 			if( otherInCondition == null )
 				return DataAccessMethods.CompareCommandConditionTypes( this, other );
 
-			var columnNameResult = StringComparer.InvariantCulture.Compare( columnName, otherInCondition.columnName );
-			return columnNameResult != 0 ? columnNameResult : StringComparer.InvariantCulture.Compare( subQuery, otherInCondition.subQuery );
+			var columnNameResult = EwlStatics.Compare( columnName, otherInCondition.columnName, comparer: StringComparer.InvariantCulture );
+			return columnNameResult != 0 ? columnNameResult : EwlStatics.Compare( subQuery, otherInCondition.subQuery, comparer: StringComparer.InvariantCulture );
 		}
 	}
 }
