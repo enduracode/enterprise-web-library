@@ -31,6 +31,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					writer,
 					columns.AllColumns,
 					localWriter => {
+						if( !isRevisionHistoryTable )
+							return;
+						writer.WriteLine(
+							"public UserTransaction Transaction { get { return RevisionHistoryStatics.UserTransactionsById[ RevisionHistoryStatics.RevisionsById[ " +
+							EwlStatics.GetCSharpIdentifierSimple( columns.PrimaryKeyAndRevisionIdColumn.PascalCasedNameExceptForOracle ) + " ].UserTransactionId ]; } }" );
+					},
+					localWriter => {
 						if( !columns.DataColumns.Any() )
 							return;
 

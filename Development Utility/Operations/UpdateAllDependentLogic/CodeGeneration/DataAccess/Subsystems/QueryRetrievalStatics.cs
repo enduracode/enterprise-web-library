@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "public static partial class " + query.name + "Retrieval {" );
 
 				// Write nested classes.
-				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => { } );
+				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => { }, localWriter => { } );
 				writeCacheClass( writer, database, query );
 
 				writer.WriteLine( "private const string selectFromClause = @\"" + query.selectFromClause + " \";" );
