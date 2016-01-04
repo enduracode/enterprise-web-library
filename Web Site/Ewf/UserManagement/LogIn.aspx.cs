@@ -40,12 +40,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new EwfTextBox( "", masksCharacters: true ),
 						validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
 
-			registeredTable.AddItem(
-				new EwfTableItem(
-					new PlaceHolder().AddControlsReturnThis(
-						"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-						new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) )
-						.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+			if( FormsAuthStatics.PasswordResetEnabled ) {
+				registeredTable.AddItem(
+					new EwfTableItem(
+						new PlaceHolder().AddControlsReturnThis(
+							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
+							new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) )
+							.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+			}
+
 			ph.AddControlsReturnThis( registeredTable );
 
 			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();

@@ -288,6 +288,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Password Reset
 
 		/// <summary>
+		/// EWL use only.
+		/// </summary>
+		public static bool PasswordResetEnabled {
+			get {
+				string subject;
+				string bodyHtml;
+				SystemProvider.GetPasswordResetParams( "", "", out subject, out bodyHtml );
+				return subject.Any() || bodyHtml.Any();
+			}
+		}
+
+		/// <summary>
 		/// Resets the password of the user with the specified email address and sends a message with the new password to their email address. Do not call if the
 		/// system does not implement the forms authentication capable user management provider.
 		/// </summary>
