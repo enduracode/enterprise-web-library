@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
-using Humanizer;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
@@ -68,27 +68,34 @@ namespace EnterpriseWebLibrary.MailMerging {
 				}
 			}
 
-			// Since we have evaluated all merge fields, we can now assume that any remaining tags are invalid.
+			// Since we have evaluated all recognized merge fields, we can now assume that any remaining fields are invalid.
 			// NOTE: Valid merge fields that caused a MailMergingException above are incorrectly included in this message. Fix this when we switch to stateful parsing.
-			errors.AddRange( findInvalidTags( template ).Select( tag => "Merge field " + tag + " is invalid." ) );
+			errors.AddRange( getFieldsInTemplateString( template ).Select( i => "Merge field " + i + " is invalid." ) );
 
 			if( errors.Count > 0 )
 				throw new MailMergingException( errors.ToArray() );
 			return template;
 		}
 
-		private static IEnumerable<string> findInvalidTags( string template ) {
-			var tags = new List<string>();
+		/// <summary>
+		/// Gets a merge field name tree of the fields that exist in the specified template string.
+		/// </summary>
+		public static MergeFieldNameTree GetMergeFieldsInTemplateString( string template ) {
+			return new MergeFieldNameTree( getFieldsInTemplateString( template ) );
+		}
+
+		private static IEnumerable<string> getFieldsInTemplateString( string template ) {
+			var fields = new List<string>();
 			foreach( Match match in Regex.Matches( template, @"@@(\w+)", RegexOptions.Multiline ) ) {
 				foreach( Group group in match.Groups ) {
 					foreach( Capture capture in group.Captures ) {
 						// This makes sure it's not an empty capture and it's not the capture that contains the at signs.
 						if( capture.Value != "" && capture.Value.IndexOf( "@@" ) == -1 )
-							tags.Add( capture.Value );
+							fields.Add( capture.Value );
 					}
 				}
 			}
-			return tags;
+			return fields;
 		}
 
 		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
