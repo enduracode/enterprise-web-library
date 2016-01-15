@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using EnterpriseWebLibrary.DatabaseSpecification;
 
@@ -66,8 +65,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 
 		public bool Equals( InlineDbCommandCondition other ) {
 			var otherInequalityCondition = other as InequalityCondition;
-			return otherInequalityCondition != null && op == otherInequalityCondition.op &&
-			       EwlStatics.AreEqual( columnValue, otherInequalityCondition.columnValue );
+			return otherInequalityCondition != null && op == otherInequalityCondition.op && EwlStatics.AreEqual( columnValue, otherInequalityCondition.columnValue );
 		}
 
 		public override int GetHashCode() {
@@ -88,8 +86,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 			if( otherInequalityCondition == null )
 				return DataAccessMethods.CompareCommandConditionTypes( this, other );
 
-			var opResult = Comparer<Operator>.Default.Compare( op, otherInequalityCondition.op );
-			return opResult != 0 ? opResult : Comparer<InlineDbCommandColumnValue>.Default.Compare( columnValue, otherInequalityCondition.columnValue );
+			var opResult = EwlStatics.Compare( op, otherInequalityCondition.op );
+			return opResult != 0 ? opResult : EwlStatics.Compare( columnValue, otherInequalityCondition.columnValue );
 		}
 	}
 }

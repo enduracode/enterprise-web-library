@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions {
 	/// <summary>
@@ -96,11 +96,11 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 			if( otherLikeCondition == null )
 				return DataAccessMethods.CompareCommandConditionTypes( this, other );
 
-			var behaviorResult = Comparer<Behavior>.Default.Compare( behavior, otherLikeCondition.behavior );
+			var behaviorResult = EwlStatics.Compare( behavior, otherLikeCondition.behavior );
 			if( behaviorResult != 0 )
 				return behaviorResult;
-			var columnNameResult = StringComparer.InvariantCulture.Compare( columnName, otherLikeCondition.columnName );
-			return columnNameResult != 0 ? columnNameResult : StringComparer.InvariantCulture.Compare( searchTerm, otherLikeCondition.searchTerm );
+			var columnNameResult = EwlStatics.Compare( columnName, otherLikeCondition.columnName, comparer: StringComparer.InvariantCulture );
+			return columnNameResult != 0 ? columnNameResult : EwlStatics.Compare( searchTerm, otherLikeCondition.searchTerm, comparer: StringComparer.InvariantCulture );
 		}
 	}
 }

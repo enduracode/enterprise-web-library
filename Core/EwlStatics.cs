@@ -350,6 +350,15 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
+		/// Returns an integer indicating whether the first specified object precedes (negative value), follows (positive value), or occurs in the same position in
+		/// the sort order (zero) as the second specified object, according to the default sort-order comparer. If you are comparing strings, Microsoft recommends
+		/// that you use a StringComparer instead of the default comparer.
+		/// </summary>
+		public static int Compare<T>( T x, T y, IComparer<T> comparer = null ) {
+			return ( comparer ?? Comparer<T>.Default ).Compare( x, y );
+		}
+
+		/// <summary>
 		/// Returns the default value of the specified type.
 		/// </summary>
 		public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using EnterpriseWebLibrary.DatabaseSpecification;
 
@@ -58,7 +57,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 			if( otherEqualityCondition == null )
 				return DataAccessMethods.CompareCommandConditionTypes( this, other );
 
-			return Comparer<InlineDbCommandColumnValue>.Default.Compare( columnValue, otherEqualityCondition.columnValue );
+			return EwlStatics.Compare( columnValue, otherEqualityCondition.columnValue );
 		}
 	}
 }
