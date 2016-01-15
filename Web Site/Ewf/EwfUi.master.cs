@@ -81,8 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
 						new CssElement(
 							"UiTopErrorMessageControlListBlock",
-							ErrorMessageControlListBlockStatics.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass )
-								.ToArray() )
+							ListErrorDisplayStyle.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass ).ToArray() )
 					};
 			}
 
@@ -228,12 +227,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new[]
 						{
 							appLogoAndUserInfoControlOverrider != null ? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl() : getAppLogoAndUserInfoBlock(),
-							getGlobalNavBlock(), new ModificationErrorPlaceholder( null, getErrorMessageList )
-						}.Where( i => i != null ).ToArray() )
-					{
-						ClientIDMode = ClientIDMode.Static,
-						ID = CssElementCreator.GlobalBlockId
-					};
+							getGlobalNavBlock(),
+							new ModificationErrorPlaceholder(
+								null,
+								new ListErrorDisplayStyle( additionalClasses: CssElementCreator.TopErrorMessageListBlockCssClass.ToSingleElementArray() ) )
+						}.Where( i => i != null )
+						.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {
@@ -278,14 +277,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				{
 					CssClass = CssElementCreator.GlobalNavBlockCssClass
 				};
-		}
-
-		private IEnumerable<Control> getErrorMessageList( IEnumerable<string> errors ) {
-			if( !errors.Any() )
-				yield break;
-			var list = ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors );
-			list.CssClass = list.CssClass.ConcatenateWithSpace( CssElementCreator.TopErrorMessageListBlockCssClass );
-			yield return list;
 		}
 
 		private Control getEntityAndTopTabBlock() {

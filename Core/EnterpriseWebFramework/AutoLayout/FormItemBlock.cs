@@ -172,7 +172,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				i => {
 					var stack = ControlStack.Create( true );
 					if( i.Validation != null )
-						stack.AddModificationErrorItem( i.Validation, errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
+						stack.AddModificationErrorItem( i.Validation, new ListErrorDisplayStyle() );
 					stack.AddControls( i.Control );
 					return new EwfTableItem( i.Label, stack.ToCell( new TableCellSetup( textAlignment: i.TextAlignment ) ) );
 				} );

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web.UI;
+﻿using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -10,19 +8,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// don't end up being different from the way they were before the transfer.
 	public class ModificationErrorPlaceholder: Control, INamingContainer, ControlTreeDataLoader {
 		private readonly EwfValidation validation;
-		private readonly Func<IEnumerable<string>, IEnumerable<Control>> controlGetter;
+		private readonly ErrorDisplayStyle displayStyle;
 
 		/// <summary>
 		/// Creates a modification error placeholder for the specified validation, or for the top modification errors if no validation is passed.
 		/// </summary>
-		public ModificationErrorPlaceholder( EwfValidation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
+		public ModificationErrorPlaceholder( EwfValidation validation, ErrorDisplayStyle displayStyle ) {
 			this.validation = validation;
-			this.controlGetter = controlGetter;
+			this.displayStyle = displayStyle;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis(
-				controlGetter(
+				displayStyle.GetControls(
 					validation != null
 						? EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, "", validation )
 						: AppRequestState.Instance.EwfPageRequestState.TopModificationErrors ) );

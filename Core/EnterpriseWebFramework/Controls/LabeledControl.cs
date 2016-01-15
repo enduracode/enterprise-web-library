@@ -47,11 +47,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var controlStack = ControlStack.Create( false );
 			if( label != null )
 				controlStack.AddControls( label );
-			if( validation != null ) {
-				controlStack.AddModificationErrorItem(
-					validation,
-					errors => ErrorMessageControlListBlockStatics.CreateErrorMessageListBlock( errors ).ToSingleElementArray() );
-			}
+			if( validation != null )
+				controlStack.AddModificationErrorItem( validation, new ListErrorDisplayStyle() );
 			controlStack.AddControls( new PlaceHolder().AddControlsReturnThis( wrappedControls ) );
 			Controls.Add( controlStack );
 		}

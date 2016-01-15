@@ -105,13 +105,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Adds an item for the error messages from the specified validation. If there aren't any error messages, the control getter is not called and no item is
 		/// added.
 		/// </summary>
-		public void AddModificationErrorItem( EwfValidation validation, Func<IEnumerable<string>, IEnumerable<Control>> controlGetter ) {
+		public void AddModificationErrorItem( EwfValidation validation, ErrorDisplayStyle displayStyle ) {
 			items.Add(
 				Tuple.Create(
 					new Func<ControlListItem>(
 						() => {
 							var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
-							return new ControlListItem( errors.Any() ? controlGetter( errors ) : new Control[ 0 ] );
+							return new ControlListItem( displayStyle.GetControls( errors ) );
 						} ),
 					true ) );
 		}
