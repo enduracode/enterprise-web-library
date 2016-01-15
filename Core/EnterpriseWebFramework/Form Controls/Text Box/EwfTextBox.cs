@@ -5,8 +5,8 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.JavaScriptWriting;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -174,9 +174,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
 				postBack = EwfPage.Instance.DataUpdatePostBack;
 
-			if( postBack != null )
+			if( postBack != null && ( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
 				EwfPage.Instance.AddPostBack( postBack );
-			PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
+			if( !isTextarea )
+				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
 
 			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
 				PreRender += delegate {
