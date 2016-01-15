@@ -17,6 +17,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				if( User == null )
 					throw new ApplicationException( "emailAddress" );
 			}
+
+			protected override AlternativeResourceMode createAlternativeMode() {
+				return FormsAuthStatics.PasswordResetEnabled ? null : new DisabledResourceMode( "Password reset is disabled." );
+			}
 		}
 
 		protected override void loadData() {
