@@ -100,7 +100,10 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			return conceptualRevisions.AsEnumerable().Reverse();
 		}
 
-		internal static Dictionary<int, UserTransaction> UserTransactionsById {
+		/// <summary>
+		/// Get a dictionary of all transactions by ID.
+		/// </summary>
+		public static Dictionary<int, UserTransaction> UserTransactionsById {
 			get {
 				return DataAccessState.Current.GetCacheValue(
 					"ewl-userTransactionsById",
@@ -108,7 +111,10 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			}
 		}
 
-		internal static Dictionary<int, Revision> RevisionsById {
+		/// <summary>
+		/// Gets a dictionary of all revisions by ID.
+		/// </summary>
+		public static Dictionary<int, Revision> RevisionsById {
 			get { return DataAccessState.Current.GetCacheValue( "ewl-revisionsById", () => SystemProvider.GetAllRevisions().ToDictionary( i => i.RevisionId ) ); }
 		}
 

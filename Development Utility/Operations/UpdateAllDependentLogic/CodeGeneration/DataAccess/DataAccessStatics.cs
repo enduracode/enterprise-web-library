@@ -52,7 +52,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return cmd;
 		}
 
-		internal static void WriteRowClasses( TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> toModificationMethodWriter ) {
+		internal static void WriteRowClasses(
+			TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> transactionPropertyWriter, Action<TextWriter> toModificationMethodWriter ) {
 			// BasicRow
 
 			writer.WriteLine( "internal class BasicRow {" );
@@ -119,6 +120,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "return " + condition + ";" );
 			writer.WriteLine( "}" ); // Equals method
 
+			transactionPropertyWriter( writer );
 			toModificationMethodWriter( writer );
 
 			writer.WriteLine( "}" ); // class
