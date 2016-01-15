@@ -263,10 +263,13 @@
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
+    <Compile Include="EnterpriseWebFramework\Data Modification\ErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\EwfValidation.cs" />
     <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
-    <Compile Include="EnterpriseWebFramework\ErrorMessageControlListBlockStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display Styles\CustomErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display Styles\ListErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display Styles\SectionErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\EwfConfigurationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EwfInitializationOps.cs" />
     <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />

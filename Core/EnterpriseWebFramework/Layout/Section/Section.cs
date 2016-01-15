@@ -58,9 +58,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public Section( IEnumerable<Control> contentControls, SectionStyle style = SectionStyle.Normal ): this( "", contentControls, style: style ) {}
 
 		/// <summary>
-		/// Creates a section. Do not pass null for the heading.
+		/// Creates a section.
 		/// </summary>
-		/// <param name="heading">The section's heading.</param>
+		/// <param name="heading">The section's heading. Do not pass null.</param>
 		/// <param name="contentControls">The section's content.</param>
 		/// <param name="style">The section's style.</param>
 		/// <param name="postHeadingControls">Controls that follow the heading but are still part of the heading container.</param>
