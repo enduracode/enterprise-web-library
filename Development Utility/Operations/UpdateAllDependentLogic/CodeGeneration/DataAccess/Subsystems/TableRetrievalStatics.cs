@@ -74,8 +74,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					writeGetRowsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, true, true );
 				}
 
-				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
-					writeGetRowMatchingIdMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable );
+				writeGetRowMatchingPkMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable );
 
 				if( isRevisionHistoryTable )
 					DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn.Name );
@@ -200,10 +199,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeGetRowMatchingIdMethod(
+		private static void writeGetRowMatchingPkMethod(
 			DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool tableUsesRowVersionedCaching,
 			bool isRevisionHistoryTable ) {
-			writer.WriteLine( "public static Row GetRowMatchingId( " + tableColumns.KeyColumns.Single().DataTypeName + " id, bool returnNullIfNoMatch = false ) {" );
+			var pkIsId = tableColumns.KeyColumns.Count() == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
+			var methodName = pkIsId ? "GetRowMatchingId" : "GetRowMatchingPk";
+			var pkParameters = pkIsId
+				                   ? "{0} id".FormatWith( tableColumns.KeyColumns.Single().DataTypeName )
+				                   : StringTools.ConcatenateWithDelimiter(
+					                   ", ",
+					                   tableColumns.KeyColumns.Select( i => "{0} {1}".FormatWith( i.DataTypeName, i.CamelCasedName ) ).ToArray() );
+			writer.WriteLine( "public static Row " + methodName + "( " + pkParameters + ", bool returnNullIfNoMatch = false ) {" );
 			if( isSmallTable ) {
 				writer.WriteLine( "var cache = Cache.Current;" );
 				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToSingleElementArray()" : "new InlineDbCommandCondition[ 0 ]";
@@ -212,14 +218,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "} );" );
 
 				var rowsByPkExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
+				var pkTupleCreationArguments = pkIsId
+					                               ? "id"
+					                               : StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.CamelCasedName ).ToArray() );
 				writer.WriteLine( "if( !returnNullIfNoMatch )" );
-				writer.WriteLine( "return {0}[ System.Tuple.Create( id ) ];".FormatWith( rowsByPkExpression ) );
+				writer.WriteLine( "return {0}[ System.Tuple.Create( {1} ) ];".FormatWith( rowsByPkExpression, pkTupleCreationArguments ) );
 				writer.WriteLine( "Row row;" );
-				writer.WriteLine( "return {0}.TryGetValue( System.Tuple.Create( id ), out row ) ? row : null;".FormatWith( rowsByPkExpression ) );
+				writer.WriteLine( "return {0}.TryGetValue( System.Tuple.Create( {1} ), out row ) ? row : null;".FormatWith( rowsByPkExpression, pkTupleCreationArguments ) );
 			}
 			else {
 				writer.WriteLine(
-					"var rows = GetRows( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) + "( id ) );" );
+					"var rows = GetRows( {0} );".FormatWith(
+						pkIsId
+							? "new {0}( id )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) )
+							: StringTools.ConcatenateWithDelimiter(
+								", ",
+								tableColumns.KeyColumns.Select(
+									i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) ).ToArray() ) ) );
 				writer.WriteLine( "return returnNullIfNoMatch ? rows.SingleOrDefault() : rows.Single();" );
 			}
 			writer.WriteLine( "}" );
