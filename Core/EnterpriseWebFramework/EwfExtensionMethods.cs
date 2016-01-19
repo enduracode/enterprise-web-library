@@ -1,22 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Useful methods that require a web context.
 	/// </summary>
 	public static class EwfExtensionMethods {
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
-		public static EwfResponse GetExcelFileResponse( this ExcelFileWriter workbook, string fileNameWithoutExtension ) {
-			return new EwfResponse( () => fileNameWithoutExtension, () => workbook );
-		}
-
 		/// <summary>
 		/// Returns a System.Web.UI.WebControls.Literal that contains an HTML encoded version of this string.
 		/// // NOTE: This should be renamed to "ToControl."

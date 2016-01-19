@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
 using EnterpriseWebLibrary.MailMerging.RowTree;
@@ -96,16 +95,6 @@ namespace EnterpriseWebLibrary.MailMerging {
 				}
 			}
 			return fields;
-		}
-
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
-		public static EwfResponse CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, string inputFilePath ) {
-			return new EwfResponse( () => "MergedLetter", rowTree, ensureAllFieldsHaveValues, inputFilePath );
-		}
-
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
-		public static EwfResponse CreateMsWordDoc( MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) {
-			return new EwfResponse( () => "MergedLetter", rowTree, ensureAllFieldsHaveValues, inputStreamProvider );
 		}
 
 		/// <summary>
@@ -207,12 +196,6 @@ namespace EnterpriseWebLibrary.MailMerging {
 				foreach( var i in streams )
 					i.Dispose();
 			}
-		}
-
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use an EwfResponse constructor instead." ) ]
-		public static EwfResponse CreateExcelWorkbook(
-			MergeRowTree rowTree, IEnumerable<string> fieldNames, string fileNameWithoutExtension, bool useMsWordFieldNames = false ) {
-			return new EwfResponse( () => fileNameWithoutExtension, rowTree, fieldNames, useMsWordFieldNames: useMsWordFieldNames );
 		}
 
 		/// <summary>
