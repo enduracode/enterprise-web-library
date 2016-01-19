@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	public interface StrictFormsAuthUserManagementProvider: FormsAuthCapableUserManagementProvider {
 		/// <summary>
 		/// Performs actions immediately after authentication, which could include counting failed authentication attempts or preventing a user from logging in.
-		/// Only called if <see cref="user"/> is not null. Runs at modification time; it is safe to throw <see cref="DataModificationException"/> here.
+		/// Only called if user is not null. Runs at modification time; it is safe to throw <see cref="DataModificationException"/> here.
 		/// </summary>
 		void PostAuthenticate( FormsAuthCapableUser user, bool authenticationSuccessful );
 
