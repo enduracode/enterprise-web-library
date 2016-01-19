@@ -130,20 +130,4 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		bool IHttpHandler.IsReusable { get { return true; } }
 	}
-
-	[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticFileHandler class instead." ) ]
-	public class StaticCssHandler {
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticFileHandler class instead." ) ]
-		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return StaticFileHandler.GetUrlVersionString( dateAndTime );
-		}
-	}
-
-	[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticFileHandler class instead." ) ]
-	public class CssHandler {
-		[ Obsolete( "Guaranteed through 31 December 2014. Please use the StaticFileHandler class instead." ) ]
-		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return StaticFileHandler.GetUrlVersionString( dateAndTime );
-		}
-	}
 }
