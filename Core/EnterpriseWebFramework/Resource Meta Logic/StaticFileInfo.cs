@@ -54,7 +54,4 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract string appRelativeFilePath { get; }
 	}
-
-	[ Obsolete( "Guaranteed through 28 February 2015. Please use the StaticFileInfo class instead." ) ]
-	public abstract class StaticCssInfo: StaticFileInfo {}
 }
