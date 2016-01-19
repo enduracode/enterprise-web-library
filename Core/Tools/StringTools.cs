@@ -12,22 +12,6 @@ namespace EnterpriseWebLibrary {
 	/// Provides helpful string methods.
 	/// </summary>
 	public static class StringTools {
-		private static readonly char[] nonAlphaNumericCharacters =
-			{
-				'~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', '_', ',', '.', '/', '?', '<',
-				'>', '[', ']', '{', '}', '\\', '|'
-			};
-
-		private static readonly char[] numericCharacters = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' };
-
-		private static readonly char[] nonAlphaCharacters;
-
-		static StringTools() {
-			var list = new List<char>( nonAlphaNumericCharacters );
-			list.AddRange( numericCharacters );
-			nonAlphaCharacters = list.ToArray();
-		}
-
 		/// <summary>
 		/// Returns a two-element string array containing
 		/// the strings on either side of the given word (neither
@@ -146,44 +130,6 @@ namespace EnterpriseWebLibrary {
 			foreach( var character in characters )
 				text = text.Replace( character.ToString(), replacementString );
 			return text;
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphaCharacters instead." ) ]
-		public static string RemoveCommonNonAlphaCharacters( this string line ) {
-			return RemoveCharacters( line, nonAlphaCharacters );
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
-		public static string RemoveCommonNonAlphaNumericCharacters( this string line ) {
-			if( line == null )
-				return null;
-			return Regex.Replace( line, "[^a-z0-9\\s]", "", RegexOptions.IgnoreCase );
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphaCharactersWithWhiteSpace instead." ) ]
-		public static string ReplaceCommonNonAlphaCharactersWithWhitespace( this string text ) {
-			return ReplaceCharactersWithWhitespace( text, nonAlphaCharacters );
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use ReplaceNonAlphanumericCharactersWithWhiteSpace instead." ) ]
-		public static string ReplaceCommonNonAlphaNumericCharactersWithWhitespace( this string text ) {
-			return ReplaceCharactersWithWhitespace( text, nonAlphaNumericCharacters );
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphanumericCharacters instead." ) ]
-		public static string ReturnAlphaNumericOnlyString( this string line ) {
-			line = RemoveCommonNonAlphaNumericCharacters( line );
-			if( line == "" )
-				return null;
-			return line;
-		}
-
-		[ Obsolete( "Guaranteed through 31 August 2014. Please use RemoveNonAlphaCharacters instead." ) ]
-		public static string ReturnAlphaOnlyString( this string line ) {
-			line = RemoveCommonNonAlphaCharacters( line );
-			if( line == "" )
-				return null;
-			return line;
 		}
 
 		/// <summary>

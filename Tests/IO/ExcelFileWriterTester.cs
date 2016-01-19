@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Humanizer;
-using NUnit.Framework;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
+using NUnit.Framework;
 
 namespace EnterpriseWebLibrary.Tests.IO {
 	[ TestFixture ]
@@ -154,7 +153,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 					const string worksheetName = "Worksheet Name With Spaces";
 
 					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-					writer.AddWorksheet( worksheetName.RemoveCommonNonAlphaNumericCharacters() ).AddRowToWorksheet( "500", "5000", "5", "50" );
+					writer.AddWorksheet( worksheetName.RemoveNonAlphanumericCharacters() ).AddRowToWorksheet( "500", "5000", "5", "50" );
 
 					return "same_sheet_name_testing";
 				} );
