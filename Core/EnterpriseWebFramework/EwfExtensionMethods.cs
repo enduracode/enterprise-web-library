@@ -91,22 +91,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Converts a string to an EwfTableCell.
-		/// </summary>
-		[ Obsolete( "Guaranteed through 30 September 2014. Strings are implicitly converted to EwfTableCell." ) ]
-		public static EwfTableCell ToCell( this string text ) {
-			return new EwfTableCell( text );
-		}
-
-		/// <summary>
-		/// Converts a control to an EwfTableCell.
-		/// </summary>
-		[ Obsolete( "Guaranteed through 30 September 2014. Controls are implicitly converted to EwfTableCell." ) ]
-		public static EwfTableCell ToCell( this Control control ) {
-			return new EwfTableCell( control );
-		}
-
-		/// <summary>
 		/// Returns true if this request is secure. Always use this method instead of IsSecureConnection.
 		/// </summary>
 		public static bool IsSecure( this HttpRequest request ) {

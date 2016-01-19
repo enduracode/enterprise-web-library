@@ -269,13 +269,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			// Verify that this row has the right number of cells.
 			try {
-				if( cells.Sum( c => c.FieldSpan ) + previousRowColumnSpans.Sum( rcSpan => rcSpan.ColumnSpan ) != columnSetups.Count )
+				if( cells.Sum( c => c.Setup.FieldSpan ) + previousRowColumnSpans.Sum( rcSpan => rcSpan.ColumnSpan ) != columnSetups.Count )
 					throw new ApplicationException( "Row to be added has the wrong number of cells." );
 
 				// Despite that it would make no sense to do this and all latest browsers will draw tables incorrectly when this happens, I cannot find official documentation
 				// saying that it is wrong. NOTE: This check isn't as good as the logic we are going to add to EwfTableItemRemainingData (to ensure that the item has at
 				// least one cell) because it doesn't catch a case like two cells that each have a row span greater than one and together span all columns.
-				if( cells.Any( c => c.ItemSpan > 1 && c.FieldSpan == columnSetups.Count ) )
+				if( cells.Any( c => c.Setup.ItemSpan > 1 && c.Setup.FieldSpan == columnSetups.Count ) )
 					throw new ApplicationException( "Cell may not take up all columns and span multiple rows." );
 			}
 			catch( ApplicationException e ) {
@@ -290,8 +290,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			previousRowColumnSpans =
 				( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 )
 					.Concat(
-						cells.Where( c => c.ItemSpan != 1 )
-							.Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.ItemSpan - 1, ColumnSpan = rowSpanCell.FieldSpan } ) ) ).ToList();
+						cells.Where( c => c.Setup.ItemSpan != 1 )
+							.Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.Setup.ItemSpan - 1, ColumnSpan = rowSpanCell.Setup.FieldSpan } ) ) ).ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
 			TableOps.DrawRow( table, rowSetup, cellPlaceHolders, columnSetups, false );

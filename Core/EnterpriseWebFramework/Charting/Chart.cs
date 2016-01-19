@@ -6,10 +6,10 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using Humanizer;
-using JetBrains.Annotations;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -217,10 +217,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var table = new ColumnPrimaryTable(
 				firstDataFieldIndex: 1,
 				items:
-					new EwfTableItem( from i in setup.XAxisTitle.ToSingleElementArray().Concat( setup.Labels ) select i.ToCell() ).ToSingleElementArray()
+					new EwfTableItem( from i in setup.XAxisTitle.ToSingleElementArray().Concat( setup.Labels ) select (EwfTableCell)i ).ToSingleElementArray()
 						.Concat(
 							from series in seriesCollection
-							select new EwfTableItem( series.Name.ToCell().ToSingleElementArray().Concat( from i in series.Values select i.ToString().ToCell() ) ) ) );
+							select new EwfTableItem( ( (EwfTableCell)series.Name ).ToSingleElementArray().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
 			Controls.Add( table );
 
 			using( var writer = new StringWriter() ) {

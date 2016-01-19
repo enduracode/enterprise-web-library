@@ -31,8 +31,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private static TableCell buildCell( EwfTableCell ewfCell, RowSetup rowSetup, ColumnSetup columnSetup, bool tableIsColumnPrimary ) {
-			var colSpan = tableIsColumnPrimary ? ewfCell.ItemSpan : ewfCell.FieldSpan;
-			var rowSpan = tableIsColumnPrimary ? ewfCell.FieldSpan : ewfCell.ItemSpan;
+			var colSpan = tableIsColumnPrimary ? ewfCell.Setup.ItemSpan : ewfCell.Setup.FieldSpan;
+			var rowSpan = tableIsColumnPrimary ? ewfCell.Setup.FieldSpan : ewfCell.Setup.ItemSpan;
 
 			var underlyingCell = ( rowSetup.IsHeader || columnSetup.IsHeader ) ? new TableHeaderCell() : new TableCell();
 			underlyingCell.AddControlsReturnThis( ewfCell.Controls );
@@ -42,13 +42,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				" ",
 				EwfTable.CssElementCreator.AllCellAlignmentsClass,
 				columnSetup.CssClassOnAllCells,
-				ewfCell.CssClass );
-			if( ewfCell.ClickScript != null )
-				ewfCell.ClickScript.SetUpClickableControl( underlyingCell );
+				StringTools.ConcatenateWithDelimiter( " ", ewfCell.Setup.Classes.ToArray() ) );
+			if( ewfCell.Setup.ClickScript != null )
+				ewfCell.Setup.ClickScript.SetUpClickableControl( underlyingCell );
 
-			if( !ewfCell.ToolTip.IsNullOrWhiteSpace() || ewfCell.ToolTipControl != null || !columnSetup.ToolTipOnCells.IsNullOrWhiteSpace() ) {
-				var toolTipControl = ewfCell.ToolTipControl ??
-				                     ToolTip.GetToolTipTextControl( !ewfCell.ToolTip.IsNullOrWhiteSpace() ? ewfCell.ToolTip : columnSetup.ToolTipOnCells );
+			if( !ewfCell.Setup.ToolTip.IsNullOrWhiteSpace() || ewfCell.Setup.ToolTipControl != null || !columnSetup.ToolTipOnCells.IsNullOrWhiteSpace() ) {
+				var toolTipControl = ewfCell.Setup.ToolTipControl ??
+				                     ToolTip.GetToolTipTextControl( !ewfCell.Setup.ToolTip.IsNullOrWhiteSpace() ? ewfCell.Setup.ToolTip : columnSetup.ToolTipOnCells );
 				// NOTE: This comment is no longer accurate.
 				// It is very important that we add the tool tip to the cell so that the tool tip is hidden if the row/cell is hidden.
 				new ToolTip( toolTipControl, underlyingCell );
@@ -94,7 +94,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var potentialCellPlaceholderCountForItem = cellPlaceholdersForItem.Count( cellPlaceholder => cellPlaceholder != null );
 
 				// Add to that the number of cells this item will take up.
-				potentialCellPlaceholderCountForItem += itemCells.Sum( cell => cell.FieldSpan );
+				potentialCellPlaceholderCountForItem += itemCells.Sum( cell => cell.Setup.FieldSpan );
 
 				if( potentialCellPlaceholderCountForItem != fieldCount )
 					throw new ApplicationException( "Item to be added has " + potentialCellPlaceholderCountForItem + " cells, but should have " + fieldCount + " cells." );
@@ -104,14 +104,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				foreach( var cell in itemCells ) {
 					while( cellPlaceholdersForItem[ fieldIndex ] != null )
 						fieldIndex += 1;
-					for( var fieldSpanIndex = 0; fieldSpanIndex < cell.FieldSpan; fieldSpanIndex += 1 ) {
-						for( var itemSpanIndex = 0; itemSpanIndex < cell.ItemSpan; itemSpanIndex += 1 ) {
+					for( var fieldSpanIndex = 0; fieldSpanIndex < cell.Setup.FieldSpan; fieldSpanIndex += 1 ) {
+						for( var itemSpanIndex = 0; itemSpanIndex < cell.Setup.ItemSpan; itemSpanIndex += 1 ) {
 							if( itemIndex + itemSpanIndex >= cellPlaceholderListsForItems.Count )
 								addCellPlaceholderListForItem( cellPlaceholderListsForItems, fieldCount );
 							if( cellPlaceholderListsForItems[ itemIndex + itemSpanIndex ][ fieldIndex ] != null )
 								throw new ApplicationException( "Two cells spanning multiple fields and/or items have overlapped." );
 							cellPlaceholderListsForItems[ itemIndex + itemSpanIndex ][ fieldIndex ] = itemSpanIndex == 0 && fieldSpanIndex == 0
-								                                                                          ? cell as CellPlaceholder
+								                                                                          ? (CellPlaceholder)cell
 								                                                                          : new SpaceForMultiColOrRowCell();
 						}
 						fieldIndex += 1;
@@ -158,22 +158,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 									cellAndIndex => {
 										var cellControl = new WebControl( cellAndIndex.ColumnIndex < firstDataColumnIndex ? HtmlTextWriterTag.Th : HtmlTextWriterTag.Td );
 
-										var rowSpan = tableIsColumnPrimary ? cellAndIndex.Cell.FieldSpan : cellAndIndex.Cell.ItemSpan;
+										var rowSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.FieldSpan : cellAndIndex.Cell.Setup.ItemSpan;
 										if( rowSpan != 1 )
 											cellControl.Attributes.Add( "rowspan", rowSpan.ToString() );
 
-										var colSpan = tableIsColumnPrimary ? cellAndIndex.Cell.ItemSpan : cellAndIndex.Cell.FieldSpan;
+										var colSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.ItemSpan : cellAndIndex.Cell.Setup.FieldSpan;
 										if( colSpan != 1 )
 											cellControl.Attributes.Add( "colspan", colSpan.ToString() );
 
 										var rowSetup = rowSetups[ rowIndex ];
 										var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-										var clickScript = cellAndIndex.Cell.ClickScript ?? ( tableIsColumnPrimary || rowSetup.ClickScript == null ? columnSetup.ClickScript : null );
+										var clickScript = cellAndIndex.Cell.Setup.ClickScript ?? ( tableIsColumnPrimary || rowSetup.ClickScript == null ? columnSetup.ClickScript : null );
 										if( clickScript != null )
 											clickScript.SetUpClickableControl( cellControl );
 
 										var columnClassString = StringTools.ConcatenateWithDelimiter( " ", columnSetup.Classes.ToArray() );
-										var cellClassString = cellAndIndex.Cell.CssClass;
+										var cellClassString = StringTools.ConcatenateWithDelimiter( " ", cellAndIndex.Cell.Setup.Classes.ToArray() );
 										cellControl.CssClass = StringTools.ConcatenateWithDelimiter(
 											" ",
 											cellControl.CssClass,
@@ -189,8 +189,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 											throw new ApplicationException( "A column cannot have a tool tip control because there is no way to clone this control to put it on every cell." );
 										if( columnSetup.ToolTip.Length > 0 )
 											new ToolTip( ToolTip.GetToolTipTextControl( columnSetup.ToolTip ), cellControl );
-										if( cellAndIndex.Cell.ToolTipControl != null || cellAndIndex.Cell.ToolTip.Length > 0 )
-											new ToolTip( cellAndIndex.Cell.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.ToolTip ), cellControl );
+										if( cellAndIndex.Cell.Setup.ToolTipControl != null || cellAndIndex.Cell.Setup.ToolTip.Length > 0 )
+											new ToolTip( cellAndIndex.Cell.Setup.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.Setup.ToolTip ), cellControl );
 
 										return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
 									} ) );
@@ -199,7 +199,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private static string textAlignmentClass( EwfTableCell cell, EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {
 			// NOTE: Think about whether the row or the column should win if nothing is specified on the cell.
-			var alignments = new[] { cell.TextAlignment, row.TextAlignment, column.TextAlignment };
+			var alignments = new[] { cell.Setup.TextAlignment, row.TextAlignment, column.TextAlignment };
 			return ( from i in alignments select TextAlignmentStatics.Class( i ) ).FirstOrDefault( i => i.Length > 0 ) ?? "";
 		}
 

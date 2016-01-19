@@ -134,7 +134,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				return fields;
 
 			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
-			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.FieldSpan );
+			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.Setup.FieldSpan );
 			return Enumerable.Repeat( new EwfTableField(), fieldCount ).ToArray();
 		}
 
