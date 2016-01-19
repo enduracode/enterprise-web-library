@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.Collections {
 	/// <summary>
 	/// A cache of values.
 	/// </summary>
 	public class Cache<KeyType, ValType> {
-		private IDictionary<KeyType, ValType> dictionary;
-		private readonly IEqualityComparer<KeyType> comparer;
+		private readonly IDictionary<KeyType, ValType> dictionary;
 
 		public Cache( bool isThreadSafe, IEqualityComparer<KeyType> comparer = null ) {
 			dictionary = isThreadSafe
@@ -17,7 +15,6 @@ namespace EnterpriseWebLibrary.Collections {
 					               ? (IDictionary<KeyType, ValType>)new ConcurrentDictionary<KeyType, ValType>( comparer )
 					               : new ConcurrentDictionary<KeyType, ValType>()
 				             : new Dictionary<KeyType, ValType>( comparer );
-			this.comparer = comparer;
 		}
 
 		/// <summary>
@@ -75,18 +72,6 @@ namespace EnterpriseWebLibrary.Collections {
 		/// </summary>
 		public bool Remove( KeyType key ) {
 			return dictionary.Remove( key );
-		}
-
-		[ Obsolete( "Guaranteed through 31 October 2014. Contact the EWL team if you are using this method." ) ]
-		// After removing this, make the dictionary field readonly.
-		public void PreFill( IEnumerable<ValType> values, Func<ValType, KeyType> keyCreator ) {
-			if( dictionary is ConcurrentDictionary<KeyType, ValType> ) {
-				dictionary = comparer != null
-					             ? new ConcurrentDictionary<KeyType, ValType>( from i in values select new KeyValuePair<KeyType, ValType>( keyCreator( i ), i ), comparer )
-					             : new ConcurrentDictionary<KeyType, ValType>( from i in values select new KeyValuePair<KeyType, ValType>( keyCreator( i ), i ) );
-			}
-			else
-				dictionary = values.ToDictionary( keyCreator, comparer );
 		}
 	}
 }
