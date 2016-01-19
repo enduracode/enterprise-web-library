@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -24,10 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private ResourceInfo imageInfo;
-
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the constructor instead." ) ]
-		public string ImageUrl { get { return imageInfo.GetUrl( false, false, false ); } set { imageInfo = new ExternalResourceInfo( value ); } }
+		private readonly ResourceInfo imageInfo;
 
 		/// <summary>
 		/// Alternate text to be placed in the alt tag of the image.
@@ -57,14 +53,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="imageInfo">Do not pass null.</param>
 		public EwfImage( ResourceInfo imageInfo ) {
 			this.imageInfo = imageInfo;
-		}
-
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use another constructor." ) ]
-		public EwfImage() {}
-
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use another constructor." ) ]
-		public EwfImage( string imageUrl ) {
-			imageInfo = new ExternalResourceInfo( imageUrl );
 		}
 
 		void ControlTreeDataLoader.LoadData() {

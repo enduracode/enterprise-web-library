@@ -58,17 +58,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public MonthViewCalendar() {
 			PreviousButtonText = "Previous";
-			PreviousButton = new ImageActionControlStyle( "~/Ewf/Images/Calendar/button_previous.gif" ) { AlternateText = PreviousButtonText };
+			PreviousButton = new ImageActionControlStyle( new ExternalResourceInfo( "~/Ewf/Images/Calendar/button_previous.gif" ) )
+				{
+					AlternateText = PreviousButtonText
+				};
 			CurrentDateButtonText = "Current Date";
 			CurrentDateButton =
-				new ImageActionControlStyle( IsTwoWeekCalendar ? "~/Ewf/Images/Calendar/button_currentweek.gif" : "~/Ewf/Images/Calendar/button_currentmonth.gif" )
-					{
-						AlternateText = CurrentDateButtonText
-					};
+				new ImageActionControlStyle(
+					IsTwoWeekCalendar
+						? new ExternalResourceInfo( "~/Ewf/Images/Calendar/button_currentweek.gif" )
+						: new ExternalResourceInfo( "~/Ewf/Images/Calendar/button_currentmonth.gif" ) ) { AlternateText = CurrentDateButtonText };
 
 
 			NextButtonText = "Next";
-			NextButton = new ImageActionControlStyle( "~/Ewf/Images/Calendar/button_next.gif" ) { AlternateText = NextButtonText };
+			NextButton = new ImageActionControlStyle( new ExternalResourceInfo( "~/Ewf/Images/Calendar/button_next.gif" ) ) { AlternateText = NextButtonText };
 		}
 
 		/// <summary>

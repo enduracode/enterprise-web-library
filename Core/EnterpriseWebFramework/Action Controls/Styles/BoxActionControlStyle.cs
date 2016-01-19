@@ -22,8 +22,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a box action control style. Do not pass null for any string parameters.
 		/// </summary>
-		public BoxActionControlStyle( string text, string leftImageUrl, int leftImageWidth, string rightImageUrl, int rightImageWidth, string backgroundImageUrl,
-		                              int imageHeight ) {
+		public BoxActionControlStyle(
+			string text, string leftImageUrl, int leftImageWidth, string rightImageUrl, int rightImageWidth, string backgroundImageUrl, int imageHeight ) {
 			Text = text;
 			this.leftImageUrl = leftImageUrl;
 			this.leftImageWidth = leftImageWidth;
@@ -43,10 +43,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			span.Style.Add( "margin-right", rightImageWidth.Value + "px" );
 			span.Style.Add( "background-image", control.GetClientUrl( backgroundImageUrl ) );
 
-			var leftImage = new EwfImage( leftImageUrl ) { CssClass = "left" };
+			var leftImage = new EwfImage( new ExternalResourceInfo( leftImageUrl ) ) { CssClass = "left" };
 			leftImage.Style.Add( "margin-left", -leftImageWidth + "px" );
 
-			var rightImage = new EwfImage( rightImageUrl ) { CssClass = "right" };
+			var rightImage = new EwfImage( new ExternalResourceInfo( rightImageUrl ) ) { CssClass = "right" };
 			rightImage.Style.Add( "margin-right", -rightImageWidth + "px" );
 
 			var label = new Label { Text = Text.Length > 0 ? Text : defaultText, CssClass = CssElementCreator.BoxStyleTextClass };

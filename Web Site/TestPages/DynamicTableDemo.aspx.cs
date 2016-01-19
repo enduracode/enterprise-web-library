@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						{
 							ClickScript = clickScript,
 							UniqueIdentifier = 3,
-							ToolTipControl = new EwfImage { ImageUrl = "http://redstapler.biz/images/logo_blkgradient.png" }
+							ToolTipControl = new EwfImage( new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) )
 						},
 					cells[ 0 ],
 					cells[ 1 ],

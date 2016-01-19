@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class ImageActionControlStyle: ActionControlStyle {
 		private readonly ResourceInfo imageInfo;
-		private ResourceInfo rolloverImageInfo;
+		private readonly ResourceInfo rolloverImageInfo;
 
 		/// <summary>
 		/// Creates an image action control style with the specified image. Do not pass null.
@@ -17,19 +17,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.rolloverImageInfo = rolloverImageInfo;
 		}
 
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the other constructor." ) ]
-		public ImageActionControlStyle( string imageUrl ): this( new ExternalResourceInfo( imageUrl ) ) {}
-
 		/// <summary>
 		/// Alternate text to be placed in the alt tag of the image.
 		/// </summary>
 		public string AlternateText { get; set; }
-
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the constructor." ) ]
-		public string RolloverImageUrl {
-			get { return rolloverImageInfo.GetUrl( false, false, false ); }
-			set { rolloverImageInfo = new ExternalResourceInfo( value ); }
-		}
 
 		/// <summary>
 		/// If true, sets the size to the width available.

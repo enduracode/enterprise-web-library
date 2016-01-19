@@ -5,8 +5,8 @@ using System.Linq;
 using System.Web.UI;
 using Aspose.Pdf.Facades;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -107,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// we first save the image.
 			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailResourceInfoCreator == null )
 				return null;
-			return new EwfImage( thumbnailResourceInfoCreator( file.FileId ).GetUrl() ) { SizesToAvailableWidth = true };
+			return new EwfImage( thumbnailResourceInfoCreator( file.FileId ) ) { SizesToAvailableWidth = true };
 		}
 
 		// NOTE: Use this from blob file manager, etc.
