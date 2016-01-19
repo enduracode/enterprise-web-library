@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
@@ -20,28 +16,5 @@ namespace EnterpriseWebLibrary {
 		public static User User {
 			get { return EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.UserAndImpersonator.Item1 : null; }
 		}
-
-		[ Obsolete( "Guaranteed through 31 July 2015. Please use TelemetryStatics.ReportError instead." ) ]
-		public static void EmailAndLogError( Exception e ) {
-			TelemetryStatics.ReportError( e );
-		}
-
-		[ Obsolete( "Guaranteed through 31 July 2015. Please use TelemetryStatics.ReportError instead." ) ]
-		public static void EmailAndLogError( string prefix, Exception exception ) {
-			TelemetryStatics.ReportError( prefix, exception );
-		}
-
-		[ Obsolete( "Guaranteed through 31 July 2015. Please use EmailStatics.SendEmailWithDefaultFromAddress instead." ) ]
-		public static void SendEmailWithDefaultFromAddress( EmailMessage m ) {
-			EmailStatics.SendEmailWithDefaultFromAddress( m );
-		}
-
-		[ Obsolete( "Guaranteed through 31 March 2015. Please use EmailStatics.SendEmail instead." ) ]
-		public static void SendEmail( EmailMessage message ) {
-			EmailStatics.SendEmail( message );
-		}
-
-		[ Obsolete( "Guaranteed through 31 July 2015. Please use EmailStatics.GetAdministratorEmailAddresses instead." ) ]
-		public static List<EmailAddress> AdministratorEmailAddresses { get { return EmailStatics.GetAdministratorEmailAddresses().ToList(); } }
 	}
 }
