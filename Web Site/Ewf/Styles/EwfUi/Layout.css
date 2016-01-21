@@ -26,7 +26,7 @@ ewfPagePath > h1 {
 	margin: 0;
 	font-weight: inherit;
 }
-ewfSectionNormalStyleBothStates, ewfH2 {
+ewfSectionNormalStyleBothStates {
 	margin-top: 2em;
 }
 ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
@@ -34,25 +34,21 @@ ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading
 	margin-top: 0;
 	margin-bottom: 1em;
 }
-ewfH2 {
-	font-size: 1.2em;
-	margin-bottom: 1em;
-}
-ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates, ewfH3 {
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
 }
-ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading, ewfH3 {
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1.1em;
 	margin-bottom: 0;
 }
-ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates, ewfH4 {
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
 }
-ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading, ewfH4 {
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
 	margin-bottom: 0;
 }
-ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfH2:first-child, ewfH3:first-child, ewfH4:first-child {
+ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
 	margin-top: 0;
 }
 

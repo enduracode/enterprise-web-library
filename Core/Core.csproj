@@ -335,8 +335,6 @@
     <Compile Include="EnterpriseWebFramework\PageBase\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\PageBase\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectList.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\Heading.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\HeadingControl\HeadingLevel.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />

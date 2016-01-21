@@ -4,9 +4,6 @@
 
 ewfPagePath,
 ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
-ewfH2,
-ewfH3,
-ewfH4,
 /*control list with a class to limit to major nav elements,*/
 ewfTableStandardAndStandardExceptLayoutStyles > caption,
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh,

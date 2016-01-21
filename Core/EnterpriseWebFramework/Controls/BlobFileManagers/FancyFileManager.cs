@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				new Control[]
 					{
 						new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) ),
-						new Heading { CssClass = "upload-count" }
+						new Panel { CssClass = "upload-count" }
 					},
 				style: SectionStyle.Box ) { CssClass = "queuedFiles" };
 
