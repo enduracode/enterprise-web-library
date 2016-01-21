@@ -69,7 +69,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 			else
 				regionControls.Add( new Paragraph( "Nothing here yet." ) );
-			yield return new NamingPlaceholder( new Box( "Basic Update Region", regionControls ).ToSingleElementArray(), updateRegionSet: rs );
+			yield return
+				new NamingPlaceholder( new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToSingleElementArray(), updateRegionSet: rs );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
 			pb.AddModificationMethod(
@@ -104,7 +105,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			for( var i = 0; i < info.NonIdItemStates.Count(); i += 1 )
 				stack.AddItem( getNonIdItem( i ) );
 
-			yield return new Box( "Control List With Non-ID Items", stack.ToSingleElementArray() );
+			yield return new Section( "Control List With Non-ID Items", stack.ToSingleElementArray(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getNonIdItem( int i ) {
@@ -148,7 +149,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
-			yield return new Box( "Control List With ID Items", stack.ToSingleElementArray() );
+			yield return new Section( "Control List With ID Items", stack.ToSingleElementArray(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getIdItem( int id ) {

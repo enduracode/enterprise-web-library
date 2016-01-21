@@ -192,7 +192,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( seriesCollection.Count() > 1 ) {
 				Controls.Add(
-					new Box(
+					new Section(
 						"Key",
 						new ControlLine(
 							chartData.datasets.Select(
@@ -202,7 +202,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										Text =
 											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
 									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
-									} as Control ).ToArray() ).ToSingleElementArray() ) );
+									} as Control ).ToArray() ).ToSingleElementArray(),
+						style: SectionStyle.Box ) );
 			}
 
 			// Remove this when ColumnPrimaryTable supports Excel export.

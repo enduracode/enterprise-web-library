@@ -81,24 +81,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			chooseUploadMethod.AddDisplayLink( ( true as bool? ).ToSingleElementArray(), true, dragFilesHerePanel.ToSingleElementArray() );
 			chooseUploadMethod.AddDisplayLink( ( false as bool? ).ToSingleElementArray(), true, browseForFiles.ToSingleElementArray() );
 
-			var uploadPending = new Box( "Files to be uploaded",
-			                             new Control[]
-				                             {
-					                             new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) )
-					                             , new Heading { CssClass = "upload-count" }
-				                             } ) { CssClass = "queuedFiles" };
+			var uploadPending = new Section(
+				"Files to be uploaded",
+				new Control[]
+					{
+						new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) ),
+						new Heading { CssClass = "upload-count" }
+					},
+				style: SectionStyle.Box ) { CssClass = "queuedFiles" };
 
 			Controls.Add(
-				new Box( new Control[]
-					{
-						new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
-						new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
-						new CustomButton( () => @"uploadButtonClicked(this);" )
-							{
-								ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ),
-								CssClass = "beginUploadButton"
-							}
-					} ) { CssClass = "upload-box" } );
+				new Section(
+					new Control[]
+						{
+							new Panel { CssClass = "ewfErrorMessageListBlock" }, chooseUploadMethod,
+							new Panel { CssClass = "dropWrapper" }.AddControlsReturnThis( dragFilesHerePanel ), browseForFiles, uploadPending,
+							new CustomButton( () => @"uploadButtonClicked(this);" )
+								{
+									ActionControlStyle = new ButtonActionControlStyle( "Begin upload" ),
+									CssClass = "beginUploadButton"
+								}
+						},
+					style: SectionStyle.Box ) { CssClass = "upload-box" } );
 		}
 
 		/// <summary>

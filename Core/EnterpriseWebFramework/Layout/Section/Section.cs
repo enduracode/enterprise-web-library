@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -123,15 +122,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private string getSectionClass( string closedClass, string expandedClass ) {
 			return !expanded.HasValue || expanded.Value ? expandedClass : closedClass;
 		}
-	}
-
-	[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
-	public class Box: Section {
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
-		public Box( IEnumerable<Control> childControls ): this( "", childControls ) {}
-
-		[ Obsolete( "Guaranteed through 30 April 2015. Please use the Section control instead." ) ]
-		public Box( string heading, IEnumerable<Control> childControls, bool? expanded = null )
-			: base( SectionStyle.Box, heading, null, childControls, expanded, false ) {}
 	}
 }
