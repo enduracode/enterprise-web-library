@@ -80,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems( List<EwfTableItem> items, int fieldCount ) {
+		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems( IReadOnlyCollection<EwfTableItem> items, int fieldCount ) {
 			var itemIndex = 0;
 			var cellPlaceholderListsForItems = new List<List<CellPlaceholder>>();
 			foreach( var itemCells in items.Select( i => i.Cells ) ) {
