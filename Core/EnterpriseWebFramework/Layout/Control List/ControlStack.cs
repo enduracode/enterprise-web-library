@@ -126,7 +126,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			var itemControls = visibleItems.Select(
 				i => {
-					var np = new NamingPlaceholder( getItemControl( i ), updateRegionSet: i.Item1.UpdateRegionSet );
+					var np = new NamingPlaceholder( getItemControl( i ), updateRegionSets: i.Item1.UpdateRegionSets );
 					if( i.Item1.Id != null )
 						np.ID = i.Item1.Id;
 					return np;
@@ -141,7 +141,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"tail",
 					from region in tailUpdateRegions
 					let staticItemCount = items.Count() - region.UpdatingItemCount
-					select new PreModificationUpdateRegion( region.Set, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
+					select new PreModificationUpdateRegion( region.Sets, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
 					arg => itemControls.Skip( int.Parse( arg ) ) ) );
 
 			var itemControlsById =
@@ -155,7 +155,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					from region in itemInsertionUpdateRegions
 					select
 						new PreModificationUpdateRegion(
-						region.Set,
+						region.Sets,
 						() => new Control[ 0 ],
 						() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
 					arg => arg.Separate( ",", false ).Where( itemControlsById.ContainsKey ).Select( i => itemControlsById[ i ] as Control ) ) );
@@ -166,9 +166,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"remove",
 					visibleItems.Select(
 						( item, index ) =>
-						item.Item1.RemovalUpdateRegionSet != null
-							? new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSet, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" )
-							: null ).Where( i => i != null ),
+						new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" ) ),
 					arg => new Control[ 0 ] ) );
 		}
 

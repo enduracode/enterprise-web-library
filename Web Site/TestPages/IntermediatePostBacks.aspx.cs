@@ -70,7 +70,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			else
 				regionControls.Add( new Paragraph( "Nothing here yet." ) );
 			yield return
-				new NamingPlaceholder( new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToSingleElementArray(), updateRegionSet: rs );
+				new NamingPlaceholder(
+					new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToSingleElementArray(),
+					updateRegionSets: rs.ToSingleElementArray() );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
 			pb.AddModificationMethod(
@@ -101,7 +103,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new ButtonActionControlStyle( "Remove Two Items" ),
 						usesSubmitBehavior: false ) );
 
-			var stack = ControlStack.Create( true, tailUpdateRegions: new[] { new TailUpdateRegion( addRs, 0 ), new TailUpdateRegion( removeRs, 2 ) } );
+			var stack = ControlStack.Create(
+				true,
+				tailUpdateRegions: new[] { new TailUpdateRegion( addRs.ToSingleElementArray(), 0 ), new TailUpdateRegion( removeRs.ToSingleElementArray(), 2 ) } );
 			for( var i = 0; i < info.NonIdItemStates.Count(); i += 1 )
 				stack.AddItem( getNonIdItem( i ) );
 
@@ -123,7 +127,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			pb.AddModificationMethod(
 				() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
 
-			return new ControlListItem( itemStack.ToSingleElementArray(), updateRegionSet: rs );
+			return new ControlListItem( itemStack.ToSingleElementArray(), updateRegionSets: rs.ToSingleElementArray() );
 		}
 
 		private IEnumerable<Control> getIdListRegionBlocks() {
@@ -145,7 +149,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var stack = ControlStack.Create(
 				true,
 				itemInsertionUpdateRegions:
-					new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToSingleElementArray() ).ToSingleElementArray() );
+					new ItemInsertionUpdateRegion( rs.ToSingleElementArray(), () => parametersModification.ItemIds.First().ToString().ToSingleElementArray() )
+						.ToSingleElementArray() );
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
@@ -163,7 +168,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			pb.AddModificationMethod( () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() );
 
-			return new ControlListItem( itemStack.ToSingleElementArray(), id.ToString(), removalUpdateRegionSet: rs );
+			return new ControlListItem( itemStack.ToSingleElementArray(), id.ToString(), removalUpdateRegionSets: rs.ToSingleElementArray() );
 		}
 	}
 }
