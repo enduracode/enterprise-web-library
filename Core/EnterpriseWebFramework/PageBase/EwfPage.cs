@@ -799,7 +799,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptStartUpLogic() {
-			var controlInitStatements = getDescendants( this, i => true ).Where( i => i.Item2 != null ).Select( i => i.Item2() ).Aggregate( ( a, b ) => a + b );
+			var controlInitStatements = getDescendants( this, i => true )
+				.Where( i => i.Item2 != null )
+				.Select( i => i.Item2() )
+				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
 
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
