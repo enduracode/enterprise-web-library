@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -137,8 +136,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		internal static IEnumerable<WebControl> BuildRows(
-			List<List<CellPlaceholder>> cellPlaceholderListsForRows, ReadOnlyCollection<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
-			ReadOnlyCollection<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
+			List<List<CellPlaceholder>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
+			IReadOnlyList<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
 			return cellPlaceholderListsForRows.Select(
 				( row, rowIndex ) => {
 					var rowControl = new WebControl( HtmlTextWriterTag.Tr );

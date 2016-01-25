@@ -379,15 +379,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 				SetUpTableAndCaption( this, style, classes, caption, subCaption );
 
-				var visibleItemGroupsAndItems = new List<KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>>();
+				var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
 				foreach( var itemGroup in itemGroups ) {
-					var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Value.Count ) ).Select( i => i() );
-					visibleItemGroupsAndItems.Add( new KeyValuePair<EwfTableItemGroup, List<EwfTableItem>>( itemGroup, visibleItems.ToList() ) );
-					if( visibleItemGroupsAndItems.Sum( i => i.Value.Count ) == CurrentItemLimit )
+					var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
+					visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.ToImmutableArray() ) );
+					if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == CurrentItemLimit )
 						break;
 				}
 
-				var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Value ) );
+				var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 				if( !fields.Any() )
 					fields = new EwfTableField().ToSingleElementArray();
 
@@ -411,12 +411,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var bodyRowGroupsAndRows = new List<Tuple<WebControl, ImmutableArray<Control>>>();
 				for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 					var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
-					var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Value.Count ) % 2 == 1;
-					var groupBodyRows = buildRows( groupAndItems.Value, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).ToImmutableArray();
+					var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
+					var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).ToImmutableArray();
 					var rowGroup =
 						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
 							buildRows(
-								groupAndItems.Key.GetHeadItems( fields.Length ),
+								groupAndItems.Item1.GetHeadItems( fields.Length ),
 								Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
 								null,
 								true,
@@ -429,7 +429,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						new UpdateRegionLinker(
 							rowGroup,
 							"tail",
-							from region in groupAndItems.Key.RemainingData.Value.TailUpdateRegions
+							from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
 							let staticItemCount = groupBodyRows.Length - region.UpdatingItemCount
 							select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticItemCount ), staticItemCount.ToString ),
 							arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
@@ -486,7 +486,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 							usesSubmitBehavior: false );
 					var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
-					var useContrast = visibleItemGroupsAndItems.Sum( i => i.Value.Count ) % 2 == 1;
+					var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 					itemLimitingRowGroup.Add(
 						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
 							buildRows(
@@ -563,18 +563,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private IEnumerable<Control> buildRows(
-			IReadOnlyCollection<EwfTableItem> items, EwfTableField[] fields, bool? useContrastForFirstRow, bool useHeadCells,
+			IReadOnlyCollection<EwfTableItem> items, IReadOnlyCollection<EwfTableField> fields, bool? useContrastForFirstRow, bool useHeadCells,
 			Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter, List<EwfTableItem> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
-			var cellPlaceholderListsForRows = TableOps.BuildCellPlaceholderListsForItems( items, fields.Length );
+			var cellPlaceholderListsForRows = TableOps.BuildCellPlaceholderListsForItems( items, fields.Count );
 
 			// NOTE: Be sure to take check box and reordering columns into account.
 			var rows = TableOps.BuildRows(
 				cellPlaceholderListsForRows,
-				items.Select( i => i.Setup.FieldOrItemSetup ).ToList().AsReadOnly(),
+				items.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
 				useContrastForFirstRow,
-				fields.Select( i => i.FieldOrItemSetup ).ToList().AsReadOnly(),
-				useHeadCells ? fields.Length : 0,
+				fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
+				useHeadCells ? fields.Count : 0,
 				false );
 
 			allVisibleItems.AddRange( items );

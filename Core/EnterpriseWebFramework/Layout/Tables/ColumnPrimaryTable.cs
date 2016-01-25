@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.UI;
@@ -106,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			EwfTable.SetUpTableAndCaption( this, style, classes, caption, subCaption );
 
 			var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) ).Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) );
-			var allItemSetups = itemSetupLists.SelectMany( i => i ).ToList();
+			var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
 			var columnWidthFactor = EwfTable.GetColumnWidthFactor( allItemSetups );
 			foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
 				Controls.Add(
@@ -121,21 +122,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// Pivot the cell placeholders from column primary into row primary format.
 			var cellPlaceholderListsForRows =
 				Enumerable.Range( 0, fields.Length )
-					.Select( field => Enumerable.Range( 0, allItemSetups.Count ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
+					.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
 					.ToList();
 
 			var headRows = TableOps.BuildRows(
 				cellPlaceholderListsForRows.Take( firstDataFieldIndex ).ToList(),
-				fields.Select( i => i.FieldOrItemSetup ).ToList().AsReadOnly(),
+				fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
 				null,
-				allItemSetups.AsReadOnly(),
-				allItemSetups.Count,
+				allItemSetups,
+				allItemSetups.Length,
 				true );
 			var bodyRows = TableOps.BuildRows(
 				cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
-				fields.Select( i => i.FieldOrItemSetup ).ToList().AsReadOnly(),
+				fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
 				false,
-				allItemSetups.AsReadOnly(),
+				allItemSetups,
 				headItems.Count,
 				true );
 
