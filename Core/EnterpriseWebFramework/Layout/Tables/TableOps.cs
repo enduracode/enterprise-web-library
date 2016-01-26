@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			cellPlaceholderListsForItems.Add( list );
 		}
 
-		internal static IEnumerable<WebControl> BuildRows(
+		internal static IEnumerable<Control> BuildRows(
 			List<List<CellPlaceholder>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
 			IReadOnlyList<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
 			return cellPlaceholderListsForRows.Select(
@@ -150,49 +150,50 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value ) ? EwfTable.CssElementCreator.ContrastClass : "" );
 					rowControl.CssClass = rowControl.CssClass.ConcatenateWithSpace( StringTools.ConcatenateWithDelimiter( " ", rowSetups[ rowIndex ].Classes.ToArray() ) );
 					return
-						rowControl.AddControlsReturnThis(
-							row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
-								.Where( cellAndIndex => cellAndIndex.Cell != null )
-								.Select(
-									cellAndIndex => {
-										var cellControl = new WebControl( cellAndIndex.ColumnIndex < firstDataColumnIndex ? HtmlTextWriterTag.Th : HtmlTextWriterTag.Td );
+						new NamingPlaceholder(
+							rowControl.AddControlsReturnThis(
+								row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
+									.Where( cellAndIndex => cellAndIndex.Cell != null )
+									.Select(
+										cellAndIndex => {
+											var cellControl = new WebControl( cellAndIndex.ColumnIndex < firstDataColumnIndex ? HtmlTextWriterTag.Th : HtmlTextWriterTag.Td );
 
-										var rowSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.FieldSpan : cellAndIndex.Cell.Setup.ItemSpan;
-										if( rowSpan != 1 )
-											cellControl.Attributes.Add( "rowspan", rowSpan.ToString() );
+											var rowSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.FieldSpan : cellAndIndex.Cell.Setup.ItemSpan;
+											if( rowSpan != 1 )
+												cellControl.Attributes.Add( "rowspan", rowSpan.ToString() );
 
-										var colSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.ItemSpan : cellAndIndex.Cell.Setup.FieldSpan;
-										if( colSpan != 1 )
-											cellControl.Attributes.Add( "colspan", colSpan.ToString() );
+											var colSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.ItemSpan : cellAndIndex.Cell.Setup.FieldSpan;
+											if( colSpan != 1 )
+												cellControl.Attributes.Add( "colspan", colSpan.ToString() );
 
-										var rowSetup = rowSetups[ rowIndex ];
-										var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-										var clickScript = cellAndIndex.Cell.Setup.ClickScript ?? ( tableIsColumnPrimary || rowSetup.ClickScript == null ? columnSetup.ClickScript : null );
-										if( clickScript != null )
-											clickScript.SetUpClickableControl( cellControl );
+											var rowSetup = rowSetups[ rowIndex ];
+											var columnSetup = columns[ cellAndIndex.ColumnIndex ];
+											var clickScript = cellAndIndex.Cell.Setup.ClickScript ?? ( tableIsColumnPrimary || rowSetup.ClickScript == null ? columnSetup.ClickScript : null );
+											if( clickScript != null )
+												clickScript.SetUpClickableControl( cellControl );
 
-										var columnClassString = StringTools.ConcatenateWithDelimiter( " ", columnSetup.Classes.ToArray() );
-										var cellClassString = StringTools.ConcatenateWithDelimiter( " ", cellAndIndex.Cell.Setup.Classes.ToArray() );
-										cellControl.CssClass = StringTools.ConcatenateWithDelimiter(
-											" ",
-											cellControl.CssClass,
-											EwfTable.CssElementCreator.AllCellAlignmentsClass,
-											textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ),
-											verticalAlignmentClass( rowSetup, columnSetup ),
-											columnClassString,
-											cellClassString );
+											var columnClassString = StringTools.ConcatenateWithDelimiter( " ", columnSetup.Classes.ToArray() );
+											var cellClassString = StringTools.ConcatenateWithDelimiter( " ", cellAndIndex.Cell.Setup.Classes.ToArray() );
+											cellControl.CssClass = StringTools.ConcatenateWithDelimiter(
+												" ",
+												cellControl.CssClass,
+												EwfTable.CssElementCreator.AllCellAlignmentsClass,
+												textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ),
+												verticalAlignmentClass( rowSetup, columnSetup ),
+												columnClassString,
+												cellClassString );
 
-										if( ( rowSetup.ToolTipControl != null || rowSetup.ToolTip.Length > 0 ) && cellAndIndex.ColumnIndex == 0 )
-											new ToolTip( rowSetup.ToolTipControl ?? ToolTip.GetToolTipTextControl( rowSetup.ToolTip ), rowControl );
-										if( columnSetup.ToolTipControl != null )
-											throw new ApplicationException( "A column cannot have a tool tip control because there is no way to clone this control to put it on every cell." );
-										if( columnSetup.ToolTip.Length > 0 )
-											new ToolTip( ToolTip.GetToolTipTextControl( columnSetup.ToolTip ), cellControl );
-										if( cellAndIndex.Cell.Setup.ToolTipControl != null || cellAndIndex.Cell.Setup.ToolTip.Length > 0 )
-											new ToolTip( cellAndIndex.Cell.Setup.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.Setup.ToolTip ), cellControl );
+											if( ( rowSetup.ToolTipControl != null || rowSetup.ToolTip.Length > 0 ) && cellAndIndex.ColumnIndex == 0 )
+												new ToolTip( rowSetup.ToolTipControl ?? ToolTip.GetToolTipTextControl( rowSetup.ToolTip ), rowControl );
+											if( columnSetup.ToolTipControl != null )
+												throw new ApplicationException( "A column cannot have a tool tip control because there is no way to clone this control to put it on every cell." );
+											if( columnSetup.ToolTip.Length > 0 )
+												new ToolTip( ToolTip.GetToolTipTextControl( columnSetup.ToolTip ), cellControl );
+											if( cellAndIndex.Cell.Setup.ToolTipControl != null || cellAndIndex.Cell.Setup.ToolTip.Length > 0 )
+												new ToolTip( cellAndIndex.Cell.Setup.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.Setup.ToolTip ), cellControl );
 
-										return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
-									} ) );
+											return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
+										} ) ).ToSingleElementArray() );
 				} );
 		}
 
