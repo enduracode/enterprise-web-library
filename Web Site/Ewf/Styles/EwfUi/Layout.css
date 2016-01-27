@@ -223,8 +223,10 @@ ewfUiSideTabBlock {
 	padding-top: .5rem;
 	padding-bottom: .5rem;
 }
+ewfUiGlobalNavBlock ewfActionControlAllStylesActionlessState,
 ewfUiGlobalNavBlock ewfActionControlAllStylesAllNormalStates,
 ewfUiGlobalNavBlock ewfActionControlAllStylesAllVisitedStates,
+ewfUiEntityNavAndActionBlock ewfActionControlAllStylesActionlessState,
 ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalStates,
 ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllVisitedStates {
 	text-decoration: none;
