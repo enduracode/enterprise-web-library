@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
@@ -15,7 +14,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				var searchPaths = new[]
 					{
 						// Ordered by preferred path.
-						@"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools", @"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools"
+						@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools", @"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools",
+						@"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\NETFX 4.0 Tools"
 					};
 				try {
 					return searchPaths.First( Directory.Exists );
