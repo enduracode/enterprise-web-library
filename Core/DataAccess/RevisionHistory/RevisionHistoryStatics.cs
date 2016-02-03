@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
@@ -98,6 +99,25 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			}
 
 			return conceptualRevisions.AsEnumerable().Reverse();
+		}
+
+		/// <summary>
+		/// Returns a dictionary containing the latest user transaction for each conceptual-entity ID in the specified list of revisions. If an entity was modified
+		/// very recently, it will map to null since there's a chance that a concurrent transaction with a slightly earlier date/time could still commit. This would
+		/// modify the entity state without changing the latest transaction.
+		/// </summary>
+		/// <param name="revisions">A list of revisions that is ordered by transaction date/time, descending.</param>
+		public static IReadOnlyDictionary<int, UserTransaction> GetLatestTransactionsByEntityId<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>(
+			IEnumerable<ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType>> revisions ) {
+			var latestRevisionTransactionsByEntityId = ImmutableDictionary<int, UserTransaction>.Empty.ToBuilder();
+			var cutoffDateAndTime = DateTime.Now.AddMinutes( -5 );
+			foreach( var revision in revisions ) {
+				if( latestRevisionTransactionsByEntityId.ContainsKey( revision.ConceptualEntityId ) )
+					continue;
+				var transaction = revision.Transaction;
+				latestRevisionTransactionsByEntityId.Add( revision.ConceptualEntityId, transaction.TransactionDateTime < cutoffDateAndTime ? transaction : null );
+			}
+			return latestRevisionTransactionsByEntityId.ToImmutable();
 		}
 
 		/// <summary>
