@@ -310,7 +310,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<EwfTableItem> headItems;
 		private readonly DataRowLimit defaultItemLimit;
 		private readonly bool disableEmptyFieldDetection;
-		private readonly IReadOnlyCollection<EwfTableItemGroup> itemGroups;
+		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
 		private readonly IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
 
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
@@ -426,13 +426,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								allVisibleItems ).Concat( new NamingPlaceholder( groupBodyRows ).ToSingleElementArray() ) );
 					bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 
+					var cachedVisibleGroupIndex = visibleGroupIndex;
 					EwfPage.Instance.AddUpdateRegionLinker(
 						new UpdateRegionLinker(
 							rowGroup,
 							"tail",
 							from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-							let staticItemCount = groupBodyRows.Length - region.UpdatingItemCount
-							select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticItemCount ), staticItemCount.ToString ),
+							let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+							select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
 							arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
 
 					// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
@@ -446,7 +447,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				Controls.Add( new NamingPlaceholder( bodyRowGroupsAndRows.Select( i => i.Item1 ) ) );
 
 				if( defaultItemLimit != DataRowLimit.Unlimited ) {
-					var currentItemLimit = CurrentItemLimit; // It's important to cache this before the modification executes.
+					var oldItemLimit = CurrentItemLimit;
+					var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, CurrentItemLimit ) );
+
 					var itemLimitingTailUpdateRegionControlGetter = new Func<int, IEnumerable<Control>>(
 						staticItemCount => {
 							var rowCount = 0;
@@ -455,18 +458,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								rowCount += rows.Length;
 								if( rowCount < staticItemCount )
 									continue;
-								return rows.Take( rows.Length - ( rowCount - staticItemCount ) ).Concat( bodyRowGroupsAndRows.Skip( groupIndex ).Select( i => i.Item1 ) );
+								return rows.Skip( rows.Length - ( rowCount - staticItemCount ) ).Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
 							}
 							return ImmutableArray<Control>.Empty;
 						} );
+
 					EwfPage.Instance.AddUpdateRegionLinker(
 						new UpdateRegionLinker(
 							this,
 							"itemLimitingTail",
 							new PreModificationUpdateRegion(
 								itemLimitingUpdateRegionSet.ToSingleElementArray(),
-								() => itemLimitingTailUpdateRegionControlGetter( currentItemLimit ),
-								currentItemLimit.ToString ).ToSingleElementArray(),
+								() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
+								() => lowerItemLimit.Value.ToString() ).ToSingleElementArray(),
 							arg => itemLimitingTailUpdateRegionControlGetter( int.Parse( arg ) ) ) );
 				}
 
@@ -475,7 +479,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						this,
 						"tail",
 						from region in
-							tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = bodyRowGroupsAndRows.Count - i.UpdatingItemCount } )
+							tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
 							.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
 						select
 							new PreModificationUpdateRegion(
