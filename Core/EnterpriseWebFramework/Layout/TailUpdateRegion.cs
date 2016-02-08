@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class TailUpdateRegion {
-		internal readonly IEnumerable<UpdateRegionSet> Sets;
+		internal readonly IReadOnlyCollection<UpdateRegionSet> Sets;
 		internal readonly int UpdatingItemCount;
 
 		/// <summary>
@@ -12,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="sets"></param>
 		/// <param name="updatingItemCount">Pass zero if you only want to append items.</param>
 		public TailUpdateRegion( IEnumerable<UpdateRegionSet> sets, int updatingItemCount ) {
-			Sets = sets;
+			Sets = sets.ToImmutableArray();
 			UpdatingItemCount = updatingItemCount;
 		}
 	}

@@ -23,7 +23,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="groupActions">Group action buttons</param>
 		/// <param name="groupHeadClickScript">The click script for the group head</param>
 		/// <param name="initiallyCollapsed">Whether the group is initially collapsed. Null means the group cannot be collapsed and is always visible.</param>
-		/// <param name="tailUpdateRegions">The tail update regions for the group</param>
+		/// <param name="tailUpdateRegions">The tail update regions for the group. If a table uses item limiting, these regions will include all subsequent item
+		/// groups in the table. This is necessary because any number of items could be appended to this item group, potentially causing subsequent item groups to
+		/// become invisible.</param>
 		public EwfTableItemGroupRemainingData(
 			Control groupName, IEnumerable<Tuple<string, Action>> groupActions = null, ClickScript groupHeadClickScript = null, bool? initiallyCollapsed = null,
 			IEnumerable<TailUpdateRegion> tailUpdateRegions = null ) {

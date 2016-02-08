@@ -409,6 +409,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
 
 				var bodyRowGroupsAndRows = new List<Tuple<WebControl, ImmutableArray<Control>>>();
+				var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
 				for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 					var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
 					var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
@@ -433,6 +434,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							let staticItemCount = groupBodyRows.Length - region.UpdatingItemCount
 							select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticItemCount ), staticItemCount.ToString ),
 							arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
+
+					// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
+					if( defaultItemLimit != DataRowLimit.Unlimited ) {
+						updateRegionSetListsAndStaticRowGroupCounts.Add(
+							Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
+								groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).ToImmutableArray(),
+								visibleGroupIndex + 1 ) );
+					}
 				}
 				Controls.Add( new NamingPlaceholder( bodyRowGroupsAndRows.Select( i => i.Item1 ) ) );
 
@@ -465,9 +474,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					new UpdateRegionLinker(
 						this,
 						"tail",
-						from region in tailUpdateRegions
-						let staticItemCount = bodyRowGroupsAndRows.Count - region.UpdatingItemCount
-						select new PreModificationUpdateRegion( region.Sets, () => bodyRowGroupsAndRows.Skip( staticItemCount ).Select( i => i.Item1 ), staticItemCount.ToString ),
+						from region in
+							tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = bodyRowGroupsAndRows.Count - i.UpdatingItemCount } )
+							.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+						select
+							new PreModificationUpdateRegion(
+							region.sets,
+							() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
+							region.staticRowGroupCount.ToString ),
 						arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
 
 				var itemCount = itemGroups.Sum( i => i.Items.Count );
