@@ -95,6 +95,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Configuration\Aspose.Total.lic" />
     <None Include="Files\System Template\Web Site\Web.config" />
     <None Include="Files\Template.config" />

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.Email {
@@ -20,7 +19,7 @@ namespace EnterpriseWebLibrary.Email {
 			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
 				emailSender = message => sendEmailWithSmtpServer( null, message );
 			else {
-				EmailSendingService service;
+				Configuration.InstallationStandard.EmailSendingService service;
 				if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live ) {
 					var liveConfig = ConfigurationStatics.InstallationConfiguration.LiveInstallationConfiguration;
 					service = liveConfig.EmailSendingService;
@@ -30,8 +29,8 @@ namespace EnterpriseWebLibrary.Email {
 					service = intermediateConfig.EmailSendingService;
 				}
 
-				var sendGridService = service as SendGrid;
-				var smtpServerService = service as SmtpServer;
+				var sendGridService = service as Configuration.InstallationStandard.SendGrid;
+				var smtpServerService = service as Configuration.InstallationStandard.SmtpServer;
 				if( sendGridService != null )
 					emailSender = message => sendEmailWithSendGrid( sendGridService, message );
 				else if( smtpServerService != null )
@@ -41,7 +40,7 @@ namespace EnterpriseWebLibrary.Email {
 			}
 		}
 
-		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {
+		private static void sendEmailWithSendGrid( Configuration.InstallationStandard.SendGrid sendGrid, EmailMessage message ) {
 			// We want this method to use the SendGrid API (https://github.com/sendgrid/sendgrid-csharp), but as of 20 June 2014 it looks like the SendGrid Web API
 			// does not support CC recipients!
 
@@ -66,7 +65,7 @@ namespace EnterpriseWebLibrary.Email {
 			}
 		}
 
-		private static void sendEmailWithSmtpServer( SmtpServer smtpServer, EmailMessage message ) {
+		private static void sendEmailWithSmtpServer( Configuration.InstallationStandard.SmtpServer smtpServer, EmailMessage message ) {
 			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
 			var smtpClient = new System.Net.Mail.SmtpClient();
 			try {
