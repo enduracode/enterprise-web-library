@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.Email {
 	public static class EmailStatics {
@@ -13,6 +13,33 @@ namespace EnterpriseWebLibrary.Email {
 		/// System Manager and private use only.
 		/// </summary>
 		public const string InstallationIdHeaderFieldName = "X-EWL-Installation-ID";
+
+		private static Action<EmailMessage> emailSender;
+
+		internal static void Init() {
+			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
+				emailSender = message => sendEmailWithSmtpServer( null, message );
+			else {
+				EmailSendingService service;
+				if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live ) {
+					var liveConfig = ConfigurationStatics.InstallationConfiguration.LiveInstallationConfiguration;
+					service = liveConfig.EmailSendingService;
+				}
+				else {
+					var intermediateConfig = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
+					service = intermediateConfig.EmailSendingService;
+				}
+
+				var sendGridService = service as SendGrid;
+				var smtpServerService = service as SmtpServer;
+				if( sendGridService != null )
+					emailSender = message => sendEmailWithSendGrid( sendGridService, message );
+				else if( smtpServerService != null )
+					emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
+				else
+					throw new ApplicationException( "Failed to find an email-sending provider in the installation configuration file." );
+			}
+		}
 
 		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
 			message.From = defaultFromEmailAddress;
@@ -45,29 +72,9 @@ namespace EnterpriseWebLibrary.Email {
 		}
 
 		private static void sendEmail( EmailMessage message, bool isDeveloperNotificationEmail ) {
-			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
-				sendEmailWithSmtpServer( null, message );
-			else {
-				EmailSendingService service;
-				if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live ) {
-					var liveConfig = ConfigurationStatics.InstallationConfiguration.LiveInstallationConfiguration;
-					service = liveConfig.EmailSendingService;
-				}
-				else {
-					if( !isDeveloperNotificationEmail )
-						alterMessageForIntermediateInstallation( message );
-
-					var intermediateConfig = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
-					service = intermediateConfig.EmailSendingService;
-				}
-
-				if( service is SendGrid )
-					sendEmailWithSendGrid( service as SendGrid, message );
-				else if( service is SmtpServer )
-					sendEmailWithSmtpServer( service as SmtpServer, message );
-				else
-					throw new ApplicationException( "Failed to find an email-sending provider in the installation configuration file." );
-			}
+			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Intermediate && !isDeveloperNotificationEmail )
+				alterMessageForIntermediateInstallation( message );
+			emailSender( message );
 		}
 
 		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {

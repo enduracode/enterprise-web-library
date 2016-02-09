@@ -3,6 +3,7 @@ using System.Linq;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -65,6 +66,7 @@ namespace EnterpriseWebLibrary {
 				BlobFileOps.Init();
 				DataAccessStatics.Init();
 				DataAccessState.Init( mainDataAccessStateGetter );
+				EmailStatics.Init();
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
 				InstallationSupportUtility.ConfigurationLogic.Init1();
