@@ -199,10 +199,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					buildMessageInstallation.Id = installationConfigurationFile.rsisInstallationId;
 					buildMessageInstallation.Name = installationConfigurationFile.installedInstallation.name;
 					buildMessageInstallation.ShortName = installationConfigurationFile.installedInstallation.shortName;
-					buildMessageInstallation.IsLiveInstallation = installationConfigurationFile.installedInstallation.InstallationTypeConfiguration != null
-						                                              ? installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is
-						                                                LiveInstallationConfiguration
-						                                              : installationConfigurationFile.installedInstallation.IsLiveInstallation;
+					buildMessageInstallation.IsLiveInstallation =
+						installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
 					buildMessageInstallation.ConfigurationPackage = ZipOps.ZipFolderAsByteArray( installationConfigurationFolderPath );
 					build.Installations.Add( buildMessageInstallation );
 					operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;

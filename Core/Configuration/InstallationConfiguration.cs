@@ -83,10 +83,9 @@ namespace EnterpriseWebLibrary.Configuration {
 			// configuration is system-wide (technically installation-wide) and not app-specific like Web.config and app.config. Second, it could be disastrous to
 			// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
 			// could potentially be served up to users.
-			configurationFolderPath =
-				EwlStatics.CombinePaths(
-					InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
-					ConfigurationFolderName );
+			configurationFolderPath = EwlStatics.CombinePaths(
+				InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
+				ConfigurationFolderName );
 
 
 			// Do not perform schema validation for non-development installations because the schema files may not be available. For development installations, also
@@ -114,9 +113,7 @@ namespace EnterpriseWebLibrary.Configuration {
 				                                          : EwlStatics.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName );
 
 			// installation standard configuration
-			var installationStandardConfigurationFilePath = EwlStatics.CombinePaths(
-				installationConfigurationFolderPath,
-				InstallationStandardConfigurationFileName );
+			var installationStandardConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationStandardConfigurationFileName );
 			installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
 
 
@@ -287,14 +284,11 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// </summary>
 		public InstallationType InstallationType {
 			get {
-				if( isDevelopmentInstallation )
-					return InstallationType.Development;
-				bool isLive;
-				if( installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration != null )
-					isLive = installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
-				else
-					isLive = installationStandardConfiguration.installedInstallation.IsLiveInstallation;
-				return isLive ? InstallationType.Live : InstallationType.Intermediate;
+				return isDevelopmentInstallation
+					       ? InstallationType.Development
+					       : installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
+						         ? InstallationType.Live
+						         : InstallationType.Intermediate;
 			}
 		}
 
