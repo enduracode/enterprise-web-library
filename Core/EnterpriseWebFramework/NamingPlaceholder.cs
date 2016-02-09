@@ -8,28 +8,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class NamingPlaceholder: Control, INamingContainer, ControlTreeDataLoader {
 		private readonly IEnumerable<Control> childControls;
-		private readonly UpdateRegionSet updateRegionSet;
+		private readonly IEnumerable<UpdateRegionSet> updateRegionSets;
 
 		/// <summary>
 		/// Creates a naming placeholder. Add all child controls now; do not use AddControlsReturnThis at any time.
 		/// </summary>
 		/// <param name="childControls"></param>
-		/// <param name="updateRegionSet">The intermediate-post-back update-region set that this naming placeholder will be a part of.</param>
-		public NamingPlaceholder( IEnumerable<Control> childControls, UpdateRegionSet updateRegionSet = null ) {
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this naming placeholder will be a part of.</param>
+		public NamingPlaceholder( IEnumerable<Control> childControls, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
 			this.childControls = childControls.ToArray();
-			this.updateRegionSet = updateRegionSet;
+			this.updateRegionSets = updateRegionSets;
 		}
 
 		void ControlTreeDataLoader.LoadData() {
 			this.AddControlsReturnThis( childControls );
 
-			EwfPage.Instance.AddUpdateRegionLinker( new UpdateRegionLinker( this,
-			                                                                "",
-			                                                                updateRegionSet != null
-				                                                                ? new PreModificationUpdateRegion( updateRegionSet, this.ToSingleElementArray, () => "" )
-					                                                                  .ToSingleElementArray()
-				                                                                : new PreModificationUpdateRegion[ 0 ],
-			                                                                arg => this.ToSingleElementArray() ) );
+			EwfPage.Instance.AddUpdateRegionLinker(
+				new UpdateRegionLinker(
+					this,
+					"",
+					new PreModificationUpdateRegion( updateRegionSets, this.ToSingleElementArray, () => "" ).ToSingleElementArray(),
+					arg => this.ToSingleElementArray() ) );
 		}
 	}
 }

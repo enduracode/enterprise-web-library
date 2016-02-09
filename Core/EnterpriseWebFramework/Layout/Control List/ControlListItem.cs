@@ -8,17 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ControlListItem {
 		internal readonly IEnumerable<Control> ChildControls;
 		internal readonly string Id;
-		internal readonly UpdateRegionSet UpdateRegionSet;
-		internal readonly UpdateRegionSet RemovalUpdateRegionSet;
+		internal readonly IEnumerable<UpdateRegionSet> UpdateRegionSets;
+		internal readonly IEnumerable<UpdateRegionSet> RemovalUpdateRegionSets;
 
 		/// <summary>
 		/// Creates a control-list item.
 		/// </summary>
 		/// <param name="childControls">The item content.</param>
-		/// <param name="updateRegionSet">The intermediate-post-back update-region set that this item will be a part of.</param>
-		public ControlListItem( IEnumerable<Control> childControls, UpdateRegionSet updateRegionSet = null ) {
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		public ControlListItem( IEnumerable<Control> childControls, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
 			ChildControls = childControls;
-			UpdateRegionSet = updateRegionSet;
+			UpdateRegionSets = updateRegionSets;
 		}
 
 		/// <summary>
@@ -27,13 +27,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="childControls">The item content.</param>
 		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
 		/// intermediate post-back. Do not pass null.</param>
-		/// <param name="updateRegionSet">The intermediate-post-back update-region set that this item will be a part of.</param>
-		/// <param name="removalUpdateRegionSet">The intermediate-post-back update-region set that this item's removal will be a part of.</param>
-		public ControlListItem( IEnumerable<Control> childControls, string id, UpdateRegionSet updateRegionSet = null, UpdateRegionSet removalUpdateRegionSet = null ) {
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
+		public ControlListItem(
+			IEnumerable<Control> childControls, string id, IEnumerable<UpdateRegionSet> updateRegionSets = null,
+			IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null ) {
 			ChildControls = childControls;
 			Id = id;
-			UpdateRegionSet = updateRegionSet;
-			RemovalUpdateRegionSet = removalUpdateRegionSet;
+			UpdateRegionSets = updateRegionSets;
+			RemovalUpdateRegionSets = removalUpdateRegionSets;
 		}
 	}
 }

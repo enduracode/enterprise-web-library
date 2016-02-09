@@ -479,7 +479,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						var preModRegions =
 							updateRegionLinkers.SelectMany(
 								i => i.PreModificationRegions,
-								( linker, region ) => new { region.Set, region.ControlGetter, linker.Key, region.ArgumentGetter } ).Where( i => regionSets.Contains( i.Set ) ).ToArray();
+								( linker, region ) => new { region.Sets, region.ControlGetter, linker.Key, region.ArgumentGetter } )
+								.Where( i => regionSets.Overlaps( i.Sets ) )
+								.ToArray();
 						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
 						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
@@ -797,7 +799,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptStartUpLogic() {
-			var controlInitStatements = getDescendants( this, i => true ).Where( i => i.Item2 != null ).Select( i => i.Item2() ).Aggregate( ( a, b ) => a + b );
+			var controlInitStatements = getDescendants( this, i => true )
+				.Where( i => i.Item2 != null )
+				.Select( i => i.Item2() )
+				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
 
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
