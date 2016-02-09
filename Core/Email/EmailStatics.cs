@@ -41,70 +41,6 @@ namespace EnterpriseWebLibrary.Email {
 			}
 		}
 
-		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
-			message.From = defaultFromEmailAddress;
-			message.ToAddresses.AddRange( getDeveloperEmailAddresses() );
-			sendEmail( message, true );
-		}
-
-		/// <summary>
-		/// After setting the From property to the from address specified in the config file, sends the specified mail message using the SMTP server specified in
-		/// the config file.
-		/// </summary>
-		public static void SendEmailWithDefaultFromAddress( EmailMessage message ) {
-			message.From = defaultFromEmailAddress;
-			SendEmail( message );
-		}
-
-		private static EmailAddress defaultFromEmailAddress {
-			get {
-				return new EmailAddress(
-					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
-					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
-			}
-		}
-
-		/// <summary>
-		/// Sends the specified mail message using the SMTP server specified in the config file.
-		/// </summary>
-		public static void SendEmail( EmailMessage message ) {
-			sendEmail( message, false );
-		}
-
-		private static void sendEmail( EmailMessage message, bool isDeveloperNotificationEmail ) {
-			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Intermediate && !isDeveloperNotificationEmail )
-				alterMessageForIntermediateInstallation( message );
-			emailSender( message );
-		}
-
-		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
-			var originalInfoParagraph =
-				"Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-					m.From.ToMailAddress().ToString(),
-					m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine + Environment.NewLine;
-
-			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
-			// bad idea to mix testing and demo mail into deliverability reports for live mail.
-			var config = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
-			m.From = new EmailAddress( config.EmailFromAddress, config.EmailFromName );
-
-			// Don't actually send email to recipients (they may be real people).
-			m.ToAddresses.Clear();
-			m.CcAddresses.Clear();
-			m.BccAddresses.Clear();
-
-			if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
-				m.ToAddresses.Add( new EmailAddress( "system-manager@enterpriseweblibrary.com", "EWL System Manager" ) );
-				m.CustomHeaders.Add( Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
-			}
-			else {
-				m.ToAddresses.AddRange( getDeveloperEmailAddresses() );
-				m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
-			}
-
-			m.BodyHtml = originalInfoParagraph.GetTextAsEncodedHtml() + m.BodyHtml;
-		}
-
 		private static void sendEmailWithSendGrid( SendGrid sendGrid, EmailMessage message ) {
 			// We want this method to use the SendGrid API (https://github.com/sendgrid/sendgrid-csharp), but as of 20 June 2014 it looks like the SendGrid Web API
 			// does not support CC recipients!
@@ -167,6 +103,70 @@ namespace EnterpriseWebLibrary.Email {
 				if( !string.IsNullOrEmpty( smtpClient.Host ) )
 					smtpClient.Dispose();
 			}
+		}
+
+		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
+			message.From = defaultFromEmailAddress;
+			message.ToAddresses.AddRange( getDeveloperEmailAddresses() );
+			sendEmail( message, true );
+		}
+
+		/// <summary>
+		/// After setting the From property to the from address specified in the config file, sends the specified mail message using the SMTP server specified in
+		/// the config file.
+		/// </summary>
+		public static void SendEmailWithDefaultFromAddress( EmailMessage message ) {
+			message.From = defaultFromEmailAddress;
+			SendEmail( message );
+		}
+
+		private static EmailAddress defaultFromEmailAddress {
+			get {
+				return new EmailAddress(
+					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
+					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
+			}
+		}
+
+		/// <summary>
+		/// Sends the specified mail message using the SMTP server specified in the config file.
+		/// </summary>
+		public static void SendEmail( EmailMessage message ) {
+			sendEmail( message, false );
+		}
+
+		private static void sendEmail( EmailMessage message, bool isDeveloperNotificationEmail ) {
+			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Intermediate && !isDeveloperNotificationEmail )
+				alterMessageForIntermediateInstallation( message );
+			emailSender( message );
+		}
+
+		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
+			var originalInfoParagraph =
+				"Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
+					m.From.ToMailAddress().ToString(),
+					m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine + Environment.NewLine;
+
+			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
+			// bad idea to mix testing and demo mail into deliverability reports for live mail.
+			var config = ConfigurationStatics.InstallationConfiguration.IntermediateInstallationConfiguration;
+			m.From = new EmailAddress( config.EmailFromAddress, config.EmailFromName );
+
+			// Don't actually send email to recipients (they may be real people).
+			m.ToAddresses.Clear();
+			m.CcAddresses.Clear();
+			m.BccAddresses.Clear();
+
+			if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
+				m.ToAddresses.Add( new EmailAddress( "system-manager@enterpriseweblibrary.com", "EWL System Manager" ) );
+				m.CustomHeaders.Add( Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
+			}
+			else {
+				m.ToAddresses.AddRange( getDeveloperEmailAddresses() );
+				m.Subject = "[{0}] ".FormatWith( ConfigurationStatics.InstallationConfiguration.FullShortName ) + m.Subject;
+			}
+
+			m.BodyHtml = originalInfoParagraph.GetTextAsEncodedHtml() + m.BodyHtml;
 		}
 
 		/// <summary>
