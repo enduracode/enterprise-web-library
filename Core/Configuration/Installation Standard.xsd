@@ -131,8 +131,7 @@
 		<complexContent>
 			<extension base="rs:EmailSendingService">
 				<sequence>
-					<element name="UserName" type="string" />
-					<element name="Password" type="string" />
+					<element name="ApiKey" type="string" />
 				</sequence>
 			</extension>
 		</complexContent>

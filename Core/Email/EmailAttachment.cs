@@ -5,10 +5,10 @@ namespace EnterpriseWebLibrary.Email {
 	/// An email attachment.
 	/// </summary>
 	public class EmailAttachment {
-		private readonly Stream stream;
+		internal readonly Stream Stream;
 		private readonly string contentType;
-		private readonly string attachmentDisplayName;
-		private readonly string filePath;
+		internal readonly string AttachmentDisplayName;
+		internal readonly string FilePath;
 
 		/// <summary>
 		/// Creates an email attachment. The stream must contain the contents of the attachment, be readable and must not be closed.
@@ -17,27 +17,27 @@ namespace EnterpriseWebLibrary.Email {
 		/// sending the file to the browser and emailing it.
 		/// </summary>
 		public EmailAttachment( Stream stream, string contentType, string attachmentDisplayName ) {
-			this.stream = stream;
+			Stream = stream;
 			this.contentType = contentType;
-			this.attachmentDisplayName = attachmentDisplayName;
+			AttachmentDisplayName = attachmentDisplayName;
 		}
 
 		/// <summary>
 		/// Creates an email attachment.
 		/// </summary>
 		public EmailAttachment( string filePath ) {
-			this.filePath = filePath;
+			FilePath = filePath;
 		}
 
 		/// <summary>
 		/// Converts this to a System.Net.Mail.Attachment.
 		/// </summary>
 		internal System.Net.Mail.Attachment ToAttachment() {
-			if( stream == null )
-				return new System.Net.Mail.Attachment( filePath );
+			if( Stream == null )
+				return new System.Net.Mail.Attachment( FilePath );
 
-			var attachment = new System.Net.Mail.Attachment( stream, contentType );
-			attachment.ContentDisposition.FileName = attachmentDisplayName;
+			var attachment = new System.Net.Mail.Attachment( Stream, contentType );
+			attachment.ContentDisposition.FileName = AttachmentDisplayName;
 			return attachment;
 		}
 	}

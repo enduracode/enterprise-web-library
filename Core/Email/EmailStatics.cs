@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using Humanizer;
 
@@ -31,8 +34,18 @@ namespace EnterpriseWebLibrary.Email {
 
 				var sendGridService = service as Configuration.InstallationStandard.SendGrid;
 				var smtpServerService = service as Configuration.InstallationStandard.SmtpServer;
-				if( sendGridService != null )
-					emailSender = message => sendEmailWithSendGrid( sendGridService, message );
+				if( sendGridService != null ) {
+					var webTransport = new SendGrid.Web( sendGridService.ApiKey );
+					emailSender = message => {
+						var sendGridMessage = getSendGridMessage( message );
+						try {
+							webTransport.DeliverAsync( sendGridMessage ).Wait();
+						}
+						catch( Exception e ) {
+							throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
+						}
+					};
+				}
 				else if( smtpServerService != null )
 					emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
 				else
@@ -40,29 +53,32 @@ namespace EnterpriseWebLibrary.Email {
 			}
 		}
 
-		private static void sendEmailWithSendGrid( Configuration.InstallationStandard.SendGrid sendGrid, EmailMessage message ) {
-			// We want this method to use the SendGrid API (https://github.com/sendgrid/sendgrid-csharp), but as of 20 June 2014 it looks like the SendGrid Web API
-			// does not support CC recipients!
+		private static SendGrid.SendGridMessage getSendGridMessage( EmailMessage message ) {
+			var m = new SendGrid.SendGridMessage();
 
-			// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
-			var smtpClient = new System.Net.Mail.SmtpClient( "smtp.sendgrid.net", 587 );
-			try {
-				smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
-				smtpClient.Credentials = new System.Net.NetworkCredential( sendGrid.UserName, sendGrid.Password );
+			m.From = message.From.ToMailAddress();
+			m.ReplyTo = message.ReplyToAddresses.Select( i => i.ToMailAddress() ).ToArray();
 
-				using( var m = new System.Net.Mail.MailMessage() ) {
-					message.ConfigureMailMessage( m );
-					try {
-						smtpClient.Send( m );
-					}
-					catch( System.Net.Mail.SmtpException e ) {
-						throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
-					}
-				}
+			m.To = message.ToAddresses.Select( i => i.ToMailAddress() ).ToArray();
+			m.Cc = message.CcAddresses.Select( i => i.ToMailAddress() ).ToArray();
+			m.Bcc = message.BccAddresses.Select( i => i.ToMailAddress() ).ToArray();
+
+			m.Subject = message.Subject;
+
+			foreach( var i in message.CustomHeaders )
+				m.Headers.Add( i.Item1, i.Item2 );
+
+			m.Text = htmlToPlainText( message.BodyHtml );
+			m.Html = message.BodyHtml;
+
+			foreach( var i in message.Attachments ) {
+				if( i.Stream == null )
+					m.AddAttachment( i.FilePath );
+				else
+					m.AddAttachment( i.Stream, i.AttachmentDisplayName );
 			}
-			finally {
-				smtpClient.Dispose();
-			}
+
+			return m;
 		}
 
 		private static void sendEmailWithSmtpServer( Configuration.InstallationStandard.SmtpServer smtpServer, EmailMessage message ) {
@@ -88,7 +104,27 @@ namespace EnterpriseWebLibrary.Email {
 				}
 
 				using( var m = new System.Net.Mail.MailMessage() ) {
-					message.ConfigureMailMessage( m );
+					m.From = message.From.ToMailAddress();
+					addAddressesToMailAddressCollection( message.ReplyToAddresses, m.ReplyToList );
+
+					addAddressesToMailAddressCollection( message.ToAddresses, m.To );
+					addAddressesToMailAddressCollection( message.CcAddresses, m.CC );
+					addAddressesToMailAddressCollection( message.BccAddresses, m.Bcc );
+
+					m.Subject = message.Subject;
+
+					foreach( var i in message.CustomHeaders )
+						m.Headers.Add( i.Item1, i.Item2 );
+
+					m.Body = htmlToPlainText( message.BodyHtml );
+
+					// Add an alternate view for the HTML part.
+					m.AlternateViews.Add(
+						System.Net.Mail.AlternateView.CreateAlternateViewFromString( message.BodyHtml, new System.Net.Mime.ContentType( ContentTypes.Html ) ) );
+
+					foreach( var attachment in message.Attachments )
+						m.Attachments.Add( attachment.ToAttachment() );
+
 					try {
 						smtpClient.Send( m );
 					}
@@ -102,6 +138,61 @@ namespace EnterpriseWebLibrary.Email {
 				if( !string.IsNullOrEmpty( smtpClient.Host ) )
 					smtpClient.Dispose();
 			}
+		}
+
+		private static void addAddressesToMailAddressCollection(
+			IEnumerable<EmailAddress> emailAddressCollection, System.Net.Mail.MailAddressCollection mailAddressCollection ) {
+			foreach( var address in emailAddressCollection )
+				mailAddressCollection.Add( address.ToMailAddress() );
+		}
+
+		private static string htmlToPlainText( string html ) {
+			const string emptyString = "";
+			const string singleSpace = " ";
+
+			// Maintains insert-order. Sadly, is not generic.
+			var regexToReplacements = new OrderedDictionary
+				{
+					{ "(\r\n|\r|\n)+", singleSpace },
+					{ "\t", emptyString },
+					{ @"/\*.*\*/", emptyString },
+					{ @"<!--.*-->", emptyString },
+					{ @"\s+", singleSpace },
+					{ @"<\s*head([^>])*>.*(<\s*(/)\s*head\s*>)", emptyString },
+					{ @"<\s*script([^>])*>.*(<\s*(/)\s*script\s*>)", emptyString },
+					{ @"<\s*style([^>])*>.*(<\s*(/)\s*style\s*>)", emptyString },
+					{ @"<\s*td([^>])*>", "\t" },
+					{ @"<\s*br\s*/?>", Environment.NewLine },
+					{ @"<\s*li\s*>", Environment.NewLine },
+					{ @"<\s*div([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ @"<\s*tr([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ @"<\s*p([^>])*>", Environment.NewLine + Environment.NewLine },
+					{ RegularExpressions.HtmlTag, emptyString },
+					{ @"<![^>]*>", emptyString },
+					{ @"&bull;", " * " },
+					{ @"&lsaquo;", "<" },
+					{ @"&rsaquo;", ">" },
+					{ @"&trade;", "(tm)" },
+					{ @"&frasl;", "/" },
+					{ @"&lt;", "<" },
+					{ @"&gt;", ">" },
+					{ @"&copy;", "(c)" },
+					{ @"&reg;", "(r)" },
+					{ @"&(.{2,6});", emptyString },
+					{ Environment.NewLine + @"\s+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
+					{ @"\t\s+\t", "\t\t" },
+					{ @"\t\s+" + Environment.NewLine, "\t" + Environment.NewLine },
+					{ Environment.NewLine + @"\s+\t", Environment.NewLine + "\t" },
+					{ Environment.NewLine + @"\t+" + Environment.NewLine, Environment.NewLine + Environment.NewLine },
+					{ Environment.NewLine + @"\t+", Environment.NewLine + "\t" }
+				};
+
+			return
+				regexToReplacements.Cast<DictionaryEntry>()
+					.Aggregate(
+						html,
+						( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+					.Trim();
 		}
 
 		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
