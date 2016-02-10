@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using Humanizer;
 
@@ -39,7 +40,7 @@ namespace EnterpriseWebLibrary.Email {
 					emailSender = message => {
 						var sendGridMessage = getSendGridMessage( message );
 						try {
-							webTransport.DeliverAsync( sendGridMessage ).Wait();
+							Task.Run( () => webTransport.DeliverAsync( sendGridMessage ) ).Wait();
 						}
 						catch( Exception e ) {
 							throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
