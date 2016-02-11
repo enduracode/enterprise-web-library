@@ -1,8 +1,8 @@
 using System.IO;
 using System.Reflection;
-using Humanizer;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader {
 	partial class Upload: EwfPage {
@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									delegate {
 										var file = Request.InputStream;
 										using( var memory = new MemoryStream() ) {
-											IoMethods.CopyStream( file, memory );
+											file.CopyTo( memory );
 
 
 											// NOTE: Put in code to not trust any of the input.

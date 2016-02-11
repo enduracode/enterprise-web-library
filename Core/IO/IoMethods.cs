@@ -138,9 +138,7 @@ namespace EnterpriseWebLibrary.IO {
 			return Directory.GetDirectories( folderPath ).Select( Path.GetFileName ).ToList();
 		}
 
-		/// <summary>
-		/// Copies one stream into another using the specified buffer size. Default buffer size is 64K.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 May 2016. Please use Stream.CopyTo instead." ) ]
 		public static void CopyStream( Stream sourceStream, Stream destinationStream, int bufferSize = 65536 ) {
 			var buffer = new byte[ bufferSize ];
 

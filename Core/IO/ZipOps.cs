@@ -156,7 +156,7 @@ namespace EnterpriseWebLibrary.IO {
 						Directory.CreateDirectory( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) );
 					else {
 						using( var outputStream = IoMethods.GetFileStreamForWrite( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) ) )
-							IoMethods.CopyStream( zipInputStream, outputStream );
+							zipInputStream.CopyTo( outputStream );
 					}
 				}
 			}
@@ -191,7 +191,7 @@ namespace EnterpriseWebLibrary.IO {
 					if( entry.IsDirectory )
 						continue;
 					using( var outputStream = new MemoryStream() ) {
-						IoMethods.CopyStream( zipInputStream, outputStream );
+						zipInputStream.CopyTo( outputStream );
 						files.Add( new RsFile( outputStream.ToArray(), entry.Name ) );
 					}
 				}
@@ -228,7 +228,7 @@ namespace EnterpriseWebLibrary.IO {
 
 		private static void writeZipEntry( ZipEntry zipEntry, Stream sourceStream, ZipOutputStream zipOutputStream ) {
 			zipOutputStream.PutNextEntry( zipEntry );
-			IoMethods.CopyStream( sourceStream, zipOutputStream );
+			sourceStream.CopyTo( zipOutputStream );
 		}
 	}
 }

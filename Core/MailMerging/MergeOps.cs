@@ -165,7 +165,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 					using( var sourcePdfMemoryStreamCopy = new MemoryStream() ) {
 						// Aspose has decided that in the new Facades PDF library, they will close your source stream for you when you call doc.Save.
 						sourcePdfStream.Reset();
-						IoMethods.CopyStream( sourcePdfStream, sourcePdfMemoryStreamCopy );
+						sourcePdfStream.CopyTo( sourcePdfMemoryStreamCopy );
 
 						var doc = new Aspose.Pdf.Facades.Form( sourcePdfMemoryStreamCopy );
 						foreach( var mergeField in doc.FieldNames.Where( mergeField => !mergeField.StartsWith( "noMerge" ) ) ) {

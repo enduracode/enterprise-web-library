@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
-using EnterpriseWebLibrary.IO;
 using MimeTypes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -112,7 +111,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					                                          new EwfResponseBodyCreator(
 					                                          responseStream => {
 						                                          using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
-							                                          IoMethods.CopyStream( fileStream, responseStream );
+							                                          fileStream.CopyTo( responseStream );
 					                                          } ) );
 				responseWriter = urlVersionString.Any()
 					                 ? new EwfSafeResponseWriter(

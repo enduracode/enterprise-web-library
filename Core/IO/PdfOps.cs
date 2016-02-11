@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Aspose.Pdf.Facades;
 using Humanizer;
-using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -39,7 +38,7 @@ namespace EnterpriseWebLibrary.IO {
 
 			// Save the PDf to the output stream
 			using( var bookMarksDisplayedPdf = new MemoryStream( bookMarkedPdf ) )
-				IoMethods.CopyStream( bookMarksDisplayedPdf, outputStream );
+				bookMarksDisplayedPdf.CopyTo( outputStream );
 		}
 
 		/// <summary>
@@ -109,17 +108,18 @@ namespace EnterpriseWebLibrary.IO {
 					const string concatTwoPdfs = "ConcatTwo.pdf";
 					using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatTwoPdfs ) ) )
 						ConcatPdfs( new[] { onePage, twoPage }, concatFile );
-					explanations.Add( Tuple.Create( concatTwoPdfs, "This file should look like {0} immediately followed by {1}.".FormatWith( onePagePdfPath, twoPagePdfPath ) ) );
+					explanations.Add(
+						Tuple.Create( concatTwoPdfs, "This file should look like {0} immediately followed by {1}.".FormatWith( onePagePdfPath, twoPagePdfPath ) ) );
 
 					resetFileStream( onePage, twoPage );
 					using( var threePage = File.OpenRead( threePagePdfPath ) ) {
 						const string concatThreePdfs = "ConcatThree.pdf";
 						using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatThreePdfs ) ) )
 							ConcatPdfs( new[] { onePage, twoPage, threePage }, concatFile );
-						explanations.Add( Tuple.Create( concatThreePdfs,
-						                                "This file should look like {0} immediately followed by {1} immediately followed by {2}.".FormatWith( onePagePdfPath,
-						                                                                                                                                      twoPagePdfPath,
-						                                                                                                                                      threePagePdfPath ) ) );
+						explanations.Add(
+							Tuple.Create(
+								concatThreePdfs,
+								"This file should look like {0} immediately followed by {1} immediately followed by {2}.".FormatWith( onePagePdfPath, twoPagePdfPath, threePagePdfPath ) ) );
 					}
 				}
 			}
@@ -127,7 +127,7 @@ namespace EnterpriseWebLibrary.IO {
 			//CreateBookmarkedPdf
 
 			using( var onePage = new MemoryStream() ) {
-				IoMethods.CopyStream( File.OpenRead( onePagePdfPath ), onePage );
+				File.OpenRead( onePagePdfPath ).CopyTo( onePage );
 				const string bookmarkOnePdf = "BookmarkOne.pdf";
 				const string bookmarkTitle = "Bookmark 1";
 				using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkOnePdf ) ) )
@@ -135,20 +135,23 @@ namespace EnterpriseWebLibrary.IO {
 				explanations.Add( Tuple.Create( bookmarkOnePdf, "This should be {0} labeled with one bookmark named {1}.".FormatWith( onePagePdfPath, bookmarkTitle ) ) );
 
 				using( var twoPage = new MemoryStream() ) {
-					IoMethods.CopyStream( File.OpenRead( twoPagePdfPath ), twoPage );
+					File.OpenRead( twoPagePdfPath ).CopyTo( twoPage );
 					const string bookmarkTwoPdf = "BookmarkTwo.pdf";
 					const string firstBookmarkTitle = "First bookmark";
 					const string secondBookmarkTitle = "Second bookmark";
 					using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkTwoPdf ) ) )
 						CreateBookmarkedPdf( new[] { Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ) }, bookmarkFile );
-					explanations.Add( Tuple.Create( bookmarkTwoPdf,
-					                                "This should be {0} labeled with bookmark named {1} followed by {2} with the title of {3}.".FormatWith( onePagePdfPath,
-					                                                                                                                                        firstBookmarkTitle,
-					                                                                                                                                        twoPagePdfPath,
-					                                                                                                                                        secondBookmarkTitle ) ) );
+					explanations.Add(
+						Tuple.Create(
+							bookmarkTwoPdf,
+							"This should be {0} labeled with bookmark named {1} followed by {2} with the title of {3}.".FormatWith(
+								onePagePdfPath,
+								firstBookmarkTitle,
+								twoPagePdfPath,
+								secondBookmarkTitle ) ) );
 
 					using( var threePage = new MemoryStream() ) {
-						IoMethods.CopyStream( File.OpenRead( threePagePdfPath ), threePage );
+						File.OpenRead( threePagePdfPath ).CopyTo( threePage );
 						const string bookmarkThreePdf = "BookmarkThree.pdf";
 						const string thirdBookmarkTItle = "Third bookmark";
 						using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkThreePdf ) ) ) {
@@ -156,14 +159,16 @@ namespace EnterpriseWebLibrary.IO {
 								new[] { Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ), Tuple.Create( thirdBookmarkTItle, threePage ) },
 								bookmarkFile );
 						}
-						explanations.Add( Tuple.Create( bookmarkThreePdf,
-						                                "This should be {0} labeled with bookmark named {1} followed by {2} with the title of {3} followed by {4} with the title of {5}."
-						                                	.FormatWith( onePagePdfPath,
-						                                	             firstBookmarkTitle,
-						                                	             twoPagePdfPath,
-						                                	             secondBookmarkTitle,
-						                                	             threePagePdfPath,
-						                                	             thirdBookmarkTItle ) ) );
+						explanations.Add(
+							Tuple.Create(
+								bookmarkThreePdf,
+								"This should be {0} labeled with bookmark named {1} followed by {2} with the title of {3} followed by {4} with the title of {5}.".FormatWith(
+									onePagePdfPath,
+									firstBookmarkTitle,
+									twoPagePdfPath,
+									secondBookmarkTitle,
+									threePagePdfPath,
+									thirdBookmarkTItle ) ) );
 					}
 				}
 			}

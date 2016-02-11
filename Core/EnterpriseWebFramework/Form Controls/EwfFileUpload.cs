@@ -13,15 +13,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private RsFile postBackValue;
 
 		public EwfFileUpload() {
-			formValue = new FormValue<HttpPostedFile>( () => null,
-			                                           () => this.IsOnPage() ? UniqueID : "",
-			                                           v => "",
-			                                           rawValue =>
-			                                           rawValue != null
-				                                           ? PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue( rawValue.ContentLength > 0
-					                                                                                                                 ? rawValue
-					                                                                                                                 : null )
-				                                           : PostBackValueValidationResult<HttpPostedFile>.CreateInvalid() );
+			formValue = new FormValue<HttpPostedFile>(
+				() => null,
+				() => this.IsOnPage() ? UniqueID : "",
+				v => "",
+				rawValue =>
+				rawValue != null
+					? PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue( rawValue.ContentLength > 0 ? rawValue : null )
+					: PostBackValueValidationResult<HttpPostedFile>.CreateInvalid() );
 		}
 
 		void ControlTreeDataLoader.LoadData() {
@@ -43,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return null;
 
 				using( var ms = new MemoryStream() ) {
-					IoMethods.CopyStream( value.InputStream, ms );
+					value.InputStream.CopyTo( ms );
 					postBackValue = new RsFile( ms.ToArray(), Path.GetFileName( value.FileName ), contentType: value.ContentType );
 				}
 			}
