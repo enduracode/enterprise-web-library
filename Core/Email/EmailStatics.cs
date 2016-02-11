@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.Email {
 				else if( smtpServerService != null )
 					emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
 				else
-					throw new ApplicationException( "Failed to find an email-sending provider in the installation configuration file." );
+					emailSender = message => { throw new ApplicationException( "Failed to find an email-sending service in the installation configuration file." ); };
 			}
 		}
 
