@@ -39,10 +39,10 @@ namespace EnterpriseWebLibrary.IO {
 		}
 
 		/// <summary>
-		/// Writes the current line to the file using the given open stream writer.
+		/// Writes the current line to the file using the given open text writer.
 		/// This clears the current line after writing.
 		/// </summary>
-		public void WriteCurrentLineToFile( StreamWriter writer ) {
+		public void WriteCurrentLineToFile( TextWriter writer ) {
 			line = line.TrimEnd( delimiter );
 			writer.WriteLine( line );
 			writer.Flush();
