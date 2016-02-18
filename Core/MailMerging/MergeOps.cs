@@ -212,7 +212,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 			var excelFile = new ExcelFileWriter();
 			if( rowTree.Rows.Any() ) {
 				foreach( var fieldName in fieldNames ) {
-					if( !rowTree.Rows.First().Values.Any( i => i.Name == fieldName ) ) {
+					if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) ) {
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
 					}
