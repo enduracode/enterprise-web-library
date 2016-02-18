@@ -56,7 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					eTag = eTagBase + ( lastModificationDateAndTimeGetter != null ? GetUrlVersionString( lastModificationDateAndTime.Value ) : "" );
 				else {
 					// Buffer the response body.
-					var responseWithBufferedBody = new EwfResponse(
+					var responseWithBufferedBody = EwfResponse.Create(
 						response.Value.ContentType,
 						response.Value.BodyCreator.GetBufferedBodyCreator(),
 						fileNameCreator: response.Value.FileNameCreator );
@@ -120,7 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfSafeResponseWriter( Func<string> cssGetter, string urlVersionString, Func<ResponseMemoryCachingSetup> memoryCachingSetupGetter ) {
 			var memoryCachingSetup = new Lazy<ResponseMemoryCachingSetup>( memoryCachingSetupGetter );
 			writer = createWriter(
-				() => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+				() => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 				urlVersionString,
 				"",
 				() => memoryCachingSetup.Value.LastModificationDateAndTime,

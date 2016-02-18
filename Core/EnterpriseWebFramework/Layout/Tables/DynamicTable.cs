@@ -437,18 +437,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public PostBackAction ExportToExcel() {
 			return new PostBackAction(
 				new SecondaryResponse(
-					() => new EwfResponse(
-						      () => caption.Any() ? caption : "Excel export",
-						      () => {
-							      var workbook = new ExcelFileWriter();
-							      foreach( var rowSetup in rowSetups ) {
-								      if( rowSetup.IsHeader )
-									      workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
-								      else
-									      workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
-							      }
-							      return workbook;
-						      } ) ) );
+					() => EwfResponse.CreateExcelWorkbookResponse(
+						() => caption.Any() ? caption : "Excel export",
+						() => {
+							var workbook = new ExcelFileWriter();
+							foreach( var rowSetup in rowSetups ) {
+								if( rowSetup.IsHeader )
+									workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
+								else
+									workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
+							}
+							return workbook;
+						} ) ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
