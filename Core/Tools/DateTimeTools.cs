@@ -224,5 +224,41 @@ namespace EnterpriseWebLibrary {
 
 			return age;
 		}
+
+		/// <summary>
+		/// Gets the date of the specified day of the week in the specified month.
+		/// </summary>
+		/// <param name="year">The year.</param>
+		/// <param name="month">The month.</param>
+		/// <param name="day">The day of the week.</param>
+		/// <param name="weeksFromFirst">The number of weeks from the first occurrence of the specified day of the week in the month. Pass a negative value to count
+		/// backward from the first occurrence in the next month.</param>
+		// Based on http://stackoverflow.com/a/5422046/35349.
+		public static DateTime GetDateOfDayOfWeekInMonth( int year, int month, DayOfWeek day, int weeksFromFirst ) {
+			var date = new DateTime( year, month, 1 );
+
+			if( weeksFromFirst < 0 )
+				date = date.AddMonths( 1 );
+
+			var offset = day - date.DayOfWeek;
+			if( offset < 0 )
+				offset += 7;
+
+			date = date.AddDays( offset + weeksFromFirst * 7 );
+
+			if( date.Year != year || date.Month != month )
+				throw new ApplicationException( "nonexistent date" );
+
+			return date;
+		}
+
+		/// <summary>
+		/// Returns the number of weeks from the first occurrence of the specified date's day of the week in the month to the specified date.
+		/// </summary>
+		public static int WeeksFromFirstOccurrenceOfDayOfWeekInMonth( this DateTime date, bool countBackwardFromFirstOccurrenceInNextMonth ) {
+			if( countBackwardFromFirstOccurrenceInNextMonth )
+				return ( date.Day - DateTime.DaysInMonth( date.Year, date.Month ) ) / 7 - 1;
+			return ( date.Day - 1 ) / 7;
+		}
 	}
 }
