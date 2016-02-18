@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an Excel workbook response. Automatically converts the specified file name to a safe file name.
 		/// </summary>
 		public static EwfResponse CreateExcelWorkbookResponse( Func<string> extensionlessFileNameCreator, Func<ExcelFileWriter> workbookCreator ) {
-			return new EwfResponse(
+			return Create(
 				ExcelFileWriter.ContentType,
 				new EwfResponseBodyCreator( stream => workbookCreator().SaveToStream( stream ) ),
 				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( extensionlessFileNameCreator() ) );
@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static EwfResponse CreateMergedMsWordDocResponse(
 			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) {
-			return new EwfResponse(
+			return Create(
 				ContentTypes.WordDoc,
 				new EwfResponseBodyCreator(
 					destinationStream => inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
@@ -59,10 +59,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return CreateExcelWorkbookResponse( extensionlessFileNameCreator, () => MergeOps.CreateExcelFileWriter( rowTree, fieldNames, useMsWordFieldNames ) );
 		}
 
-		internal readonly string ContentType;
-		internal readonly Func<string> FileNameCreator;
-		internal readonly EwfResponseBodyCreator BodyCreator;
-
 		/// <summary>
 		/// Creates a response. 
 		/// </summary>
@@ -71,9 +67,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="bodyCreator">The response body creator.</param>
 		/// <param name="fileNameCreator">A function that creates the file name for saving the response. If you return a nonempty string, the response will be
 		/// processed as an attachment with the specified file name. Do not return null from the function.</param>
-		public EwfResponse( string contentType, EwfResponseBodyCreator bodyCreator, Func<string> fileNameCreator = null ) {
+		public static EwfResponse Create( string contentType, EwfResponseBodyCreator bodyCreator, Func<string> fileNameCreator = null ) {
+			return new EwfResponse( contentType, fileNameCreator ?? ( () => "" ), bodyCreator );
+		}
+
+		internal readonly string ContentType;
+		internal readonly Func<string> FileNameCreator;
+		internal readonly EwfResponseBodyCreator BodyCreator;
+
+		private EwfResponse( string contentType, Func<string> fileNameCreator, EwfResponseBodyCreator bodyCreator ) {
 			ContentType = contentType;
-			FileNameCreator = fileNameCreator ?? ( () => "" );
+			FileNameCreator = fileNameCreator;
 			BodyCreator = bodyCreator;
 		}
 
