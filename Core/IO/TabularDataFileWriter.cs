@@ -20,9 +20,9 @@ namespace EnterpriseWebLibrary.IO {
 		void AddValuesToLine( params object[] values );
 
 		/// <summary>
-		/// Writes the current line to the file using the given open stream writer.
+		/// Writes the current line to the file using the given open text writer.
 		/// This clears the current line after writing.
 		/// </summary>
-		void WriteCurrentLineToFile( StreamWriter writer );
+		void WriteCurrentLineToFile( TextWriter writer );
 	}
 }

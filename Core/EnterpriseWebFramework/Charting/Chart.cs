@@ -247,13 +247,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
 							actionGetter: () => new PostBackAction(
 								                    new SecondaryResponse(
-								                    () => new EwfResponse(
-									                          ContentTypes.Csv,
-									                          new EwfResponseBodyCreator(
-									                          output => {
+								                    () => EwfResponse.Create(
+									                    ContentTypes.Csv,
+									                    new EwfResponseBodyCreator(
+									                          writer => {
 										                          var csv = new CsvFileWriter();
-										                          var writer = new StreamWriter( output );
-
 										                          csv.AddValuesToLine( headers.ToArray() );
 										                          csv.WriteCurrentLineToFile( writer );
 										                          foreach( var td in tableData ) {
@@ -261,7 +259,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											                          csv.WriteCurrentLineToFile( writer );
 										                          }
 									                          } ),
-									                          () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ),
+									                    () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ),
 						new TextActionControlStyle( "Export" ),
 						usesSubmitBehavior: false ) );
 			block.Style.Add( "text-align", "right" );

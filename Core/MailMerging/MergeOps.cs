@@ -199,6 +199,49 @@ namespace EnterpriseWebLibrary.MailMerging {
 		}
 
 		/// <summary>
+		/// Creates a comma-separated values (CSV) or tab-separated values file from the top level of a row tree. There will be one column for each merge field
+		/// specified in the list of field names.
+		/// </summary>
+		public static void CreateTabularTextFile( MergeRowTree rowTree, IEnumerable<string> fieldNames, TextWriter destinationWriter, bool useTabAsSeparator = false ) {
+			if( !rowTree.Rows.Any() )
+				return;
+
+			foreach( var fieldName in fieldNames ) {
+				if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) ) {
+					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+					throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
+				}
+			}
+
+			var writer = useTabAsSeparator ? (TabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
+			foreach( var row in rowTree.Rows ) {
+				writer.AddValuesToLine(
+					fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select(
+						mergeValue => {
+							var mergeValueAsString = mergeValue as MergeValue<string>;
+							if( mergeValueAsString != null )
+								return mergeValueAsString.Evaluate( false );
+
+							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+							throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+						} ).Cast<object>().ToArray() );
+
+				writer.WriteCurrentLineToFile( destinationWriter );
+			}
+		}
+
+		/// <summary>
+		/// Gets the names of the merge fields from the top level of the specified row tree that are supported by the CreateTabularTextFile method.
+		/// </summary>
+		public static IEnumerable<string> GetTabularTextSupportedMergeFields( MergeRowTree rowTree ) {
+			return rowTree.Rows.First().Values.Where( mergeValueTypeIsSupportedInTabularText ).Select( v => v.Name );
+		}
+
+		private static bool mergeValueTypeIsSupportedInTabularText( MergeValue mv ) {
+			return mv is MergeValue<string>;
+		}
+
+		/// <summary>
 		/// Creates a single-sheet Excel Workbook from the top level of a row tree and writes it to a stream. There will be one column for each merge field
 		/// specified in the list of field names. Each column head will be named by calling ToEnglishFromCamel on the merge field's name or using the Microsoft Word
 		/// name without modification, the latter if useMsWordFieldNames is true.
@@ -212,7 +255,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 			var excelFile = new ExcelFileWriter();
 			if( rowTree.Rows.Any() ) {
 				foreach( var fieldName in fieldNames ) {
-					if( !rowTree.Rows.First().Values.Any( i => i.Name == fieldName ) ) {
+					if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) ) {
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
 					}

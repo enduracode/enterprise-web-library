@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -23,7 +22,7 @@ namespace EnterpriseWebLibrary.WebSite {
 		protected override EwfSafeResponseWriter responseWriter {
 			get {
 				return new EwfSafeResponseWriter(
-					() => new EwfResponse( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
+					() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
 					EwlStatics.EwlBuildDateTime,
 					() => "getSchema" + info.FileName );
 			}

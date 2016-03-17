@@ -1,6 +1,6 @@
 ﻿using System;
-using Humanizer;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal EwfResponse GetResponse() {
-			return new EwfResponse(
+			return EwfResponse.Create(
 				file.ContentType,
 				new EwfResponseBodyCreator(
 					() => {

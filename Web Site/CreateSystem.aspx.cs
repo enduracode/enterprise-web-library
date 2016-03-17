@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.WebSite {
 						new PostBackAction(
 							new SecondaryResponse(
 							() =>
-							new EwfResponse(
+							EwfResponse.Create(
 								ContentTypes.ApplicationZip,
 								new EwfResponseBodyCreator( createAndZipSystem ),
 								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) );

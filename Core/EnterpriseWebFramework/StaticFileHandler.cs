@@ -101,14 +101,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                   urlVersionString,
 						                   () => new ResponseMemoryCachingSetup( cacheKeyGetter(), staticFileInfo.GetResourceLastModificationDateAndTime() ) )
 					                 : new EwfSafeResponseWriter(
-						                   () => new EwfResponse( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+						                   () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 						                   staticFileInfo.GetResourceLastModificationDateAndTime(),
 						                   memoryCacheKeyGetter: cacheKeyGetter );
 			}
 			else {
-				Func<EwfResponse> responseCreator = () => new EwfResponse(
-					                                          contentType,
-					                                          new EwfResponseBodyCreator(
+				Func<EwfResponse> responseCreator = () => EwfResponse.Create(
+					contentType,
+					new EwfResponseBodyCreator(
 					                                          responseStream => {
 						                                          using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
 							                                          fileStream.CopyTo( responseStream );

@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				return
 					new EwfSafeResponseWriter(
-						new EwfResponse( ContentTypes.PlainText, new EwfResponseBodyCreator( () => new JavaScriptSerializer().Serialize( getItems() ) ) ) );
+						EwfResponse.Create( ContentTypes.PlainText, new EwfResponseBodyCreator( () => new JavaScriptSerializer().Serialize( getItems() ) ) ) );
 			}
 		}
 

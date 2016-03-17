@@ -175,7 +175,7 @@ namespace EnterpriseWebLibrary {
 		/// Do not pass null for text. Passing null for font will result in a generic Sans Serif, 10pt font.
 		/// </summary>
 		public static EwfResponse CreateImageFromText( string text, Font font ) {
-			return new EwfResponse(
+			return EwfResponse.Create(
 				ContentTypes.Png,
 				new EwfResponseBodyCreator(
 					stream => {

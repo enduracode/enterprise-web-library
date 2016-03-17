@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override EwfSafeResponseWriter responseWriter {
 			get {
 				return new EwfSafeResponseWriter(
-					new EwfResponse(
+					EwfResponse.Create(
 						ContentTypes.Json,
 						new EwfResponseBodyCreator(
 							() => {
