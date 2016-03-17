@@ -105,15 +105,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AppRequestState.Instance.UserDisabledByPage = true;
 			try {
 				initEntitySetup();
-				if( EsAsBaseType != null )
-					EsAsBaseType.CreateInfoFromQueryString();
-				createInfoFromQueryString();
+				if( EsAsBaseType != null ) {
+					using( MiniProfiler.Current.Step( "EWF - Create entity-setup info" ) )
+						EsAsBaseType.CreateInfoFromQueryString();
+				}
+				using( MiniProfiler.Current.Step( "EWF - Create page info" ) )
+					createInfoFromQueryString();
 
 				// If the request doesn't match the page's specified security level, redirect with the proper level. Do this before ensuring that the user can access the
 				// page since in certificate authentication systems this can be affected by the connection security level.
 				//
 				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs. We probably
 				// should only do this on GET requests since we don't want to wipe out post backs.
+				bool connectionSecurityIncorrect;
+				using( MiniProfiler.Current.Step( "EWF - Check connection security" ) )
+					connectionSecurityIncorrect = getConnectionSecurityIncorrect();
 				if( connectionSecurityIncorrect )
 					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
 			}
@@ -122,14 +128,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			// This logic depends on the authenticated user and on page and entity setup info objects.
-			if( !InfoAsBaseType.UserCanAccessResource ) {
+			bool userCanAccessResource;
+			using( MiniProfiler.Current.Step( "EWF - Check page authorization" ) )
+				userCanAccessResource = InfoAsBaseType.UserCanAccessResource;
+			if( !userCanAccessResource ) {
 				throw new AccessDeniedException(
 					ConfigurationStatics.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource &&
 					!AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
 			}
 
-			var disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
+			DisabledResourceMode disabledMode;
+			using( MiniProfiler.Current.Step( "EWF - Check alternative page mode" ) )
+				disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
@@ -217,16 +228,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				clearInfo();
 				AppRequestState.Instance.UserDisabledByPage = true;
 				try {
-					if( EsAsBaseType != null )
-						EsAsBaseType.CreateInfoFromQueryString();
-					createInfoFromQueryString();
+					if( EsAsBaseType != null ) {
+						using( MiniProfiler.Current.Step( "EWF - Create entity-setup info after page-view data modifications" ) )
+							EsAsBaseType.CreateInfoFromQueryString();
+					}
+					using( MiniProfiler.Current.Step( "EWF - Create page info after page-view data modifications" ) )
+						createInfoFromQueryString();
+
+					bool connectionSecurityIncorrect;
+					using( MiniProfiler.Current.Step( "EWF - Check connection security after page-view data modifications" ) )
+						connectionSecurityIncorrect = getConnectionSecurityIncorrect();
 					if( connectionSecurityIncorrect )
 						throw getPossibleDeveloperMistakeException( "The connection security of the page changed after page-view data modifications." );
 				}
 				finally {
 					AppRequestState.Instance.UserDisabledByPage = false;
 				}
-				if( !InfoAsBaseType.UserCanAccessResource || InfoAsBaseType.AlternativeMode is DisabledResourceMode )
+				bool userCanAccessResource;
+				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
+					userCanAccessResource = InfoAsBaseType.UserCanAccessResource;
+				DisabledResourceMode disabledMode;
+				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
+					disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
+				if( !userCanAccessResource || disabledMode != null )
 					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
 			}
 
@@ -371,7 +395,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract void createInfoFromQueryString();
 
-		private bool connectionSecurityIncorrect { get { return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request ); } }
+		private bool getConnectionSecurityIncorrect() {
+			return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request );
+		}
 
 		/// <summary>
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
