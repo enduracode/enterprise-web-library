@@ -35,6 +35,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
 			              from m in t.MethodsAndContructors
 			              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
+			              // We've considered excluding .designer.cs files here, but decided that they should remain part of the count since they still represent
+			              // logic that must be maintained (in the designer).
 			              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
 			              select m;
 

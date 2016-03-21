@@ -426,6 +426,13 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
+		/// Returns true if strings ends with otherString, ignoring case.
+		/// </summary>
+		public static bool EndsWithIgnoreCase( this string s, string otherString ) {
+			return s.EndsWith( otherString, StringComparison.OrdinalIgnoreCase );
+		}
+
+		/// <summary>
 		/// Returns true if the two strings are equal, ignoring case.
 		/// </summary>
 		public static bool EqualsIgnoreCase( this string s, string otherString ) {
