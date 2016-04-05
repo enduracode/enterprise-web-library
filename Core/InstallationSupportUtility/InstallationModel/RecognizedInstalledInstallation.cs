@@ -2,17 +2,22 @@
 	public class RecognizedInstalledInstallation: KnownInstalledInstallation, RecognizedInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
+		private readonly ExistingInstalledInstallationLogic existingInstalledInstallationLogic;
 		private readonly KnownSystemLogic knownSystemLogic;
 		private readonly KnownInstallationLogic knownInstallationLogic;
 		private readonly RecognizedInstallationLogic recognizedInstallationLogic;
 
-		public RecognizedInstalledInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
-		                                        KnownSystemLogic knownSystemLogic, RecognizedInstallationLogic recognizedInstallationLogic ) {
+		public RecognizedInstalledInstallation(
+			GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
+			ExistingInstalledInstallationLogic existingInstalledInstallationLogic, KnownSystemLogic knownSystemLogic,
+			RecognizedInstallationLogic recognizedInstallationLogic ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
+			this.existingInstalledInstallationLogic = existingInstalledInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
 			knownInstallationLogic =
-				new KnownInstallationLogic( SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
+				new KnownInstallationLogic(
+					SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
 			this.recognizedInstallationLogic = recognizedInstallationLogic;
 		}
 
@@ -30,11 +35,15 @@
 		// It's crap, but I'm not going to let it stop me from doing this for a third time.
 		public string TransactionLogBackupsPath { get { return EwlStatics.CombinePaths( ConfigurationLogic.TransactionLogBackupsPath, LatestFullShortName ); } }
 
-		public string DownloadedTransactionLogsFolderPath { get { return EwlStatics.CombinePaths( ConfigurationLogic.DownloadedTransactionLogsFolderPath, LatestFullShortName ); } }
+		public string DownloadedTransactionLogsFolderPath {
+			get { return EwlStatics.CombinePaths( ConfigurationLogic.DownloadedTransactionLogsFolderPath, LatestFullShortName ); }
+		}
 
 		public GeneralInstallationLogic GeneralLogic { get { return generalInstallationLogic; } }
 
 		public ExistingInstallationLogic ExistingInstallationLogic { get { return existingInstallationLogic; } }
+
+		public ExistingInstalledInstallationLogic ExistingInstalledInstallationLogic { get { return existingInstalledInstallationLogic; } }
 
 		public KnownSystemLogic KnownSystemLogic { get { return knownSystemLogic; } }
 

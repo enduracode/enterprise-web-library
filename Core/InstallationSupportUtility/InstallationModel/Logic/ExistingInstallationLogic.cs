@@ -3,21 +3,18 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.AccessControl;
 using System.ServiceProcess;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.Email;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstallationLogic {
 		public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 		private const int serviceFailureResetPeriod = 3600; // seconds
 
-		private static readonly string appCmdPath = EwlStatics.CombinePaths(
-			Environment.GetEnvironmentVariable( "windir" ),
-			@"system32\inetsrv\AppCmd.exe" );
+		private static readonly string appCmdPath = EwlStatics.CombinePaths( Environment.GetEnvironmentVariable( "windir" ), @"system32\inetsrv\AppCmd.exe" );
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
@@ -31,19 +28,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		public string DatabaseUpdateFilePath {
 			get { return EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName ); }
-		}
-
-		/// <summary>
-		/// Creates a text file named "Error Log.txt" in the root of the installation folder and gives NETWORK SERVICE full control over it.
-		/// </summary>
-		public void CreateFreshLogFile() {
-			File.WriteAllText( runtimeConfiguration.ErrorLogFilePath, "" );
-
-			// We need to modify permissions after creating the file so we can inherit instead of wiping out parent settings.
-			var info = new FileInfo( runtimeConfiguration.ErrorLogFilePath );
-			var security = info.GetAccessControl();
-			security.AddAccessRule( new FileSystemAccessRule( "NETWORK SERVICE", FileSystemRights.FullControl, AccessControlType.Allow ) );
-			info.SetAccessControl( security );
 		}
 
 		/// <summary>
@@ -139,10 +123,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 				EwlStatics.RunProgram(
 					EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
 					( uninstall ? "/u " : "" ) + "\"" +
-					EwlStatics.CombinePaths(
-						GetWindowsServiceFolderPath( service, true ),
-						service.NamespaceAndAssemblyName + ".exe"
-						/* file extension is required */ ) + "\"",
+					EwlStatics.CombinePaths( GetWindowsServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe" /* file extension is required */ ) + "\"",
 					"",
 					true );
 			}
