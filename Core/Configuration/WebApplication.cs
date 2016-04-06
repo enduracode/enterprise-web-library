@@ -10,19 +10,29 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Development Utility use only.
 		/// </summary>
+		public const string WebConfigFileName = "Web.config";
+
+		/// <summary>
+		/// Internal and Development Utility use only.
+		/// </summary>
 		public readonly string Name;
+
+		/// <summary>
+		/// Development Utility use only.
+		/// </summary>
+		public readonly string Path;
 
 		internal readonly bool SupportsSecureConnections;
 		internal readonly BaseUrl DefaultBaseUrl;
 		internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
 		internal WebApplication(
-			string name, bool supportsSecureConnections, string installationPath, string systemShortName, bool systemHasMultipleWebApplications, WebProject configuration ) {
+			string name, string installationPath, bool supportsSecureConnections, string systemShortName, bool systemHasMultipleWebApplications, WebProject configuration ) {
 			Name = name;
+			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
 
-			var iisExpress =
-				File.ReadAllText( EwlStatics.CombinePaths( installationPath, name, name + ".csproj" ) ).Contains( "<UseIISExpress>true</UseIISExpress>" );
+			var iisExpress = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj" ) ).Contains( "<UseIISExpress>true</UseIISExpress>" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
@@ -37,19 +47,23 @@ namespace EnterpriseWebLibrary.Configuration {
 				                          : new DefaultCookieAttributes( null, null, null );
 		}
 
-		internal WebApplication( string name, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration )
+		internal WebApplication(
+			string name, string installationPath, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration )
 			: this(
 				name,
+				installationPath,
 				supportsSecureConnections,
 				machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl,
 				machineIsStandbyServer ? configuration.StandbyDefaultCookieAttributes : configuration.DefaultCookieAttributes ) {}
 
-		internal WebApplication( string name, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
-			: this( name, supportsSecureConnections, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes ) {}
+		internal WebApplication( string name, string installationPath, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
+			: this( name, installationPath, supportsSecureConnections, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes ) {}
 
 		internal WebApplication(
-			string name, bool supportsSecureConnections, InstallationStandardBaseUrl baseUrl, InstallationStandardCookieAttributes cookieAttributes ) {
+			string name, string installationPath, bool supportsSecureConnections, InstallationStandardBaseUrl baseUrl,
+			InstallationStandardCookieAttributes cookieAttributes ) {
 			Name = name;
+			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
@@ -63,5 +77,10 @@ namespace EnterpriseWebLibrary.Configuration {
 				                          ? new DefaultCookieAttributes( cookieAttributes.Domain, cookieAttributes.Path, cookieAttributes.NamePrefix )
 				                          : new DefaultCookieAttributes( null, null, null );
 		}
+
+		/// <summary>
+		/// Internal and Development Utility use only.
+		/// </summary>
+		public string WebConfigFilePath { get { return EwlStatics.CombinePaths( Path, WebConfigFileName ); } }
 	}
 }
