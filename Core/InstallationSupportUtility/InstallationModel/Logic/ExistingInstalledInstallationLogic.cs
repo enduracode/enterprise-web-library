@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.AccessControl;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
@@ -7,6 +8,19 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		public ExistingInstalledInstallationLogic( ExistingInstallationLogic existingInstallationLogic ) {
 			this.existingInstallationLogic = existingInstallationLogic;
+		}
+
+		public void PatchLogicForEnvironment() {
+			var isWin7 = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 1;
+			if( isWin7 ) {
+				foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+					File.WriteAllText(
+						i.WebConfigFilePath,
+						File.ReadAllText( i.WebConfigFilePath )
+							.Replace( "<applicationInitialization doAppInitAfterRestart=\"true\" />", "<!--<applicationInitialization doAppInitAfterRestart=\"true\" />-->" )
+							.Replace( "<add name=\"ApplicationInitializationModule\" />", "<!--<add name=\"ApplicationInitializationModule\" />-->" ) );
+				}
+			}
 		}
 
 		/// <summary>
