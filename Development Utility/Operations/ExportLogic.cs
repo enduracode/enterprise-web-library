@@ -267,7 +267,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
 
-				var webConfigPath = EwlStatics.CombinePaths( webAppPath, "Web.config" );
+				var webConfigPath = EwlStatics.CombinePaths( webAppPath, WebApplication.WebConfigFileName );
 				File.WriteAllText(
 					webConfigPath,
 					File.ReadAllText( webConfigPath )

@@ -1,30 +1,30 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig {
 	internal class WebConfigStatics {
-		internal static void GenerateWebConfig( WebProject webProject, string webProjectPath ) {
+		internal static void GenerateWebConfig( WebApplication application, WebProject project ) {
 			var sections = new XmlDocument { PreserveWhitespace = true };
-			using( var reader = new StringReader( getSectionString( webProject ) ) )
+			using( var reader = new StringReader( getSectionString( project ) ) )
 				sections.Load( reader );
 
-			if( !File.Exists( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) ) )
-				throw new UserCorrectableException( "The Web.config file is missing." );
+			if( !File.Exists( application.WebConfigFilePath ) )
+				throw new UserCorrectableException( "The {0} file is missing.".FormatWith( WebApplication.WebConfigFileName ) );
 			var webConfig = new XmlDocument { PreserveWhitespace = true };
-			webConfig.Load( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
+			webConfig.Load( application.WebConfigFilePath );
 
 			replaceSection( sections, webConfig, "appSettings" );
 			replaceSection( sections, webConfig, "system.web" );
 			replaceSection( sections, webConfig, "system.webServer" );
 
 			try {
-				webConfig.Save( EwlStatics.CombinePaths( webProjectPath, "Web.config" ) );
+				webConfig.Save( application.WebConfigFilePath );
 			}
 			catch( Exception e ) {
 				const string message = "Failed to write web configuration file.";
@@ -34,17 +34,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			}
 		}
 
-		private static string getSectionString( WebProject webProject ) {
+		private static string getSectionString( WebProject project ) {
 			var sections = File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Template.config" ) );
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
-			var useCertificateAuth = webProject.useCertificateAuthenticationSpecified && webProject.useCertificateAuthentication;
+			var useCertificateAuth = project.useCertificateAuthenticationSpecified && project.useCertificateAuthentication;
 			sections = sections.Replace(
 				"@@CertificateAuthenticationModulePlace",
-				useCertificateAuth
-					? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
-					: "" );
+				useCertificateAuth ? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>" : "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
 			sections = sections.Replace( "@@CacheTimeout", cacheTimeoutTimeSpan );

@@ -125,19 +125,21 @@ namespace EnterpriseWebLibrary.Configuration {
 				                  isDevelopmentInstallation
 					                  ? new WebApplication(
 						                    name,
-						                    supportsSecureConnections,
 						                    installationPath,
+						                    supportsSecureConnections,
 						                    SystemShortName,
 						                    systemWebApplicationElements.Skip( 1 ).Any(),
 						                    systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
 					                  : InstallationType == InstallationType.Live
 						                    ? new WebApplication(
 							                      name,
+							                      installationPath,
 							                      supportsSecureConnections,
 							                      machineIsStandbyServer,
 							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
 						                    : new WebApplication(
 							                      name,
+							                      installationPath,
 							                      supportsSecureConnections,
 							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) );
 			webApplications = webApplications.ToArray();

@@ -465,6 +465,7 @@
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ProcedureParameter.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\ValueContainer.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\DevelopmentInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\InstallationModel\Logic\ExistingInstalledInstallationLogic.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\RecognizedDevelopmentInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\ExistingInstallation.cs" />
     <Compile Include="InstallationSupportUtility\InstallationModel\Installation.cs" />

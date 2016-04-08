@@ -392,13 +392,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject webProject ) {
-			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
+		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject project ) {
+			var application = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Single( i => i.Name == project.name );
 
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
-			WebConfigStatics.GenerateWebConfig( webProject, webProjectPath );
+			WebConfigStatics.GenerateWebConfig( application, project );
 
-			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( webProjectPath, "Generated Code" );
+			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( application.Path, "Generated Code" );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
 			var webProjectIsuFilePath = EwlStatics.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( webProjectIsuFilePath );
@@ -419,9 +419,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 				writer.WriteLine();
-				writeAssemblyInfo( writer, installation, webProject.name );
+				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();
-				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, webProjectPath, webProject );
+				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, application.Path, project );
 			}
 		}
 
