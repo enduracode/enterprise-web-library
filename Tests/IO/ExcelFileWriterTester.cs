@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		}
 
 		[ Test ]
-		[ ExpectedException ]
+		//[ ExpectedException ]
 		public void TestReAddingSameWorksheet() {
 			runTest(
 				writer => {
@@ -144,7 +144,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		}
 
 		[ Test ]
-		[ ExpectedException ]
+		//[ ExpectedException ]
 		public void TestReAddingSameWorksheetMinusSpaces() {
 			runTest(
 				writer => {
