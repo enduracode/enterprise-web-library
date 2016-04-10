@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Humanizer;
-using NUnit.Framework;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.DataTree;
 using EnterpriseWebLibrary.MailMerging.Fields;
@@ -15,18 +12,26 @@ using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.TestFileDataStructure
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PhysicianMergeFields;
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeDocumentMergeFields;
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.TestFileMergeFields;
+using Humanizer;
+using NUnit.Framework;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging {
 	[ TestFixture ]
 	internal class MergeOpsTester {
+		private readonly static string testingWordTemplatePath = EwlStatics.CombinePaths(
+			TestContext.CurrentContext.TestDirectory,
+			"..\\..\\TestFiles\\MergeOps\\word.docx" );
+
+		private readonly static string testingPracticesWordTemplatePath = EwlStatics.CombinePaths(
+			TestContext.CurrentContext.TestDirectory,
+			"..\\..\\TestFiles\\MergeOps\\PracticesUserAccess.docx" );
+
 		private string timestampPrefix;
 		private string outputFolderPath;
 		private DateTime start;
 		private DateTime doneCreating;
 		private DateTime doneTesting;
 		private string filePath;
-		private const string testingWordTemplatePath = "..\\..\\TestFiles\\MergeOps\\word.docx";
-		private const string testingPracticesWordTemplatePath = "..\\..\\TestFiles\\MergeOps\\PracticesUserAccess.docx";
 
 		[ Test ]
 		public void PersonMerge() {
@@ -87,7 +92,8 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 					} );
 
 			var practiceFields = new List<MergeField<PracticeMockData>>( MergeFieldOps.CreateBasicField( new PracticeName() ).ToSingleElementArray() );
-			var managerFields = new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new MergeFields.PracticeManagerMergeFields.Email() ).ToSingleElementArray() );
+			var managerFields =
+				new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new MergeFields.PracticeManagerMergeFields.Email() ).ToSingleElementArray() );
 			var physicianFields =
 				new List<MergeField<PhysicianMockData>>(
 					new[]
@@ -120,7 +126,8 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 		}
 
 		#region Test Setup
-		[ TestFixtureSetUp ]
+
+		[ OneTimeSetUp ]
 		public void InitializeFixture() {
 			/* Make sure all the tests run have the same prefix */
 			timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
@@ -160,6 +167,7 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 				Console.WriteLine( "Finished test in {0}ms.".FormatWith( ( doneTesting - start ).TotalMilliseconds ) );
 			}
 		}
+
 		#endregion
 	}
 }

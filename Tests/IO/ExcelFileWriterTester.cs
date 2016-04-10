@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		private string timestampPrefix;
 		private string outputFolderPath;
 
-		[ TestFixtureSetUp ]
+		[ OneTimeSetUp ]
 		public void InitializeFixture() {
 			// Make sure all the tests run have the same prefix
 			timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 				} );
 		}
 
-		private static void addAutofitTestRows( ExcelFileWriter writer, string fitOrNot ) {
+		private void addAutofitTestRows( ExcelFileWriter writer, string fitOrNot ) {
 			writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet - hopefully " + fitOrNot );
 			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50", "500", "5000", "5", "5", "5", "5", "50" );
 			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50", "500", "5000", "5", "5", "5", "5", "50" );
@@ -62,6 +62,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 				writer => {
 					Console.WriteLine( "Making sure having no default worksheet works." );
 					Assert.IsNull( writer.DefaultWorksheet );
+					writer.AddWorksheet( "Test" );
 					return "no_default_worksheet_testing";
 				},
 				false );
@@ -125,7 +126,6 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		}
 
 		[ Test ]
-		//[ ExpectedException ]
 		public void TestReAddingSameWorksheet() {
 			runTest(
 				writer => {
@@ -134,17 +134,13 @@ namespace EnterpriseWebLibrary.Tests.IO {
 					const string worksheetName = "Worksheet";
 
 					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-					writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+					Assert.That( () => writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" ), Throws.Exception );
 
 					return "same_sheet_name_testing";
 				} );
 		}
 
 		[ Test ]
-		//[ ExpectedException ]
 		public void TestReAddingSameWorksheetMinusSpaces() {
 			runTest(
 				writer => {
@@ -431,7 +427,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 					( size / 1000 ) ) );
 		}
 
-		private static string ordinalEnding( int number ) {
+		private string ordinalEnding( int number ) {
 			switch( number % 10 ) {
 				case 1:
 					return "st";

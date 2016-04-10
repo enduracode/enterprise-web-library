@@ -1,14 +1,14 @@
-﻿using NUnit.Framework;
-using EnterpriseWebLibrary;
+﻿using EnterpriseWebLibrary;
+using NUnit.Framework;
 
 [ SetUpFixture ]
 public class NUnitInitializer {
-	[ SetUp ]
+	[ OneTimeSetUp ]
 	public void InitStatics() {
 		UnitTestingInitializationOps.InitStatics( new GlobalInitializer() );
 	}
 
-	[ TearDown ]
+	[ OneTimeTearDown ]
 	public void CleanUpStatics() {
 		UnitTestingInitializationOps.CleanUpStatics();
 	}
