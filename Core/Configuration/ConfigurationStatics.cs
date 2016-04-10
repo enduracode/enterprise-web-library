@@ -36,8 +36,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		internal static string AppName { get; private set; }
 		internal static bool IsClientSideProgram { get; private set; }
 
-		internal static void Init(
-			bool useRelativeInstallationPath, Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
+		internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
 			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
 
 			initializationLog += Environment.NewLine + "About to load machine config";
@@ -73,12 +72,7 @@ namespace EnterpriseWebLibrary.Configuration {
 
 				// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
 				// one level below the installation folder.
-				if( useRelativeInstallationPath )
-					installationPath = "..";
-				else {
-					var assemblyFolderPath = Path.GetDirectoryName( AppAssembly.Location );
-					installationPath = EwlStatics.CombinePaths( assemblyFolderPath, ".." );
-				}
+				installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location ), ".." );
 				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 				if( isDevelopmentInstallation )
 					installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
