@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading;
 using ImageResizer;
 
@@ -282,20 +283,16 @@ namespace EnterpriseWebLibrary {
 			if( GetCSharpKeywords().Contains( s ) )
 				return "@" + s;
 
-			// GMS: Not sure I agree with just taking digits off the front. What if there's nothing left? What about an underscore prefix?
-			// GMS: I think it is very important that if a valid identifier is passed, the same thing is returned.
-			s = s.RemoveCharacters( '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '=', ',', '.', '/', '?', '<', '>', '[', ']', '{', '}', '\\', '|', '\'' );
-			s = s.TrimStart( '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' );
-			s = s.Replace( "-", "_" );
-			s = s.CamelToEnglish();
+			s = s.Replace( ' ', '_' ).Replace( '-', '_' );
 
-			// GMS: I do not agree with capitalizing the result. Identifiers can be either private member variables or public properties.
-			var identifier = "";
-			var parts = s.Split( ' ' );
-			foreach( var part in parts )
-				identifier += part.ToLower().CapitalizeString();
+			// Remove invalid characters.
+			s = Regex.Replace( s, @"[^\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Cf}]", "" );
 
-			return identifier;
+			// Prepend underscore if start character is invalid.
+			if( Regex.IsMatch( s, @"^[^\p{L}\p{Nl}_]" ) )
+				s = "_" + s;
+
+			return s;
 		}
 
 		// NOTE: Reconcile this with GetCSharpIdentifier and GetCSharpSafeClassName.

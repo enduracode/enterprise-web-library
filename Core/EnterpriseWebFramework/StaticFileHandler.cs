@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					CombineNamespacesAndProcessEwfIfNecessary(
 						EwfApp.GlobalType.Namespace,
 						( url.Remove( versionStringOrFileExtensionIndex ) + extension.CapitalizeString() ).Separate( "/", false )
-							.Select( EwlStatics.GetCSharpIdentifier )
+							.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) )
 							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );

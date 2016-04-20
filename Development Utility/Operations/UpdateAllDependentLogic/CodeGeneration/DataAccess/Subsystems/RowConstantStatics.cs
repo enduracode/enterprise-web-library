@@ -60,8 +60,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				// constants
 				for( var i = 0; i < values.Count; i++ ) {
 					CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
+
 					// It's important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
-					writer.WriteLine( "public const " + valueColumn.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( names[ i ] ) + " = " + values[ i ] + ";" );
+					writer.WriteLine(
+						"public const " + valueColumn.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( names[ i ].CamelToEnglish().EnglishToPascal() ) + " = " + values[ i ] +
+						";" );
 				}
 
 				// one to one map

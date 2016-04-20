@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
@@ -37,7 +36,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			className =
 				EwlStatics.GetCSharpIdentifier(
-					System.IO.Path.GetFileNameWithoutExtension( path ) + ( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
+					System.IO.Path.GetFileNameWithoutExtension( path ).CapitalizeString() +
+					( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
 
@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
 			return StaticFileHandler.CombineNamespacesAndProcessEwfIfNecessary(
 				projectNamespace,
-				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( EwlStatics.GetCSharpIdentifier ).ToArray() ) );
+				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ).ToArray() ) );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }
