@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.WebSite {
 											                             control.GetPostBackValue( pbv ),
 											                             false,
 											                             50 );
-										                             if( baseNamespace.Value != EwlStatics.GetCSharpIdentifierSimple( baseNamespace.Value ) )
+										                             if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
 											                             validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
 									                             },
 									                             pb ) )

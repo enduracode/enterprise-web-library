@@ -239,7 +239,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
 					writer.WriteLine( "public static class WebApplicationNames {" );
 					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications )
-						writer.WriteLine( "public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifierSimple( i.Name.EnglishToPascal() ), i.Name ) );
+						writer.WriteLine( "public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifier( i.Name.EnglishToPascal() ), i.Name ) );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}

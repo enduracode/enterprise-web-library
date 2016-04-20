@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class TypedCssClassStatics {
@@ -33,7 +32,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					writer.WriteLine( "/// <summary>" );
 					writer.WriteLine( "/// Constant for the '{0}' class.".FormatWith( cssClass ) );
 					writer.WriteLine( "/// </summary>" );
-					var identifier = EwlStatics.GetCSharpIdentifierSimple( cssClass ).CapitalizeString();
+					var identifier = EwlStatics.GetCSharpIdentifier( cssClass.CapitalizeString() );
 					if( identifiers.Contains( identifier ) ) {
 						var uniqueIdentifier = identifier;
 						var i = 0;

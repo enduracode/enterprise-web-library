@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							return;
 						writer.WriteLine(
 							"public UserTransaction Transaction { get { return RevisionHistoryStatics.UserTransactionsById[ RevisionHistoryStatics.RevisionsById[ System.Convert.ToInt32( " +
-							EwlStatics.GetCSharpIdentifierSimple( columns.PrimaryKeyAndRevisionIdColumn.PascalCasedNameExceptForOracle ) + " ) ].UserTransactionId ]; } }" );
+							EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn.PascalCasedNameExceptForOracle ) + " ) ].UserTransactionId ]; } }" );
 					},
 					localWriter => {
 						if( !columns.DataColumns.Any() )
@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
 							StringTools.ConcatenateWithDelimiter(
 								", ",
-								columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
+								columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 						writer.WriteLine( "}" );
 					} );
 				writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
@@ -326,7 +326,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// Add all results to RowsByPk.
 			writer.WriteLine( "foreach( var i in results ) {" );
-			var pkTupleCreationArgs = tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifierSimple( i.PascalCasedNameExceptForOracle ) );
+			var pkTupleCreationArgs = tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) );
 			var pkTuple = "System.Tuple.Create( " + StringTools.ConcatenateWithDelimiter( ", ", pkTupleCreationArgs.ToArray() ) + " )";
 			writer.WriteLine( "cache.RowsByPk[ " + pkTuple + " ] = i;" );
 			if( excludesPreviousRevisions )
@@ -361,7 +361,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 			writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
 			writer.WriteLine(
-				"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifierSimple( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
+				"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
 			writer.WriteLine( "}" );
 		}
 	}

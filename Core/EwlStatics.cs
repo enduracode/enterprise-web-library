@@ -295,21 +295,6 @@ namespace EnterpriseWebLibrary {
 			return s;
 		}
 
-		// NOTE: Reconcile this with GetCSharpIdentifier and GetCSharpSafeClassName.
-		public static string GetCSharpIdentifierSimple( string desiredIdentifierName ) {
-			if( GetCSharpKeywords().Contains( desiredIdentifierName ) )
-				return "@" + desiredIdentifierName;
-
-			desiredIdentifierName = desiredIdentifierName.Replace( "-", "_" );
-			desiredIdentifierName = desiredIdentifierName.Replace( " ", "_" );
-
-			int dummyInt;
-			if( Int32.TryParse( desiredIdentifierName.Truncate( 1 ), out dummyInt ) )
-				return "_" + desiredIdentifierName;
-
-			return desiredIdentifierName;
-		}
-
 		/// <summary>
 		/// Gets a very limited set of CSharp keywords.
 		/// </summary>
