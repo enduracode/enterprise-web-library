@@ -310,13 +310,6 @@ namespace EnterpriseWebLibrary {
 			return desiredIdentifierName;
 		}
 
-		public static string GetCSharpSafeClassName( string desiredClassName ) {
-			desiredClassName = desiredClassName.Replace( ' ', '_' );
-			if( Char.IsDigit( desiredClassName.First() ) )
-				return "_" + desiredClassName;
-			return desiredClassName;
-		}
-
 		/// <summary>
 		/// Gets a very limited set of CSharp keywords.
 		/// </summary>

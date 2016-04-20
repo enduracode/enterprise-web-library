@@ -352,7 +352,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static string GetClassName( DBConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {
 			return
-				EwlStatics.GetCSharpSafeClassName(
+				EwlStatics.GetCSharpIdentifier(
 					isRevisionHistoryTable && !isRevisionHistoryClass
 						? "Direct" + table.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"
 						: table.TableNameToPascal( cn ) + "Modification" );

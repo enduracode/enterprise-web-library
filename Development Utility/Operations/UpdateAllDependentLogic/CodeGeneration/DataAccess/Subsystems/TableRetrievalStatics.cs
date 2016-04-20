@@ -122,7 +122,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetClassName( DBConnection cn, string table ) {
-			return EwlStatics.GetCSharpSafeClassName( table.TableNameToPascal( cn ) + "TableRetrieval" );
+			return EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableRetrieval" );
 		}
 
 		private static void writeCacheClass(
