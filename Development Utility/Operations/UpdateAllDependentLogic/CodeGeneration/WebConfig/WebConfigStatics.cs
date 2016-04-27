@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 			if( project.UsesEntityFrameworkSpecified && project.UsesEntityFramework ) {
 				sections = sections.Replace(
 					"<compilation debug=\"true\" targetFramework=\"4.5.1\" />",
-					"<compilation debug=\"true\" targetFramework=\"4.5.1\"><assemblies><add assembly=\"System.Data.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\" /></assemblies><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
+					"<compilation debug=\"true\" targetFramework=\"4.5.1\"><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
 			}
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
