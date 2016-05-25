@@ -37,6 +37,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 		private static string getSectionString( WebProject project ) {
 			var sections = File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Template.config" ) );
 
+			if( project.UsesEntityFrameworkSpecified && project.UsesEntityFramework ) {
+				sections = sections.Replace(
+					"<compilation debug=\"true\" targetFramework=\"4.5.1\" />",
+					"<compilation debug=\"true\" targetFramework=\"4.5.1\"><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
+			}
+
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = project.useCertificateAuthenticationSpecified && project.useCertificateAuthentication;
