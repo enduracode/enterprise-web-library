@@ -289,9 +289,6 @@
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessor.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\BasicDataModification.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\BasicValidationList.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\DataModification.cs" />
     <Compile Include="DataAccess\DoNotCommitException.cs" />
     <Compile Include="Email\EmailAddress.cs" />
     <Compile Include="Email\EmailAttachment.cs" />
@@ -301,9 +298,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\ErrorDisplayStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\EwfValidation.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\ValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display Styles\CustomErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display Styles\ListErrorDisplayStyle.cs" />
@@ -362,9 +356,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\PageBase\ControlWithJsInitLogic.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\EtherealControl.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
@@ -405,18 +396,35 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\ControlWithCustomFocusLogic.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\FormValue.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PageState.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\PostBackValueDictionary.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PostBack.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PostBackAction.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PostBackValueValidationResult.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\PreModificationUpdateRegion.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\SecondaryPostBackOperation.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\SecondaryResponse.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionLinker.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\UpdateRegionSet.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ControlWithCustomFocusLogic.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ControlWithJsInitLogic.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicValidationList.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModification.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModificationException.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\EwfValidation.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\PostBackValueDictionary.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationList.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EntitySetupBase.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EtherealControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ParametersModificationBase.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBack.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackValueValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PreModificationUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\UpdateRegionLinker.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
@@ -426,16 +434,12 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLinkingOps.cs" />
     <Compile Include="EnterpriseWebFramework\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
-    <Compile Include="EnterpriseWebFramework\Data Modification\DataModificationException.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\EwfPageRequestState.cs" />
-    <Compile Include="EnterpriseWebFramework\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
@@ -559,10 +563,6 @@
     <Compile Include="IO\TabularDataFileWriter.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
-    <Compile Include="EnterpriseWebFramework\PageBase\EwfPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="EnterpriseWebFramework\PageBase\ScrollPosition.cs" />
     <Compile Include="Encryption\Password.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUser.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUserManagementProvider.cs" />
