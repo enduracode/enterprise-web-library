@@ -395,7 +395,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
-    <Compile Include="EnterpriseWebFramework\ControlTreeDataLoader.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ControlWithCustomFocusLogic.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
@@ -414,6 +413,19 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealElement.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageNode.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlTreeDataLoader.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementContext.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementData.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementLocalData.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\PageElement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBack.cs" />

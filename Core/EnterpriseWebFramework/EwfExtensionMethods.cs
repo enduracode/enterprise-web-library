@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -88,6 +89,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static bool IsSecure( this HttpRequest request ) {
 			return EwfApp.Instance.RequestIsSecure( request );
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static IEnumerable<Control> GetControls( this IEnumerable<FlowComponent> components ) {
+			return from component in components
+			       from node in component.GetNodes()
+			       let element = node as PageElement
+			       select element != null ? (Control)element : new Literal { Text = HttpUtility.HtmlEncode( ( (TextNode)node ).Text ) };
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static void AddEtherealControls( this IEnumerable<EtherealComponent> components, Control parent ) {
+			foreach( var element in components.SelectMany( i => i.GetElements() ) )
+				EwfPage.Instance.AddEtherealControl( parent, (PageElement)element );
 		}
 	}
 }
