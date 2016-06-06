@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class PageElement: WebControl, EtherealElement, FlowComponent, EtherealComponent, ControlTreeDataLoader, ControlWithJsInitLogic, EtherealControl {
+	public sealed class PageElement: WebControl, EtherealElement, FlowComponent, EtherealComponent, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
+		EtherealControl {
 		internal readonly Func<ElementContext, ElementData> ElementDataGetter;
+		internal readonly FormValue FormValue;
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private Func<ElementLocalData> webFormsLocalDataGetter;
 		private IEnumerable<Tuple<string, string>> webFormsAttributes;
 		private string webFormsElementName;
 
-		public PageElement( Func<ElementContext, ElementData> elementDataGetter ) {
+		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ) {
 			ElementDataGetter = elementDataGetter;
+			FormValue = formValue;
 
 			PreRender += handlePreRender;
 		}
@@ -53,6 +56,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			webFormsElementName = localData.ElementName;
 			return localData.JsInitStatements;
 		}
+
+		FormValue FormValueControl.FormValue { get { return FormValue; } }
 
 		private void handlePreRender( object sender, EventArgs e ) {
 			if( webFormsAttributes == null )

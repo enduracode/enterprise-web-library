@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal interface FormValue {
+	public interface FormValue {
 		/// <summary>
 		/// Returns the empty string if this form value is inactive.
 		/// </summary>
@@ -33,8 +33,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="stringValueSelector"></param>
 		/// <param name="stringPostBackValueValidator">Avoid using exceptions in this method if possible since it is sometimes called many times during a request,
 		/// and we've seen exceptions take as long as 50 ms each when debugging.</param>
-		internal FormValue( Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
-		                    Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator ) {
+		internal FormValue(
+			Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
+			Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator ) {
 			this.durableValueGetter = durableValueGetter;
 			this.postBackValueKeyGetter = postBackValueKeyGetter;
 			this.stringValueSelector = stringValueSelector;
@@ -51,8 +52,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="stringValueSelector"></param>
 		/// <param name="filePostBackValueValidator">Avoid using exceptions in this method if possible since it is sometimes called many times during a request, and
 		/// we've seen exceptions take as long as 50 ms each when debugging.</param>
-		internal FormValue( Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
-		                    Func<HttpPostedFile, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
+		internal FormValue(
+			Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
+			Func<HttpPostedFile, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
 			this.durableValueGetter = durableValueGetter;
 			this.postBackValueKeyGetter = postBackValueKeyGetter;
 			this.stringValueSelector = stringValueSelector;
