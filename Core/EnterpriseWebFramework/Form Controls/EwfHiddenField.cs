@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A hidden field.
 	/// </summary>
-	public class EwfHiddenField: WebControl, ControlTreeDataLoader, FormControl, EtherealControl {
+	public class EwfHiddenField: WebControl, ControlTreeDataLoader, FormValueControl, EtherealControl {
 		/// <summary>
 		/// Creates a hidden field. Do not pass null for value.
 		/// </summary>
@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return "";
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
+		FormValue FormValueControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.

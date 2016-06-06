@@ -107,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl,
+	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl,
 		ControlWithCustomFocusLogic, DisplayLink {
 		private class ListItem {
 			private readonly SelectListItem<ItemIdType> item;
@@ -319,7 +319,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Page.SetFocus( this );
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
+		FormValue FormValueControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Validates and returns the selected item ID in the post back. The default value of the item ID type will be considered valid only if it matches a

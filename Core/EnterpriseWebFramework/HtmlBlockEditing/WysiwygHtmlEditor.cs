@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A WYSIWYG HTML editor.
 	/// </summary>
-	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
+	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl {
 		private readonly string ckEditorConfiguration;
 		private readonly FormValue<string> formValue;
 
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return "CKEDITOR.replace( '" + ClientID + "', { " + configuration + " } );";
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
+		FormValue FormValueControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.

@@ -2,7 +2,7 @@
 	/// <summary>
 	/// A form control.
 	/// </summary>
-	internal interface FormControl {
+	internal interface FormValueControl {
 		FormValue FormValue { get; }
 	}
 }

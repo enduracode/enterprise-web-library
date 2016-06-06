@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
-	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
 		private readonly FormValue<bool> checkBoxFormValue;
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return highlightWhenChecked ? "$( '#" + checkBox.ClientID + "' ).click( function() { changeCheckBoxColor( this ); } );" : "";
 		}
 
-		FormValue FormControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
+		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
 
 		/// <summary>
 		/// Gets whether the box is checked in the post back.

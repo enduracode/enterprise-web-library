@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An in-line check box with the label vertically centered on the box.
 	/// </summary>
-	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl, ControlWithCustomFocusLogic {
+	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithCustomFocusLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfCheckBox";
 
@@ -146,7 +146,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl : checkBox );
 		}
 
-		FormValue FormControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
+		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
 
 		/// <summary>
 		/// Gets whether the box is checked in the post back.

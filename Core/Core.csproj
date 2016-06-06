@@ -411,8 +411,10 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValueControl.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealElement.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />

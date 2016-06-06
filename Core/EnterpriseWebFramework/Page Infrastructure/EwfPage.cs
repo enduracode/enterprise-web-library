@@ -297,7 +297,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						else {
 							var formValuesChanged =
 								GetDescendants( contentContainer )
-									.OfType<FormControl>()
+									.OfType<FormValueControl>()
 									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
 						}
@@ -470,7 +470,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( actionPostBack != null ) {
 						var formValuesChanged =
 							GetDescendants( contentContainer )
-								.OfType<FormControl>()
+								.OfType<FormValueControl>()
 								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						try {
 							dmExecuted |= actionPostBack.Execute(
@@ -917,7 +917,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
-		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormControl ); } }
+		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormValueControl ); } }
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -985,7 +985,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
 			var staticFormValues =
 				GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
-					.OfType<FormControl>()
+					.OfType<FormValueControl>()
 					.Select( i => i.FormValue )
 					.Where( i => i != null )
 					.Distinct()
