@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface FormValue {
+	internal interface FormValue {
 		/// <summary>
 		/// Returns the empty string if this form value is inactive.
 		/// </summary>
