@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class PageElement: WebControl, EtherealElement, FlowComponent, EtherealComponent, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
+	public sealed class PageElement: WebControl, ElementNode, FlowComponent, EtherealComponent, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
 		EtherealControl {
 		internal readonly Func<ElementContext, ElementData> ElementDataGetter;
 		internal readonly FormValue FormValue;
@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return this.ToSingleElementArray();
 		}
 
-		IEnumerable<EtherealElement> EtherealComponent.GetElements() {
+		IEnumerable<ElementNode> EtherealComponent.GetElements() {
 			return this.ToSingleElementArray();
 		}
 

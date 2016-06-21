@@ -2,6 +2,6 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface EtherealComponent: PageComponent {
-		IEnumerable<EtherealElement> GetElements();
+		IEnumerable<ElementNode> GetElements();
 	}
 }

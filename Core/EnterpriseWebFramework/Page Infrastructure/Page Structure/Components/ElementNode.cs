@@ -1,3 +1,3 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface EtherealElement: PageNode {}
+	public interface ElementNode: PageNode {}
 }

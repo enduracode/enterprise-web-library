@@ -410,8 +410,8 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\ElementNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealElement.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageNode.cs" />
