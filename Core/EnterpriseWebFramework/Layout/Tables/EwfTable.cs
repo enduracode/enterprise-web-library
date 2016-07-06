@@ -312,6 +312,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly bool disableEmptyFieldDetection;
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
 		private readonly IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
 		private EwfTable(
@@ -338,6 +339,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.disableEmptyFieldDetection = disableEmptyFieldDetection;
 			this.itemGroups = itemGroups.ToImmutableArray();
 			this.tailUpdateRegions = tailUpdateRegions != null ? tailUpdateRegions.ToImmutableArray() : ImmutableArray<TailUpdateRegion>.Empty;
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -372,162 +375,163 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		void ControlTreeDataLoader.LoadData() {
 			using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
-				if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
-					Visible = false;
-					return;
-				}
+				ValidationSetupState.ExecuteWithDataModifications(
+					dataModifications,
+					() => {
+						if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
+							Visible = false;
+							return;
+						}
 
-				SetUpTableAndCaption( this, style, classes, caption, subCaption );
+						SetUpTableAndCaption( this, style, classes, caption, subCaption );
 
-				var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
-				foreach( var itemGroup in itemGroups ) {
-					var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
-					visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.ToImmutableArray() ) );
-					if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == CurrentItemLimit )
-						break;
-				}
+						var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
+						foreach( var itemGroup in itemGroups ) {
+							var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
+							visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.ToImmutableArray() ) );
+							if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == CurrentItemLimit )
+								break;
+						}
 
-				var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
-				if( !fields.Any() )
-					fields = new EwfTableField().ToSingleElementArray();
+						var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
+						if( !fields.Any() )
+							fields = new EwfTableField().ToSingleElementArray();
 
-				addColumnSpecifications( fields );
+						addColumnSpecifications( fields );
 
-				var allVisibleItems = new List<EwfTableItem>();
+						var allVisibleItems = new List<EwfTableItem>();
 
-				var itemLimitingUpdateRegionSet = new UpdateRegionSet();
-				var headRows =
-					buildRows(
-						getItemLimitingAndGeneralActionsItem( fields.Length, itemLimitingUpdateRegionSet ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
-						Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-						null,
-						false,
-						null,
-						null,
-						allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
-				if( headRows.Any() )
-					Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
-
-				var bodyRowGroupsAndRows = new List<Tuple<WebControl, ImmutableArray<Control>>>();
-				var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
-				for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
-					var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
-					var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
-					var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).ToImmutableArray();
-					var rowGroup =
-						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
+						var headRows =
 							buildRows(
-								groupAndItems.Item1.GetHeadItems( fields.Length ),
+								getItemLimitingAndGeneralActionsItem( fields.Length, itemLimitingUpdateRegionSet ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
 								Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
 								null,
-								true,
-								null,
-								null,
-								allVisibleItems ).Concat( new NamingPlaceholder( groupBodyRows ).ToSingleElementArray() ) );
-					bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
-
-					var cachedVisibleGroupIndex = visibleGroupIndex;
-					EwfPage.Instance.AddUpdateRegionLinker(
-						new UpdateRegionLinker(
-							rowGroup,
-							"tail",
-							from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-							let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-							select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
-							arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
-
-					// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
-					if( defaultItemLimit != DataRowLimit.Unlimited ) {
-						updateRegionSetListsAndStaticRowGroupCounts.Add(
-							Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
-								groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).ToImmutableArray(),
-								visibleGroupIndex + 1 ) );
-					}
-				}
-				Controls.Add( new NamingPlaceholder( bodyRowGroupsAndRows.Select( i => i.Item1 ) ) );
-
-				if( defaultItemLimit != DataRowLimit.Unlimited ) {
-					var oldItemLimit = CurrentItemLimit;
-					var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, CurrentItemLimit ) );
-
-					var itemLimitingTailUpdateRegionControlGetter = new Func<int, IEnumerable<Control>>(
-						staticItemCount => {
-							var rowCount = 0;
-							for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
-								var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
-								rowCount += rows.Length;
-								if( rowCount < staticItemCount )
-									continue;
-								return rows.Skip( rows.Length - ( rowCount - staticItemCount ) ).Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
-							}
-							return ImmutableArray<Control>.Empty;
-						} );
-
-					EwfPage.Instance.AddUpdateRegionLinker(
-						new UpdateRegionLinker(
-							this,
-							"itemLimitingTail",
-							new PreModificationUpdateRegion(
-								itemLimitingUpdateRegionSet.ToSingleElementArray(),
-								() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
-								() => lowerItemLimit.Value.ToString() ).ToSingleElementArray(),
-							arg => itemLimitingTailUpdateRegionControlGetter( int.Parse( arg ) ) ) );
-				}
-
-				EwfPage.Instance.AddUpdateRegionLinker(
-					new UpdateRegionLinker(
-						this,
-						"tail",
-						from region in
-							tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
-							.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
-						select
-							new PreModificationUpdateRegion(
-							region.sets,
-							() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
-							region.staticRowGroupCount.ToString ),
-						arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
-
-				var itemCount = itemGroups.Sum( i => i.Items.Count );
-				var itemLimitingRowGroup = new List<Control>();
-				if( CurrentItemLimit < itemCount ) {
-					var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
-					var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
-					var validationDm = EwfPage.Instance.DataUpdate; // This is a hack, but should be easily corrected when EnduraCode goal 768 is done.
-					var button =
-						new PostBackButton(
-							PostBack.CreateIntermediate(
-								itemLimitingUpdateRegionSet.ToSingleElementArray(),
-								validationDm,
-								id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-								firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
-							new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-							usesSubmitBehavior: false );
-					var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
-					var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
-					itemLimitingRowGroup.Add(
-						new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-							buildRows(
-								item.ToSingleElementArray().ToList(),
-								Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
-								useContrast,
 								false,
 								null,
 								null,
-								allVisibleItems ) ) );
-				}
-				Controls.Add(
-					new NamingPlaceholder(
-						itemLimitingRowGroup,
-						updateRegionSets:
-							itemLimitingUpdateRegionSet.ToSingleElementArray()
-								.Concat( itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ) ) );
+								allVisibleItems ).Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) ).ToArray();
+						if( headRows.Any() )
+							Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
 
-				// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-				var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Length );
+						var bodyRowGroupsAndRows = new List<Tuple<WebControl, ImmutableArray<Control>>>();
+						var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
+						for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
+							var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
+							var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
+							var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).ToImmutableArray();
+							var rowGroup =
+								new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+									buildRows(
+										groupAndItems.Item1.GetHeadItems( fields.Length ),
+										Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+										null,
+										true,
+										null,
+										null,
+										allVisibleItems ).Concat( new NamingPlaceholder( groupBodyRows ).ToSingleElementArray() ) );
+							bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 
-				if( !disableEmptyFieldDetection )
-					AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+							var cachedVisibleGroupIndex = visibleGroupIndex;
+							EwfPage.Instance.AddUpdateRegionLinker(
+								new UpdateRegionLinker(
+									rowGroup,
+									"tail",
+									from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+									let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+									select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+									arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
+
+							// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
+							if( defaultItemLimit != DataRowLimit.Unlimited )
+								updateRegionSetListsAndStaticRowGroupCounts.Add(
+									Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
+										groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).ToImmutableArray(),
+										visibleGroupIndex + 1 ) );
+						}
+						Controls.Add( new NamingPlaceholder( bodyRowGroupsAndRows.Select( i => i.Item1 ) ) );
+
+						if( defaultItemLimit != DataRowLimit.Unlimited ) {
+							var oldItemLimit = CurrentItemLimit;
+							var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, CurrentItemLimit ) );
+
+							var itemLimitingTailUpdateRegionControlGetter = new Func<int, IEnumerable<Control>>(
+								staticItemCount => {
+									var rowCount = 0;
+									for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
+										var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
+										rowCount += rows.Length;
+										if( rowCount < staticItemCount )
+											continue;
+										return rows.Skip( rows.Length - ( rowCount - staticItemCount ) ).Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
+									}
+									return ImmutableArray<Control>.Empty;
+								} );
+
+							EwfPage.Instance.AddUpdateRegionLinker(
+								new UpdateRegionLinker(
+									this,
+									"itemLimitingTail",
+									new PreModificationUpdateRegion(
+										itemLimitingUpdateRegionSet.ToSingleElementArray(),
+										() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
+										() => lowerItemLimit.Value.ToString() ).ToSingleElementArray(),
+									arg => itemLimitingTailUpdateRegionControlGetter( int.Parse( arg ) ) ) );
+						}
+
+						EwfPage.Instance.AddUpdateRegionLinker(
+							new UpdateRegionLinker(
+								this,
+								"tail",
+								from region in
+									tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
+									.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+								select
+									new PreModificationUpdateRegion(
+									region.sets,
+									() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
+									region.staticRowGroupCount.ToString ),
+								arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
+
+						var itemCount = itemGroups.Sum( i => i.Items.Count );
+						var itemLimitingRowGroup = new List<Control>();
+						if( CurrentItemLimit < itemCount ) {
+							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
+							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
+							var button =
+								new PostBackButton(
+									PostBack.CreateIntermediate(
+										itemLimitingUpdateRegionSet.ToSingleElementArray(),
+										id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+										firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
+									new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+									usesSubmitBehavior: false );
+							var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
+							var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
+							itemLimitingRowGroup.Add(
+								new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
+									buildRows(
+										item.ToSingleElementArray().ToList(),
+										Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+										useContrast,
+										false,
+										null,
+										null,
+										allVisibleItems ) ) );
+						}
+						Controls.Add(
+							new NamingPlaceholder(
+								itemLimitingRowGroup,
+								updateRegionSets:
+									itemLimitingUpdateRegionSet.ToSingleElementArray()
+										.Concat( itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ) ) );
+
+						// Assert that every visible item in the table has the same number of cells and store a data structure for below.
+						var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Length );
+
+						if( !disableEmptyFieldDetection )
+							AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+					} );
 			}
 		}
 
@@ -560,12 +564,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 			if( itemLimit == (DataRowLimit)CurrentItemLimit )
 				return text.GetLiteralControl();
-			var validationDm = EwfPage.Instance.DataUpdate; // This is a hack, but should be easily corrected when EnduraCode goal 768 is done.
 			return
 				new PostBackButton(
 					PostBack.CreateIntermediate(
 						updateRegionSet.ToSingleElementArray(),
-						validationDm,
 						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
 						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
 					new TextActionControlStyle( text ),

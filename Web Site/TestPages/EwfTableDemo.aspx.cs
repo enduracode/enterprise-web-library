@@ -30,7 +30,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					new PostBackButton(
 						PostBack.CreateIntermediate(
 							updateRegionSet.ToSingleElementArray(),
-							DataUpdate,
 							id: "removeLastGroup",
 							firstModificationMethod: () => {
 								if( info.GroupCount <= 0 )
@@ -62,7 +61,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						ClickScript.CreatePostBackScript(
 							PostBack.CreateIntermediate(
 								null,
-								DataUpdate,
 								id: "group{0}".FormatWith( groupNumber ),
 								firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
 						tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToSingleElementArray(), 1 ).ToSingleElementArray() : null ),
@@ -75,7 +73,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								  new PostBackButton(
 								  PostBack.CreateIntermediate(
 									  updateRegionSet.ToSingleElementArray(),
-									  DataUpdate,
 									  id: "addRow",
 									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ),
 								  new ButtonActionControlStyle( "Add Row" ),

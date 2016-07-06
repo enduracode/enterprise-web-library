@@ -55,18 +55,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private IEnumerable<Control> getBasicRegionBlocks() {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), DataUpdate, id: "basic" );
+			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: "basic" );
 			yield return new Paragraph( new PostBackButton( pb, new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false ) );
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
-			if( info.Toggled ) {
+			if( info.Toggled )
 				regionControls.Add(
 					FormItem.Create(
 						"Dynamic Field",
 						new EwfTextBox( "This was just added!" ),
 						validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
-			}
 			else
 				regionControls.Add( new Paragraph( "Nothing here yet." ) );
 			yield return
@@ -88,7 +87,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					new PostBackButton(
 						PostBack.CreateIntermediate(
 							addRs.ToSingleElementArray(),
-							DataUpdate,
 							id: "nonIdAdd",
 							firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ),
 						new ButtonActionControlStyle( "Add Two Items" ),
@@ -96,7 +94,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					new PostBackButton(
 						PostBack.CreateIntermediate(
 							removeRs.ToSingleElementArray(),
-							DataUpdate,
 							id: "nonIdRemove",
 							firstModificationMethod:
 								() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ),
@@ -114,7 +111,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private ControlListItem getNonIdItem( int i ) {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), DataUpdate, id: PostBack.GetCompositeId( "nonId", i.ToString() ) );
+			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: PostBack.GetCompositeId( "nonId", i.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
@@ -137,7 +134,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					new PostBackButton(
 						PostBack.CreateIntermediate(
 							rs.ToSingleElementArray(),
-							DataUpdate,
 							id: "idAdd",
 							firstModificationMethod:
 								() =>
@@ -159,7 +155,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private ControlListItem getIdItem( int id ) {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), DataUpdate, id: PostBack.GetCompositeId( "id", id.ToString() ) );
+			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
 			itemStack.AddControls( new EwfTextBox( "ID {0}".FormatWith( id ) ) );
