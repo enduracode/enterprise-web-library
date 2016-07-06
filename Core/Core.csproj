@@ -403,6 +403,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\EwfValidation.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\PostBackValueDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationList.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationSetupState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPage.cs">
       <SubType>ASPXCodeBehind</SubType>

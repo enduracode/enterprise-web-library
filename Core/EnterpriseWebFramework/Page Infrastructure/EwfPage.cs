@@ -29,6 +29,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
 
 		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			ValidationSetupState.Init(
+				() => Instance.validationSetupState,
+				dataModifications => {
+					if( dataModifications.Contains( Instance.dataUpdate ) && dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
+						throw new ApplicationException(
+							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
+				} );
 			EwfPage.cssInfoCreator = cssInfoCreator;
 		}
 
@@ -36,6 +43,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
 		/// </summary>
 		public static EwfPage Instance { get { return HttpContext.Current.CurrentHandler as EwfPage; } }
+
+		/// <summary>
+		/// Gets the post-back corresponding to the first of the current data modifications.
+		/// </summary>
+		internal static PostBack PostBack {
+			get {
+				var firstDataModification = ValidationSetupState.Current.DataModifications.First();
+				return firstDataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)firstDataModification;
+			}
+		}
 
 		/// <summary>
 		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
@@ -47,6 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private Control contentContainer;
 		private Control etherealPlace;
+		private ValidationSetupState validationSetupState;
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
@@ -542,13 +560,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					InfoAsBaseType.ResourceFullName ) );
 
 			Form.Controls.Add( etherealPlace = new PlaceHolder() );
-			if( EsAsBaseType != null )
-				using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
-					EsAsBaseType.LoadData();
-			using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
-				loadData();
+
+			validationSetupState = new ValidationSetupState();
+			ValidationSetupState.ExecuteWithDataModifications(
+				DataUpdate.ToSingleElementArray(),
+				() => {
+					if( EsAsBaseType != null )
+						using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
+							EsAsBaseType.LoadData();
+					using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
+						loadData();
+				} );
 			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
 				loadDataForControlAndChildren( this );
+			validationSetupState = null;
 
 			foreach( var i in controlTreeValidations )
 				i();
@@ -672,8 +697,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private void loadDataForControlAndChildren( Control control ) {
 			var controlTreeDataLoader = control as ControlTreeDataLoader;
-			if( controlTreeDataLoader != null )
+			if( controlTreeDataLoader != null ) {
+				ValidationSetupState.Current.SetForNextElement();
 				controlTreeDataLoader.LoadData();
+			}
 
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
 				loadDataForControlAndChildren( child );
