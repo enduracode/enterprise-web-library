@@ -104,8 +104,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				() => this.IsOnPage() ? UniqueID : "",
 				v => v,
 				rawValue =>
-				rawValue != null
-					? readOnly ? PostBackValueValidationResult<string>.CreateValidWithNoValue() : PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
+				rawValue != null && ( !readOnly || rawValue == formValue.GetDurableValue() )
+					? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
 					: PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.postBack = postBack;
@@ -181,14 +181,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( !isTextarea )
 				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
 
-			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
+			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) )
 				PreRender += delegate {
 					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
 					textBox.AddJavaScriptEventScript(
 						JsWritingMethods.onchange,
 						"setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
 				};
-			}
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
