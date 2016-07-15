@@ -9,31 +9,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// ID for the group. Otherwise use FreeFormRadioList.
 	/// </summary>
 	public class RadioButtonGroup {
-		internal static FormValue<CommonCheckBox> GetFormValue( bool allowsNoSelection, Func<IEnumerable<CommonCheckBox>> allCheckBoxesGetter,
-		                                                        Func<IEnumerable<CommonCheckBox>> checkedCheckBoxesGetter,
-		                                                        Func<CommonCheckBox, string> stringValueSelector,
-		                                                        Func<string, IEnumerable<CommonCheckBox>> checkedCheckBoxesInPostBackGetter ) {
-			return new FormValue<CommonCheckBox>( () => checkedCheckBoxesGetter().FirstOrDefault(),
-			                                      () => {
-				                                      var firstCheckBoxOnPage = allCheckBoxesGetter().Select( i => (Control)i ).FirstOrDefault( i => i.IsOnPage() );
-				                                      return firstCheckBoxOnPage != null ? firstCheckBoxOnPage.UniqueID : "";
-			                                      },
-			                                      stringValueSelector,
-			                                      rawValue => {
-				                                      if( rawValue != null ) {
-					                                      var selectedButton = checkedCheckBoxesInPostBackGetter( rawValue ).SingleOrDefault();
-					                                      return selectedButton != null
-						                                             ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( selectedButton )
-						                                             : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
-				                                      }
-				                                      return allowsNoSelection
-					                                             ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( null )
-					                                             : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
-			                                      } );
+		internal static FormValue<CommonCheckBox> GetFormValue(
+			bool allowsNoSelection, Func<IEnumerable<CommonCheckBox>> allCheckBoxesGetter, Func<IEnumerable<CommonCheckBox>> checkedCheckBoxesGetter,
+			Func<CommonCheckBox, string> stringValueSelector, Func<string, IEnumerable<CommonCheckBox>> checkedCheckBoxesInPostBackGetter ) {
+			return new FormValue<CommonCheckBox>(
+				() => checkedCheckBoxesGetter().FirstOrDefault(),
+				() => {
+					var firstCheckBoxOnPage = allCheckBoxesGetter().Select( i => (Control)i ).FirstOrDefault( i => i.IsOnPage() );
+					return firstCheckBoxOnPage != null ? firstCheckBoxOnPage.UniqueID : "";
+				},
+				stringValueSelector,
+				rawValue => {
+					if( rawValue != null ) {
+						var selectedButton = checkedCheckBoxesInPostBackGetter( rawValue ).SingleOrDefault();
+						return selectedButton != null
+							       ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( selectedButton )
+							       : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
+					}
+					return allowsNoSelection
+						       ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( null )
+						       : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
+				} );
 		}
 
-		internal static void ValidateControls( bool allowsNoSelection, bool inNoSelectionState, IEnumerable<CommonCheckBox> checkBoxes,
-		                                       bool disableSingleButtonDetection ) {
+		internal static void ValidateControls(
+			bool allowsNoSelection, bool inNoSelectionState, IEnumerable<CommonCheckBox> checkBoxes, bool disableSingleButtonDetection ) {
 			Control selectedButton = null;
 			if( !allowsNoSelection || !inNoSelectionState ) {
 				var selectedButtons = checkBoxes.Where( i => i.IsChecked ).ToArray();
@@ -64,21 +64,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this group. Use with caution, as this
 		/// violates the HTML specification.</param>
 		public RadioButtonGroup( bool allowNoSelection, bool disableSingleButtonDetection = false ) {
-			formValue = GetFormValue( allowNoSelection,
-			                          () => from i in checkBoxesAndSelectionStates select i.Item1,
-			                          () => from i in checkBoxesAndSelectionStates where i.Item2 select i.Item1,
-			                          v => v != null ? ( (Control)v ).UniqueID : "",
-			                          rawValue => from checkBoxAndSelectionState in checkBoxesAndSelectionStates
-			                                      let control = (Control)checkBoxAndSelectionState.Item1
-			                                      where control.IsOnPage() && control.UniqueID == rawValue
-			                                      select checkBoxAndSelectionState.Item1 );
+			formValue = GetFormValue(
+				allowNoSelection,
+				() => from i in checkBoxesAndSelectionStates select i.Item1,
+				() => from i in checkBoxesAndSelectionStates where i.Item2 select i.Item1,
+				v => v != null ? ( (Control)v ).UniqueID : "",
+				rawValue => from checkBoxAndSelectionState in checkBoxesAndSelectionStates
+				            let control = (Control)checkBoxAndSelectionState.Item1
+				            where control.IsOnPage() && control.UniqueID == rawValue
+				            select checkBoxAndSelectionState.Item1 );
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() =>
-				ValidateControls( allowNoSelection,
-				                  checkBoxesAndSelectionStates.All( i => !i.Item2 ),
-				                  checkBoxesAndSelectionStates.Select( i => i.Item1 ),
-				                  disableSingleButtonDetection ) );
+				ValidateControls(
+					allowNoSelection,
+					checkBoxesAndSelectionStates.All( i => !i.Item2 ),
+					checkBoxesAndSelectionStates.Select( i => i.Item1 ),
+					disableSingleButtonDetection ) );
 		}
 
 		/// <summary>
