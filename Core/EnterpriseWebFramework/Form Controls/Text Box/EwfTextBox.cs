@@ -104,7 +104,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				() => this.IsOnPage() ? UniqueID : "",
 				v => v,
 				rawValue =>
-				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
+				rawValue != null
+					? readOnly ? PostBackValueValidationResult<string>.CreateValidWithNoValue() : PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
+					: PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.postBack = postBack;
 			this.autoPostBack = autoPostBack;
