@@ -23,11 +23,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( rawValue != null ) {
 						var selectedButton = checkedCheckBoxesInPostBackGetter( rawValue ).SingleOrDefault();
 						return selectedButton != null
-							       ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( selectedButton )
+							       ? PostBackValueValidationResult<CommonCheckBox>.CreateValid( selectedButton )
 							       : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
 					}
 					return allowsNoSelection
-						       ? PostBackValueValidationResult<CommonCheckBox>.CreateValidWithValue( null )
+						       ? PostBackValueValidationResult<CommonCheckBox>.CreateValid( null )
 						       : PostBackValueValidationResult<CommonCheckBox>.CreateInvalid();
 				} );
 		}

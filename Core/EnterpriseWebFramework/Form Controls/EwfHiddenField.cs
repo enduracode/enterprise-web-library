@@ -27,8 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => value,
 				() => UniqueID,
 				v => v,
-				rawValue =>
-				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
+				rawValue => rawValue != null ? PostBackValueValidationResult<string>.CreateValid( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
 		}
 
 		WebControl EtherealControl.Control { get { return this; } }

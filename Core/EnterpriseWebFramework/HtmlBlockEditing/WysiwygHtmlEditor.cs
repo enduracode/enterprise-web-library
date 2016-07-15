@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( rawValue.EndsWith( Environment.NewLine ) && rawValue.Remove( rawValue.Length - Environment.NewLine.Length ) == formValue.GetDurableValue() )
 						rawValue = formValue.GetDurableValue();
 
-					return PostBackValueValidationResult<string>.CreateValidWithValue( rawValue );
+					return PostBackValueValidationResult<string>.CreateValid( rawValue );
 				} );
 		}
 

@@ -229,7 +229,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					v => v.ObjectToString( true ),
 					rawValue =>
 					rawValue != null && itemsByStringId.ContainsKey( rawValue )
-						? PostBackValueValidationResult<ItemIdType>.CreateValidWithValue( itemsByStringId[ rawValue ].Id )
+						? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
 						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
 				if( postBack != null || autoPostBack )
 					EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
@@ -239,20 +239,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
-				if( autoPostBack ) {
+				if( autoPostBack )
 					PreRender +=
 						delegate {
 							selectControl.AddJavaScriptEventScript(
 								JavaScriptWriting.JsWritingMethods.onchange,
 								PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
 						};
-				}
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-				if( placeholderItem != null ) {
+				if( placeholderItem != null )
 					// Don't let the attribute value be the empty string since this seems to confuse Select2.
 					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " );
-				}
 
 				PreRender += delegate {
 					foreach( var i in items )

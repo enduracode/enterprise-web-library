@@ -105,7 +105,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				v => v,
 				rawValue =>
 				rawValue != null && ( !readOnly || rawValue == formValue.GetDurableValue() )
-					? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue )
+					? PostBackValueValidationResult<string>.CreateValid( rawValue )
 					: PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.postBack = postBack;

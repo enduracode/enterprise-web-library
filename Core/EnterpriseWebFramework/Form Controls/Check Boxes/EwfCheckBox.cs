@@ -34,18 +34,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static FormValue<bool> GetFormValue( bool isChecked, Control checkBox ) {
-			return new FormValue<bool>( () => isChecked,
+			return new FormValue<bool>(
+				() => isChecked,
 				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
 				v => v.ToString(),
 				rawValue =>
 				rawValue == null
-					? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
-					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValidWithValue( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
+					? PostBackValueValidationResult<bool>.CreateValid( false )
+					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValid( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
-		internal static void AddCheckBoxAttributes( WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue,
-		                                            FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId, PostBack postBack, bool autoPostBack,
-		                                            IEnumerable<string> onClickJsMethods ) {
+		internal static void AddCheckBoxAttributes(
+			WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue, FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId,
+			PostBack postBack, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
 			checkBoxElement.Attributes.Add( "type", checkBoxFormValue != null ? "checkbox" : "radio" );
 			checkBoxElement.Attributes.Add( "name", checkBoxFormValue != null ? checkBox.UniqueID : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() );
 			if( radioButtonFormValue != null )

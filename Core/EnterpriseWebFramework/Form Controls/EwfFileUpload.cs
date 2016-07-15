@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				v => "",
 				rawValue =>
 				rawValue != null
-					? PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue( rawValue.ContentLength > 0 ? rawValue : null )
+					? PostBackValueValidationResult<HttpPostedFile>.CreateValid( rawValue.ContentLength > 0 ? rawValue : null )
 					: PostBackValueValidationResult<HttpPostedFile>.CreateInvalid() );
 		}
 
