@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -10,14 +11,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private Func<ElementLocalData> webFormsLocalDataGetter;
-		private IEnumerable<Tuple<string, string>> webFormsAttributes;
-		private string webFormsElementName;
+		private ElementLocalData webFormsLocalData;
 
 		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ) {
 			ElementDataGetter = elementDataGetter;
 			FormValue = formValue;
-
-			PreRender += handlePreRender;
 		}
 
 		IEnumerable<PageNode> FlowComponent.GetNodes() {
@@ -32,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 
 		void ControlTreeDataLoader.LoadData() {
-			var elementData = ElementDataGetter( new ElementContext( UniqueID ) );
+			var elementData = ElementDataGetter( new ElementContext( ClientID ) );
 			this.AddControlsReturnThis( elementData.Children.GetControls() );
 			elementData.EtherealChildren.AddEtherealControls( this );
 			webFormsLocalDataGetter = elementData.LocalDataGetter;
@@ -51,26 +49,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private string getJsInitStatements() {
 			if( webFormsLocalDataGetter == null )
 				throw new ApplicationException( "webFormsLocalDataGetter not set" );
-			var localData = webFormsLocalDataGetter();
-			webFormsAttributes = localData.Attributes;
-			webFormsElementName = localData.ElementName;
-			return localData.JsInitStatements;
+			webFormsLocalData = webFormsLocalDataGetter();
+			return webFormsLocalData.JsInitStatements;
 		}
 
 		FormValue FormValueControl.FormValue { get { return FormValue; } }
 
-		private void handlePreRender( object sender, EventArgs e ) {
-			if( webFormsAttributes == null )
-				throw new ApplicationException( "webFormsAttributes not set" );
-			foreach( var i in webFormsAttributes )
-				Attributes.Add( i.Item1, i.Item2 );
+		protected override void AddAttributesToRender( HtmlTextWriter writer ) {
+			if( webFormsLocalData == null )
+				throw new ApplicationException( "webFormsLocalData not set" );
+			foreach( var i in webFormsLocalData.Attributes )
+				writer.AddAttribute( i.Item1, i.Item2 );
+			if( webFormsLocalData.IncludeIdAttribute )
+				writer.AddAttribute( HtmlTextWriterAttribute.Id, ClientID );
 		}
 
 		protected override string TagName {
 			get {
-				if( webFormsElementName == null )
-					throw new ApplicationException( "webFormsElementName not set" );
-				return webFormsElementName;
+				if( webFormsLocalData == null )
+					throw new ApplicationException( "webFormsLocalData not set" );
+				return webFormsLocalData.ElementName;
 			}
 		}
 	}
