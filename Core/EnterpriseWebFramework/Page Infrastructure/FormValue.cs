@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !key.Any() || postBackValues == null || postBackValues.KeyRemoved( key ) )
 				return durableValueGetter();
 			var result = validatePostBackValue( postBackValues.GetValue( key ) );
-			return result.IsValid && result.HasValue ? result.Value : durableValueGetter();
+			return result.IsValid ? result.Value : durableValueGetter();
 		}
 
 		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
