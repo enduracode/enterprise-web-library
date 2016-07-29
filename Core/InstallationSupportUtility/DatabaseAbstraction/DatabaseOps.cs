@@ -78,9 +78,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 		}
 
 		private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {
-			return EwlStatics.CombinePaths(
-				dataPackageFolderPath,
-				( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
+			return EwlStatics.CombinePaths( dataPackageFolderPath, ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
 		}
 
 		/// <summary>
@@ -92,6 +90,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			StatusStatics.SetStatus( "Waiting for database to be ready..." );
 			EwlStatics.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
 			StatusStatics.SetStatus( "Database is ready." );
+		}
+
+		/// <summary>
+		/// Gets the tables in the specified database, ordered by name.
+		/// </summary>
+		public static IEnumerable<string> GetDatabaseTables( Database database ) {
+			return database.GetTables().OrderBy( i => i );
 		}
 
 		/// <summary>
@@ -107,13 +112,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 					lines++;
 			}
 			return lines;
-		}
-
-		/// <summary>
-		/// Gets the tables in the specified database, ordered by name.
-		/// </summary>
-		public static IEnumerable<string> GetDatabaseTables( Database database ) {
-			return database.GetTables().OrderBy( i => i );
 		}
 	}
 }
