@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -101,7 +102,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateWindowsServiceCode( installation, service );
 			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 				generateServerSideConsoleProjectCode( installation, project );
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
+			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 				generateCodeForProject(
 					installation,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
@@ -110,7 +111,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
 						writeAssemblyInfo( writer, installation, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
 					} );
-			}
 
 			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
 			generateXmlSchemaLogicForOtherXsdFiles( installation );
@@ -134,21 +134,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) {
 					var asposeLicenseFilePath = EwlStatics.CombinePaths( ConfigurationStatics.ConfigurationFolderPath, asposeLicenseFileName );
-					if( File.Exists( asposeLicenseFilePath ) ) {
+					if( File.Exists( asposeLicenseFilePath ) )
 						IoMethods.CopyFile(
 							asposeLicenseFilePath,
 							EwlStatics.CombinePaths(
 								InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 								InstallationFileStatics.FilesFolderName,
 								asposeLicenseFileName ) );
-					}
 				}
 
 				// If web projects exist for this installation, copy appropriate files into them.
-				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
+				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null )
 					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
 						copyInWebProjectFiles( installation, webProject );
-				}
 			}
 		}
 
@@ -321,47 +319,48 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private void generateDataAccessCodeForDatabase(
 			InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
 			Configuration.SystemDevelopment.Database configuration ) {
-			// Ensure that all tables specified in the configuration file actually exist.
-			var tableNames = DatabaseOps.GetDatabaseTables( database );
+			var tableNames = DatabaseOps.GetDatabaseTables( database ).ToImmutableArray();
+
 			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
 			ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
 			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
+			ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
+			tableNames =
+				tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+					.ToImmutableArray();
+
 			database.ExecuteDbMethod(
 				delegate( DBConnection cn ) {
 					// database logic access - standard
-					if( !configuration.EveryTableHasKeySpecified || configuration.EveryTableHasKey ) {
-						writer.WriteLine();
-						TableConstantStatics.Generate( cn, writer, baseNamespace, database );
-					}
+					writer.WriteLine();
+					TableConstantStatics.Generate( cn, writer, baseNamespace, database, tableNames );
 
 					// database logic access - custom
 					writer.WriteLine();
 					RowConstantStatics.Generate( cn, writer, baseNamespace, database, configuration );
 
 					// retrieval and modification commands - standard
-					if( !configuration.EveryTableHasKeySpecified || configuration.EveryTableHasKey ) {
-						writer.WriteLine();
-						CommandConditionStatics.Generate( cn, writer, baseNamespace, database );
+					writer.WriteLine();
+					CommandConditionStatics.Generate( cn, writer, baseNamespace, database, tableNames );
 
-						writer.WriteLine();
-						var tableRetrievalNamespaceDeclaration = TableRetrievalStatics.GetNamespaceDeclaration( baseNamespace, database );
-						TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, configuration );
+					writer.WriteLine();
+					var tableRetrievalNamespaceDeclaration = TableRetrievalStatics.GetNamespaceDeclaration( baseNamespace, database );
+					TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, tableNames, configuration );
 
-						writer.WriteLine();
-						var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
-						StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, configuration );
+					writer.WriteLine();
+					var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
+					StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, tableNames, configuration );
 
-						foreach( var tableName in DatabaseOps.GetDatabaseTables( database ) ) {
-							TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
-							StandardModificationStatics.WritePartialClass(
-								cn,
-								libraryBasePath,
-								modNamespaceDeclaration,
-								database,
-								tableName,
-								CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
-						}
+					foreach( var tableName in tableNames ) {
+						TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
+						StandardModificationStatics.WritePartialClass(
+							cn,
+							libraryBasePath,
+							modNamespaceDeclaration,
+							database,
+							tableName,
+							CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
 					}
 
 					// retrieval and modification commands - custom
@@ -380,16 +379,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				} );
 		}
 
-		private void ensureTablesExist( IEnumerable<string> databaseTables, IEnumerable<string> specifiedTables, string tableAdjective ) {
+		private void ensureTablesExist( IReadOnlyCollection<string> databaseTables, IEnumerable<string> specifiedTables, string tableAdjective ) {
 			if( specifiedTables == null )
 				return;
 			var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();
-			if( nonexistentTables.Any() ) {
+			if( nonexistentTables.Any() )
 				throw new UserCorrectableException(
-					tableAdjective.CapitalizeString() + " " + ( nonexistentTables.Count() > 1 ? "tables" : "table" ) + " " +
-					StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Count() > 1 ? "do" : "does" ) +
+					tableAdjective.CapitalizeString() + " " + ( nonexistentTables.Length > 1 ? "tables" : "table" ) + " " +
+					StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Length > 1 ? "do" : "does" ) +
 					" not exist." );
-			}
 		}
 
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject project ) {
@@ -569,18 +567,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( DevelopmentInstallation installation ) {
 			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
-			if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) ) {
+			if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) )
 				generateXmlSchemaLogic(
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					customInstallationConfigSchemaPathInProject,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Installation",
 					"Installation Custom Configuration.cs",
 					true );
-			}
 		}
 
 		private void generateXmlSchemaLogicForOtherXsdFiles( DevelopmentInstallation installation ) {
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null ) {
+			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null )
 				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
 					generateXmlSchemaLogic(
 						EwlStatics.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),
@@ -589,7 +586,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						xmlSchema.codeFileName,
 						xmlSchema.useSvcUtil );
 				}
-			}
 		}
 
 		private void generateXmlSchemaLogic( string projectPath, string schemaPathInProject, string nameSpace, string codeFileName, bool useSvcUtil ) {
@@ -621,14 +617,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 				var outputCodeFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, Path.GetFileNameWithoutExtension( schemaPathInProject ) + ".cs" );
 				var desiredCodeFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, codeFileName );
-				if( outputCodeFilePath != desiredCodeFilePath ) {
+				if( outputCodeFilePath != desiredCodeFilePath )
 					try {
 						IoMethods.MoveFile( outputCodeFilePath, desiredCodeFilePath );
 					}
 					catch( IOException e ) {
 						throw new UserCorrectableException( "Failed to move the generated code file for an XML schema. Please try the operation again.", e );
 					}
-				}
 			}
 		}
 

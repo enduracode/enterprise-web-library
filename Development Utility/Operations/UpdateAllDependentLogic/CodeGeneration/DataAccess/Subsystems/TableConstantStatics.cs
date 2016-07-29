@@ -1,12 +1,13 @@
+using System.Collections.Generic;
 using System.IO;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableConstantStatics {
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
+		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
-			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
+			foreach( var table in tableNames ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );
 				writer.WriteLine( "public class " + EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "Table" ) + " {" );
 

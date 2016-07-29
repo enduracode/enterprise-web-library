@@ -17,12 +17,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
+			Configuration.SystemDevelopment.Database configuration ) {
 			StandardModificationStatics.writer = writer;
 			StandardModificationStatics.database = database;
 
 			writer.WriteLine( namespaceDeclaration );
-			foreach( var tableName in DatabaseOps.GetDatabaseTables( database ) ) {
+			foreach( var tableName in tableNames ) {
 				var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( tableName, configuration );
 
 				writeClass( cn, tableName, isRevisionHistoryTable, false );
@@ -457,7 +458,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			writer.WriteLine( "var insert = new InlineInsert( \"" + tableName + "\" );" );
 			writer.WriteLine( "addColumnModifications( insert );" );
-			if( identityColumn != null ) {
+			if( identityColumn != null )
 				// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can't cast a boxed decimal to an int.
 				writer.WriteLine(
 					"{0}.Value = {1};".FormatWith(
@@ -466,7 +467,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							"EwlStatics.ChangeType( insert.Execute( {0} ), typeof( {1} ) )".FormatWith(
 								DataAccessStatics.GetConnectionExpression( database ),
 								identityColumn.UnconvertedDataTypeName ) ) ) );
-			}
 			else
 				writer.WriteLine( "insert.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
 

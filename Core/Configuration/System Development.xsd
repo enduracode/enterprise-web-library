@@ -83,7 +83,13 @@
 	</complexType>
 	<complexType name="Database">
 		<sequence>
-			<element name="EveryTableHasKey" type="boolean" minOccurs="0" />
+			<element name="WhitelistedTables" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Table" type="string" minOccurs="0" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 			<element name="rowConstantTables" minOccurs="0">
 				<complexType>
 					<sequence>

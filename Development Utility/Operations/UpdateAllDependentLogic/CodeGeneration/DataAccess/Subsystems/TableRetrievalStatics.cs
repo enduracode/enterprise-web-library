@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
@@ -17,9 +18,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
+			Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
-			foreach( var table in DatabaseOps.GetDatabaseTables( database ) ) {
+			foreach( var table in tableNames ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
 				writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
 
@@ -58,12 +60,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				var tableUsesRowVersionedCaching = configuration.TablesUsingRowVersionedDataCaching != null &&
 				                                   configuration.TablesUsingRowVersionedDataCaching.Any( i => i.EqualsIgnoreCase( table ) );
-				if( tableUsesRowVersionedCaching && columns.RowVersionColumn == null && !( cn.DatabaseInfo is OracleInfo ) ) {
+				if( tableUsesRowVersionedCaching && columns.RowVersionColumn == null && !( cn.DatabaseInfo is OracleInfo ) )
 					throw new UserCorrectableException(
 						cn.DatabaseInfo is MySqlInfo
 							? "Row-versioned data caching cannot currently be used with MySQL databases."
 							: "Row-versioned data caching can only be used with the {0} table if you add a rowversion column.".FormatWith( table ) );
-				}
 
 				if( isSmallTable )
 					writeGetAllRowsMethod( writer, isRevisionHistoryTable, false );
@@ -135,10 +136,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private readonly TableRetrievalQueryCache<Row> queries = new TableRetrievalQueryCache<Row>();" );
 			writer.WriteLine(
 				"private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
-			if( isRevisionHistoryTable ) {
+			if( isRevisionHistoryTable )
 				writer.WriteLine(
 					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
-			}
 			writer.WriteLine( "private Cache() {}" );
 			writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
 			writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
