@@ -430,10 +430,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />

@@ -62,6 +62,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, messageHtml ) );
 		}
 
+		internal static void AssertPageTreeNotBuilt() {
+			if( Instance.validationSetupState == null )
+				throw new ApplicationException( "The page tree has already been built." );
+		}
+
+		internal static void AssertPageTreeBuilt() {
+			if( Instance.validationSetupState != null )
+				throw new ApplicationException( "The page tree has not yet been built." );
+		}
+
 		private Control contentContainer;
 		private Control etherealPlace;
 		private ValidationSetupState validationSetupState;
@@ -587,13 +597,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// The empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted.
 			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
 
-			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
-			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
-			// happen after LoadData is called on all controls.
+			foreach( var i in formValues )
+				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+
+			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			foreach( var displayLink in displayLinks )
 				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-
-			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
 
