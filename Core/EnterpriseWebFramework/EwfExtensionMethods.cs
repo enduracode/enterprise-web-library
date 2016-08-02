@@ -93,10 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		public static IEnumerable<Control> GetControls( this IEnumerable<FlowComponent> components ) {
-			return from component in components
-			       from node in component.GetNodes()
-			       let element = node as PageElement
-			       select element != null ? (Control)element : new Literal { Text = HttpUtility.HtmlEncode( ( (TextNode)node ).Text ) };
+			return components.SelectMany( i => i.GetNodes() ).Cast<Control>();
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
