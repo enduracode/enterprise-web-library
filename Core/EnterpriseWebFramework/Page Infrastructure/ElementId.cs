@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public void AddId( string id ) {
 			EwfPage.AssertPageTreeNotBuilt();
-			if( id.Length > 0 )
+			if( this.id.Length > 0 )
 				throw new ApplicationException( "The ID was already added." );
 			this.id = id;
 		}
