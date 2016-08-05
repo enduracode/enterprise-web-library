@@ -708,7 +708,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var controlTreeDataLoader = control as ControlTreeDataLoader;
 			if( controlTreeDataLoader != null ) {
 				ValidationSetupState.Current.SetForNextElement();
-				controlTreeDataLoader.LoadData();
+
+				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
+				if( control is MasterPage )
+					ValidationSetupState.ExecuteWithDataModifications( DataUpdate.ToSingleElementArray(), controlTreeDataLoader.LoadData );
+				else
+					controlTreeDataLoader.LoadData();
 			}
 
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
