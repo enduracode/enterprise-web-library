@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private Func<ElementLocalData> webFormsLocalDataGetter;
 		private ElementLocalData webFormsLocalData;
 
-		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ) {
+		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ): base( HtmlTextWriterTag.Unknown ) {
 			ElementDataGetter = elementDataGetter;
 			FormValue = formValue;
 		}
