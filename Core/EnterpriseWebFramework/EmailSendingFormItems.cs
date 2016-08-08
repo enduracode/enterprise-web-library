@@ -18,11 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					                             vl ) );
 		}
 
-		public static FormItem<WysiwygHtmlEditor> GetBodyHtmlFormItem( this EmailMessage emailMessage, ValidationList vl, string value = "" ) {
-			return FormItem.Create(
-				"Body",
-				new WysiwygHtmlEditor( value ),
-				validationGetter: control => new EwfValidation( ( pbv, validator ) => emailMessage.BodyHtml = control.GetPostBackValue( pbv ), vl ) );
+		public static FormItem GetBodyHtmlFormItem( this EmailMessage emailMessage, string value = "" ) {
+			return new WysiwygHtmlEditor( value, true, ( postBackValue, validator ) => emailMessage.BodyHtml = postBackValue ).ToFormItem( "Body" );
 		}
 	}
 }

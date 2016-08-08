@@ -35,10 +35,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
 	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
-		internal static void AddTextareaValue( Control textarea, string value ) {
+		internal static string GetTextareaValue( string value ) {
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
 			// does in their System.Web.UI.WebControls.TextBox implementation.
-			textarea.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( Environment.NewLine + value ) } );
+			return Environment.NewLine + value;
 		}
 
 		private readonly int rows;
@@ -156,7 +156,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var value = formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 				var valueOrWatermark = watermarkText.Any() && !value.Any() ? watermarkText : value;
 				if( isTextarea )
-					AddTextareaValue( textBox, valueOrWatermark );
+					textBox.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( GetTextareaValue( valueOrWatermark ) ) } );
 				else if( !masksCharacters )
 					textBox.Attributes.Add( "value", valueOrWatermark );
 			};

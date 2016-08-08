@@ -318,10 +318,12 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
+    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
+    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />

@@ -101,5 +101,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var element in components.SelectMany( i => i.GetElements() ) )
 				EwfPage.Instance.AddEtherealControl( parent, (PageElement)element );
 		}
+
+		/// <summary>
+		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
+		/// </summary>
+		public static FormItem ToFormItem(
+			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			return new FormItem<Control>(
+				label,
+				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToSingleElementArray().GetControls() ),
+				cellSpan,
+				textAlignment,
+				formControl.Validation );
+		}
 	}
 }
