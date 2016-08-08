@@ -118,7 +118,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new EwfCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new EwfCheckBox( formValue, label, postBack, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
+				{
+					AutoPostBack = autoPostBack
+				};
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
@@ -128,7 +131,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new BlockCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new BlockCheckBox( formValue, label, postBack, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
+				{
+					AutoPostBack = autoPostBack
+				};
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}

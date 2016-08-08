@@ -54,7 +54,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly FormValue<CommonCheckBox> formValue;
-		private readonly List<Tuple<CommonCheckBox, bool>> checkBoxesAndSelectionStates = new List<Tuple<CommonCheckBox, bool>>();
+
+		private readonly List<Tuple<CommonCheckBox, bool, PageModificationValue<bool>>> checkBoxesAndSelectionStatesAndPageModificationValues =
+			new List<Tuple<CommonCheckBox, bool, PageModificationValue<bool>>>();
 
 		/// <summary>
 		/// Creates a radio button group.
@@ -66,10 +68,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public RadioButtonGroup( bool allowNoSelection, bool disableSingleButtonDetection = false ) {
 			formValue = GetFormValue(
 				allowNoSelection,
-				() => from i in checkBoxesAndSelectionStates select i.Item1,
-				() => from i in checkBoxesAndSelectionStates where i.Item2 select i.Item1,
+				() => from i in checkBoxesAndSelectionStatesAndPageModificationValues select i.Item1,
+				() => from i in checkBoxesAndSelectionStatesAndPageModificationValues where i.Item2 select i.Item1,
 				v => v != null ? ( (Control)v ).UniqueID : "",
-				rawValue => from checkBoxAndSelectionState in checkBoxesAndSelectionStates
+				rawValue => from checkBoxAndSelectionState in checkBoxesAndSelectionStatesAndPageModificationValues
 				            let control = (Control)checkBoxAndSelectionState.Item1
 				            where control.IsOnPage() && control.UniqueID == rawValue
 				            select checkBoxAndSelectionState.Item1 );
@@ -78,26 +80,52 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() =>
 				ValidateControls(
 					allowNoSelection,
-					checkBoxesAndSelectionStates.All( i => !i.Item2 ),
-					checkBoxesAndSelectionStates.Select( i => i.Item1 ),
+					checkBoxesAndSelectionStatesAndPageModificationValues.All( i => !i.Item2 ),
+					checkBoxesAndSelectionStatesAndPageModificationValues.Select( i => i.Item1 ),
 					disableSingleButtonDetection ) );
 		}
 
 		/// <summary>
 		/// Creates an in-line radio button that is part of the group.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
-			var checkBox = new EwfCheckBox( formValue, label, postBack ) { AutoPostBack = autoPostBack };
-			checkBoxesAndSelectionStates.Add( Tuple.Create<CommonCheckBox, bool>( checkBox, isSelected ) );
+		public EwfCheckBox CreateInlineRadioButton(
+			bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null ) {
+			EwfCheckBox checkBox = null;
+			checkBox = new EwfCheckBox(
+				formValue,
+				label,
+				postBack,
+				() =>
+				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
+					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ) ) { AutoPostBack = autoPostBack };
+			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
+				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );
+
+			if( pageModificationValue != null )
+				formValue.AddPageModificationValue( pageModificationValue, value => value == checkBox );
+
 			return checkBox;
 		}
 
 		/// <summary>
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
-			var checkBox = new BlockCheckBox( formValue, label, postBack ) { AutoPostBack = autoPostBack };
-			checkBoxesAndSelectionStates.Add( Tuple.Create<CommonCheckBox, bool>( checkBox, isSelected ) );
+		public BlockCheckBox CreateBlockRadioButton(
+			bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null ) {
+			BlockCheckBox checkBox = null;
+			checkBox = new BlockCheckBox(
+				formValue,
+				label,
+				postBack,
+				() =>
+				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
+					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ) ) { AutoPostBack = autoPostBack };
+			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
+				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );
+
+			if( pageModificationValue != null )
+				formValue.AddPageModificationValue( pageModificationValue, value => value == checkBox );
+
 			return checkBox;
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -18,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string label;
 		private readonly bool highlightWhenChecked;
 		private readonly PostBack postBack;
-		private readonly List<string> onClickJsMethods = new List<string>();
+		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private WebControl checkBox;
 
 		/// <summary>
@@ -35,11 +36,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
-		internal BlockCheckBox( FormValue<CommonCheckBox> formValue, string label, PostBack postBack, string listItemId = null ) {
+		internal BlockCheckBox(
+			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
 			this.postBack = postBack;
+			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 			NestedControls = new List<Control>();
 		}
 
@@ -76,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
 		/// </summary>
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
-			onClickJsMethods.Add( jsMethodInvocation );
+			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToSingleElementArray );
 		}
 
 		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
@@ -101,7 +104,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender +=
 				delegate {
-					EwfCheckBox.AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, postBack, AutoPostBack, onClickJsMethods );
+					EwfCheckBox.AddCheckBoxAttributes(
+						checkBox,
+						this,
+						checkBoxFormValue,
+						radioButtonFormValue,
+						radioButtonListItemId,
+						postBack,
+						AutoPostBack,
+						jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				};
 
 			var checkBoxCell = new TableCell().AddControlsReturnThis( checkBox );
@@ -128,7 +139,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Controls.Add( table );
 			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Length > 0 ? (Control)labelControl : checkBox );
+				new ToolTip(
+					ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ),
+					label.Length > 0 ? (Control)labelControl : checkBox );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -71,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string radioButtonListItemId;
 		private readonly string label;
 		private readonly PostBack postBack;
-		private readonly List<string> onClickJsMethods = new List<string>();
+		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private WebControl checkBox;
 
 		/// <summary>
@@ -86,11 +87,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
-		internal EwfCheckBox( FormValue<CommonCheckBox> formValue, string label, PostBack postBack, string listItemId = null ) {
+		internal EwfCheckBox(
+			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
 			this.postBack = postBack;
+			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 		}
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
@@ -114,7 +117,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
 		/// </summary>
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
-			onClickJsMethods.Add( jsMethodInvocation );
+			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToSingleElementArray );
 		}
 
 		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
@@ -132,7 +135,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender += delegate {
-				AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, postBack, AutoPostBack, onClickJsMethods );
+				AddCheckBoxAttributes(
+					checkBox,
+					this,
+					checkBoxFormValue,
+					radioButtonFormValue,
+					radioButtonListItemId,
+					postBack,
+					AutoPostBack,
+					jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				checkBox.Attributes.Add( "class", CssElementCreator.CssClass );
 			};
 			Controls.Add( checkBox );
