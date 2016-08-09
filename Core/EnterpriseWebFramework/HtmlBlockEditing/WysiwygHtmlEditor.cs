@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FormValue<string> formValue = null;
 			formValue = new FormValue<string>(
 				() => value,
-				() => id.Id,
+				() => setup.IsReadOnly ? "" : id.Id,
 				v => v,
 				rawValue => {
 					if( rawValue == null )
@@ -57,7 +57,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return new ElementData(
 						() => {
 							var attributes = new List<Tuple<string, string>>();
-							attributes.Add( Tuple.Create( "name", context.Id ) );
+							if( setup.IsReadOnly )
+								attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+							else
+								attributes.Add( Tuple.Create( "name", context.Id ) );
 							if( !displaySetup.ComponentsDisplayed )
 								attributes.Add( Tuple.Create( "style", "display: none" ) );
 
