@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                             return;
 						                             control.Validate( pbv );
 					                             },
-					                             validationList ?? EwfPage.Instance.DataUpdate ) );
+					                             validationList ) );
 		}
 
 		/// <summary>
@@ -101,7 +101,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                             return;
 						                             control.Validate( pbv );
 					                             },
-					                             validationList ?? EwfPage.Instance.DataUpdate ) );
+					                             validationList ) );
 		}
 	}
 

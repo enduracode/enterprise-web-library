@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Gets an email address form item for use on log-in pages. The validation sets this data value to the post back value of the text box, if valid, or adds
 		/// the specified error message to the form item.
 		/// </summary>
-		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage, ValidationList vl ) {
+		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage ) {
 			return FormItem.Create(
 				label,
 				new EwfTextBox( "" ),
@@ -88,8 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					new EwfValidation(
 						( pbv, validator ) =>
 						emailAddress.Value =
-						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ),
-						vl ) );
+						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ) ) );
 		}
 
 		/// <summary>

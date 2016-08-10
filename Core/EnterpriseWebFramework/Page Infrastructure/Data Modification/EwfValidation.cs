@@ -43,7 +43,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// This overload exists to support form controls that still require a post-back-value dictionary. It will be removed when EnduraCode goal 588 is complete.
 		/// </summary>
-		public EwfValidation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList = null )
+		public EwfValidation( Action<PostBackValueDictionary, Validator> method )
+			: this( validator => method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator ) ) {}
+
+		[ Obsolete( "Guaranteed through 31 October 2016. Use ValidationSetupState.ExecuteWithDataModifications instead." ) ]
+		public EwfValidation( Action<PostBackValueDictionary, Validator> method, ValidationList validationList )
 			: this( validator => method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator ), validationList ) {}
 
 		internal Action<Validator> Method { get { return method; } }

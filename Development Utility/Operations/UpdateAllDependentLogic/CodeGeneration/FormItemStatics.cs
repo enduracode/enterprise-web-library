@@ -6,9 +6,6 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class FormItemStatics {
-		private const string validationListParamDocComment =
-			"The DataModification or BasicValidationList to which this form item's validation should be added. Pass null to use the page's data update.";
-
 		internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {
 			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters, instead of
 			// just adding them to the data modification. This allows client code on a page to specify the order of modification methods, which is important because
@@ -696,7 +693,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			IEnumerable<string> additionalSummarySentences ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
-			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
 			var parameters = new List<CSharpParameter>();
 			if( valueParamTypeName.Length > 0 )
@@ -775,8 +771,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
 					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
 				};
-			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) +
-			       " }, validationList ?? EwfPage.Instance.DataUpdate )";
+			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) + " }, validationList )";
 		}
 
 		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, string body ) {
@@ -809,7 +804,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			TextWriter writer, ModificationField field, bool includeValueParams, bool? includeValidationMethodReturnValue, string body ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
 			CodeGenerationStatics.AddParamDocComment( writer, "additionalValidationMethod", "Passes the labelAndSubject and a validator to the function." );
-			CodeGenerationStatics.AddParamDocComment( writer, "validationList", validationListParamDocComment );
 
 			var parameters = new List<CSharpParameter>();
 			if( includeValueParams )
