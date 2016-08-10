@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An HTML section.
 	/// </summary>
-	public class Section: WebControl, ControlTreeDataLoader {
+	public sealed class Section: WebControl {
 		// This class allows us to use just one selector in the SectionAllStylesBothStates element.
 		private const string allStylesBothStatesClass = "ewfSec";
 
@@ -42,13 +42,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly SectionStyle style;
-		private readonly string heading;
-		private readonly IEnumerable<Control> postHeadingControls;
-		private readonly IEnumerable<Control> contentControls;
-		private readonly bool? expanded;
-		private readonly bool disableStatePersistence;
-
 		/// <summary>
 		/// Creates a section.
 		/// </summary>
@@ -74,19 +67,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public Section(
 			SectionStyle style, string heading, IEnumerable<Control> postHeadingControls, IEnumerable<Control> contentControls, bool? expanded,
 			bool disableStatePersistence ): base( "section" ) {
-			this.style = style;
-			this.heading = heading;
-			this.postHeadingControls = postHeadingControls != null ? postHeadingControls.ToArray() : new Control[ 0 ];
-			this.contentControls = contentControls != null ? contentControls.ToArray() : new Control[ 0 ];
-			this.expanded = expanded;
-			this.disableStatePersistence = disableStatePersistence;
-		}
+			postHeadingControls = postHeadingControls != null ? postHeadingControls.ToArray() : new Control[ 0 ];
+			contentControls = contentControls != null ? contentControls.ToArray() : new Control[ 0 ];
 
-		void ControlTreeDataLoader.LoadData() {
 			CssClass =
 				CssClass.ConcatenateWithSpace(
 					allStylesBothStatesClass + " " +
-					( style == SectionStyle.Normal ? getSectionClass( normalClosedClass, normalExpandedClass ) : getSectionClass( boxClosedClass, boxExpandedClass ) ) );
+					( style == SectionStyle.Normal
+						  ? getSectionClass( expanded, normalClosedClass, normalExpandedClass )
+						  : getSectionClass( expanded, boxClosedClass, boxExpandedClass ) ) );
 
 			if( heading.Any() ) {
 				var headingControls =
@@ -108,7 +97,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									ActionControlStyle = actionControlStyle
 								}
-							: new ToggleButton( this.ToSingleElementArray(), actionControlStyle, toggleClasses: toggleClasses ) as Control );
+							: new ToggleButton( this.ToSingleElementArray(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as
+							  Control );
 				}
 				else {
 					var headingContainer = new Block( headingControls.ToArray() ) { CssClass = headingClass };
@@ -119,7 +109,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				this.AddControlsReturnThis( new Block( contentControls.ToArray() ) { CssClass = contentClass } );
 		}
 
-		private string getSectionClass( string closedClass, string expandedClass ) {
+		private string getSectionClass( bool? expanded, string closedClass, string expandedClass ) {
 			return !expanded.HasValue || expanded.Value ? expandedClass : closedClass;
 		}
 	}

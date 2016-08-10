@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
@@ -11,11 +13,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private FormsAuthCapableUser user;
 
 		protected override void loadData() {
-			var logInPb =
-				PostBack.CreateFull(
-					actionGetter:
-						() =>
-						new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
+			Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
+			var logInPb = PostBack.CreateFull(
+				firstModificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
+				actionGetter:
+					() =>
+					new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			var registeredTable = EwfTable.Create( caption: "Registered users" );
@@ -40,14 +43,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new EwfTextBox( "", masksCharacters: true ),
 						validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ), logInPb ) ).ToControl() ) );
 
-			if( FormsAuthStatics.PasswordResetEnabled ) {
+			if( FormsAuthStatics.PasswordResetEnabled )
 				registeredTable.AddItem(
 					new EwfTableItem(
 						new PlaceHolder().AddControlsReturnThis(
 							"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
 							new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) )
 							.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
-			}
 
 			ph.AddControlsReturnThis( registeredTable );
 
@@ -62,14 +64,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
 
-			var logInMethod = FormsAuthStatics.GetLogInMethod(
-				this,
+			logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(
 				emailAddress,
 				password,
 				getUnregisteredEmailMessage(),
-				"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below.",
-				logInPb );
-			logInPb.AddModificationMethod( () => user = logInMethod() );
+				"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
+			logInHiddenFieldsAndMethod.Item1.AddEtherealControls( this );
 		}
 
 		private PostBackAction getSendNewPasswordAction() {

@@ -7,10 +7,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control for managing a single file stored in a database.
 	/// </summary>
-	public class BlobFileManager: WebControl, INamingContainer, ControlTreeDataLoader {
+	public sealed class BlobFileManager: WebControl, INamingContainer {
 		private int? fileCollectionId;
-		private BlobFile file;
-		private EwfFileUpload uploadedFile;
+		private readonly BlobFile file;
+		private readonly EwfFileUpload uploadedFile;
 		private string[] acceptableFileExtensions;
 
 		/// <summary>
@@ -24,23 +24,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
 		/// <summary>
-		/// Call this during LoadData.  This does not need to be called if there is no existing file collection.
-		/// </summary>
-		public void LoadData( int fileCollectionId ) {
-			this.fileCollectionId = fileCollectionId;
-		}
-
-		/// <summary>
 		/// Prevents the user from uploading a file of a type other than those provided. File type constants found in EnterpriseWebLibrary.FileExtensions.
 		/// </summary>
 		public void SetFileTypeFilter( params string[] acceptableFileExtensions ) {
 			this.acceptableFileExtensions = acceptableFileExtensions;
 		}
 
-		// NOTE: EVERYTHING should be done here. We shouldn't have LoadData. We should audit everyone using this control and see if we can improve things.
-		// NOTE: This should also be full of delegates that run when events (such as deleting a file) are occurring.
-		// NOTE: There should be a way to tell if a file was uploaded.
-		void ControlTreeDataLoader.LoadData() {
+		public BlobFileManager( int? fileCollectionId ) {
+			this.fileCollectionId = fileCollectionId;
+
 			if( fileCollectionId != null )
 				file = BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value );
 
@@ -67,7 +59,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				uploadedFile.SetInitialDisplay( false );
 				var replaceExistingFileLink = new ToggleButton(
 					uploadedFile.ToSingleElementArray(),
-					new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ) ) { AlternateText = "" };
+					new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ),
+					false,
+					( postBackValue, validator ) => { } ) { AlternateText = "" };
 				controlStack.AddControls( replaceExistingFileLink );
 			}
 
