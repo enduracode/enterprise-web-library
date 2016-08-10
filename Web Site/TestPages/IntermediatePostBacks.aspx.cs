@@ -34,8 +34,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						                             ( pbv, validator ) => {
 							                             if( control.ValueChangedOnPostBack( pbv ) )
 								                             validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
-						                             },
-						                             DataUpdate ) ) );
+						                             } ) ) );
 			staticTable.IncludeButtonWithThisText = "Submit";
 			ph.AddControlsReturnThis( staticTable );
 
@@ -60,14 +59,18 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
-			if( info.Toggled )
-				regionControls.Add(
-					FormItem.Create(
-						"Dynamic Field",
-						new EwfTextBox( "This was just added!" ),
-						validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ), pb ) ).ToControl() );
-			else
-				regionControls.Add( new Paragraph( "Nothing here yet." ) );
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					if( info.Toggled )
+						regionControls.Add(
+							FormItem.Create(
+								"Dynamic Field",
+								new EwfTextBox( "This was just added!" ),
+								validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ) ) ).ToControl() );
+					else
+						regionControls.Add( new Paragraph( "Nothing here yet." ) );
+				} );
 			yield return
 				new NamingPlaceholder(
 					new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToSingleElementArray(),

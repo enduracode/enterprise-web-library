@@ -29,44 +29,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			ph.AddControlsReturnThis( new PageName() );
 
-			if( ConfigurationStatics.IsLiveInstallation ) {
+			if( ConfigurationStatics.IsLiveInstallation )
 				ph.AddControlsReturnThis(
 					new Paragraph(
 						new Strong( "Warning:" ),
 						" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".GetLiteralControl() ) );
-			}
-
-			var pb = PostBack.CreateFull(
-				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
 
 			DataValue<User> user = new DataValue<User>();
-			ph.AddControlsReturnThis(
-				FormItem.Create(
-					"User's email address (leave blank for anonymous)",
-					new EwfTextBox( "" ),
-					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             var errorHandler = new ValidationErrorHandler( "user" );
-							                             var emailAddress = validator.GetEmailAddress( errorHandler, control.GetPostBackValue( pbv ), true );
-							                             if( errorHandler.LastResult != ErrorCondition.NoError )
-								                             return;
-							                             if( !emailAddress.Any() ) {
-								                             user.Value = null;
-								                             return;
-							                             }
-							                             user.Value = UserManagementStatics.GetUser( emailAddress );
-							                             if( user.Value == null )
-								                             validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
-						                             },
-						                             pb ) ).ToControl(),
-				new Paragraph(
-					new PostBackButton(
-						pb,
-						new ButtonActionControlStyle(
-							AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
-							buttonSize: ButtonActionControlStyle.ButtonSize.Large ) ) ) );
-
-			pb.AddModificationMethod( () => UserImpersonationStatics.BeginImpersonation( user.Value ) );
+			var pb = PostBack.CreateFull(
+				firstModificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
+				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					ph.AddControlsReturnThis(
+						FormItem.Create(
+							"User's email address (leave blank for anonymous)",
+							new EwfTextBox( "" ),
+							validationGetter: control => new EwfValidation(
+								                             ( pbv, validator ) => {
+									                             var errorHandler = new ValidationErrorHandler( "user" );
+									                             var emailAddress = validator.GetEmailAddress( errorHandler, control.GetPostBackValue( pbv ), true );
+									                             if( errorHandler.LastResult != ErrorCondition.NoError )
+										                             return;
+									                             if( !emailAddress.Any() ) {
+										                             user.Value = null;
+										                             return;
+									                             }
+									                             user.Value = UserManagementStatics.GetUser( emailAddress );
+									                             if( user.Value == null )
+										                             validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
+								                             } ) ).ToControl(),
+						new Paragraph(
+							new PostBackButton(
+								pb,
+								new ButtonActionControlStyle(
+									AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
+									buttonSize: ButtonActionControlStyle.ButtonSize.Large ) ) ) );
+				} );
 		}
 	}
 }

@@ -12,15 +12,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName { get { return "Select List"; } }
 		}
 
-		private ActionPostBack pb;
-
 		protected override void loadData() {
-			pb = PostBack.CreateFull();
-			ph.AddControlsReturnThis(
-				FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
-				FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
-				getSelect2UpgradeTestingInfo(),
-				FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
+			var pb = PostBack.CreateFull();
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					ph.AddControlsReturnThis(
+						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
+						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
+						getSelect2UpgradeTestingInfo(),
+						FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
+				} );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Submit", new PostBackButton( pb ) ) );
 		}
 
@@ -41,11 +43,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							FormItem.Create(
 								StringTools.ConcatenateWithDelimiter(
 									", ",
-									items.Count() == 4 ? "Default in list" : "Default not in list",
+									items.Length == 4 ? "Default in list" : "Default not in list",
 									selectedItemId.HasValue ? "One selected" : "default selected",
 									defaultValueItemLabel.Any() ? "default label" : "no default label" ),
 								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
-								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
+								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
 					}
 				}
 			}
@@ -88,12 +90,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								FormItem.Create(
 									StringTools.ConcatenateWithDelimiter(
 										", ",
-										items.Count() == 4 ? "Default in list" : "Default not in list",
+										items.Length == 4 ? "Default in list" : "Default not in list",
 										selectedItemId.HasValue ? "One selected" : "default selected",
 										defaultValueItemLabel.Any() ? "default label" : "no default label",
 										placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
 									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
-									validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ), pb ) );
+									validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
 						}
 					}
 				}

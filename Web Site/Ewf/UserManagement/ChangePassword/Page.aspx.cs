@@ -14,27 +14,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) );
-			var fib = FormItemBlock.CreateFormItemTable();
+			var pb = PostBack.CreateFull(
+				firstModificationMethod: modifyData,
+				actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) );
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					var fib = FormItemBlock.CreateFormItemTable();
 
-			newPassword = new DataValue<string>();
-			fib.AddFormItems(
-				FormItem.Create(
-					"New password",
-					new EwfTextBox( "", masksCharacters: true ),
-					validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), pb ) ) );
-			var newPasswordConfirm = new DataValue<string>();
-			fib.AddFormItems(
-				FormItem.Create(
-					"Re-type new password",
-					new EwfTextBox( "", masksCharacters: true ),
-					validationGetter: control => new EwfValidation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ), pb ) ) );
-			pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
+					newPassword = new DataValue<string>();
+					fib.AddFormItems(
+						FormItem.Create(
+							"New password",
+							new EwfTextBox( "", masksCharacters: true ),
+							validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ) ) ) );
+					var newPasswordConfirm = new DataValue<string>();
+					fib.AddFormItems(
+						FormItem.Create(
+							"Re-type new password",
+							new EwfTextBox( "", masksCharacters: true ),
+							validationGetter: control => new EwfValidation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ) ) ) );
+					pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
 
-			ph.AddControlsReturnThis( fib );
+					ph.AddControlsReturnThis( fib );
+				} );
+
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton( pb ) ) );
-
-			pb.AddModificationMethod( modifyData );
 		}
 
 		private void modifyData() {
