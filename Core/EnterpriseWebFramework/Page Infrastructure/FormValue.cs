@@ -74,8 +74,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfValidation CreateValidation( Action<PostBackValue<T>, Validator> validationMethod ) {
 			return
 				new EwfValidation(
-					( postBackValues, validator ) =>
-					validationMethod( new PostBackValue<T>( GetValue( postBackValues ), ValueChangedOnPostBack( postBackValues ) ), validator ) );
+					validator =>
+					validationMethod(
+						new PostBackValue<T>(
+						GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
+						ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
+						validator ) );
 		}
 
 		/// <summary>

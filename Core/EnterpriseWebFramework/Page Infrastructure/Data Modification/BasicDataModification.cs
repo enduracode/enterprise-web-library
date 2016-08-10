@@ -39,10 +39,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var topValidator = new Validator();
 				foreach( var validation in validations ) {
 					if( topValidations.Contains( validation ) )
-						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, topValidator );
+						validation.Method( topValidator );
 					else {
 						var validator = new Validator();
-						validation.Method( AppRequestState.Instance.EwfPageRequestState.PostBackValues, validator );
+						validation.Method( validator );
 						if( validator.ErrorsOccurred )
 							topValidator.NoteError();
 						validationErrorHandler( validation, validator.ErrorMessages );
@@ -58,10 +58,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			DataAccessState.Current.DisableCache();
 			try {
-				if( !skipModification ) {
+				if( !skipModification )
 					foreach( var method in modificationMethods )
 						method();
-				}
 				if( actionMethodAndPostModificationMethod != null )
 					actionMethodAndPostModificationMethod.Item1();
 				DataAccessState.Current.ResetCache();
