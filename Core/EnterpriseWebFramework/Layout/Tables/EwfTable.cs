@@ -498,14 +498,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						if( CurrentItemLimit < itemCount ) {
 							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
 							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
-							var button =
-								new PostBackButton(
+							var button = new PostBackButton(
+								new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+								usesSubmitBehavior: false,
+								postBack:
 									PostBack.CreateIntermediate(
 										itemLimitingUpdateRegionSet.ToSingleElementArray(),
 										id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-										firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ),
-									new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-									usesSubmitBehavior: false );
+										firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ) );
 							var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
 							var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 							itemLimitingRowGroup.Add(
@@ -564,14 +564,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 			if( itemLimit == (DataRowLimit)CurrentItemLimit )
 				return text.GetLiteralControl();
-			return
-				new PostBackButton(
+			return new PostBackButton(
+				new TextActionControlStyle( text ),
+				usesSubmitBehavior: false,
+				postBack:
 					PostBack.CreateIntermediate(
 						updateRegionSet.ToSingleElementArray(),
 						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ),
-					new TextActionControlStyle( text ),
-					usesSubmitBehavior: false );
+						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ) );
 		}
 
 		private EwfTableItem[] getItemActionsItem( int fieldCount ) {

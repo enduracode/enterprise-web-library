@@ -120,7 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					if( !ReadOnly )
 						table.AddRow(
 							getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-							( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
+							( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
 								new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 				} );
 
@@ -141,15 +141,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			cells.Add(
 				new PostBackButton(
-					PostBack.CreateFull(
+					new TextActionControlStyle( file.FileName ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateFull(
 						id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
 						firstModificationMethod: () => {
 							if( fileIsUnread && markFileAsReadMethod != null )
 								markFileAsReadMethod( file.FileId );
 						},
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ),
-					new TextActionControlStyle( file.FileName ),
-					false ) { ToolTip = file.FileName } );
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) { ToolTip = file.FileName } );
 
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToSingleElementArray() ) ) );
@@ -209,7 +209,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						true,
 						"Select and upload a new file:",
 						fi.ToControl(),
-						new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) );
+						new PostBackButton( new ButtonActionControlStyle( "Upload new file" ), usesSubmitBehavior: false ) );
 				} );
 		}
 

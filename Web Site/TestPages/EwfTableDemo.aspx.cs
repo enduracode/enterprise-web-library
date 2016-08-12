@@ -71,12 +71,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							  () =>
 							  new EwfTableItem(
 								  new PostBackButton(
+								  new ButtonActionControlStyle( "Add Row" ),
+								  usesSubmitBehavior: false,
+								  postBack:
 								  PostBack.CreateIntermediate(
 									  updateRegionSet.ToSingleElementArray(),
 									  id: "addRow",
-									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ),
-								  new ButtonActionControlStyle( "Add Row" ),
-								  usesSubmitBehavior: false ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) ).ToSingleElementArray() )
+									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) )
+							  .ToSingleElementArray() )
 						: getItems( 250 ) );
 		}
 

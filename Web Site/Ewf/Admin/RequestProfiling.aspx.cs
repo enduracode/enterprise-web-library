@@ -1,8 +1,8 @@
 using System;
-using Humanizer;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	partial class RequestProfiling: EwfPage {
@@ -20,14 +20,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ) ),
 				new Paragraph(
 					new PostBackButton(
-						PostBack.CreateFull(
-							id: "toggle",
-							firstModificationMethod:
-								() =>
-								AppRequestState.AddNonTransactionalModificationMethod(
-									() => AppMemoryCache.SetRequestProfilingForUser( AppRequestState.Instance.ProfilingUserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ),
 						new ButtonActionControlStyle( userIsProfiling ? "Turn Profiling OFF" : "Turn Profiling ON" ),
-						usesSubmitBehavior: false ) ) );
+						usesSubmitBehavior: false,
+						postBack:
+							PostBack.CreateFull(
+								id: "toggle",
+								firstModificationMethod:
+									() =>
+									AppRequestState.AddNonTransactionalModificationMethod(
+										() => AppMemoryCache.SetRequestProfilingForUser( AppRequestState.Instance.ProfilingUserId, userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) ) );
 		}
 	}
 }

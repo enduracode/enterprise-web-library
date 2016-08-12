@@ -9,9 +9,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				getBox(
 					new PostBackButton(
-						PostBack.CreateFull( id: "tiny" ),
 						new ButtonActionControlStyle( "Tiny Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-						false ) ) );
+						usesSubmitBehavior: false,
+						postBack: PostBack.CreateFull( id: "tiny" ) ) ) );
 			ph.AddControlsReturnThis(
 				getBox(
 					EwfLink.Create( SubFolder.General.GetInfo(), new ButtonActionControlStyle( "Tiny EWF Link", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) ) );
@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				getBox(
-					new PostBackButton( PostBack.CreateFull( id: "normal" ), new ButtonActionControlStyle( "Post Back Button" ), usesSubmitBehavior: false )
+					new PostBackButton( new ButtonActionControlStyle( "Post Back Button" ), usesSubmitBehavior: false, postBack: PostBack.CreateFull( id: "normal" ) )
 						{
 							Width = Unit.Pixel( 200 )
 						} ) );
@@ -36,9 +36,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				getBox(
 					new PostBackButton(
-						PostBack.CreateFull( id: "large" ),
 						new ButtonActionControlStyle( "Large Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.Large ),
-						usesSubmitBehavior: false ) ) );
+						usesSubmitBehavior: false,
+						postBack: PostBack.CreateFull( id: "large" ) ) ) );
 			ph.AddControlsReturnThis(
 				getBox( EwfLink.Create( EwfTableDemo.GetInfo(), new ButtonActionControlStyle( "Large EWF Link", ButtonActionControlStyle.ButtonSize.Large ) ) ) );
 			ph.AddControlsReturnThis(

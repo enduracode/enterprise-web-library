@@ -152,7 +152,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					var box =
 						FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )
 							.Control;
-					var button = new PostBackButton( pb, new ButtonActionControlStyle( "OK" ), usesSubmitBehavior: false );
+					var button = new PostBackButton( new ButtonActionControlStyle( "OK" ), usesSubmitBehavior: false );
 					return new Section(
 						"Post-back with non-default submit button. This post-back-value shouldn't show up when the page's submit button is submitted.",
 						new WebControl[] { box, button },

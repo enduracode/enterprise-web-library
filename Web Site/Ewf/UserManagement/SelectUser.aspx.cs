@@ -62,7 +62,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								                             } ) ).ToControl(),
 						new Paragraph(
 							new PostBackButton(
-								pb,
 								new ButtonActionControlStyle(
 									AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
 									buttonSize: ButtonActionControlStyle.ButtonSize.Large ) ) ) );

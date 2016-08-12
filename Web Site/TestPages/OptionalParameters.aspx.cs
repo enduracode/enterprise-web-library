@@ -1,4 +1,3 @@
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
@@ -22,9 +21,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			ph.AddControlsReturnThis(
 				new PostBackButton(
-					PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ),
 					new ButtonActionControlStyle( "Navigate and change Field 2" ),
-					usesSubmitBehavior: false ) );
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) );
 
 			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url", "Valid?" ) } );
 			ph.AddControlsReturnThis( table );

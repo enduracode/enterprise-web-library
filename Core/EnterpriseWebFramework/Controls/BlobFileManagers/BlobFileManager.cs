@@ -39,16 +39,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var controlStack = ControlStack.Create( true );
 			if( file != null ) {
 				var download = new PostBackButton(
-					PostBack.CreateFull(
+					new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 						actionGetter: () => {
 							// Refresh the file here in case a new one was uploaded on the same post-back.
 							return
 								new PostBackAction(
 									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ), false ) );
-						} ),
-					new TextActionControlStyle( Translation.DownloadExisting + " (" + file.FileName + ")" ),
-					false );
+						} ) );
 				controlStack.AddControls( download );
 			}
 			else if( !HideNoExistingFileMessage )

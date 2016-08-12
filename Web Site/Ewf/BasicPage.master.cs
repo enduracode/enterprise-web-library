@@ -3,12 +3,12 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
@@ -123,16 +123,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				var children = new List<Control>();
 				children.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
 				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
-				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
+				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
 					children.Add(
 						new PostBackButton(
-							PostBack.CreateFull(
-								id: "ewfIntermediateLogOut",
-								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
 							new ButtonActionControlStyle( "Log Out", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-							false ) );
-				}
+							usesSubmitBehavior: false,
+							postBack:
+								PostBack.CreateFull(
+									id: "ewfIntermediateLogOut",
+									firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
+									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) );
 				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
 			}
 			else if( ConfigurationStatics.MachineIsStandbyServer ) {
@@ -143,7 +143,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
-			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) ) {
+			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),
@@ -152,13 +152,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							new ButtonActionControlStyle( "Change User", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ),
 						" ".GetLiteralControl(),
 						new PostBackButton(
-							PostBack.CreateFull(
-								id: "ewfEndImpersonation",
-								firstModificationMethod: UserImpersonationStatics.EndImpersonation,
-								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ),
 							new ButtonActionControlStyle( "End Impersonation", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-							usesSubmitBehavior: false ) ) );
-			}
+							usesSubmitBehavior: false,
+							postBack:
+								PostBack.CreateFull(
+									id: "ewfEndImpersonation",
+									firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) );
 
 			if( warningControls.Any() ) {
 				var warningControl = warningControls.Count() > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();

@@ -154,20 +154,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			EwfPage.Instance.DataUpdate.AddModificationMethod( () => dateModificationMethod( adjustDateByNumberOfIntervals( date, numIntervals ) ) );
 
 
-			var previousLink =
-				new PostBackButton(
-					PostBack.CreateFull( id: "prev", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ),
-					PreviousButton,
-					usesSubmitBehavior: false );
+			var previousLink = new PostBackButton(
+				PreviousButton,
+				usesSubmitBehavior: false,
+				postBack: PostBack.CreateFull( id: "prev", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, -1 ) ) ) );
 			var todayLink = new PostBackButton(
-				PostBack.CreateFull( id: "today", firstModificationMethod: () => dateModificationMethod( DateTime.Today ) ),
 				CurrentDateButton,
-				usesSubmitBehavior: false );
-			var nextLink =
-				new PostBackButton(
-					PostBack.CreateFull( id: "next", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ),
-					NextButton,
-					usesSubmitBehavior: false );
+				usesSubmitBehavior: false,
+				postBack: PostBack.CreateFull( id: "today", firstModificationMethod: () => dateModificationMethod( DateTime.Today ) ) );
+			var nextLink = new PostBackButton(
+				NextButton,
+				usesSubmitBehavior: false,
+				postBack: PostBack.CreateFull( id: "next", firstModificationMethod: () => dateModificationMethod( adjustDateByNumberOfIntervals( date, 1 ) ) ) );
 
 			var table = new DynamicTable { CssClass = "calendarViewHeader ewfNavigationBoxHeader", IsStandard = false };
 			var navControls = new Panel();

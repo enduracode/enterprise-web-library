@@ -18,15 +18,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				EwfLink.Create( changePasswordPage, new TextActionControlStyle( "Change password" ) ),
 				new LiteralControl( "&nbsp;&bull;&nbsp;" ),
 				new PostBackButton(
-					PostBack.CreateFull(
+					new TextActionControlStyle( "Log out" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateFull(
 						id: "ewfLogOut",
 						firstModificationMethod: FormsAuthStatics.LogOutUser,
 						actionGetter: () => {
 							// NOTE: Is this the correct behavior if we are already on a public page?
 							return new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) );
-						} ),
-					new TextActionControlStyle( "Log out" ),
-					false ) );
+						} ) ) );
 		}
 	}
 }

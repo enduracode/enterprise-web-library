@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class StatusMessages: EwfPage {
@@ -15,7 +14,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				EwfTable.CreateWithItems(
 					items:
 						getStatusTests()
-							.Select( tests => new EwfTableItem( tests.Item1, new PostBackButton( tests.Item2, new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false ) ) )
+							.Select(
+								tests => new EwfTableItem( tests.Item1, new PostBackButton( new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false, postBack: tests.Item2 ) ) )
 							.ToFunctions() ) );
 		}
 

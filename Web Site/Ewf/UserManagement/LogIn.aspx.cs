@@ -51,8 +51,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							new EwfTableItem(
 								new PlaceHolder().AddControlsReturnThis(
 									"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-									new PostBackButton( newPasswordPb, new TextActionControlStyle( "click here to immediately send yourself a new password." ), usesSubmitBehavior: false ) )
-									.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+									new PostBackButton(
+										new TextActionControlStyle( "click here to immediately send yourself a new password." ),
+										usesSubmitBehavior: false,
+										postBack: newPasswordPb ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 					ph.AddControlsReturnThis( registeredTable );
 
@@ -71,9 +73,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						getUnregisteredEmailMessage(),
 						"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
 					logInHiddenFieldsAndMethod.Item1.AddEtherealControls( this );
-				} );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( logInPb ) ) );
+					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton() ) );
+				} );
 		}
 
 		private PostBackAction getSendNewPasswordAction() {

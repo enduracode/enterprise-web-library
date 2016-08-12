@@ -65,12 +65,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			// Perform image-specific validation if necessary.
-			if( mustBeRenderableImage ) {
+			if( mustBeRenderableImage )
 				// Make sure it is an image according to its content type.
 				if( !ContentTypes.IsImageType( GetContentTypeForPostedFile( file ) ) )
 					validator.NoteErrorAndAddMessage( "Please upload a valid image file." );
-				else {
-					// Make sure it is an image type that we understand. Also perform optional custom validation.
+				else
+				// Make sure it is an image type that we understand. Also perform optional custom validation.
 					try {
 						using( var stream = new MemoryStream( file.Contents ) ) {
 							var image = System.Drawing.Image.FromStream( stream );
@@ -82,8 +82,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						// is image at this point, this usually means that the file is some sort of unsupported image format, like NEF.
 						validator.NoteErrorAndAddMessage( "The uploaded image file is in an unsupported format." );
 					}
-				}
-			}
 		}
 
 		/// <summary>
@@ -121,14 +119,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var file = GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return
-				new PostBackButton(
+			return new PostBackButton(
+				new TextActionControlStyle( labelOverride ?? file.FileName ),
+				usesSubmitBehavior: false,
+				postBack:
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 						actionGetter:
-							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ),
-					new TextActionControlStyle( labelOverride ?? file.FileName ),
-					false );
+							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ) );
 		}
 
 		/// <summary>
@@ -141,13 +139,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var file = SystemProvider.GetFile( fileId );
 			if( file == null )
 				return textIfNoFile.GetLiteralControl();
-			return
-				new PostBackButton(
+			return new PostBackButton(
+				new TextActionControlStyle( labelOverride ?? file.FileName ),
+				usesSubmitBehavior: false,
+				postBack:
 					PostBack.CreateFull(
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ),
-					new TextActionControlStyle( labelOverride ?? file.FileName ),
-					false );
+						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) );
 		}
 
 		/// <summary>
