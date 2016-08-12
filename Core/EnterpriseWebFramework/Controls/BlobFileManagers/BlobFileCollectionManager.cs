@@ -84,14 +84,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
 
-			if( AppRequestState.Instance.Browser.IsInternetExplorer() ) {
-				base.Controls.Add(
+			if( AppRequestState.Instance.Browser.IsInternetExplorer() )
+				Controls.Add(
 					new HtmlGenericControl( "p" )
 						{
 							InnerText =
 								"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
 						} );
-			}
 
 			var columnSetups = new List<ColumnSetup>();
 			if( ThumbnailResourceInfoCreator != null )
@@ -106,20 +105,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
-			var deletePb = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "delete" ) );
 			var deleteModMethods = new List<Func<bool>>();
-			foreach( var file in files )
-				addFileRow( table, file, deletePb, deleteModMethods );
-			if( !ReadOnly ) {
-				table.AddRow(
-					getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-					( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
-						new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
-			}
-			deletePb.AddModificationMethod(
-				() => {
+			var deletePb = PostBack.CreateFull(
+				id: PostBack.GetCompositeId( postBackIdBase, "delete" ),
+				firstModificationMethod: () => {
 					if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
 						EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+				} );
+			ValidationSetupState.ExecuteWithDataModifications(
+				deletePb.ToSingleElementArray(),
+				() => {
+					foreach( var file in files )
+						addFileRow( table, file, deleteModMethods );
+					if( !ReadOnly )
+						table.AddRow(
+							getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
+							( files.Any() ? new PostBackButton( deletePb, new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
+								new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 				} );
 
 			Controls.Add( table );
@@ -128,7 +130,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				Visible = false;
 		}
 
-		private void addFileRow( DynamicTable table, BlobFile file, ActionPostBack deletePb, List<Func<bool>> deleteModMethods ) {
+		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
 			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
@@ -156,8 +158,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var deleteCheckBox =
 				FormItem.Create(
 					"",
-					new EwfCheckBox( false, postBack: deletePb ),
-					validationGetter: control => new EwfValidation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); }, deletePb ) ).ToControl();
+					new EwfCheckBox( false ),
+					validationGetter: control => new EwfValidation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); } ) ).ToControl();
 			cells.Add( ReadOnly ? null : deleteCheckBox );
 			deleteModMethods.Add(
 				() => {
@@ -171,21 +173,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private ControlList getUploadControlList() {
-			var dm = PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "add" ) );
-
 			RsFile file = null;
-			var fi = FormItem.Create(
-				"",
-				new EwfFileUpload(),
-				validationGetter: control => new EwfValidation(
-					                             ( pbv, validator ) => {
-						                             BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
-						                             file = control.GetPostBackValue( pbv );
-					                             },
-					                             dm ) );
-
-			dm.AddModificationMethod(
-				() => {
+			var dm = PostBack.CreateFull(
+				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
+				firstModificationMethod: () => {
 					if( file == null )
 						return;
 
@@ -202,12 +193,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						NewFileNotificationMethod( newFileId );
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} );
+			return ValidationSetupState.ExecuteWithDataModifications(
+				dm.ToSingleElementArray(),
+				() => {
+					var fi = FormItem.Create(
+						"",
+						new EwfFileUpload(),
+						validationGetter: control => new EwfValidation(
+							                             ( pbv, validator ) => {
+								                             BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
+								                             file = control.GetPostBackValue( pbv );
+							                             } ) );
 
-			return ControlList.CreateWithControls(
-				true,
-				"Select and upload a new file:",
-				fi.ToControl(),
-				new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) );
+					return ControlList.CreateWithControls(
+						true,
+						"Select and upload a new file:",
+						fi.ToControl(),
+						new PostBackButton( dm, new ButtonActionControlStyle( "Upload new file" ), false ) );
+				} );
 		}
 
 		/// <summary>

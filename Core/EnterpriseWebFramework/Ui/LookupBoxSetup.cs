@@ -35,16 +35,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		public WebControl BuildLookupBoxPanel() {
 			var val = new DataValue<string>();
 			var postBack = PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( handler( val.Value ) ) );
+			return ValidationSetupState.ExecuteWithDataModifications(
+				postBack.ToSingleElementArray(),
+				() => {
+					var textBox = FormItem.Create(
+						"",
+						new EwfTextBox( "" ) { Width = new Unit( pixelWidth ) },
+						validationGetter: control => new EwfValidation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ) ) );
+					textBox.Control.SetWatermarkText( defaultText );
+					if( autoCompleteService != null )
+						textBox.Control.SetupAutoComplete( autoCompleteService, AutoCompleteOption.PostBackOnItemSelect );
 
-			var textBox = FormItem.Create(
-				"",
-				new EwfTextBox( "", postBack: postBack ) { Width = new Unit( pixelWidth ) },
-				validationGetter: control => new EwfValidation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ), postBack ) );
-			textBox.Control.SetWatermarkText( defaultText );
-			if( autoCompleteService != null )
-				textBox.Control.SetupAutoComplete( autoCompleteService, AutoCompleteOption.PostBackOnItemSelect );
-
-			return new Block( textBox.ToControl() ) { CssClass = "ewfLookupBox" };
+					return new Block( textBox.ToControl() ) { CssClass = "ewfLookupBox" };
+				} );
 		}
 	}
 }
