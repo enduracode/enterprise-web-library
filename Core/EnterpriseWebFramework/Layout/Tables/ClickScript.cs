@@ -18,9 +18,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a script that performs a post-back.
 		/// </summary>
-		/// <param name="postBack">Do not pass null.</param>
-		public static ClickScript CreatePostBackScript( PostBack postBack ) {
-			return new ClickScript { postBack = postBack };
+		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
+		public static ClickScript CreatePostBackScript( PostBack postBack = null ) {
+			return new ClickScript { postBack = postBack ?? EwfPage.PostBack };
 		}
 
 		/// <summary>

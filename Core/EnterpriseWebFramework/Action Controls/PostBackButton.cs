@@ -50,11 +50,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
 		}
 
-		private readonly PostBack postBack;
 		private bool usesSubmitBehavior;
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
 		private ModalWindow confirmationWindow;
+		private readonly PostBack postBack;
 
 		/// <summary>
 		/// Gets or sets the display style of this button. Do not set this to null.
@@ -75,21 +75,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a post-back button.
 		/// </summary>
-		/// <param name="postBack">Do not pass null.</param>
 		/// <param name="actionControlStyle"></param>
 		/// <param name="usesSubmitBehavior">True if this button should act like a submit button (respond to the enter key). Doesn't work with the text or custom
 		/// action control styles.</param>
-		public PostBackButton( PostBack postBack, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true ) {
-			this.postBack = postBack;
+		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
+		public PostBackButton( ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true, PostBack postBack = null ) {
 			ActionControlStyle = actionControlStyle;
 			this.usesSubmitBehavior = usesSubmitBehavior;
+			this.postBack = postBack;
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() => {
 					if( !this.IsOnPage() || !this.usesSubmitBehavior )
 						return;
 					var submitButtons = EwfPage.Instance.GetDescendants( EwfPage.Instance ).OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
-					if( submitButtons.Count() > 1 )
+					if( submitButtons.Length > 1 )
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
 							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
@@ -97,12 +97,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				} );
 		}
 
+		[ Obsolete( "Guaranteed through 31 October 2016. Use the constructor in which the post-back is optional." ) ]
+		public PostBackButton( PostBack postBack, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true )
+			: this( actionControlStyle, usesSubmitBehavior: usesSubmitBehavior, postBack: postBack ) {}
+
 		/// <summary>
 		/// Creates a post-back button.
 		/// </summary>
-		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
-		public PostBackButton( PostBack postBack ): this( postBack, new ButtonActionControlStyle( "" ) ) {}
+		public PostBackButton( PostBack postBack = null ): this( new ButtonActionControlStyle( "" ), postBack: postBack ) {}
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.
