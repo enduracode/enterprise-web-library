@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly bool disableBrowserAutoComplete;
 		private readonly bool? suggestSpellCheck;
 		private readonly FormValue<string> formValue;
-		private PostBack postBack;
+		private readonly PostBack postBack;
 		private readonly bool autoPostBack;
 		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
@@ -108,7 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					? PostBackValueValidationResult<string>.CreateValid( rawValue )
 					: PostBackValueValidationResult<string>.CreateInvalid() );
 
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			this.autoPostBack = autoPostBack;
 		}
 
@@ -171,15 +171,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText + "'; } ).val( '' )" );
 			}
 
-			var jsNeededForImplicitSubmission = postBack != null || autoPostBack ||
-			                                    ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
-			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
-				postBack = EwfPage.Instance.DataUpdatePostBack;
-
-			if( postBack != null && ( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
+			if( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) )
 				EwfPage.Instance.AddPostBack( postBack );
 			if( !isTextarea )
-				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
+				PreRender +=
+					delegate {
+						PostBackButton.EnsureImplicitSubmission(
+							this,
+							postBack,
+							autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
+					};
 
 			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) )
 				PreRender += delegate {

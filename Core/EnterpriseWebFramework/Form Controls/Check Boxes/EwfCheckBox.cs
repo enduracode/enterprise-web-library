@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack );
+			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack, false );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton
@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfCheckBox( bool isChecked, string label = "", PostBack postBack = null ) {
 			checkBoxFormValue = GetFormValue( isChecked, this );
 			this.label = label;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 		}
 
 		/// <summary>
@@ -92,7 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 		}
 
@@ -128,8 +128,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			if( postBack != null || AutoPostBack )
-				EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+			EwfPage.Instance.AddPostBack( postBack );
 
 			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 

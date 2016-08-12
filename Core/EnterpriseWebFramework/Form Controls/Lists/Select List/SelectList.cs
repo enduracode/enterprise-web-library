@@ -182,7 +182,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			this.disableSingleRadioButtonDetection = disableSingleRadioButtonDetection;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			this.autoPostBack = autoPostBack;
 			this.itemIdPageModificationValue = itemIdPageModificationValue;
 			this.itemMatchPageModificationSetups = itemMatchPageModificationSetups;
@@ -248,21 +248,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					rawValue != null && itemsByStringId.ContainsKey( rawValue )
 						? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
 						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
-				if( postBack != null || autoPostBack )
-					EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+				EwfPage.Instance.AddPostBack( postBack );
 
-				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, postBack ?? EwfPage.Instance.SubmitButtonPostBack ); };
+				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, postBack, true ); };
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
 				if( autoPostBack )
 					PreRender +=
-						delegate {
-							selectControl.AddJavaScriptEventScript(
-								JavaScriptWriting.JsWritingMethods.onchange,
-								PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack ) );
-						};
+						delegate { selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( postBack ) ); };
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 				if( placeholderItem != null )

@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.JavaScriptWriting;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -32,26 +32,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. Specify null for the post-back to
-		/// rely on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
+		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. If you specify the submit-button
+		/// post-back, this method relies on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
 		/// </summary>
-		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, string predicate = "" ) {
-			if( postBack != null ) {
+		/// <param name="control"></param>
+		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="forceJsHandling"></param>
+		/// <param name="predicate"></param>
+		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, bool forceJsHandling, string predicate = "" ) {
+			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
+			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
+			// http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission. Second, we don't want the
+			// implicit submission behavior of form controls to unpredictably change if a submit button is added or removed.
+			if( postBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
 				control.AddJavaScriptEventScript(
 					JsWritingMethods.onkeypress,
 					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
-				return;
-			}
-			if( EwfPage.Instance.SubmitButtonPostBack != null )
-				return;
-
-			var sentences = new[]
-				{
-					"EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button.", "There are two reasons for this.",
-					"First, the behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission.",
-					"Second, we don't want the implicit submission behavior of form controls to unpredictably change if a submit button is added or removed."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 		}
 
 		private readonly PostBack postBack;
@@ -93,11 +89,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					if( !this.IsOnPage() || !this.usesSubmitBehavior )
 						return;
 					var submitButtons = EwfPage.Instance.GetDescendants( EwfPage.Instance ).OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
-					if( submitButtons.Count() > 1 ) {
+					if( submitButtons.Count() > 1 )
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
 							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
-					}
 					EwfPage.Instance.SubmitButtonPostBack = this.postBack;
 				} );
 		}

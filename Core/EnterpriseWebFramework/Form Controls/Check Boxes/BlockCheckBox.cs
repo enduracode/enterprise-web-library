@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 			this.label = label;
 			this.highlightWhenChecked = highlightWhenChecked;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			NestedControls = new List<Control>();
 		}
 
@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 			NestedControls = new List<Control>();
 		}
@@ -90,8 +90,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			if( postBack != null || AutoPostBack )
-				EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+			EwfPage.Instance.AddPostBack( postBack );
 
 			PreRender += delegate {
 				if( highlightWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
