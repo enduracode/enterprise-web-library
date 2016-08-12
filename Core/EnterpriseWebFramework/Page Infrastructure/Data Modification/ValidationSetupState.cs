@@ -44,6 +44,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Executes the specified method with the specified data modifications being used for any validations that are created.
+		/// </summary>
+		public static T ExecuteWithDataModifications<T>( IReadOnlyCollection<DataModification> dataModifications, Func<T> method ) {
+			if( dataModifications.Count == 0 )
+				throw new ApplicationException( "There must be at least one data modification." );
+			dataModificationAsserter( dataModifications );
+
+			Current.stack.Push( Tuple.Create( new Stack<Func<bool>>(), dataModifications ) );
+			try {
+				return method();
+			}
+			finally {
+				Current.stack.Pop();
+			}
+		}
+
+		/// <summary>
 		/// Executes the specified method with the specified predicate being used for any validations that are created.
 		/// </summary>
 		public static void ExecuteWithValidationPredicate( Func<bool> validationPredicate, Action method ) {
