@@ -345,7 +345,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\NewFileNotificationMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBox.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Calendar\MonthViewCalendar.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\CommonCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlLine.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlList.cs" />

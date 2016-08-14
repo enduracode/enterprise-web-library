@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
-using EnterpriseWebLibrary.WebSite.TestPages;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {
@@ -28,13 +26,6 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 					"Test method" ) );
 			navButtonSetups.Add( new ActionButtonSetup( "Test", new ToolTipButton( menu ) ) );
 
-			navButtonSetups.Add(
-				new ActionButtonSetup(
-					"Calendar",
-					new EwfLink(
-						CalendarDemo.GetInfo(
-							new EntitySetup.OptionalParameterPackage(),
-							new CalendarDemo.OptionalParameterPackage { ReturnUrl = EwfPage.Instance.InfoAsBaseType.GetUrl(), Date = DateTime.Now } ) ) ) );
 			return navButtonSetups;
 		}
 
