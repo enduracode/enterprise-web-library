@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -92,11 +93,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
 							validationGetter: control => new EwfValidation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ) ) ).ToControl() ) );
 
-				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
-				providePasswordRadio.NestedControls.Add( newPasswordTable );
 				var providePassword = FormItem.Create(
 					"",
-					providePasswordRadio,
+					group.CreateBlockRadioButton(
+						false,
+						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
+						nestedControlListGetter: () => { return newPasswordTable.ToSingleElementArray(); } ),
 					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -20,30 +21,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly bool highlightWhenChecked;
 		private readonly PostBack postBack;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
+		private readonly IReadOnlyCollection<Control> nestedControls;
 		private WebControl checkBox;
 
 		/// <summary>
-		/// Creates a check box. Do not pass null for label.
+		/// Creates a check box.
 		/// </summary>
-		public BlockCheckBox( bool isChecked, string label = "", bool highlightWhenChecked = false, PostBack postBack = null ) {
+		/// <param name="isChecked"></param>
+		/// <param name="label">Do not pass null.</param>
+		/// <param name="highlightWhenChecked"></param>
+		/// <param name="postBack"></param>
+		/// <param name="nestedControlListGetter">A function that gets the controls that will appear beneath the check box's label only when the box is checked.</param>
+		public BlockCheckBox(
+			bool isChecked, string label = "", bool highlightWhenChecked = false, PostBack postBack = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 			this.label = label;
 			this.highlightWhenChecked = highlightWhenChecked;
 			this.postBack = postBack ?? EwfPage.PostBack;
-			NestedControls = new List<Control>();
+			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
 		internal BlockCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
+			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
+			Func<IEnumerable<Control>> nestedControlListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
 			this.postBack = postBack ?? EwfPage.PostBack;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
-			NestedControls = new List<Control>();
+			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
@@ -52,13 +61,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets or sets whether or not the check box automatically posts the page back to the server when it is checked or unchecked.
 		/// </summary>
 		public bool AutoPostBack { get; set; }
-
-		/// <summary>
-		/// Sets a control that appears beneath the check box's label only when the box is checked.
-		/// Controls added to this collection do not need to be added to the page separately.
-		/// NOTE: We should make this an Add method instead or exposing the collection.
-		/// </summary>
-		public List<Control> NestedControls { get; private set; }
 
 		/// <summary>
 		/// Sets whether or not the nested controls, if any exist, are always visible or only visible when the box is checked.
@@ -126,10 +128,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			table.Rows.Add( row );
 
-			if( NestedControls.Any() ) {
+			if( nestedControls.Any() ) {
 				var nestedControlRow = new TableRow();
 				nestedControlRow.Cells.Add( new TableCell() );
-				nestedControlRow.Cells.Add( new TableCell().AddControlsReturnThis( NestedControls ) );
+				nestedControlRow.Cells.Add( new TableCell().AddControlsReturnThis( nestedControls ) );
 				table.Rows.Add( nestedControlRow );
 
 				if( !NestedControlsAlwaysVisible )

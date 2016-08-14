@@ -111,7 +111,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
 		public BlockCheckBox CreateBlockRadioButton(
-			bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null ) {
+			bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null,
+			Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			BlockCheckBox checkBox = null;
 			checkBox = new BlockCheckBox(
 				formValue,
@@ -119,7 +120,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				postBack,
 				() =>
 				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
-					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ) ) { AutoPostBack = autoPostBack };
+					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ),
+				nestedControlListGetter ) { AutoPostBack = autoPostBack };
 			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
 				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );
 

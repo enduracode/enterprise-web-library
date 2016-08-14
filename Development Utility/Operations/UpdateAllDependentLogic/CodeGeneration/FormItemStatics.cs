@@ -418,7 +418,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"BlockCheckBox",
 				valueParamTypeName,
 				valueParamDefaultValue,
-				new CSharpParameter( "IEnumerable<Control>", "nestedControls" ).ToSingleElementArray(),
+				new CSharpParameter( "Func<IEnumerable<Control>>", "nestedControlListGetter" ).ToSingleElementArray(),
 				new CSharpParameter[ 0 ],
 				new[]
 					{
@@ -426,13 +426,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						new CSharpParameter( "bool", "autoPostBack", "false" ), new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
 					},
 				new CSharpParameter[ 0 ],
-				"{ " +
-				StringTools.ConcatenateWithDelimiter(
-					" ",
-					"var c = new BlockCheckBox( v.Value" + toBoolSuffix +
-					", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible };",
-					"c.NestedControls.AddRange( nestedControls );",
-					"return c;" ) + " }",
+				"new BlockCheckBox( v.Value" + toBoolSuffix +
+				", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack, nestedControlListGetter: nestedControlListGetter ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible }",
 				"control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
 				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}

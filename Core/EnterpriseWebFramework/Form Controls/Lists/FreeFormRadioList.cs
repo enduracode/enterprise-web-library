@@ -129,12 +129,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
+		public BlockCheckBox CreateBlockRadioButton(
+			ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			validateListItem( listItemId );
-			var checkBox = new BlockCheckBox( formValue, label, postBack, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
-				{
-					AutoPostBack = autoPostBack
-				};
+			var checkBox = new BlockCheckBox(
+				formValue,
+				label,
+				postBack,
+				() => ImmutableArray<string>.Empty,
+				nestedControlListGetter,
+				listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
