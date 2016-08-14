@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public PostBackButton( ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true, PostBack postBack = null ) {
 			ActionControlStyle = actionControlStyle;
 			this.usesSubmitBehavior = usesSubmitBehavior;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() => {
