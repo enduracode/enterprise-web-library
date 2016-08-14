@@ -18,6 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			validations.AddRange( validationList.Validations );
 		}
 
+		[ Obsolete( "Guaranteed through 31 October 2016. Use EwfValidation instead." ) ]
 		public void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod ) {
 			var validation = new EwfValidation( validationMethod, this );
 			topValidations.Add( validation );

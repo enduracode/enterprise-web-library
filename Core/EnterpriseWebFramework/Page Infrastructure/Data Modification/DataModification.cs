@@ -7,9 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A collection of validation methods and a collection of modification methods.
 	/// </summary>
 	public interface DataModification: ValidationList {
-		/// <summary>
-		/// Adds a validation method whose errors are displayed at the top of the window.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 October 2016. Use EwfValidation instead." ) ]
 		void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod );
 
 		/// <summary>
