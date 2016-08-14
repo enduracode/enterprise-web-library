@@ -7,6 +7,7 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -21,6 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly bool highlightWhenChecked;
 		private readonly PostBack postBack;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
+		private readonly EwfValidation validation;
 		private readonly IReadOnlyCollection<Control> nestedControls;
 		private WebControl checkBox;
 
@@ -28,16 +30,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a check box.
 		/// </summary>
 		/// <param name="isChecked"></param>
+		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="label">Do not pass null.</param>
 		/// <param name="highlightWhenChecked"></param>
 		/// <param name="postBack"></param>
 		/// <param name="nestedControlListGetter">A function that gets the controls that will appear beneath the check box's label only when the box is checked.</param>
 		public BlockCheckBox(
-			bool isChecked, string label = "", bool highlightWhenChecked = false, PostBack postBack = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
+			bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", bool highlightWhenChecked = false, PostBack postBack = null,
+			Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
+
 			this.label = label;
 			this.highlightWhenChecked = highlightWhenChecked;
 			this.postBack = postBack ?? EwfPage.PostBack;
+
+			validation = checkBoxFormValue.CreateValidation( validationMethod );
+
 			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
@@ -45,13 +53,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a radio button.
 		/// </summary>
 		internal BlockCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
+			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, EwfValidation validation,
 			Func<IEnumerable<Control>> nestedControlListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
 			this.postBack = postBack ?? EwfPage.PostBack;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
+
+			this.validation = validation;
+
 			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
@@ -83,6 +94,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
 			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToSingleElementArray );
 		}
+
+		public EwfValidation Validation { get { return validation; } }
 
 		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
 

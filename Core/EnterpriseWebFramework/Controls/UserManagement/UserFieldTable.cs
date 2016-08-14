@@ -97,18 +97,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"",
 					group.CreateBlockRadioButton(
 						false,
+						( postBackValue, validator ) => {
+							if( !validationShouldRun() || !postBackValue.Value )
+								return;
+							FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
+							var p = new Password( newPassword.Value );
+							Salt = p.Salt;
+							SaltedPassword = p.ComputeSaltedHash();
+							MustChangePassword = false;
+						},
 						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
 						nestedControlListGetter: () => { return newPasswordTable.ToSingleElementArray(); } ),
-					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
-								                             return;
-							                             FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
-							                             var p = new Password( newPassword.Value );
-							                             Salt = p.Salt;
-							                             SaltedPassword = p.ComputeSaltedHash();
-							                             MustChangePassword = false;
-						                             } ) );
+					validationGetter: control => control.Validation );
 
 				b.AddFormItems(
 					FormItem.Create( "Password", ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );

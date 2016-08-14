@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
+using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -110,10 +111,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
+		/// <param name="isSelected"></param>
+		/// <param name="validationMethod">The validation method. Do not pass null.</param>
+		/// <param name="label"></param>
+		/// <param name="postBack"></param>
+		/// <param name="autoPostBack"></param>
+		/// <param name="pageModificationValue"></param>
+		/// <param name="nestedControlListGetter"></param>
+		/// <returns></returns>
 		public BlockCheckBox CreateBlockRadioButton(
-			bool isSelected, string label = "", PostBack postBack = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null,
-			Func<IEnumerable<Control>> nestedControlListGetter = null ) {
+			bool isSelected, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", PostBack postBack = null, bool autoPostBack = false,
+			PageModificationValue<bool> pageModificationValue = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			BlockCheckBox checkBox = null;
+			var validation =
+				formValue.CreateValidation(
+					( postBackValue, validator ) => validationMethod( new PostBackValue<bool>( postBackValue.Value == checkBox, postBackValue.ChangedOnPostBack ), validator ) );
+
 			checkBox = new BlockCheckBox(
 				formValue,
 				label,
@@ -121,6 +134,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() =>
 				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
 					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ),
+				validation,
 				nestedControlListGetter ) { AutoPostBack = autoPostBack };
 			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
 				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );

@@ -137,6 +137,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				label,
 				postBack,
 				() => ImmutableArray<string>.Empty,
+				null,
 				nestedControlListGetter,
 				listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
