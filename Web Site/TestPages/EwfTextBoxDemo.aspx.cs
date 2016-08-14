@@ -21,45 +21,49 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var pb = PostBack.CreateFull();
-			addMessageIfNotNull( ph, getTest1( null ) );
-			ph.AddControlsReturnThis( test1( pb, setTest1 ) );
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					addMessageIfNotNull( ph, getTest1( null ) );
+					ph.AddControlsReturnThis( test1( pb, setTest1 ) );
 
-			addMessageIfNotNull( ph, getTest2( null ) );
-			ph.AddControlsReturnThis( test2( setTest2 ) );
+					addMessageIfNotNull( ph, getTest2( null ) );
+					ph.AddControlsReturnThis( test2( setTest2 ) );
 
-			addMessageIfNotNull( ph, getTest3( null ) );
-			ph.AddControlsReturnThis( test3( setTest3 ) );
+					addMessageIfNotNull( ph, getTest3( null ) );
+					ph.AddControlsReturnThis( test3( setTest3 ) );
 
-			addMessageIfNotNull( ph, getTest4( null ) );
-			ph.AddControlsReturnThis( test4( setTest4 ) );
+					addMessageIfNotNull( ph, getTest4( null ) );
+					ph.AddControlsReturnThis( test4( setTest4 ) );
 
-			addMessageIfNotNull( ph, getTest5( null ) );
-			ph.AddControlsReturnThis( test5( setTest5 ) );
+					addMessageIfNotNull( ph, getTest5( null ) );
+					ph.AddControlsReturnThis( test5( setTest5 ) );
 
-			addMessageIfNotNull( ph, getTest6( null ) );
-			ph.AddControlsReturnThis( test6( setTest6 ) );
+					addMessageIfNotNull( ph, getTest6( null ) );
+					ph.AddControlsReturnThis( test6( setTest6 ) );
 
-			var table = FormItemBlock.CreateFormItemTable();
-			table.AddFormItems(
-				FormItem.Create( "Textarea", new EwfTextBox( "This is a paragraph.", rows: 4 ) ),
-				FormItem.Create( "Masked Input", new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
-			ph.AddControlsReturnThis( table );
+					var table = FormItemBlock.CreateFormItemTable();
+					table.AddFormItems(
+						FormItem.Create( "Textarea", new EwfTextBox( "This is a paragraph.", rows: 4 ) ),
+						FormItem.Create( "Masked Input", new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
+					ph.AddControlsReturnThis( table );
 
-			EwfUiStatics.SetContentFootActions(
-				new ActionButtonSetup( "OK", new PostBackButton( pb ) ),
-				new ActionButtonSetup(
-					"Reset Values",
-					new PostBackButton(
-						PostBack.CreateFull(
-							id: "reset",
-							firstModificationMethod: () => {
-								setTest1( null );
-								setTest2( null );
-								setTest3( null );
-								setTest4( null );
-								setTest5( null );
-								setTest6( null );
-							} ) ) ) );
+					EwfUiStatics.SetContentFootActions(
+						new ActionButtonSetup( "OK", new PostBackButton() ),
+						new ActionButtonSetup(
+							"Reset Values",
+							new PostBackButton(
+								PostBack.CreateFull(
+									id: "reset",
+									firstModificationMethod: () => {
+										setTest1( null );
+										setTest2( null );
+										setTest3( null );
+										setTest4( null );
+										setTest5( null );
+										setTest6( null );
+									} ) ) ) );
+				} );
 		}
 
 		private void addMessageIfNotNull( Control control, string s ) {
