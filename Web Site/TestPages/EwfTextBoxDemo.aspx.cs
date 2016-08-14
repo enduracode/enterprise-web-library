@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				pb.ToSingleElementArray(),
 				() => {
 					addMessageIfNotNull( ph, getTest1( null ) );
-					ph.AddControlsReturnThis( test1( pb, setTest1 ) );
+					ph.AddControlsReturnThis( test1( setTest1 ) );
 
 					addMessageIfNotNull( ph, getTest2( null ) );
 					ph.AddControlsReturnThis( test2( setTest2 ) );
@@ -71,14 +71,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				control.AddControlsReturnThis( "The value posted from this box was '{0}'".FormatWith( s ).GetLiteralControl() );
 		}
 
-		private Section test1( DataModification dm, Action<string> setValue ) {
-			var box = new EwfTextBox( "" );
+		private Section test1( Action<string> setValue ) {
+			var box =
+				FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )
+					.Control;
 			box.SetupAutoComplete( TestService.GetInfo(), AutoCompleteOption.NoPostBack );
-
-			var dv = new DataValue<string>();
-			dm.AddTopValidationMethod( ( pbvd, validator ) => dv.Value = box.GetPostBackValue( pbvd ) );
-			dm.AddModificationMethod( () => setValue( dv.Value ) );
-
 			return
 				new Section(
 					"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " +
