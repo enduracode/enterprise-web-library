@@ -426,9 +426,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						new CSharpParameter( "bool", "autoPostBack", "false" ), new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
 					},
 				new CSharpParameter[ 0 ],
-				"new BlockCheckBox( v.Value" + toBoolSuffix +
+				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => " + field.PropertyName + " = postBackValue.Value" + fromBoolSuffix +
 				", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack, nestedControlListGetter: nestedControlListGetter ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible }",
-				"control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
+				"",
 				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}
 

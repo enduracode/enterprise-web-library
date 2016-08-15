@@ -59,7 +59,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var place = new PlaceHolder();
 				for( var j = i * itemsPerColumn; j < maxIndex; j += 1 ) {
 					var item = items.ElementAt( j );
-					var checkBox = new BlockCheckBox( selectedItemIds.Contains( item.Id ), label: item.Label, highlightWhenChecked: true, postBack: postBack );
+					var checkBox = new BlockCheckBox(
+						selectedItemIds.Contains( item.Id ),
+						( postBackValue, validator ) => { },
+						label: item.Label,
+						highlightWhenChecked: true,
+						postBack: postBack );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}
