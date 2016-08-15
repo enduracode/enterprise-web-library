@@ -19,13 +19,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A check box list that allows multiple items to be selected.
 	/// NOTE: Consider using something like the multi select feature of http://harvesthq.github.com/chosen/ to provide a space-saving mode for this control.
 	/// </summary>
-	public class EwfCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
+	public sealed class EwfCheckBoxList<ItemIdType>: WebControl, ControlWithCustomFocusLogic {
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
-		private readonly IEnumerable<ItemIdType> selectedItemIds;
-		private readonly string caption;
-		private readonly bool includeSelectAndDeselectAllButtons;
-		private readonly byte numberOfColumns;
-		private readonly PostBack postBack;
 
 		private readonly Dictionary<SelectListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<SelectListItem<ItemIdType>, BlockCheckBox>();
 
@@ -36,14 +31,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<SelectListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
 			byte numberOfColumns = 1, PostBack postBack = null ) {
 			this.items = items.ToArray();
-			this.selectedItemIds = selectedItemIds.ToArray();
-			this.caption = caption;
-			this.includeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
-			this.numberOfColumns = numberOfColumns;
-			this.postBack = postBack;
-		}
+			selectedItemIds = selectedItemIds.ToArray();
 
-		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CheckBoxListCssElementCreator.CssClass );
 
 			var table = new DynamicTable { Caption = caption };
