@@ -20,26 +20,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			ValidationSetupState.ExecuteWithDataModifications(
 				pb.ToSingleElementArray(),
 				() => {
-					var fib = FormItemBlock.CreateFormItemTable();
-
 					newPassword = new DataValue<string>();
-					fib.AddFormItems(
-						FormItem.Create(
-							"New password",
-							new EwfTextBox( "", masksCharacters: true ),
-							validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ) ) ) );
-					var newPasswordConfirm = new DataValue<string>();
-					fib.AddFormItems(
-						FormItem.Create(
-							"Re-type new password",
-							new EwfTextBox( "", masksCharacters: true ),
-							validationGetter: control => new EwfValidation( ( pbv, v ) => newPasswordConfirm.Value = control.GetPostBackValue( pbv ) ) ) );
-					pb.AddTopValidationMethod( ( pbv, validator ) => FormsAuthStatics.ValidatePassword( validator, newPassword, newPasswordConfirm ) );
-
-					ph.AddControlsReturnThis( fib );
+					ph.AddControlsReturnThis(
+						FormItemBlock.CreateFormItemTable(
+							formItems: newPassword.GetPasswordModificationFormItems( firstLabel: "New password", secondLabel: "Re-type new password" ) ) );
+					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton() ) );
 				} );
-
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton( pb ) ) );
 		}
 
 		private void modifyData() {

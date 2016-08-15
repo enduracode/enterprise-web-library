@@ -73,6 +73,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		/// <summary>
+		/// Executes the specified method with the specified predicate being used for any validations that are created.
+		/// </summary>
+		public static T ExecuteWithValidationPredicate<T>( Func<bool> validationPredicate, Func<T> method ) {
+			Current.validationPredicateStack.Push( validationPredicate );
+			try {
+				return method();
+			}
+			finally {
+				Current.validationPredicateStack.Pop();
+			}
+		}
+
 		private readonly Stack<Tuple<Stack<Func<bool>>, IReadOnlyCollection<DataModification>>> stack =
 			new Stack<Tuple<Stack<Func<bool>>, IReadOnlyCollection<DataModification>>>();
 

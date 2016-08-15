@@ -75,40 +75,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								                             genPassword( true );
 						                             } ) );
 
-				var newPassword = new DataValue<string>();
-				var confirmPassword = new DataValue<string>();
-				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
-				newPasswordTable.AddItem(
-					new EwfTableItem(
-						"Password",
-						FormItem.Create(
+				var providePassword = ValidationSetupState.ExecuteWithValidationPredicate(
+					validationShouldRun,
+					() => {
+						var providePasswordSelected = new DataValue<bool>();
+						return FormItem.Create(
 							"",
-							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ) ) ).ToControl() ) );
-				newPasswordTable.AddItem(
-					new EwfTableItem(
-						"Password again",
-						FormItem.Create(
-							"",
-							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new EwfValidation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ) ) ).ToControl() ) );
+							group.CreateBlockRadioButton(
+								false,
+								( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
+								label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
+								nestedControlListGetter: () => {
+									return ValidationSetupState.ExecuteWithValidationPredicate(
+										() => providePasswordSelected.Value,
+										() => {
+											var password = new DataValue<string>();
+											var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
+											foreach( var i in password.GetPasswordModificationFormItems( textBoxWidth: Unit.Pixel( 200 ) ) )
+												newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
 
-				var providePassword = FormItem.Create(
-					"",
-					group.CreateBlockRadioButton(
-						false,
-						( postBackValue, validator ) => {
-							if( !validationShouldRun() || !postBackValue.Value )
-								return;
-							FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
-							var p = new Password( newPassword.Value );
-							Salt = p.Salt;
-							SaltedPassword = p.ComputeSaltedHash();
-							MustChangePassword = false;
-						},
-						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
-						nestedControlListGetter: () => { return newPasswordTable.ToSingleElementArray(); } ),
-					validationGetter: control => control.Validation );
+											new EwfValidation(
+												validator => {
+													var p = new Password( password.Value );
+													Salt = p.Salt;
+													SaltedPassword = p.ComputeSaltedHash();
+													MustChangePassword = false;
+												} );
+
+											return newPasswordTable.ToSingleElementArray();
+										} );
+								} ),
+							validationGetter: control => control.Validation );
+					} );
 
 				b.AddFormItems(
 					FormItem.Create( "Password", ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );

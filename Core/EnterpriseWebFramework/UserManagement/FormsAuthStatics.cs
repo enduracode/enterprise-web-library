@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -58,18 +59,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Adding a New User
 
 		/// <summary>
-		/// Ensures that the specified data values contain identical, valid password values.
+		/// Gets password and "password again" form items. The validation sets this data value to the provided password, and ensures that the two form items contain
+		/// identical, valid passwords.
 		/// </summary>
-		public static void ValidatePassword( Validator validator, DataValue<string> password, DataValue<string> passwordAgain ) {
-			if( password.Value != passwordAgain.Value )
-				validator.NoteErrorAndAddMessage( "Passwords do not match." );
-			else {
-				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-				if( strictProvider != null )
-					strictProvider.ValidatePassword( validator, password.Value );
-				else if( password.Value.Length < 7 )
-					validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-			}
+		public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
+			this DataValue<string> password, Unit? textBoxWidth = null, FormItemLabel firstLabel = null, FormItemLabel secondLabel = null ) {
+			var passwordAgain = new DataValue<string>();
+			var passwordAgainFormItem = FormItem.Create(
+				secondLabel ?? "Password again",
+				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
+				validationGetter: control => new EwfValidation( ( pbv, v ) => passwordAgain.Value = control.GetPostBackValue( pbv ) ) );
+			if( textBoxWidth.HasValue )
+				passwordAgainFormItem.Control.Width = textBoxWidth.Value;
+
+			var passwordFormItem = FormItem.Create(
+				firstLabel ?? "Password",
+				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
+				validationGetter: control => new EwfValidation(
+					                             ( pbv, v ) => {
+						                             password.Value = control.GetPostBackValue( pbv );
+						                             if( password.Value != passwordAgain.Value )
+							                             v.NoteErrorAndAddMessage( "Passwords do not match." );
+						                             else {
+							                             var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+							                             if( strictProvider != null )
+								                             strictProvider.ValidatePassword( v, password.Value );
+							                             else if( password.Value.Length < 7 )
+								                             v.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+						                             }
+					                             } ) );
+			if( textBoxWidth.HasValue )
+				passwordFormItem.Control.Width = textBoxWidth.Value;
+
+			return new[] { passwordFormItem, passwordAgainFormItem };
 		}
 
 
