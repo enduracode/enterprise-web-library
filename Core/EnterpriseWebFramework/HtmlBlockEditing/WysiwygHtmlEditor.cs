@@ -1,29 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.InputValidation;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A WYSIWYG HTML editor.
 	/// </summary>
-	public class WysiwygHtmlEditor: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormControl {
-		private readonly string ckEditorConfiguration;
-		private readonly FormValue<string> formValue;
+	public class WysiwygHtmlEditor: FormControl<FlowComponent> {
+		private readonly FlowComponent component;
+		private readonly EwfValidation validation;
 
 		/// <summary>
 		/// Creates a simple HTML editor.
 		/// </summary>
 		/// <param name="value">Do not pass null.</param>
-		/// <param name="ckEditorConfiguration">A comma-separated list of CKEditor configuration options ("toolbar: [ [ 'Bold', 'Italic' ] ]", etc.). Use this to
-		/// customize the underlying CKEditor. Do not pass null.</param>
-		public WysiwygHtmlEditor( string value, string ckEditorConfiguration = "" ) {
-			this.ckEditorConfiguration = ckEditorConfiguration;
+		/// <param name="allowEmpty"></param>
+		/// <param name="validationMethod">The validation method. Do not pass null.</param>
+		/// <param name="setup">The setup object for the HTML editor.</param>
+		/// <param name="maxLength"></param>
+		public WysiwygHtmlEditor(
+			string value, bool allowEmpty, Action<string, Validator> validationMethod, WysiwygHtmlEditorSetup setup = null, int? maxLength = null ) {
+			setup = setup ?? new WysiwygHtmlEditorSetup();
 
+			var id = new ElementId();
+			FormValue<string> formValue = null;
 			formValue = new FormValue<string>(
 				() => value,
-				() => this.IsOnPage() ? UniqueID : "",
+				() => setup.IsReadOnly ? "" : id.Id,
 				v => v,
 				rawValue => {
 					if( rawValue == null )
@@ -34,41 +40,64 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( rawValue.EndsWith( Environment.NewLine ) && rawValue.Remove( rawValue.Length - Environment.NewLine.Length ) == formValue.GetDurableValue() )
 						rawValue = formValue.GetDurableValue();
 
-					return PostBackValueValidationResult<string>.CreateValidWithValue( rawValue );
+					return PostBackValueValidationResult<string>.CreateValid( rawValue );
 				} );
+
+			var modificationValue = new PageModificationValue<string>();
+
+			component = new PageElement(
+				context => {
+					id.AddId( context.Id );
+
+					var displaySetup = setup.DisplaySetup ?? new DisplaySetup( true );
+					var jsShowStatements = getJsShowStatements( context.Id, setup.CkEditorConfiguration );
+					displaySetup.AddJsShowStatements( jsShowStatements );
+					displaySetup.AddJsHideStatements( "CKEDITOR.instances.{0}.destroy(); $( '#{0}' ).css( 'display', 'none' );".FormatWith( context.Id ) );
+
+					return new ElementData(
+						() => {
+							var attributes = new List<Tuple<string, string>>();
+							if( setup.IsReadOnly )
+								attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+							else
+								attributes.Add( Tuple.Create( "name", context.Id ) );
+							if( !displaySetup.ComponentsDisplayed )
+								attributes.Add( Tuple.Create( "style", "display: none" ) );
+
+							return new ElementLocalData( "textarea", attributes, true, displaySetup.ComponentsDisplayed ? jsShowStatements : "" );
+						},
+						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToSingleElementArray() );
+				},
+				formValue: formValue );
+
+			validation = formValue.CreateValidation(
+				( postBackValue, validator ) => {
+					if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
+						return;
+
+					var errorHandler = new ValidationErrorHandler( "HTML" );
+					var validatedValue = maxLength.HasValue
+						                     ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
+						                     : validator.GetString( errorHandler, postBackValue.Value, allowEmpty );
+					if( errorHandler.LastResult != ErrorCondition.NoError ) {
+						setup.ValidationErrorNotifier();
+						return;
+					}
+
+					validationMethod( validatedValue, validator );
+				} );
+
+			formValue.AddPageModificationValue( modificationValue, v => v );
 		}
 
-		void ControlTreeDataLoader.LoadData() {
-			Attributes.Add( "name", UniqueID );
-			PreRender += delegate { EwfTextBox.AddTextareaValue( this, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ); };
-		}
-
-		string ControlWithJsInitLogic.GetJsInitStatements() {
+		private string getJsShowStatements( string id, string ckEditorConfiguration ) {
 			const string toolbar =
 				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Image', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink', 'Styles' ]";
 			var configuration = ckEditorConfiguration.Any() ? ckEditorConfiguration : "toolbar: [ " + toolbar + " ]";
-			return "CKEDITOR.replace( '" + ClientID + "', { " + configuration + " } );";
+			return "CKEDITOR.replace( '" + id + "', { " + configuration + " } );";
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
-
-		/// <summary>
-		/// Gets the post back value.
-		/// </summary>
-		public string GetPostBackValue( PostBackValueDictionary postBackValues ) {
-			return formValue.GetValue( postBackValues );
-		}
-
-		/// <summary>
-		/// Returns true if the value changed on this post back.
-		/// </summary>
-		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return formValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		/// <summary>
-		/// Returns the tag that represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Textarea; } }
+		public FlowComponent PageComponent { get { return component; } }
+		public EwfValidation Validation { get { return validation; } }
 	}
 }

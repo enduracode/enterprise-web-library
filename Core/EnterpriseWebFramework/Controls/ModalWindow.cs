@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				new EwfTableItem(
 					new ControlLine(
 						new CustomButton( () => "$.modal.close()" ) { ActionControlStyle = new ButtonActionControlStyle( "Cancel" ) },
-						new PostBackButton( postBack, new ButtonActionControlStyle( "Continue" ), usesSubmitBehavior: false ) ).ToCell(
+						new PostBackButton( new ButtonActionControlStyle( "Continue" ), usesSubmitBehavior: false, postBack: postBack ) ).ToCell(
 							new TableCellSetup( textAlignment: TextAlignment.Right ) ) ) );
 			return table.ToSingleElementArray();
 		}

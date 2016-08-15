@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -20,8 +22,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectedItemId"></param>
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
 		/// violates the HTML specification.</param>
-		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>( bool allowNoSelection, ItemIdType selectedItemId, bool disableSingleButtonDetection = false ) {
-			return new FreeFormRadioList<ItemIdType>( allowNoSelection, disableSingleButtonDetection, selectedItemId );
+		/// <param name="itemIdPageModificationValue"></param>
+		/// <param name="itemMatchPageModificationSetups"></param>
+		public static FreeFormRadioList<ItemIdType> Create<ItemIdType>(
+			bool allowNoSelection, ItemIdType selectedItemId, bool disableSingleButtonDetection = false,
+			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
+			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
+			return new FreeFormRadioList<ItemIdType>(
+				allowNoSelection,
+				disableSingleButtonDetection,
+				selectedItemId,
+				itemIdPageModificationValue,
+				itemMatchPageModificationSetups );
 		}
 	}
 
@@ -36,7 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> displayLinkingAddJavaScriptMethods = new List<Action>();
 		private readonly List<Tuple<ItemIdType, CommonCheckBox>> itemIdsAndCheckBoxes = new List<Tuple<ItemIdType, CommonCheckBox>>();
 
-		internal FreeFormRadioList( bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId ) {
+		internal FreeFormRadioList(
+			bool allowNoSelection, bool disableSingleButtonDetection, ItemIdType selectedItemId, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
+			itemMatchPageModificationSetups = itemMatchPageModificationSetups ?? ImmutableArray<ListItemMatchPageModificationSetup<ItemIdType>>.Empty;
+
 			this.allowNoSelection = allowNoSelection;
 			formValue = RadioButtonGroup.GetFormValue(
 				allowNoSelection,
@@ -55,6 +71,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
 					itemIdsAndCheckBoxes.Select( i => i.Item2 ),
 					disableSingleButtonDetection ) );
+
+			if( itemIdPageModificationValue != null ) {
+				formValue.AddPageModificationValue( itemIdPageModificationValue, getItemIdFromCheckBox );
+				displayLinkingAddJavaScriptMethods.Add(
+					() => {
+						foreach( var pair in itemIdsAndCheckBoxes )
+							pair.Item2.AddOnClickJsMethod( itemIdPageModificationValue.GetJsModificationStatements( "'{0}'".FormatWith( pair.Item1.ObjectToString( true ) ) ) );
+					} );
+			}
+			foreach( var setup in itemMatchPageModificationSetups ) {
+				formValue.AddPageModificationValue( setup.PageModificationValue, checkBox => setup.ItemIds.Contains( getItemIdFromCheckBox( checkBox ) ) );
+				displayLinkingAddJavaScriptMethods.Add(
+					() => {
+						foreach( var pair in itemIdsAndCheckBoxes )
+							pair.Item2.AddOnClickJsMethod( setup.PageModificationValue.GetJsModificationStatements( setup.ItemIds.Contains( pair.Item1 ) ? "true" : "false" ) );
+					} );
+			}
 
 			EwfPage.Instance.AddDisplayLink( this );
 		}
@@ -85,7 +118,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new EwfCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new EwfCheckBox( formValue, label, postBack, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
+				{
+					AutoPostBack = autoPostBack
+				};
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
@@ -93,9 +129,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
-		public BlockCheckBox CreateBlockRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
+		public BlockCheckBox CreateBlockRadioButton(
+			ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			validateListItem( listItemId );
-			var checkBox = new BlockCheckBox( formValue, label, postBack, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+			var checkBox = new BlockCheckBox(
+				formValue,
+				label,
+				postBack,
+				() => ImmutableArray<string>.Empty,
+				null,
+				nestedControlListGetter,
+				listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
@@ -125,8 +169,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the selected item ID in the post back.
 		/// </summary>
 		public ItemIdType GetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues ) {
-			var selectedPair = itemIdsAndCheckBoxes.SingleOrDefault( i => i.Item2 == formValue.GetValue( postBackValues ) );
-			return selectedPair != null ? selectedPair.Item1 : getNoSelectionItemId();
+			return getItemIdFromCheckBox( formValue.GetValue( postBackValues ) );
+		}
+
+		private ItemIdType getItemIdFromCheckBox( CommonCheckBox checkBox ) {
+			var pair = itemIdsAndCheckBoxes.SingleOrDefault( i => i.Item2 == checkBox );
+			return pair != null ? pair.Item1 : getNoSelectionItemId();
 		}
 
 		private ItemIdType getNoSelectionItemId() {

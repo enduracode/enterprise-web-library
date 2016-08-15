@@ -190,7 +190,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			Controls.Add( canvas );
 
-			if( seriesCollection.Count() > 1 ) {
+			if( seriesCollection.Count() > 1 )
 				Controls.Add(
 					new Section(
 						"Key",
@@ -204,7 +204,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
 									} as Control ).ToArray() ).ToSingleElementArray(),
 						style: SectionStyle.Box ) );
-			}
 
 			// Remove this when ColumnPrimaryTable supports Excel export.
 			var headers = setup.XAxisTitle.ToSingleElementArray().Concat( seriesCollection.Select( v => v.Name ) );
@@ -243,25 +242,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var block =
 				new Block(
 					new PostBackButton(
-						PostBack.CreateFull(
-							id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
-							actionGetter: () => new PostBackAction(
-								                    new SecondaryResponse(
-								                    () => EwfResponse.Create(
-									                    ContentTypes.Csv,
-									                    new EwfResponseBodyCreator(
-									                          writer => {
-										                          var csv = new CsvFileWriter();
-										                          csv.AddValuesToLine( headers.ToArray() );
-										                          csv.WriteCurrentLineToFile( writer );
-										                          foreach( var td in tableData ) {
-											                          csv.AddValuesToLine( td.ToArray() );
-											                          csv.WriteCurrentLineToFile( writer );
-										                          }
-									                          } ),
-									                    () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ),
 						new TextActionControlStyle( "Export" ),
-						usesSubmitBehavior: false ) );
+						usesSubmitBehavior: false,
+						postBack:
+							PostBack.CreateFull(
+								id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
+								actionGetter: () => new PostBackAction(
+									                    new SecondaryResponse(
+									                    () => EwfResponse.Create(
+										                    ContentTypes.Csv,
+										                    new EwfResponseBodyCreator(
+										                          writer => {
+											                          var csv = new CsvFileWriter();
+											                          csv.AddValuesToLine( headers.ToArray() );
+											                          csv.WriteCurrentLineToFile( writer );
+											                          foreach( var td in tableData ) {
+												                          csv.AddValuesToLine( td.ToArray() );
+												                          csv.WriteCurrentLineToFile( writer );
+											                          }
+										                          } ),
+										                    () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ) ) );
 			block.Style.Add( "text-align", "right" );
 			return block;
 		}

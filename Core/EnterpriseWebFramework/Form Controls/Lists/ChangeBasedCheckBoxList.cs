@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                             return;
 						                             control.Validate( pbv );
 					                             },
-					                             validationList ?? EwfPage.Instance.DataUpdate ) );
+					                             validationList ) );
 		}
 
 		/// <summary>
@@ -101,20 +101,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                             return;
 						                             control.Validate( pbv );
 					                             },
-					                             validationList ?? EwfPage.Instance.DataUpdate ) );
+					                             validationList ) );
 		}
 	}
 
-	internal class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
+	internal sealed class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlWithCustomFocusLogic {
 		private readonly IEnumerable<ChangeBasedListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
-		private readonly string caption;
-		private readonly bool includeSelectAndDeselectAllButtons;
-		private readonly byte numberOfColumns;
-		private readonly IEnumerable<ItemIdType> uiSelectedItemIds;
-		private readonly PostBack postBack;
 
-		private EwfCheckBoxList<ItemIdType> checkBoxList;
+		private readonly EwfCheckBoxList<ItemIdType> checkBoxList;
 		private IEnumerable<ItemIdType> selectedItemIdsInPostBack;
 
 		internal ChangeBasedCheckBoxList(
@@ -122,14 +117,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			byte numberOfColumns, IEnumerable<ItemIdType> uiSelectedItemIds, PostBack postBack ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();
-			this.caption = caption;
-			this.includeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
-			this.numberOfColumns = numberOfColumns;
-			this.uiSelectedItemIds = uiSelectedItemIds.ToArray();
-			this.postBack = postBack;
-		}
 
-		void ControlTreeDataLoader.LoadData() {
 			Controls.Add(
 				checkBoxList =
 				new EwfCheckBoxList<ItemIdType>(

@@ -29,6 +29,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
 
 		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			ValidationSetupState.Init(
+				() => Instance.validationSetupState,
+				dataModifications => {
+					if( dataModifications.Contains( Instance.dataUpdate ) && dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
+						throw new ApplicationException(
+							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
+				} );
 			EwfPage.cssInfoCreator = cssInfoCreator;
 		}
 
@@ -38,6 +45,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfPage Instance { get { return HttpContext.Current.CurrentHandler as EwfPage; } }
 
 		/// <summary>
+		/// Gets the post-back corresponding to the first of the current data modifications.
+		/// </summary>
+		internal static PostBack PostBack {
+			get {
+				var firstDataModification = ValidationSetupState.Current.DataModifications.First();
+				return firstDataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)firstDataModification;
+			}
+		}
+
+		/// <summary>
 		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
 		/// tags as part of the text.
 		/// </summary>
@@ -45,8 +62,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, messageHtml ) );
 		}
 
+		internal static void AssertPageTreeNotBuilt() {
+			if( Instance.validationSetupState == null )
+				throw new ApplicationException( "The page tree has already been built." );
+		}
+
+		internal static void AssertPageTreeBuilt() {
+			if( Instance.validationSetupState != null )
+				throw new ApplicationException( "The page tree has not yet been built." );
+		}
+
 		private Control contentContainer;
 		private Control etherealPlace;
+		private ValidationSetupState validationSetupState;
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
@@ -93,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes EWF logic in addition to the standard ASP.NET PreInit logic.
 		/// </summary>
-		protected override sealed void OnPreInit( EventArgs e ) {
+		protected sealed override void OnPreInit( EventArgs e ) {
 			// This logic should happen before the page gets the PreInit event in case it wants to determine the master based on parameters.
 			// NOTE: If the entity setup is a master page, we need to delay this call until after PreInit.
 			initEntitySetupAndCreateInfoObjects();
@@ -105,10 +133,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AppRequestState.Instance.UserDisabledByPage = true;
 			try {
 				initEntitySetup();
-				if( EsAsBaseType != null ) {
+				if( EsAsBaseType != null )
 					using( MiniProfiler.Current.Step( "EWF - Create entity-setup info" ) )
 						EsAsBaseType.CreateInfoFromQueryString();
-				}
 				using( MiniProfiler.Current.Step( "EWF - Create page info" ) )
 					createInfoFromQueryString();
 
@@ -131,12 +158,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool userCanAccessResource;
 			using( MiniProfiler.Current.Step( "EWF - Check page authorization" ) )
 				userCanAccessResource = InfoAsBaseType.UserCanAccessResource;
-			if( !userCanAccessResource ) {
+			if( !userCanAccessResource )
 				throw new AccessDeniedException(
 					ConfigurationStatics.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource &&
 					!AppRequestState.Instance.IntermediateUserExists,
 					InfoAsBaseType.LogInPage );
-			}
 
 			DisabledResourceMode disabledMode;
 			using( MiniProfiler.Current.Step( "EWF - Check alternative page mode" ) )
@@ -168,7 +194,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.
 		/// </summary>
-		protected override sealed void OnInitComplete( EventArgs e ) {
+		protected sealed override void OnInitComplete( EventArgs e ) {
 			base.OnInitComplete( e );
 			if( IsPostBack )
 				return;
@@ -228,10 +254,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				clearInfo();
 				AppRequestState.Instance.UserDisabledByPage = true;
 				try {
-					if( EsAsBaseType != null ) {
+					if( EsAsBaseType != null )
 						using( MiniProfiler.Current.Step( "EWF - Create entity-setup info after page-view data modifications" ) )
 							EsAsBaseType.CreateInfoFromQueryString();
-					}
 					using( MiniProfiler.Current.Step( "EWF - Create page info after page-view data modifications" ) )
 						createInfoFromQueryString();
 
@@ -268,7 +293,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
 				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
-				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) ) {
+				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) )
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
 							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
@@ -276,7 +301,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
 								  ? "Form controls outside of update regions may not change on an intermediate post-back."
 								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
-				}
 			}
 
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
@@ -297,7 +321,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						else {
 							var formValuesChanged =
 								GetDescendants( contentContainer )
-									.OfType<FormControl>()
+									.OfType<FormValueControl>()
 									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
 						}
@@ -352,7 +376,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					else if( externalAuthProvider != null )
 						externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
 				};
-				if( ConfigurationStatics.DatabaseExists ) {
+				if( ConfigurationStatics.DatabaseExists )
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
 						() => {
 							try {
@@ -365,7 +389,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								throw new DoNotCommitException();
 							}
 						} );
-				}
 				else
 					userUpdater();
 			};
@@ -403,7 +426,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
 		/// changes.
 		/// </summary>
-		protected override sealed object LoadPageStateFromPersistenceMedium() {
+		protected sealed override object LoadPageStateFromPersistenceMedium() {
 			string formValueHash = null;
 			string lastPostBackFailingDmId = null;
 			try {
@@ -452,7 +475,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					// Execute the page's data update.
 					var dmExecuted = false;
-					if( !postBack.IsIntermediate ) {
+					if( !postBack.IsIntermediate )
 						try {
 							dmExecuted |= dataUpdate.Execute(
 								!postBack.ForcePageDataUpdate,
@@ -463,14 +486,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
 							throw;
 						}
-					}
 
 					// Execute the post-back.
 					var actionPostBack = postBack as ActionPostBack;
 					if( actionPostBack != null ) {
 						var formValuesChanged =
 							GetDescendants( contentContainer )
-								.OfType<FormControl>()
+								.OfType<FormValueControl>()
 								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						try {
 							dmExecuted |= actionPostBack.Execute(
@@ -548,14 +570,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					InfoAsBaseType.ResourceFullName ) );
 
 			Form.Controls.Add( etherealPlace = new PlaceHolder() );
-			if( EsAsBaseType != null ) {
-				using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
-					EsAsBaseType.LoadData();
-			}
-			using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
-				loadData();
+
+			validationSetupState = new ValidationSetupState();
+			ValidationSetupState.ExecuteWithDataModifications(
+				DataUpdate.ToSingleElementArray(),
+				() => {
+					if( EsAsBaseType != null )
+						using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
+							EsAsBaseType.LoadData();
+					using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
+						loadData();
+				} );
 			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
 				loadDataForControlAndChildren( this );
+			validationSetupState = null;
 
 			foreach( var i in controlTreeValidations )
 				i();
@@ -569,13 +597,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// The empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted.
 			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
 
-			// Set the initial client-side display state of all controls involved in display linking. This step will most likely be eliminated or undergo major
-			// changes when we move EWF away from the Web Forms control model, so we haven't put much thought into exactly where it should go, but it should probably
-			// happen after LoadData is called on all controls.
+			foreach( var i in formValues )
+				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+
+			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			foreach( var displayLink in displayLinks )
 				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-
-			// Add inter-element JavaScript. This must be done after LoadData is called on all controls so that all controls have IDs.
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
 
@@ -679,8 +706,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private void loadDataForControlAndChildren( Control control ) {
 			var controlTreeDataLoader = control as ControlTreeDataLoader;
-			if( controlTreeDataLoader != null )
-				controlTreeDataLoader.LoadData();
+			if( controlTreeDataLoader != null ) {
+				ValidationSetupState.Current.SetForNextElement();
+
+				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
+				if( control is MasterPage )
+					ValidationSetupState.ExecuteWithDataModifications( DataUpdate.ToSingleElementArray(), controlTreeDataLoader.LoadData );
+				else
+					controlTreeDataLoader.LoadData();
+			}
 
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
 				loadDataForControlAndChildren( child );
@@ -917,7 +951,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The control that receives focus when the page is loaded by the browser.
 		/// </summary>
-		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormControl ); } }
+		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormValueControl ); } }
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -985,7 +1019,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
 			var staticFormValues =
 				GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
-					.OfType<FormControl>()
+					.OfType<FormValueControl>()
 					.Select( i => i.FormValue )
 					.Where( i => i != null )
 					.Distinct()
@@ -997,20 +1031,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			if( requestState.ModificationErrorsExist ) {
+			if( requestState.ModificationErrorsExist )
 				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
 				// errors from being displayed.
 				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
 					contents.Append( modErrorDisplayKey + " " );
-			}
 
 			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) ) {
+			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
 				// It's probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
 				// processed.
 				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
 					contents.Append( postBack.Id );
-			}
 
 			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
 		}
@@ -1086,7 +1118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
 		}
 
-		protected override sealed void OnPreRender( EventArgs eventArgs ) {
+		protected sealed override void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
@@ -1104,7 +1136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Saves view state.
 		/// </summary>
-		protected override sealed object SaveViewState() {
+		protected sealed override object SaveViewState() {
 			// This is the last possible place in the life cycle this could go; view state is saved right after this.
 			foreach( Control child in Controls )
 				child.EnableViewState = false;
@@ -1115,7 +1147,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Saves hidden field state.
 		/// </summary>
-		protected override sealed void SavePageStateToPersistenceMedium( object state ) {
+		protected sealed override void SavePageStateToPersistenceMedium( object state ) {
 			var rs = AppRequestState.Instance.EwfPageRequestState;
 			var failingDmId = rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null &&
 			                  rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly

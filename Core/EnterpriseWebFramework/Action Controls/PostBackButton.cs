@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.JavaScriptWriting;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -32,33 +32,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. Specify null for the post-back to
-		/// rely on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
+		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. If you specify the submit-button
+		/// post-back, this method relies on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
 		/// </summary>
-		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, string predicate = "" ) {
-			if( postBack != null ) {
+		/// <param name="control"></param>
+		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="forceJsHandling"></param>
+		/// <param name="predicate"></param>
+		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, bool forceJsHandling, string predicate = "" ) {
+			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
+			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
+			// http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission. Second, we don't want the
+			// implicit submission behavior of form controls to unpredictably change if a submit button is added or removed.
+			if( postBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
 				control.AddJavaScriptEventScript(
 					JsWritingMethods.onkeypress,
 					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
-				return;
-			}
-			if( EwfPage.Instance.SubmitButtonPostBack != null )
-				return;
-
-			var sentences = new[]
-				{
-					"EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button.", "There are two reasons for this.",
-					"First, the behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission.",
-					"Second, we don't want the implicit submission behavior of form controls to unpredictably change if a submit button is added or removed."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ) );
 		}
 
-		private readonly PostBack postBack;
 		private bool usesSubmitBehavior;
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
 		private ModalWindow confirmationWindow;
+		private readonly PostBack postBack;
 
 		/// <summary>
 		/// Gets or sets the display style of this button. Do not set this to null.
@@ -79,35 +75,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a post-back button.
 		/// </summary>
-		/// <param name="postBack">Do not pass null.</param>
 		/// <param name="actionControlStyle"></param>
 		/// <param name="usesSubmitBehavior">True if this button should act like a submit button (respond to the enter key). Doesn't work with the text or custom
 		/// action control styles.</param>
-		public PostBackButton( PostBack postBack, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true ) {
-			this.postBack = postBack;
+		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
+		public PostBackButton( ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true, PostBack postBack = null ) {
 			ActionControlStyle = actionControlStyle;
 			this.usesSubmitBehavior = usesSubmitBehavior;
+			this.postBack = postBack ?? EwfPage.PostBack;
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() => {
 					if( !this.IsOnPage() || !this.usesSubmitBehavior )
 						return;
 					var submitButtons = EwfPage.Instance.GetDescendants( EwfPage.Instance ).OfType<PostBackButton>().Where( i => i.usesSubmitBehavior ).ToArray();
-					if( submitButtons.Count() > 1 ) {
+					if( submitButtons.Length > 1 )
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
 							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
-					}
 					EwfPage.Instance.SubmitButtonPostBack = this.postBack;
 				} );
 		}
 
+		[ Obsolete( "Guaranteed through 31 October 2016. Use the constructor in which the post-back is optional." ) ]
+		public PostBackButton( PostBack postBack, ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true )
+			: this( actionControlStyle, usesSubmitBehavior: usesSubmitBehavior, postBack: postBack ) {}
+
 		/// <summary>
 		/// Creates a post-back button.
 		/// </summary>
-		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
-		public PostBackButton( PostBack postBack ): this( postBack, new ButtonActionControlStyle( "" ) ) {}
+		public PostBackButton( PostBack postBack = null ): this( new ButtonActionControlStyle( "" ), postBack: postBack ) {}
 
 		/// <summary>
 		/// Gets or sets the width of this button. Doesn't work with the text action control style.

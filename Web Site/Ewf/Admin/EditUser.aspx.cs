@@ -24,22 +24,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private UserFieldTable userFieldTable;
 
 		protected override void loadData() {
-			if( info.UserId.HasValue ) {
+			if( info.UserId.HasValue )
 				EwfUiStatics.SetPageActions(
 					new ActionButtonSetup(
 						"Delete User",
 						new PostBackButton(
 							PostBack.CreateFull( id: "delete", firstModificationMethod: deleteUser, actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
-			}
 
-			var pb = PostBack.CreateFull( actionGetter: () => new PostBackAction( es.info.ParentResource ) );
-
-			userFieldTable = new UserFieldTable();
-			userFieldTable.LoadData( info.UserId, pb );
-			ph.AddControlsReturnThis( userFieldTable );
+			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( es.info.ParentResource ) );
+			ValidationSetupState.ExecuteWithDataModifications(
+				pb.ToSingleElementArray(),
+				() => {
+					userFieldTable = new UserFieldTable();
+					userFieldTable.LoadData( info.UserId );
+					ph.AddControlsReturnThis( userFieldTable );
+				} );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( pb ) ) );
-
-			pb.AddModificationMethod( modifyData );
 		}
 
 		private void deleteUser() {
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private void modifyData() {
 			if( FormsAuthStatics.FormsAuthEnabled ) {
-				if( info.UserId.HasValue ) {
+				if( info.UserId.HasValue )
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						info.User.UserId,
 						userFieldTable.Email,
@@ -57,8 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						userFieldTable.Salt,
 						userFieldTable.SaltedPassword,
 						userFieldTable.MustChangePassword );
-				}
-				else {
+				else
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						null,
 						userFieldTable.Email,
@@ -67,7 +66,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						userFieldTable.Salt,
 						userFieldTable.SaltedPassword,
 						userFieldTable.MustChangePassword );
-				}
 			}
 			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;

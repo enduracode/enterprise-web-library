@@ -48,6 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Unit? secondColumnWidth;
 		private readonly TableCellVerticalAlignment verticalAlignment;
 		private readonly List<FormItem> formItems;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
 		/// Set this value in order to have a button added as the last form item and formatted automatically. The button will have the specified text.
@@ -69,6 +70,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.secondColumnWidth = secondColumnWidth;
 			this.verticalAlignment = verticalAlignment;
 			this.formItems = ( formItems ?? new FormItem[ 0 ] ).ToList();
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -79,32 +82,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			if( hideIfEmpty && !formItems.Any() ) {
-				Visible = false;
-				return;
-			}
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					if( hideIfEmpty && !formItems.Any() ) {
+						Visible = false;
+						return;
+					}
 
-			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
-			if( IncludeButtonWithThisText != null ) {
-				// We need to do logic to get the button to be on the right of the row.
-				if( useFormItemListMode && numberOfColumns.HasValue ) {
-					var widthOfLastRowWithButton = getFormItemRows( formItems, numberOfColumns.Value ).Last().Sum( fi => getCellSpan( fi ) ) + defaultFormItemCellSpan;
-					var numberOfPlaceholdersRequired = 0;
-					if( widthOfLastRowWithButton < numberOfColumns.Value )
-						numberOfPlaceholdersRequired = numberOfColumns.Value - widthOfLastRowWithButton;
-					if( widthOfLastRowWithButton > numberOfColumns.Value )
-						numberOfPlaceholdersRequired = numberOfColumns.Value - ( ( widthOfLastRowWithButton - numberOfColumns.Value ) % numberOfColumns.Value );
+					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+					if( IncludeButtonWithThisText != null ) {
+						// We need to do logic to get the button to be on the right of the row.
+						if( useFormItemListMode && numberOfColumns.HasValue ) {
+							var widthOfLastRowWithButton = getFormItemRows( formItems, numberOfColumns.Value ).Last().Sum( fi => getCellSpan( fi ) ) + defaultFormItemCellSpan;
+							var numberOfPlaceholdersRequired = 0;
+							if( widthOfLastRowWithButton < numberOfColumns.Value )
+								numberOfPlaceholdersRequired = numberOfColumns.Value - widthOfLastRowWithButton;
+							if( widthOfLastRowWithButton > numberOfColumns.Value )
+								numberOfPlaceholdersRequired = numberOfColumns.Value - ( ( widthOfLastRowWithButton - numberOfColumns.Value ) % numberOfColumns.Value );
 
-					numberOfPlaceholdersRequired.Times( () => formItems.Add( getPlaceholderFormItem() ) );
-				}
-				formItems.Add(
-					FormItem.Create(
-						"",
-						new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( IncludeButtonWithThisText ) ) { Width = Unit.Percentage( 50 ) },
-						textAlignment: TextAlignment.Right,
-						cellSpan: defaultFormItemCellSpan ) );
-			}
-			Controls.Add( useFormItemListMode ? getTableForFormItemList() : getTableForFormItemTable() );
+							numberOfPlaceholdersRequired.Times( () => formItems.Add( getPlaceholderFormItem() ) );
+						}
+						formItems.Add(
+							FormItem.Create(
+								"",
+								new PostBackButton( new ButtonActionControlStyle( IncludeButtonWithThisText ), postBack: EwfPage.Instance.DataUpdatePostBack )
+									{
+										Width = Unit.Percentage( 50 )
+									},
+								textAlignment: TextAlignment.Right,
+								cellSpan: defaultFormItemCellSpan ) );
+					}
+					Controls.Add( useFormItemListMode ? getTableForFormItemList() : getTableForFormItemTable() );
+				} );
 		}
 
 		private WebControl getTableForFormItemList() {

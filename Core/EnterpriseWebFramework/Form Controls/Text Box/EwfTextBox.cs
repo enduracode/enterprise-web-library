@@ -34,11 +34,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
-	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
-		internal static void AddTextareaValue( Control textarea, string value ) {
+	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+		internal static string GetTextareaValue( string value ) {
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
 			// does in their System.Web.UI.WebControls.TextBox implementation.
-			textarea.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( Environment.NewLine + value ) } );
+			return Environment.NewLine + value;
 		}
 
 		private readonly int rows;
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly bool disableBrowserAutoComplete;
 		private readonly bool? suggestSpellCheck;
 		private readonly FormValue<string> formValue;
-		private PostBack postBack;
+		private readonly PostBack postBack;
 		private readonly bool autoPostBack;
 		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
@@ -104,9 +104,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				() => this.IsOnPage() ? UniqueID : "",
 				v => v,
 				rawValue =>
-				rawValue != null ? PostBackValueValidationResult<string>.CreateValidWithValue( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
+				rawValue != null && ( !readOnly || rawValue == formValue.GetDurableValue() )
+					? PostBackValueValidationResult<string>.CreateValid( rawValue )
+					: PostBackValueValidationResult<string>.CreateInvalid() );
 
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 			this.autoPostBack = autoPostBack;
 		}
 
@@ -154,7 +156,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var value = formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 				var valueOrWatermark = watermarkText.Any() && !value.Any() ? watermarkText : value;
 				if( isTextarea )
-					AddTextareaValue( textBox, valueOrWatermark );
+					textBox.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( GetTextareaValue( valueOrWatermark ) ) } );
 				else if( !masksCharacters )
 					textBox.Attributes.Add( "value", valueOrWatermark );
 			};
@@ -169,24 +171,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"$( '#" + textBox.ClientID + "' ).filter( function() { return this.value == '" + watermarkText + "'; } ).val( '' )" );
 			}
 
-			var jsNeededForImplicitSubmission = postBack != null || autoPostBack ||
-			                                    ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect );
-			if( postBack == null && ( autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
-				postBack = EwfPage.Instance.DataUpdatePostBack;
-
-			if( postBack != null && ( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) ) )
+			if( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) )
 				EwfPage.Instance.AddPostBack( postBack );
 			if( !isTextarea )
-				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, jsNeededForImplicitSubmission ? postBack : null ); };
+				PreRender +=
+					delegate {
+						PostBackButton.EnsureImplicitSubmission(
+							this,
+							postBack,
+							autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
+					};
 
-			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) ) {
+			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) )
 				PreRender += delegate {
 					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
 					textBox.AddJavaScriptEventScript(
 						JsWritingMethods.onchange,
 						"setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
 				};
-			}
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), textBox );
@@ -228,7 +230,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return script.ToString();
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
+		FormValue FormValueControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.

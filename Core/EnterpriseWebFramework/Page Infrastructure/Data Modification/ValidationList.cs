@@ -1,7 +1,7 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	/// <summary>
-	/// A list of validations.
-	/// </summary>
+﻿using System;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	[ Obsolete( "Guaranteed through 31 October 2016. Use ValidationSetupState.ExecuteWithDataModifications instead." ) ]
 	public interface ValidationList {
 		/// <summary>
 		/// Adds all validations from the specified basic validation list.

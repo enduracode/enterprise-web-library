@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -22,11 +23,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Call this during LoadData.
 		/// </summary>
 		/// <param name="userId"></param>
-		/// <param name="vl"></param>
 		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available 
 		/// in the System Provider are used.</param>
 		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
-		public void LoadData( int? userId, ValidationList vl, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
+		public void LoadData( int? userId, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
 			availableRoles = ( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
@@ -45,8 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )
 								                             Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
-						                             },
-						                             vl ) ) );
+						                             } ) ) );
 
 			if( includePasswordControls() ) {
 				var group = new RadioButtonGroup( false );
@@ -65,8 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							                             }
 							                             else
 								                             genPassword( false );
-						                             },
-						                             vl ) );
+						                             } ) );
 
 				var generatePassword = FormItem.Create(
 					"",
@@ -75,43 +73,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
 								                             genPassword( true );
-						                             },
-						                             vl ) );
+						                             } ) );
 
-				var newPassword = new DataValue<string>();
-				var confirmPassword = new DataValue<string>();
-				var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
-				newPasswordTable.AddItem(
-					new EwfTableItem(
-						"Password",
-						FormItem.Create(
+				var providePassword = ValidationSetupState.ExecuteWithValidationPredicate(
+					validationShouldRun,
+					() => {
+						var providePasswordSelected = new DataValue<bool>();
+						return FormItem.Create(
 							"",
-							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new EwfValidation( ( pbv, v ) => newPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
-				newPasswordTable.AddItem(
-					new EwfTableItem(
-						"Password again",
-						FormItem.Create(
-							"",
-							new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ) { Width = Unit.Pixel( 200 ) },
-							validationGetter: control => new EwfValidation( ( pbv, v ) => confirmPassword.Value = control.GetPostBackValue( pbv ), vl ) ).ToControl() ) );
+							group.CreateBlockRadioButton(
+								false,
+								( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
+								label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
+								nestedControlListGetter: () => {
+									return ValidationSetupState.ExecuteWithValidationPredicate(
+										() => providePasswordSelected.Value,
+										() => {
+											var password = new DataValue<string>();
+											var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
+											foreach( var i in password.GetPasswordModificationFormItems( textBoxWidth: Unit.Pixel( 200 ) ) )
+												newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
 
-				var providePasswordRadio = group.CreateBlockRadioButton( false, label: "Provide a " + ( userId.HasValue ? "new " : "" ) + "password" );
-				providePasswordRadio.NestedControls.Add( newPasswordTable );
-				var providePassword = FormItem.Create(
-					"",
-					providePasswordRadio,
-					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
-								                             return;
-							                             FormsAuthStatics.ValidatePassword( validator, newPassword, confirmPassword );
-							                             var p = new Password( newPassword.Value );
-							                             Salt = p.Salt;
-							                             SaltedPassword = p.ComputeSaltedHash();
-							                             MustChangePassword = false;
-						                             },
-						                             vl ) );
+											new EwfValidation(
+												validator => {
+													var p = new Password( password.Value );
+													Salt = p.Salt;
+													SaltedPassword = p.ComputeSaltedHash();
+													MustChangePassword = false;
+												} );
+
+											return newPasswordTable.ToSingleElementArray();
+										} );
+								} ),
+							validationGetter: control => control.Validation );
+					} );
 
 				b.AddFormItems(
 					FormItem.Create( "Password", ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
@@ -127,8 +122,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )
 								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default ( int );
-						                             },
-						                             vl ) ) );
+						                             } ) ) );
 
 			Controls.Add( b );
 		}

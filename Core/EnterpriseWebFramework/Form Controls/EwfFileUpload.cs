@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A file upload control.
 	/// </summary>
-	public class EwfFileUpload: WebControl, ControlTreeDataLoader, FormControl {
+	public class EwfFileUpload: WebControl, ControlTreeDataLoader, FormValueControl {
 		private readonly FormValue<HttpPostedFile> formValue;
 		private RsFile postBackValue;
 
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				v => "",
 				rawValue =>
 				rawValue != null
-					? PostBackValueValidationResult<HttpPostedFile>.CreateValidWithValue( rawValue.ContentLength > 0 ? rawValue : null )
+					? PostBackValueValidationResult<HttpPostedFile>.CreateValid( rawValue.ContentLength > 0 ? rawValue : null )
 					: PostBackValueValidationResult<HttpPostedFile>.CreateInvalid() );
 		}
 
@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwfPage.Instance.Form.Enctype = "multipart/form-data";
 		}
 
-		FormValue FormControl.FormValue { get { return formValue; } }
+		FormValue FormValueControl.FormValue { get { return formValue; } }
 
 		/// <summary>
 		/// Gets the post back value.

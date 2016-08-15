@@ -1,10 +1,9 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	public partial class HtmlEditing: EwfPage {
+	partial class HtmlEditing: EwfPage {
 		protected override void loadData() {
 			addHtmlEditor();
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post back", new PostBackButton( PostBack.CreateFull() ) ) );
@@ -12,11 +11,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private void addHtmlEditor() {
 			HtmlBlockEditorModification mod;
-			ph.AddControlsReturnThis(
-				FormItem.Create(
-					"",
-					new HtmlBlockEditor( null, id => { }, out mod ),
-					validationGetter: c => new EwfValidation( ( pbv, v ) => c.Validate( pbv, v, new ValidationErrorHandler( "html" ) ), DataUpdate ) ).ToControl() );
+			ph.AddControlsReturnThis( new HtmlBlockEditor( null, id => { }, out mod ).ToFormItem( "" ).ToControl() );
 		}
 	}
 }

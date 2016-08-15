@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class StatusMessages: EwfPage {
@@ -15,7 +14,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				EwfTable.CreateWithItems(
 					items:
 						getStatusTests()
-							.Select( tests => new EwfTableItem( tests.Item1, new PostBackButton( tests.Item2, new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false ) ) )
+							.Select(
+								tests => new EwfTableItem( tests.Item1, new PostBackButton( new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false, postBack: tests.Item2 ) ) )
 							.ToFunctions() ) );
 		}
 
@@ -33,10 +33,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			yield return
 				Tuple.Create(
-					"Validation error message",
-					PostBack.CreateFull(
-						id: "valError",
-						firstTopValidationMethod: ( dictionary, validator ) => validator.NoteErrorAndAddMessage( "This is the validation error" ) ) );
+					"Modification error message",
+					PostBack.CreateFull( id: "valError", firstModificationMethod: () => { throw new ApplicationException( "This is the validation error" ); } ) );
 
 			yield return
 				Tuple.Create(
@@ -50,16 +48,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				Tuple.Create(
 					"Very Long-running operation: 15 seconds.",
 					PostBack.CreateFull( id: "veryLongRunning", firstModificationMethod: () => Thread.Sleep( 15000 ) ) );
-
-			yield return
-				Tuple.Create(
-					"Five validation error messages",
-					PostBack.CreateFull(
-						id: "fiveValErrors",
-						firstTopValidationMethod: ( dictionary, validator ) => {
-							foreach( var i in Enumerable.Range( 0, 5 ) )
-								validator.NoteErrorAndAddMessage( "This message is {0} in line.".FormatWith( i ) );
-						} ) );
 
 			yield return Tuple.Create(
 				"Two info messages",
@@ -120,17 +108,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						foreach( var i in Enumerable.Range( 0, 100 ) )
 							AddStatusMessage( StatusMessageType.Info, "This message is {0} in line.".FormatWith( i ) );
 					} ) );
-
-			yield return
-				Tuple.Create(
-					"Info, warning, validation error messages.",
-					PostBack.CreateFull(
-						id: "infoWarningValError",
-						firstTopValidationMethod: ( dictionary, validator ) => validator.NoteErrorAndAddMessage( "This is the validation error" ),
-						firstModificationMethod: () => {
-							AddStatusMessage( StatusMessageType.Info, "This is the info message." );
-							AddStatusMessage( StatusMessageType.Warning, "This is the warning message" );
-						} ) );
 		}
 
 		private string longMessage() {

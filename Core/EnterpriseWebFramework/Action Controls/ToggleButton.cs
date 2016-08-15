@@ -4,16 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
+using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control that, when clicked, toggles the display of other controls.
 	/// </summary>
+	// When migrating this away from Web Forms, all it will do directly is manipulate the hidden field and a page-modification value. To replace the toggleClasses
+	// functionality, make a ClassToggler that is similar in structure to DisplaySetup. Create them with an extension method:
+	// PageModificationValue.ToClassToggler( classes, toggledWhenValueSet=true )
 	public class ToggleButton: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, DisplayLink, ActionControl {
-		private const string pageStateKey = "controlsToggled";
-
 		private readonly List<WebControl> controlsToToggle = new List<WebControl>();
 
 		/// <summary>
@@ -33,18 +36,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly IEnumerable<string> toggleClasses;
 		private Unit width = Unit.Empty;
 		private Unit height = Unit.Empty;
-		private Func<PostBackValueDictionary, string> controlsToggledHiddenFieldValueGetter;
-		private Func<string> controlsToggledHiddenFieldClientIdGetter;
+		private readonly HiddenFieldId hiddenFieldId = new HiddenFieldId();
+		private readonly PageModificationValue<string> hiddenFieldValue = new PageModificationValue<string>();
 		private Control textControl;
 
 		/// <summary>
 		/// Creates a toggle button with ControlsToToggle already populated.
 		/// Use SetInitialDisplay on each control to set up the initial visibility of each control.
 		/// </summary>
-		public ToggleButton( IEnumerable<WebControl> controlsToToggle, ActionControlStyle actionControlStyle, IEnumerable<string> toggleClasses = null ) {
+		public ToggleButton(
+			IEnumerable<WebControl> controlsToToggle, ActionControlStyle actionControlStyle, bool controlsToggled,
+			Action<PostBackValue<bool>, Validator> validationMethod, IEnumerable<string> toggleClasses = null ) {
 			AddControlsToToggle( controlsToToggle.ToArray() );
 			ActionControlStyle = actionControlStyle;
 			this.toggleClasses = toggleClasses;
+
+			var hiddenField = new EwfHiddenField(
+				controlsToggled.ToString(),
+				( postBackValue, validator ) =>
+				validationMethod( new PostBackValue<bool>( getControlsToggled( postBackValue.Value ), postBackValue.ChangedOnPostBack ), validator ),
+				id: hiddenFieldId,
+				pageModificationValue: hiddenFieldValue );
+			hiddenField.PageComponent.ToSingleElementArray().AddEtherealControls( this );
 		}
 
 		/// <summary>
@@ -67,20 +80,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			EwfPage.Instance.AddDisplayLink( this );
 
-			// NOTE: Currently this hidden field will always be persisted in page state whether the page cares about that or not. We should put this decision into the
-			// hands of the page, maybe by making ToggleButton sort of like a form control such that it takes a boolean value in its constructor and allows access to
-			// its post back value.
-			var controlsToggled = false;
-			EwfHiddenField.Create(
-				this,
-				EwfPage.Instance.PageState.GetValue( this, pageStateKey, false ).ToString(),
-				postBackValue => controlsToggled = getControlsToggled( postBackValue ),
-				EwfPage.Instance.DataUpdate,
-				out controlsToggledHiddenFieldValueGetter,
-				out controlsToggledHiddenFieldClientIdGetter );
-			EwfPage.Instance.DataUpdate.AddModificationMethod(
-				() => AppRequestState.AddNonTransactionalModificationMethod( () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, controlsToggled ) ) );
-
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			this.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
@@ -96,7 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "function " + handlerName + "() {" );
 
-				sw.WriteLine( "var controlsToggled = document.getElementById( '" + controlsToggledHiddenFieldClientIdGetter() + "' );" );
+				sw.WriteLine( "var controlsToggled = document.getElementById( '" + hiddenFieldId.Id + "' );" );
 				if( textControl != null )
 					sw.WriteLine( "var textElement = document.getElementById( '" + textControl.ClientID + "' );" );
 
@@ -129,20 +128,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private string handlerName { get { return "toggleState_" + ClientID; } }
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
-			if( getControlsToggled( controlsToggledHiddenFieldValueGetter( formControlValues ) ) ) {
-				if( textControl != null ) {
+			if( getControlsToggled( hiddenFieldValue.Value ) ) {
+				if( textControl != null )
 					if( getAlternateText().Any() ) {
 						textControl.Controls.Clear();
 						textControl.Controls.Add( getAlternateText().GetLiteralControl() );
 					}
 					else
 						this.SetInitialDisplay( false );
-				}
 				foreach( var webControl in controlsToToggle ) {
-					if( toggleClasses != null ) {
+					if( toggleClasses != null )
 						foreach( var i in toggleClasses )
 							webControl.CssClass = webControl.CssClass.Contains( i ) ? webControl.CssClass.Replace( i, "" ) : webControl.CssClass.ConcatenateWithSpace( i );
-					}
 					else
 						webControl.ToggleInitialDisplay();
 				}

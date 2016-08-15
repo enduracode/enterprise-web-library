@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -88,6 +89,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static bool IsSecure( this HttpRequest request ) {
 			return EwfApp.Instance.RequestIsSecure( request );
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static IEnumerable<Control> GetControls( this IEnumerable<FlowComponent> components ) {
+			return components.SelectMany( i => i.GetNodes() ).Cast<Control>();
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static void AddEtherealControls( this IEnumerable<EtherealComponent> components, Control parent ) {
+			foreach( var element in components.SelectMany( i => i.GetElements() ) )
+				EwfPage.Instance.AddEtherealControl( parent, (PageElement)element );
+		}
+
+		/// <summary>
+		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
+		/// </summary>
+		public static FormItem ToFormItem(
+			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			return new FormItem<Control>(
+				label,
+				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToSingleElementArray().GetControls() ),
+				cellSpan,
+				textAlignment,
+				formControl.Validation );
 		}
 	}
 }

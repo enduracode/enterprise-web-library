@@ -196,7 +196,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				globalFootPlace.AddControlsReturnThis( globalFootBlock );
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
-				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession ) {
+				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )
 					EwfPage.AddStatusMessage(
 						StatusMessageType.Warning,
 						StringTools.ConcatenateWithDelimiter(
@@ -213,7 +213,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							"Click here to get the latest Internet Explorer (it's free)",
 							new ExternalResourceInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
 							true ) );
-				}
 				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 			}
 		}
@@ -431,7 +430,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
 				else if( EwfPage.Instance.IsAutoDataUpdater )
-					controls.Add( new PostBackButton( EwfPage.Instance.DataUpdatePostBack, new ButtonActionControlStyle( "Update Now" ) ) );
+					controls.Add( new PostBackButton( new ButtonActionControlStyle( "Update Now" ), postBack: EwfPage.Instance.DataUpdatePostBack ) );
 			}
 			else {
 				if( EwfPage.Instance.IsAutoDataUpdater )
@@ -458,7 +457,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
 
 			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
-			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
+			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
 				controls.Add(
 					new Paragraph(
 						"Powered by the ".GetLiteralControl(),
@@ -467,7 +466,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						{
 							CssClass = CssElementCreator.PoweredByEwlFooterCssClass
 						} );
-			}
 
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
 		}

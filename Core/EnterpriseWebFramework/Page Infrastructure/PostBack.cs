@@ -16,24 +16,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="forcePageDataUpdate">Pass true to force the page's data update to execute even if no form values changed.</param>
 		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
 		/// are included in this post-back.</param>
-		/// <param name="firstTopValidationMethod"></param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="actionGetter">A method that returns the action EWF will perform if there were no modification errors.</param>
 		public static ActionPostBack CreateFull(
-			string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false,
-			Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null, Func<PostBackAction> actionGetter = null ) {
+			string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false, Action firstModificationMethod = null,
+			Func<PostBackAction> actionGetter = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
-			return new ActionPostBack(
-				true,
-				null,
-				id,
-				forcePageDataUpdate,
-				skipModificationIfNoChanges,
-				firstTopValidationMethod,
-				firstModificationMethod,
-				actionGetter,
-				null );
+			return new ActionPostBack( true, null, id, forcePageDataUpdate, skipModificationIfNoChanges, firstModificationMethod, actionGetter, null );
 		}
 
 		/// <summary>
@@ -42,35 +32,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="updateRegions">The regions of the page that will change as a result of this post-back. If forceFullPagePostBack is true, the regions only
 		/// need to include the form controls that will change; other changes are allowed anywhere on the page.</param>
-		/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back.</param>
 		/// <param name="forceFullPagePostBack">Pass true to force a full-page post-back instead of attempting an async post-back. Note that an async post-back will
 		/// automatically fall back to a full-page post-back if the page has changed in any way since it was last sent. This parameter currently has no effect since
 		/// async post-backs are not yet implemented; see RSIS goal 478.</param>
 		/// <param name="id">The ID of this post-back. Must be unique for every post-back in the page. Do not pass null or the empty string.</param>
 		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
 		/// are included in this post-back.</param>
-		/// <param name="firstTopValidationMethod"></param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="secondaryResponseGetter">A method that returns the secondary response EWF will send, in a new window/tab or as an attachment, if there were
 		/// no modification errors.</param>
+		/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
+		/// first of the current data modifications.</param>
 		public static ActionPostBack CreateIntermediate(
-			IEnumerable<UpdateRegionSet> updateRegions, DataModification validationDm, bool forceFullPagePostBack = false, string id = "main",
-			bool skipModificationIfNoChanges = false, Action<PostBackValueDictionary, Validator> firstTopValidationMethod = null, Action firstModificationMethod = null,
-			Func<SecondaryResponse> secondaryResponseGetter = null ) {
+			IEnumerable<UpdateRegionSet> updateRegions, bool forceFullPagePostBack = false, string id = "main", bool skipModificationIfNoChanges = false,
+			Action firstModificationMethod = null, Func<SecondaryResponse> secondaryResponseGetter = null, DataModification validationDm = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
-			if( validationDm == null )
-				throw new ApplicationException( "A validation data-modification is required." );
 			return new ActionPostBack(
 				forceFullPagePostBack,
 				updateRegions,
 				id,
 				null,
 				skipModificationIfNoChanges,
-				firstTopValidationMethod,
 				firstModificationMethod,
 				secondaryResponseGetter != null ? new Func<PostBackAction>( () => new PostBackAction( secondaryResponseGetter() ) ) : null,
-				validationDm );
+				validationDm ?? ValidationSetupState.Current.DataModifications.First() );
 		}
 
 		internal static PostBack CreateDataUpdate() {
@@ -102,14 +88,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal ActionPostBack(
 			bool forceFullPagePostBack, IEnumerable<UpdateRegionSet> updateRegions, string id, bool? forcePageDataUpdate, bool skipModificationIfNoChanges,
-			Action<PostBackValueDictionary, Validator> firstTopValidationMethod, Action firstModificationMethod, Func<PostBackAction> actionGetter,
-			DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
+			Action firstModificationMethod, Func<PostBackAction> actionGetter, DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
 			this.updateRegions = updateRegions ?? new UpdateRegionSet[ 0 ];
 			this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
 			dataModification = new BasicDataModification();
-			if( firstTopValidationMethod != null )
-				dataModification.AddTopValidationMethod( firstTopValidationMethod );
 			if( firstModificationMethod != null )
 				dataModification.AddModificationMethod( firstModificationMethod );
 
@@ -130,9 +113,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			dataModification.AddValidations( validationList );
 		}
 
-		/// <summary>
-		/// Adds a validation method whose errors are displayed at the top of the window.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 October 2016. Use EwfValidation instead." ) ]
 		public void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod ) {
 			dataModification.AddTopValidationMethod( validationMethod );
 		}

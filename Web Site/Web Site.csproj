@@ -263,13 +263,6 @@
     <Compile Include="TestPages\HtmlEditing.aspx.designer.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\CalendarDemo.aspx.cs">
-      <DependentUpon>CalendarDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\CalendarDemo.aspx.designer.cs">
-      <DependentUpon>CalendarDemo.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.cs">
       <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -451,13 +444,6 @@
     <Compile Include="TestPages\TestService.aspx.designer.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\TwoWeekCalendarTest.aspx.cs">
-      <DependentUpon>TwoWeekCalendarTest.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\TwoWeekCalendarTest.aspx.designer.cs">
-      <DependentUpon>TwoWeekCalendarTest.aspx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="CreateSystem.aspx" />
@@ -573,7 +559,6 @@
     <Content Include="TestPages\EwfTextBoxDemo.aspx" />
     <Content Include="TestPages\Html5FileUpload.aspx" />
     <Content Include="TestPages\HtmlEditing.aspx" />
-    <Content Include="TestPages\CalendarDemo.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
@@ -581,9 +566,6 @@
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
     <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
     <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
-    <Content Include="Ewf\Images\Calendar\button_currentmonth.gif" />
-    <Content Include="Ewf\Images\Calendar\button_next.gif" />
-    <Content Include="Ewf\Images\Calendar\button_previous.gif" />
     <Content Include="Ewf\ErrorPages\ErrorPage.master" />
     <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
@@ -624,11 +606,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Ewf\Images\Calendar\button_currentweek.gif" />
     <Content Include="Ewf\IntermediateLogIn.aspx" />
     <Content Include="Service\Service.svc" />
     <Content Include="TestPages\GetImage.aspx" />
-    <Content Include="TestPages\TwoWeekCalendarTest.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

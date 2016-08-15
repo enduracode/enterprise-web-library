@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -20,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An in-line check box with the label vertically centered on the box.
 	/// </summary>
-	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormControl, ControlWithCustomFocusLogic {
+	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithCustomFocusLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfCheckBox";
 
@@ -34,18 +35,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static FormValue<bool> GetFormValue( bool isChecked, Control checkBox ) {
-			return new FormValue<bool>( () => isChecked,
+			return new FormValue<bool>(
+				() => isChecked,
 				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
 				v => v.ToString(),
 				rawValue =>
 				rawValue == null
-					? PostBackValueValidationResult<bool>.CreateValidWithValue( false )
-					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValidWithValue( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
+					? PostBackValueValidationResult<bool>.CreateValid( false )
+					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValid( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
-		internal static void AddCheckBoxAttributes( WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue,
-		                                            FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId, PostBack postBack, bool autoPostBack,
-		                                            IEnumerable<string> onClickJsMethods ) {
+		internal static void AddCheckBoxAttributes(
+			WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue, FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId,
+			PostBack postBack, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
 			checkBoxElement.Attributes.Add( "type", checkBoxFormValue != null ? "checkbox" : "radio" );
 			checkBoxElement.Attributes.Add( "name", checkBoxFormValue != null ? checkBox.UniqueID : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() );
 			if( radioButtonFormValue != null )
@@ -55,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack );
+			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack, false );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton
@@ -70,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string radioButtonListItemId;
 		private readonly string label;
 		private readonly PostBack postBack;
-		private readonly List<string> onClickJsMethods = new List<string>();
+		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private WebControl checkBox;
 
 		/// <summary>
@@ -79,17 +81,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfCheckBox( bool isChecked, string label = "", PostBack postBack = null ) {
 			checkBoxFormValue = GetFormValue( isChecked, this );
 			this.label = label;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
-		internal EwfCheckBox( FormValue<CommonCheckBox> formValue, string label, PostBack postBack, string listItemId = null ) {
+		internal EwfCheckBox(
+			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
-			this.postBack = postBack;
+			this.postBack = postBack ?? EwfPage.PostBack;
+			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 		}
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
@@ -113,7 +117,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
 		/// </summary>
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
-			onClickJsMethods.Add( jsMethodInvocation );
+			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToSingleElementArray );
 		}
 
 		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
@@ -124,14 +128,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			if( postBack != null || AutoPostBack )
-				EwfPage.Instance.AddPostBack( postBack ?? EwfPage.Instance.DataUpdatePostBack );
+			EwfPage.Instance.AddPostBack( postBack );
 
 			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender += delegate {
-				AddCheckBoxAttributes( checkBox, this, checkBoxFormValue, radioButtonFormValue, radioButtonListItemId, postBack, AutoPostBack, onClickJsMethods );
+				AddCheckBoxAttributes(
+					checkBox,
+					this,
+					checkBoxFormValue,
+					radioButtonFormValue,
+					radioButtonListItemId,
+					postBack,
+					AutoPostBack,
+					jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				checkBox.Attributes.Add( "class", CssElementCreator.CssClass );
 			};
 			Controls.Add( checkBox );
@@ -146,7 +157,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl : checkBox );
 		}
 
-		FormValue FormControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
+		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
 
 		/// <summary>
 		/// Gets whether the box is checked in the post back.

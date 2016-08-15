@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -58,18 +59,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Adding a New User
 
 		/// <summary>
-		/// Ensures that the specified data values contain identical, valid password values.
+		/// Gets password and "password again" form items. The validation sets this data value to the provided password, and ensures that the two form items contain
+		/// identical, valid passwords.
 		/// </summary>
-		public static void ValidatePassword( Validator validator, DataValue<string> password, DataValue<string> passwordAgain ) {
-			if( password.Value != passwordAgain.Value )
-				validator.NoteErrorAndAddMessage( "Passwords do not match." );
-			else {
-				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-				if( strictProvider != null )
-					strictProvider.ValidatePassword( validator, password.Value );
-				else if( password.Value.Length < 7 )
-					validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-			}
+		public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
+			this DataValue<string> password, Unit? textBoxWidth = null, FormItemLabel firstLabel = null, FormItemLabel secondLabel = null ) {
+			var passwordAgain = new DataValue<string>();
+			var passwordAgainFormItem = FormItem.Create(
+				secondLabel ?? "Password again",
+				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
+				validationGetter: control => new EwfValidation( ( pbv, v ) => passwordAgain.Value = control.GetPostBackValue( pbv ) ) );
+			if( textBoxWidth.HasValue )
+				passwordAgainFormItem.Control.Width = textBoxWidth.Value;
+
+			var passwordFormItem = FormItem.Create(
+				firstLabel ?? "Password",
+				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
+				validationGetter: control => new EwfValidation(
+					                             ( pbv, v ) => {
+						                             password.Value = control.GetPostBackValue( pbv );
+						                             if( password.Value != passwordAgain.Value )
+							                             v.NoteErrorAndAddMessage( "Passwords do not match." );
+						                             else {
+							                             var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+							                             if( strictProvider != null )
+								                             strictProvider.ValidatePassword( v, password.Value );
+							                             else if( password.Value.Length < 7 )
+								                             v.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+						                             }
+					                             } ) );
+			if( textBoxWidth.HasValue )
+				passwordFormItem.Control.Width = textBoxWidth.Value;
+
+			return new[] { passwordFormItem, passwordAgainFormItem };
 		}
 
 
@@ -79,7 +101,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Gets an email address form item for use on log-in pages. The validation sets this data value to the post back value of the text box, if valid, or adds
 		/// the specified error message to the form item.
 		/// </summary>
-		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage, ValidationList vl ) {
+		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage ) {
 			return FormItem.Create(
 				label,
 				new EwfTextBox( "" ),
@@ -88,56 +110,57 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					new EwfValidation(
 						( pbv, validator ) =>
 						emailAddress.Value =
-						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ),
-						vl ) );
+						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ) ) );
 		}
 
 		/// <summary>
-		/// Sets up client-side logic for user log-in and returns a modification method that logs in a user. Do not call if the system does not implement the
-		/// forms-authentication-capable user-management provider.
+		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
+		/// does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Func<FormsAuthCapableUser> GetLogInMethod(
-			Control etherealControlParent, DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage,
-			ValidationList vl ) {
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
+			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var utcOffset = new DataValue<string>();
-			setUpClientSideLogicForLogIn( etherealControlParent, utcOffset, vl );
+			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( utcOffset );
 
-			return () => {
-				var errors = new List<string>();
+			return Tuple.Create(
+				hiddenFields,
+				new Func<FormsAuthCapableUser>(
+					() => {
+						var errors = new List<string>();
 
-				var user = SystemProvider.GetUser( emailAddress.Value );
-				if( user != null ) {
-					var authenticationSuccessful = false;
-					if( user.SaltedPassword != null ) {
-						// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
-						var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
-						if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
-							authenticationSuccessful = true;
-					}
+						var user = SystemProvider.GetUser( emailAddress.Value );
+						if( user != null ) {
+							var authenticationSuccessful = false;
+							if( user.SaltedPassword != null ) {
+								// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
+								var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
+								if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
+									authenticationSuccessful = true;
+							}
 
-					var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-					if( strictProvider != null ) {
-						strictProvider.PostAuthenticate( user, authenticationSuccessful );
+							var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+							if( strictProvider != null ) {
+								strictProvider.PostAuthenticate( user, authenticationSuccessful );
 
-						// Re-retrieve the user in case PostAuthenticate modified it.
-						user = SystemProvider.GetUser( user.UserId );
-					}
+								// Re-retrieve the user in case PostAuthenticate modified it.
+								user = SystemProvider.GetUser( user.UserId );
+							}
 
-					if( authenticationSuccessful )
-						setFormsAuthCookieAndUser( user );
-					else
-						errors.Add( passwordErrorMessage );
-				}
-				else
-					errors.Add( emailAddressErrorMessage );
+							if( authenticationSuccessful )
+								setFormsAuthCookieAndUser( user );
+							else
+								errors.Add( passwordErrorMessage );
+						}
+						else
+							errors.Add( emailAddressErrorMessage );
 
-				errors.AddRange( verifyTestCookie() );
-				addStatusMessageIfClockNotSynchronized( utcOffset );
+						errors.AddRange( verifyTestCookie() );
+						addStatusMessageIfClockNotSynchronized( utcOffset );
 
-				if( errors.Any() )
-					throw new DataModificationException( errors.ToArray() );
-				return user;
-			};
+						if( errors.Any() )
+							throw new DataModificationException( errors.ToArray() );
+						return user;
+					} ) );
 		}
 
 		/// <summary>
@@ -151,45 +174,43 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// Sets up client-side logic for user log-in and returns a modification method that logs in the specified user. Do not call if the system does not
-		/// implement the forms-authentication-capable user-management provider.
-		/// This method should be called in LoadData. The method returned should be called in an event handler.
+		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
+		/// the system does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Action<int> GetSpecifiedUserLogInMethod( Control etherealControlParent, ValidationList vl ) {
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod( Control etherealControlParent ) {
 			var utcOffset = new DataValue<string>();
-			setUpClientSideLogicForLogIn( etherealControlParent, utcOffset, vl );
+			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( utcOffset );
 
-			return userId => {
-				var user = SystemProvider.GetUser( userId );
-				setFormsAuthCookieAndUser( user );
+			return Tuple.Create(
+				hiddenFields,
+				new Action<int>(
+					userId => {
+						var user = SystemProvider.GetUser( userId );
+						setFormsAuthCookieAndUser( user );
 
-				var errors = new List<string>();
-				errors.AddRange( verifyTestCookie() );
-				addStatusMessageIfClockNotSynchronized( utcOffset );
-				if( errors.Any() )
-					throw new DataModificationException( errors.ToArray() );
-			};
+						var errors = new List<string>();
+						errors.AddRange( verifyTestCookie() );
+						addStatusMessageIfClockNotSynchronized( utcOffset );
+						if( errors.Any() )
+							throw new DataModificationException( errors.ToArray() );
+					} ) );
 		}
 
-		private static void setUpClientSideLogicForLogIn( Control etherealControlParent, DataValue<string> utcOffset, ValidationList vl ) {
+		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> utcOffset ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
-			Func<PostBackValueDictionary, string> utcOffsetHiddenFieldValueGetter; // unused
-			Func<string> utcOffsetHiddenFieldClientIdGetter;
-			EwfHiddenField.Create(
-				etherealControlParent,
-				"",
-				postBackValue => utcOffset.Value = postBackValue,
-				vl,
-				out utcOffsetHiddenFieldValueGetter,
-				out utcOffsetHiddenFieldClientIdGetter );
-			EwfPage.Instance.PreRender +=
-				delegate {
-					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
-						typeof( UserManagementStatics ),
-						"formSubmitEventHandler",
-						"getClientUtcOffset( '" + utcOffsetHiddenFieldClientIdGetter() + "' )" );
-				};
+			HiddenFieldId utcOffsetHiddenFieldId = new HiddenFieldId();
+			var utcOffsetHiddenField = new EwfHiddenField( "", ( postBackValue, validator ) => utcOffset.Value = postBackValue.Value, id: utcOffsetHiddenFieldId );
+			EwfPage.Instance.PreRender += delegate {
+				if( utcOffsetHiddenFieldId.Id.Length == 0 )
+					throw new ApplicationException( "The log-in hidden fields must be on the page." );
+				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
+					typeof( UserManagementStatics ),
+					"formSubmitEventHandler",
+					"getClientUtcOffset( '{0}' )".FormatWith( utcOffsetHiddenFieldId.Id ) );
+			};
+
+			return utcOffsetHiddenField.PageComponent.ToSingleElementArray();
 		}
 
 		private static void setFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
@@ -227,12 +248,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				// generated by its own product, so we convert it to be the same as the time Firefox gives, which parses fine.
 				var clockDifference = DateTime.Parse( utcOffset.Value.Replace( "UTC", "GMT" ) ) - DateTime.Now;
 
-				if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
+				if( Math.Abs( clockDifference.TotalMinutes ) > 5 )
 					EwfPage.AddStatusMessage(
 						StatusMessageType.Warning,
 						Translation.YourClockIsWrong + " " + DateTime.Now.ToShortTimeString() + " " +
 						( TimeZone.CurrentTimeZone.IsDaylightSavingTime( DateTime.Now ) ? TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName ) + "." );
-				}
 			}
 			catch {} // NOTE: Figure out why the date time field passed from javascript might be empty, and get rid of this catch
 		}

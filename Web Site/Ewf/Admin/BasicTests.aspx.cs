@@ -1,6 +1,6 @@
 using System;
-using Humanizer;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class BasicTests: EwfPage {
@@ -9,13 +9,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				ControlStack.CreateWithControls(
 					true,
 					new PostBackButton(
-						PostBack.CreateFull( id: "sendHealthCheck", firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ),
 						new ButtonActionControlStyle( "Send Health Check" ),
-						usesSubmitBehavior: false ),
+						usesSubmitBehavior: false,
+						postBack: PostBack.CreateFull( id: "sendHealthCheck", firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ) ),
 					new PostBackButton(
-						PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ),
 						new ButtonActionControlStyle( "Throw Unhandled Exception" ),
-						usesSubmitBehavior: false ) ) );
+						usesSubmitBehavior: false,
+						postBack: PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ) ) ) );
 		}
 
 		private void throwException() {
