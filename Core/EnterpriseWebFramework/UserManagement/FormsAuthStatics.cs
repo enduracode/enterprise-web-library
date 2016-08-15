@@ -147,7 +147,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 							}
 
 							if( authenticationSuccessful )
-								setFormsAuthCookieAndUser( user );
+								SetFormsAuthCookieAndUser( user );
 							else
 								errors.Add( passwordErrorMessage );
 						}
@@ -186,7 +186,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				new Action<int>(
 					userId => {
 						var user = SystemProvider.GetUser( userId );
-						setFormsAuthCookieAndUser( user );
+						SetFormsAuthCookieAndUser( user );
 
 						var errors = new List<string>();
 						errors.AddRange( verifyTestCookie() );
@@ -213,7 +213,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			return utcOffsetHiddenField.PageComponent.ToSingleElementArray();
 		}
 
-		private static void setFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
+		/// <summary>
+		/// MVC and private use only.
+		/// </summary>
+		public static void SetFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
 			if( AppRequestState.Instance.ImpersonatorExists )
 				UserImpersonationStatics.SetCookie( user );
 			else {
