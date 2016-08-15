@@ -114,7 +114,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
+		/// <summary>
+		/// MVC and internal use only.
+		/// </summary>
+		public void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
 		}
 
@@ -167,11 +170,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-				if( userAndImpersonator == null ) {
+				if( userAndImpersonator == null )
 					userAndImpersonator = UserManagementStatics.UserManagementEnabled
 						                      ? UserManagementStatics.GetUserAndImpersonatorFromRequest()
 						                      : Tuple.Create<User, Tuple<User>>( null, null );
-				}
 				return userAndImpersonator;
 			}
 		}
