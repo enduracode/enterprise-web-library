@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			validation = checkBoxFormValue.CreateValidation( validationMethod );
 
-			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = nestedControlListGetter != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			this.validation = validation;
 
-			nestedControls = nestedControlListGetter() != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = nestedControlListGetter != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
