@@ -418,7 +418,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"BlockCheckBox",
 				valueParamTypeName,
 				valueParamDefaultValue,
-				new CSharpParameter( "Func<IEnumerable<Control>>", "nestedControlListGetter" ).ToSingleElementArray(),
+				new CSharpParameter( "System.Func<IEnumerable<Control>>", "nestedControlListGetter" ).ToSingleElementArray(),
 				new CSharpParameter[ 0 ],
 				new[]
 					{
