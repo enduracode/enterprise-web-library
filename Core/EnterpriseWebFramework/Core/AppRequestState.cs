@@ -114,10 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		/// <summary>
-		/// MVC and internal use only.
-		/// </summary>
-		public void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
+		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
 		}
 
