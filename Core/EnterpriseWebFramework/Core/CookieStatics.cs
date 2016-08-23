@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Humanizer;
@@ -49,7 +50,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// Ensure that the domain and path of the cookie are in scope for both the request URL and resource URL. These two URLs can be different on shortcut URL
 			// requests, requests that transfer to the log-in page, etc.
-			var requestUrls = new[] { AppRequestState.Instance.Url, EwfPage.Instance.InfoAsBaseType.GetUrl( false, false, true ) };
+			var requestUrls = new List<string> { AppRequestState.Instance.Url };
+			if( EwfPage.Instance != null )
+				requestUrls.Add( EwfPage.Instance.InfoAsBaseType.GetUrl( false, false, true ) );
 			foreach( var url in requestUrls ) {
 				var uri = new Uri( url );
 				if( domain.Any() && !( "." + uri.Host ).EndsWith( "." + domain ) )
@@ -59,11 +62,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			if( !domain.Any() ) {
 				var requestHosts = requestUrls.Select( i => new Uri( i ).Host );
-				if( requestHosts.Distinct().Count() > 1 ) {
+				if( requestHosts.Distinct().Count() > 1 )
 					throw new ApplicationException(
 						"The cookie domain could arbitrarily be either {0} depending upon the request URL.".FormatWith(
 							StringTools.ConcatenateWithDelimiter( " or ", requestHosts.ToArray() ) ) );
-				}
 			}
 
 			return Tuple.Create( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, domain, path );

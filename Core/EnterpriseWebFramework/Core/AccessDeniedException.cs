@@ -4,16 +4,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An exception caused by a failed authorization check.
 	/// </summary>
-	internal class AccessDeniedException: ApplicationException {
+	public class AccessDeniedException: ApplicationException {
 		private readonly bool causedByIntermediateUser;
-		private readonly PageInfo logInPage;
+		private readonly ResourceInfo logInPage;
 
-		internal AccessDeniedException( bool causedByIntermediateUser, PageInfo logInPage ) {
+		/// <summary>
+		/// MVC and internal use only.
+		/// </summary>
+		public AccessDeniedException( bool causedByIntermediateUser, ResourceInfo logInPage ) {
 			this.causedByIntermediateUser = causedByIntermediateUser;
 			this.logInPage = logInPage;
 		}
 
 		internal bool CausedByIntermediateUser { get { return causedByIntermediateUser; } }
-		internal PageInfo LogInPage { get { return logInPage; } }
+		internal ResourceInfo LogInPage { get { return logInPage; } }
 	}
 }
