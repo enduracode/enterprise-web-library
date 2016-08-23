@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Controls.Add(
 				checkBoxList =
 				new EwfCheckBoxList<ItemIdType>(
-					items.Select( i => i.Item ),
+					this.items.Select( i => i.Item ),
 					uiSelectedItemIds,
 					caption: caption,
 					includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,

@@ -41,13 +41,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				table.AddActionLink( new ActionButtonSetup( "Deselect All", new CustomButton( () => string.Format( @"toggleCheckBoxes( '{0}', false )", ClientID ) ) ) );
 			}
 
-			var itemsPerColumn = (int)Math.Ceiling( (decimal)items.Count() / numberOfColumns );
+			var itemsPerColumn = (int)Math.Ceiling( (decimal)this.items.Count() / numberOfColumns );
 			var cells = new List<EwfTableCell>();
 			for( byte i = 0; i < numberOfColumns; i += 1 ) {
-				var maxIndex = Math.Min( ( i + 1 ) * itemsPerColumn, items.Count() );
+				var maxIndex = Math.Min( ( i + 1 ) * itemsPerColumn, this.items.Count() );
 				var place = new PlaceHolder();
 				for( var j = i * itemsPerColumn; j < maxIndex; j += 1 ) {
-					var item = items.ElementAt( j );
+					var item = this.items.ElementAt( j );
 					var checkBox = new BlockCheckBox(
 						selectedItemIds.Contains( item.Id ),
 						( postBackValue, validator ) => { },
