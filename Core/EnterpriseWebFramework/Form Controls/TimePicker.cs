@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.InputValidation;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -23,6 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private bool autoPostBack;
 		private readonly int minuteInterval;
 		private readonly PostBack postBack;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		private EwfTextBox textBox;
 		private SelectList<TimeSpan?> selectList;
@@ -38,6 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.value = value;
 			this.minuteInterval = minuteInterval;
 			this.postBack = postBack;
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -56,36 +59,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public Control ToolTipControl { get; set; }
 
 		void ControlTreeDataLoader.LoadData() {
-			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			if( minuteInterval < 30 ) {
-				textBox = new EwfTextBox(
-					value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "",
-					disableBrowserAutoComplete: true,
-					postBack: postBack,
-					autoPostBack: autoPostBack );
-				Controls.Add( new ControlLine( textBox, getIconButton() ) );
-			}
-			else {
-				var minuteValues = new List<int>();
-				for( var i = 0; i < 60; i += minuteInterval )
-					minuteValues.Add( i );
-				selectList = SelectList.CreateDropDown(
-					from hour in Enumerable.Range( 0, 24 )
-					from minute in minuteValues
-					let timeSpan = new TimeSpan( hour, minute, 0 )
-					select SelectListItem.Create<TimeSpan?>( timeSpan, timeSpan.ToTimeOfDayHourAndMinuteString() ),
-					value,
-					width: Unit.Percentage( 100 ),
-					placeholderIsValid: true,
-					placeholderText: "",
-					postBack: postBack,
-					autoPostBack: autoPostBack );
-				Controls.Add( selectList );
-			}
+					if( minuteInterval < 30 ) {
+						textBox = new EwfTextBox(
+							value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "",
+							disableBrowserAutoComplete: true,
+							postBack: postBack,
+							autoPostBack: autoPostBack );
+						Controls.Add( new ControlLine( textBox, getIconButton() ) );
+					}
+					else {
+						var minuteValues = new List<int>();
+						for( var i = 0; i < 60; i += minuteInterval )
+							minuteValues.Add( i );
+						selectList = SelectList.CreateDropDown(
+							from hour in Enumerable.Range( 0, 24 )
+							from minute in minuteValues
+							let timeSpan = new TimeSpan( hour, minute, 0 )
+							select SelectListItem.Create<TimeSpan?>( timeSpan, timeSpan.ToTimeOfDayHourAndMinuteString() ),
+							value,
+							width: Unit.Percentage( 100 ),
+							placeholderIsValid: true,
+							placeholderText: "",
+							postBack: postBack,
+							autoPostBack: autoPostBack );
+						Controls.Add( selectList );
+					}
 
-			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+					if( ToolTip != null || ToolTipControl != null )
+						new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+				} );
 		}
 
 		private WebControl getIconButton() {
@@ -125,12 +132,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Validates the time and returns the time. The value is expressed in time since 12AM on an arbitrary day.
 		/// </summary>
 		public TimeSpan ValidateAndGetTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
-			if( textBox != null ) {
+			if( textBox != null )
 				return validator.GetTimeOfDayTimeSpan(
 					errorHandler,
 					textBox.GetPostBackValue( postBackValues ).ToUpper(),
 					DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
-			}
 
 			var selectedItemIdInPostBack = selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 			if( selectedItemIdInPostBack.HasValue )

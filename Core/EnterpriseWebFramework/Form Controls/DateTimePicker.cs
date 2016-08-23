@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Humanizer;
 using EnterpriseWebLibrary.InputValidation;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -24,6 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private DateTime? maxDate;
 		private bool constrainToSqlSmallDateTimeRange = true;
 		private readonly int minuteInterval;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		private EwfTextBox textBox;
 		private DateTime min;
@@ -35,6 +37,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public DateTimePicker( DateTime? value, int minuteInterval = 15 ) {
 			this.value = value;
 			this.minuteInterval = minuteInterval;
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -68,27 +72,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public Control ToolTipControl { get; set; }
 
 		void ControlTreeDataLoader.LoadData() {
-			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
-			textBox = new EwfTextBox(
-				value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "",
-				disableBrowserAutoComplete: true,
-				autoPostBack: autoPostBack );
-			Controls.Add( new ControlLine( textBox, getIconButton() ) );
+					textBox = new EwfTextBox(
+						value.HasValue ? value.Value.ToMonthDayYearString() + " " + value.Value.ToHourAndMinuteString() : "",
+						disableBrowserAutoComplete: true,
+						autoPostBack: autoPostBack );
+					Controls.Add( new ControlLine( textBox, getIconButton() ) );
 
-			min = DateTime.MinValue;
-			max = DateTime.MaxValue;
-			if( constrainToSqlSmallDateTimeRange ) {
-				min = Validator.SqlSmallDateTimeMinValue;
-				max = Validator.SqlSmallDateTimeMaxValue;
-			}
-			if( minDate.HasValue && minDate.Value > min )
-				min = minDate.Value;
-			if( maxDate.HasValue && maxDate.Value < max )
-				max = maxDate.Value;
+					min = DateTime.MinValue;
+					max = DateTime.MaxValue;
+					if( constrainToSqlSmallDateTimeRange ) {
+						min = Validator.SqlSmallDateTimeMinValue;
+						max = Validator.SqlSmallDateTimeMaxValue;
+					}
+					if( minDate.HasValue && minDate.Value > min )
+						min = minDate.Value;
+					if( maxDate.HasValue && maxDate.Value < max )
+						max = maxDate.Value;
 
-			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+					if( ToolTip != null || ToolTipControl != null )
+						new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
+				} );
 		}
 
 		private WebControl getIconButton() {
