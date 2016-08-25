@@ -107,6 +107,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static FormItem ToFormItem(
 			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+			var webControl = formControl as WebControl;
+			if( webControl != null )
+				return new FormItem<Control>( label, webControl, cellSpan, textAlignment, formControl.Validation );
+
 			return new FormItem<Control>(
 				label,
 				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToSingleElementArray().GetControls() ),

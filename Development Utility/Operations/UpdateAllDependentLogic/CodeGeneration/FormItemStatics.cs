@@ -414,7 +414,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeFormItemGetters(
 				writer,
 				field,
-				"BlockCheckBox",
+				"",
 				"BlockCheckBox",
 				valueParamTypeName,
 				valueParamDefaultValue,
@@ -426,8 +426,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						new CSharpParameter( "bool", "autoPostBack", "false" ), new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
 					},
 				new CSharpParameter[ 0 ],
-				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => " + field.PropertyName + " = postBackValue.Value" + fromBoolSuffix +
-				", label: putLabelOnCheckBox ? ls : \"\", postBack: postBack, nestedControlListGetter: nestedControlListGetter ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible }",
+				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => vs( postBackValue.Value" + fromBoolSuffix +
+				" ), label: putLabelOnCheckBox ? ls : \"\", postBack: postBack, nestedControlListGetter: nestedControlListGetter ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible }",
 				"",
 				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}

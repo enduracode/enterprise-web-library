@@ -14,7 +14,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
-	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic,
+		FormControl<FlowComponent> {
 		private readonly FormValue<bool> checkBoxFormValue;
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
@@ -65,6 +66,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			nestedControls = nestedControlListGetter != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
+
+		FlowComponent FormControl<FlowComponent>.PageComponent { get { throw new ApplicationException( "not implemented" ); } }
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
 
