@@ -135,11 +135,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var checkBox = new BlockCheckBox(
 				formValue,
 				label,
-				postBack,
+				new BlockCheckBoxSetup( postBack: postBack, triggersPostBackWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
 				() => ImmutableArray<string>.Empty,
 				null,
-				nestedControlListGetter,
-				listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
+				listItemId: getStringId( listItemId ) );
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}

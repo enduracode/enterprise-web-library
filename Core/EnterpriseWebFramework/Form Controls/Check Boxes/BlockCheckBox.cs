@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
 		private readonly string label;
-		private readonly bool highlightWhenChecked;
+		private readonly BlockCheckBoxSetup setup;
 		private readonly PostBack postBack;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private readonly EwfValidation validation;
@@ -33,53 +33,41 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="isChecked"></param>
 		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="label">Do not pass null.</param>
-		/// <param name="highlightWhenChecked"></param>
-		/// <param name="postBack"></param>
-		/// <param name="nestedControlListGetter">A function that gets the controls that will appear beneath the check box's label only when the box is checked.</param>
-		public BlockCheckBox(
-			bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", bool highlightWhenChecked = false, PostBack postBack = null,
-			Func<IEnumerable<Control>> nestedControlListGetter = null ) {
+		/// <param name="setup">The setup object for the check box.</param>
+		public BlockCheckBox( bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", BlockCheckBoxSetup setup = null ) {
+			this.setup = setup ?? new BlockCheckBoxSetup();
+
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 
 			this.label = label;
-			this.highlightWhenChecked = highlightWhenChecked;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			postBack = this.setup.PostBack ?? EwfPage.PostBack;
 
 			validation = checkBoxFormValue.CreateValidation( validationMethod );
 
-			nestedControls = nestedControlListGetter != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = this.setup.NestedControlListGetter != null ? this.setup.NestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
 		internal BlockCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, EwfValidation validation,
-			Func<IEnumerable<Control>> nestedControlListGetter, string listItemId = null ) {
+			FormValue<CommonCheckBox> formValue, string label, BlockCheckBoxSetup setup, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
+			EwfValidation validation, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			this.setup = setup;
+			postBack = setup.PostBack ?? EwfPage.PostBack;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 
 			this.validation = validation;
 
-			nestedControls = nestedControlListGetter != null ? nestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = setup.NestedControlListGetter != null ? setup.NestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
 
 		FlowComponent FormControl<FlowComponent>.PageComponent { get { throw new ApplicationException( "not implemented" ); } }
 
 		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
-
-		/// <summary>
-		/// Gets or sets whether or not the check box automatically posts the page back to the server when it is checked or unchecked.
-		/// </summary>
-		public bool AutoPostBack { get; set; }
-
-		/// <summary>
-		/// Sets whether or not the nested controls, if any exist, are always visible or only visible when the box is checked.
-		/// </summary>
-		public bool NestedControlsAlwaysVisible { private get; set; }
 
 		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
@@ -111,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwfPage.Instance.AddPostBack( postBack );
 
 			PreRender += delegate {
-				if( highlightWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+				if( setup.HighlightedWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
 					CssClass = CssClass.ConcatenateWithSpace( "checkedChecklistCheckboxDiv" );
 			};
 
@@ -128,7 +116,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						radioButtonFormValue,
 						radioButtonListItemId,
 						postBack,
-						AutoPostBack,
+						setup.TriggersPostBackWhenCheckedOrUnchecked,
 						jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				};
 
@@ -150,7 +138,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				nestedControlRow.Cells.Add( new TableCell().AddControlsReturnThis( nestedControls ) );
 				table.Rows.Add( nestedControlRow );
 
-				if( !NestedControlsAlwaysVisible )
+				if( !setup.NestedControlsAlwaysVisible )
 					CheckBoxToControlArrayDisplayLink.AddToPage( this, true, nestedControlRow );
 			}
 
@@ -162,7 +150,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return highlightWhenChecked ? "$( '#" + checkBox.ClientID + "' ).click( function() { changeCheckBoxColor( this ); } );" : "";
+			return setup.HighlightedWhenChecked ? "$( '#" + checkBox.ClientID + "' ).click( function() { changeCheckBoxColor( this ); } );" : "";
 		}
 
 		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }

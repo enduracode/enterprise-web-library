@@ -418,16 +418,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"BlockCheckBox",
 				valueParamTypeName,
 				valueParamDefaultValue,
-				new CSharpParameter( "System.Func<IEnumerable<Control>>", "nestedControlListGetter" ).ToSingleElementArray(),
+				new CSharpParameter[ 0 ],
 				new CSharpParameter[ 0 ],
 				new[]
 					{
-						new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "PostBack", "postBack", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" ), new CSharpParameter( "bool", "nestedControlsAlwaysVisible", "false" )
+						new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "BlockCheckBoxSetup", "setup", "null" ),
+						new CSharpParameter( "System.Action<Validator>", "additionalValidationMethod", "null" )
 					},
 				new CSharpParameter[ 0 ],
-				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => vs( postBackValue.Value" + fromBoolSuffix +
-				" ), label: putLabelOnCheckBox ? ls : \"\", postBack: postBack, nestedControlListGetter: nestedControlListGetter ) { AutoPostBack = autoPostBack, NestedControlsAlwaysVisible = nestedControlsAlwaysVisible }",
+				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => { vs( postBackValue.Value" + fromBoolSuffix +
+				" ); if( additionalValidationMethod != null ) additionalValidationMethod( validator ); }, label: putLabelOnCheckBox ? ls : \"\", setup: setup )",
 				"",
 				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}
