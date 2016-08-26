@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
@@ -177,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
 		/// the system does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod( Control etherealControlParent ) {
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
 			var utcOffset = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( utcOffset );
 
