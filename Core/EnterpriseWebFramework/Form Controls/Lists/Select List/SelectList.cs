@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.InputValidation;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// This control should never support custom-text scenarios. An essential element of SelectList is that each item has both a label and an ID, and custom text
@@ -90,10 +92,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
 		/// <param name="postBack">The post-back that will occur when the user hits Enter on the drop-down list.</param>
 		/// <param name="autoPostBack">Pass true if you want a post-back to occur when the selection changes.</param>
+		/// <param name="itemIdPageModificationValue"></param>
+		/// <param name="itemMatchPageModificationSetups"></param>
 		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, System.Web.UI.WebControls.Unit? width = null,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string defaultValueItemLabel = "", bool placeholderIsValid = false,
-			string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false ) {
+			string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false,
+			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
+			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
 			return new SelectList<ItemIdType>(
 				null,
 				width,
@@ -106,8 +112,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				selectedItemId,
 				postBack,
 				autoPostBack,
-				null,
-				null );
+				itemIdPageModificationValue,
+				itemMatchPageModificationSetups ?? ImmutableArray<ListItemMatchPageModificationSetup<ItemIdType>>.Empty );
 		}
 	}
 
@@ -255,9 +261,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
 				selectControl.Attributes.Add( "name", UniqueID );
-				if( autoPostBack )
-					PreRender +=
-						delegate { selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, PostBackButton.GetPostBackScript( postBack ) ); };
+				PreRender += delegate {
+					var changeHandler = "";
+					if( itemIdPageModificationValue != null )
+						changeHandler += itemIdPageModificationValue.GetJsModificationStatements( "$( '#{0}' ).val()".FormatWith( selectControl.ClientID ) );
+					foreach( var setup in itemMatchPageModificationSetups ) {
+						changeHandler +=
+							setup.PageModificationValue.GetJsModificationStatements(
+								"[ {0} ].indexOf( $( '#{1}' ).val() ) != -1".FormatWith(
+									StringTools.ConcatenateWithDelimiter( ", ", setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
+									selectControl.ClientID ) );
+					}
+					if( autoPostBack )
+						changeHandler += PostBackButton.GetPostBackScript( postBack );
+					if( changeHandler.Any() )
+						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
+				};
 
 				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 				if( placeholderItem != null )
@@ -270,6 +289,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				};
 
 				Controls.Add( selectControl );
+
+				if( itemIdPageModificationValue != null )
+					formValue.AddPageModificationValue( itemIdPageModificationValue, v => v );
+				foreach( var setup in itemMatchPageModificationSetups )
+					formValue.AddPageModificationValue( setup.PageModificationValue, id => setup.ItemIds.Contains( id ) );
 
 				EwfPage.Instance.AddDisplayLink( this );
 			}
