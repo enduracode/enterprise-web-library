@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -58,6 +60,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	}
 
 	public static class DisplaySetupExtensionCreators {
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		private class DisplayLinkAdapter: DisplayLink {
+			private readonly IEnumerable<WebControl> controls;
+			private readonly Func<bool> controlsDisplayedPredicate;
+
+			internal DisplayLinkAdapter( IEnumerable<WebControl> controls, Func<bool> controlsDisplayedPredicate ) {
+				this.controls = controls;
+				this.controlsDisplayedPredicate = controlsDisplayedPredicate;
+			}
+
+			void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
+				foreach( var i in controls )
+					DisplayLinkingOps.SetControlDisplay( i, controlsDisplayedPredicate() );
+			}
+
+			void DisplayLink.AddJavaScript() {
+				throw new ApplicationException( "not implemented" );
+			}
+		}
+
 		/// <summary>
 		/// Creates a display setup object for display that depends on this page-modification value.
 		/// </summary>
@@ -100,6 +122,41 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								valueExpression,
 								componentsDisplayedOnMatch ? "==" : "!=" ) + " { " + statements + " }" ) ),
 					() => values.Contains( pageModificationValue.Value ) ^ !componentsDisplayedOnMatch );
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static void AddDisplayLink(
+			this PageModificationValue<bool> pageModificationValue, IEnumerable<WebControl> controls, bool controlsDisplayedWhenValueSet = true ) {
+			controls = controls.ToImmutableArray();
+
+			foreach( var control in controls ) {
+				pageModificationValue.AddJsModificationStatement(
+					valueExpression =>
+					"setElementDisplay( '{0}', {1} );".FormatWith(
+						control.ClientID,
+						controlsDisplayedWhenValueSet ? valueExpression : "!( {0} )".FormatWith( valueExpression ) ) );
+			}
+
+			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => pageModificationValue.Value ^ !controlsDisplayedWhenValueSet ) );
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static void AddDisplayLink<T>(
+			this PageModificationValue<T> pageModificationValue, IEnumerable<T> values, IEnumerable<WebControl> controls, bool controlsDisplayedOnMatch = true ) {
+			values = values.ToImmutableArray();
+			controls = controls.ToImmutableArray();
+
+			foreach( var control in controls ) {
+				pageModificationValue.AddJsModificationStatement(
+					valueExpression =>
+					"setElementDisplay( '{0}', [ {1} ].indexOf( {2} ) {3} -1 );".FormatWith(
+						control.ClientID,
+						StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
+						valueExpression,
+						controlsDisplayedOnMatch ? "!=" : "==" ) );
+			}
+
+			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => values.Contains( pageModificationValue.Value ) ^ !controlsDisplayedOnMatch ) );
 		}
 	}
 }
