@@ -75,9 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					DisplayLinkingOps.SetControlDisplay( i, controlsDisplayedPredicate() );
 			}
 
-			void DisplayLink.AddJavaScript() {
-				throw new ApplicationException( "not implemented" );
-			}
+			void DisplayLink.AddJavaScript() {}
 		}
 
 		/// <summary>
