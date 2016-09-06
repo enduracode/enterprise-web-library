@@ -11,14 +11,18 @@ namespace EnterpriseWebLibrary.IO {
 	/// </summary>
 	public static class IoMethods {
 		/// <summary>
-		/// Creates the destination path if it does not exist, and downloads the file to that destination path.  Credentials can be null.
+		/// Creates the destination path if it does not exist, and downloads the file to that destination path.
 		/// </summary>
-		public static void DownloadFile( string url, string destinationPath, NetworkCredential credentials ) {
+		public static void DownloadFile( string url, string destinationPath, NetworkCredential credentials = null, string customAuthorizationHeaderValue = "" ) {
 			Directory.CreateDirectory( Path.GetDirectoryName( destinationPath ) );
-			var webClient = new WebClient();
-			if( credentials != null )
-				webClient.Credentials = credentials;
-			webClient.DownloadFile( url, destinationPath );
+			using( var webClient = new WebClient() ) {
+				if( credentials != null )
+					webClient.Credentials = credentials;
+				else if( customAuthorizationHeaderValue.Any() )
+					webClient.Headers.Add( HttpRequestHeader.Authorization, customAuthorizationHeaderValue );
+
+				webClient.DownloadFile( url, destinationPath );
+			}
 		}
 
 		/// <summary>
@@ -106,10 +110,9 @@ namespace EnterpriseWebLibrary.IO {
 			var attributes = File.GetAttributes( path );
 			if( ( attributes & FileAttributes.ReadOnly ) == FileAttributes.ReadOnly )
 				File.SetAttributes( path, attributes & ~FileAttributes.ReadOnly );
-			if( Directory.Exists( path ) ) {
+			if( Directory.Exists( path ) )
 				foreach( var childPath in Directory.GetFileSystemEntries( path ) )
 					RecursivelyRemoveReadOnlyAttributeFromItem( childPath );
-			}
 		}
 
 		/// <summary>
@@ -193,9 +196,8 @@ namespace EnterpriseWebLibrary.IO {
 			// There is a race condition here: another process could create a directory after we check if our folder path exists, but before we create the folder. See
 			// http://stackoverflow.com/a/217198/35349. We believe this is unlikely and is an acceptable risk.
 			string folderPath;
-			do {
+			do
 				folderPath = EwlStatics.CombinePaths( Path.GetTempPath(), Path.GetRandomFileName() );
-			}
 			while( File.Exists( folderPath ) || Directory.Exists( folderPath ) );
 			Directory.CreateDirectory( folderPath );
 
