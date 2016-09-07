@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -55,6 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private Unit height = Unit.Empty;
 		private ModalWindow confirmationWindow;
 		private readonly PostBack postBack;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
 		/// Gets or sets the display style of this button. Do not set this to null.
@@ -95,6 +97,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
 					EwfPage.Instance.SubmitButtonPostBack = this.postBack;
 				} );
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		[ Obsolete( "Guaranteed through 31 October 2016. Use the constructor in which the post-back is optional." ) ]
@@ -119,24 +123,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public override Unit Height { get { return height; } set { height = value; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			if( TagKey == HtmlTextWriterTag.Button ) {
-				Attributes.Add( "name", EwfPage.ButtonElementName );
-				Attributes.Add( "value", "v" );
-				Attributes.Add( "type", usesSubmitBehavior ? "submit" : "button" );
-			}
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					if( TagKey == HtmlTextWriterTag.Button ) {
+						Attributes.Add( "name", EwfPage.ButtonElementName );
+						Attributes.Add( "value", "v" );
+						Attributes.Add( "type", usesSubmitBehavior ? "submit" : "button" );
+					}
 
-			EwfPage.Instance.AddPostBack( postBack );
+					EwfPage.Instance.AddPostBack( postBack );
 
-			if( ConfirmationWindowContentControl != null ) {
-				if( usesSubmitBehavior )
-					throw new ApplicationException( "PostBackButton cannot be the submit button and also have a confirmation message." );
-				confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
-			}
-			else if( !usesSubmitBehavior )
-				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
+					if( ConfirmationWindowContentControl != null ) {
+						if( usesSubmitBehavior )
+							throw new ApplicationException( "PostBackButton cannot be the submit button and also have a confirmation message." );
+						confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
+					}
+					else if( !usesSubmitBehavior )
+						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
 
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
+					CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+					ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
+				} );
 		}
 
 		private void setWidth( Unit w ) {
