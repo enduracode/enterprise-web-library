@@ -119,7 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		#endregion
 
 		private readonly ChartSetup setup;
-		private readonly string jsInitStatements;
+		private readonly Func<string> jsInitStatementGetter;
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -214,12 +214,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							select new EwfTableItem( ( (EwfTableCell)series.Name ).ToSingleElementArray().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
 			Controls.Add( table );
 
-			using( var writer = new StringWriter() ) {
-				writer.WriteLine( "var canvas = document.getElementById( '{0}' );".FormatWith( canvas.ClientID ) );
-				writer.WriteLine( "canvas.width = $( canvas ).parent().width();" );
-				writer.WriteLine( "new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith( setup.ChartType, chartData.ToJson(), options.ToJson() ) );
-				jsInitStatements = writer.ToString();
-			}
+			jsInitStatementGetter = () => {
+				using( var writer = new StringWriter() ) {
+					writer.WriteLine( "var canvas = document.getElementById( '{0}' );".FormatWith( canvas.ClientID ) );
+					writer.WriteLine( "canvas.width = $( canvas ).parent().width();" );
+					writer.WriteLine( "new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith( setup.ChartType, chartData.ToJson(), options.ToJson() ) );
+					return writer.ToString();
+				}
+			};
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
@@ -258,7 +260,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return jsInitStatements;
+			return jsInitStatementGetter();
 		}
 
 		/// <summary>
