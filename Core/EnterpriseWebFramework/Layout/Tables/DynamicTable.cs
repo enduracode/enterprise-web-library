@@ -33,6 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly List<RowSetup> rowSetups = new List<RowSetup>(); // This is parallel to table.Rows.
 		private int dataRowCount;
 
+		private IReadOnlyCollection<DataModification> dataModifications;
+
 		/// <summary>
 		/// Returns the collection of strings representing the header for this table (if any). This is useful to share the column headers between the table and a separate
 		/// Excel Export routine.
@@ -90,6 +92,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			Controls.Add( table );
 
 			PreRender += ewfTable_PreRender;
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -308,123 +312,127 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public bool HasContentRows { get { return dataRowCount > 0; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			var modifiedCaption = caption;
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					var modifiedCaption = caption;
 
-			// Display the caption and the sub caption.
-			if( defaultDataRowLimit != DataRowLimit.Unlimited ) {
-				var formattedDataRowCount = dataRowCount.ToString( "N0" );
-				if( caption.Length > 0 )
-					modifiedCaption += " (" + formattedDataRowCount + ")";
-				else
-					modifiedCaption = formattedDataRowCount + " items";
-			}
-			if( modifiedCaption.Length > 0 ) {
-				captionTable.Visible = true;
-				captionStack.AddControls( new Label { Text = modifiedCaption, CssClass = "ewfCaption" } );
-			}
-			if( subCaption.Length > 0 ) {
-				captionTable.Visible = true;
-				captionStack.AddText( subCaption );
-			}
-
-			// Row limiting
-			if( defaultDataRowLimit != DataRowLimit.Unlimited )
-				captionStack.AddControls(
-					new ControlLine(
-						new LiteralControl( "Show:" ),
-						getDataRowLimitControl( DataRowLimit.Fifty ),
-						getDataRowLimitControl( DataRowLimit.FiveHundred ),
-						getDataRowLimitControl( DataRowLimit.Unlimited ) ) );
-
-			// Excel export
-			if( allowExportToExcel )
-				actionLinks.Add(
-					new ActionButtonSetup(
-						"Export to Excel",
-						new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ), actionGetter: ExportToExcel ) ) ) );
-
-			// Action links
-			foreach( var actionLink in actionLinks ) {
-				captionTable.Visible = true;
-				actionLinkStack.AddControls( actionLink.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false ) );
-			}
-
-			// Selected row actions
-			foreach( var button in selectedRowActionButtonsToAdd ) {
-				captionTable.Visible = true;
-				actionLinkStack.AddControls( button );
-			}
-
-			foreach( var buttonToMethod in selectedRowDataModificationsToMethods ) {
-				var dataModification = buttonToMethod.Key;
-				var method = buttonToMethod.Value;
-				dataModification.AddModificationMethod(
-					() => {
-						foreach( var rowSetup in rowSetups ) {
-							if( rowSetup.UniqueIdentifier != null &&
-							    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
-								    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
-								method( rowSetup.UniqueIdentifier );
-						}
-					} );
-			}
-
-			if( selectedRowDataModificationsToMethods.Any() )
-				foreach( var rowSetup in rowSetups ) {
-					var cell = new TableCell
-						{
-							Width = Unit.Percentage( 5 ),
-							CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
-						};
-					if( rowSetup.UniqueIdentifier != null ) {
-						var firstDm = selectedRowDataModificationsToMethods.First().Key;
-						var pb = firstDm as PostBack;
-						cell.Controls.Add( new EwfCheckBox( false, postBack: pb ?? EwfPage.Instance.DataUpdatePostBack ) );
+					// Display the caption and the sub caption.
+					if( defaultDataRowLimit != DataRowLimit.Unlimited ) {
+						var formattedDataRowCount = dataRowCount.ToString( "N0" );
+						if( caption.Length > 0 )
+							modifiedCaption += " (" + formattedDataRowCount + ")";
+						else
+							modifiedCaption = formattedDataRowCount + " items";
 					}
-					rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
-				}
+					if( modifiedCaption.Length > 0 ) {
+						captionTable.Visible = true;
+						captionStack.AddControls( new Label { Text = modifiedCaption, CssClass = "ewfCaption" } );
+					}
+					if( subCaption.Length > 0 ) {
+						captionTable.Visible = true;
+						captionStack.AddText( subCaption );
+					}
 
-			// Reordering
-			var filteredRowSetups = rowSetups.Where( rs => rs.RankId.HasValue ).ToList();
-			for( var i = 0; i < filteredRowSetups.Count; i++ ) {
-				var previousRowSetup = ( i == 0 ? null : filteredRowSetups[ i - 1 ] );
-				var rowSetup = filteredRowSetups[ i ];
-				var nextRowSetup = ( ( i == filteredRowSetups.Count - 1 ) ? null : filteredRowSetups[ i + 1 ] );
+					// Row limiting
+					if( defaultDataRowLimit != DataRowLimit.Unlimited )
+						captionStack.AddControls(
+							new ControlLine(
+								new LiteralControl( "Show:" ),
+								getDataRowLimitControl( DataRowLimit.Fifty ),
+								getDataRowLimitControl( DataRowLimit.FiveHundred ),
+								getDataRowLimitControl( DataRowLimit.Unlimited ) ) );
 
-				var controlLine = new ControlLine( new Control[ 0 ] );
-				if( previousRowSetup != null ) {
-					var upButton = new PostBackButton(
-						new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateFull(
-								id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
-								firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) );
-					controlLine.AddControls( upButton );
-				}
-				if( nextRowSetup != null ) {
-					var downButton = new PostBackButton(
-						new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateFull(
-								id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
-								firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) );
-					controlLine.AddControls( downButton );
-				}
+					// Excel export
+					if( allowExportToExcel )
+						actionLinks.Add(
+							new ActionButtonSetup(
+								"Export to Excel",
+								new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ), actionGetter: ExportToExcel ) ) ) );
 
-				// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
-				var cell = new TableCell
-					{
-						Width = Unit.Percentage( 10 ),
-						CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
-					};
-				cell.Controls.Add( controlLine );
-				rowSetup.UnderlyingTableRow.Cells.Add( cell );
-			}
+					// Action links
+					foreach( var actionLink in actionLinks ) {
+						captionTable.Visible = true;
+						actionLinkStack.AddControls( actionLink.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false ) );
+					}
 
-			if( HideIfEmpty && !HasContentRows )
-				Visible = false;
+					// Selected row actions
+					foreach( var button in selectedRowActionButtonsToAdd ) {
+						captionTable.Visible = true;
+						actionLinkStack.AddControls( button );
+					}
+
+					foreach( var buttonToMethod in selectedRowDataModificationsToMethods ) {
+						var dataModification = buttonToMethod.Key;
+						var method = buttonToMethod.Value;
+						dataModification.AddModificationMethod(
+							() => {
+								foreach( var rowSetup in rowSetups ) {
+									if( rowSetup.UniqueIdentifier != null &&
+									    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
+										    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+										method( rowSetup.UniqueIdentifier );
+								}
+							} );
+					}
+
+					if( selectedRowDataModificationsToMethods.Any() )
+						foreach( var rowSetup in rowSetups ) {
+							var cell = new TableCell
+								{
+									Width = Unit.Percentage( 5 ),
+									CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+								};
+							if( rowSetup.UniqueIdentifier != null ) {
+								var firstDm = selectedRowDataModificationsToMethods.First().Key;
+								var pb = firstDm as PostBack;
+								cell.Controls.Add( new EwfCheckBox( false, postBack: pb ?? EwfPage.Instance.DataUpdatePostBack ) );
+							}
+							rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
+						}
+
+					// Reordering
+					var filteredRowSetups = rowSetups.Where( rs => rs.RankId.HasValue ).ToList();
+					for( var i = 0; i < filteredRowSetups.Count; i++ ) {
+						var previousRowSetup = ( i == 0 ? null : filteredRowSetups[ i - 1 ] );
+						var rowSetup = filteredRowSetups[ i ];
+						var nextRowSetup = ( ( i == filteredRowSetups.Count - 1 ) ? null : filteredRowSetups[ i + 1 ] );
+
+						var controlLine = new ControlLine( new Control[ 0 ] );
+						if( previousRowSetup != null ) {
+							var upButton = new PostBackButton(
+								new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+								usesSubmitBehavior: false,
+								postBack:
+									PostBack.CreateFull(
+										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) );
+							controlLine.AddControls( upButton );
+						}
+						if( nextRowSetup != null ) {
+							var downButton = new PostBackButton(
+								new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+								usesSubmitBehavior: false,
+								postBack:
+									PostBack.CreateFull(
+										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) );
+							controlLine.AddControls( downButton );
+						}
+
+						// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
+						var cell = new TableCell
+							{
+								Width = Unit.Percentage( 10 ),
+								CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+							};
+						cell.Controls.Add( controlLine );
+						rowSetup.UnderlyingTableRow.Cells.Add( cell );
+					}
+
+					if( HideIfEmpty && !HasContentRows )
+						Visible = false;
+				} );
 		}
 
 		/// <summary>

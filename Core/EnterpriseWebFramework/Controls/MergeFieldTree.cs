@@ -9,32 +9,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A merge field tree display.
 	/// </summary>
-	public class MergeFieldTree: WebControl, ControlTreeDataLoader {
-		private string name;
-		private MergeRowTree emptyRowTree;
-
+	public sealed class MergeFieldTree: WebControl {
 		/// <summary>
 		/// Creates a merge field tree.
 		/// </summary>
-		public MergeFieldTree() {}
-
-		/// <summary>
-		/// Creates a merge field tree and sets the name and empty row tree.
-		/// </summary>
+		/// <param name="name">The plural name of the data type at the top level in the row tree, e.g. Clients.</param>
+		/// <param name="emptyRowTree">The merge row tree that will be used to draw the field tree.</param>
 		public MergeFieldTree( string name, MergeRowTree emptyRowTree ) {
-			SetNameAndEmptyRowTree( name, emptyRowTree );
-		}
-
-		/// <summary>
-		/// Sets the name and the merge row tree that will be used to draw the field tree. The name should be the plural name of the data type at the top level in
-		/// the row tree, e.g. Clients.
-		/// </summary>
-		public void SetNameAndEmptyRowTree( string name, MergeRowTree emptyRowTree ) {
-			this.name = name;
-			this.emptyRowTree = emptyRowTree;
-		}
-
-		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( "ewfMergeFieldTree" );
 			Controls.Add( buildTree( name, emptyRowTree.Rows ) );
 		}

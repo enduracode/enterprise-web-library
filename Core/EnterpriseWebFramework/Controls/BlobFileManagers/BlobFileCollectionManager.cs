@@ -21,6 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly string postBackIdBase;
 		private Action<Validator, System.Drawing.Image> validateImage = delegate { };
 		private IEnumerable<BlobFile> files;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
 		/// Sets the caption on the file table. Do not set this to null.
@@ -61,6 +62,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			Caption = "";
 			this.sortByName = sortByName;
 			this.postBackIdBase = PostBack.GetCompositeId( "ewfFileCollection", postBackIdBase );
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -82,52 +85,56 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
 
-			if( AppRequestState.Instance.Browser.IsInternetExplorer() )
-				Controls.Add(
-					new HtmlGenericControl( "p" )
-						{
-							InnerText =
-								"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
+					if( AppRequestState.Instance.Browser.IsInternetExplorer() )
+						Controls.Add(
+							new HtmlGenericControl( "p" )
+								{
+									InnerText =
+										"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
+								} );
+
+					var columnSetups = new List<ColumnSetup>();
+					if( ThumbnailResourceInfoCreator != null )
+						columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 10 ) } );
+					columnSetups.Add( new ColumnSetup { CssClassOnAllCells = "ewfOverflowedCell" } );
+					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 13 ) } );
+					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 7 ) } );
+					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 23 ), CssClassOnAllCells = "ewfRightAlignCell" } );
+
+					var table = new DynamicTable( columnSetups.ToArray() ) { Caption = Caption };
+
+					files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
+					files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
+
+					var deleteModMethods = new List<Func<bool>>();
+					var deletePb = PostBack.CreateFull(
+						id: PostBack.GetCompositeId( postBackIdBase, "delete" ),
+						firstModificationMethod: () => {
+							if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
+								EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+						} );
+					ValidationSetupState.ExecuteWithDataModifications(
+						deletePb.ToSingleElementArray(),
+						() => {
+							foreach( var file in files )
+								addFileRow( table, file, deleteModMethods );
+							if( !ReadOnly )
+								table.AddRow(
+									getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
+									( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
+										new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
 						} );
 
-			var columnSetups = new List<ColumnSetup>();
-			if( ThumbnailResourceInfoCreator != null )
-				columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 10 ) } );
-			columnSetups.Add( new ColumnSetup { CssClassOnAllCells = "ewfOverflowedCell" } );
-			columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 13 ) } );
-			columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 7 ) } );
-			columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 23 ), CssClassOnAllCells = "ewfRightAlignCell" } );
+					Controls.Add( table );
 
-			var table = new DynamicTable( columnSetups.ToArray() ) { Caption = Caption };
-
-			files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
-			files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
-
-			var deleteModMethods = new List<Func<bool>>();
-			var deletePb = PostBack.CreateFull(
-				id: PostBack.GetCompositeId( postBackIdBase, "delete" ),
-				firstModificationMethod: () => {
-					if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
-						EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+					if( ReadOnly && !files.Any() )
+						Visible = false;
 				} );
-			ValidationSetupState.ExecuteWithDataModifications(
-				deletePb.ToSingleElementArray(),
-				() => {
-					foreach( var file in files )
-						addFileRow( table, file, deleteModMethods );
-					if( !ReadOnly )
-						table.AddRow(
-							getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-							( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
-								new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
-				} );
-
-			Controls.Add( table );
-
-			if( ReadOnly && !files.Any() )
-				Visible = false;
 		}
 
 		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {

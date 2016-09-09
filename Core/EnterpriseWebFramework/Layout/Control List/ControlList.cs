@@ -10,6 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class ControlList: WebControl, ControlTreeDataLoader {
 		private readonly List<EwfTableCell> codeControls = new List<EwfTableCell>();
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
 		/// Gets or sets the number of columns this control list will use when rendering its items.
@@ -68,14 +69,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return cl;
 		}
 
-		/// <summary>
-		/// Markup use only.
-		/// </summary>
-		public ControlList() {
+		private ControlList() {
 			NumberOfColumns = 1;
 			EmptyCellCreator = () => "";
 			IsStandard = true;
 			SpacerCellSetup = new ControlListSpacerCellSetup();
+
+			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -93,60 +93,64 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			var table = new DynamicTable { IsStandard = false };
+			ValidationSetupState.ExecuteWithDataModifications(
+				dataModifications,
+				() => {
+					var table = new DynamicTable { IsStandard = false };
 
-			var controls = codeControls;
-			if( HideIfEmpty && controls.Count == 0 ) {
-				Visible = false;
-				return;
-			}
-			var firstPassThroughRowLoop = true;
-			for( var i = 0; i < controls.Count; i += NumberOfColumns ) {
-				// spacer row
-				if( !firstPassThroughRowLoop ) {
-					var spacerRowCount = SpacerCellSetup.RowSpacerCellCreator().Count;
-					for( var spacerRowIndex = 0; spacerRowIndex < spacerRowCount; spacerRowIndex += 1 ) {
-						var firstPassThroughSpacerRowColumnLoop = true;
-						var spacerRowCells = new List<EwfTableCell>();
-						for( var spacerRowColumnIndex = 0; spacerRowColumnIndex < NumberOfColumns; spacerRowColumnIndex += 1 ) {
-							if( !firstPassThroughSpacerRowColumnLoop )
-								spacerRowCells.AddRange( SpacerCellSetup.RowAndColumnSpacerCellCreator()[ spacerRowIndex ] );
-							spacerRowCells.Add( SpacerCellSetup.RowSpacerCellCreator()[ spacerRowIndex ] );
-							firstPassThroughSpacerRowColumnLoop = false;
+					var controls = codeControls;
+					if( HideIfEmpty && controls.Count == 0 ) {
+						Visible = false;
+						return;
+					}
+					var firstPassThroughRowLoop = true;
+					for( var i = 0; i < controls.Count; i += NumberOfColumns ) {
+						// spacer row
+						if( !firstPassThroughRowLoop ) {
+							var spacerRowCount = SpacerCellSetup.RowSpacerCellCreator().Count;
+							for( var spacerRowIndex = 0; spacerRowIndex < spacerRowCount; spacerRowIndex += 1 ) {
+								var firstPassThroughSpacerRowColumnLoop = true;
+								var spacerRowCells = new List<EwfTableCell>();
+								for( var spacerRowColumnIndex = 0; spacerRowColumnIndex < NumberOfColumns; spacerRowColumnIndex += 1 ) {
+									if( !firstPassThroughSpacerRowColumnLoop )
+										spacerRowCells.AddRange( SpacerCellSetup.RowAndColumnSpacerCellCreator()[ spacerRowIndex ] );
+									spacerRowCells.Add( SpacerCellSetup.RowSpacerCellCreator()[ spacerRowIndex ] );
+									firstPassThroughSpacerRowColumnLoop = false;
+								}
+								table.AddRow( spacerRowCells.ToArray() );
+							}
 						}
-						table.AddRow( spacerRowCells.ToArray() );
+
+						// content row
+						var firstPassThroughColumnLoop = true;
+						var cells = new List<EwfTableCell>();
+						for( var columnIndex = 0; columnIndex < NumberOfColumns; columnIndex += 1 ) {
+							// spacer cells
+							if( !firstPassThroughColumnLoop )
+								cells.AddRange( SpacerCellSetup.ColumnSpacerCellCreator() );
+
+							// content cell
+
+							if( firstPassThroughRowLoop && CaptionControl != null ) {
+								cells.Add( CaptionControl );
+								i -= NumberOfColumns;
+							}
+							else {
+								var controlIndex = i + columnIndex;
+								if( controlIndex < controls.Count )
+									cells.Add( controls[ controlIndex ] );
+								else
+									cells.Add( EmptyCellCreator() );
+							}
+							firstPassThroughColumnLoop = false;
+						}
+						table.AddRow( cells.ToArray() );
+
+						firstPassThroughRowLoop = false;
 					}
-				}
 
-				// content row
-				var firstPassThroughColumnLoop = true;
-				var cells = new List<EwfTableCell>();
-				for( var columnIndex = 0; columnIndex < NumberOfColumns; columnIndex += 1 ) {
-					// spacer cells
-					if( !firstPassThroughColumnLoop )
-						cells.AddRange( SpacerCellSetup.ColumnSpacerCellCreator() );
-
-					// content cell
-
-					if( firstPassThroughRowLoop && CaptionControl != null ) {
-						cells.Add( CaptionControl );
-						i -= NumberOfColumns;
-					}
-					else {
-						var controlIndex = i + columnIndex;
-						if( controlIndex < controls.Count )
-							cells.Add( controls[ controlIndex ] );
-						else
-							cells.Add( EmptyCellCreator() );
-					}
-					firstPassThroughColumnLoop = false;
-				}
-				table.AddRow( cells.ToArray() );
-
-				firstPassThroughRowLoop = false;
-			}
-
-			Controls.Add( table );
+					Controls.Add( table );
+				} );
 		}
 
 		/// <summary>

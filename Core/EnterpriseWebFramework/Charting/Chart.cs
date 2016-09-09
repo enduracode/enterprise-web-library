@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control capable of displaying chart data. Currently implemented with Chart.js.
 	/// </summary>
-	public class Chart: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic {
+	public sealed class Chart: WebControl, ControlWithJsInitLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfChart";
 
@@ -119,14 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		#endregion
 
 		private readonly ChartSetup setup;
-
-		[ NotNull ]
-		private readonly IEnumerable<DataSeries> seriesCollection;
-
-		[ CanBeNull ]
-		private readonly IEnumerable<Color> colors;
-
-		private string jsInitStatements;
+		private readonly string jsInitStatements;
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -146,18 +139,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="colors">The colors to use for the data series collection. Pass null for default colors. If you specify your own colors, the number of
 		/// colors does not need to match the number of series. If you pass fewer colors than series, the chart will use random colors for the remaining series.
 		/// </param>
-		public Chart( ChartSetup setup, IEnumerable<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
-			this.setup = setup;
-			this.seriesCollection = seriesCollection.ToArray();
-			this.colors = colors;
-		}
-
-		void ControlTreeDataLoader.LoadData() {
-			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+		public Chart( ChartSetup setup, [ NotNull ] IEnumerable<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
+			seriesCollection = seriesCollection.ToArray();
 
 			var rand = new Random();
-			var actualColors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count() )
+			colors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count() )
 				.Pad( seriesCollection.Count(), () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
+
+			this.setup = setup;
+
+			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			Func<DataSeries, Color, BaseDataset> datasetSelector;
 			OptionsBase options;
@@ -177,7 +168,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var chartData = new ChartData(
 				setup.Labels.TakeLast( setup.MaxXValues ),
-				seriesCollection.Zip( actualColors, ( series, color ) => datasetSelector( series, color ) ).ToArray() );
+				seriesCollection.Zip( colors, ( series, color ) => datasetSelector( series, color ) ).ToArray() );
 
 			var canvas = new HtmlGenericControl( "canvas" );
 			switch( setup.ChartType ) {
