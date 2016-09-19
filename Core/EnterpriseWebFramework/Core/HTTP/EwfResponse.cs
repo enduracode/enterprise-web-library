@@ -61,6 +61,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Creates a response containing a tab-separated values file created from the top level of a row tree. There will be one column for each merge field
+		/// specified in the list of field names.
+		/// </summary>
+		public static EwfResponse CreateMergedTabSeparatedValuesResponse(
+			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames ) {
+			return Create(
+				ContentTypes.TabSeparatedValues,
+				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true ) ),
+				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );
+		}
+
+		/// <summary>
 		/// Creates a response containing a single-sheet Excel workbook created from the top level of a row tree. There will be one column for each merge field
 		/// specified in the list of field names. Each column head will be named by calling ToEnglishFromCamel on the merge field's name or using the Microsoft Word
 		/// name without modification, the latter if useMsWordFieldNames is true.

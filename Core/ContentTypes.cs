@@ -51,6 +51,11 @@ namespace EnterpriseWebLibrary {
 		public const string PlainText = MediaTypeNames.Text.Plain;
 
 		/// <summary>
+		/// Content type to be used for tab-separated values files.
+		/// </summary>
+		public const string TabSeparatedValues = "text/tab-separated-values";
+
+		/// <summary>
 		/// Content type to be used by XML files.
 		/// </summary>
 		public const string Xml = MediaTypeNames.Text.Xml;

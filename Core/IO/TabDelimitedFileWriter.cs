@@ -1,12 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
-	/// Helps in writing data to a file in tab-delimited format.
+	/// Helps in writing data to a file in tab-separated values format.
 	/// </summary>
 	public class TabDelimitedFileWriter: TabularDataFileWriter {
-		private string line = "";
 		private const char delimiter = '\t';
+		private string line = "";
 
 		/// <summary>
 		/// Clears the current line.  This does not affect the file at all, it simply undoes any
@@ -23,8 +25,12 @@ namespace EnterpriseWebLibrary.IO {
 		public void AddValueToLine( object val ) {
 			if( val == null || val.ToString() == "" )
 				line += delimiter;
-			else
-				line += "\"" + val.ToString().Replace( "\"", "\"\"" ) + "\"" + delimiter;
+			else {
+				var s = val.ToString();
+				if( s.Contains( delimiter ) || s.Contains( Environment.NewLine ) )
+					throw new ApplicationException( "The tab-separated values format does not support tabs or newline sequences in a value." );
+				line += s + delimiter;
+			}
 		}
 
 		/// <summary>
