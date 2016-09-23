@@ -6,8 +6,13 @@ namespace EnterpriseWebLibrary {
 	/// </summary>
 	public static class Cultures {
 		/// <summary>
-		/// Spanish language. Country of Spain (es-ES).
+		/// English (United States)
 		/// </summary>
-		public static readonly CultureInfo Spain = new CultureInfo( "es-ES" );
+		public static CultureInfo EnglishUnitedStates { get { return CultureInfo.GetCultureInfo( "en-US" ); } }
+
+		/// <summary>
+		/// Spanish (Spain)
+		/// </summary>
+		public static CultureInfo SpanishSpain { get { return CultureInfo.GetCultureInfo( "es-ES" ); } }
 	}
 }
