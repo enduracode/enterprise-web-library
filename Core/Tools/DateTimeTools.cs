@@ -29,7 +29,9 @@ namespace EnterpriseWebLibrary {
 		/// Formats the date portion of the specified date/time in "day month year" style, e.g. 5 Apr 2008.
 		/// </summary>
 		public static string ToDayMonthYearString( this DateTime dateTime, bool useLeadingZero, bool includeDayOfWeek = false ) {
-			return dateTime.ToString( ( includeDayOfWeek ? "ddd, " : "" ) + ( useLeadingZero ? dayMonthYearFormatLz : dayMonthYearFormat ) );
+			return dateTime.ToString(
+				( includeDayOfWeek ? "ddd, " : "" ) + ( useLeadingZero ? dayMonthYearFormatLz : dayMonthYearFormat ),
+				Cultures.EnglishUnitedStates );
 		}
 
 		/// <summary>
@@ -44,14 +46,14 @@ namespace EnterpriseWebLibrary {
 		/// Formats the date portion of the specified date/time in "01/01/2001" style.
 		/// </summary>
 		public static string ToMonthDayYearString( this DateTime dateTime ) {
-			return dateTime.ToString( monthDayYearFormat );
+			return dateTime.ToString( monthDayYearFormat, Cultures.EnglishUnitedStates );
 		}
 
 		/// <summary>
 		/// Formats the date portion of the specified date/time in "month year" style, e.g. April 2008.
 		/// </summary>
 		public static string ToMonthYearString( this DateTimeOffset dateTime ) {
-			return dateTime.ToString( monthYearFormat );
+			return dateTime.ToString( monthYearFormat, Cultures.EnglishUnitedStates );
 		}
 
 		/// <summary>
@@ -66,7 +68,7 @@ namespace EnterpriseWebLibrary {
 		/// Formats the time portion of the specified date/time in hour:minute style followed by a single lowercase letter indicating AM or PM.
 		/// </summary>
 		public static string ToHourAndMinuteString( this DateTime dateTime ) {
-			return dateTime.ToString( HourAndMinuteFormat ).ToLower();
+			return dateTime.ToString( HourAndMinuteFormat, Cultures.EnglishUnitedStates ).ToLower();
 		}
 
 		/// <summary>

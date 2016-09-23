@@ -251,7 +251,7 @@ namespace EnterpriseWebLibrary.InputValidation {
 
 			if( valueAsString.IsNullOrWhiteSpace() )
 				errorHandler.SetValidationResult( ValidationResult.Empty() );
-			else {
+			else
 				try {
 					intResult = Convert.ToInt64( valueAsString );
 
@@ -266,7 +266,6 @@ namespace EnterpriseWebLibrary.InputValidation {
 				catch( OverflowException ) {
 					errorHandler.SetValidationResult( ValidationResult.Invalid() );
 				}
-			}
 
 			if( errorHandler.LastResult != ErrorCondition.NoError )
 				return default( T );
@@ -493,7 +492,7 @@ namespace EnterpriseWebLibrary.InputValidation {
 					url = GetString( errorHandler, validSchemes.Any( s => url.StartsWithIgnoreCase( s ) ) ? url : "http://" + url, true, maxUrlLength );
 
 					/* If the getstring didn't fail, keep on keepin keepin on. */
-					if( errorHandler.LastResult == ErrorCondition.NoError ) {
+					if( errorHandler.LastResult == ErrorCondition.NoError )
 						try {
 							if( !Uri.IsWellFormedUriString( url, UriKind.Absolute ) )
 								throw new UriFormatException();
@@ -511,7 +510,6 @@ namespace EnterpriseWebLibrary.InputValidation {
 						catch( UriFormatException ) {
 							errorHandler.SetValidationResult( ValidationResult.Invalid() );
 						}
-					}
 					return url;
 				} );
 		}
@@ -585,13 +583,13 @@ namespace EnterpriseWebLibrary.InputValidation {
 						else
 							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, "The five digit phone number you entered isn't recognized." ) );
 					}
-						// International phone numbers
-						// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
-						// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
-						// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
+					// International phone numbers
+					// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
+					// We feel this is a reasonable limit to ensure that they are entering an actual phone number, but there is no source for this limit.
+					// We have no idea why we ever began accepting letters, but it's risky to stop accepting them and the consequences of accepting them are small.
 					else if( Regex.IsMatch( input, @"\+\s*[0|2-9]([a-zA-Z,#/ \.\(\)\*]*[0-9]){7}" ) )
 						phoneNumber = PhoneNumber.CreateInternational( input );
-						// Validated it as a North American Numbering Plan phone number
+					// Validated it as a North American Numbering Plan phone number
 					else {
 						var regex = @"(?<lead>\+?1)?\s*(?<ac>\d{3})\s*(?<num1>\d{3})\s*(?<num2>\d{4})\s*?(?:(?:x|\s|ext|ext\.|extension)\s*(?<ext>\d{1,5}))?\s*";
 						if( !allowSurroundingGarbage )
@@ -604,10 +602,9 @@ namespace EnterpriseWebLibrary.InputValidation {
 							var number = match.Groups[ "num1" ].Value + match.Groups[ "num2" ].Value;
 							var extension = match.Groups[ "ext" ].Value;
 							phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
-							if( !allowExtension && phoneNumber.Extension.Length > 0 ) {
+							if( !allowExtension && phoneNumber.Extension.Length > 0 )
 								errorHandler.SetValidationResult(
 									ValidationResult.Custom( ErrorCondition.Invalid, invalidPrefix + " Extensions are not permitted in this field. Use the separate extension field." ) );
-							}
 						}
 						else
 							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, invalidMessage ) );
@@ -765,7 +762,7 @@ namespace EnterpriseWebLibrary.InputValidation {
 
 		private static DateTime validateSqlSmallDateTimeExact( ValidationErrorHandler errorHandler, string dateAsString, string pattern ) {
 			DateTime date;
-			if( !DateTime.TryParseExact( dateAsString, pattern, CultureInfo.CurrentCulture, DateTimeStyles.None, out date ) )
+			if( !DateTime.TryParseExact( dateAsString, pattern, Cultures.EnglishUnitedStates, DateTimeStyles.None, out date ) )
 				errorHandler.SetValidationResult( ValidationResult.Invalid() );
 			else
 				validateNativeDateTime( errorHandler, date, false, SqlSmallDateTimeMinValue, SqlSmallDateTimeMaxValue );
@@ -776,7 +773,9 @@ namespace EnterpriseWebLibrary.InputValidation {
 		private static DateTime validateDateTime( ValidationErrorHandler errorHandler, string dateAsString, string[] formats, DateTime min, DateTime max ) {
 			var date = DateTime.Now;
 			try {
-				date = formats != null ? DateTime.ParseExact( dateAsString, formats, null, DateTimeStyles.None ) : DateTime.Parse( dateAsString );
+				date = formats != null
+					       ? DateTime.ParseExact( dateAsString, formats, null, DateTimeStyles.None )
+					       : DateTime.Parse( dateAsString, Cultures.EnglishUnitedStates );
 				validateNativeDateTime( errorHandler, date, false, min, max );
 			}
 			catch( FormatException ) {
@@ -797,7 +796,7 @@ namespace EnterpriseWebLibrary.InputValidation {
 			if( date == null && !allowEmpty )
 				errorHandler.SetValidationResult( ValidationResult.Empty() );
 			else if( date.HasValue ) {
-				var minMaxMessage = " It must be between " + minDate + " and " + maxDate + ".";
+				var minMaxMessage = " It must be between " + minDate.ToDayMonthYearString( false ) + " and " + maxDate.ToDayMonthYearString( false ) + ".";
 				if( date < minDate )
 					errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooEarly, "The " + errorHandler.Subject + " is too early." + minMaxMessage ) );
 				else if( date >= maxDate )
