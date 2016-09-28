@@ -638,7 +638,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( regionBegin );
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
-				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".v12.suo" );
+				writer.WriteLine( ".vs/{0}/v14/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 				writer.WriteLine( "Error Log.txt" );
