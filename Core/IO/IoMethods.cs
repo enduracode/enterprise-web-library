@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -207,6 +208,16 @@ namespace EnterpriseWebLibrary.IO {
 			finally {
 				DeleteFolder( folderPath );
 			}
+		}
+
+		public static string GetFirstExistingFolderPath( IReadOnlyCollection<string> folderPaths, string folderAdjective ) {
+			var first = folderPaths.FirstOrDefault( Directory.Exists );
+			if( first == null )
+				throw new ApplicationException(
+					"Unable to find a {0} folder. The following paths do not exist or are inaccessible: {1}".FormatWith(
+						folderAdjective,
+						folderPaths.GetCommaDelimitedStringFromCollection() ) );
+			return first;
 		}
 	}
 }

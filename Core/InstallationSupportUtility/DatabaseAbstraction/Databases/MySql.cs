@@ -7,12 +7,11 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.IO;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class MySql: Database {
-		private const string binFolderPath = @"C:\Program Files\MySQL\MySQL Server 5.5\bin";
-
 		private readonly MySqlInfo info;
 
 		public MySql( MySqlInfo info ) {
@@ -107,6 +106,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					} );
 			}
 		}
+
+		private string binFolderPath
+			=> IoMethods.GetFirstExistingFolderPath( new[] { @"C:\Program Files\MySQL\MySQL Server 5.7\bin", @"C:\Program Files\MySQL\MySQL Server 5.5\bin" }, "MySQL" );
 
 		private string getHostAndAuthenticationArguments() {
 			return "--host=localhost --user=root --password=password";
