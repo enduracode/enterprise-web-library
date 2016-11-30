@@ -558,17 +558,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToSingleElementArray() ),
 				new CSharpParameter[ 0 ],
 				new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray()
-					.Concat( ( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToSingleElementArray() ) )
+					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToSingleElementArray() )
 					.Concat(
 						new[]
 							{
 								new CSharpParameter( "string", "placeholderText", "\"Please select\"" ), new CSharpParameter( "PostBack", "postBack", "null" ),
-								new CSharpParameter( "bool", "autoPostBack", "false" )
+								new CSharpParameter( "bool", "autoPostBack", "false" ),
+								new CSharpParameter( "PageModificationValue<{0}>".FormatWith( field.NullableTypeName ), "itemIdPageModificationValue", "null" ),
+								new CSharpParameter(
+									"IEnumerable<ListItemMatchPageModificationSetup<{0}>>".FormatWith( field.NullableTypeName ),
+									"itemMatchPageModificationSetups",
+									"null" )
 							} ),
 				new CSharpParameter[ 0 ],
 				"SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
 				", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) +
-				", placeholderText: placeholderText, postBack: postBack, autoPostBack: autoPostBack )",
+				", placeholderText: placeholderText, postBack: postBack, autoPostBack: autoPostBack, itemIdPageModificationValue: itemIdPageModificationValue, itemMatchPageModificationSetups: itemMatchPageModificationSetups )",
 				"{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 				( nonNullableField ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )" : "selectedItemIdInPostBack" ) +
 				"; }",
