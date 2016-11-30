@@ -21,9 +21,16 @@
       <param name="message">A message that describes the error.</param>
     </member>
     <member name="M:NDepend.Analysis.AnalysisException.#ctor(System.Exception)">
-      <summary>
+      <summary> 
             Initializes a new instance of the <see cref="T:NDepend.Analysis.AnalysisException" /> class with a reference to the inner exception that is the cause of this exception.
             </summary>
+      <param name="innerException">The exception that is the cause of the current exception. If the <paramref name="innerException" /> parameter is not a null reference, the current exception is raised in a catch block that handles the inner exception.</param>
+    </member>
+    <member name="M:NDepend.Analysis.AnalysisException.#ctor(System.String,System.Exception)">
+      <summary>
+            Initializes a new instance of the <see cref="T:NDepend.Analysis.AnalysisException" /> class with a specified error message and with a reference to the inner exception that is the cause of this exception.
+            </summary>
+      <param name="message">A message that describes the error.</param>
       <param name="innerException">The exception that is the cause of the current exception. If the <paramref name="innerException" /> parameter is not a null reference, the current exception is raised in a catch block that handles the inner exception.</param>
     </member>
     <member name="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult">
@@ -89,7 +96,7 @@
             Try gets an analysis reference corresponding to this project baseline to compare with.
             </summary>
       <param name="projectBaseline">This NDepend project baseline, obtained from IProject.<see cref="P:NDepend.Project.IProject.BaselineDuringAnalysis" /> or IProject.<see cref="P:NDepend.Project.IProject.BaselineInUI" />.</param>
-      <param name="analysisResultRef">If the method returns <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" />, <paramref name="analysisResultRef" /> is not null and refernces the analysis result used for baseline.</param>
+      <param name="analysisResultRef">If the method returns <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" />, <paramref name="analysisResultRef" /> is not null and references the analysis result used for baseline.</param>
       <returns>
         <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" /> if an an analysis result reference representing the baseline to compare with can be found, else returns another value of the enumeration <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.</returns>
       <requires description="projectBaseline must not be null" csharp="projectBaseline != null" vb="projectBaseline &lt;&gt; Nothing">projectBaseline != null</requires>
@@ -99,11 +106,51 @@
             Try gets an analysis reference corresponding to this project baseline to compare with.
             </summary>
       <param name="projectBaseline">This NDepend project baseline, obtained from IProject.<see cref="P:NDepend.Project.IProject.BaselineDuringAnalysis" /> or IProject.<see cref="P:NDepend.Project.IProject.BaselineInUI" />.</param>
-      <param name="analysisResultRef">If the method returns <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" />, <paramref name="analysisResultRef" /> is not null and refernces the analysis result used for baseline.</param>
+      <param name="analysisResultRef">If the method returns <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" />, <paramref name="analysisResultRef" /> is not null and references the analysis result used for baseline.</param>
       <param name="failureReason">If the method returns <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.ErrorGettingTheAnalysisResultRef" />, <paramref name="failureReason" /> is not null not empty, and explains in plain-english why the project baseline cannot be retrieved.</param>
       <returns>
         <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.<see cref="F:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult.DoCompareWith" /> if an an analysis result reference representing the baseline to compare with can be found, else returns another value of the enumeration <see cref="T:NDepend.Analysis.TryGetAnalysisResultRefToCompareWithResult" />.</returns>
       <requires description="projectBaseline must not be null" csharp="projectBaseline != null" vb="projectBaseline &lt;&gt; Nothing">projectBaseline != null</requires>
+    </member>
+    <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.BuildAnalysisResultRefFor(NDepend.Project.IProject,NDepend.Path.IAbsoluteFilePath)">
+      <summary>
+            Create an <see cref="T:NDepend.Analysis.IAnalysisResultRef" /> object from a project, an analysis result file (.ndar extension) and a date.
+            </summary>
+      <remarks>
+            The analysis result is not loaded, only the reference to the analysis result is returned.<br />
+            The <see cref="T:NDepend.Analysis.IAnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Date" /> is inferred from the directy path if the analysis result parent directory path. NDepend stores historic analysis result in a folder hierarchy named after <i>YYYY_MM</i> and then sub folder <i>DD_HH_MM</i>.<br />
+            If the analysis result file is not stored in such folder, <see cref="T:NDepend.Analysis.IAnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Date" /> is the last write date of the analysis result file.
+            </remarks>
+      <param name="project">The project.</param>
+      <param name="analysisResultFilePath">The analysis result file path (.ndar extension).</param>
+      <returns>The analysis result reference.</returns>
+      <exception cref="T:System.IO.FileNotFoundException">This exception is thrown if the analysis result file <paramref name="analysisResultFilePath" /> doesn't exist.</exception>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <requires description="analysisResultFilePath must not be null" csharp="analysisResultFilePath != null" vb="analysisResultFilePath &lt;&gt; Nothing">analysisResultFilePath != null</requires>
+      <ensures description="returned IAnalysisResultRef reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.LoadAnalysisResultFromFile(NDepend.Project.IProject,NDepend.Path.IAbsoluteFilePath)">
+      <summary>
+            Loads the analysis result of a project from an analysis result file (.ndar extension).
+            </summary>
+      <param name="project">The project.</param>
+      <param name="analysisResultFilePath">The analysis result file path.</param>
+      <returns>The analysis result loaded.</returns>
+      <exception cref="T:NDepend.Analysis.AnalysisException">If the analysis load fails, an AnalysisException with an informative message is thrown.</exception>
+      <exception cref="T:System.IO.FileNotFoundException">This exception is thrown if the analysis result file <paramref name="analysisResultFilePath" /> doesn't exist.</exception>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <ensures description="returned IAnalysisResult reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.LoadCodeBaseFromAnalysisResultFile(NDepend.Path.IAbsoluteFilePath)">
+      <summary>
+            Loads a code base snapshot from an analysis result file (.ndar extension).
+            </summary>
+      <param name="analysisResultFilePath">The analysis result file path (.ndar extension).</param>
+      <returns>The code base snapshot.</returns>
+      <exception cref="T:NDepend.Analysis.AnalysisException">If the analysis load fails, an AnalysisException with an informative message is thrown.</exception>
+      <exception cref="T:System.IO.FileNotFoundException">This exception is thrown if the analysis result file <paramref name="analysisResultFilePath" /> doesn't exist.</exception>
+      <requires description="analysisResultFilePath must not be null" csharp="analysisResultFilePath != null" vb="analysisResultFilePath &lt;&gt; Nothing">analysisResultFilePath != null</requires>
+      <ensures description="returned ICodeBase reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.RunAnalysis(NDepend.Project.IProject)">
       <summary>
@@ -179,6 +226,14 @@
       <requires description="progressLogHandler must not be null" csharp="progressLogHandler != null" vb="progressLogHandler &lt;&gt; Nothing">progressLogHandler != null</requires>
       <ensures description="returned reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
+    <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.CanAllPathsReferencedBeResolvedAsAbsolute(NDepend.Project.IProject)">
+      <summary>
+            This method returns a list of string, that each describes in plain-english, the failure to resolve as absolute a path referenced by <paramref name="project" />. The list returned is empty if all paths can be resolved as absolute.
+            </summary>
+      <param name="project">The project on which to try to resolve paths referenced as absolute.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <ensures description="returned list is not null but can be empty" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.AnalyzeAssemblies(System.Collections.Generic.ICollection{System.String})">
       <summary>
             Analyze a set of assemblies, in-process and synchronously, and return a <see cref="T:NDepend.Analysis.IAnalysisResult" /> object. (Only available with a Build Machine license).
@@ -219,7 +274,7 @@
     <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.LogTrendMetrics(NDepend.Analysis.IAnalysisResult,System.DateTime)">
       <summary>Force log trend metrics values for this <i>analysisResult</i>.</summary>
       <remarks>
-            Trend metrics are extracted from code queries found in <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.<see cref="P:NDepend.Project.IProject.CodeQueries" /> and <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.QueriesExtractedFromCode" />.<br />
+            Trend metrics are extracted from code queries found in <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.<see cref="P:NDepend.Project.IProject.CodeQueries" /> and <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode" />.<br />
             Rules are extracted from the same code queries sets, for computation of code metrics: <i># Rules</i>, <i># Rules Violated</i>, <i># Rules Violations</i>.<br />
             Trend metrics values are logged into the trend metrics store of the project <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.
             </remarks>
@@ -232,7 +287,7 @@
     <member name="M:NDepend.Analysis.ExtensionMethodsProjectAnalysis.LogTrendMetrics(NDepend.Analysis.IAnalysisResult,NDepend.CodeModel.ICompareContext,System.DateTime)">
       <summary>Force log trend metrics values for this <i>analysisResult</i>, with the possibility to execute code rules and trend metrics that require to be run in diff mode.</summary>
       <remarks>
-            Trend metrics are extracted from code queries found in <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.<see cref="P:NDepend.Project.IProject.CodeQueries" /> and <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.QueriesExtractedFromCode" />.<br />
+            Trend metrics are extracted from code queries found in <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.<see cref="P:NDepend.Project.IProject.CodeQueries" /> and <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode" />.<br />
             Rules are extracted from the same code queries sets, for computation of code metrics: <i># Rules</i>, <i># Rules Violated</i>, <i># Rules Violations</i>.<br />
             Trend metrics values are logged into the trend metrics store of the project <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.AnalysisResultRef" />.<see cref="P:NDepend.Analysis.IAnalysisResultRef.Project" />.
             </remarks>
@@ -329,10 +384,11 @@
         <ensures description="returned code base object is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
     </member>
-    <member name="P:NDepend.Analysis.IAnalysisResult.QueriesExtractedFromCode">
+    <member name="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode">
       <summary>
-            Gets code rules and queries defined in the code base through the attribute <see cref="T:NDepend.Attributes.CodeRuleAttribute" />.
+            Gets the root group containing code rules and queries defined in the code base through the attribute <see cref="T:NDepend.Attributes.CodeRuleAttribute" />.
             </summary>
+      <seealso cref="M:NDepend.Project.ExtensionMethodsProject.GetRulesInProjectFileAndInRuleFilesAndDeclaredInSourceCode(NDepend.Project.IProject,NDepend.CodeQuery.IGroup)" />
       <getter>
         <ensures description="returned group of groups object is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
@@ -356,7 +412,10 @@
             </summary>
       <returns>The analysis result loaded.</returns>
       <param name="progressLogHandler">A procedure delegate object that is invoked each time the current analysis load emits a new <see cref="T:NDepend.Analysis.IProgressLog" /> object.</param>
-      <exception cref="T:NDepend.Analysis.AnalysisException">If the analysis load fails, an AnalysisException with an informative message is thrown.</exception>
+      <exception cref="T:NDepend.Analysis.AnalysisException">
+            If the analysis load fails, an <see cref="T:NDepend.Analysis.AnalysisException" /> is thrown. 
+            This <see cref="T:NDepend.Analysis.AnalysisException" /> contains an inner exception with an informative message.
+            </exception>
       <requires description="progressLogHandler must not be null" csharp="progressLogHandler != null" vb="progressLogHandler &lt;&gt; Nothing">progressLogHandler != null</requires>
       <ensures description="returned analysis result object is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
@@ -370,7 +429,7 @@
     </member>
     <member name="P:NDepend.Analysis.IAnalysisResultRef.Date">
       <summary>
-            Gets the date when the analysis has been executed.
+            Gets the date when the analysis execution finished.
             </summary>
     </member>
     <member name="P:NDepend.Analysis.IAnalysisResultRef.AnalysisResultFilePath">
@@ -525,7 +584,7 @@
             It is extracted automatically from assemblies analyzed at analysis time.<br />
             A code rule gathered from a <see cref="T:NDepend.Attributes.CodeRuleAttribute" /> appears under a group named: "Rules extracted from Source Code".<br />
             Under this rule, code rules are grouped under the parent namespaces of code elements tagged by <see cref="T:NDepend.Attributes.CodeRuleAttribute" />.<br />
-            More information at <a href="http://www.ndepend.com/ConstraintsExtractedFromCode.aspx">Rules extracted from code</a></remarks>
+            More information at <a href="http://www.ndepend.com/docs/declare-cqlinq-rules-in-csharp-or-vbnet-code">Rules extracted from code</a></remarks>
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.HasAttribute(NDepend.CodeModel.IAttributeTarget,System.String)" />
       <seealso cref="M:NDepend.CodeModel.IAttributeTarget.HasAttribute(NDepend.CodeModel.IType)" />
       <seealso cref="P:NDepend.CodeQuery.IQuery.IsExtractedFromCode" />
@@ -596,7 +655,7 @@
       <remarks>
             The default value is false.<br />
             A critical code rule is useful to break the build process once the rule is violated.<br />
-            More information at: <a href="http://www.ndepend.com/Doc_CI_CriticalRule.aspx">Critical Rules and Build Failure</a></remarks>
+            More information at: <a href="http://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
     </member>
     <member name="T:NDepend.Attributes.ImmutableAttribute">
       <summary>
@@ -626,7 +685,7 @@
             The properties IMethod.<see cref="P:NDepend.CodeModel.IMethod.ChangesObjectState" /> and IMethod.<see cref="P:NDepend.CodeModel.IMethod.ChangesTypeState" /> can be used to determine whether a method is pure or not.<br />
             A code rule is provided by default to continuously make sure that all methods tagged with this attribute are pure.<br />
             A code rule is provided by default to continuously make sure that all pure methods are tagged with this attribute.<br />
-            Since .NET v4, you can also use the attribute type System.Diagnostics.Contracts.PureAttribute declared in mscorlib.
+            Since .NET v4, you can also use the attribute type System.Diagnostics.Contracts.PureAttribute declared in mscorlib (only for VS projects on which Microsoft Code Contract is enabled, else the PureAttribute is discarded by the compiler).
             </remarks>
       <seealso cref="P:NDepend.CodeModel.IMethod.ChangesObjectState" />
       <seealso cref="P:NDepend.CodeModel.IMethod.ChangesTypeState" />
@@ -858,7 +917,7 @@
       <param name="compareContext">The <see cref="T:NDepend.CodeModel.ICompareContext" /> object against which to compile.</param>
       <remarks>
             The <see cref="T:NDepend.CodeModel.ICompareContext" /> object is needed because the code query might reference some code elements by name.<br />
-            In such situation, code elements are resolved by name agains the code base <see cref="T:NDepend.CodeModel.ICompareContext" />.<see cref="P:NDepend.CodeModel.ICompareContext.NewerCodeBase" />.<br />
+            In such situation, code elements are resolved by name against the code base <see cref="T:NDepend.CodeModel.ICompareContext" />.<see cref="P:NDepend.CodeModel.ICompareContext.NewerCodeBase" />.<br />
             The property <see cref="T:NDepend.CodeQuery.IQueryCompiledSuccess" />.<see cref="P:NDepend.CodeQuery.IQueryCompiledSuccess.RelyOnCompareContext" /> is equal to true if a code query is meant to be executed in a comparison context.
             </remarks>
       <returns>This code query compiled.</returns>
@@ -896,7 +955,7 @@
       <param name="compareContext">The <see cref="T:NDepend.CodeModel.ICompareContext" /> object against which to compile.</param>
       <remarks>
             The <see cref="T:NDepend.CodeModel.ICompareContext" /> object is needed because some code queries might reference some code elements by name.<br />
-            In such situation, code elements are resolved by name agains the code base ICompareContext.<see cref="P:NDepend.CodeModel.ICompareContext.NewerCodeBase" />.<br />
+            In such situation, code elements are resolved by name against the code base ICompareContext.<see cref="P:NDepend.CodeModel.ICompareContext.NewerCodeBase" />.<br />
             To compile <i>N</i> CQLinq queries strings, calling once <i>CompileMany()</i> is much faster than calling <i>N</i> times <i>Compile()</i>.<br />
             The property <see cref="T:NDepend.CodeQuery.IQueryCompiledSuccess" />.<see cref="P:NDepend.CodeQuery.IQueryCompiledSuccess.RelyOnCompareContext" /> is equal to true if a code query is meant to be executed in a comparison context.
             </remarks>
@@ -911,6 +970,56 @@
       <requires description="compareContext must not be null" csharp="compareContext != null" vb="compareContext &lt;&gt; Nothing">compareContext != null</requires>
       <ensures description="returned collection of queries compiled is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       <ensures description="returned collection of queries compiled count is equal to queryStrings.Count" csharp="result.Count == Count&lt;string&gt;(queryStrings)" vb="result.Count = Count(queryStrings)">result.Count == System.Linq.Enumerable.Count&lt;string&gt;(queryStrings)</ensures>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.CompileMany(System.Collections.Generic.IEnumerable{NDepend.CodeQuery.IQuery},NDepend.CodeModel.ICodeBase)">
+      <summary>
+            Compile against a code base, several code queries.
+            </summary>
+      <param name="queries">This collection of code queries.</param>
+      <param name="codeBase">The code base against which to compile each query.</param>
+      <remarks>
+            The <paramref name="codeBase" /> is needed because a code query might reference some code elements by name.<br />
+            To compile <i>N</i> CQLinq queries, calling once <i>CompileMany()</i> is much faster than calling <i>N</i> times <i>Compile()</i>. 
+            </remarks>
+      <returns>A dictionary where keys are <see cref="T:NDepend.CodeQuery.IQuery" /> objects, and values are <see cref="T:NDepend.CodeQuery.IQueryCompiled" /> objects.</returns>
+      <requires description="queries must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3 local_1 = new NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3();&#xD;&#xA;        local_1.codeBase = codeBase;&#xD;&#xA;    }&#xD;&#xA;    return queries != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3 local_1 = New NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3();&#xD;&#xA;    local_1.codeBase = codeBase&#xD;&#xA;    return queries &lt;&gt; Nothing; })()">(() =&gt; {
+    {
+        NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3 local_1 = new NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass3();
+        local_1.codeBase = codeBase;
+    }
+    return queries != null; })()</requires>
+      <requires description="no query in queries is null" csharp="All&lt;NDepend.CodeQuery.IQuery&gt;(queries, (NDepend.CodeQuery.IQuery q) =&gt; q != null)" vb="All(queries, (q As NDepend.CodeQuery.IQuery) =&gt; q &lt;&gt; Nothing)">System.Linq.Enumerable.All&lt;NDepend.CodeQuery.IQuery&gt;(queries, (NDepend.CodeQuery.IQuery q) =&gt; q != null)</requires>
+      <requires description="codeBase must not be null" csharp="local_1.codeBase != null" vb="local_1.codeBase &lt;&gt; Nothing">local_1.codeBase != null</requires>
+      <ensures description="returned dictionary is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.CompileMany(System.Collections.Generic.IEnumerable{NDepend.CodeQuery.IQuery},NDepend.CodeModel.ICompareContext)">
+      <summary>
+            Compile several code queries, against a <see cref="T:NDepend.CodeModel.ICompareContext" /> object. This overload of <see cref="M:NDepend.CodeQuery.ExtensionMethodsQuery.CompileMany(System.Collections.Generic.IEnumerable{NDepend.CodeQuery.IQuery},NDepend.CodeModel.ICodeBase)" /> is required if some code queries are meant to be executed in a comparison context.
+            </summary>
+      <param name="queries">This collection of code queries.</param>
+      <param name="compareContext">The <see cref="T:NDepend.CodeModel.ICompareContext" /> object against which to compile.</param>
+      <remarks>
+            The <see cref="T:NDepend.CodeModel.ICompareContext" /> object is needed because some code queries might reference some code elements by name.<br />
+            In such situation, code elements are resolved by name against the code base ICompareContext.<see cref="P:NDepend.CodeModel.ICompareContext.NewerCodeBase" />.<br />
+            To compile <i>N</i> CQLinq queries, calling once <i>CompileMany()</i> is much faster than calling <i>N</i> times <i>Compile()</i>.<br />
+            The property <see cref="T:NDepend.CodeQuery.IQueryCompiledSuccess" />.<see cref="P:NDepend.CodeQuery.IQueryCompiledSuccess.RelyOnCompareContext" /> is equal to true if a code query is meant to be executed in a comparison context.
+            </remarks>
+      <returns>A dictionary where keys are <see cref="T:NDepend.CodeQuery.IQuery" /> objects, and values are <see cref="T:NDepend.CodeQuery.IQueryCompiled" /> objects.</returns>
+      <seealso cref="T:NDepend.CodeModel.ICompareContext" />
+      <seealso cref="M:NDepend.CodeModel.ExtensionMethodsHelpers.CreateCompareContextWithOlder(NDepend.CodeModel.ICodeBase,NDepend.CodeModel.ICodeBase)" />
+      <seealso cref="T:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqCompare" />
+      <seealso cref="P:NDepend.CodeQuery.IQueryCompiledSuccess.RelyOnCompareContext" />
+      <seealso cref="M:NDepend.CodeQuery.ExtensionMethodsQuery.Compile(System.String,NDepend.CodeModel.ICompareContext)" />
+      <seealso cref="M:NDepend.CodeModel.ExtensionMethodsTooling.TryCompareSourceWith(NDepend.CodeModel.ISourceFileLine,NDepend.CodeModel.ISourceFileLine)" />
+      <requires description="queries must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8 local_1 = new NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8();&#xD;&#xA;        local_1.compareContext = compareContext;&#xD;&#xA;    }&#xD;&#xA;    return queries != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8 local_1 = New NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8();&#xD;&#xA;    local_1.compareContext = compareContext&#xD;&#xA;    return queries &lt;&gt; Nothing; })()">(() =&gt; {
+    {
+        NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8 local_1 = new NDepend.CodeQuery.ExtensionMethodsQuery.&lt;&gt;c__DisplayClass8();
+        local_1.compareContext = compareContext;
+    }
+    return queries != null; })()</requires>
+      <requires description="no query in queries is null" csharp="All&lt;NDepend.CodeQuery.IQuery&gt;(queries, (NDepend.CodeQuery.IQuery q) =&gt; q != null)" vb="All(queries, (q As NDepend.CodeQuery.IQuery) =&gt; q &lt;&gt; Nothing)">System.Linq.Enumerable.All&lt;NDepend.CodeQuery.IQuery&gt;(queries, (NDepend.CodeQuery.IQuery q) =&gt; q != null)</requires>
+      <requires description="compareContext must not be null" csharp="local_1.compareContext != null" vb="local_1.compareContext &lt;&gt; Nothing">local_1.compareContext != null</requires>
+      <ensures description="returned dictionary is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.Execute(NDepend.CodeQuery.IQueryCompiledSuccess)">
       <summary>
@@ -1007,6 +1116,79 @@
       <requires description="the code base object must not be null" csharp="codeBase != null" vb="codeBase &lt;&gt; Nothing">codeBase != null</requires>
       <ensures description="returned reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.TryGetQueryName(System.String,System.String@)">
+      <summary>
+            Try extract the query name from a query string.
+            </summary>
+      <remarks>The query name, if any, is enclosed between the tags <i>&lt;Name&gt;</i> and <i>&lt;/Name&gt;</i> in a comment line in the query string.</remarks>
+      <param name="queryString">The query string.</param>
+      <param name="queryName">The query name extracted</param>
+      <returns>
+        <i>true</i> if the query name has been extracted, else returns <i>false</i>.</returns>
+      <requires description="queryString not be null" csharp="queryString != null" vb="queryString &lt;&gt; Nothing">queryString != null</requires>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.TryGetQueryDescription(System.String,NDepend.Helpers.StringFormattingKind,System.String@)">
+      <summary>
+            Try extract the query description from a query string.
+            </summary>
+      <remarks>The query description, if any, is enclosed between the tags <i>&lt;Desc&gt;</i> and <i>&lt;/Desc&gt;</i>, or <i>&lt;Description&gt;</i> and <i>&lt;/Description&gt;</i>, in one or several consecutive comment line(s) in the query string.</remarks>
+      <param name="queryString">The query string.</param>
+      <param name="stringFormattingKind">The string formatting kind of the output string.</param>
+      <param name="queryDescription">The query description extracted.</param>
+      <returns>
+        <i>true</i> if the query description has been extracted, else returns <i>false</i>.</returns>
+      <requires description="queryString not be null" csharp="queryString != null" vb="queryString &lt;&gt; Nothing">queryString != null</requires>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.TryGetRuleHowToFix(System.String,NDepend.Helpers.StringFormattingKind,System.String@)">
+      <summary>
+            Try extract the how-to-fix-rule explanations from a rule string.
+            </summary>
+      <remarks>The how-to-fix-rule explanations, if any, is enclosed between the tags <i>&lt;HowToFix&gt;</i> and <i>&lt;/HowToFix&gt;</i>.</remarks>
+      <param name="ruleString">The rule string.</param>
+      <param name="stringFormattingKind">The string formatting kind of the output string.</param>
+      <param name="ruleHowToFix">The how-to-fix-rule explanations extracted from the rule string.</param>
+      <returns>
+        <i>true</i> if the how-to-fix-rule explanations has been extracted, else returns <i>false</i>.</returns>
+      <requires description="ruleString not be null" csharp="ruleString != null" vb="ruleString &lt;&gt; Nothing">ruleString != null</requires>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.IsActiveAndAllParentGroupActive(NDepend.CodeQuery.IQuery)">
+      <summary>
+            Returns <i>true</i> if this <paramref name="query" />.<see cref="P:NDepend.CodeQuery.IQuery.IsActive" /> is <i>true</i>, and all its parents' groups (recursive) are also active.
+            </summary>
+      <remarks>A query is visible in the report only if it is active and all its parents groups are also active.</remarks>
+      <param name="query">The query object</param>
+      <requires description="query not be null" csharp="query != null" vb="query &lt;&gt; Nothing">query != null</requires>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.IsActiveAndAllParentGroupActive(NDepend.CodeQuery.IGroup)">
+      <summary>
+            Returns <i>true</i> if this <paramref name="group" />.<see cref="P:NDepend.CodeQuery.IGroup.IsActive" /> is <i>true</i>, and all its parents' groups (recursive) are also active.
+            </summary>
+      <param name="group">The group object</param>
+      <requires description="group not be null" csharp="group != null" vb="group &lt;&gt; Nothing">group != null</requires>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.GetCQLinqExecutionTimeOut">
+      <summary>
+            Get the CQLinq rules and queries execution time-out defined in Tools &gt; Options &gt; CodeQuery &gt; Time-Out.
+            </summary>
+    </member>
+    <member name="M:NDepend.CodeQuery.ExtensionMethodsQuery.FilterRecentViolationsOnly(NDepend.CodeQuery.IQueryExecutionSuccessResult,NDepend.CodeModel.ICompareContext)">
+      <summary>
+            From code elements matched by a violated rule, filter only those added or refactored since the baseline defined by <paramref name="compareContext" />.<see cref="P:NDepend.CodeModel.ICompareContext.OlderCodeBase" />.
+            </summary>
+      <remarks>
+            The fact that the user decided to <i>focus on recent violations only</i> can be obtained from <see cref="T:NDepend.Project.IProject" />.<see cref="P:NDepend.Project.IProject.BaselineDuringAnalysis" />.<see cref="P:NDepend.Project.IProjectBaseline.FocusOnRecentRulesViolations" />.<br />
+            This filter has no effect if the <see cref="P:NDepend.CodeQuery.IQueryExecutionSuccessResult.IsARuleViolated" /> is <i>false</i>.<br />
+            This filter has no effect if the code rule relies on the compare context.<br />
+            This filter is equivalent to filter through the expression (<paramref name="compareContext" />.<see cref="M:NDepend.CodeModel.ICompareContext.WasAdded(NDepend.CodeModel.ICodeElement)" /> || <paramref name="compareContext" />.<see cref="M:NDepend.CodeModel.ICompareContext.CodeWasChanged(NDepend.CodeModel.ICodeContainer)" />) applied on each code element matched by the violated rule.
+            </remarks>
+      <param name="queryExecutionSuccessResult">The code rule execution result on which to apply the filter.</param>
+      <param name="compareContext">The compare context holding the baseline.</param>
+      <returns>The code rule execution result filtered.</returns>
+      <requires description="this queryExecutionSuccessResult is not null" csharp="queryExecutionSuccessResult != null" vb="queryExecutionSuccessResult &lt;&gt; Nothing">queryExecutionSuccessResult != null</requires>
+      <requires description="compareContext is not null" csharp="compareContext != null" vb="compareContext &lt;&gt; Nothing">compareContext != null</requires>
+      <requires description="queryExecutionSuccessResult.CodeBaseOnWhichQueryHasBeenExecuted and compareContext.NewerCodeBase represent the same code base." csharp="queryExecutionSuccessResult.CodeBaseOnWhichQueryHasBeenExecuted == compareContext.NewerCodeBase" vb="queryExecutionSuccessResult.CodeBaseOnWhichQueryHasBeenExecuted = compareContext.NewerCodeBase">queryExecutionSuccessResult.CodeBaseOnWhichQueryHasBeenExecuted == compareContext.NewerCodeBase</requires>
+      <ensures description="returned reference is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="T:NDepend.CodeQuery.IControllerChild">
       <summary>
             All query related objects, <see cref="T:NDepend.CodeQuery.IQuery" />, <see cref="T:NDepend.CodeQuery.IGroup" /> and <see cref="T:NDepend.CodeQuery.IGroupOfGroups" />, are children of a <see cref="T:NDepend.CodeQuery.IController" /> object and implement this interface.
@@ -1083,10 +1265,47 @@
     <member name="F:NDepend.DotNet.DotNetProfile.AspNetMvc">
       <summary>AspNetMvc</summary>
     </member>
+    <member name="T:NDepend.Helpers.ExtensionMethodsFailure">
+      <summary>
+            Presents helpers to deal with exceptions.
+            </summary>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsFailure.GetExceptionAndInnerExceptionTypeMessageAndStackTrace(System.Exception)">
+      <summary>
+            Get a multi-lines string containing the <paramref name="exception" /> type, message and stacktrace, and if it has an inner-exception, its type, message and stacktrace are also shown.
+            </summary>
+      <remarks>The frames in the stack trace will contains IL instructions offset.</remarks>
+      <param name="exception">The exception</param>
+      <returns>The multi-lines string.</returns>
+      <requires description="exception must not be null" csharp="exception != null" vb="exception &lt;&gt; Nothing">exception != null</requires>
+      <ensures description="returned string is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsFailure.GetExceptionAndInnerExceptionTypeAndMessage(System.Exception)">
+      <summary>
+            Get a multi-lines string containing the <paramref name="exception" /> type and message, and if it has an inner-exception, its type and message are also shown.
+            </summary>
+      <param name="exception">The exception</param>
+      <returns>The multi-lines string.</returns>
+      <requires description="exception must not be null" csharp="exception != null" vb="exception &lt;&gt; Nothing">exception != null</requires>
+      <ensures description="returned string is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="T:NDepend.Helpers.ExtensionMethodsEnumerable">
       <summary>
             Provides a set of extension methods dedicated to enumerables. 
             </summary>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsEnumerable.Distinct``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+      <summary>
+            Returns distinct elements from a sequence <paramref name="seq" />  by using the default equality comparer of the type <typeparamref name="TKey" />, on which items are projected through <paramref name="funcProjection" />.
+            </summary>
+      <typeparam name="T">The type of the elements of <paramref name="seq" />.</typeparam>
+      <typeparam name="TKey">The type on which elements of <paramref name="seq" /> are projected.</typeparam>
+      <param name="seq">The source sequence that contains elements.</param>
+      <param name="funcProjection">The projection function to obtain an instance of type <typeparamref name="TKey" /> from an instance of type <typeparamref name="T" />.</param>
+      <returns>The sequence of distinct items.</returns>
+      <requires description="seq must not be null" csharp="seq != null" vb="seq &lt;&gt; Nothing">seq != null</requires>
+      <requires description="funcProjection must not be null" csharp="funcProjection != null" vb="funcProjection &lt;&gt; Nothing">funcProjection != null</requires>
+      <ensures description="returned sequence is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsEnumerable.ContainsNullElement``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>&gt;
@@ -1594,6 +1813,79 @@
       <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
       <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.Get4BytesHashCodeFast(System.String)">
+      <summary>
+            Get a 4 bytes string hash code, case-sensitive.
+            </summary>
+      <param name="thisString">The string to get hash code for.</param>
+      <remarks>
+            This method is about 4 times more performant than <i>StringComparer.OrdinalIgnoreCase.GetHashCode(str)</i>.<br />
+            It treats characters two by two by using pointers.
+            </remarks>
+      <requires description="thisString must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.Get8BytesHashCodeFast(System.String)">
+      <summary>
+            Get a 8 bytes string hash code, case-sensitive.
+            </summary>
+      <param name="thisString">The string to get hash code for.</param>
+      <requires description="thisString must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.IsNullOrEmpty(System.String)">
+      <summary>
+            Returns <i>true</i> if <paramref name="str" /> is a null reference or an empty string.
+            </summary>
+      <remarks>
+            An alternative to <i>string.IsNullOrEmpty()</i> with less characters.
+            </remarks>
+      <param name="str">The string reference.</param>
+    </member>
+    <member name="T:NDepend.Helpers.ExtensionMethodsTimeSpan">
+      <summary>
+            Provides a set of extension methods dedicated to TimeSpan. 
+            </summary>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsTimeSpan.ToMilliSeconds(System.Int32)">
+      <summary>
+            Gets a <see cref="T:System.TimeSpan" /> value, with total number of milli-seconds equals to <paramref name="nbMilliSeconds" />.
+            </summary>
+      <param name="nbMilliSeconds">The number of milli-seconds.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsTimeSpan.ToSeconds(System.Int32)">
+      <summary>
+            Gets a <see cref="T:System.TimeSpan" /> value, with total number of seconds equals to <paramref name="nbSeconds" />.
+            </summary>
+      <param name="nbSeconds">The number of seconds.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsTimeSpan.ToMinutes(System.Int32)">
+      <summary>
+            Gets a <see cref="T:System.TimeSpan" /> value, with total number of minutes equals to <paramref name="nbMinutes" />.
+            </summary>
+      <param name="nbMinutes">The number of minutes.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsTimeSpan.ToHours(System.Int32)">
+      <summary>
+            Gets a <see cref="T:System.TimeSpan" /> value, with total number of hours equals to <paramref name="nbHours" />.
+            </summary>
+      <param name="nbHours">The number of minutes.</param>
+    </member>
+    <member name="T:NDepend.Helpers.StringFormattingKind">
+      <summary>
+            Define a string format, useful when extracting rule description from rule string for example.
+            </summary>
+    </member>
+    <member name="F:NDepend.Helpers.StringFormattingKind.Raw">
+      <summary>Raw</summary>
+    </member>
+    <member name="F:NDepend.Helpers.StringFormattingKind.Readable">
+      <summary>Readable</summary>
+    </member>
+    <member name="F:NDepend.Helpers.StringFormattingKind.Html">
+      <summary>Html</summary>
+    </member>
+    <member name="F:NDepend.Helpers.StringFormattingKind.Rtf">
+      <summary>Rtf</summary>
     </member>
     <member name="T:NDepend.Path.AbsolutePathKind">
       <summary>
@@ -2697,6 +2989,7 @@
             Returns <paramref name="path" />.ToString() is path is null, else returns the empty string. 
             </summary>
       <param name="path">The path reference.</param>
+      <ensures description="returned reference string is not null, but can be empty." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.Path.PathHelpers.IsNotNullAndExists(NDepend.Path.IAbsolutePath)">
       <summary>
@@ -2709,7 +3002,7 @@
             Returns <i>true</i> if <paramref name="path" /> and <paramref name="pathOther" /> are both <i>null</i>, or if <paramref name="path" />.Equals(<paramref name="pathOther" />). 
             </summary>
       <param name="path">The first path.</param>
-      <param name="pathOther">The scond path.</param>
+      <param name="pathOther">The second path.</param>
     </member>
     <member name="M:NDepend.Path.PathHelpers.ToAbsoluteFilePath(System.String)">
       <summary>
@@ -3196,7 +3489,8 @@
             Determine whether this string is a valid directory path prefixed with an environment variable or not.
             </summary>
       <remarks>
-            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarDirectoryPath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarDirectoryPath" />.
+            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarDirectoryPath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarDirectoryPath" />.<br />
+            In addition to the the letters and digits, the following characters are accepted in the environment variable name _(){}[]$+-#',;.@!
             </remarks>
       <param name="pathString">This string from which is determined the path validity.</param>
       <returns>
@@ -3208,7 +3502,8 @@
             Determine whether this string is a valid directory path prefixed with an environment variable or not.
             </summary>
       <remarks>
-            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarDirectoryPath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarDirectoryPath" />.
+            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarDirectoryPath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarDirectoryPath" />.<br />
+            In addition to the the letters and digits, the following characters are accepted in the environment variable name _(){}[]$+-#',;.@!
             </remarks>
       <param name="pathString">This string from which is determined the path validity.</param>
       <param name="failureReason">If false is returned, failureReason contains the plain english description of the failure.</param>
@@ -3298,7 +3593,8 @@
             Determine whether this string is a valid file path prefixed with an environment variable or not.
             </summary>
       <remarks>
-            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarFilePath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarFilePath" />.
+            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarFilePath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarFilePath" />.<br />
+            In addition to the the letters and digits, the following characters are accepted in the environment variable name _(){}[]$+-#',;.@!
             </remarks>
       <param name="pathString">This string from which is determined the path validity.</param>
       <returns>
@@ -3310,7 +3606,8 @@
             Determine whether this string is a valid file path prefixed with an environment variable or not.
             </summary>
       <remarks>
-            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarFilePath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarFilePath" />.
+            If this method returns true, the extension method <see cref="M:NDepend.Path.PathHelpers.ToEnvVarFilePath(System.String)" /> can be safely invoked on this string to obtain a <see cref="T:NDepend.Path.IEnvVarFilePath" />.<br />
+            In addition to the the letters and digits, the following characters are accepted in the environment variable name _(){}[]$+-#',;.@!
             </remarks>
       <param name="pathString">This string from which is determined the path validity.</param>
       <param name="failureReason">If false is returned, failureReason contains the plain english description of the failure.</param>
@@ -3343,26 +3640,35 @@
         <i>true</i> if this string represents a valid file path that contains variables, otherwise <i>false</i>.
             </returns>
     </member>
-    <member name="P:NDepend.Path.PathHelpers.ForbiddenCharInPath">
-      <summary>
-            An array of char forbidden in string representing path.
-            </summary>
-      <remarks>
-            Use this string.IndexOfAny(char[]) method to detect the presence of any of this char in a string.
-            </remarks>
-      <getter>
-        <ensures description="returned array is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
-      </getter>
-    </member>
     <member name="P:NDepend.Path.PathHelpers.PathVariableBegin">
       <summary>
             Path variables are formatted this way $(VariableName). Hence this getter returns the string "$(".
             </summary>
+      <getter>
+        <ensures description="returned reference string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+        <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
+      </getter>
     </member>
     <member name="P:NDepend.Path.PathHelpers.PathVariableEnd">
       <summary>
             Path variables are formatted this way $(VariableName). Hence this getter returns the string ")".
             </summary>
+      <getter>
+        <ensures description="returned reference string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+        <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
+      </getter>
+    </member>
+    <member name="P:NDepend.Path.PathHelpers.ForbiddenCharInPath">
+      <summary>
+            An array of char forbidden in string representing path.
+            </summary>
+      <remarks>
+            Use this string.IndexOfAny(char[]) method to detect the presence of any of this char in a string.<br />
+            The char ':' is not included in this array. The only proper position for this character in a path, is the second position, just after a letter.
+            </remarks>
+      <getter>
+        <ensures description="returned array is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
     </member>
     <member name="T:NDepend.Path.PathMode">
       <summary>
@@ -3411,6 +3717,207 @@
       <summary> 
             All variables have been resolved but the resulting path is not a valid absolute path. 
             </summary>
+    </member>
+    <member name="T:NDepend.Project.ExtensionMethodsProject">
+      <summary>
+            Provides a set of extension methods to help working with NDepend project. 
+            </summary>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.GetOutputDirectoryAbsolutePath(NDepend.Project.IProject)">
+      <summary>
+            Gets the output directory absolute path that is used during the analysis.
+            </summary>
+      <remarks>
+            If the project output directory provided is not an absolute path and cannot be resolved, the absolute path returned is the one returned by <see cref="M:NDepend.Project.ExtensionMethodsProject.GetDefaultOutputDirectoryAbsolutePath(NDepend.Project.IProject)" />.
+            </remarks>
+      <param name="project">The project on which to get the output directory as absolute path.</param>
+      <returns>The output directory absolute path that is used during the analysis.</returns>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <ensures description="returned directory path is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.GetDefaultOutputDirectoryAbsolutePath(NDepend.Project.IProject)">
+      <summary>
+            Gets the output directory absolute path that is used during the analysis if the project output directory provided is not an absolute path and cannot be resolved.
+            </summary>
+      <remarks>
+            This path is the directory named "NDependOut" under the project file path parent directory.
+            </remarks>
+      <param name="project">The project on which to get the default output directory.</param>
+      <returns>The output directory absolute path that is used during the analysis if the project output directory provided is not an absolute path and cannot be resolved.</returns>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <ensures description="returned directory path is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IFilePath,NDepend.Path.IAbsoluteFilePath@,System.String@)">
+      <summary>This method attempts to resolve an absolute file path from a file path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="filePath" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="filePath" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="filePath" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="filePath">The file path to resolve as absolute.</param>
+      <param name="absoluteFilePath">The result absolute file path if the resolving succeed.</param>
+      <param name="failureReason">A plain english failure description if the resolving fails.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IFilePath,NDepend.Path.IAbsoluteFilePath@)">
+      <summary>This method attempts to resolve an absolute file path from a file path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="filePath" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="filePath" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="filePath" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="filePath">The file path to resolve as absolute.</param>
+      <param name="absoluteFilePath">The result absolute file path if the resolving succeed.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IDirectoryPath,NDepend.Path.IAbsoluteDirectoryPath@,System.String@)">
+      <summary>This method attempts to resolve an absolute directory path from a directory path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="directoryPath" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="directoryPath" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="directoryPath" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="directoryPath">The directory path to resolve as absolute.</param>
+      <param name="absoluteDirectoryPath">The result absolute directory path if the resolving succeed.</param>
+      <param name="failureReason">A plain english failure description if the resolving fails.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IDirectoryPath,NDepend.Path.IAbsoluteDirectoryPath@)">
+      <summary>This method attempts to resolve an absolute directory path from a directory path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="directoryPath" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="directoryPath" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="directoryPath" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="directoryPath">The directory path to resolve as absolute.</param>
+      <param name="absoluteDirectoryPath">The result absolute directory path if the resolving succeed.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IPath,NDepend.Path.IAbsolutePath@)">
+      <summary>This method attempts to resolve an absolute path from a path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="path" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="path" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="path" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="path">The path to resolve as absolute.</param>
+      <param name="absolutePath">The result absolute path if the resolving succeed.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryResolveAbsolutePathFromProject(NDepend.Project.IProject,NDepend.Path.IPath,NDepend.Path.IAbsolutePath@,System.String@)">
+      <summary>This method attempts to resolve an absolute path from a path</summary>
+      <returns>
+        <i>true</i> if the absolute path resolving succeed, else returns <i>false</i>.</returns>
+      <remarks>
+            If <paramref name="path" /> is prefixed with an environment variable, <paramref name="project" /> is not used for resolving the absolute path.<br />
+            If <paramref name="path" /> contains path variable(s), variables declared in <paramref name="project" />.<see cref="P:NDepend.Project.IProject.PathVariables" /> are used for resolving the absolute path.<br />
+            If <paramref name="path" /> is relative to the project file, <paramref name="project" />.<see cref="P:NDepend.Project.IProject.Properties" />.<see cref="P:NDepend.Project.IProjectProperties.FilePath" /> is used for resolving the absolute path.
+            </remarks>
+      <param name="project">The project used for resolving the absolute path.</param>
+      <param name="path">The path to resolve as absolute.</param>
+      <param name="absolutePath">The result absolute path if the resolving succeed.</param>
+      <param name="failureReason">A plain english failure description if the resolving fails.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryLoadRuleFile(NDepend.Project.IProject,NDepend.Project.IRuleFileRef,NDepend.CodeQuery.IGroup@,System.String@)">
+      <summary>
+            Try load code rules and queries defined in the rule file defined by <paramref name="ruleFileRef" />.
+            </summary>
+      <returns>
+        <i>true</i> if the rules have been properly loaded from the rule file, else returns <i>false</i>.</returns>
+      <param name="project">The NDepend project used to resolve rule file absolute path from <paramref name="ruleFileRef" /></param>
+      <param name="ruleFileRef">The reference to the rule file.</param>
+      <param name="group">The group of code queries and rules, not null only if this method returns <i>true</i>.</param>
+      <param name="failureReason">If the method returns <i>false</i>, <paramref name="failureReason" /> is not null not empty, and explains in plain-english why the rule files' code queries and rules haven't been loaded.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <requires description="ruleFileRef must not be null" csharp="ruleFileRef != null" vb="ruleFileRef &lt;&gt; Nothing">ruleFileRef != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TryLoadRuleFile(NDepend.Path.IAbsoluteFilePath,System.Boolean,NDepend.CodeQuery.IGroup@,System.String@)">
+      <summary>
+            Try load code rules and queries defined in the rule file defined by <paramref name="ruleFilePath" />.
+            </summary>
+      <returns>
+        <i>true</i> if the rules have been properly loaded from the rule file, else returns <i>false</i>.</returns>
+      <param name="ruleFilePath">The absolute path to the rule file.</param>
+      <param name="isActive">A value that indicates whether the loaded rule file is active or not.</param>
+      <param name="group">The group of code queries and rules, not null only if this method returns <i>true</i>.</param>
+      <param name="failureReason">If the method returns <i>false</i>, <paramref name="failureReason" /> is not null not empty, and explains in plain-english why the rule files' code queries and rules haven't been loaded.</param>
+      <remarks>
+        <paramref name="isActive" /> is defined in the project file and can be obtained from <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.IsActive" />.</remarks>
+      <requires description="ruleFilePath must not be null" csharp="ruleFilePath != null" vb="ruleFilePath &lt;&gt; Nothing">ruleFilePath != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TrySaveRuleFile(NDepend.Project.IProject,NDepend.Project.IRuleFileRef,NDepend.CodeQuery.IGroup,System.String@)">
+      <summary>
+            Try save code rules and queries defined in a rule file defined by <paramref name="ruleFileRef" />.
+            </summary>
+      <returns>
+        <i>true</i> if the rules have been properly saved to the rule file, else returns <i>false</i>.</returns>
+      <param name="project">The NDepend project used to resolve rule file absolute path from <paramref name="ruleFileRef" /></param>
+      <param name="ruleFileRef">The reference to the rule file.</param>
+      <param name="group">The group of code queries and rules to save.</param>
+      <param name="failureReason">If the method returns <i>false</i>, <paramref name="failureReason" /> is not null not empty, and explains in plain-english why code queries and rules haven't been saved to the rule file.</param>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <requires description="ruleFileRef must not be null" csharp="ruleFileRef != null" vb="ruleFileRef &lt;&gt; Nothing">ruleFileRef != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.TrySaveRuleFile(NDepend.Path.IAbsoluteFilePath,NDepend.CodeQuery.IGroup,System.String@)">
+      <summary>
+            Try save code rules and queries defined in the rule file defined by <paramref name="ruleFilePath" />.
+            </summary>
+      <returns>
+        <i>true</i> if the rules have been properly saved to the rule file, else returns <i>false</i>.</returns>
+      <param name="ruleFilePath">The absolute path to the rule file.</param>
+      <param name="group">The group of code queries and rules, not null only if this method returns <i>true</i>.</param>
+      <param name="failureReason">If the method returns <i>false</i>, <paramref name="failureReason" /> is not null not empty, and explains in plain-english why code queries and rules haven't been saved to the rule file.</param>
+      <requires description="ruleFilePath must not be null" csharp="ruleFilePath != null" vb="ruleFilePath &lt;&gt; Nothing">ruleFilePath != null</requires>
+      <requires description="group must not be null" csharp="group != null" vb="group &lt;&gt; Nothing">group != null</requires>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.GetRulesInProjectFileAndInRuleFiles(NDepend.Project.IProject)">
+      <summary>
+            Try get rules and queries declared in the project file and in rule files referenced by the project.
+            </summary>
+      <returns>A controller object that can be used to read and update the hierarchy of rules and queries.</returns>
+      <param name="project">The NDepend project.</param>
+      <remarks>
+            If some rules cannot be loaded, like rule in a rule file for example, a <see cref="T:NDepend.CodeQuery.IGroup" /> object will be present with a <see cref="P:NDepend.CodeQuery.IGroup.Name" /> 
+            that will contains <i>Failed to load rule file: RuleFileName</i>.
+            To get more information you can call the method <see cref="M:NDepend.Project.ExtensionMethodsProject.TryLoadRuleFile(NDepend.Project.IProject,NDepend.Project.IRuleFileRef,NDepend.CodeQuery.IGroup@,System.String@)" />
+            and read the <i>out</i> parameter <i>failureReason</i>.
+            </remarks>
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <ensures description="returned querues and rules controller is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Project.ExtensionMethodsProject.GetRulesInProjectFileAndInRuleFilesAndDeclaredInSourceCode(NDepend.Project.IProject,NDepend.CodeQuery.IGroup)">
+      <summary>
+            Try get rules and queries declared in the project file, in rule files referenced by the project and in source code.
+            </summary>
+      <returns>A controller object that can be used to read and update the hierarchy of rules and queries.</returns>
+      <param name="project">The NDepend project.</param>
+      <param name="analysisResultRulesExtractedFromCode">The rules and queries extracted from source code obtained through <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode" />.</param>
+      <remarks>
+            If some rules cannot be loaded, like rule in a rule file for example, a <see cref="T:NDepend.CodeQuery.IGroup" /> object will be present with a <see cref="P:NDepend.CodeQuery.IGroup.Name" /> 
+            that will contains <i>Failed to load rule file: RuleFileName</i>.
+            To get more information you can call the method <see cref="M:NDepend.Project.ExtensionMethodsProject.TryLoadRuleFile(NDepend.Project.IProject,NDepend.Project.IRuleFileRef,NDepend.CodeQuery.IGroup@,System.String@)" />
+            and read the <i>out</i> parameter <i>failureReason</i>.
+            </remarks>
+      <seealso cref="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode" />
+      <requires description="project must not be null" csharp="project != null" vb="project &lt;&gt; Nothing">project != null</requires>
+      <requires description="analysisResult must not be null" csharp="analysisResultRulesExtractedFromCode != null" vb="analysisResultRulesExtractedFromCode &lt;&gt; Nothing">analysisResultRulesExtractedFromCode != null</requires>
+      <ensures description="returned querues and rules controller is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="T:NDepend.Project.IProjectHistoricAnalysisResult">
       <summary>
@@ -3556,6 +4063,105 @@
         <ensures description="returned list is not empty, it contains at least the two path variables $(NdProjectDir) and $(NdProjectOutputDir)." csharp="result.Count &gt; 0" vb="result.Count &gt; 0">result.Count &gt; 0</ensures>
       </getter>
     </member>
+    <member name="T:NDepend.Project.IProjectRuleFiles">
+      <summary>
+            Represents the list of rule files referenced by this project.
+            </summary>
+      <seealso cref="N:NDepend.CodeQuery" />
+    </member>
+    <member name="M:NDepend.Project.IProjectRuleFiles.TryAdd(NDepend.Path.IFilePath,System.Boolean)">
+      <summary>
+            Add a rule file referenced by this project.
+            </summary>
+      <returns>
+        <i>false</i> if there is already a rule file referenced by this project, with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePath" />
+            else the rule file gets added and the method returns <i>true</i>.
+            </returns>
+      <remarks>
+            If this method adds a rule file, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.RuleFilesRef_Paths" /> activated.
+            </remarks>
+      <param name="filePath">The rule file path.</param>
+      <param name="active">The rule file active status.</param>
+      <requires description="filePath must not be null" csharp="filePath != null" vb="filePath &lt;&gt; Nothing">filePath != null</requires>
+    </member>
+    <member name="M:NDepend.Project.IProjectRuleFiles.TryChangeRuleFileRefActivation(NDepend.Path.IFilePath,System.Boolean)">
+      <summary>
+            Change the activation of a rule file referenced by this project.
+            </summary>
+      <returns>
+        <i>false</i> if there is no rule file with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePath" />.
+            </returns>
+      <remarks>
+            If there is a rule file with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePath" />, its value <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.IsActive" /> gets overridden by the value <paramref name="active" />.
+            If this method modifies the <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.IsActive" /> status of a rule file, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.RuleFilesRef_Activation" /> activated.
+            </remarks>
+      <param name="filePath">The rule file path.</param>
+      <param name="active">The new rule file active status.</param>
+      <requires description="filePath must not be null" csharp="filePath != null" vb="filePath &lt;&gt; Nothing">filePath != null</requires>
+    </member>
+    <member name="M:NDepend.Project.IProjectRuleFiles.TryChangeRuleFileRefPath(NDepend.Path.IFilePath,NDepend.Path.IFilePath)">
+      <summary>
+            Change the path of a rule file referenced by this project.
+            </summary>
+      <returns>
+        <i>false</i> if there is no rule file with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePathOld" />.
+            </returns>
+      <remarks>
+            If there is a rule file with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePathOld" />, its path gets overridden by the value <paramref name="filePathNew" />.
+            If this method modifies the path of a rule file, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.RuleFilesRef_Paths" /> activated.
+            </remarks>
+      <param name="filePathOld">The old path of the rule file to override.</param>
+      <param name="filePathNew">The new path of the rule file.</param>
+      <requires description="filePathOld must not be null" csharp="filePathOld != null" vb="filePathOld &lt;&gt; Nothing">filePathOld != null</requires>
+      <requires description="filePathNew must not be null" csharp="filePathNew != null" vb="filePathNew &lt;&gt; Nothing">filePathNew != null</requires>
+    </member>
+    <member name="M:NDepend.Project.IProjectRuleFiles.TryRemove(NDepend.Path.IFilePath)">
+      <summary>
+            Remove a rule file referenced by this project.
+            </summary>
+      <returns>
+        <i>false</i> if there is no rule file with <see cref="T:NDepend.Project.IRuleFileRef" />.<see cref="P:NDepend.Project.IRuleFileRef.Path" /> equals to <paramref name="filePath" />, else returns <i>true</i>.
+            </returns>
+      <remarks>
+            If this method removes a rule file, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.RuleFilesRef_Paths" /> activated.
+            </remarks>
+      <param name="filePath">The rule file path.</param>
+      <requires description="filePath must not be null" csharp="filePath != null" vb="filePath &lt;&gt; Nothing">filePath != null</requires>
+    </member>
+    <member name="P:NDepend.Project.IProjectRuleFiles.RuleFilesRef">
+      <summary>
+            Gets all rule files referenced by this project. 
+            </summary>
+      <getter>
+        <ensures description="returned list is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
+    </member>
+    <member name="T:NDepend.Project.IRuleFileRef">
+      <summary>
+            Represents a reference to a file containing extra code rules and queries.
+            </summary>
+      <returns>
+            Rule files are especially useful to be shared amongst several NDepend projects.
+            </returns>
+    </member>
+    <member name="P:NDepend.Project.IRuleFileRef.Path">
+      <summary>
+            Gets the rule file path.
+            </summary>
+      <getter>
+        <ensures description="returned file path is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
+    </member>
+    <member name="P:NDepend.Project.IRuleFileRef.IsActive">
+      <summary>
+            Gets a value that indicates whether this rule file is active.
+            </summary>
+      <remarks>
+            The default value is <i>true</i>.<br />
+            If this value is <i>false</i>, all queries and rules in this file are not active.<br />
+            If this value is <i>true</i>, queries and rules in this file might be activated or not, depending on their <see cref="T:NDepend.CodeQuery.IQuery" />.<see cref="P:NDepend.CodeQuery.IQuery.IsActive" /> and <see cref="T:NDepend.CodeQuery.IQuery" />.<see cref="P:NDepend.CodeQuery.IQuery.Parent" />.<see cref="P:NDepend.CodeQuery.IGroup.IsActive" /> status.
+            </remarks>
+    </member>
     <member name="T:NDepend.Project.PathVariable">
       <summary>
             Define a path variable. 
@@ -3578,11 +4184,18 @@
       <summary>
             Gets the name of the path variable.
             </summary>
+      <getter>
+        <ensures description="returned reference string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+        <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
+      </getter>
     </member>
     <member name="P:NDepend.Project.PathVariable.Value">
       <summary>
             Gets the value of the path variable.
             </summary>
+      <getter>
+        <ensures description="returned reference string is not null, but can be empty." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
     </member>
     <member name="P:NDepend.Project.PathVariable.Access">
       <summary>
@@ -4384,7 +4997,6 @@
         <paramref name="codeElementName" /> prefixed with <i>"FROM_ASM{<paramref name="assemblyName" />}"</i>.</returns>
       <requires description="codeElementName must not be null" csharp="codeElementName != null" vb="codeElementName &lt;&gt; Nothing">codeElementName != null</requires>
       <requires description="assemblyName must not be null" csharp="assemblyName != null" vb="assemblyName &lt;&gt; Nothing">assemblyName != null</requires>
-      <requires description="assemblyName must not be empty" csharp="assemblyName.Length &gt; 0" vb="assemblyName.Length &gt; 0">assemblyName.Length &gt; 0</requires>
       <ensures description="returned string reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.MatchAssembly(System.String)">
@@ -6855,13 +7467,12 @@
       <seealso cref="P:NDepend.CodeModel.IMethod.ReturnType" />
       <seealso cref="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.WithReturnTypeIn(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IMethod},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})" />
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.ReturnTypeIs(NDepend.CodeModel.IMethod,System.String)" />
-      <requires description="methods must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1();&#xD;&#xA;        local_0.returnType = returnType;&#xD;&#xA;    }&#xD;&#xA;    return methods != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1 local_0 = New NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1();&#xD;&#xA;    local_0.returnType = returnType&#xD;&#xA;    return methods &lt;&gt; Nothing; })()">(() =&gt; {
+      <requires description="methods must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1();&#xD;&#xA;    }&#xD;&#xA;    return methods != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1 local_0 = New NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1();&#xD;&#xA;    return methods &lt;&gt; Nothing; })()">(() =&gt; {
     {
         NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass1();
-        local_0.returnType = returnType;
     }
     return methods != null; })()</requires>
-      <requires description="returnType must not be null" csharp="local_0.returnType != null" vb="local_0.returnType &lt;&gt; Nothing">local_0.returnType != null</requires>
+      <requires description="returnType must not be null" csharp="returnType != null" vb="returnType &lt;&gt; Nothing">returnType != null</requires>
       <ensures description="returned sequence is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.WithReturnTypeIn(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IMethod},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})">
@@ -6896,13 +7507,12 @@
       <see cref="P:NDepend.CodeModel.IField.FieldType" />
       <seealso cref="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.WithFieldTypeIn(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IField},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})" />
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.FieldTypeIs(NDepend.CodeModel.IField,System.String)" />
-      <requires description="fields must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7();&#xD;&#xA;        local_0.fieldType = fieldType;&#xD;&#xA;    }&#xD;&#xA;    return fields != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7 local_0 = New NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7();&#xD;&#xA;    local_0.fieldType = fieldType&#xD;&#xA;    return fields &lt;&gt; Nothing; })()">(() =&gt; {
+      <requires description="fields must not be null" csharp="(() =&gt; {&#xD;&#xA;    {&#xD;&#xA;        NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7();&#xD;&#xA;    }&#xD;&#xA;    return fields != null; })()" vb="(() =&gt; {&#xD;&#xA;    NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7 local_0 = New NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7();&#xD;&#xA;    return fields &lt;&gt; Nothing; })()">(() =&gt; {
     {
         NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7 local_0 = new NDepend.CodeModel.ExtensionMethodsSequenceUsage.&lt;&gt;c__DisplayClass7();
-        local_0.fieldType = fieldType;
     }
     return fields != null; })()</requires>
-      <requires description="fieldType must not be null" csharp="local_0.fieldType != null" vb="local_0.fieldType &lt;&gt; Nothing">local_0.fieldType != null</requires>
+      <requires description="fieldType must not be null" csharp="fieldType != null" vb="fieldType &lt;&gt; Nothing">fieldType != null</requires>
       <ensures description="returned sequence is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.WithFieldTypeIn(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IField},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})">
@@ -8168,6 +8778,10 @@
             Gets a sequence of methods that are assigning this field.
             </summary>
       <remarks>
+            For an instance field, constructor(s) of its class that assign the field are not counted.
+            
+            For a static field, the class constructor that assigns the field is not counted.
+            
             This property getter has a <i>O(this.<see cref="P:NDepend.CodeModel.IField.MethodsUsingMe" />.Count)</i> time complexity.
             </remarks>
       <seealso cref="P:NDepend.CodeModel.IMethod.FieldsUsed" />
@@ -8330,7 +8944,7 @@
     </member>
     <member name="P:NDepend.CodeModel.IMethod.AccessThis">
       <summary>
-            Gets a value indicating whether this method is explicitely accessign the this reference.
+            Gets a value indicating whether this method is explicitly accessign the this reference.
             </summary>
       <remarks>
             Returns false for any static method.
@@ -8595,7 +9209,7 @@
             </summary>
       <remarks>
             Certainly the best resource on the web about this <i>new slot</i> advanced topic is <a href="http://stackoverflow.com/questions/2072983/more-about-virtual-new-plus-interfaces">this stackoverflow Q&amp;A</a><br />
-            Internally, NDepend relies on this <i>new slot</i> value to compute the override/overridden methods sets in <see cref="T:NDepend.CodeModel.IMethod" /> property getter <see cref="P:NDepend.CodeModel.IMethod.OverriddensBase" />, <see cref="P:NDepend.CodeModel.IMethod.OverridesDerived" /> and <see cref="P:NDepend.CodeModel.IMethod.OverridesDirectDerived" />.
+            Internally, NDepend relies on this <i>new slot</i> value to compute the override/overriden methods sets in <see cref="T:NDepend.CodeModel.IMethod" /> property getter <see cref="P:NDepend.CodeModel.IMethod.OverriddensBase" />, <see cref="P:NDepend.CodeModel.IMethod.OverridesDerived" /> and <see cref="P:NDepend.CodeModel.IMethod.OverridesDirectDerived" />.
             </remarks>
     </member>
     <member name="P:NDepend.CodeModel.IMethod.IsPInvokeImpl">
@@ -8630,6 +9244,11 @@
       <remarks>
             VB.NET does not support <i>unsafe code</i> but C# does.
             </remarks>
+    </member>
+    <member name="P:NDepend.CodeModel.IMethod.IsAsync">
+      <summary>
+            Gets a value indicating whether this method is asynchronous, declared with the keyword <i>async</i>.
+            </summary>
     </member>
     <member name="P:NDepend.CodeModel.IMethod.IsUsingPinning">
       <summary>
@@ -8691,7 +9310,7 @@
       <returns>
         <i>null</i> if this method is declared in a third-party assembly.<br /><i>null</i> if this method is abstract or is a default constructor.<br /><i>null</i> if the PDB file of this method parent's assembly, hasen't been found.<br /><i>null</i> if the source code file path referenced from the PDB file cannot be found.<br /><i>null</i> if the source code of this method is written with a programming language different than C#.<br />
             Otherwise returns this method body complexity computed from source code.<br />
-            More information on this can be found at: <a href="http://www.ndepend.com/Doc_CI_Inputs.aspx" target="_blank">Understanding NDepend Analysis Inputs</a><br />
+            More information on this can be found at: <a href="http://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a><br />
             If source code CC is not available for a non-abstract method, the code metric <see cref="T:NDepend.CodeModel.IMethod" />.<see cref="P:NDepend.CodeModel.IMethod.ILCyclomaticComplexity" /> can be used instead.
             </returns>
     </member>
@@ -9479,6 +10098,19 @@
       <seealso cref="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.ThatImplementAny(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})" />
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.Implement(NDepend.CodeModel.IType,System.String)" />
     </member>
+    <member name="P:NDepend.CodeModel.IType.IsTypeForwaded">
+      <summary>
+            Returns a value indicating if this type is defined through the attribute <see cref="T:System.Runtime.CompilerServices.TypeForwardedToAttribute" />.
+            </summary>
+      <remarks>
+            If <i>true</i> is returned the property <see cref="P:NDepend.CodeModel.IType.TypeForwadedDeclAssemblyName" /> returns the name of the assembly that contains the declaration of this type.
+            </remarks>
+    </member>
+    <member name="P:NDepend.CodeModel.IType.TypeForwadedDeclAssemblyName">
+      <summary>
+            If this type is defined through the attribute <see cref="T:System.Runtime.CompilerServices.TypeForwardedToAttribute" />, returns the name of the assembly that contains the declaration of this type. Else returns <i>null</i>.
+            </summary>
+    </member>
     <member name="P:NDepend.CodeModel.IType.IsGeneric">
       <summary>
             Gets a value indicating whether this type is a generic type.
@@ -9608,7 +10240,7 @@
       <returns>
         <i>null</i> if this type is declared in a third-party assembly.<br /><i>null</i> if this type has no method where <see cref="T:NDepend.CodeModel.IMethod" />.<see cref="P:NDepend.CodeModel.IMethod.CyclomaticComplexity" /> is available.<br /><i>null</i> if the PDB file of this type parent's assembly, hasen't been found.<br /><i>null</i> if the source code file path referenced from the PDB file cannot be found.<br /><i>null</i> if the source code of this type is written with a programming language different than C#.<br />
             Otherwise returns this type child methods additive source code complexity.<br />
-            More information on this can be found at: <a href="http://www.ndepend.com/Doc_CI_Inputs.aspx" target="_blank">Understanding NDepend Analysis Inputs</a></returns>
+            More information on this can be found at: <a href="http://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a></returns>
     </member>
     <member name="P:NDepend.CodeModel.IType.ILCyclomaticComplexity">
       <summary>
@@ -10000,7 +10632,7 @@
             </summary>
       <remarks>
             The interfaces <see cref="T:NDepend.CodeQuery.IQuery" />, <see cref="T:NDepend.CodeQuery.IGroup" /> and <see cref="T:NDepend.CodeQuery.IGroupOfGroups" /> implement the interface <see cref="T:NDepend.CodeQuery.IControllerChild" />, because they all depend from a <see cref="T:NDepend.CodeQuery.IController" /> object.<br />
-            A hierarchy of queries can be gathered from <see cref="T:NDepend.Project.IProjectCodeQueries" />.<see cref="P:NDepend.Project.IProjectCodeQueries.CodeQueriesSet" /> or <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.QueriesExtractedFromCode" />.
+            A hierarchy of queries can be gathered from <see cref="T:NDepend.Project.IProjectCodeQueries" />.<see cref="P:NDepend.Project.IProjectCodeQueries.CodeQueriesSet" /> or <see cref="T:NDepend.Analysis.IAnalysisResult" />.<see cref="P:NDepend.Analysis.IAnalysisResult.RulesExtractedFromCode" />.
             </remarks>
     </member>
     <member name="M:NDepend.CodeQuery.IController.CreateQuery(System.Boolean,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
@@ -10516,6 +11148,15 @@
       <requires description="queryToMove must not be null" csharp="queryToMove != null" vb="queryToMove &lt;&gt; Nothing">queryToMove != null</requires>
       <ensures description="returned group is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
+    <member name="M:NDepend.CodeQuery.IGroup.CloneDeep(NDepend.CodeQuery.IController)">
+      <summary>
+            Clone this group and all its child groups and child queries recursively, through <paramref name="controller" />.
+            </summary>
+      <param name="controller">The queries controller used for cloning.</param>
+      <returns>This group cloned.</returns>
+      <requires description="controller must not be null" csharp="controller != null" vb="controller &lt;&gt; Nothing">controller != null</requires>
+      <ensures description="returned group is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="P:NDepend.CodeQuery.IGroup.Parent">
       <summary>
             Gets the parent group. Returns null if the group has no parent group.
@@ -10571,7 +11212,7 @@
     </member>
     <member name="M:NDepend.CodeQuery.IQuery.EqualsTo(NDepend.CodeQuery.IQuery)">
       <summary>
-            Returns true if this query and <paramref name="queryToCompareWith" /> have same value for <see cref="P:NDepend.CodeQuery.IQuery.QueryString" />, <see cref="P:NDepend.CodeQuery.IQuery.IsActive" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplayListInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplaySelectionViewInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplayStatInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.IsCriticalRule" />.
+            Returns <i>true</i> if this query and <paramref name="queryToCompareWith" /> have same value for <see cref="P:NDepend.CodeQuery.IQuery.QueryString" />, <see cref="P:NDepend.CodeQuery.IQuery.IsActive" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplayListInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplaySelectionViewInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.DisplayStatInReport" />, <see cref="P:NDepend.CodeQuery.IQuery.IsCriticalRule" />.
             </summary>
       <remarks>
         <see cref="P:NDepend.CodeQuery.IQuery.IsExtractedFromCode" /> is not taken account for this equality operation.</remarks>
@@ -10658,7 +11299,7 @@
       <remarks>
             The default value is false.<br />
             A critical code rule is useful to break the build process once the rule is violated.<br />
-            More information at: <a href="http://www.ndepend.com/Doc_CI_CriticalRule.aspx">Critical Rules and Build Failure</a></remarks>
+            More information at: <a href="http://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
     </member>
     <member name="P:NDepend.CodeQuery.IQuery.QueryString">
       <summary>
@@ -11174,7 +11815,7 @@
             </returns>
       <remarks>
             Versions are returned in decreased order, highest version installed first. <br />
-            Notes that NDepend needs at least .NET framework v3.5 to run, so the returned version for the <see cref="F:NDepend.DotNet.DotNetProfile.DotNetFramework" /> profile must include v3.5 or above. <br />
+            Notes that NDepend needs at least .NET framework v4.0 to run, so the returned version for the <see cref="F:NDepend.DotNet.DotNetProfile.DotNetFramework" /> profile must include v4.0 or above. <br />
             Only the version major and minor numbers are taken account.
             </remarks>
       <param name="dotNetProfile">The .NET profile target.</param>
@@ -11257,7 +11898,7 @@
     </member>
     <member name="M:NDepend.DotNet.VisualStudio.IVisualStudioManager.IsVisualStudioVersionIntalled(NDepend.DotNet.VisualStudio.VisualStudioVersion)">
       <summary>
-            Returns true if the specified Visual Studio version is installed on the current machine.
+            Returns <i>true</i> if the specified Visual Studio version is installed on the current machine.
             </summary>
       <param name="visualStudioVersion">The Visual Studio version.</param>
     </member>
@@ -11275,6 +11916,31 @@
       <seealso cref="M:NDepend.Analysis.IAnalysisManager.ShowDialogBuildComparison(System.IntPtr,NDepend.Project.IProject@,NDepend.Analysis.IAnalysisResultRef@,NDepend.Project.IProject@,NDepend.Analysis.IAnalysisResultRef@)" />
       <requires description="ownerWindowHandle is not zero" csharp="ownerWindowHandle != System.IntPtr.Zero" vb="ownerWindowHandle &lt;&gt; .Zero ">ownerWindowHandle != System.IntPtr.Zero</requires>
       <ensures description="returned collection is not null if this method returns true" csharp="result ⇒ visualStudioSolutionsOrProjectsFilePaths != null" vb="result Implies visualStudioSolutionsOrProjectsFilePaths &lt;&gt; Nothing">!result || visualStudioSolutionsOrProjectsFilePaths != null</ensures>
+    </member>
+    <member name="M:NDepend.DotNet.VisualStudio.IVisualStudioManager.TryGetNDependProjectFilePathAttachedToVisualStudioSolution(NDepend.Path.IAbsoluteFilePath,NDepend.Path.IAbsoluteFilePath@)">
+      <summary>
+            Returns <i>true</i> if the <paramref name="visualStudioSolutionFilePath" /> exists, and contains a <paramref name="ndependProjectFilePath" /> that can be resolved to an absolute path.
+            </summary>
+      <remarks>
+            If project attachment is done through the VS solutionn user options file (.suo) this method won't be able to retrieve the project attached.
+            This method only deal with VS solution files (.sln).  
+            </remarks>
+      <param name="visualStudioSolutionFilePath">The path to the Visual Studio solution file.</param>
+      <param name="ndependProjectFilePath">The path to the NDepend project file.</param>
+      <requires description="inputed visualStudioSolutionFilePath cannot be null" csharp="visualStudioSolutionFilePath != null" vb="visualStudioSolutionFilePath &lt;&gt; Nothing">visualStudioSolutionFilePath != null</requires>
+    </member>
+    <member name="M:NDepend.DotNet.VisualStudio.IVisualStudioManager.TryGetNDependProjectFilePathAttachedToVisualStudioSolution(NDepend.Path.IAbsoluteFilePath,NDepend.Path.IAbsoluteFilePath@,System.String@)">
+      <summary>
+            Returns <i>true</i> if the <paramref name="visualStudioSolutionFilePath" /> exists, and contains a <paramref name="ndependProjectFilePath" /> that can be resolved to an absolute path.
+            </summary>
+      <remarks>
+            If project attachment is done through the VS solutionn user options file (.suo) this method won't be able to retrieve the project attached.
+            This method only deal with VS solution files (.sln).  
+            </remarks>
+      <param name="visualStudioSolutionFilePath">The path to the Visual Studio solution file.</param>
+      <param name="ndependProjectFilePath">The path to the NDepend project file.</param>
+      <param name="failureReason">If this method returns <i>false</i>, this string contains a plain-english description of the reason why a NDepend project file path cannot be resolved.</param>
+      <requires description="inputed visualStudioSolutionFilePath cannot be null" csharp="visualStudioSolutionFilePath != null" vb="visualStudioSolutionFilePath &lt;&gt; Nothing">visualStudioSolutionFilePath != null</requires>
     </member>
     <member name="T:NDepend.DotNet.VisualStudio.VisualStudioVersion">
       <summary>
@@ -11301,6 +11967,9 @@
     </member>
     <member name="F:NDepend.DotNet.VisualStudio.VisualStudioVersion.V12_2013">
       <summary>V12_2013</summary>
+    </member>
+    <member name="F:NDepend.DotNet.VisualStudio.VisualStudioVersion.V14_2015">
+      <summary>V14_2015</summary>
     </member>
     <member name="T:NDepend.CodeQuery.RecordCellValue">
       <summary>
@@ -12501,30 +13170,6 @@
         <ensures description="returned reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
     </member>
-    <member name="T:NDepend.Project.CoverageFileMergeMode">
-      <summary>
-            When NDepend loads several coverage files to extract coverage information, the enumeration <see cref="T:NDepend.Project.CoverageFileMergeMode" /> indicates for each file how to combine coverage data.
-            </summary>
-      <remarks>
-            For each method with a body, coverage data are represented through an array of bit of length <see cref="T:NDepend.CodeModel.ICodeContainer" />.<see cref="P:NDepend.CodeModel.ICodeContainer.NbLinesOfCode" />.<br />
-            Each coverage file determines such an array of bits for each method with a body.<br />
-            Values of <see cref="T:NDepend.Project.CoverageFileMergeMode" /> indicates for each coverage file loaded, how to combine these arrays of bits.<br />
-            The default value is <see cref="F:NDepend.Project.CoverageFileMergeMode.Or" /> since most of the time, the user wants an addiditive combination of multiple coverage data obtained from multiple coverage files.
-            </remarks>
-      <seealso cref="P:NDepend.Project.IProjectCoverage.Item(NDepend.Path.IFilePath)" />
-    </member>
-    <member name="F:NDepend.Project.CoverageFileMergeMode.Or">
-      <summary>Or</summary>
-    </member>
-    <member name="F:NDepend.Project.CoverageFileMergeMode.And">
-      <summary>And</summary>
-    </member>
-    <member name="F:NDepend.Project.CoverageFileMergeMode.XOr">
-      <summary>XOr</summary>
-    </member>
-    <member name="F:NDepend.Project.CoverageFileMergeMode.None">
-      <summary>None</summary>
-    </member>
     <member name="T:NDepend.Project.IAssemblyResolvingError">
       <summary>
             Represents an application or third-party assembly resolving error, obtained when trying to resolve assemblies with the method <see cref="T:NDepend.Project.IProjectCodeToAnalyze" />.<see cref="M:NDepend.Project.IProjectCodeToAnalyze.Resolve(NDepend.Helpers.IReadOnlyList{NDepend.Path.IAbsoluteFilePath}@,NDepend.Helpers.IReadOnlyList{NDepend.Path.IAbsoluteFilePath}@,NDepend.Helpers.IReadOnlyList{NDepend.Project.IAssemblyResolvingError}@,NDepend.Helpers.IReadOnlyList{NDepend.Project.IAssemblyResolvingError}@)" />.
@@ -12663,6 +13308,14 @@
             Represents this NDepend project code queries and code rules.
             </summary>
       <seealso cref="N:NDepend.CodeQuery" />
+      <getter>
+        <ensures description="returned reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
+    </member>
+    <member name="P:NDepend.Project.IProject.RuleFiles">
+      <summary>
+            Represents the list of rule files referenced by this project.
+            </summary>
       <getter>
         <ensures description="returned reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
@@ -12885,7 +13538,6 @@
             If the path is added, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.Coverage_Settings" /> activated.<br /></remarks>
       <returns>
             Returns <i>true</i> only if the path is correctly added.<br />
-            If the path is correctly added, its associated <see cref="T:NDepend.Project.CoverageFileMergeMode" /> is <see cref="T:NDepend.Project.CoverageFileMergeMode" />.<see cref="F:NDepend.Project.CoverageFileMergeMode.Or" />.<br />
             When adding a duplicate path, the method does nothing and returns <i>false</i>.<br /></returns>
       <param name="coverageFilePath">The coverage file path to add.</param>
       <requires description="the file path must not be null" csharp="coverageFilePath != null" vb="coverageFilePath &lt;&gt; Nothing">coverageFilePath != null</requires>
@@ -12922,20 +13574,15 @@
         <ensures description="returned collection of paths can be empty but not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
     </member>
-    <member name="P:NDepend.Project.IProjectCoverage.Item(NDepend.Path.IFilePath)">
+    <member name="P:NDepend.Project.IProjectCoverage.CoverageDir">
       <summary>
-            Gets or sets the <see cref="T:NDepend.Project.CoverageFileMergeMode" /> value corresponding to the coverage file path inputed.
+            Gets or sets a directory path that contains some coverage files to import. A <i>null</i> value means that this facility is not used.
             </summary>
-      <param name="coverageFilePath">The coverage file path from which to get or set the <see cref="T:NDepend.Project.CoverageFileMergeMode" /> value.</param>
       <remarks>
-            If no coverage file path correspond to <paramref name="coverageFilePath" />:<br />
-            - the getter returns <see cref="T:NDepend.Project.CoverageFileMergeMode" />.<see cref="F:NDepend.Project.CoverageFileMergeMode.None" />.<br />
-            - the setter does nothing.<br />
-            If the setter modifies a state, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.Coverage_Settings" /> activated.
+            In additon to the specified list of coverage files, a directory can be specified to import all files in this directory as coverage files.
+            This facility is useful to just dump all coverage files in a directory at build time, and don't need to care about their number nor names.
+            If some files in this directory are not recognized as coverage files, a warning will be emitted.
             </remarks>
-      <getter>
-        <requires description="the file path must not be null" csharp="coverageFilePath != null" vb="coverageFilePath &lt;&gt; Nothing">coverageFilePath != null</requires>
-      </getter>
     </member>
     <member name="P:NDepend.Project.IProjectCoverage.UncoverableAttribute">
       <summary>Gets or sets the full name string of the uncoverable attribute.</summary>
@@ -13140,6 +13787,16 @@
       <remarks>
             When the property is changed, the event <see cref="T:NDepend.Project.IProject" />.<see cref="E:NDepend.Project.IProject.SettingsChanged" /> is triggered with the flag <see cref="T:NDepend.Project.ProjectSettings" />.<see cref="F:NDepend.Project.ProjectSettings.Report_KeepXmlFilesUsedToBuildReport" /> activated.<br /></remarks>
     </member>
+    <member name="P:NDepend.Project.IProjectProperties.MergeCodeGeneratedByCompiler">
+      <summary>
+            Gets or sets a boolean value indicating whether at analysis time, types and methods generated by the C# and VB.NET compilers to handle language constructs like lambda, iterators, anonymous and asynchronous methods, are merged within their declaring methods.
+            </summary>
+      <remarks>
+            The default value is <i>true</i>. In most situations you'll want to avoid having to deal with such generated types and methods.<br />
+            Anonymous types are not merged since they are explicitely created and used in the source code.<br />
+            Types created by the Microsoft Code Contract infrastructure are not merged as well.
+            </remarks>
+    </member>
     <member name="T:NDepend.Project.IProjectCodeQueries">
       <summary>
             Represents this NDepend project code queries and code rules.
@@ -13167,6 +13824,11 @@
       <setter>
         <requires description="inputed set of code rules and queries must not be null" csharp="value != null" vb="value &lt;&gt; Nothing">value != null</requires>
       </setter>
+    </member>
+    <member name="P:NDepend.Project.IProjectCodeQueries.AreActive">
+      <summary>
+            Gets or sets the active status of code queries and rules defined in this NDepend project.
+            </summary>
     </member>
     <member name="T:NDepend.Project.IProjectSourceFilesRebasing">
       <summary>
@@ -13348,6 +14010,9 @@
     <member name="F:NDepend.Project.ReportOptionsFlags.CollapseCodeQueriesBodies">
       <summary>CollapseCodeQueriesBodies</summary>
     </member>
+    <member name="F:NDepend.Project.ReportOptionsFlags.ShowRuleDescriptionIfAvailable">
+      <summary>ShowRuleDescriptionIfAvailable</summary>
+    </member>
     <member name="F:NDepend.Project.ReportOptionsFlags.Default">
       <summary>Default</summary>
     </member>
@@ -13406,7 +14071,7 @@
             If the project file exists, this data is loaded from and saved in the project file.<br />
             (getter only) If the project file is corrupted, an empty array is returned.
             </remarks>
-      <exception cref="T:System.IO.IOException">(setter only) The project file cannot be written.</exception>
+      <exception cref="T:System.IO.IOException">The project file cannot be read or written.</exception>
       <getter>
         <ensures description="returned collection is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
@@ -13525,6 +14190,9 @@
     <member name="F:NDepend.Project.ProjectSettings.Coverage_FilesPaths">
       <summary>Coverage_FilesPaths</summary>
     </member>
+    <member name="F:NDepend.Project.ProjectSettings.Coverage_Dir">
+      <summary>Coverage_Dir</summary>
+    </member>
     <member name="F:NDepend.Project.ProjectSettings.Rebasing_FromPath">
       <summary>Rebasing_FromPath</summary>
     </member>
@@ -13549,37 +14217,17 @@
     <member name="F:NDepend.Project.ProjectSettings.HistoricAnalysisResult_CustomDirectoryPath">
       <summary>HistoricAnalysisResult_CustomDirectoryPath</summary>
     </member>
-    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_Expression">
-      <ensures inheritedFrom="M:System.Linq.IQueryable.get_Expression" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    <member name="F:NDepend.Project.ProjectSettings.RuleFilesRef_Activation">
+      <summary>RuleFilesRef_Activation</summary>
     </member>
-    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_ElementType">
-      <ensures inheritedFrom="M:System.Linq.IQueryable.get_ElementType" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    <member name="F:NDepend.Project.ProjectSettings.RuleFilesRef_Paths">
+      <summary>RuleFilesRef_Paths</summary>
     </member>
-    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_Provider">
-      <ensures inheritedFrom="M:System.Linq.IQueryable.get_Provider" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    <member name="F:NDepend.Project.ProjectSettings.ProjectRules_AreActive">
+      <summary>ProjectRules_AreActive</summary>
     </member>
-    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Collections#IEnumerable#GetEnumerator">
-      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
-      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_Model == this.get_Model" vb="result.get_Model = Me.get_Model">result.get_Model == this.get_Model</ensures>
-      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_CurrentIndex == -1" vb="result.get_CurrentIndex = -1">result.get_CurrentIndex == -1</ensures>
-    </member>
-    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#Expression">
-      <getter>
-        <ensures inheritedFrom="M:System.Linq.IQueryable.get_Expression" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
-      </getter>
-    </member>
-    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#ElementType">
-      <getter>
-        <ensures inheritedFrom="M:System.Linq.IQueryable.get_ElementType" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
-      </getter>
-    </member>
-    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#Provider">
-      <getter>
-        <ensures inheritedFrom="M:System.Linq.IQueryable.get_Provider" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
-      </getter>
-    </member>
-    <member name="M:NDepend.Reserved.Linq.CodeQueryExpressionVisitor.ToString">
-      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    <member name="F:NDepend.Project.ProjectSettings.MergeCodeGeneratedByCompiler">
+      <summary>MergeCodeGeneratedByCompiler</summary>
     </member>
     <member name="M:NDepend.Path.PathHelpers.PathBase.ToString">
       <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
@@ -14087,6 +14735,38 @@
       <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_Model == this.get_Model" vb="result.get_Model = Me.get_Model">result.get_Model == this.get_Model</ensures>
       <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_CurrentIndex == -1" vb="result.get_CurrentIndex = -1">result.get_CurrentIndex == -1</ensures>
+    </member>
+    <member name="M:NDepend.Reserved.Linq.CodeQueryExpressionVisitor.ToString">
+      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_Expression">
+      <ensures inheritedFrom="M:System.Linq.IQueryable.get_Expression" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_ElementType">
+      <ensures inheritedFrom="M:System.Linq.IQueryable.get_ElementType" inheritedFromTypeName="IQueryable" csharp="result != (System.Type)null" vb="result &lt;&gt; ((System.Type)Nothing) ">result != (System.Type)null</ensures>
+    </member>
+    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_Provider">
+      <ensures inheritedFrom="M:System.Linq.IQueryable.get_Provider" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
+    <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Collections#IEnumerable#GetEnumerator">
+      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_Model == this.get_Model" vb="result.get_Model = Me.get_Model">result.get_Model == this.get_Model</ensures>
+      <ensures inheritedFrom="M:System.Collections.IEnumerable.GetEnumerator" inheritedFromTypeName="IEnumerable" csharp="result.get_CurrentIndex == -1" vb="result.get_CurrentIndex = -1">result.get_CurrentIndex == -1</ensures>
+    </member>
+    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#Expression">
+      <getter>
+        <ensures inheritedFrom="M:System.Linq.IQueryable.get_Expression" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
+    </member>
+    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#ElementType">
+      <getter>
+        <ensures inheritedFrom="M:System.Linq.IQueryable.get_ElementType" inheritedFromTypeName="IQueryable" csharp="result != (System.Type)null" vb="result &lt;&gt; ((System.Type)Nothing) ">result != (System.Type)null</ensures>
+      </getter>
+    </member>
+    <member name="P:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#Provider">
+      <getter>
+        <ensures inheritedFrom="M:System.Linq.IQueryable.get_Provider" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      </getter>
     </member>
   </members>
 </doc>
