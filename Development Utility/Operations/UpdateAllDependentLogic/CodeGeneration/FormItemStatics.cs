@@ -629,9 +629,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) +
 			           "cellSpan: cellSpan, textAlignment: textAlignment" + ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
-			           ( includeValidationParams
-				             ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
-				             : "" ) + " );";
+			           ( includeValidationParams ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod" : "" ) +
+			           " );";
 
 			writeFormItemGetter(
 				writer,
@@ -663,7 +662,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			                              labelOverrideNullCoalescingExpression.PrependDelimiter( " ?? " ) +
 			                              ", value: value, cellSpan: cellSpan, textAlignment: textAlignment" +
 			                              ( validationMethodExpressionOrBlock.Any()
-				                                ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
+				                                ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod"
 				                                : "" ) + " );";
 			writeFormItemGetter(
 				writer,
@@ -712,7 +711,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			if( includeValidationParams ) {
 				parameters.Add( new CSharpParameter( "System.Action", "validationErrorNotifier", "null" ) );
 				parameters.Add( new CSharpParameter( "System.Action<string,Validator>", "additionalValidationMethod", "null" ) );
-				parameters.Add( new CSharpParameter( "ValidationList", "validationList", "null" ) );
 			}
 
 			writer.WriteLine(
@@ -740,7 +738,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			           ( includeValidationMethodReturnValue.HasValue ? ", validationMethod" : "" ) +
 			           ", labelAndSubject: labelAndSubject, labelOverride: labelOverride, cellSpan: cellSpan, textAlignment: textAlignment" +
 			           ( includeValidationMethodReturnValue.HasValue
-				             ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod, validationList: validationList"
+				             ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod"
 				             : "" ) + " );";
 			writeGenericGetter( writer, field, false, includeValidationMethodReturnValue, body );
 		}
@@ -771,7 +769,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
 					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
 				};
-			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) + " }, validationList )";
+			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) + " } )";
 		}
 
 		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, string body ) {
@@ -825,7 +823,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( "System.Func<bool>", "validationPredicate", "null" ) );
 				parameters.Add( new CSharpParameter( "System.Action", "validationErrorNotifier", "null" ) );
 				parameters.Add( new CSharpParameter( "System.Action<string,Validator>", "additionalValidationMethod", "null" ) );
-				parameters.Add( new CSharpParameter( "ValidationList", "validationList", "null" ) );
 			}
 
 			writer.WriteLine(
