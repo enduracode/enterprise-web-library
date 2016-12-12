@@ -27,13 +27,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="cellSpan"></param>
 		/// <param name="textAlignment"></param>
 		/// <param name="validationPredicate"></param>
-		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem GetFormItem<ItemIdType>(
 			FormItemLabel label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
 			string caption = "", bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null,
-			PostBack postBack = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null,
-			ValidationList validationList = null ) {
+			PostBack postBack = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
 			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>(
 				items,
 				selectedItemIds,
@@ -53,8 +51,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                             if( validationPredicate != null && !validationPredicate() )
 							                             return;
 						                             control.Validate( pbv );
-					                             },
-					                             validationList ) );
+					                             } ) );
 		}
 
 		/// <summary>
@@ -72,12 +69,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="cellSpan"></param>
 		/// <param name="textAlignment"></param>
 		/// <param name="validationPredicate"></param>
-		/// <param name="validationList"></param>
 		/// <returns></returns>
 		public static FormItem GetFormItem<ItemIdType>(
 			FormItemLabel label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, string caption = "",
 			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, PostBack postBack = null, int? cellSpan = null,
-			TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null, ValidationList validationList = null ) {
+			TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
 			var itemArray = items.ToArray();
 			var selectedItemIds = itemArray.Where( i => i.IsSelected ).Select( i => i.Item.Item.Id );
 			var uiSelectedItemIds = itemArray.Where( i => i.IsSelectedInUi ).Select( i => i.Item.Item.Id );
@@ -100,8 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                             if( validationPredicate != null && !validationPredicate() )
 							                             return;
 						                             control.Validate( pbv );
-					                             },
-					                             validationList ) );
+					                             } ) );
 		}
 	}
 
@@ -148,6 +143,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

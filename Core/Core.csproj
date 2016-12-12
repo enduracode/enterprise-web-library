@@ -430,7 +430,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicValidationList.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModificationException.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ErrorDisplayStyle.cs" />

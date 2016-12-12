@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class PostBack {
@@ -79,7 +78,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal bool ForcePageDataUpdate { get { return forcePageDataUpdate.Value; } }
 	}
 
-	public class ActionPostBack: PostBack, DataModification, ValidationListInternal {
+	public class ActionPostBack: PostBack, DataModification, ValidationList {
 		private readonly IEnumerable<UpdateRegionSet> updateRegions;
 		private readonly bool skipModificationIfNoChanges;
 		private readonly BasicDataModification dataModification;
@@ -102,20 +101,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal IEnumerable<UpdateRegionSet> UpdateRegions { get { return updateRegions; } }
 
-		void ValidationListInternal.AddValidation( EwfValidation validation ) {
-			( (ValidationListInternal)dataModification ).AddValidation( validation );
-		}
-
-		/// <summary>
-		/// Adds all validations from the specified basic validation list.
-		/// </summary>
-		public void AddValidations( BasicValidationList validationList ) {
-			dataModification.AddValidations( validationList );
-		}
-
-		[ Obsolete( "Guaranteed through 31 October 2016. Use EwfValidation instead." ) ]
-		public void AddTopValidationMethod( Action<PostBackValueDictionary, Validator> validationMethod ) {
-			dataModification.AddTopValidationMethod( validationMethod );
+		void ValidationList.AddValidation( EwfValidation validation ) {
+			( (ValidationList)dataModification ).AddValidation( validation );
 		}
 
 		/// <summary>
