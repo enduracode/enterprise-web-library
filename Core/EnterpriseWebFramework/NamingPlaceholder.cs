@@ -24,10 +24,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.AddControlsReturnThis( childControls );
 
 			EwfPage.Instance.AddUpdateRegionLinker(
-				new UpdateRegionLinker(
+				new LegacyUpdateRegionLinker(
 					this,
 					"",
-					new PreModificationUpdateRegion( updateRegionSets, this.ToSingleElementArray, () => "" ).ToSingleElementArray(),
+					new LegacyPreModificationUpdateRegion( updateRegionSets, this.ToSingleElementArray, () => "" ).ToSingleElementArray(),
 					arg => this.ToSingleElementArray() ) );
 		}
 	}

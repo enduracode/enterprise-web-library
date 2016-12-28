@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private FormsAuthCapableUser user;
 
 		protected override void loadData() {
-			Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
+			Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
 			var logInPb = PostBack.CreateFull(
 				firstModificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
 				actionGetter:

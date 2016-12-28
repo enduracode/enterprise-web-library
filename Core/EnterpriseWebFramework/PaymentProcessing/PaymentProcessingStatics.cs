@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can
 		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
 		/// email address).</param>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
+		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
 			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
 			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var token = new DataValue<string>();
 
 			var hiddenFieldId = new HiddenFieldId();
-			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
+			List<EtherealComponentOrElement> hiddenFields = new List<EtherealComponentOrElement>();
 			ValidationSetupState.ExecuteWithDataModifications(
 				postBack.ToSingleElementArray(),
 				() => hiddenFields.Add( new EwfHiddenField( "", ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 
 			EwfPage.Instance.AddPostBack( postBack );
-			return Tuple.Create<IReadOnlyCollection<EtherealComponent>, Func<string>>(
+			return Tuple.Create<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>>(
 				hiddenFields,
 				() => {
 					if( hiddenFieldId.Id.Length == 0 )

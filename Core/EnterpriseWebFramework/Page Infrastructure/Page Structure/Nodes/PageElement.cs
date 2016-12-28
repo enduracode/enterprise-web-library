@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class PageElement: WebControl, ElementNode, FlowComponent, EtherealComponent, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
+	public sealed class PageElement: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
 		EtherealControl {
 		internal readonly Func<ElementContext, ElementData> ElementDataGetter;
 		internal readonly FormValue FormValue;
@@ -16,14 +15,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ): base( HtmlTextWriterTag.Unknown ) {
 			ElementDataGetter = elementDataGetter;
 			FormValue = formValue;
-		}
-
-		IEnumerable<PageNode> FlowComponent.GetNodes() {
-			return this.ToSingleElementArray();
-		}
-
-		IEnumerable<ElementNode> EtherealComponent.GetElements() {
-			return this.ToSingleElementArray();
 		}
 
 

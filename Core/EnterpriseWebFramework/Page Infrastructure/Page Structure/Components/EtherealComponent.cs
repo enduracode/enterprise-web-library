@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface EtherealComponent: PageComponent {
-		IEnumerable<ElementNode> GetElements();
+	public interface EtherealComponent: EtherealComponentOrElement {
+		IEnumerable<EtherealComponentOrElement> GetChildren();
 	}
 }

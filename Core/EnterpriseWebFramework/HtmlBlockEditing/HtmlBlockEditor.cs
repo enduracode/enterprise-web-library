@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for editing an HTML block.
 	/// </summary>
-	public class HtmlBlockEditor: FormControl<FlowComponent> {
+	public class HtmlBlockEditor: FormControl<FlowComponentOrNode> {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly HtmlBlockEditorModification mod;
-		private readonly FlowComponent component;
+		private readonly FlowComponentOrNode component;
 		private readonly EwfValidation validation;
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			validation = wysiwygEditor.Validation;
 		}
 
-		public FlowComponent PageComponent { get { return component; } }
+		public FlowComponentOrNode PageComponent { get { return component; } }
 		public EwfValidation Validation { get { return validation; } }
 
 		/// <summary>

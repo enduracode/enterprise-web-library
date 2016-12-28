@@ -1,3 +1,3 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface PageNode {}
+	public interface FlowComponentOrNode: PageComponent {}
 }

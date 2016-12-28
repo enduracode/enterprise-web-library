@@ -7,17 +7,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Data for a page element.
 	/// </summary>
 	public sealed class ElementData {
-		internal readonly IEnumerable<FlowComponent> Children;
-		internal readonly IEnumerable<EtherealComponent> EtherealChildren;
+		internal readonly IEnumerable<FlowComponentOrNode> Children;
+		internal readonly IEnumerable<EtherealComponentOrElement> EtherealChildren;
 		internal readonly Func<ElementLocalData> LocalDataGetter;
 
 		/// <summary>
 		/// Creates an element-data object.
 		/// </summary>
 		public ElementData(
-			Func<ElementLocalData> localDataGetter, IEnumerable<FlowComponent> children = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
-			Children = children ?? ImmutableArray<FlowComponent>.Empty;
-			EtherealChildren = etherealChildren ?? ImmutableArray<EtherealComponent>.Empty;
+			Func<ElementLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			Children = children ?? ImmutableArray<FlowComponentOrNode>.Empty;
+			EtherealChildren = etherealChildren ?? ImmutableArray<EtherealComponentOrElement>.Empty;
 			LocalDataGetter = localDataGetter;
 		}
 	}

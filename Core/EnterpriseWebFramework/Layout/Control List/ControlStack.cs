@@ -136,12 +136,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			Controls.Add( new NamingPlaceholder( itemControls ) );
 
 			EwfPage.Instance.AddUpdateRegionLinker(
-				new UpdateRegionLinker(
+				new LegacyUpdateRegionLinker(
 					this,
 					"tail",
 					from region in tailUpdateRegions
 					let staticItemCount = items.Count() - region.UpdatingItemCount
-					select new PreModificationUpdateRegion( region.Sets, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
+					select new LegacyPreModificationUpdateRegion( region.Sets, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
 					arg => itemControls.Skip( int.Parse( arg ) ) ) );
 
 			var itemControlsById =
@@ -149,24 +149,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					.Where( i => i.Id != null )
 					.ToDictionary( i => i.Id, i => i.control );
 			EwfPage.Instance.AddUpdateRegionLinker(
-				new UpdateRegionLinker(
+				new LegacyUpdateRegionLinker(
 					this,
 					"add",
 					from region in itemInsertionUpdateRegions
 					select
-						new PreModificationUpdateRegion(
+						new LegacyPreModificationUpdateRegion(
 						region.Sets,
 						() => new Control[ 0 ],
 						() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
 					arg => arg.Separate( ",", false ).Where( itemControlsById.ContainsKey ).Select( i => itemControlsById[ i ] as Control ) ) );
 
 			EwfPage.Instance.AddUpdateRegionLinker(
-				new UpdateRegionLinker(
+				new LegacyUpdateRegionLinker(
 					this,
 					"remove",
 					visibleItems.Select(
 						( item, index ) =>
-						new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" ) ),
+						new LegacyPreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" ) ),
 					arg => new Control[ 0 ] ) );
 		}
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -92,21 +93,90 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static IEnumerable<Control> GetControls( this IEnumerable<FlowComponent> components ) {
-			return components.SelectMany( i => i.GetNodes() ).Cast<Control>();
+		public static IEnumerable<Control> GetControls( this IEnumerable<FlowComponentOrNode> components ) {
+			return components.SelectMany(
+				i => {
+					var controls = getControls( i );
+					EwfPage.Instance.ControlsByComponent.Add( i, controls );
+					return controls;
+				} );
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static void AddEtherealControls( this IEnumerable<EtherealComponent> components, Control parent ) {
-			foreach( var element in components.SelectMany( i => i.GetElements() ) )
-				EwfPage.Instance.AddEtherealControl( parent, (PageElement)element );
+		private static IReadOnlyCollection<Control> getControls( FlowComponentOrNode component ) {
+			var control = component as Control;
+			if( control != null )
+				return control.ToCollection();
+
+			var children = ( (FlowComponent)component ).GetChildren().GetControls();
+			var identifiedComponent = component as IdentifiedFlowComponent;
+			if( identifiedComponent == null )
+				return children.ToImmutableArray();
+
+			var ph = new PlaceHolder().AddControlsReturnThis( children );
+			foreach( var linker in identifiedComponent.UpdateRegionLinkers ) {
+				EwfPage.Instance.AddUpdateRegionLinker(
+					new LegacyUpdateRegionLinker(
+						ph,
+						linker.KeySuffix,
+						linker.PreModificationRegions.Select(
+							region =>
+							new LegacyPreModificationUpdateRegion(
+								region.Sets,
+								() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
+								region.ArgumentGetter ) ),
+						arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
+			}
+			return ph.ToCollection();
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		public static IEnumerable<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
+			return components.SelectMany(
+				i => {
+					var controls = addEtherealControls( parent, i );
+					EwfPage.Instance.ControlsByComponent.Add( i, controls );
+					return controls;
+				} );
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		private static IReadOnlyCollection<Control> addEtherealControls( Control parent, EtherealComponentOrElement component ) {
+			var element = component as PageElement;
+			if( element != null ) {
+				EwfPage.Instance.AddEtherealControl( parent, element );
+				return ( (EtherealControl)element ).Control.ToCollection();
+			}
+
+			var children = ( (EtherealComponent)component ).GetChildren();
+			var identifiedComponent = component as IdentifiedEtherealComponent;
+			if( identifiedComponent == null )
+				return children.AddEtherealControls( parent ).ToImmutableArray();
+
+			var ph = new PlaceHolder();
+			children.AddEtherealControls( ph );
+			foreach( var linker in identifiedComponent.UpdateRegionLinkers ) {
+				EwfPage.Instance.AddUpdateRegionLinker(
+					new LegacyUpdateRegionLinker(
+						ph,
+						linker.KeySuffix,
+						linker.PreModificationRegions.Select(
+							region =>
+							new LegacyPreModificationUpdateRegion(
+								region.Sets,
+								() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
+								region.ArgumentGetter ) ),
+						arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
+			}
+			parent.AddControlsReturnThis( ph );
+			return ph.ToCollection();
 		}
 
 		/// <summary>
 		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
 		/// </summary>
 		public static FormItem ToFormItem(
-			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			this FormControl<FlowComponentOrNode> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			var webControl = formControl as WebControl;
 			if( webControl != null )

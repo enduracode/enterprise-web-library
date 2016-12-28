@@ -116,7 +116,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
 		/// does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
+		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
 			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var utcOffset = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( utcOffset );
@@ -176,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
 		/// the system does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
+		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
 			var utcOffset = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( utcOffset );
 
@@ -195,7 +195,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					} ) );
 		}
 
-		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> utcOffset ) {
+		private static IReadOnlyCollection<EtherealComponentOrElement> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> utcOffset ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
 			HiddenFieldId utcOffsetHiddenFieldId = new HiddenFieldId();

@@ -6,8 +6,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A hidden field.
 	/// </summary>
-	public class EwfHiddenField: FormControl<EtherealComponent> {
-		private readonly EtherealComponent component;
+	public class EwfHiddenField: FormControl<EtherealComponentOrElement> {
+		private readonly EtherealComponentOrElement component;
 		private readonly EwfValidation validation;
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			formValue.AddPageModificationValue( pageModificationValue, v => v );
 		}
 
-		public EtherealComponent PageComponent { get { return component; } }
+		public EtherealComponentOrElement PageComponent { get { return component; } }
 		public EwfValidation Validation { get { return validation; } }
 	}
 }

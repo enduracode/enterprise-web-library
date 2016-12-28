@@ -9,8 +9,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A WYSIWYG HTML editor.
 	/// </summary>
-	public class WysiwygHtmlEditor: FormControl<FlowComponent> {
-		private readonly FlowComponent component;
+	public class WysiwygHtmlEditor: FormControl<FlowComponentOrNode> {
+		private readonly FlowComponentOrNode component;
 		private readonly EwfValidation validation;
 
 		/// <summary>
@@ -97,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return "CKEDITOR.replace( '" + id + "', { " + configuration + " } );";
 		}
 
-		public FlowComponent PageComponent { get { return component; } }
+		public FlowComponentOrNode PageComponent { get { return component; } }
 		public EwfValidation Validation { get { return validation; } }
 	}
 }

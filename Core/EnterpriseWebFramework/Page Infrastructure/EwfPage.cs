@@ -77,11 +77,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private ValidationSetupState validationSetupState;
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
+		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent = new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
 		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
-		private readonly List<UpdateRegionLinker> updateRegionLinkers = new List<UpdateRegionLinker>();
+		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
@@ -285,7 +286,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
 				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
 					keyAndArg => {
-						UpdateRegionLinker linker;
+						LegacyUpdateRegionLinker linker;
 						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
 							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
 						return linker.PostModificationRegionGetter( keyAndArg.Item2 );
@@ -790,7 +791,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			displayLinks.Add( displayLink );
 		}
 
-		internal void AddUpdateRegionLinker( UpdateRegionLinker linker ) {
+		internal void AddUpdateRegionLinker( LegacyUpdateRegionLinker linker ) {
 			updateRegionLinkers.Add( linker );
 		}
 

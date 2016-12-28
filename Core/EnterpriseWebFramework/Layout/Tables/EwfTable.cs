@@ -434,12 +434,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 							var cachedVisibleGroupIndex = visibleGroupIndex;
 							EwfPage.Instance.AddUpdateRegionLinker(
-								new UpdateRegionLinker(
+								new LegacyUpdateRegionLinker(
 									rowGroup,
 									"tail",
 									from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
 									let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-									select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+									select new LegacyPreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
 									arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
 
 							// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
@@ -469,10 +469,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								} );
 
 							EwfPage.Instance.AddUpdateRegionLinker(
-								new UpdateRegionLinker(
+								new LegacyUpdateRegionLinker(
 									this,
 									"itemLimitingTail",
-									new PreModificationUpdateRegion(
+									new LegacyPreModificationUpdateRegion(
 										itemLimitingUpdateRegionSet.ToSingleElementArray(),
 										() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
 										() => lowerItemLimit.Value.ToString() ).ToSingleElementArray(),
@@ -480,14 +480,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						}
 
 						EwfPage.Instance.AddUpdateRegionLinker(
-							new UpdateRegionLinker(
+							new LegacyUpdateRegionLinker(
 								this,
 								"tail",
 								from region in
 									tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
 									.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
 								select
-									new PreModificationUpdateRegion(
+									new LegacyPreModificationUpdateRegion(
 									region.sets,
 									() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
 									region.staticRowGroupCount.ToString ),
