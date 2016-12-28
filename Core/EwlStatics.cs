@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -73,7 +74,7 @@ namespace EnterpriseWebLibrary {
 					// Throw an exception after the program exits if the code is not zero. Include all recorded output.
 					p.WaitForExit();
 					outputResult = output.ToString();
-					if( p.ExitCode != 0 ) {
+					if( p.ExitCode != 0 )
 						using( var sw = new StringWriter() ) {
 							sw.WriteLine( "Program exited with a nonzero code." );
 							sw.WriteLine();
@@ -87,7 +88,6 @@ namespace EnterpriseWebLibrary {
 							sw.WriteLine( errorOutput.ToString() );
 							throw new ApplicationException( sw.ToString() );
 						}
-					}
 				}
 				else {
 					p.Start();
@@ -242,11 +242,16 @@ namespace EnterpriseWebLibrary {
 			TestStatics.RunTests();
 		}
 
-		/// <summary>
-		/// Returns a single-element array of the item's type, containing only the item.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 31 March 2017. Use ToCollection instead." ) ]
 		public static T[] ToSingleElementArray<T>( this T item ) {
 			return new[] { item };
+		}
+
+		/// <summary>
+		/// Creates a collection containing only this item.
+		/// </summary>
+		public static IReadOnlyCollection<T> ToCollection<T>( this T item ) {
+			return ImmutableArray.Create( item );
 		}
 
 		/// <summary>
@@ -376,13 +381,12 @@ namespace EnterpriseWebLibrary {
 			guid = "Global\\" + guid;
 
 			using( var mutex = new Mutex( false /*Do not try to immediately acquire the mutex*/, guid ) ) {
-				if( skipExecutionIfMutexAlreadyOwned ) {
+				if( skipExecutionIfMutexAlreadyOwned )
 					try {
 						if( !mutex.WaitOne( 0 ) )
 							return false;
 					}
 					catch( AbandonedMutexException ) {}
-				}
 
 				try {
 					// AbandonedMutexException exists to warn us that data might be corrupt because another thread didn't properly release the mutex. We ignore it because
