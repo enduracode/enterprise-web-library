@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -37,38 +35,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				true,
 				( postBackValue, validator ) => {
 					this.mod.Html = postBackValue;
-					if( setup.AdditionalValidationMethod != null )
-						setup.AdditionalValidationMethod( validator );
+					setup.AdditionalValidationMethod?.Invoke( validator );
 				},
 				setup: setup.WysiwygSetup );
 
-			component = new PageElement(
-				context => {
-					var displaySetup = setup.DisplaySetup ?? new DisplaySetup( true );
-					displaySetup.AddJsShowStatements( "$( '#{0}' ).show( 200 );".FormatWith( context.Id ) );
-					displaySetup.AddJsHideStatements( "$( '#{0}' ).hide( 200 );".FormatWith( context.Id ) );
-
-					return new ElementData(
-						() => {
-							var attributes = new List<Tuple<string, string>>();
-							attributes.Add( Tuple.Create( "class", CssElementCreator.CssClass ) );
-							if( !displaySetup.ComponentsDisplayed )
-								attributes.Add( Tuple.Create( "style", "display: none" ) );
-
-							return new ElementLocalData( "div", attributes, displaySetup.UsesJsStatements, "" );
-						},
-						children: wysiwygEditor.PageComponent.ToSingleElementArray() );
-				} );
+			component =
+				new DisplayableElement(
+					context => {
+						return new DisplayableElementData(
+							setup.DisplaySetup,
+							() => new DisplayableElementLocalData( "div", classes: new ElementClass( CssElementCreator.CssClass ) ),
+							children: wysiwygEditor.PageComponent.ToCollection() );
+					} );
 
 			validation = wysiwygEditor.Validation;
 		}
 
-		public FlowComponentOrNode PageComponent { get { return component; } }
-		public EwfValidation Validation { get { return validation; } }
+		public FlowComponentOrNode PageComponent => component;
+		public EwfValidation Validation => validation;
 
 		/// <summary>
 		/// Gets whether this HTML block has HTML (i.e. is not empty).
 		/// </summary>
-		public bool HasHtml { get { return mod.Html.Any(); } }
+		public bool HasHtml => mod.Html.Any();
 	}
 }

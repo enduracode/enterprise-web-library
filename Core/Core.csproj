@@ -283,6 +283,14 @@
     <Compile Include="EnterpriseWebFramework\Charting\ChartSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\DataSeries.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElement.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElementData.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElementLocalData.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\DisplayLink.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\DisplayLinkingOps.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
+    <Compile Include="EnterpriseWebFramework\Component Display\DisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AccessDeniedException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AppMetaLogicFactory.cs" />
@@ -324,7 +332,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Element Classification\ElementClass.cs" />
     <Compile Include="EnterpriseWebFramework\Element Classification\ElementClassSet.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
@@ -488,10 +495,6 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplayLinking\CheckBoxToControlArrayDisplayLink.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLink.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplayLinking\DisplayLinkingOps.cs" />
-    <Compile Include="EnterpriseWebFramework\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
