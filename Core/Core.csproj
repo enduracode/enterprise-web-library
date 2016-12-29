@@ -325,6 +325,8 @@
     <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
     <Compile Include="EnterpriseWebFramework\DisplaySetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Classification\ElementClass.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Classification\ElementClassSet.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display Styles\CustomErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display Styles\ListErrorDisplayStyle.cs" />
