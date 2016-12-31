@@ -335,9 +335,13 @@
     <Compile Include="EnterpriseWebFramework\Element Classification\ElementClass.cs" />
     <Compile Include="EnterpriseWebFramework\Element Classification\ElementClassSet.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
-    <Compile Include="EnterpriseWebFramework\Error Display Styles\CustomErrorDisplayStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Error Display Styles\ListErrorDisplayStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Error Display Styles\SectionErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display\ErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display\ModificationErrorPlaceholder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EnterpriseWebFramework\Error Display\Styles\CustomErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display\Styles\ListErrorDisplayStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Error Display\Styles\SectionErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\EwfInitializationOps.cs" />
     <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
@@ -368,7 +372,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
-    <Compile Include="EnterpriseWebFramework\ModificationErrorPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="ContentTypes.cs" />
@@ -439,7 +442,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModificationException.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\EwfValidation.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\PostBackValueDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationList.cs" />
