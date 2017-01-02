@@ -108,25 +108,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( control != null )
 				return control.ToCollection();
 
-			var children = ( (FlowComponent)component ).GetChildren().GetControls();
-			var identifiedComponent = component as IdentifiedFlowComponent;
-			if( identifiedComponent == null )
-				return children.ToImmutableArray();
+			var flowComponent = component as FlowComponent;
+			if( flowComponent != null )
+				return flowComponent.GetChildren().GetControls().ToImmutableArray();
 
-			var ph = new PlaceHolder().AddControlsReturnThis( children );
-			foreach( var linker in identifiedComponent.UpdateRegionLinkers ) {
-				EwfPage.Instance.AddUpdateRegionLinker(
-					new LegacyUpdateRegionLinker(
-						ph,
-						linker.KeySuffix,
-						linker.PreModificationRegions.Select(
-							region =>
-							new LegacyPreModificationUpdateRegion(
-								region.Sets,
-								() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
-								region.ArgumentGetter ) ),
-						arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
-			}
+			var identifiedComponent = (IdentifiedFlowComponent)component;
+			Control ph = null;
+			ph = new PlaceholderControl(
+				() => {
+					var componentData = identifiedComponent.ComponentDataGetter();
+
+					foreach( var linker in componentData.UpdateRegionLinkers ) {
+						EwfPage.Instance.AddUpdateRegionLinker(
+							new LegacyUpdateRegionLinker(
+								ph,
+								linker.KeySuffix,
+								linker.PreModificationRegions.Select(
+									region =>
+									new LegacyPreModificationUpdateRegion(
+										region.Sets,
+										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
+										region.ArgumentGetter ) ),
+								arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
+					}
+
+					var validationIndex = 0;
+					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
+					foreach( var i in componentData.Validations ) {
+						errorDictionary.Add( i, EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray() );
+						validationIndex += 1;
+					}
+
+					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) ).GetControls();
+					return componentData.IsIdContainer ? new NamingPlaceholder( children ).ToCollection() : children;
+				} );
 			return ph.ToCollection();
 		}
 
@@ -148,26 +163,47 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return ( (EtherealControl)element ).Control.ToCollection();
 			}
 
-			var children = ( (EtherealComponent)component ).GetChildren();
-			var identifiedComponent = component as IdentifiedEtherealComponent;
-			if( identifiedComponent == null )
-				return children.AddEtherealControls( parent ).ToImmutableArray();
+			var etherealComponent = component as EtherealComponent;
+			if( etherealComponent != null )
+				return etherealComponent.GetChildren().AddEtherealControls( parent ).ToImmutableArray();
 
-			var ph = new PlaceHolder();
-			children.AddEtherealControls( ph );
-			foreach( var linker in identifiedComponent.UpdateRegionLinkers ) {
-				EwfPage.Instance.AddUpdateRegionLinker(
-					new LegacyUpdateRegionLinker(
-						ph,
-						linker.KeySuffix,
-						linker.PreModificationRegions.Select(
-							region =>
-							new LegacyPreModificationUpdateRegion(
-								region.Sets,
-								() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
-								region.ArgumentGetter ) ),
-						arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
-			}
+			var identifiedComponent = (IdentifiedEtherealComponent)component;
+			Control ph = null;
+			ph = new PlaceholderControl(
+				() => {
+					var componentData = identifiedComponent.ComponentDataGetter();
+
+					foreach( var linker in componentData.UpdateRegionLinkers ) {
+						EwfPage.Instance.AddUpdateRegionLinker(
+							new LegacyUpdateRegionLinker(
+								ph,
+								linker.KeySuffix,
+								linker.PreModificationRegions.Select(
+									region =>
+									new LegacyPreModificationUpdateRegion(
+										region.Sets,
+										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
+										region.ArgumentGetter ) ),
+								arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
+					}
+
+					var validationIndex = 0;
+					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
+					foreach( var i in componentData.Validations ) {
+						errorDictionary.Add( i, EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray() );
+						validationIndex += 1;
+					}
+
+					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) );
+					if( componentData.IsIdContainer ) {
+						var np = new NamingPlaceholder( ImmutableArray<Control>.Empty );
+						children.AddEtherealControls( np );
+						ph.AddControlsReturnThis( np );
+					}
+					else
+						children.AddEtherealControls( ph );
+					return ImmutableArray<Control>.Empty;
+				} );
 			parent.AddControlsReturnThis( ph );
 			return ph.ToCollection();
 		}

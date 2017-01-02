@@ -455,6 +455,10 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedFlowComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\WebForms.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponentOrElement.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />
@@ -475,8 +479,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ParametersModificationBase.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\IdentifiedEtherealComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\IdentifiedFlowComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionSet.cs" />
