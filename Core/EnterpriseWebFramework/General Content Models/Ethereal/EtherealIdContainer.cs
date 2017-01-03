@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new IdentifiedEtherealComponent(
 					() =>
 					new IdentifiedComponentData<EtherealComponentOrElement>(
-						true,
+						"",
 						ImmutableArray<UpdateRegionLinker>.Empty,
 						ImmutableArray<EwfValidation>.Empty,
 						errorsByValidation => children ) ).ToCollection();

@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new IdentifiedFlowComponent(
 					() =>
 					new IdentifiedComponentData<FlowComponentOrNode>(
-						true,
+						"",
 						ImmutableArray<UpdateRegionLinker>.Empty,
 						ImmutableArray<EwfValidation>.Empty,
 						errorsByValidation => children ) ).ToCollection();

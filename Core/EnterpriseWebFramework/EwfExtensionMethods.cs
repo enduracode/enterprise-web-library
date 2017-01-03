@@ -113,11 +113,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return flowComponent.GetChildren().GetControls().ToImmutableArray();
 
 			var identifiedComponent = (IdentifiedFlowComponent)component;
+			var componentData = identifiedComponent.ComponentDataGetter();
 			Control ph = null;
 			ph = new PlaceholderControl(
 				() => {
-					var componentData = identifiedComponent.ComponentDataGetter();
-
 					foreach( var linker in componentData.UpdateRegionLinkers ) {
 						EwfPage.Instance.AddUpdateRegionLinker(
 							new LegacyUpdateRegionLinker(
@@ -140,8 +139,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) ).GetControls();
-					return componentData.IsIdContainer ? new NamingPlaceholder( children ).ToCollection() : children;
+					if( componentData.Id == null )
+						return children;
+					var np = new NamingPlaceholder( children );
+					if( componentData.Id.Any() )
+						np.ID = componentData.Id + "np";
+					return np.ToCollection();
 				} );
+			if( !string.IsNullOrEmpty( componentData.Id ) )
+				ph.ID = componentData.Id;
 			return ph.ToCollection();
 		}
 
@@ -168,11 +174,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return etherealComponent.GetChildren().AddEtherealControls( parent ).ToImmutableArray();
 
 			var identifiedComponent = (IdentifiedEtherealComponent)component;
+			var componentData = identifiedComponent.ComponentDataGetter();
 			Control ph = null;
 			ph = new PlaceholderControl(
 				() => {
-					var componentData = identifiedComponent.ComponentDataGetter();
-
 					foreach( var linker in componentData.UpdateRegionLinkers ) {
 						EwfPage.Instance.AddUpdateRegionLinker(
 							new LegacyUpdateRegionLinker(
@@ -195,15 +200,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) );
-					if( componentData.IsIdContainer ) {
-						var np = new NamingPlaceholder( ImmutableArray<Control>.Empty );
-						children.AddEtherealControls( np );
-						ph.AddControlsReturnThis( np );
-					}
-					else
+					if( componentData.Id == null ) {
 						children.AddEtherealControls( ph );
-					return ImmutableArray<Control>.Empty;
+						return ImmutableArray<Control>.Empty;
+					}
+					var np = new NamingPlaceholder( ImmutableArray<Control>.Empty );
+					if( componentData.Id.Any() )
+						np.ID = componentData.Id + "np";
+					children.AddEtherealControls( np );
+					return np.ToCollection();
 				} );
+			if( !string.IsNullOrEmpty( componentData.Id ) )
+				ph.ID = componentData.Id;
 			parent.AddControlsReturnThis( ph );
 			return ph.ToCollection();
 		}
