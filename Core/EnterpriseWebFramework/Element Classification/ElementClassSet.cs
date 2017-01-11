@@ -2,6 +2,8 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ElementClassSet {
+		public static readonly ElementClassSet Empty = new ElementClassSet( ImmutableHashSet<string>.Empty );
+
 		public static implicit operator ElementClassSet( ElementClass elementClass ) {
 			return new ElementClassSet( elementClass.ClassName.ToCollection().ToImmutableHashSet() );
 		}

@@ -11,12 +11,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an ID container.
 		/// </summary>
-		public FlowIdContainer( IEnumerable<FlowComponentOrNode> children, string id = "" ) {
+		public FlowIdContainer( IEnumerable<FlowComponentOrNode> children ) {
 			this.children =
 				new IdentifiedFlowComponent(
 					() =>
 					new IdentifiedComponentData<FlowComponentOrNode>(
-						id,
+						"",
 						ImmutableArray<UpdateRegionLinker>.Empty,
 						ImmutableArray<EwfValidation>.Empty,
 						errorsByValidation => children ) ).ToCollection();

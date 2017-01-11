@@ -53,15 +53,15 @@ ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSe
 }
 
 /* lists */
-ul {
+ewfHtmlBlock ul {
 	margin-left: 1em;
 	padding: 0;
 	list-style-type: circle;
 }
-li {
+ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
 	margin-top: .25em;
 }
-li:first-child {
+ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
 	margin-top: 0;
 }
 .ewfControlList tr td {
@@ -154,16 +154,16 @@ ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
 }
 
 /* block element vertical spacing */
-p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock, ewfHtmlBlock {
+p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, div.ewfMergeFieldTree, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock, ewfHtmlBlock {
 	margin-top: 1em;
 }
-p:first-child, ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child, ewfHtmlBlock:first-child {
+p:first-child, ewfUnorderedLineList:first-child, ewfUnorderedStackList:first-child, ewfUnorderedWrappingList:first-child, ewfHtmlBlock ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, div.ewfMergeFieldTree:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child, ewfHtmlBlock:first-child {
 	margin-top: 0;
 }
 ewfUiPageActionAndContentAndContentFootCell {
 	padding-top: 1em;
 }
-p, ul {
+p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul {
 	margin-bottom: 0;
 }
 

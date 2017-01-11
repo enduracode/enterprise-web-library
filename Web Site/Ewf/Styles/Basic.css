@@ -4,6 +4,20 @@ html {
 }
 
 /* lists */
+ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
+	display: flex;
+	padding: 0;
+	list-style-type: none;
+}
+ewfUnorderedLineList {
+	flex-flow: row nowrap;
+}
+ewfUnorderedStackList {
+	flex-flow: column nowrap;
+}
+ewfUnorderedWrappingList {
+	flex-flow: row wrap;
+}
 ewfStandardControlStack > ewfControlStackItem {
 	margin-top: 4px;
 }

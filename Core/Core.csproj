@@ -370,7 +370,14 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Control List\ItemInsertionUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\ItemInsertionUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\Line\LineList.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\Raw\RawList.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\Stack\StackList.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\Wrapping\WrappingList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
