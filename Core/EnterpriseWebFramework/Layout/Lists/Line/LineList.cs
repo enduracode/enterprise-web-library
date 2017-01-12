@@ -8,9 +8,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a line list.
 		/// </summary>
 		/// <param name="items">The items. Do not pass null.</param>
-		/// <param name="setup">The setup object for the list.</param>
-		public LineList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
-			children = ( setup ?? new ComponentListSetup() ).GetComponents( CssElementCreator.LineListClass, items );
+		/// <param name="generalSetup">The setup object for the list.</param>
+		/// <param name="alignment">The horizontal alignment of the items in the list.</param>
+		public LineList( IEnumerable<ComponentListItem> items, ComponentListSetup generalSetup = null, FlexboxAlignment alignment = FlexboxAlignment.NotSpecified ) {
+			children = ( generalSetup ?? new ComponentListSetup() ).GetComponents(
+				CssElementCreator.LineListClass.Union( FlexboxAlignmentStatics.Class( alignment ) ),
+				items );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

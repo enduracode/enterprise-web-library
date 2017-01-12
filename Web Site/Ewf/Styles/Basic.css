@@ -18,6 +18,18 @@ ewfUnorderedStackList {
 ewfUnorderedWrappingList {
 	flex-flow: row wrap;
 }
+.ewfFaL {
+	justify-content: flex-start;
+}
+.ewfFaR {
+	justify-content: flex-end;
+}
+.ewfFaC {
+	justify-content: center;
+}
+.ewfFaJ {
+	justify-content: space-between;
+}
 ewfStandardControlStack > ewfControlStackItem {
 	margin-top: 4px;
 }

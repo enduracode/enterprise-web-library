@@ -373,6 +373,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\FlexboxAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Line\LineList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Raw\RawList.cs" />
