@@ -30,6 +30,18 @@ ewfUnorderedWrappingList {
 .ewfFaJ {
 	justify-content: space-between;
 }
+.ewfFvaT {
+	align-items: flex-start;
+}
+.ewfFvaB {
+	align-items: flex-end;
+}
+.ewfFvaC {
+	align-items: center;
+}
+.ewfFvaBl {
+	align-items: baseline;
+}
 ewfStandardControlStack > ewfControlStackItem {
 	margin-top: 4px;
 }

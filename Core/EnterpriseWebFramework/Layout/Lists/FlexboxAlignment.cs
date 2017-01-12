@@ -36,8 +36,8 @@
 		private static readonly ElementClass centerClass = new ElementClass( "ewfFaC" );
 		private static readonly ElementClass justifyClass = new ElementClass( "ewfFaJ" );
 
-		internal static ElementClassSet Class( FlexboxAlignment textAlignment ) {
-			switch( textAlignment ) {
+		internal static ElementClassSet Class( FlexboxAlignment alignment ) {
+			switch( alignment ) {
 				case FlexboxAlignment.Left:
 					return leftClass;
 				case FlexboxAlignment.Right:
