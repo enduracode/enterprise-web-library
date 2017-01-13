@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class StackList: FlowComponent {
@@ -10,7 +11,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="items">The items. Do not pass null.</param>
 		/// <param name="setup">The setup object for the list.</param>
 		public StackList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
-			children = ( setup ?? new ComponentListSetup() ).GetComponents( CssElementCreator.StackListClass, items );
+			children = ( setup ?? new ComponentListSetup() ).GetComponents(
+				CssElementCreator.StackListClass,
+				from i in items select i.GetItemAndComponent( ElementClassSet.Empty ) );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

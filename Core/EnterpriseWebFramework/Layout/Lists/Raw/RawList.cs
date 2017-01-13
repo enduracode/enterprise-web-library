@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class RawList: FlowComponent {
@@ -10,7 +11,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="items">The items. Do not pass null.</param>
 		/// <param name="setup">The setup object for the list.</param>
 		public RawList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
-			children = ( setup ?? new ComponentListSetup() ).GetComponents( ElementClassSet.Empty, items );
+			children = ( setup ?? new ComponentListSetup() ).GetComponents(
+				ElementClassSet.Empty,
+				from i in items select i.GetItemAndComponent( ElementClassSet.Empty ) );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

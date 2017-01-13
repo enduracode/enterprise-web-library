@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The general configuration for a component list.
 	/// </summary>
 	public class ComponentListSetup {
-		private readonly Func<ElementClassSet, IEnumerable<ComponentListItem>, IReadOnlyCollection<FlowComponentOrNode>> componentGetter;
+		private readonly Func<ElementClassSet, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>>, IReadOnlyCollection<FlowComponentOrNode>> componentGetter;
 
 		/// <summary>
 		/// Creates a component-list setup object.
@@ -24,13 +24,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
-				var itemComponents = new Lazy<IEnumerable<FlowComponentOrNode>>( () => items.Select( i => i.GetComponent() ).ToImmutableArray() );
+				var itemComponents = new Lazy<IEnumerable<FlowComponentOrNode>>( () => items.Select( i => i.Item2 ).ToImmutableArray() );
 				var itemComponentsById =
-					new Lazy<Dictionary<string, FlowComponentOrNode>>(
-						() =>
-						itemComponents.Value.Select( ( component, index ) => new { items.ElementAt( index ).Id, component } )
-							.Where( i => i.Id.Any() )
-							.ToDictionary( i => i.Id, i => i.component ) );
+					new Lazy<Dictionary<string, FlowComponentOrNode>>( () => items.Where( i => i.Item1.Id.Any() ).ToDictionary( i => i.Item1.Id, i => i.Item2 ) );
 
 				return
 					new IdentifiedFlowComponent(
@@ -58,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"remove",
 							items.Select(
 								( item, index ) =>
-								new PreModificationUpdateRegion( item.RemovalUpdateRegionSets, () => itemComponents.Value.ElementAt( index ).ToCollection(), () => "" ) ),
+								new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemComponents.Value.ElementAt( index ).ToCollection(), () => "" ) ),
 							arg => ImmutableArray<PageComponent>.Empty )
 								},
 							ImmutableArray<EwfValidation>.Empty,
@@ -71,12 +67,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										new DisplayableElementLocalData(
 											isOrdered ? "ol" : "ul",
 											classes: CssElementCreator.AllListsClass.Union( listTypeClasses ).Union( classes ?? ElementClassSet.Empty ) ),
-										children: from i in items select i.GetComponent() );
+										children: itemComponents.Value );
 								} ).ToCollection() ) ).ToCollection();
 			};
 		}
 
-		internal IReadOnlyCollection<FlowComponentOrNode> GetComponents( ElementClassSet classes, IEnumerable<ComponentListItem> items ) {
+		internal IReadOnlyCollection<FlowComponentOrNode> GetComponents( ElementClassSet classes, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>> items ) {
 			return componentGetter( classes, items );
 		}
 	}

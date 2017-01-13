@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An item for a component list.
 	/// </summary>
 	public class ComponentListItem {
-		private readonly Func<FlowComponentOrNode> componentGetter;
+		private readonly Func<ElementClassSet, FlowComponentOrNode> componentGetter;
 		internal readonly string Id;
 		internal readonly IEnumerable<UpdateRegionSet> RemovalUpdateRegionSets;
 
@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<FlowComponentOrNode> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
-			componentGetter = () => {
+			componentGetter = itemTypeClasses => {
 				FlowComponentOrNode component = null;
 				component =
 					new IdentifiedFlowComponent(
@@ -72,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										                      () =>
 										                      new DisplayableElementLocalData(
 											                      "li",
-											                      classes: CssElementCreator.AllItemAlignmentsClass.Union( classes ?? ElementClassSet.Empty ),
+											                      classes: CssElementCreator.AllItemAlignmentsClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
 											                      additionalAttributes: attributes ),
 										                      children: children,
 										                      etherealChildren: etherealChildren );
@@ -84,8 +84,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			RemovalUpdateRegionSets = removalUpdateRegionSets;
 		}
 
-		internal FlowComponentOrNode GetComponent() {
-			return componentGetter();
+		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes ) {
+			return Tuple.Create( this, componentGetter( classes ) );
 		}
 	}
 }
