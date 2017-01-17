@@ -6,18 +6,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class WrappingListItem {
 		public static implicit operator WrappingListItem( ComponentListItem item ) {
-			return new WrappingListItem( item );
+			return item.ToWrappingListItem();
 		}
 
 		internal readonly Func<Tuple<ComponentListItem, FlowComponentOrNode>> ItemAndComponentGetter;
 
-		/// <summary>
-		/// Creates a list item.
-		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <param name="verticalAlignment">The vertical alignment of the item.</param>
-		public WrappingListItem( ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified ) {
+		internal WrappingListItem( ComponentListItem item, FlexboxVerticalAlignment verticalAlignment ) {
 			ItemAndComponentGetter = () => item.GetItemAndComponent( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ) );
+		}
+	}
+
+	public static class WrappingListItemExtensionCreators {
+		/// <summary>
+		/// Creates a wrapping-list item from this general list item. If you don't need to pass any arguments, don't use this method; general list items are
+		/// implicitly converted to wrapping-list items.
+		/// </summary>
+		/// <param name="item"></param>
+		/// <param name="verticalAlignment">The vertical alignment of the item.</param>
+		public static WrappingListItem ToWrappingListItem(
+			this ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified ) {
+			return new WrappingListItem( item, verticalAlignment );
 		}
 	}
 }
