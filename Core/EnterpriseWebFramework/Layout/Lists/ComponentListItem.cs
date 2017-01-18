@@ -12,31 +12,43 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly string Id;
 		internal readonly IEnumerable<UpdateRegionSet> RemovalUpdateRegionSets;
 
+		internal ComponentListItem( Func<ElementClassSet, FlowComponentOrNode> componentGetter, string id, IEnumerable<UpdateRegionSet> removalUpdateRegionSets ) {
+			this.componentGetter = componentGetter;
+			Id = id;
+			RemovalUpdateRegionSets = removalUpdateRegionSets;
+		}
+
+		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes ) {
+			return Tuple.Create( this, componentGetter( classes ) );
+		}
+	}
+
+	public static class ComponentListItemExtensionCreators {
 		/// <summary>
-		/// Creates a list item.
+		/// Creates a list item containing these components.
 		/// </summary>
-		/// <param name="children">The item content.</param>
+		/// <param name="children"></param>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the item.</param>
 		/// <param name="visualOrderRank"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="etherealChildren"></param>
-		public ComponentListItem(
-			IEnumerable<FlowComponentOrNode> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null )
-			: this(
-				children,
+		public static ComponentListItem ToComponentListItem(
+			this IEnumerable<FlowComponentOrNode> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			return children.ToComponentListItem(
 				"",
 				displaySetup: displaySetup,
 				classes: classes,
 				visualOrderRank: visualOrderRank,
 				updateRegionSets: updateRegionSets,
-				etherealChildren: etherealChildren ) {}
+				etherealChildren: etherealChildren );
+		}
 
 		/// <summary>
-		/// Creates a list item.
+		/// Creates a list item containing these components.
 		/// </summary>
-		/// <param name="children">The item content.</param>
+		/// <param name="children"></param>
 		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
 		/// intermediate post-back. Do not pass null or the empty string.</param>
 		/// <param name="displaySetup"></param>
@@ -45,47 +57,43 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 		/// <param name="etherealChildren"></param>
-		public ComponentListItem(
-			IEnumerable<FlowComponentOrNode> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+		public static ComponentListItem ToComponentListItem(
+			this IEnumerable<FlowComponentOrNode> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
-			componentGetter = itemTypeClasses => {
-				FlowComponentOrNode component = null;
-				component =
-					new IdentifiedFlowComponent(
-						() =>
-						new IdentifiedComponentData<FlowComponentOrNode>(
-							id,
-							new UpdateRegionLinker(
-							"",
-							new PreModificationUpdateRegion( updateRegionSets, component.ToCollection, () => "" ).ToCollection(),
-							arg => component.ToCollection() ).ToCollection(),
-							ImmutableArray<EwfValidation>.Empty,
-							errorsByValidation => new DisplayableElement(
-								                      context => {
-									                      var attributes = new List<Tuple<string, string>>();
-									                      if( visualOrderRank.HasValue )
-										                      attributes.Add( Tuple.Create( "style", "order: {0}".FormatWith( visualOrderRank.Value ) ) );
+			return new ComponentListItem(
+				itemTypeClasses => {
+					FlowComponentOrNode component = null;
+					component =
+						new IdentifiedFlowComponent(
+							() =>
+							new IdentifiedComponentData<FlowComponentOrNode>(
+								id,
+								new UpdateRegionLinker(
+								"",
+								new PreModificationUpdateRegion( updateRegionSets, component.ToCollection, () => "" ).ToCollection(),
+								arg => component.ToCollection() ).ToCollection(),
+								ImmutableArray<EwfValidation>.Empty,
+								errorsByValidation => new DisplayableElement(
+									                      context => {
+										                      var attributes = new List<Tuple<string, string>>();
+										                      if( visualOrderRank.HasValue )
+											                      attributes.Add( Tuple.Create( "style", "order: {0}".FormatWith( visualOrderRank.Value ) ) );
 
-									                      return new DisplayableElementData(
-										                      displaySetup,
-										                      () =>
-										                      new DisplayableElementLocalData(
-											                      "li",
-											                      classes: CssElementCreator.AllItemAlignmentsClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
-											                      additionalAttributes: attributes ),
-										                      children: children,
-										                      etherealChildren: etherealChildren );
-								                      } ).ToCollection() ) );
-				return component;
-			};
-
-			Id = id;
-			RemovalUpdateRegionSets = removalUpdateRegionSets;
-		}
-
-		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes ) {
-			return Tuple.Create( this, componentGetter( classes ) );
+										                      return new DisplayableElementData(
+											                      displaySetup,
+											                      () =>
+											                      new DisplayableElementLocalData(
+												                      "li",
+												                      classes: CssElementCreator.AllItemAlignmentsClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
+												                      additionalAttributes: attributes ),
+											                      children: children,
+											                      etherealChildren: etherealChildren );
+									                      } ).ToCollection() ) );
+					return component;
+				},
+				id,
+				removalUpdateRegionSets );
 		}
 	}
 }
