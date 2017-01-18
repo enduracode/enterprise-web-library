@@ -24,9 +24,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
-				var itemComponents = new Lazy<IEnumerable<FlowComponentOrNode>>( () => items.Select( i => i.Item2 ).ToImmutableArray() );
-				var itemComponentsById =
-					new Lazy<Dictionary<string, FlowComponentOrNode>>( () => items.Where( i => i.Item1.Id.Any() ).ToDictionary( i => i.Item1.Id, i => i.Item2 ) );
+				var itemComponents = items.Select( i => i.Item2 ).ToImmutableArray();
+				var itemComponentsById = items.Where( i => i.Item1.Id.Any() ).ToDictionary( i => i.Item1.Id, i => i.Item2 );
 
 				return
 					new IdentifiedFlowComponent(
@@ -39,8 +38,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"tail",
 							from region in tailUpdateRegions ?? ImmutableArray<TailUpdateRegion>.Empty
 							let staticItemCount = items.Count() - region.UpdatingItemCount
-							select new PreModificationUpdateRegion( region.Sets, () => itemComponents.Value.Skip( staticItemCount ), staticItemCount.ToString ),
-							arg => itemComponents.Value.Skip( int.Parse( arg ) ) ),
+							select new PreModificationUpdateRegion( region.Sets, () => itemComponents.Skip( staticItemCount ), staticItemCount.ToString ),
+							arg => itemComponents.Skip( int.Parse( arg ) ) ),
 									new UpdateRegionLinker(
 							"add",
 							from region in itemInsertionUpdateRegions ?? ImmutableArray<ItemInsertionUpdateRegion>.Empty
@@ -49,12 +48,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								region.Sets,
 								() => ImmutableArray<PageComponent>.Empty,
 								() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
-							arg => arg.Separate( ",", false ).Where( itemComponentsById.Value.ContainsKey ).Select( i => itemComponentsById.Value[ i ] ) ),
+							arg => arg.Separate( ",", false ).Where( itemComponentsById.ContainsKey ).Select( i => itemComponentsById[ i ] ) ),
 									new UpdateRegionLinker(
 							"remove",
 							items.Select(
 								( item, index ) =>
-								new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemComponents.Value.ElementAt( index ).ToCollection(), () => "" ) ),
+								new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemComponents.ElementAt( index ).ToCollection(), () => "" ) ),
 							arg => ImmutableArray<PageComponent>.Empty )
 								},
 							ImmutableArray<EwfValidation>.Empty,
@@ -67,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										new DisplayableElementLocalData(
 											isOrdered ? "ol" : "ul",
 											classes: CssElementCreator.AllListsClass.Union( listTypeClasses ).Union( classes ?? ElementClassSet.Empty ) ),
-										children: itemComponents.Value );
+										children: itemComponents );
 								} ).ToCollection() ) ).ToCollection();
 			};
 		}
