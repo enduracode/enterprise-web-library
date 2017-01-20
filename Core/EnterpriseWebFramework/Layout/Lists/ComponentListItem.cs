@@ -8,19 +8,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An item for a component list.
 	/// </summary>
 	public class ComponentListItem {
-		private readonly Func<ElementClassSet, CssLength, FlowComponentOrNode> componentGetter;
+		private readonly Func<bool, ElementClassSet, CssLength, FlowComponentOrNode> componentGetter;
 		internal readonly string Id;
 		internal readonly IEnumerable<UpdateRegionSet> RemovalUpdateRegionSets;
 
 		internal ComponentListItem(
-			Func<ElementClassSet, CssLength, FlowComponentOrNode> componentGetter, string id, IEnumerable<UpdateRegionSet> removalUpdateRegionSets ) {
+			Func<bool, ElementClassSet, CssLength, FlowComponentOrNode> componentGetter, string id, IEnumerable<UpdateRegionSet> removalUpdateRegionSets ) {
 			this.componentGetter = componentGetter;
 			Id = id;
 			RemovalUpdateRegionSets = removalUpdateRegionSets;
 		}
 
-		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes, CssLength width ) {
-			return Tuple.Create( this, componentGetter( classes, width ) );
+		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes, CssLength width, bool includeContentContainer = false ) {
+			return Tuple.Create( this, componentGetter( includeContentContainer, classes, width ) );
 		}
 	}
 
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			return new ComponentListItem(
-				( itemTypeClasses, width ) => {
+				( includeContentContainer, itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
 					component =
 						new IdentifiedFlowComponent(
@@ -92,10 +92,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											                      () =>
 											                      new DisplayableElementLocalData(
 												                      "li",
-												                      classes: CssElementCreator.AllItemAlignmentsClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
+												                      classes: CssElementCreator.ItemClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
 												                      additionalAttributes: attributes ),
-											                      children: children,
-											                      etherealChildren: etherealChildren );
+											                      children:
+												                      includeContentContainer
+													                      ? new DisplayableElement(
+														                        innerContext =>
+														                        new DisplayableElementData(
+															                        null,
+															                        () => new DisplayableElementLocalData( "div", classes: CssElementCreator.ItemClass ),
+															                        children: children,
+															                        etherealChildren: etherealChildren ) ).ToCollection()
+													                      : children,
+											                      etherealChildren: includeContentContainer ? null : etherealChildren );
 									                      } ).ToCollection() ) );
 					return component;
 				},

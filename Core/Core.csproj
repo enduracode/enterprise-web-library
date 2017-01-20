@@ -378,6 +378,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\FlexboxAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\FlexboxVerticalAlignment.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\Inline\InlineList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Line\LineList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Line\LineListItem.cs" />

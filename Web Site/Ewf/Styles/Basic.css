@@ -4,10 +4,12 @@ html {
 }
 
 /* lists */
-ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
-	display: flex;
+ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfUnorderedInlineList {
 	padding: 0;
 	list-style-type: none;
+}
+ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
+	display: flex;
 }
 ewfUnorderedLineList {
 	flex-flow: row nowrap;
@@ -17,6 +19,12 @@ ewfUnorderedStackList {
 }
 ewfUnorderedWrappingList {
 	flex-flow: row wrap;
+}
+ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInlineListItemContentContainer {
+	display: inline;
+}
+ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
+	content: " | ";
 }
 .ewfFaL {
 	justify-content: flex-start;
