@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public StackList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
 			children = ( setup ?? new ComponentListSetup() ).GetComponents(
 				CssElementCreator.StackListClass,
-				from i in items select i.GetItemAndComponent( ElementClassSet.Empty ) );
+				from i in items select i.GetItemAndComponent( ElementClassSet.Empty, null ) );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

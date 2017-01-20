@@ -8,18 +8,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An item for a component list.
 	/// </summary>
 	public class ComponentListItem {
-		private readonly Func<ElementClassSet, FlowComponentOrNode> componentGetter;
+		private readonly Func<ElementClassSet, CssLength, FlowComponentOrNode> componentGetter;
 		internal readonly string Id;
 		internal readonly IEnumerable<UpdateRegionSet> RemovalUpdateRegionSets;
 
-		internal ComponentListItem( Func<ElementClassSet, FlowComponentOrNode> componentGetter, string id, IEnumerable<UpdateRegionSet> removalUpdateRegionSets ) {
+		internal ComponentListItem(
+			Func<ElementClassSet, CssLength, FlowComponentOrNode> componentGetter, string id, IEnumerable<UpdateRegionSet> removalUpdateRegionSets ) {
 			this.componentGetter = componentGetter;
 			Id = id;
 			RemovalUpdateRegionSets = removalUpdateRegionSets;
 		}
 
-		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes ) {
-			return Tuple.Create( this, componentGetter( classes ) );
+		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes, CssLength width ) {
+			return Tuple.Create( this, componentGetter( classes, width ) );
 		}
 	}
 
@@ -62,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			return new ComponentListItem(
-				itemTypeClasses => {
+				( itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
 					component =
 						new IdentifiedFlowComponent(
@@ -77,8 +78,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								errorsByValidation => new DisplayableElement(
 									                      context => {
 										                      var attributes = new List<Tuple<string, string>>();
-										                      if( visualOrderRank.HasValue )
-											                      attributes.Add( Tuple.Create( "style", "order: {0}".FormatWith( visualOrderRank.Value ) ) );
+										                      if( visualOrderRank.HasValue || width != null )
+											                      attributes.Add(
+												                      Tuple.Create(
+													                      "style",
+													                      StringTools.ConcatenateWithDelimiter(
+														                      ", ",
+														                      visualOrderRank.HasValue ? "order: {0}".FormatWith( visualOrderRank.Value ) : "",
+														                      width != null ? "width: {0}".FormatWith( width.Value ) : "" ) ) );
 
 										                      return new DisplayableElementData(
 											                      displaySetup,

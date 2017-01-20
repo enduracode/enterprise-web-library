@@ -11,8 +11,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal readonly Func<Tuple<ComponentListItem, FlowComponentOrNode>> ItemAndComponentGetter;
 
-		internal LineListItem( ComponentListItem item, FlexboxVerticalAlignment verticalAlignment ) {
-			ItemAndComponentGetter = () => item.GetItemAndComponent( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ) );
+		internal LineListItem( Func<Tuple<ComponentListItem, FlowComponentOrNode>> itemAndComponentGetter ) {
+			ItemAndComponentGetter = itemAndComponentGetter;
 		}
 	}
 
@@ -23,8 +23,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="item"></param>
 		/// <param name="verticalAlignment">The vertical alignment of the item.</param>
-		public static LineListItem ToLineListItem( this ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified ) {
-			return new LineListItem( item, verticalAlignment );
+		/// <param name="width">The width of the item.</param>
+		public static LineListItem ToLineListItem(
+			this ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified, ContentBasedLength width = null ) {
+			return new LineListItem( () => item.GetItemAndComponent( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ), width ) );
 		}
 	}
 }

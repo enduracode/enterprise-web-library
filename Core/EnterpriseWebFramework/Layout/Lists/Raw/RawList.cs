@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public RawList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
 			children = ( setup ?? new ComponentListSetup() ).GetComponents(
 				ElementClassSet.Empty,
-				from i in items select i.GetItemAndComponent( ElementClassSet.Empty ) );
+				from i in items select i.GetItemAndComponent( ElementClassSet.Empty, null ) );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
