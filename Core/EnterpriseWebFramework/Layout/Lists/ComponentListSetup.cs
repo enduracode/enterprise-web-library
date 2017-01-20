@@ -13,14 +13,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a component-list setup object.
 		/// </summary>
+		/// <param name="hideIfEmpty">Pass true if you want the list to hide itself if it has no items.</param>
 		/// <param name="displaySetup"></param>
 		/// <param name="isOrdered">Pass true if the list items have been intentionally ordered, such that changing the order would change the meaning of the page.</param>
 		/// <param name="classes">The classes on the list.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		/// <param name="itemInsertionUpdateRegions"></param>
 		public ComponentListSetup(
-			DisplaySetup displaySetup = null, bool isOrdered = false, ElementClassSet classes = null, IEnumerable<TailUpdateRegion> tailUpdateRegions = null,
-			IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
+			bool hideIfEmpty = false, DisplaySetup displaySetup = null, bool isOrdered = false, ElementClassSet classes = null,
+			IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
@@ -58,16 +59,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								},
 							ImmutableArray<EwfValidation>.Empty,
 							errorsByValidation =>
-							new DisplayableElement(
-								context => {
-									return new DisplayableElementData(
-										displaySetup,
-										() =>
-										new DisplayableElementLocalData(
-											isOrdered ? "ol" : "ul",
-											classes: CssElementCreator.AllListsClass.Union( listTypeClasses ).Union( classes ?? ElementClassSet.Empty ) ),
-										children: itemComponents );
-								} ).ToCollection() ) ).ToCollection();
+							hideIfEmpty && !items.Any()
+								? Enumerable.Empty<FlowComponentOrNode>()
+								: new DisplayableElement(
+									  context => {
+										  return new DisplayableElementData(
+											  displaySetup,
+											  () =>
+											  new DisplayableElementLocalData(
+												  isOrdered ? "ol" : "ul",
+												  classes: CssElementCreator.AllListsClass.Union( listTypeClasses ).Union( classes ?? ElementClassSet.Empty ) ),
+											  children: itemComponents );
+									  } ).ToCollection() ) ).ToCollection();
 			};
 		}
 
