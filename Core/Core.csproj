@@ -319,6 +319,9 @@
     <Compile Include="EnterpriseWebFramework\Core\ShortcutUrlResolver.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\Core\UserDisabledByPageException.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Length\AncestorRelativeLength.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Length\ContentBasedLength.cs" />
+    <Compile Include="EnterpriseWebFramework\CSS Length\CssLength.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\ControlCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssElement.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Preprocessing\CssPreprocessingStatics.cs" />
