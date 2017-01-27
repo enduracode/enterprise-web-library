@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web.UI.WebControls;
+﻿using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -27,39 +26,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool SizesToAvailableWidth { get; set; }
 
-		string ActionControlStyle.Text { get { return ""; } }
+		string ActionControlStyle.Text => "";
 
-		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter ) {
+		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + CssElementCreator.ImageStyleClass );
 
-			var image = new EwfImage( imageInfo ) { AlternateText = AlternateText };
-			if( SizesToAvailableWidth ) {
-				control.CssClass = control.CssClass.ConcatenateWithSpace( "ewfBlockContainer" );
-				image.IsAutoSizer = true;
-			}
-			else {
-				image.Width = width;
-				image.Height = height;
+			if( rolloverImageInfo != null && rolloverImageInfo.GetUrl() != imageInfo.GetUrl() ) {
+				control.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseover, "src='" + rolloverImageInfo.GetUrl() + "'" );
+				control.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseout, "src='" + imageInfo.GetUrl() + "'" );
 			}
 
-			if( rolloverImageInfo != null && getClientUrl( control, rolloverImageInfo ) != getClientUrl( control, imageInfo ) ) {
-				// NOTE: These events should be handled at the PostBackButton level instead of the image element level so rolling over the PostBackButton border works.
-				image.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseover, "src='" + getClientUrl( control, rolloverImageInfo ) + "'" );
-				image.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseout, "src='" + getClientUrl( control, imageInfo ) + "'" );
-			}
+			control.AddControlsReturnThis(
+				new EwfImage(
+					new ImageSetup(
+						AlternateText,
+						sizesToAvailableWidth: SizesToAvailableWidth,
+						classes: SizesToAvailableWidth ? new ElementClass( "ewfBlockContainer" ) : ElementClassSet.Empty ),
+					imageInfo ).ToCollection().GetControls() );
 
-			control.Controls.Add( image );
 			return null;
 		}
 
-		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
-			if( rolloverImageInfo == null || getClientUrl( controlForGetClientUrl, rolloverImageInfo ) == getClientUrl( controlForGetClientUrl, imageInfo ) )
+		string ActionControlStyle.GetJsInitStatements() {
+			if( rolloverImageInfo == null || rolloverImageInfo.GetUrl() == imageInfo.GetUrl() )
 				return "";
-			return "new Image().src = '" + getClientUrl( controlForGetClientUrl, rolloverImageInfo ) + "';";
-		}
-
-		private string getClientUrl( WebControl control, ResourceInfo imageInfo ) {
-			return control.GetClientUrl( imageInfo.GetUrl( true, true, false ) );
+			return "new Image().src = '" + rolloverImageInfo.GetUrl() + "';";
 		}
 	}
 }

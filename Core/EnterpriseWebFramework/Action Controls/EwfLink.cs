@@ -87,9 +87,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private PopUpWindowSettings popUpWindowSettings;
 		private bool navigatesInOpeningWindow;
 
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
-
 		private string toolTip;
 		private Control toolTipControl;
 
@@ -107,17 +104,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			ActionControlStyle = new TextActionControlStyle( "" );
 		}
 
-		public ResourceInfo DestinationResourceInfo { get { return destinationResourceInfo; } }
-
-		/// <summary>
-		/// Gets or sets the width of this button. Doesn't work with the text action control style.
-		/// </summary>
-		public override Unit Width { get { return width; } set { width = value; } }
-
-		/// <summary>
-		/// Gets or sets the height of this button. Only works with the image action control style.
-		/// </summary>
-		public override Unit Height { get { return height; } set { height = value; } }
+		public ResourceInfo DestinationResourceInfo => destinationResourceInfo;
 
 		/// <summary>
 		/// Standard library use only.
@@ -148,33 +135,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			if( destinationResourceInfo != null && destinationResourceInfo.AlternativeMode is NewContentResourceMode )
+			if( destinationResourceInfo?.AlternativeMode is NewContentResourceMode )
 				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
-			ActionControlStyle.SetUpControl( this, url, width, height, setWidth );
+			ActionControlStyle.SetUpControl( this, url );
 
-			if( destinationResourceInfo != null && destinationResourceInfo.AlternativeMode is DisabledResourceMode ) {
-				var message = ( destinationResourceInfo.AlternativeMode as DisabledResourceMode ).Message;
+			if( destinationResourceInfo?.AlternativeMode is DisabledResourceMode ) {
+				var message = ( (DisabledResourceMode)destinationResourceInfo.AlternativeMode ).Message;
 				new ToolTip( EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( message.Any() ? message : Translation.ThePageYouRequestedIsDisabled ), this );
 			}
 			else if( toolTip != null || toolTipControl != null )
 				new ToolTip( toolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( toolTip ), this );
 		}
 
-		private void setWidth( Unit w ) {
-			base.Width = w;
-		}
-
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.A;
 
-		private bool isPostBackButton {
-			get { return EwfPage.Instance.IsAutoDataUpdater && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow; }
-		}
+		private bool isPostBackButton => EwfPage.Instance.IsAutoDataUpdater && !navigatesInNewWindow && popUpWindowSettings == null && !navigatesInOpeningWindow;
 	}
 }

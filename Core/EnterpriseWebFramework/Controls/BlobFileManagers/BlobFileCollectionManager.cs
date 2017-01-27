@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -119,7 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 						} );
 					ValidationSetupState.ExecuteWithDataModifications(
-						deletePb.ToSingleElementArray(),
+						deletePb.ToCollection(),
 						() => {
 							foreach( var file in files )
 								addFileRow( table, file, deleteModMethods );
@@ -127,7 +128,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								table.AddRow(
 									getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
 									( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
-										new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToSingleElementArray() ) ) );
+										new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToCollection() ) ) );
 						} );
 
 					Controls.Add( table );
@@ -140,9 +141,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
-			if( thumbnailControl != null )
-				cells.Add( thumbnailControl );
+			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator ).ToImmutableArray();
+			if( thumbnailControl.Any() )
+				cells.Add( thumbnailControl.ToCell() );
 
 			var fileIsUnread = fileIdsMarkedAsRead != null && !fileIdsMarkedAsRead.Contains( file.FileId );
 
@@ -153,13 +154,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					postBack: PostBack.CreateFull(
 						id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
 						firstModificationMethod: () => {
-							if( fileIsUnread && markFileAsReadMethod != null )
-								markFileAsReadMethod( file.FileId );
+							if( fileIsUnread )
+								markFileAsReadMethod?.Invoke( file.FileId );
 						},
 						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) { ToolTip = file.FileName } );
 
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
-			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToSingleElementArray() ) ) );
+			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
 			var delete = false;
 			var deleteCheckBox =
@@ -196,12 +197,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					else
 						newFileId = BlobFileOps.SystemProvider.InsertFile( fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
 
-					if( NewFileNotificationMethod != null )
-						NewFileNotificationMethod( newFileId );
+					NewFileNotificationMethod?.Invoke( newFileId );
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				dm.ToSingleElementArray(),
+				dm.ToCollection(),
 				() => {
 					var fi = FormItem.Create(
 						"",
@@ -232,6 +232,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
 						new CssElement(
 							"UiAppLogoBlock",
-							EwfImage.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
+							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
 								.Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
 								.ToArray() ),
 						new CssElement(

@@ -52,8 +52,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private bool usesSubmitBehavior;
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
 		private ModalWindow confirmationWindow;
 		private readonly PostBack postBack;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
@@ -112,16 +110,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		// This constructor is needed because of ActionButtonSetups, which take the text in the ActionButtonSetup instead of here and the submit behavior will be overridden.
 		public PostBackButton( PostBack postBack = null ): this( new ButtonActionControlStyle( "" ), postBack: postBack ) {}
 
-		/// <summary>
-		/// Gets or sets the width of this button. Doesn't work with the text action control style.
-		/// </summary>
-		public override Unit Width { get { return width; } set { width = value; } }
-
-		/// <summary>
-		/// Gets or sets the height of this button. Only works with the image action control style.
-		/// </summary>
-		public override Unit Height { get { return height; } set { height = value; } }
-
 		void ControlTreeDataLoader.LoadData() {
 			ValidationSetupState.ExecuteWithDataModifications(
 				dataModifications,
@@ -143,23 +131,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
 
 					CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-					ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
+					ActionControlStyle.SetUpControl( this, "" );
 				} );
-		}
-
-		private void setWidth( Unit w ) {
-			base.Width = w;
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			if( ConfirmationWindowContentControl != null )
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, confirmationWindow.GetJsOpenStatement() + " return false" );
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return usesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey => usesSubmitBehavior ? HtmlTextWriterTag.Button : GetTagKey( ActionControlStyle );
 	}
 }

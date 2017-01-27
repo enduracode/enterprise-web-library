@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
@@ -39,7 +40,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					};
 			}
 
-			public override string EntitySetupName { get { return "Customer #1"; } }
+			public override string EntitySetupName => "Customer #1";
 		}
 
 		private ModalWindow one;
@@ -52,7 +53,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			one = new ModalWindow( this, new Paragraph( "Test!" ) );
 			two = new ModalWindow(
 				this,
-				new EwfImage( new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ) );
+				new PlaceHolder().AddControlsReturnThis(
+					new EwfImage(
+						new ImageSetup( null ),
+						new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection().GetControls() ) );
 		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {

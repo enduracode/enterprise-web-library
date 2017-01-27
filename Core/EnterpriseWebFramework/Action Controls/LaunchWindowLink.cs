@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, "", Unit.Empty, Unit.Empty, width => { } );
+			ActionControlStyle.SetUpControl( this, "" );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
@@ -55,12 +55,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			this.AddJavaScriptEventScript( JsWritingMethods.onclick, windowToLaunch.GetJsOpenStatement() + " return false" );
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return PostBackButton.GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey => PostBackButton.GetTagKey( ActionControlStyle );
 	}
 }

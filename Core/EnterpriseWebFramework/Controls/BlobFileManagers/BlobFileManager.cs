@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( file != null ) {
 				uploadedFile.SetInitialDisplay( false );
 				var replaceExistingFileLink = new ToggleButton(
-					uploadedFile.ToSingleElementArray(),
+					uploadedFile.ToCollection(),
 					new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ),
 					false,
 					( postBackValue, validator ) => { } ) { AlternateText = "" };
@@ -67,9 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			controlStack.AddControls( uploadedFile );
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
-			if( thumbnailControl != null )
-				Controls.Add( thumbnailControl );
+			this.AddControlsReturnThis( BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator ) );
 			Controls.Add( controlStack );
 		}
 
@@ -129,6 +127,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

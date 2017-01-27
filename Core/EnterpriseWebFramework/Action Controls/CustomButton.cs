@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -29,16 +28,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, "", Unit.Empty, Unit.Empty, width => { } );
+			ActionControlStyle.SetUpControl( this, "" );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return PostBackButton.GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey => PostBackButton.GetTagKey( ActionControlStyle );
 	}
 }

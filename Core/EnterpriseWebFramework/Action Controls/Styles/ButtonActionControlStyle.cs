@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -43,11 +42,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.text = text;
 		}
 
-		string ActionControlStyle.Text { get { return text; } }
+		string ActionControlStyle.Text => text;
 
-		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter ) {
-			widthSetter( width );
-
+		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
 			var cssElement = CssElementCreator.NormalButtonStyleClass;
 			if( buttonSize == ButtonSize.ShrinkWrap )
 				cssElement = CssElementCreator.ShrinkWrapButtonStyleClass;
@@ -58,7 +55,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextControls( icon, text.Any() ? text : defaultText ) );
 		}
 
-		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
+		string ActionControlStyle.GetJsInitStatements() {
 			return "";
 		}
 	}

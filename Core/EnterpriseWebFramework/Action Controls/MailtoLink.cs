@@ -1,7 +1,6 @@
 ﻿using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -49,9 +48,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public Control ToolTipControl { get; set; }
 
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
-
 		/// <summary>
 		/// Creates a new Mailto Link.
 		/// </summary>
@@ -64,45 +60,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			Body = "";
 		}
 
-		/// <summary>
-		/// Gets or sets the width of this link. Doesn't work with the text action control style.
-		/// </summary>
-		public override Unit Width { get { return width; } set { width = value; } }
-
-		/// <summary>
-		/// Gets or sets the height of this link. Only works with the image action control style.
-		/// </summary>
-		public override Unit Height { get { return height; } set { height = value; } }
-
 		void ControlTreeDataLoader.LoadData() {
-			Attributes.Add( "href",
-			                "mailto:" +
-			                StringTools.ConcatenateWithDelimiter( "?",
-			                                                      ToAddress,
-			                                                      StringTools.ConcatenateWithDelimiter( "&",
-			                                                                                            CcAddress.PrependDelimiter( "cc=" ),
-			                                                                                            BccAddress.PrependDelimiter( "bcc=" ),
-			                                                                                            HttpUtility.UrlEncode( Subject ).PrependDelimiter( "subject=" ),
-			                                                                                            HttpUtility.UrlEncode( Body ).PrependDelimiter( "body=" ) ) ) );
+			Attributes.Add(
+				"href",
+				"mailto:" +
+				StringTools.ConcatenateWithDelimiter(
+					"?",
+					ToAddress,
+					StringTools.ConcatenateWithDelimiter(
+						"&",
+						CcAddress.PrependDelimiter( "cc=" ),
+						BccAddress.PrependDelimiter( "bcc=" ),
+						HttpUtility.UrlEncode( Subject ).PrependDelimiter( "subject=" ),
+						HttpUtility.UrlEncode( Body ).PrependDelimiter( "body=" ) ) ) );
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			ActionControlStyle.SetUpControl( this, "", width, height, setWidth );
+			ActionControlStyle.SetUpControl( this, "" );
 
 			if( ToolTip != null || ToolTipControl != null )
 				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), this );
 		}
 
-		private void setWidth( Unit w ) {
-			base.Width = w;
-		}
-
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.A; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.A;
 	}
 }

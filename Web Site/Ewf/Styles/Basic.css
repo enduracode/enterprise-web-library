@@ -231,18 +231,6 @@ ewfActionControlAllStylesAllStates > ewfIcon:first-child {
 ewfActionControlAllStylesAllStates > ewfIcon:last-child {
 	padding-right: 0;
 }
-ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox {
-	display: block;
-	background-repeat: repeat-x;
-}
-ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.left {
-	float: left;
-	margin-right: 4px;
-}
-ewfActionControlBoxStyleAllStates > ewfActionControlBoxStyleSideAndBackgroundImageBox > img.right {
-	float: right;
-	margin-left: 4px;
-}
 ewfActionControlAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none;

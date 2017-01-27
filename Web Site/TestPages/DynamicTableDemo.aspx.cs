@@ -1,3 +1,4 @@
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
@@ -5,7 +6,7 @@ using EnterpriseWebLibrary.WebSessionState;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class DynamicTableDemo: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return "Old Table"; } }
+			public override string ResourceName => "Old Table";
 
 			protected override AlternativeResourceMode createAlternativeMode() {
 				return new DisabledResourceMode( "This demo is disabled." );
@@ -82,7 +83,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						{
 							ClickScript = clickScript,
 							UniqueIdentifier = 3,
-							ToolTipControl = new EwfImage( new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) )
+							ToolTipControl =
+								new PlaceHolder().AddControlsReturnThis(
+									new EwfImage( new ImageSetup( null ), new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) ).ToCollection().GetControls() )
 						},
 					cells[ 0 ],
 					cells[ 1 ],
@@ -175,6 +178,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			//table9.AddTextRow( "","" );
 		}
 
-		public override bool IsAutoDataUpdater { get { return true; } }
+		public override bool IsAutoDataUpdater => true;
 	}
 }

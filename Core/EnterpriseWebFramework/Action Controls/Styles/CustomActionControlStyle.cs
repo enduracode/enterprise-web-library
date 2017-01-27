@@ -15,15 +15,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.setUpControlMethod = setUpControlMethod;
 		}
 
-		string ActionControlStyle.Text { get { return ""; } }
+		string ActionControlStyle.Text => "";
 
-		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter ) {
+		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass );
 			setUpControlMethod( control );
 			return null;
 		}
 
-		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
+		string ActionControlStyle.GetJsInitStatements() {
 			return "";
 		}
 	}

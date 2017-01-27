@@ -11,9 +11,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		// This class allows us to cut the number of selectors in the ActionControlAllStyles... elements by an order of magnitude.
 		internal const string AllStylesClass = "ewfAction";
 
-		internal const string BoxStyleClass = "ewfActionBox";
-		internal const string BoxStyleSideAndBackgroundImageBoxClass = "ewfActionBox1";
-		internal const string BoxStyleTextClass = "ewfActionBox2";
 		internal const string ShrinkWrapButtonStyleClass = "ewfActionShrinkWrapButton";
 		internal const string NormalButtonStyleClass = "ewfActionNormalButton";
 		internal const string LargeButtonStyleClass = "ewfActionLargeButton";
@@ -157,12 +154,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			const string newContentSelector = "." + NewContentClass;
 			const string normalContentSelector = ":not(" + newContentSelector + ")";
 			var contentSelectors = newContent.HasValue
-				                       ? newContent.Value ? newContentSelector.ToSingleElementArray() : normalContentSelector.ToSingleElementArray()
+				                       ? newContent.Value ? newContentSelector.ToCollection() : normalContentSelector.ToCollection()
 				                       : new[] { normalContentSelector, newContentSelector };
 			var selectors = from styleSelector in styleSelectors
-			                from contentSelector in
-				                ( actionlessSelector != null ? ( null as string ).ToSingleElementArray() : new string[ 0 ] ).Concat( contentSelectors )
-			                from stateSelector in contentSelector == null ? Tuple.Create( actionlessSelector, "" ).ToSingleElementArray() : actionStateSelectors
+			                from contentSelector in ( actionlessSelector != null ? ( null as string ).ToCollection() : new string[ 0 ] ).Concat( contentSelectors )
+			                from stateSelector in contentSelector == null ? Tuple.Create( actionlessSelector, "" ).ToCollection() : actionStateSelectors
 			                from selectorGetter in
 				                contentSelector == null || stateSelector.Item1.StartsWith( ":visited" )
 					                ? new Func<string, string, string, string, string>[]
@@ -182,9 +178,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return
 				new[]
 					{
-						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass ), getElementsForAllStates( "ActionControlBoxStyle", "." + BoxStyleClass ),
-						new CssElement( "ActionControlBoxStyleSideAndBackgroundImageBox", "span." + BoxStyleSideAndBackgroundImageBoxClass ).ToSingleElementArray(),
-						new CssElement( "ActionControlBoxStyleText", "span." + BoxStyleTextClass ).ToSingleElementArray(),
+						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass ),
 						getElementsForAllStates( "ActionControlAllButtonStyles", "." + ShrinkWrapButtonStyleClass, "." + NormalButtonStyleClass, "." + LargeButtonStyleClass ),
 						getElementsForAllStates( "ActionControlShrinkWrapButtonStyle", "." + ShrinkWrapButtonStyleClass ),
 						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass ),

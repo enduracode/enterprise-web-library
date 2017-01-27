@@ -97,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns null if the file is null, the file is not an image, or there is no thumbnail resource info creator.
 		/// </summary>
-		internal static Control GetThumbnailControl( BlobFile file, Func<decimal, ResourceInfo> thumbnailResourceInfoCreator ) {
+		internal static IEnumerable<Control> GetThumbnailControl( BlobFile file, Func<decimal, ResourceInfo> thumbnailResourceInfoCreator ) {
 			// NOTE: We'd like to check here whether the file is a renderable image or not. But we can't because we don't have the file contents.
 			// So, we'll have to make sure that all ThumbnailPageInfoCreators provide a page that knows how to handle NEF files (ideally we'd want
 			// it to behave as if there was no thumbnail at all if there is an unrenderable image file).
@@ -105,7 +105,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// we first save the image.
 			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailResourceInfoCreator == null )
 				return null;
-			return new EwfImage( thumbnailResourceInfoCreator( file.FileId ) ) { SizesToAvailableWidth = true };
+			return new EwfImage( new ImageSetup( null, sizesToAvailableWidth: true ), thumbnailResourceInfoCreator( file.FileId ) ).ToCollection().GetControls();
 		}
 
 		// NOTE: Use this from blob file manager, etc.

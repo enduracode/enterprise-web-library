@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -31,12 +30,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			Text = text;
 		}
 
-		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText, Unit width, Unit height, Action<Unit> widthSetter ) {
+		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + CssElementCreator.TextStyleClass );
 			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextControls( icon, Text.Any() ? Text : defaultText ) );
 		}
 
-		string ActionControlStyle.GetJsInitStatements( WebControl controlForGetClientUrl ) {
+		string ActionControlStyle.GetJsInitStatements() {
 			return "";
 		}
 	}

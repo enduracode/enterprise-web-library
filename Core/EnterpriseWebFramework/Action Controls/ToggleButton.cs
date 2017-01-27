@@ -34,8 +34,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public ActionControlStyle ActionControlStyle { get; set; }
 
 		private readonly IEnumerable<string> toggleClasses;
-		private Unit width = Unit.Empty;
-		private Unit height = Unit.Empty;
 		private readonly HiddenFieldId hiddenFieldId = new HiddenFieldId();
 		private readonly PageModificationValue<string> hiddenFieldValue = new PageModificationValue<string>();
 		private Control textControl;
@@ -57,7 +55,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				validationMethod( new PostBackValue<bool>( getControlsToggled( postBackValue.Value ), postBackValue.ChangedOnPostBack ), validator ),
 				id: hiddenFieldId,
 				pageModificationValue: hiddenFieldValue );
-			hiddenField.PageComponent.ToSingleElementArray().AddEtherealControls( this );
+			hiddenField.PageComponent.ToCollection().AddEtherealControls( this );
 		}
 
 		/// <summary>
@@ -67,16 +65,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.controlsToToggle.AddRange( controlsToToggle );
 		}
 
-		/// <summary>
-		/// Gets or sets the width of this button. Doesn't work with the text action control style.
-		/// </summary>
-		public override Unit Width { get { return width; } set { width = value; } }
-
-		/// <summary>
-		/// Gets or sets the height of this button. Only works with the image action control style.
-		/// </summary>
-		public override Unit Height { get { return height; } set { height = value; } }
-
 		void ControlTreeDataLoader.LoadData() {
 			EwfPage.Instance.AddDisplayLink( this );
 
@@ -84,11 +72,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				PostBackButton.AddButtonAttributes( this );
 			this.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
-			textControl = ActionControlStyle.SetUpControl( this, "", width, height, w => base.Width = w );
+			textControl = ActionControlStyle.SetUpControl( this, "" );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return ActionControlStyle.GetJsInitStatements( this );
+			return ActionControlStyle.GetJsInitStatements();
 		}
 
 		void DisplayLink.AddJavaScript() {
@@ -125,7 +113,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private string handlerName { get { return "toggleState_" + ClientID; } }
+		private string handlerName => "toggleState_" + ClientID;
 
 		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
 			if( getControlsToggled( hiddenFieldValue.Value ) ) {
@@ -158,6 +146,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return PostBackButton.GetTagKey( ActionControlStyle ); } }
+		protected override HtmlTextWriterTag TagKey => PostBackButton.GetTagKey( ActionControlStyle );
 	}
 }
