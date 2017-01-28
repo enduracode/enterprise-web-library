@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			/// </summary>
 			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new CssElement( "ErrorMessageControlListBlock", Selectors ).ToSingleElementArray();
 			}
 		}

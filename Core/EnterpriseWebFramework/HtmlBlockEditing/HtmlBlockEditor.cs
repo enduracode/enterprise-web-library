@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -9,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "HtmlBlockEditor", "div." + CssClass ) };
 			}
 		}

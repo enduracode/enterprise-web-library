@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private const string statusMessageTextClass = "ewfStatusText";
 
 		internal class CssElementCreator: ControlCssElementCreator {
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var elements = new List<CssElement>();
 				elements.Add( new CssElement( "TopWarningBlock", "div.{0}".FormatWith( topWarningBlockCssClass ) ) );
 

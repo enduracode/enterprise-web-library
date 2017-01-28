@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDateAndTimePicker";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "DateAndTimePicker", "div." + CssClass ) };
 			}
 		}

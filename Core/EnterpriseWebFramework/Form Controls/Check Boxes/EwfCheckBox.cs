@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfCheckBox";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[]
 					{
 						new CssElement( "InlineCheckBox", "label." + CssClass ), new CssElement( "InlineCheckBoxBox", "input." + CssClass ),

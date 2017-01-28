@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass ).ToArray();
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var elements =
 					new[]
 						{

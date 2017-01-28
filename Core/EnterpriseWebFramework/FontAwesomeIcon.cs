@@ -7,7 +7,7 @@ using Humanizer;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FontAwesomeIcon: WebControl, ControlTreeDataLoader {
 		internal class CssElementCreator: ControlCssElementCreator {
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "Icon", "span.fa" ) };
 			}
 		}

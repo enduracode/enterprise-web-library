@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string DropDownCssClass = "ewfDropDown";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .select2-container" ) };
 			}
 		}

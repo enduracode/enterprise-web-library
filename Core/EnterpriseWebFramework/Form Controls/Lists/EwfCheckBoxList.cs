@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CheckBoxListCssElementCreator: ControlCssElementCreator {
 		internal const string CssClass = "ewfStandardCheckBoxList";
 
-		CssElement[] ControlCssElementCreator.CreateCssElements() {
+		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			return new[] { new CssElement( "CheckBoxList", "div." + CssClass ) };
 		}
 	}

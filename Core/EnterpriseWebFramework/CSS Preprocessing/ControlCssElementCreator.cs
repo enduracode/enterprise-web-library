@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using System.Collections.Generic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that defines one or more CSS elements.
 	/// </summary>
@@ -6,6 +8,6 @@
 		/// <summary>
 		/// Creates an array of CSS elements.
 		/// </summary>
-		CssElement[] CreateCssElements();
+		IReadOnlyCollection<CssElement> CreateCssElements();
 	}
 }

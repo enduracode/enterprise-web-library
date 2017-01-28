@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -10,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlock";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "HtmlBlock", "div." + CssClass ) };
 			}
 		}

@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfChart";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "Chart", "div." + CssClass ) };
 			}
 		}

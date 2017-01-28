@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDatePicker";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "DatePicker", "div." + CssClass ) };
 			}
 		}

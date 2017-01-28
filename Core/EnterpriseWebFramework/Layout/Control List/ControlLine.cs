@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			/// </summary>
 			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var itemSelectors = from i in EwfTable.CssElementCreator.CellSelectors select "table > tbody > tr > " + i + "." + ItemCssClass;
 				return new[] { new CssElement( "ControlLine", Selectors ), new CssElement( "ControlLineItem", itemSelectors.ToArray() ) };
 			}

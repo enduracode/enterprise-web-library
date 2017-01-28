@@ -174,7 +174,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return new CssElement( baseName + ( newContent.HasValue ? newContent.Value ? newContentName : normalContentName : allContentName ), selectors.ToArray() );
 		}
 
-		CssElement[] ControlCssElementCreator.CreateCssElements() {
+		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			return
 				new[]
 					{

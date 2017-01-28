@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -30,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfPagePath";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "PagePath", "div." + CssClass ) };
 			}
 		}
@@ -41,12 +42,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a page path control.
 		/// </summary>
 		public PagePath( PagePathCurrentPageBehavior currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage ) {
-			if( currentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage ) {
+			if( currentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage )
 				pageName = new PageName
 					{
 						ExcludesPageNameIfEntitySetupExists = currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 					};
-			}
 		}
 
 		/// <summary>

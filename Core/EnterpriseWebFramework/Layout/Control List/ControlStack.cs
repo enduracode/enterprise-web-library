@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			/// </summary>
 			public const string ItemSelector = "div." + ItemCssClass;
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[]
 					{
 						new CssElement( "ControlStack" /*NOTE: Rename to ControlStackAllStyles.*/, Selectors ),

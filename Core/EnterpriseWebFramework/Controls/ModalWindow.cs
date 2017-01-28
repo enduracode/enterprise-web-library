@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfModal";
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "ModalSectionContainer", "div." + CssClass ) };
 			}
 		}

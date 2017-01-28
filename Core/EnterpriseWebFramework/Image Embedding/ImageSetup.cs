@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			/// </summary>
 			public static readonly IReadOnlyCollection<string> Selectors = "img.{0}".FormatWith( Class.ClassName ).ToCollection();
 
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[] { new CssElement( "Image", Selectors.ToArray() ) };
 			}
 		}

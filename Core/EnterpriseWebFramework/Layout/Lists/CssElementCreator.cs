@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// This class ensures that the item selector does not have lower specificity than the alignment rules in the EWF CSS files.
 		internal static readonly ElementClass ItemClass = new ElementClass( "ewfLi" );
 
-		CssElement[] ControlCssElementCreator.CreateCssElements() {
+		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			return
 				new[]
 					{

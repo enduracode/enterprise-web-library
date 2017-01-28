@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private const string contentClass = "ewfSecContent";
 
 		internal class CssElementCreator: ControlCssElementCreator {
-			CssElement[] ControlCssElementCreator.CreateCssElements() {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				const string normalClosedSelector = "section." + normalClosedClass;
 				const string normalExpandedSelector = "section." + normalExpandedClass;
 				const string boxClosedSelector = "section." + boxClosedClass;
