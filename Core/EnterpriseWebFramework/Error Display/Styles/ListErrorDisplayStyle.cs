@@ -19,10 +19,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			/// <summary>
 			/// EWL use only.
 			/// </summary>
-			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
+			public static readonly IReadOnlyCollection<string> Selectors = ( "div." + CssClass ).ToCollection();
 
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new CssElement( "ErrorMessageControlListBlock", Selectors ).ToSingleElementArray();
+				return new CssElement( "ErrorMessageControlListBlock", Selectors.ToArray() ).ToCollection();
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		IEnumerable<Control> ErrorDisplayStyle.GetControls( IEnumerable<string> errors ) {
-			return errors.Any() ? GetErrorMessageListBlock( additionalClasses, errors ).ToSingleElementArray() : new Control[ 0 ];
+			return errors.Any() ? GetErrorMessageListBlock( additionalClasses, errors ).ToCollection() : new Control[ 0 ];
 		}
 
 		internal static Control GetErrorMessageListBlock( IEnumerable<string> additionalClasses, IEnumerable<string> errors ) {
@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							(Control)new PlaceHolder().AddControlsReturnThis( new FontAwesomeIcon( "fa-times-circle", "fa-lg" ), " ".GetLiteralControl(), new Literal { Text = i } ) )
 							.ToArray() ) )
 					{
-						CssClass = StringTools.ConcatenateWithDelimiter( " ", CssElementCreator.CssClass.ToSingleElementArray().Concat( additionalClasses ).ToArray() )
+						CssClass = StringTools.ConcatenateWithDelimiter( " ", CssElementCreator.CssClass.ToCollection().Concat( additionalClasses ).ToArray() )
 					};
 		}
 	}

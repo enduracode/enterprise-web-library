@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( es.info.ParentResource ) );
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					userFieldTable = new UserFieldTable();
 					userFieldTable.LoadData( info.UserId );

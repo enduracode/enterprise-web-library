@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 			var val = new DataValue<string>();
 			var postBack = PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( handler( val.Value ) ) );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				postBack.ToSingleElementArray(),
+				postBack.ToCollection(),
 				() => {
 					var textBox = FormItem.Create(
 						"",

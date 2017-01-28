@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var pb = PostBack.CreateFull();
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			return new Section(
 				"What to look for after updating Select2",
-				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToSingleElementArray(),
+				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToCollection(),
 				style: SectionStyle.Box );
 		}
 

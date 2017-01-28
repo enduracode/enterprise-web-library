@@ -373,7 +373,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 			var pdf = EwlStatics.CombinePaths( inputTestFiles, "pdf.pdf" );
 
 			MergeStatics.Init();
-			var singleTestRow = new PseudoTableRow( 1 ).ToSingleElementArray();
+			var singleTestRow = new PseudoTableRow( 1 ).ToCollection();
 			var testRows = new[] { new PseudoTableRow( 1 ), new PseudoTableRow( 2 ), new PseudoTableRow( 3 ) };
 			var singleRowTree = MergeStatics.CreatePseudoTableRowTree( singleTestRow );
 			var pseudoTableRowTree = MergeStatics.CreatePseudoTableRowTree( testRows );

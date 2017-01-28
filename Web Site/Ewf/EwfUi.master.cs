@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
 						new CssElement(
 							"UiAppLogoBlock",
-							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToSingleElementArray() )
+							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToCollection() )
 								.Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
 								.ToArray() ),
 						new CssElement(
@@ -229,13 +229,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							getGlobalNavBlock(),
 							new ModificationErrorPlaceholder(
 								null,
-								new ListErrorDisplayStyle( additionalClasses: CssElementCreator.TopErrorMessageListBlockCssClass.ToSingleElementArray() ) )
+								new ListErrorDisplayStyle( additionalClasses: CssElementCreator.TopErrorMessageListBlockCssClass.ToCollection() ) )
 						}.Where( i => i != null )
 						.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToSingleElementArray() );
+			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToCollection() );
 
 			var appLogoBlock = ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
 				                     ? EwfUiStatics.AppProvider.GetLogoControl()
@@ -311,7 +311,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var cells = new[] { getEntityNavCell(), getEntityActionCell() }.Where( i => i != null );
 			if( !cells.Any() )
 				return null;
-			var table = EwfTable.Create( style: EwfTableStyle.Raw, classes: CssElementCreator.EntityNavAndActionBlockCssClass.ToSingleElementArray() );
+			var table = EwfTable.Create( style: EwfTableStyle.Raw, classes: CssElementCreator.EntityNavAndActionBlockCssClass.ToCollection() );
 			table.AddItem( new EwfTableItem( cells ) );
 			return table;
 		}
@@ -441,7 +441,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !controls.Any() )
 				return null;
 
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToSingleElementArray() );
+			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToCollection() );
 			table.AddItem(
 				new EwfTableItem(
 					controls.ToCell( new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );

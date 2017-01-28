@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					"Remove Last Group",
 					new PostBackButton(
 						PostBack.CreateIntermediate(
-							updateRegionSet.ToSingleElementArray(),
+							updateRegionSet.ToCollection(),
 							id: "removeLastGroup",
 							firstModificationMethod: () => {
 								if( info.GroupCount <= 0 )
@@ -46,8 +46,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					fields:
 						new[]
 							{ new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ), new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" ) },
-					headItems: new EwfTableItem( "First Column", "Second Column" ).ToSingleElementArray(),
-					tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToSingleElementArray(), 1 ).ToSingleElementArray() ) );
+					headItems: new EwfTableItem( "First Column", "Second Column" ).ToCollection(),
+					tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() ) );
 		}
 
 		private EwfTableItemGroup getItemGroup( int groupNumber ) {
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								null,
 								id: "group{0}".FormatWith( groupNumber ),
 								firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
-						tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToSingleElementArray(), 1 ).ToSingleElementArray() : null ),
+						tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
 					groupNumber == 1
 						? getItems( info.FirstGroupItemCount )
 							  .Concat(
@@ -75,10 +75,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								  usesSubmitBehavior: false,
 								  postBack:
 								  PostBack.CreateIntermediate(
-									  updateRegionSet.ToSingleElementArray(),
+									  updateRegionSet.ToCollection(),
 									  id: "addRow",
 									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) )
-							  .ToSingleElementArray() )
+							  .ToCollection() )
 						: getItems( 250 ) );
 		}
 

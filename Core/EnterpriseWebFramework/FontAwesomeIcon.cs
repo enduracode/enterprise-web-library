@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="iconName">The name of the icon. Do not pass null or the empty string.</param>
 		/// <param name="additionalClasses">Additional classes that will be added to the icon element.</param>
 		public FontAwesomeIcon( string iconName, params string[] additionalClasses ) {
-			classes = iconName.ToSingleElementArray().Concat( additionalClasses );
+			classes = iconName.ToCollection().Concat( additionalClasses );
 		}
 
 		void ControlTreeDataLoader.LoadData() {

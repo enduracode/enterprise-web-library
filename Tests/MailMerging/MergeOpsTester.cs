@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 
 			var mergeTree = MergeDataTreeOps.CreateRowTree(
 				mergingInfoFields.AsReadOnly(),
-				singlePersonMergeData.ToSingleElementArray(),
+				singlePersonMergeData.ToCollection(),
 				new List<MergeDataTreeChild<MergeTestData>>
 					{
 						new MergeDataTreeChild<MergeTestData, MergeTestData.Thing>( "Things", internalTableDataFields.AsReadOnly(), info => info.Things )
@@ -91,9 +91,9 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 						new PhysicianMockData( "mister.pullman@celebri.ty", "Billy", "Pullman" ), new PhysicianMockData( "fresh.prince@aol.com", "William", "Smithers" )
 					} );
 
-			var practiceFields = new List<MergeField<PracticeMockData>>( MergeFieldOps.CreateBasicField( new PracticeName() ).ToSingleElementArray() );
+			var practiceFields = new List<MergeField<PracticeMockData>>( MergeFieldOps.CreateBasicField( new PracticeName() ).ToCollection() );
 			var managerFields =
-				new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new MergeFields.PracticeManagerMergeFields.Email() ).ToSingleElementArray() );
+				new List<MergeField<PracticeManagerMockData>>( MergeFieldOps.CreateBasicField( new MergeFields.PracticeManagerMergeFields.Email() ).ToCollection() );
 			var physicianFields =
 				new List<MergeField<PhysicianMockData>>(
 					new[]
@@ -109,7 +109,7 @@ namespace EnterpriseWebLibrary.Tests.MailMerging {
 			var physiciansChild = new MergeDataTreeChild<PracticeMockData, PhysicianMockData>( "Physicians", physicianFields.AsReadOnly(), data => data.Physicians );
 			var mergeTree = MergeDataTreeOps.CreateRowTree(
 				practiceFields.AsReadOnly(),
-				practiceData.ToSingleElementArray(),
+				practiceData.ToCollection(),
 				new List<MergeDataTreeChild<PracticeMockData>> { managersChild, physiciansChild }.AsReadOnly() );
 
 			using( var templateStream = File.OpenRead( testingPracticesWordTemplatePath ) ) {

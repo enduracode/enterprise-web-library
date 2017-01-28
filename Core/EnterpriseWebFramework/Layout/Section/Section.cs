@@ -80,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( heading.Any() ) {
 				var headingControls =
 					new WebControl( HtmlTextWriterTag.H1 ) { CssClass = headingClass }.AddControlsReturnThis( heading.GetLiteralControl() )
-						.ToSingleElementArray()
+						.ToCollection()
 						.Concat( postHeadingControls );
 				if( expanded.HasValue ) {
 					var toggleClasses = style == SectionStyle.Normal ? new[] { normalClosedClass, normalExpandedClass } : new[] { boxClosedClass, boxExpandedClass };
@@ -97,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									ActionControlStyle = actionControlStyle
 								}
-							: new ToggleButton( this.ToSingleElementArray(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as
+							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as
 							  Control );
 				}
 				else {

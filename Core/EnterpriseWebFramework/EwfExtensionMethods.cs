@@ -228,7 +228,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new FormItem<Control>(
 				label,
-				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToSingleElementArray().GetControls() ),
+				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToCollection().GetControls() ),
 				cellSpan,
 				textAlignment,
 				formControl.Validation );

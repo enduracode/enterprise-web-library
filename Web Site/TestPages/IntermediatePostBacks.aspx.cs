@@ -54,13 +54,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private IEnumerable<Control> getBasicRegionBlocks() {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: "basic" );
+			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: "basic" );
 			yield return new Paragraph( new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					if( info.Toggled )
 						regionControls.Add(
@@ -73,8 +73,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				} );
 			yield return
 				new NamingPlaceholder(
-					new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToSingleElementArray(),
-					updateRegionSets: rs.ToSingleElementArray() );
+					new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(),
+					updateRegionSets: rs.ToCollection() );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
 			pb.AddModificationMethod(
@@ -92,7 +92,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						usesSubmitBehavior: false,
 						postBack:
 							PostBack.CreateIntermediate(
-								addRs.ToSingleElementArray(),
+								addRs.ToCollection(),
 								id: "nonIdAdd",
 								firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ),
 					new PostBackButton(
@@ -100,23 +100,23 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						usesSubmitBehavior: false,
 						postBack:
 							PostBack.CreateIntermediate(
-								removeRs.ToSingleElementArray(),
+								removeRs.ToCollection(),
 								id: "nonIdRemove",
 								firstModificationMethod:
 									() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) );
 
 			var stack = ControlStack.Create(
 				true,
-				tailUpdateRegions: new[] { new TailUpdateRegion( addRs.ToSingleElementArray(), 0 ), new TailUpdateRegion( removeRs.ToSingleElementArray(), 2 ) } );
+				tailUpdateRegions: new[] { new TailUpdateRegion( addRs.ToCollection(), 0 ), new TailUpdateRegion( removeRs.ToCollection(), 2 ) } );
 			for( var i = 0; i < info.NonIdItemStates.Count(); i += 1 )
 				stack.AddItem( getNonIdItem( i ) );
 
-			yield return new Section( "Control List With Non-ID Items", stack.ToSingleElementArray(), style: SectionStyle.Box );
+			yield return new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getNonIdItem( int i ) {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: PostBack.GetCompositeId( "nonId", i.ToString() ) );
+			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "nonId", i.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
@@ -132,7 +132,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			pb.AddModificationMethod(
 				() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
 
-			return new ControlListItem( itemStack.ToSingleElementArray(), updateRegionSets: rs.ToSingleElementArray() );
+			return new ControlListItem( itemStack.ToCollection(), updateRegionSets: rs.ToCollection() );
 		}
 
 		private IEnumerable<Control> getIdListRegionBlocks() {
@@ -144,28 +144,28 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						usesSubmitBehavior: false,
 						postBack:
 							PostBack.CreateIntermediate(
-								rs.ToSingleElementArray(),
+								rs.ToCollection(),
 								id: "idAdd",
 								firstModificationMethod:
 									() =>
 									parametersModification.ItemIds =
-									( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToSingleElementArray().Concat( parametersModification.ItemIds ) ) ) )
+									( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection().Concat( parametersModification.ItemIds ) ) ) )
 				;
 
 			var stack = ControlStack.Create(
 				true,
 				itemInsertionUpdateRegions:
-					new ItemInsertionUpdateRegion( rs.ToSingleElementArray(), () => parametersModification.ItemIds.First().ToString().ToSingleElementArray() )
-						.ToSingleElementArray() );
+					new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
+						.ToCollection() );
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
-			yield return new Section( "Control List With ID Items", stack.ToSingleElementArray(), style: SectionStyle.Box );
+			yield return new Section( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getIdItem( int id ) {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToSingleElementArray(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
+			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
 			itemStack.AddControls( new EwfTextBox( "ID {0}".FormatWith( id ) ) );
@@ -177,7 +177,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			pb.AddModificationMethod( () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() );
 
-			return new ControlListItem( itemStack.ToSingleElementArray(), id.ToString(), removalUpdateRegionSets: rs.ToSingleElementArray() );
+			return new ControlListItem( itemStack.ToCollection(), id.ToString(), removalUpdateRegionSets: rs.ToCollection() );
 		}
 	}
 }

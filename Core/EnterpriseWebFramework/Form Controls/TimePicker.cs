@@ -123,7 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				       ? validator.GetNullableTimeOfDayTimeSpan(
 					       errorHandler,
 					       textBox.GetPostBackValue( postBackValues ).ToUpper(),
-					       DateTimeTools.HourAndMinuteFormat.ToSingleElementArray(),
+					       DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
 					       allowEmpty )
 				       : selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 		}
@@ -136,7 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				return validator.GetTimeOfDayTimeSpan(
 					errorHandler,
 					textBox.GetPostBackValue( postBackValues ).ToUpper(),
-					DateTimeTools.HourAndMinuteFormat.ToSingleElementArray() );
+					DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray() );
 
 			var selectedItemIdInPostBack = selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 			if( selectedItemIdInPostBack.HasValue )

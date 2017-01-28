@@ -100,7 +100,7 @@ namespace EnterpriseWebLibrary.IO {
 			using( var onePage = File.OpenRead( onePagePdfPath ) ) {
 				const string concatOnePdf = "ConcatOne.pdf";
 				using( var concatFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, concatOnePdf ) ) )
-					ConcatPdfs( onePage.ToSingleElementArray(), concatFile );
+					ConcatPdfs( onePage.ToCollection(), concatFile );
 				explanations.Add( Tuple.Create( concatOnePdf, "This file should be exactly the same as {0}.".FormatWith( onePagePdfPath ) ) );
 
 				resetFileStream( onePage );
@@ -131,7 +131,7 @@ namespace EnterpriseWebLibrary.IO {
 				const string bookmarkOnePdf = "BookmarkOne.pdf";
 				const string bookmarkTitle = "Bookmark 1";
 				using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkOnePdf ) ) )
-					CreateBookmarkedPdf( Tuple.Create( bookmarkTitle, onePage ).ToSingleElementArray(), bookmarkFile );
+					CreateBookmarkedPdf( Tuple.Create( bookmarkTitle, onePage ).ToCollection(), bookmarkFile );
 				explanations.Add( Tuple.Create( bookmarkOnePdf, "This should be {0} labeled with one bookmark named {1}.".FormatWith( onePagePdfPath, bookmarkTitle ) ) );
 
 				using( var twoPage = new MemoryStream() ) {

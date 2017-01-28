@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var table = FormItemBlock.CreateFormItemTable();
 					table.AddFormItems(

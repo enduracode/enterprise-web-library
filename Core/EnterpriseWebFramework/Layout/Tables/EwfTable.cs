@@ -127,7 +127,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( new Control[] { caption.GetLiteralControl() }.Concat( subCaptionControls ) ) );
 		}
 
-		internal static EwfTableField[] GetFields( EwfTableField[] fields, ReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
+		internal static IReadOnlyCollection<EwfTableField> GetFields(
+			EwfTableField[] fields, ReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
 			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
 			if( firstSpecifiedItem == null )
 				return new EwfTableField[ 0 ];
@@ -154,13 +155,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				};
 		}
 
-		internal static void AssertAtLeastOneCellPerField( EwfTableField[] fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
+		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
 			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
 			if( !cellPlaceholderListsForItems.Any() )
 				return;
 
 			// Enforce that there is at least one cell in each field by looking at array of all items.
-			for( var fieldIndex = 0; fieldIndex < fields.Length; fieldIndex += 1 ) {
+			for( var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex += 1 ) {
 				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
 					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
 			}
@@ -206,7 +207,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				defaultItemLimit,
 				disableEmptyFieldDetection,
 				new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), ImmutableArray<Func<EwfTableItem>>.Empty )
-					.ToSingleElementArray(),
+					.ToCollection(),
 				null );
 		}
 
@@ -250,7 +251,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				headItems,
 				defaultItemLimit,
 				disableEmptyFieldDetection,
-				new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ).ToSingleElementArray(),
+				new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ).ToCollection(),
 				null );
 		}
 
@@ -338,7 +339,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.defaultItemLimit = defaultItemLimit;
 			this.disableEmptyFieldDetection = disableEmptyFieldDetection;
 			this.itemGroups = itemGroups.ToImmutableArray();
-			this.tailUpdateRegions = tailUpdateRegions != null ? tailUpdateRegions.ToImmutableArray() : ImmutableArray<TailUpdateRegion>.Empty;
+			this.tailUpdateRegions = tailUpdateRegions?.ToImmutableArray() ?? ImmutableArray<TailUpdateRegion>.Empty;
 
 			dataModifications = ValidationSetupState.Current.DataModifications;
 		}
@@ -346,7 +347,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Gets the maximum number of items that will be shown in this table.
 		/// </summary>
-		public int CurrentItemLimit { get { return EwfPage.Instance.PageState.GetValue( this, itemLimitPageStateKey, (int)defaultItemLimit ); } }
+		public int CurrentItemLimit => EwfPage.Instance.PageState.GetValue( this, itemLimitPageStateKey, (int)defaultItemLimit );
 
 		/// <summary>
 		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If
@@ -395,7 +396,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 						var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 						if( !fields.Any() )
-							fields = new EwfTableField().ToSingleElementArray();
+							fields = new EwfTableField().ToCollection();
 
 						addColumnSpecifications( fields );
 
@@ -404,8 +405,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
 						var headRows =
 							buildRows(
-								getItemLimitingAndGeneralActionsItem( fields.Length, itemLimitingUpdateRegionSet ).Concat( getItemActionsItem( fields.Length ) ).ToList(),
-								Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+								getItemLimitingAndGeneralActionsItem( fields.Count, itemLimitingUpdateRegionSet ).Concat( getItemActionsItem( fields.Count ) ).ToList(),
+								Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
 								null,
 								false,
 								null,
@@ -423,13 +424,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							var rowGroup =
 								new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
 									buildRows(
-										groupAndItems.Item1.GetHeadItems( fields.Length ),
-										Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+										groupAndItems.Item1.GetHeadItems( fields.Count ),
+										Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
 										null,
 										true,
 										null,
 										null,
-										allVisibleItems ).Concat( new NamingPlaceholder( groupBodyRows ).ToSingleElementArray() ) );
+										allVisibleItems ).Concat( new NamingPlaceholder( groupBodyRows ).ToCollection() ) );
 							bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 
 							var cachedVisibleGroupIndex = visibleGroupIndex;
@@ -473,9 +474,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 									this,
 									"itemLimitingTail",
 									new LegacyPreModificationUpdateRegion(
-										itemLimitingUpdateRegionSet.ToSingleElementArray(),
+										itemLimitingUpdateRegionSet.ToCollection(),
 										() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
-										() => lowerItemLimit.Value.ToString() ).ToSingleElementArray(),
+										() => lowerItemLimit.Value.ToString() ).ToCollection(),
 									arg => itemLimitingTailUpdateRegionControlGetter( int.Parse( arg ) ) ) );
 						}
 
@@ -503,16 +504,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								usesSubmitBehavior: false,
 								postBack:
 									PostBack.CreateIntermediate(
-										itemLimitingUpdateRegionSet.ToSingleElementArray(),
+										itemLimitingUpdateRegionSet.ToCollection(),
 										id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
 										firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ) );
-							var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Length ) ) );
+							var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
 							var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 							itemLimitingRowGroup.Add(
 								new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
 									buildRows(
-										item.ToSingleElementArray().ToList(),
-										Enumerable.Repeat( new EwfTableField(), fields.Length ).ToArray(),
+										item.ToCollection().ToList(),
+										Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
 										useContrast,
 										false,
 										null,
@@ -523,11 +524,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							new NamingPlaceholder(
 								itemLimitingRowGroup,
 								updateRegionSets:
-									itemLimitingUpdateRegionSet.ToSingleElementArray()
+									itemLimitingUpdateRegionSet.ToCollection()
 										.Concat( itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ) ) );
 
 						// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-						var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Length );
+						var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
 
 						if( !disableEmptyFieldDetection )
 							AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
@@ -535,14 +536,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private void addColumnSpecifications( EwfTableField[] fields ) {
+		private void addColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
 			var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
 			var factor = GetColumnWidthFactor( fieldOrItemSetups );
 			this.AddControlsReturnThis( fieldOrItemSetups.Select( f => GetColControl( f, factor ) ) );
 		}
 
 		// NOTE: This row also needs to include general actions, on the right. Don't forget about Export to Excel.
-		private EwfTableItem[] getItemLimitingAndGeneralActionsItem( int fieldCount, UpdateRegionSet itemLimitingUpdateRegionSet ) {
+		private IReadOnlyCollection<EwfTableItem> getItemLimitingAndGeneralActionsItem( int fieldCount, UpdateRegionSet itemLimitingUpdateRegionSet ) {
 			if( defaultItemLimit == DataRowLimit.Unlimited )
 				return new EwfTableItem[ 0 ];
 
@@ -550,14 +551,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var cl =
 				new ControlLine(
 					new NamingPlaceholder(
-						"Item".ToQuantity( itemCount ).GetLiteralControl().ToSingleElementArray(),
+						"Item".ToQuantity( itemCount ).GetLiteralControl().ToCollection(),
 						updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ),
 					"".GetLiteralControl(),
 					"Show:".GetLiteralControl() );
 			cl.AddControls( getItemLimitButton( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) );
 			cl.AddControls( getItemLimitButton( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) );
 			cl.AddControls( getItemLimitButton( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) );
-			return new EwfTableItem( cl.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToSingleElementArray();
+			return new EwfTableItem( cl.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
 		private Control getItemLimitButton( DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
@@ -569,7 +570,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				usesSubmitBehavior: false,
 				postBack:
 					PostBack.CreateIntermediate(
-						updateRegionSet.ToSingleElementArray(),
+						updateRegionSet.ToCollection(),
 						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
 						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ) );
 		}
@@ -604,6 +605,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the table element, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Table; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Table;
 	}
 }

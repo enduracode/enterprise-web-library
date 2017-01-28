@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var pb = PostBack.CreateFull();
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					addMessageIfNotNull( ph, getTest1( null ) );
 					ph.AddControlsReturnThis( test1( setTest1 ) );
@@ -80,14 +80,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new Section(
 					"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " +
 					"Selecting an item or changing the text will no cause a post-back. This value show appear when submitting the page's submit button.",
-					box.ToSingleElementArray(),
+					box.ToCollection(),
 					style: SectionStyle.Box );
 		}
 
 		private Section test2( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test2" );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var box =
 						FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					return
 						new Section(
 							"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " + "Selecting an item will cause a post-back.",
-							box.ToSingleElementArray(),
+							box.ToCollection(),
 							style: SectionStyle.Box );
 				} );
 		}
@@ -104,7 +104,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private Section test3( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test3" );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var box =
 						FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )
@@ -114,7 +114,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new Section(
 							"Autofill behavior. Typing more than 3 characters should bring up autofill options from a web service. " +
 							"Selecting an item  or changing the text will cause a post-back.",
-							box.ToSingleElementArray(),
+							box.ToCollection(),
 							style: SectionStyle.Box );
 				} );
 		}
@@ -122,33 +122,33 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private Section test4( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test4" );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var box =
 						FormItem.Create(
 							"",
 							new EwfTextBox( "", autoPostBack: true ),
 							validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) ).Control;
-					return new Section( "Post-back on change.", box.ToSingleElementArray(), style: SectionStyle.Box );
+					return new Section( "Post-back on change.", box.ToCollection(), style: SectionStyle.Box );
 				} );
 		}
 
 		private Section test5( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test5" );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var box =
 						FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )
 							.Control;
-					return new Section( "Post-back on enter.", box.ToSingleElementArray(), style: SectionStyle.Box );
+					return new Section( "Post-back on enter.", box.ToCollection(), style: SectionStyle.Box );
 				} );
 		}
 
 		private Section test6( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test6" );
 			return ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					var box =
 						FormItem.Create( "", new EwfTextBox( "" ), validationGetter: control => new EwfValidation( ( pbv, v ) => setValue( control.GetPostBackValue( pbv ) ) ) )

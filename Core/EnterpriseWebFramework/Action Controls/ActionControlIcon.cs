@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var textControl = text.GetLabelControl();
 
 			if( icon == null )
-				return textControl.ToSingleElementArray();
+				return textControl.ToCollection();
 			if( icon.placement == ActionControlIconPlacement.Left )
 				return new Control[] { icon.icon, textControl };
 			if( icon.placement == ActionControlIconPlacement.Right )

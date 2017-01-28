@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				},
 				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(
@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											                                                 ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
 											                             if( !passwordMatch )
 												                             validator.NoteErrorAndAddMessage( "Incorrect password." );
-										                             } ) ).ToSingleElementArray() ) );
+										                             } ) ).ToCollection() ) );
 				} );
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( pb ) ) );

@@ -22,15 +22,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal EwfTableCell( TableCellSetup setup, string text ) {
 			Setup = setup;
-			Controls = ( text ?? "" ).GetLiteralControl().ToSingleElementArray();
+			Controls = ( text ?? "" ).GetLiteralControl().ToCollection();
 			simpleText = text;
 		}
 
-		internal EwfTableCell( TableCellSetup setup, Control control ): this( setup, control != null ? control.ToSingleElementArray() : new Control[ 0 ] ) {}
+		internal EwfTableCell( TableCellSetup setup, Control control ): this( setup, control != null ? control.ToCollection() : new Control[ 0 ] ) {}
 
 		internal EwfTableCell( TableCellSetup setup, IEnumerable<Control> controls ) {
 			Setup = setup;
-			Controls = controls.Any() ? controls : "".GetLiteralControl().ToSingleElementArray();
+			Controls = controls.Any() ? controls : "".GetLiteralControl().ToCollection();
 			simpleText = null;
 		}
 

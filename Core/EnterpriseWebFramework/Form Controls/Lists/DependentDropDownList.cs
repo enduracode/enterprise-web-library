@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "There must not be more than one drop-down list per parent item ID." );
 			parentItemIdsAndDropDowns.Add( Tuple.Create( parentItemId, dropDown ) );
 
-			parent.AddDisplayLink( parentItemId.ToSingleElementArray(), true, dropDown.ToSingleElementArray() );
+			parent.AddDisplayLink( parentItemId.ToCollection(), true, dropDown.ToCollection() );
 		}
 
 		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator,

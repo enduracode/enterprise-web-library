@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		private Control getBox( Control contentControl ) {
-			return new Section( contentControl.ToSingleElementArray(), style: SectionStyle.Box );
+			return new Section( contentControl.ToCollection(), style: SectionStyle.Box );
 		}
 	}
 }

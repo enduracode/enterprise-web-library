@@ -128,7 +128,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="series">The data series.</param>
 		/// <param name="color">The color to use for the data series.</param>
 		public Chart( ChartSetup setup, DataSeries series, Color? color = null )
-			: this( setup, series.ToSingleElementArray(), colors: color != null ? color.Value.ToSingleElementArray() : null ) {}
+			: this( setup, series.ToCollection(), colors: color != null ? color.Value.ToCollection() : null ) {}
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -193,25 +193,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										Text =
 											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
 									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
-									} as Control ).ToArray() ).ToSingleElementArray(),
+									} as Control ).ToArray() ).ToCollection(),
 						style: SectionStyle.Box ) );
 
 			// Remove this when ColumnPrimaryTable supports Excel export.
-			var headers = setup.XAxisTitle.ToSingleElementArray().Concat( seriesCollection.Select( v => v.Name ) );
+			var headers = setup.XAxisTitle.ToCollection().Concat( seriesCollection.Select( v => v.Name ) );
 			var tableData = new List<IEnumerable<object>>( seriesCollection.First().Values.Count() );
 			for( var i = 0; i < tableData.Capacity; i++ ) {
 				var i1 = i;
-				tableData.Add( setup.Labels.ElementAt( i1 ).ToSingleElementArray().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
+				tableData.Add( setup.Labels.ElementAt( i1 ).ToCollection().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
 			}
 			Controls.Add( getExportButton( headers, tableData ) );
 
 			var table = new ColumnPrimaryTable(
 				firstDataFieldIndex: 1,
 				items:
-					new EwfTableItem( from i in setup.XAxisTitle.ToSingleElementArray().Concat( setup.Labels ) select (EwfTableCell)i ).ToSingleElementArray()
+					new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select (EwfTableCell)i ).ToCollection()
 						.Concat(
 							from series in seriesCollection
-							select new EwfTableItem( ( (EwfTableCell)series.Name ).ToSingleElementArray().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
+							select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
 			Controls.Add( table );
 
 			jsInitStatementGetter = () => {

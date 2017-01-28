@@ -193,7 +193,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 												new ToolTip( cellAndIndex.Cell.Setup.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.Setup.ToolTip ), cellControl );
 
 											return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
-										} ) ).ToSingleElementArray() );
+										} ) ).ToCollection() );
 				} );
 		}
 

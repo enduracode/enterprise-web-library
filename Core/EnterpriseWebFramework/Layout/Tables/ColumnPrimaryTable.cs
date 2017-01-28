@@ -117,11 +117,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var fields = EwfTable.GetFields( specifiedFields, headItems, itemGroups.SelectMany( i => i.Items ) );
 			var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems(
 				headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
-				fields.Length );
+				fields.Count );
 
 			// Pivot the cell placeholders from column primary into row primary format.
 			var cellPlaceholderListsForRows =
-				Enumerable.Range( 0, fields.Length )
+				Enumerable.Range( 0, fields.Count )
 					.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
 					.ToList();
 
@@ -149,6 +149,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the table element, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Table; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Table;
 	}
 }

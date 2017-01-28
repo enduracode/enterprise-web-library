@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.WebSite {
 								new EwfResponseBodyCreator( createAndZipSystem ),
 								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) );
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(

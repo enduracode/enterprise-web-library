@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			HtmlBlockEditorModification mod;
 			ValidationSetupState.ExecuteWithDataModifications(
-				PostBack.CreateFull().ToSingleElementArray(),
+				PostBack.CreateFull().ToCollection(),
 				() => {
 					ph.AddControlsReturnThis( new HtmlBlockEditor( null, id => { }, out mod ).ToFormItem( "" ).ToControl() );
 					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post Back", new PostBackButton() ) );

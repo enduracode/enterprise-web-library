@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							return new ElementLocalData( "textarea", attributes, true, displaySetup.ComponentsDisplayed ? jsShowStatements : "" );
 						},
-						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToSingleElementArray() );
+						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
 				},
 				formValue: formValue );
 

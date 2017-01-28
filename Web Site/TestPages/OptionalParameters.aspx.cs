@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new EwfTableItem(
 					url,
 					( !validator.ErrorsOccurred ).BooleanToYesNo( false )
-						.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToSingleElementArray() ) ) ) );
+						.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );
 		}
 
 		public override bool IsAutoDataUpdater { get { return true; } }

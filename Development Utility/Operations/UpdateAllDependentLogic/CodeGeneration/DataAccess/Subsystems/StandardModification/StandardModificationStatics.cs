@@ -523,7 +523,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 
 			writer.WriteLine(
-				"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn.Name + "\".ToSingleElementArray(), \"FROM " + tableName + "\", false );" );
+				"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn.Name + "\".ToCollection(), \"FROM " + tableName + "\", false );" );
 			writer.WriteLine( "conditions.ForEach( condition => command.AddCondition( condition.CommandCondition ) );" );
 			writer.WriteLine( "command.AddCondition( getLatestRevisionsCondition() );" );
 			writer.WriteLine( "var latestRevisionIds = new List<int>();" );

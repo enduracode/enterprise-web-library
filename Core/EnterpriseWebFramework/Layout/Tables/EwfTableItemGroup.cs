@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return
 				new EwfTableItem(
 					new EwfTableItemSetup( clickScript: RemainingData.Value.GroupHeadClickScript ),
-					RemainingData.Value.GroupName.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToSingleElementArray();
+					RemainingData.Value.GroupName.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
 		private IReadOnlyCollection<EwfTableItem> getItemActionsItem( int fieldCount ) {

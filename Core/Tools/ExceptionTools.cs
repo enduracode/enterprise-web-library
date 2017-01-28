@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary {
 		/// Returns a list containing this exception and all inner exceptions.
 		/// </summary>
 		public static IEnumerable<Exception> GetChain( this Exception exception ) {
-			IEnumerable<Exception> chain = exception.ToSingleElementArray();
+			IEnumerable<Exception> chain = exception.ToCollection();
 			if( exception.InnerException != null )
 				chain = chain.Concat( exception.InnerException.GetChain() );
 			return chain;

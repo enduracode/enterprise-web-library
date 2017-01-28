@@ -450,7 +450,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors =
-					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToSingleElementArray();
+					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 				resetPage();
 			}
 
@@ -574,7 +574,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			validationSetupState = new ValidationSetupState();
 			ValidationSetupState.ExecuteWithDataModifications(
-				DataUpdate.ToSingleElementArray(),
+				DataUpdate.ToCollection(),
 				() => {
 					if( EsAsBaseType != null )
 						using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
@@ -712,7 +712,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
 				if( control is MasterPage )
-					ValidationSetupState.ExecuteWithDataModifications( DataUpdate.ToSingleElementArray(), controlTreeDataLoader.LoadData );
+					ValidationSetupState.ExecuteWithDataModifications( DataUpdate.ToCollection(), controlTreeDataLoader.LoadData );
 				else
 					controlTreeDataLoader.LoadData();
 			}
@@ -804,7 +804,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( modErrorDisplaysByValidation.ContainsKey( validation ) )
 				modErrorDisplaysByValidation[ validation ].Add( key );
 			else
-				modErrorDisplaysByValidation.Add( validation, key.ToSingleElementArray().ToList() );
+				modErrorDisplaysByValidation.Add( validation, key.ToCollection().ToList() );
 
 			// We want to ignore all of the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
 			// way when we compare form control hashes after a transfer.

@@ -100,13 +100,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		/// <summary>
 		/// Gets the current BasicPage master page.
 		/// </summary>
-		public static BasicPage Instance { get { return getTopMaster( EwfPage.Instance.Master ) as BasicPage; } }
+		public static BasicPage Instance => getTopMaster( EwfPage.Instance.Master ) as BasicPage;
 
 		private static MasterPage getTopMaster( MasterPage master ) {
 			return master.Master == null ? master : getTopMaster( master.Master );
 		}
 
-		public HtmlGenericControl Body { get { return basicBody; } }
+		public HtmlGenericControl Body => basicBody;
 
 		void ControlTreeDataLoader.LoadData() {
 			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
@@ -115,8 +115,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			ph.AddControlsReturnThis(
 				new NamingPlaceholder(
 					EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-						? new Block { CssClass = notificationSpacerClass }.ToSingleElementArray()
-						: new Control[ 0 ] ) );
+						? new Block { CssClass = notificationSpacerClass }.ToCollection()
+						: Enumerable.Empty<Control>() ) );
 
 			var warningControls = new List<Control>();
 			if( !ConfigurationStatics.IsLiveInstallation ) {
@@ -161,7 +161,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) );
 
 			if( warningControls.Any() ) {
-				var warningControl = warningControls.Count() > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
+				var warningControl = warningControls.Count > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
 				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = topWarningBlockCssClass } );
 			}
 
@@ -240,8 +240,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						       ClientIDMode = ClientIDMode.Static,
 						       ID = notificationSectionContainerId,
 						       CssClass = notificationSectionContainerNotificationClass
-					       }.ToSingleElementArray()
-				       : new Control[ 0 ];
+					       }.ToCollection()
+				       : Enumerable.Empty<Control>();
 		}
 
 		private IEnumerable<Control> getStatusMessageControlList() {
@@ -255,8 +255,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							new EwfLabel { CssClass = statusMessageTextClass, Text = i.Item2 } )
 							{
 								CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass
-							} as Control ).ToArray() )
-					.ToSingleElementArray();
+							} as Control ).ToArray() ).ToCollection();
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {

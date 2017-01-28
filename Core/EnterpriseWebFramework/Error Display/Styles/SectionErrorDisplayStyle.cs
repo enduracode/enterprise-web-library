@@ -23,9 +23,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		IEnumerable<Control> ErrorDisplayStyle.GetControls( IEnumerable<string> errors ) {
 			return errors.Any()
-				       ? new Section( heading, ListErrorDisplayStyle.GetErrorMessageListBlock( ImmutableArray<string>.Empty, errors ).ToSingleElementArray(), style: style )
-					         .ToSingleElementArray()
-				       : new Control[ 0 ];
+				       ? new Section( heading, ListErrorDisplayStyle.GetErrorMessageListBlock( ImmutableArray<string>.Empty, errors ).ToCollection(), style: style )
+					         .ToCollection()
+				       : Enumerable.Empty<Control>();
 		}
 	}
 }

@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 													MustChangePassword = false;
 												} );
 
-											return newPasswordTable.ToSingleElementArray();
+											return newPasswordTable.ToCollection();
 										} );
 								} ),
 							validationGetter: control => control.Validation );

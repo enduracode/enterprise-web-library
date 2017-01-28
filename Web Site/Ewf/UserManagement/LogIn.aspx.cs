@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			ValidationSetupState.ExecuteWithDataModifications(
-				logInPb.ToSingleElementArray(),
+				logInPb.ToCollection(),
 				() => {
 					var registeredTable = EwfTable.Create( caption: "Registered users" );
 					registeredTable.AddItem(

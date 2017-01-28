@@ -170,7 +170,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			ExecuteDbMethod(
 				cn => {
 					var command = new InlineSelect(
-						"TransactionLogFileName".ToSingleElementArray(),
+						"TransactionLogFileName".ToCollection(),
 						"from RsisLogBackups",
 						false,
 						orderByClause: "order by RsisLogBackupId desc" );
@@ -241,7 +241,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				cn => {
 					var cutOffDateTime = DateTime.Now.AddHours( -24 );
 
-					var command = new InlineSelect( "count( * )".ToSingleElementArray(), "from RsisLogBackups", false );
+					var command = new InlineSelect( "count( * )".ToCollection(), "from RsisLogBackups", false );
 					command.AddCondition(
 						new InequalityCondition(
 							InequalityCondition.Operator.GreaterThan,

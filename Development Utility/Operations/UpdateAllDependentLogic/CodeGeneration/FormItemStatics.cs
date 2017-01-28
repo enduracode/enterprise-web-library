@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"string",
 				"\"\"",
 				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new[]
 					{
 						new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool", "masksCharacters", "false" ),
@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"string",
 				"\"\"",
 				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new[]
 					{
 						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"string",
 				"\"\"",
 				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new[]
 					{
 						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
@@ -100,7 +100,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"string",
 				"\"\"",
 				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new[]
 					{
 						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
@@ -119,7 +119,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"string",
 				"\"\"",
 				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new[]
 					{
 						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "PostBack", "postBack", "null" ),
@@ -176,9 +176,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"Html",
 				"string",
 				"\"\"",
-				getAllowEmptyParameter( false ).ToSingleElementArray(),
+				getAllowEmptyParameter( false ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "WysiwygHtmlEditorSetup", "setup", "null" ).ToSingleElementArray(),
+				new CSharpParameter( "WysiwygHtmlEditorSetup", "setup", "null" ).ToCollection(),
 				new CSharpParameter[ 0 ],
 				"new WysiwygHtmlEditor( v, allowEmpty, ( postBackValue, validator ) => vs( postBackValue ), setup: setup" +
 				( field.Size.HasValue ? ", maxLength: {0}".FormatWith( field.Size.Value ) : "" ) + " )",
@@ -251,7 +251,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					writer,
 					field,
 					"byte?",
-					getAllowEmptyParameter( true ).ToSingleElementArray(),
+					getAllowEmptyParameter( true ).ToCollection(),
 					"validator.GetNullableByte( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 			}
@@ -317,7 +317,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"FileCollection",
 				valueParamTypeName,
 				"-1",
-				new CSharpParameter( "bool", "sortByName" ).ToSingleElementArray(),
+				new CSharpParameter( "bool", "sortByName" ).ToCollection(),
 				new CSharpParameter[ 0 ],
 				new CSharpParameter[ 0 ],
 				new CSharpParameter[ 0 ],
@@ -351,9 +351,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"Html",
 				valueParamTypeName,
 				"null",
-				new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToSingleElementArray(),
+				new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "HtmlBlockEditorSetup", "setup", "null" ).ToSingleElementArray(),
+				new CSharpParameter( "HtmlBlockEditorSetup", "setup", "null" ).ToCollection(),
 				new CSharpParameter[ 0 ],
 				"new HtmlBlockEditor( (int?)v, id => vs( id ), out m, setup: setup )",
 				"",
@@ -367,10 +367,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"File",
 				valueParamTypeName,
 				"null",
-				new CSharpParameter( "out System.Action", "modificationMethod" ).ToSingleElementArray(),
+				new CSharpParameter( "out System.Action", "modificationMethod" ).ToCollection(),
 				new CSharpParameter[ 0 ],
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToSingleElementArray(),
+				new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection(),
 				"{ var control = new BlobFileManager( (int?)v ); mm = () => " + field.PropertyName + " = control.ModifyData(); return control; }",
 				"control.ValidateFormValues( validator, subject, requireUploadIfNoFile )",
 				"",
@@ -448,7 +448,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 							new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
 							new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" ), new CSharpParameter( "PostBack", "postBack", "null" )
 						},
-					getAllowEmptyParameter( true ).ToSingleElementArray(),
+					getAllowEmptyParameter( true ).ToCollection(),
 					"{ " +
 					StringTools.ConcatenateWithDelimiter(
 						" ",
@@ -495,7 +495,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"CheckBoxList",
 				field.TypeName,
 				"null",
-				new CSharpParameter( "IEnumerable<SelectListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToSingleElementArray(),
+				new CSharpParameter( "IEnumerable<SelectListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToCollection(),
 				new CSharpParameter[ 0 ],
 				new[]
 					{
@@ -526,8 +526,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"null",
 				new[] { new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ) },
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToSingleElementArray()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToSingleElementArray() )
+				new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToCollection()
+					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection() )
 					.Concat(
 						new[]
 							{
@@ -554,11 +554,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"DropDown",
 				field.NullableTypeName,
 				"null",
-				new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ).ToSingleElementArray()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToSingleElementArray() ),
+				new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ).ToCollection()
+					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "Unit?", "width", "null" ).ToSingleElementArray()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToSingleElementArray() )
+				new CSharpParameter( "Unit?", "width", "null" ).ToCollection()
+					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection() )
 					.Concat(
 						new[]
 							{

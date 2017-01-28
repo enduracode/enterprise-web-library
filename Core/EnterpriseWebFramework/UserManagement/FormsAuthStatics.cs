@@ -209,7 +209,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					"getClientUtcOffset( '{0}' )".FormatWith( utcOffsetHiddenFieldId.Id ) );
 			};
 
-			return utcOffsetHiddenField.PageComponent.ToSingleElementArray();
+			return utcOffsetHiddenField.PageComponent.ToCollection();
 		}
 
 		/// <summary>

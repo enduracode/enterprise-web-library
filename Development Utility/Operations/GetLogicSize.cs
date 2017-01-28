@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				installation.DevelopmentInstallationLogic.LibraryPath,
 				EwlStatics.GetProjectOutputFolderPath( debug ),
 				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
-				.ToSingleElementArray()
+				.ToCollection()
 				.Concat(
 					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ]
 					select EwlStatics.CombinePaths( installation.GeneralLogic.Path, i.name, "bin", i.NamespaceAndAssemblyName + ".dll" ) )
@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							installation.GeneralLogic.Path,
 							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
 							EwlStatics.GetProjectOutputFolderPath( debug ),
-							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" ).ToSingleElementArray()
+							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" ).ToCollection()
 						: new string[ 0 ] );
 		}
 

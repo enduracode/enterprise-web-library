@@ -19,11 +19,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			/// <summary>
 			/// EWL use only.
 			/// </summary>
-			public static readonly string[] Selectors = ( "div." + CssClass ).ToSingleElementArray();
+			public static readonly IReadOnlyCollection<string> Selectors = ( "div." + CssClass ).ToCollection();
 
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var itemSelectors = from i in EwfTable.CssElementCreator.CellSelectors select "table > tbody > tr > " + i + "." + ItemCssClass;
-				return new[] { new CssElement( "ControlLine", Selectors ), new CssElement( "ControlLineItem", itemSelectors.ToArray() ) };
+				return new[] { new CssElement( "ControlLine", Selectors.ToArray() ), new CssElement( "ControlLineItem", itemSelectors.ToArray() ) };
 			}
 		}
 
@@ -66,10 +66,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				            new TableCell
 					            {
 						            CssClass =
-							            StringTools.ConcatenateWithDelimiter( " ",
-							                                                  EwfTable.CssElementCreator.AllCellAlignmentsClass,
-							                                                  TableCellVerticalAlignmentOps.Class( VerticalAlignment ),
-							                                                  CssElementCreator.ItemCssClass )
+							            StringTools.ConcatenateWithDelimiter(
+								            " ",
+								            EwfTable.CssElementCreator.AllCellAlignmentsClass,
+								            TableCellVerticalAlignmentOps.Class( VerticalAlignment ),
+								            CssElementCreator.ItemCssClass )
 					            }.AddControlsReturnThis( i );
 			row.Cells.AddRange( cells.ToArray() );
 		}
@@ -90,6 +91,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

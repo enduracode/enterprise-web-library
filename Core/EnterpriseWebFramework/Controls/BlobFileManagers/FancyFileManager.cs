@@ -78,8 +78,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			browseForFiles.Attributes.Add( "multiple", "multiple" );
 			browseForFiles.Attributes.Add( "onchange", @"inputChanged(this);" );
 
-			chooseUploadMethod.AddDisplayLink( ( true as bool? ).ToSingleElementArray(), true, dragFilesHerePanel.ToSingleElementArray() );
-			chooseUploadMethod.AddDisplayLink( ( false as bool? ).ToSingleElementArray(), true, browseForFiles.ToSingleElementArray() );
+			chooseUploadMethod.AddDisplayLink( ( true as bool? ).ToCollection(), true, dragFilesHerePanel.ToCollection() );
+			chooseUploadMethod.AddDisplayLink( ( false as bool? ).ToCollection(), true, browseForFiles.ToCollection() );
 
 			var uploadPending = new Section(
 				"Files to be uploaded",

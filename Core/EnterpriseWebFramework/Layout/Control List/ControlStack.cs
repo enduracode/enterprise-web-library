@@ -98,7 +98,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public void AddControls( params Control[] controls ) {
 			foreach( var i in controls )
-				AddItem( new ControlListItem( i.ToSingleElementArray() ) );
+				AddItem( new ControlListItem( i.ToCollection() ) );
 		}
 
 		/// <summary>
@@ -166,7 +166,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"remove",
 					visibleItems.Select(
 						( item, index ) =>
-						new LegacyPreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToSingleElementArray(), () => "" ) ),
+						new LegacyPreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToCollection(), () => "" ) ),
 					arg => new Control[ 0 ] ) );
 		}
 

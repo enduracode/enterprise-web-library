@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public ModalWindow( Control parent, Control content, string title = "", bool open = false ): this( parent, content, title: title, postBack: null, open: open ) {}
 
 		internal ModalWindow( Control parent, Control content, string title = "", PostBack postBack = null, bool open = false ) {
-			control = new Block( new Section( title, content.ToSingleElementArray().Concat( getButtonTable( postBack ) ) ) ) { CssClass = CssElementCreator.CssClass };
+			control = new Block( new Section( title, content.ToCollection().Concat( getButtonTable( postBack ) ) ) ) { CssClass = CssElementCreator.CssClass };
 			this.open = open;
 
 			EwfPage.Instance.AddEtherealControl( parent, this );
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						new CustomButton( () => "$.modal.close()" ) { ActionControlStyle = new ButtonActionControlStyle( "Cancel" ) },
 						new PostBackButton( new ButtonActionControlStyle( "Continue" ), usesSubmitBehavior: false, postBack: postBack ) ).ToCell(
 							new TableCellSetup( textAlignment: TextAlignment.Right ) ) ) );
-			return table.ToSingleElementArray();
+			return table.ToCollection();
 		}
 
 		WebControl EtherealControl.Control { get { return control; } }

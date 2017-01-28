@@ -186,12 +186,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine(
 				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( System.Tuple.Create( " +
 				StringTools.ConcatenateWithDelimiter( ", ", pkConditionVariableNames.Select( i => i + ".Value" ).ToArray() ) + " ), out row ) )" );
-			writer.WriteLine( "return row.ToSingleElementArray();" );
+			writer.WriteLine( "return row.ToCollection();" );
 			writer.WriteLine( "}" );
 
 			var commandConditionsExpression = "conditions.Select( i => i.CommandCondition )";
 			if( excludePreviousRevisions )
-				commandConditionsExpression += ".Concat( getLatestRevisionsCondition().ToSingleElementArray() )";
+				commandConditionsExpression += ".Concat( getLatestRevisionsCondition().ToCollection() )";
 			writer.WriteLine( "return cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
 			writeResultSetCreatorBody( cn, writer, database, table, tableColumns, tableUsesRowVersionedCaching, excludePreviousRevisions, "!isPkQuery" );
 			writer.WriteLine( "} );" );
@@ -212,7 +212,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "public static Row " + methodName + "( " + pkParameters + ", bool returnNullIfNoMatch = false ) {" );
 			if( isSmallTable ) {
 				writer.WriteLine( "var cache = Cache.Current;" );
-				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToSingleElementArray()" : "new InlineDbCommandCondition[ 0 ]";
+				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToCollection()" : "new InlineDbCommandCondition[ 0 ]";
 				writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
 				writeResultSetCreatorBody( cn, writer, database, table, tableColumns, tableUsesRowVersionedCaching, isRevisionHistoryTable, "true" );
 				writer.WriteLine( "} );" );

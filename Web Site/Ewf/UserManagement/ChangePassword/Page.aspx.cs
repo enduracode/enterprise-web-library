@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				firstModificationMethod: modifyData,
 				actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) );
 			ValidationSetupState.ExecuteWithDataModifications(
-				pb.ToSingleElementArray(),
+				pb.ToCollection(),
 				() => {
 					newPassword = new DataValue<string>();
 					ph.AddControlsReturnThis(

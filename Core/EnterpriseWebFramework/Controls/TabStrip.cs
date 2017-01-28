@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var selectList = SelectList.CreateRadioList( tabs.Select( i => SelectListItem.Create( i.Item1, i.Item1 ) ), tabs.First().Item1, useHorizontalLayout: true );
 			foreach( var i in tabs ) {
 				Controls.Add( i.Item2 );
-				selectList.AddDisplayLink( i.Item1.ToSingleElementArray(), true, i.Item2.ToSingleElementArray() );
+				selectList.AddDisplayLink( i.Item1.ToCollection(), true, i.Item2.ToCollection() );
 			}
 			Controls.Add( selectList );
 		}

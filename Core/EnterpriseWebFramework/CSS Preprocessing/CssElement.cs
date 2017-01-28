@@ -15,15 +15,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Creates a CSS element. In CSS files, the name should be prefixed with "ewf".
-		/// NOTE: Get rid of this method.
-		/// </summary>
-		public CssElement( string name, string firstSelector, params string[] remainingSelectors ) {
-			this.name = name;
-			selectors = new[] { firstSelector }.Concat( remainingSelectors ).ToList().AsReadOnly();
-		}
-
-		/// <summary>
-		/// Creates a CSS element. In CSS files, the name should be prefixed with "ewf".
 		/// </summary>
 		public CssElement( string name, params string[] selectors ) {
 			if( !selectors.Any() )
@@ -33,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.selectors = selectors.ToList().AsReadOnly();
 		}
 
-		internal string Name { get { return name; } }
-		internal ReadOnlyCollection<string> Selectors { get { return selectors; } }
+		internal string Name => name;
+		internal ReadOnlyCollection<string> Selectors => selectors;
 	}
 }
