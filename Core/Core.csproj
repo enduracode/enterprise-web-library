@@ -376,6 +376,8 @@
     <Compile Include="EnterpriseWebFramework\Image Embedding\FlexibleImageSourceSet.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\ImageSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Figure\EwfFigure.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Figure\FigureCaption.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
