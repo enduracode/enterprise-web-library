@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -17,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal readonly TableCellSetup Setup;
-		internal readonly IEnumerable<Control> Controls;
+		internal readonly IReadOnlyCollection<Control> Controls;
 		private readonly string simpleText;
 
 		internal EwfTableCell( TableCellSetup setup, string text ) {
@@ -30,10 +31,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal EwfTableCell( TableCellSetup setup, IEnumerable<Control> controls ) {
 			Setup = setup;
-			Controls = controls.Any() ? controls : "".GetLiteralControl().ToCollection();
+
+			Controls = controls.ToImmutableArray();
+			Controls = Controls.Any() ? Controls : "".GetLiteralControl().ToCollection();
+
 			simpleText = null;
 		}
 
-		string CellPlaceholder.SimpleText { get { return simpleText; } }
+		string CellPlaceholder.SimpleText => simpleText;
 	}
 }
