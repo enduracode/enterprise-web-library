@@ -11,12 +11,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public override EntitySetupInfo EsInfoAsBaseType { get { return null; } }
+		public override EntitySetupInfo EsInfoAsBaseType => null;
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public override string ResourceName { get { return ""; } }
+		public override string ResourceName => "";
+
+		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 		protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {
 			var info = infoAsBaseType as StaticFileInfo;
@@ -47,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the path of the file.
 		/// </summary>
-		internal string FilePath { get { return EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath ); } }
+		internal string FilePath => EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath );
 
 		/// <summary>
 		/// Gets the app relative path of the file.
