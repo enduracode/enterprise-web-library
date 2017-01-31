@@ -104,7 +104,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// The only alternative to this that I can think of is creating a new file table field called "IsRenderable" that we store when
 			// we first save the image.
 			if( file == null || !ContentTypes.IsImageType( file.ContentType ) || thumbnailResourceInfoCreator == null )
-				return null;
+				return Enumerable.Empty<Control>();
 			return new EwfImage( new ImageSetup( null, sizesToAvailableWidth: true ), thumbnailResourceInfoCreator( file.FileId ) ).ToCollection().GetControls();
 		}
 
