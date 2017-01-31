@@ -152,13 +152,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static IEnumerable<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
+		public static IReadOnlyCollection<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
 			return components.SelectMany(
 				i => {
 					var controls = addEtherealControls( parent, i );
 					EwfPage.Instance.ControlsByComponent.Add( i, controls );
 					return controls;
-				} );
+				} ).ToImmutableArray();
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
@@ -171,7 +171,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var etherealComponent = component as EtherealComponent;
 			if( etherealComponent != null )
-				return etherealComponent.GetChildren().AddEtherealControls( parent ).ToImmutableArray();
+				return etherealComponent.GetChildren().AddEtherealControls( parent );
 
 			var identifiedComponent = (IdentifiedEtherealComponent)component;
 			var componentData = identifiedComponent.ComponentDataGetter();
