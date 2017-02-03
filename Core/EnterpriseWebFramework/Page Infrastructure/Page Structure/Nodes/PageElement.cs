@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -27,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			webFormsLocalDataGetter = elementData.LocalDataGetter;
 		}
 
-		WebControl EtherealControl.Control { get { return this; } }
+		WebControl EtherealControl.Control => this;
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return getJsInitStatements();
@@ -44,15 +45,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return webFormsLocalData.JsInitStatements;
 		}
 
-		FormValue FormValueControl.FormValue { get { return FormValue; } }
+		FormValue FormValueControl.FormValue => FormValue;
 
 		protected override void AddAttributesToRender( HtmlTextWriter writer ) {
 			if( webFormsLocalData == null )
 				throw new ApplicationException( "webFormsLocalData not set" );
 			foreach( var i in webFormsLocalData.Attributes )
 				writer.AddAttribute( i.Item1, i.Item2 );
-			if( webFormsLocalData.IncludeIdAttribute )
-				writer.AddAttribute( HtmlTextWriterAttribute.Id, ClientID );
+			if( webFormsLocalData.Id != null )
+				writer.AddAttribute( HtmlTextWriterAttribute.Id, webFormsLocalData.Id.Any() ? webFormsLocalData.Id : ClientID );
 		}
 
 		protected override string TagName {
