@@ -1,4 +1,5 @@
 ﻿using System.Web.UI.WebControls;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -32,8 +33,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + CssElementCreator.ImageStyleClass );
 
 			if( rolloverImageInfo != null && rolloverImageInfo.GetUrl() != imageInfo.GetUrl() ) {
-				control.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseover, "src='" + rolloverImageInfo.GetUrl() + "'" );
-				control.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onmouseout, "src='" + imageInfo.GetUrl() + "'" );
+				control.AddJavaScriptEventScript(
+					JavaScriptWriting.JsWritingMethods.onmouseover,
+					"$( this ).children().attr( 'src', '{0}' )".FormatWith( rolloverImageInfo.GetUrl() ) );
+				control.AddJavaScriptEventScript(
+					JavaScriptWriting.JsWritingMethods.onmouseout,
+					"$( this ).children().attr( 'src', '{0}' )".FormatWith( imageInfo.GetUrl() ) );
 			}
 
 			control.AddControlsReturnThis(
