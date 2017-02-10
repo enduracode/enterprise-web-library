@@ -100,17 +100,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var parent = new EwfLabel { CssClass = "fa-stack datetimepickerIcon" };
-			var iconCal = new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" );
-			var iconTime = new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" );
-			iconTime.Style.Add( HtmlTextWriterStyle.Position, "relative" );
-			iconTime.Style.Add( HtmlTextWriterStyle.Top, ".20em" );
-			parent.AddControlsReturnThis( iconCal, iconTime );
-
-			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( parent ) );
 			return new CustomButton( () => "$( '#{0}' ).datetimepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) )
 				{
-					ActionControlStyle = style,
+					ActionControlStyle =
+						new CustomActionControlStyle(
+							control =>
+							control.AddControlsReturnThis(
+								new GenericPhrasingContainer(
+								new[] { new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" ), new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" ) },
+								classes: new ElementClass( "fa-stack" ).Union( new ElementClass( "datetimepickerIcon" ) ) ).ToCollection().GetControls() ) ),
 					CssClass = "icon"
 				};
 		}

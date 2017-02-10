@@ -71,9 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
 						new CssElement(
 							"UiAppLogoBlock",
-							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToCollection() )
-								.Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass )
-								.ToArray() ),
+							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToCollection() ).Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass ).ToArray() ),
 						new CssElement(
 							"UiUserInfoControlList",
 							ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
@@ -143,12 +141,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private IEnumerable<CssElement> getTabElements() {
 				return new[]
 					{
-						new CssElement(
-							"UiCurrentTabActionControl",
-							EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
-						new CssElement(
-							"UiDisabledTabActionControl",
-							EnterpriseWebFramework.Controls.CssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
+						new CssElement( "UiCurrentTabActionControl", ActionComponentCssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
+						new CssElement( "UiDisabledTabActionControl", ActionComponentCssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
 					};
 			}
 
@@ -230,8 +224,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							new ModificationErrorPlaceholder(
 								null,
 								new ListErrorDisplayStyle( additionalClasses: CssElementCreator.TopErrorMessageListBlockCssClass.ToCollection() ) )
-						}.Where( i => i != null )
-						.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
+						}.Where( i => i != null ).ToArray() )
+					{
+						ClientIDMode = ClientIDMode.Static,
+						ID = CssElementCreator.GlobalBlockId
+					};
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {

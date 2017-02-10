@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
 			if( resource != null && EwfPage.Instance.IsAutoDataUpdater ) {
-				postBack = EwfLink.GetLinkPostBack( resource );
+				postBack = HyperlinkBehavior.GetHyperlinkPostBack( resource );
 				resource = null;
 			}
 
@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( resource.GetUrl() ) + "'; return false";
 			else if( postBack != null ) {
 				EwfPage.Instance.AddPostBack( postBack );
-				scriptGetter = () => PostBackButton.GetPostBackScript( postBack );
+				scriptGetter = () => EwfPage.GetPostBackScript( postBack );
 			}
 			else
 				scriptGetter = () => script;

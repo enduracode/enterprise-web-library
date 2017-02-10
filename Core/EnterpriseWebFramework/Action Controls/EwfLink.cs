@@ -8,11 +8,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// A link that intelligently behaves like either a HyperLink or a LinkButton depending on whether its page needs to be saved.
 	/// </summary>
 	public class EwfLink: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
-		internal static PostBack GetLinkPostBack( ResourceInfo destination ) {
-			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
-			return EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) );
-		}
-
 		/// <summary>
 		/// Creates a link.
 		/// </summary>
@@ -121,9 +116,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			if( isPostBackButton && url.Any() ) {
-				var postBack = GetLinkPostBack( destinationResourceInfo );
+				var postBack = HyperlinkBehavior.GetHyperlinkPostBack( destinationResourceInfo );
 				EwfPage.Instance.AddPostBack( postBack );
-				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, PostBackButton.GetPostBackScript( postBack ) ); };
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, EwfPage.GetPostBackScript( postBack ) ); };
 			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );
@@ -136,7 +131,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 			if( destinationResourceInfo?.AlternativeMode is NewContentResourceMode )
-				CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.NewContentClass );
+				CssClass = CssClass.ConcatenateWithSpace( ActionComponentCssElementCreator.NewContentClass.ClassName );
 			ActionControlStyle.SetUpControl( this, url );
 
 			if( destinationResourceInfo?.AlternativeMode is DisabledResourceMode ) {

@@ -49,7 +49,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						true,
 						errors.Select(
 							i =>
-							(Control)new PlaceHolder().AddControlsReturnThis( new FontAwesomeIcon( "fa-times-circle", "fa-lg" ), " ".GetLiteralControl(), new Literal { Text = i } ) )
+							(Control)
+							new PlaceHolder().AddControlsReturnThis(
+								new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection().GetControls().Concat( new[] { " ".GetLiteralControl(), new Literal { Text = i } } ) ) )
 							.ToArray() ) )
 					{
 						CssClass = StringTools.ConcatenateWithDelimiter( " ", CssElementCreator.CssClass.ToCollection().Concat( additionalClasses ).ToArray() )

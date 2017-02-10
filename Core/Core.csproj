@@ -262,10 +262,17 @@
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlIcon.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlIconPlacement.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentCssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIcon.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIconPlacement.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\EwfHyperlink.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\CustomHyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\ImageHyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\CssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\CustomButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\EwfLink.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\LaunchWindowLink.cs" />
@@ -364,6 +371,7 @@
     <Compile Include="EnterpriseWebFramework\General Content Models\Flow\FlowIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingComponent.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingIdContainer.cs" />
+    <Compile Include="EnterpriseWebFramework\GenericPhrasingContainer.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorSetup.cs" />
@@ -379,6 +387,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Figure\EwfFigure.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Figure\FigureCaption.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\GenericFlowContainer.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ComponentListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
@@ -517,6 +526,7 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\EwfText.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />

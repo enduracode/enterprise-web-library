@@ -45,14 +45,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		string ActionControlStyle.Text => text;
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
-			var cssElement = CssElementCreator.NormalButtonStyleClass;
+			var cssElement = ActionComponentCssElementCreator.NormalButtonStyleClass.ClassName;
 			if( buttonSize == ButtonSize.ShrinkWrap )
-				cssElement = CssElementCreator.ShrinkWrapButtonStyleClass;
+				cssElement = ActionComponentCssElementCreator.ShrinkWrapButtonStyleClass.ClassName;
 			else if( buttonSize == ButtonSize.Large )
-				cssElement = CssElementCreator.LargeButtonStyleClass;
-			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + cssElement );
+				cssElement = ActionComponentCssElementCreator.LargeButtonStyleClass.ClassName;
+			control.CssClass = control.CssClass.ConcatenateWithSpace( ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + cssElement );
 
-			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextControls( icon, text.Any() ? text : defaultText ) );
+			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextComponents( icon, text.Any() ? text : defaultText ).GetControls() );
 		}
 
 		string ActionControlStyle.GetJsInitStatements() {

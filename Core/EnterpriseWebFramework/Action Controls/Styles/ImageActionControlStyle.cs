@@ -30,7 +30,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		string ActionControlStyle.Text => "";
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
-			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + CssElementCreator.ImageStyleClass );
+			control.CssClass =
+				control.CssClass.ConcatenateWithSpace(
+					ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + ActionComponentCssElementCreator.ImageStyleClass.ClassName );
 
 			if( rolloverImageInfo != null && rolloverImageInfo.GetUrl() != imageInfo.GetUrl() ) {
 				control.AddJavaScriptEventScript(

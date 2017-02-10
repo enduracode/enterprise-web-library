@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public class CssElementCreator: ControlCssElementCreator {
+	public class ActionComponentCssElementCreator: ControlCssElementCreator {
 		// This class allows us to cut the number of selectors in the ActionControlAllStyles... elements by an order of magnitude.
-		internal const string AllStylesClass = "ewfAction";
+		internal static readonly ElementClass AllStylesClass = new ElementClass( "ewfAction" );
 
-		internal const string ShrinkWrapButtonStyleClass = "ewfActionShrinkWrapButton";
-		internal const string NormalButtonStyleClass = "ewfActionNormalButton";
-		internal const string LargeButtonStyleClass = "ewfActionLargeButton";
-		internal const string ImageStyleClass = "ewfActionImage";
-		internal const string TextStyleClass = "ewfActionText";
+		internal static readonly ElementClass ShrinkWrapButtonStyleClass = new ElementClass( "ewfActionShrinkWrapButton" );
+		internal static readonly ElementClass NormalButtonStyleClass = new ElementClass( "ewfActionNormalButton" );
+		internal static readonly ElementClass LargeButtonStyleClass = new ElementClass( "ewfActionLargeButton" );
+		internal static readonly ElementClass ImageStyleClass = new ElementClass( "ewfActionImage" );
+		internal static readonly ElementClass TextStyleClass = new ElementClass( "ewfActionText" );
 
-		internal const string NewContentClass = "ewfNc";
+		internal static readonly ElementClass NewContentClass = new ElementClass( "ewfNc" );
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static readonly string[] Selectors = getElementsForAllStates( "", "." + AllStylesClass ).Single( i => i.Name == "AllStates" ).Selectors.ToArray();
+		public static readonly IReadOnlyCollection<string> Selectors =
+			getElementsForAllStates( "", "." + AllStylesClass.ClassName ).Single( i => i.Name == "AllStates" ).Selectors.ToImmutableArray();
 
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
 			const string actionless = ":not([href]):not([" + JsWritingMethods.onclick + "])";
@@ -151,8 +153,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private static CssElement getStateElement(
 			string baseName, string allContentName, string normalContentName, string newContentName, IEnumerable<string> styleSelectors, bool? newContent,
 			string actionlessSelector, params Tuple<string, string>[] actionStateSelectors ) {
-			const string newContentSelector = "." + NewContentClass;
-			const string normalContentSelector = ":not(" + newContentSelector + ")";
+			var newContentSelector = "." + NewContentClass.ClassName;
+			var normalContentSelector = ":not(" + newContentSelector + ")";
 			var contentSelectors = newContent.HasValue
 				                       ? newContent.Value ? newContentSelector.ToCollection() : normalContentSelector.ToCollection()
 				                       : new[] { normalContentSelector, newContentSelector };
@@ -178,14 +180,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return
 				new[]
 					{
-						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass ),
-						getElementsForAllStates( "ActionControlAllButtonStyles", "." + ShrinkWrapButtonStyleClass, "." + NormalButtonStyleClass, "." + LargeButtonStyleClass ),
-						getElementsForAllStates( "ActionControlShrinkWrapButtonStyle", "." + ShrinkWrapButtonStyleClass ),
-						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass ),
-						getElementsForAllStates( "ActionControlLargeButtonStyle", "." + LargeButtonStyleClass ),
-						getElementsForAllStates( "ActionControlImageStyle", "." + ImageStyleClass ), getElementsForAllStates( "ActionControlTextStyle", "." + TextStyleClass )
-					}
-					.SelectMany( i => i ).ToArray();
+						getElementsForAllStates( "ActionControlAllStyles", "." + AllStylesClass.ClassName ),
+						getElementsForAllStates(
+							"ActionControlAllButtonStyles",
+							"." + ShrinkWrapButtonStyleClass.ClassName,
+							"." + NormalButtonStyleClass.ClassName,
+							"." + LargeButtonStyleClass.ClassName ),
+						getElementsForAllStates( "ActionControlShrinkWrapButtonStyle", "." + ShrinkWrapButtonStyleClass.ClassName ),
+						getElementsForAllStates( "ActionControlNormalButtonStyle", "." + NormalButtonStyleClass.ClassName ),
+						getElementsForAllStates( "ActionControlLargeButtonStyle", "." + LargeButtonStyleClass.ClassName ),
+						getElementsForAllStates( "ActionControlImageStyle", "." + ImageStyleClass.ClassName ),
+						getElementsForAllStates( "ActionControlTextStyle", "." + TextStyleClass.ClassName )
+					}.SelectMany( i => i ).ToArray();
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		string ActionControlStyle.Text => "";
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
-			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass );
+			control.CssClass = control.CssClass.ConcatenateWithSpace( ActionComponentCssElementCreator.AllStylesClass.ClassName );
 			setUpControlMethod( control );
 			return null;
 		}

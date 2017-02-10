@@ -29,7 +29,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( !data.DisplaySetup.ComponentsDisplayed )
 								attributes.Add( Tuple.Create( "style", "display: none" ) );
 
-							return new ElementLocalData( localData.ElementName, attributes, data.DisplaySetup.UsesJsStatements, localData.JsInitStatements );
+							return new ElementLocalData(
+								localData.ElementName,
+								attributes,
+								data.DisplaySetup.UsesJsStatements || localData.IncludeIdAttribute,
+								localData.JsInitStatements );
 						},
 						children: data.Children,
 						etherealChildren: data.EtherealChildren );

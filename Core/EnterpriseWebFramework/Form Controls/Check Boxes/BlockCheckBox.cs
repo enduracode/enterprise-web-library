@@ -144,7 +144,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Controls.Add( table );
 			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip(
+				new Controls.ToolTip(
 					ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ),
 					label.Length > 0 ? (Control)labelControl : checkBox );
 		}

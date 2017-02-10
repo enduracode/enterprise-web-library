@@ -31,8 +31,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
-			control.CssClass = control.CssClass.ConcatenateWithSpace( CssElementCreator.AllStylesClass + " " + CssElementCreator.TextStyleClass );
-			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextControls( icon, Text.Any() ? Text : defaultText ) );
+			control.CssClass =
+				control.CssClass.ConcatenateWithSpace(
+					ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + ActionComponentCssElementCreator.TextStyleClass.ClassName );
+			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextComponents( icon, Text.Any() ? Text : defaultText ).GetControls() );
 		}
 
 		string ActionControlStyle.GetJsInitStatements() {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Stripe;
 
@@ -89,7 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( hiddenFieldId.Id.Length == 0 )
 						throw new ApplicationException( "The credit-card-collection hidden fields must be on the page." );
 					var jsTokenHandler = "function( res ) { $( '#" + hiddenFieldId.Id + "' ).val( res.id ); " +
-					                     PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
+					                     EwfPage.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
 					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 					       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
 					       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";

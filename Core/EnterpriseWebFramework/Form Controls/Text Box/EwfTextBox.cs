@@ -187,7 +187,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
 					textBox.AddJavaScriptEventScript(
 						JsWritingMethods.onchange,
-						"setTimeout( function() { " + PostBackButton.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
+						"setTimeout( function() { " + EwfPage.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
 				};
 
 			if( ToolTip != null || ToolTipControl != null )
@@ -215,9 +215,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteService.GetUrl() + "'" ) );
 
 				if( autoCompleteOption != AutoCompleteOption.NoPostBack ) {
-					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith(
-						textBox.ClientID,
-						PostBackButton.GetPostBackScript( postBack ) );
+					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( textBox.ClientID, EwfPage.GetPostBackScript( postBack ) );
 					autocompleteOptions.Add( Tuple.Create( "select", handler ) );
 				}
 

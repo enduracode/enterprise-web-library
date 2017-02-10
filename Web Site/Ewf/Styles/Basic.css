@@ -203,13 +203,14 @@ ewfDateAndTimePicker {
 .datetimepickerIcon {
 	font-size: .8em;
 }
+.datetimepickerIcon > .fa-clock-o {
+	position: relative;
+	top: .20em;
+}
 
 /* action controls */
 button {
 	font: inherit;
-}
-a.ewfBlockContainer, span.ewfBlockContainer {
-	display: inline-block;
 }
 ewfActionControlAllStylesAllStates {
 	margin: 0;

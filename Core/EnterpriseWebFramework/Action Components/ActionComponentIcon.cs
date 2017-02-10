@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ActionControlIcon {
-		internal static IEnumerable<Control> GetIconAndTextControls( ActionControlIcon icon, string text ) {
-			// Use a label because our CSS selectors for icons include first-child and last-child and these do not take into account "text nodes", i.e. text that is
-			// interspersed with elements.
-			var textControl = text.GetLabelControl();
+		internal static IReadOnlyCollection<PhrasingComponent> GetIconAndTextComponents( ActionControlIcon icon, string text ) {
+			// Use a container because our CSS selectors for icons include first-child and last-child and these do not take into account "text nodes", i.e. text that
+			// is interspersed with elements.
+			var textComponent = new GenericPhrasingContainer( text.ToComponent().ToCollection() );
 
 			if( icon == null )
-				return textControl.ToCollection();
+				return textComponent.ToCollection();
 			if( icon.placement == ActionControlIconPlacement.Left )
-				return new Control[] { icon.icon, textControl };
+				return new PhrasingComponent[] { icon.icon, textComponent };
 			if( icon.placement == ActionControlIconPlacement.Right )
-				return new Control[] { textControl, icon.icon };
+				return new PhrasingComponent[] { textComponent, icon.icon };
 			throw new ApplicationException( "unknown placement" );
 		}
 

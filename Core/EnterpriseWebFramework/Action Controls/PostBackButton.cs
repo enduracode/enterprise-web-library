@@ -4,22 +4,12 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.JavaScriptWriting;
-using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A control that, when clicked, causes a post back and executes code.
 	/// </summary>
 	public class PostBackButton: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ActionControl {
-		internal static string GetPostBackScript( PostBack postBack, bool includeReturnFalse = true ) {
-			if( EwfPage.Instance.GetPostBack( postBack.Id ) != postBack )
-				throw new ApplicationException( "The post-back must have been added to the page." );
-			var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
-			if( validationPostBack != null && EwfPage.Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
-				throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
-			return "postBack( '{0}' )".FormatWith( postBack.Id ) + ( includeReturnFalse ? "; return false" : "" );
-		}
-
 		internal static HtmlTextWriterTag GetTagKey( ActionControlStyle actionControlStyle ) {
 			// NOTE: In theory, we should always return the button tag, but buttons are difficult to style in IE7.
 			// NOTE: Another problem with button is that according to the HTML Standard, it can only contain phrasing content.
@@ -48,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( postBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
 				control.AddJavaScriptEventScript(
 					JsWritingMethods.onkeypress,
-					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + GetPostBackScript( postBack ) + "; }" );
+					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + EwfPage.GetPostBackScript( postBack ) + "; }" );
 		}
 
 		private bool usesSubmitBehavior;
@@ -128,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
 					}
 					else if( !usesSubmitBehavior )
-						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, GetPostBackScript( postBack ) ); };
+						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, EwfPage.GetPostBackScript( postBack ) ); };
 
 					CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 					ActionControlStyle.SetUpControl( this, "" );

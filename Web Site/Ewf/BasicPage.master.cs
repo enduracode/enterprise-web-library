@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var warningControls = new List<Control>();
 			if( !ConfigurationStatics.IsLiveInstallation ) {
 				var children = new List<Control>();
-				children.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
+				children.AddRange( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection().GetControls() );
 				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
 					children.Add(
@@ -138,8 +138,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			else if( ConfigurationStatics.MachineIsStandbyServer ) {
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
-						new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ),
-						" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl() ) );
+						new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection()
+							.GetControls()
+							.Concat(
+								" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl()
+									.ToCollection() ) ) );
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
@@ -251,11 +254,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					EwfPage.Instance.StatusMessages.Select(
 						i =>
 						new Block(
-							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ),
-							new EwfLabel { CssClass = statusMessageTextClass, Text = i.Item2 } )
-							{
-								CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass
-							} as Control ).ToArray() ).ToCollection();
+							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ).ToCollection()
+							.GetControls()
+							.Concat( new EwfLabel { CssClass = statusMessageTextClass, Text = i.Item2 }.ToCollection() )
+							.ToArray() ) { CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass } as Control ).ToArray() )
+					.ToCollection();
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {

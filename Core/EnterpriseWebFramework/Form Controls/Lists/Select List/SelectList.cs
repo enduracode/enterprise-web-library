@@ -273,7 +273,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									selectControl.ClientID ) );
 					}
 					if( autoPostBack )
-						changeHandler += PostBackButton.GetPostBackScript( postBack );
+						changeHandler += EwfPage.GetPostBackScript( postBack );
 					if( changeHandler.Any() )
 						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
 				};

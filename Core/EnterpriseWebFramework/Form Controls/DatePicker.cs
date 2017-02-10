@@ -103,7 +103,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var icon = new FontAwesomeIcon( "fa-calendar", "datepickerIcon" );
+			var icon = new FontAwesomeIcon( "fa-calendar", "datepickerIcon" ).ToCollection().GetControls();
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
 			return new CustomButton( () => "$( '#{0}' ).datepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}

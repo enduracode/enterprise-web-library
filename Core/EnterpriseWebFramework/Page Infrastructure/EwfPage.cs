@@ -62,6 +62,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, messageHtml ) );
 		}
 
+		internal static string GetPostBackScript( PostBack postBack, bool includeReturnFalse = true ) {
+			if( Instance.GetPostBack( postBack.Id ) != postBack )
+				throw new ApplicationException( "The post-back must have been added to the page." );
+			var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
+			if( validationPostBack != null && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+				throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
+			return "postBack( '{0}' )".FormatWith( postBack.Id ) + ( includeReturnFalse ? "; return false" : "" );
+		}
+
 		internal static void AssertPageTreeNotBuilt() {
 			if( Instance.validationSetupState == null )
 				throw new ApplicationException( "The page tree has already been built." );
@@ -449,8 +458,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors =
-					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
+				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 				resetPage();
 			}
 

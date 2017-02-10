@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private WebControl getIconButton() {
-			var icon = new FontAwesomeIcon( "fa-clock-o", "timepickerIcon" );
+			var icon = new FontAwesomeIcon( "fa-clock-o", "timepickerIcon" ).ToCollection().GetControls();
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
 			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
 		}

@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton
-				                     ? PostBackButton.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack, includeReturnFalse: false )
+				                     ? EwfPage.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack, includeReturnFalse: false )
 				                     : "";
 			var customScript = StringTools.ConcatenateWithDelimiter( "; ", onClickJsMethods.ToArray() );
 			checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "; ", postBackScript, customScript ) );
@@ -154,7 +154,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			if( ToolTip != null || ToolTipControl != null )
-				new ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl : checkBox );
+				new Controls.ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl : checkBox );
 		}
 
 		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
