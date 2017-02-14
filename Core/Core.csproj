@@ -440,7 +440,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\LineBreak.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\MergeFieldTree.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\PageName.cs" />
@@ -529,6 +528,7 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
     <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />

@@ -47,6 +47,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		FormValue FormValueControl.FormValue => FormValue;
 
+		protected override void Render( HtmlTextWriter writer ) {
+			if( webFormsLocalData == null )
+				throw new ApplicationException( "webFormsLocalData not set" );
+			if( webFormsLocalData.ElementName == "br" )
+				writer.WriteBreak();
+			else
+				base.Render( writer );
+		}
+
 		protected override void AddAttributesToRender( HtmlTextWriter writer ) {
 			if( webFormsLocalData == null )
 				throw new ApplicationException( "webFormsLocalData not set" );
