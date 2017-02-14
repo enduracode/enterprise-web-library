@@ -4,16 +4,16 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class PageElement: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
+	internal sealed class ElementNode: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
 		EtherealControl {
-		internal readonly Func<ElementContext, ElementData> ElementDataGetter;
+		internal readonly Func<ElementContext, ElementNodeData> ElementDataGetter;
 		internal readonly FormValue FormValue;
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		private Func<ElementLocalData> webFormsLocalDataGetter;
-		private ElementLocalData webFormsLocalData;
+		private Func<ElementNodeLocalData> webFormsLocalDataGetter;
+		private ElementNodeLocalData webFormsLocalData;
 
-		public PageElement( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ): base( HtmlTextWriterTag.Unknown ) {
+		public ElementNode( Func<ElementContext, ElementNodeData> elementDataGetter, FormValue formValue = null ): base( HtmlTextWriterTag.Unknown ) {
 			ElementDataGetter = elementDataGetter;
 			FormValue = formValue;
 		}

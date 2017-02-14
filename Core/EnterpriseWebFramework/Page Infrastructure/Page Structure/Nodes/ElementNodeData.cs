@@ -4,18 +4,18 @@ using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// Data for a page element.
+	/// Data for an element node.
 	/// </summary>
-	public sealed class ElementData {
+	internal sealed class ElementNodeData {
 		internal readonly IEnumerable<FlowComponentOrNode> Children;
 		internal readonly IEnumerable<EtherealComponentOrElement> EtherealChildren;
-		internal readonly Func<ElementLocalData> LocalDataGetter;
+		internal readonly Func<ElementNodeLocalData> LocalDataGetter;
 
 		/// <summary>
-		/// Creates an element-data object.
+		/// Creates an element-node-data object.
 		/// </summary>
-		public ElementData(
-			Func<ElementLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+		public ElementNodeData(
+			Func<ElementNodeLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			Children = children ?? ImmutableArray<FlowComponentOrNode>.Empty;
 			EtherealChildren = etherealChildren ?? ImmutableArray<EtherealComponentOrElement>.Empty;
 			LocalDataGetter = localDataGetter;

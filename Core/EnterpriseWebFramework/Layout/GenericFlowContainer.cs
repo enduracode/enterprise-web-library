@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public GenericFlowContainer( IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
 			children =
 				new DisplayableElement(
-					context => new DisplayableElementData( displaySetup, () => new DisplayableElementLocalData( "div", classes: classes ), children: content ) ).ToCollection();
+					context => new DisplayableElementData( displaySetup, () => new DisplayableElementLocalData( "div" ), classes: classes, children: content ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

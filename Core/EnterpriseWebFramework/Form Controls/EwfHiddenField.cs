@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				v => v,
 				rawValue => rawValue != null ? PostBackValueValidationResult<string>.CreateValid( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
 
-			component = new PageElement(
+			component = new ElementComponent(
 				context => {
 					idLocal.AddId( context.Id );
 					return new ElementData(
@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							attributes.Add( Tuple.Create( "name", context.Id ) );
 							attributes.Add( Tuple.Create( "value", pageModificationValue.Value ) );
 
-							return new ElementLocalData( "input", attributes, id != null, "" );
+							return new ElementLocalData( "input", attributes: attributes, includeIdAttribute: id != null );
 						} );
 				},
 				formValue: formValue );
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			formValue.AddPageModificationValue( pageModificationValue, v => v );
 		}
 
-		public EtherealComponentOrElement PageComponent { get { return component; } }
-		public EwfValidation Validation { get { return validation; } }
+		public EtherealComponentOrElement PageComponent => component;
+		public EwfValidation Validation => validation;
 	}
 }

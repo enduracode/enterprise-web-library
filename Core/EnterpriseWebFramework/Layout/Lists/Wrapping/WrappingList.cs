@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified ) {
 			children =
 				( generalSetup ?? new ComponentListSetup() ).GetComponents(
-					CssElementCreator.WrappingListClass.Union( FlexboxAlignmentStatics.Class( alignment ) ).Union( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ) ),
+					CssElementCreator.WrappingListClass.Add( FlexboxAlignmentStatics.Class( alignment ) ).Add( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ) ),
 					from i in items select i.ItemAndComponentGetter() );
 		}
 

@@ -163,7 +163,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private static IReadOnlyCollection<Control> addEtherealControls( Control parent, EtherealComponentOrElement component ) {
-			var element = component as PageElement;
+			var element = component as ElementNode;
 			if( element != null ) {
 				EwfPage.Instance.AddEtherealControl( parent, element );
 				return ( (EtherealControl)element ).Control.ToCollection();

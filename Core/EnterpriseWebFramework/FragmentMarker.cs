@@ -15,7 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="id">The ID of the marker, which should be unique on the page. Do not pass null or the empty string.</param>
 		public FragmentMarker( string id ) {
 			children =
-				new PageElement( context => new ElementData( () => new ElementLocalData( "span", Enumerable.Empty<Tuple<string, string>>(), id, "" ) ) ).ToCollection();
+				new ElementNode( context => new ElementNodeData( () => new ElementNodeLocalData( "span", Enumerable.Empty<Tuple<string, string>>(), id, "" ) ) )
+					.ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

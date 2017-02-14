@@ -30,7 +30,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					context =>
 					new DisplayableElementData(
 						displaySetup,
-						() => new DisplayableElementLocalData( "figure", classes: CssElementCreator.Class.Union( classes ?? ElementClassSet.Empty ) ),
+						() => new DisplayableElementLocalData( "figure" ),
+						classes: CssElementCreator.Class.Add( classes ?? ElementClassSet.Empty ),
 						children: caption != null ? caption.FigureIsTextual ? caption.Components.Concat( content ) : content.Concat( caption.Components ) : content ) )
 					.ToCollection();
 		}

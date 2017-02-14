@@ -4,10 +4,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Text for a page.
 	/// </summary>
-	public sealed class EwfText: PhrasingComponent {
+	public sealed class TextComponent: PhrasingComponent {
 		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
 
-		internal EwfText( string text ) {
+		internal TextComponent( string text ) {
 			children = new TextNode( () => text ).ToCollection();
 		}
 
@@ -21,8 +21,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a text component containing this string.
 		/// </summary>
 		/// <param name="s">Do not pass null.</param>
-		public static EwfText ToComponent( this string s ) {
-			return new EwfText( s );
+		public static TextComponent ToComponent( this string s ) {
+			return new TextComponent( s );
 		}
 	}
 }

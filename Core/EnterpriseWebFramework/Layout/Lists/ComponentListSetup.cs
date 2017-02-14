@@ -65,10 +65,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									  context => {
 										  return new DisplayableElementData(
 											  displaySetup,
-											  () =>
-											  new DisplayableElementLocalData(
-												  isOrdered ? "ol" : "ul",
-												  classes: CssElementCreator.AllListsClass.Union( listTypeClasses ).Union( classes ?? ElementClassSet.Empty ) ),
+											  () => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
+											  classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
 											  children: itemComponents );
 									  } ).ToCollection() ) ).ToCollection();
 			};

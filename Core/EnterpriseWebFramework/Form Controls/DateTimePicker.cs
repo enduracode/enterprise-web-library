@@ -108,7 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							control.AddControlsReturnThis(
 								new GenericPhrasingContainer(
 								new[] { new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" ), new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" ) },
-								classes: new ElementClass( "fa-stack" ).Union( new ElementClass( "datetimepickerIcon" ) ) ).ToCollection().GetControls() ) ),
+								classes: new ElementClass( "fa-stack" ).Add( new ElementClass( "datetimepickerIcon" ) ) ).ToCollection().GetControls() ) ),
 					CssClass = "icon"
 				};
 		}
@@ -158,6 +158,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

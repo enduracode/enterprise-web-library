@@ -89,18 +89,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 										                      return new DisplayableElementData(
 											                      displaySetup,
-											                      () =>
-											                      new DisplayableElementLocalData(
-												                      "li",
-												                      classes: CssElementCreator.ItemClass.Union( itemTypeClasses ).Union( classes ?? ElementClassSet.Empty ),
-												                      additionalAttributes: attributes ),
+											                      () => new DisplayableElementLocalData( "li", attributes: attributes ),
+											                      classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
 											                      children:
 												                      includeContentContainer
 													                      ? new DisplayableElement(
 														                        innerContext =>
 														                        new DisplayableElementData(
 															                        null,
-															                        () => new DisplayableElementLocalData( "div", classes: CssElementCreator.ItemClass ),
+															                        () => new DisplayableElementLocalData( "div" ),
+															                        classes: CssElementCreator.ItemClass,
 															                        children: children,
 															                        etherealChildren: etherealChildren ) ).ToCollection()
 													                      : children,

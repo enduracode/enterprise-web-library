@@ -13,9 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control that, when clicked, toggles the display of other controls.
 	/// </summary>
-	// When migrating this away from Web Forms, all it will do directly is manipulate the hidden field and a page-modification value. To replace the toggleClasses
-	// functionality, make a ClassToggler that is similar in structure to DisplaySetup. Create them with an extension method:
-	// PageModificationValue.ToClassToggler( classes, toggledWhenValueSet=true )
+	// When migrating this away from Web Forms, all it will do directly is manipulate the hidden field and a page-modification value.
 	public class ToggleButton: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, DisplayLink, ActionControl {
 		private readonly List<WebControl> controlsToToggle = new List<WebControl>();
 

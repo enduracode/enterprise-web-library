@@ -45,7 +45,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					context => {
 						return new DisplayableElementData(
 							setup.DisplaySetup,
-							() => new DisplayableElementLocalData( "div", classes: new ElementClass( CssElementCreator.CssClass ) ),
+							() => new DisplayableElementLocalData( "div" ),
+							classes: new ElementClass( CssElementCreator.CssClass ),
 							children: wysiwygEditor.PageComponent.ToCollection() );
 					} );
 

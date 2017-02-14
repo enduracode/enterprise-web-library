@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Components =
 				new DisplayableElement(
 					context =>
-					new DisplayableElementData( null, () => new DisplayableElementLocalData( "figcaption", classes: CssElementCreator.Class ), children: components ) )
+					new DisplayableElementData( null, () => new DisplayableElementLocalData( "figcaption" ), classes: CssElementCreator.Class, children: components ) )
 					.ToCollection();
 		}
 	}

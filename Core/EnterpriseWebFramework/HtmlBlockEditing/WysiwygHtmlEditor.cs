@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var modificationValue = new PageModificationValue<string>();
 
-			component = new PageElement(
+			component = new ElementComponent(
 				context => {
 					id.AddId( context.Id );
 
@@ -64,7 +64,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( !displaySetup.ComponentsDisplayed )
 								attributes.Add( Tuple.Create( "style", "display: none" ) );
 
-							return new ElementLocalData( "textarea", attributes, true, displaySetup.ComponentsDisplayed ? jsShowStatements : "" );
+							return new ElementLocalData(
+								"textarea",
+								attributes: attributes,
+								includeIdAttribute: true,
+								jsInitStatements: displaySetup.ComponentsDisplayed ? jsShowStatements : "" );
 						},
 						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
 				},
@@ -97,7 +101,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return "CKEDITOR.replace( '" + id + "', { " + configuration + " } );";
 		}
 
-		public FlowComponentOrNode PageComponent { get { return component; } }
-		public EwfValidation Validation { get { return validation; } }
+		public FlowComponentOrNode PageComponent => component;
+		public EwfValidation Validation => validation;
 	}
 }

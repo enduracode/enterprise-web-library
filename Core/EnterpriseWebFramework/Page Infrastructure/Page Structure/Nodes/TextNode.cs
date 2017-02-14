@@ -3,7 +3,7 @@ using System.Web;
 using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class TextNode: Control, FlowComponentOrNode {
+	internal sealed class TextNode: Control, FlowComponentOrNode {
 		internal readonly Func<string> TextGetter;
 
 		public TextNode( Func<string> textGetter ) {

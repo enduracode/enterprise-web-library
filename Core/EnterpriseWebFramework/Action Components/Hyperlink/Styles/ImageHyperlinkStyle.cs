@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		ElementClassSet HyperlinkStyle.GetClasses() {
-			return ActionComponentCssElementCreator.AllStylesClass.Union( ActionComponentCssElementCreator.ImageStyleClass );
+			return ActionComponentCssElementCreator.AllStylesClass.Add( ActionComponentCssElementCreator.ImageStyleClass );
 		}
 
 		IEnumerable<FlowComponentOrNode> HyperlinkStyle.GetChildren( string destinationUrl ) {

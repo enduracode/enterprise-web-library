@@ -341,8 +341,11 @@
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
-    <Compile Include="EnterpriseWebFramework\Element Classification\ElementClass.cs" />
-    <Compile Include="EnterpriseWebFramework\Element Classification\ElementClassSet.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClass.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClassSet.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Base\ElementComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Base\ElementData.cs" />
+    <Compile Include="EnterpriseWebFramework\Element Base\ElementLocalData.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\ErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\ModificationErrorPlaceholder.cs">
@@ -503,11 +506,11 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\FormValueControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementContext.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementData.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementLocalData.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\PageElement.cs">
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNode.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeData.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeLocalData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
@@ -526,7 +529,7 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
-    <Compile Include="EnterpriseWebFramework\Text\EwfText.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />

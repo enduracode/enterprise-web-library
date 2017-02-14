@@ -22,8 +22,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					null,
 					classes:
 						additionalClasses.Aggregate(
-							new ElementClass( "fa" ).Union( new ElementClass( iconName ) ),
-							( set, additionalClass ) => set.Union( new ElementClass( additionalClass ) ) ) ).ToCollection();
+							new ElementClass( "fa" ).Add( new ElementClass( iconName ) ),
+							( set, additionalClass ) => set.Add( new ElementClass( additionalClass ) ) ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

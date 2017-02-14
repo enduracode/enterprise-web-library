@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public GenericPhrasingContainer( IEnumerable<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
 			children =
 				new DisplayableElement(
-					context => new DisplayableElementData( displaySetup, () => new DisplayableElementLocalData( "span", classes: classes ), children: content ) ).ToCollection(
+					context => new DisplayableElementData( displaySetup, () => new DisplayableElementLocalData( "span" ), classes: classes, children: content ) ).ToCollection(
 						);
 		}
 

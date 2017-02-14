@@ -48,13 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							           if( alternativeText != null )
 								           attributes.Add( Tuple.Create( "alt", alternativeText ) );
 
-							           return new DisplayableElementLocalData(
-								           "img",
-								           classes:
-									           CssElementCreator.Class.Union( sizesToAvailableWidth ? new ElementClass( "ewfAutoSizer" ) : ElementClassSet.Empty )
-										           .Union( classes ?? ElementClassSet.Empty ),
-								           additionalAttributes: attributes );
-						           } ) ).ToCollection();
+							           return new DisplayableElementLocalData( "img", attributes: attributes );
+						           },
+						           classes:
+						           CssElementCreator.Class.Add( sizesToAvailableWidth ? new ElementClass( "ewfAutoSizer" ) : ElementClassSet.Empty )
+						           .Add( classes ?? ElementClassSet.Empty ) ) ).ToCollection();
 			};
 		}
 	}

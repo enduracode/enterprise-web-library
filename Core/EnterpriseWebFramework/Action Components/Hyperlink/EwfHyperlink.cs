@@ -25,10 +25,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() =>
 						new DisplayableElementLocalData(
 							"a",
-							classes: behavior.Classes.Union( style.GetClasses() ).Union( classes ?? ElementClassSet.Empty ),
-							additionalAttributes: behavior.AttributeGetter(),
+							attributes: behavior.AttributeGetter(),
 							includeIdAttribute: behavior.IncludeIdAttribute,
 							jsInitStatements: behavior.JsInitStatementGetter( context.Id ) + style.GetJsInitStatements( context.Id ) ),
+						classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
 						children: style.GetChildren( behavior.Url ),
 						etherealChildren: behavior.EtherealChildren );
 				} ).ToCollection();
