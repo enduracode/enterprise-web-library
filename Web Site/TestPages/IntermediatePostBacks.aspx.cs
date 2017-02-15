@@ -72,9 +72,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						regionControls.Add( new Paragraph( "Nothing here yet." ) );
 				} );
 			yield return
-				new NamingPlaceholder(
-					new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(),
-					updateRegionSets: rs.ToCollection() );
+				new NamingPlaceholder( new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(), updateRegionSets: rs.ToCollection() );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
 			pb.AddModificationMethod(
@@ -124,10 +122,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			else
 				itemStack.AddText( "Item {0}".FormatWith( i ) );
 			itemStack.AddControls(
-				new PostBackButton(
-					new ButtonActionControlStyle( "Toggle", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-					usesSubmitBehavior: false,
-					postBack: pb ) );
+				new PostBackButton( new ButtonActionControlStyle( "Toggle", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 
 			pb.AddModificationMethod(
 				() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
@@ -149,14 +144,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								firstModificationMethod:
 									() =>
 									parametersModification.ItemIds =
-									( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection().Concat( parametersModification.ItemIds ) ) ) )
-				;
+									( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection().Concat( parametersModification.ItemIds ) ) ) );
 
 			var stack = ControlStack.Create(
 				true,
 				itemInsertionUpdateRegions:
-					new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
-						.ToCollection() );
+					new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() ).ToCollection() );
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
@@ -170,10 +163,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var itemStack = ControlStack.Create( true );
 			itemStack.AddControls( new EwfTextBox( "ID {0}".FormatWith( id ) ) );
 			itemStack.AddControls(
-				new PostBackButton(
-					new ButtonActionControlStyle( "Remove", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
-					usesSubmitBehavior: false,
-					postBack: pb ) );
+				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 
 			pb.AddModificationMethod( () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() );
 

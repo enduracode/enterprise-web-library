@@ -126,7 +126,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
 					children.Add(
 						new PostBackButton(
-							new ButtonActionControlStyle( "Log Out", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							new ButtonActionControlStyle( "Log Out", ButtonSize.ShrinkWrap ),
 							usesSubmitBehavior: false,
 							postBack:
 								PostBack.CreateFull(
@@ -150,12 +150,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".GetLiteralControl(),
-						EwfLink.Create(
-							SelectUser.GetInfo( AppRequestState.Instance.Url ),
-							new ButtonActionControlStyle( "Change User", ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ),
+						EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ),
 						" ".GetLiteralControl(),
 						new PostBackButton(
-							new ButtonActionControlStyle( "End Impersonation", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+							new ButtonActionControlStyle( "End Impersonation", ButtonSize.ShrinkWrap ),
 							usesSubmitBehavior: false,
 							postBack:
 								PostBack.CreateFull(

@@ -58,8 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var pagePath = EwfPage.Instance.InfoAsBaseType.ResourcePath;
 			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
-				Controls.Add(
-					EwfLink.Create( resource, new ButtonActionControlStyle( resource.ResourceFullName, buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) );
+				Controls.Add( EwfLink.Create( resource, new ButtonActionControlStyle( resource.ResourceFullName, buttonSize: ButtonSize.ShrinkWrap ) ) );
 				Controls.Add( ResourceInfo.ResourcePathSeparator.GetLiteralControl() );
 			}
 			if( pageName != null )

@@ -9,17 +9,16 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				getBox(
 					new PostBackButton(
-						new ButtonActionControlStyle( "Tiny Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+						new ButtonActionControlStyle( "Tiny Post Back Button", buttonSize: ButtonSize.ShrinkWrap ),
 						usesSubmitBehavior: false,
 						postBack: PostBack.CreateFull( id: "tiny" ) ) ) );
 			ph.AddControlsReturnThis(
-				getBox(
-					EwfLink.Create( SubFolder.General.GetInfo(), new ButtonActionControlStyle( "Tiny EWF Link", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ) ) ) );
+				getBox( EwfLink.Create( SubFolder.General.GetInfo(), new ButtonActionControlStyle( "Tiny EWF Link", buttonSize: ButtonSize.ShrinkWrap ) ) ) );
 			ph.AddControlsReturnThis(
 				getBox(
 					new ToggleButton(
 						new WebControl[ 0 ],
-						new ButtonActionControlStyle( "Tiny Toggle Button", buttonSize: ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+						new ButtonActionControlStyle( "Tiny Toggle Button", buttonSize: ButtonSize.ShrinkWrap ),
 						false,
 						( postBackValue, validator ) => { } ) ) );
 
@@ -36,16 +35,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				getBox(
 					new PostBackButton(
-						new ButtonActionControlStyle( "Large Post Back Button", buttonSize: ButtonActionControlStyle.ButtonSize.Large ),
+						new ButtonActionControlStyle( "Large Post Back Button", buttonSize: ButtonSize.Large ),
 						usesSubmitBehavior: false,
 						postBack: PostBack.CreateFull( id: "large" ) ) ) );
-			ph.AddControlsReturnThis(
-				getBox( EwfLink.Create( EwfTableDemo.GetInfo(), new ButtonActionControlStyle( "Large EWF Link", ButtonActionControlStyle.ButtonSize.Large ) ) ) );
+			ph.AddControlsReturnThis( getBox( EwfLink.Create( EwfTableDemo.GetInfo(), new ButtonActionControlStyle( "Large EWF Link", ButtonSize.Large ) ) ) );
 			ph.AddControlsReturnThis(
 				getBox(
 					new ToggleButton(
 						new WebControl[ 0 ],
-						new ButtonActionControlStyle( "Large Toggle Button", ButtonActionControlStyle.ButtonSize.Large ),
+						new ButtonActionControlStyle( "Large Toggle Button", ButtonSize.Large ),
 						false,
 						( postBackValue, validator ) => { } ) ) );
 		}

@@ -265,6 +265,12 @@
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIconPlacement.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonBehavior.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\EwfButton.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\CustomButtonStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\ImageButtonStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\StandardButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\EwfHyperlink.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkStyle.cs" />

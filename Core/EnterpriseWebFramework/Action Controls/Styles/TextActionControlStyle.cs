@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// A style that renders action controls as text.
 	/// </summary>
 	public class TextActionControlStyle: ActionControlStyle {
-		private readonly ActionControlIcon icon;
+		private readonly ActionComponentIcon icon;
 
 		/// <summary>
 		/// Gets or sets the text. Do not set this to null.
@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		/// <param name="text">Do not pass null.</param>
 		/// <param name="icon">The icon.</param>
-		public TextActionControlStyle( string text, ActionControlIcon icon = null ) {
+		public TextActionControlStyle( string text, ActionComponentIcon icon = null ) {
 			this.icon = icon;
 			Text = text;
 		}
@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			control.CssClass =
 				control.CssClass.ConcatenateWithSpace(
 					ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + ActionComponentCssElementCreator.TextStyleClass.ClassName );
-			return control.AddControlsReturnThis( ActionControlIcon.GetIconAndTextComponents( icon, Text.Any() ? Text : defaultText ).GetControls() );
+			return control.AddControlsReturnThis( ActionComponentIcon.GetIconAndTextComponents( icon, Text.Any() ? Text : defaultText ).GetControls() );
 		}
 
 		string ActionControlStyle.GetJsInitStatements() {

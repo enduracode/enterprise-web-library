@@ -390,7 +390,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					resource.IsIdenticalToCurrent() ? null : resource,
 					new TextActionControlStyle(
 						resource.ResourceName,
-						icon: includeIcons ? new ActionControlIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ) );
+						icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ) );
 
 				tab.CssClass = resource.IsIdenticalToCurrent()
 					               ? CssElementCreator.CurrentTabCssClass
@@ -420,10 +420,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() ) {
 					var first = from i in contentFootActions.Take( 1 )
-					            select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large, icon: icon ), true );
+					            select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonSize.Large, icon: icon ), true );
 					var remaining = from i in contentFootActions.Skip( 1 )
-					                select
-						                i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonActionControlStyle.ButtonSize.Large, icon: icon ), false );
+					                select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonSize.Large, icon: icon ), false );
 					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				}
 				else if( EwfPage.Instance.IsAutoDataUpdater )

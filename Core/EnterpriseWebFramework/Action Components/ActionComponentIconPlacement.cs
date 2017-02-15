@@ -1,5 +1,5 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public enum ActionControlIconPlacement {
+	public enum ActionComponentIconPlacement {
 		Left,
 		Right
 	}

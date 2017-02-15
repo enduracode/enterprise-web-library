@@ -401,7 +401,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						var controlLine = new ControlLine( new Control[ 0 ] );
 						if( previousRowSetup != null ) {
 							var upButton = new PostBackButton(
-								new ButtonActionControlStyle( @"/\", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+								new ButtonActionControlStyle( @"/\", ButtonSize.ShrinkWrap ),
 								usesSubmitBehavior: false,
 								postBack:
 									PostBack.CreateFull(
@@ -411,7 +411,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						}
 						if( nextRowSetup != null ) {
 							var downButton = new PostBackButton(
-								new ButtonActionControlStyle( @"\/", ButtonActionControlStyle.ButtonSize.ShrinkWrap ),
+								new ButtonActionControlStyle( @"\/", ButtonSize.ShrinkWrap ),
 								usesSubmitBehavior: false,
 								postBack:
 									PostBack.CreateFull(
