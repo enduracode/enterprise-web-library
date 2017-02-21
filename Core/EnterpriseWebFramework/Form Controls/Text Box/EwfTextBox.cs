@@ -176,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( !isTextarea )
 				PreRender +=
 					delegate {
-						PostBackButton.EnsureImplicitSubmission(
+						SubmitButton.EnsureImplicitSubmission(
 							this,
 							postBack,
 							autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );

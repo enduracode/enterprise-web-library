@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			PostBackButton.EnsureImplicitSubmission( checkBoxElement, postBack, false );
+			SubmitButton.EnsureImplicitSubmission( checkBoxElement, postBack, false );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton

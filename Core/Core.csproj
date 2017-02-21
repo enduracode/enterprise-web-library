@@ -277,6 +277,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\CustomHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\ImageHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\SubmitButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\CustomButton.cs" />

@@ -256,7 +256,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
 				EwfPage.Instance.AddPostBack( postBack );
 
-				PreRender += delegate { PostBackButton.EnsureImplicitSubmission( this, postBack, true ); };
+				PreRender += delegate { SubmitButton.EnsureImplicitSubmission( this, postBack, true ); };
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
