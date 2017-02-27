@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class HtmlEditing: EwfPage {
 		protected override void loadData() {
 			HtmlBlockEditorModification mod;
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
 				() => {
 					ph.AddControlsReturnThis( new HtmlBlockEditor( null, id => { }, out mod ).ToFormItem( "" ).ToControl() );

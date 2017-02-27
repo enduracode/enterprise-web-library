@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.WebSite {
 								ContentTypes.ApplicationZip,
 								new EwfResponseBodyCreator( createAndZipSystem ),
 								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) );
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(

@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var pb = PostBack.CreateFull();
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(

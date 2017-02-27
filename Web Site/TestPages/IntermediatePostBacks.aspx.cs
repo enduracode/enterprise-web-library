@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					if( info.Toggled )

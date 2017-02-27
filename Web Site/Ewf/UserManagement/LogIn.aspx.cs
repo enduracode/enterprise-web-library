@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				logInPb.ToCollection(),
 				() => {
 					var registeredTable = EwfTable.Create( caption: "Registered users" );
@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 					emailAddress = new DataValue<string>();
-					ValidationSetupState.ExecuteWithDataModifications(
+					FormState.ExecuteWithDataModificationsAndDefaultAction(
 						new[] { logInPb, newPasswordPb },
 						() =>
 						registeredTable.AddItem(

@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					AppRequestState.Instance.IntermediateUserExists = true;
 				},
 				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(

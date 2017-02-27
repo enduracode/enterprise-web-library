@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var pb = PostBack.CreateFull();
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					addMessageIfNotNull( ph, getTest1( null ) );
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private Section test2( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test2" );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					var box =
@@ -103,7 +103,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private Section test3( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test3" );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					var box =
@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private Section test4( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test4" );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					var box =
@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private Section test5( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test5" );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					var box =
@@ -147,7 +147,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private Section test6( Action<string> setValue ) {
 			var pb = PostBack.CreateFull( id: "test6" );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					var box =
