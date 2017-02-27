@@ -10,22 +10,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class SubmitButton: PhrasingComponent {
 		/// <summary>
-		/// Ensures that the specified control will submit the form when the enter key is pressed while the control has focus. If you specify the submit-button
-		/// post-back, this method relies on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
+		/// Ensures that the specified control will trigger the specified action when the enter key is pressed while the control has focus. If you specify the
+		/// submit-button post-back, this method relies on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
 		/// </summary>
 		/// <param name="control"></param>
-		/// <param name="postBack">Do not pass null.</param>
+		/// <param name="action">Do not pass null.</param>
 		/// <param name="forceJsHandling"></param>
 		/// <param name="predicate"></param>
-		internal static void EnsureImplicitSubmission( WebControl control, PostBack postBack, bool forceJsHandling, string predicate = "" ) {
+		internal static void EnsureImplicitSubmissionAction( WebControl control, FormAction action, bool forceJsHandling, string predicate = "" ) {
+			var postBackAction = action as PostBackFormAction;
+
 			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
 			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
-			// http://www.whatwg.org/specs/web-apps/current-work/multipage/association-of-controls-and-forms.html#implicit-submission. Second, we don't want the
-			// implicit submission behavior of form controls to unpredictably change if a submit button is added or removed.
-			if( postBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
+			// https://html.spec.whatwg.org/multipage/forms.html#implicit-submission. Second, we don't want the implicit submission behavior of form controls to
+			// unpredictably change if a submit button is added or removed.
+			if( postBackAction == null || postBackAction.PostBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
 				control.AddJavaScriptEventScript(
 					JsWritingMethods.onkeypress,
-					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + EwfPage.GetPostBackScript( postBack ) + "; }" );
+					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + action.GetJsStatements() + " return false; }" );
 		}
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
@@ -39,15 +41,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
 		public SubmitButton( ButtonStyle style, DisplaySetup displaySetup = null, ElementClassSet classes = null, PostBack postBack = null ) {
 			var elementChildren = style.GetChildren();
-			postBack = postBack ?? EwfPage.PostBack;
+			var postBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 
 			children = new DisplayableElement(
 				context => {
-					EwfPage.Instance.AddPostBack( postBack );
+					FormAction action = postBackAction;
+					action.AddToPageIfNecessary();
 
 					if( EwfPage.Instance.SubmitButtonPostBack != null )
 						throw new ApplicationException( "A submit button already exists on the page." );
-					EwfPage.Instance.SubmitButtonPostBack = postBack;
+					EwfPage.Instance.SubmitButtonPostBack = postBackAction.PostBack;
 
 					return new DisplayableElementData(
 						displaySetup,

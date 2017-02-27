@@ -4,6 +4,12 @@ using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class PostBack {
+		private static Func<IReadOnlyCollection<DataModification>> dataModificationGetter;
+
+		internal static void Init( Func<IReadOnlyCollection<DataModification>> dataModificationGetter ) {
+			PostBack.dataModificationGetter = dataModificationGetter;
+		}
+
 		public static string GetCompositeId( params string[] parts ) {
 			return StringTools.ConcatenateWithDelimiter( ".", parts );
 		}
@@ -55,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				skipModificationIfNoChanges,
 				firstModificationMethod,
 				secondaryResponseGetter != null ? new Func<PostBackAction>( () => new PostBackAction( secondaryResponseGetter() ) ) : null,
-				validationDm ?? ValidationSetupState.Current.DataModifications.First() );
+				validationDm ?? dataModificationGetter().First() );
 		}
 
 		internal static PostBack CreateDataUpdate() {
@@ -72,10 +78,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.forcePageDataUpdate = forcePageDataUpdate;
 		}
 
-		internal bool ForceFullPagePostBack { get { return forceFullPagePostBack; } }
-		internal string Id { get { return id; } }
-		internal bool IsIntermediate { get { return !forcePageDataUpdate.HasValue; } }
-		internal bool ForcePageDataUpdate { get { return forcePageDataUpdate.Value; } }
+		internal bool ForceFullPagePostBack => forceFullPagePostBack;
+		internal string Id => id;
+		internal bool IsIntermediate => !forcePageDataUpdate.HasValue;
+		internal bool ForcePageDataUpdate => forcePageDataUpdate.Value;
 	}
 
 	public class ActionPostBack: PostBack, DataModification, ValidationList {
@@ -99,7 +105,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.validationDm = validationDm;
 		}
 
-		internal IEnumerable<UpdateRegionSet> UpdateRegions { get { return updateRegions; } }
+		internal IEnumerable<UpdateRegionSet> UpdateRegions => updateRegions;
 
 		void ValidationList.AddValidation( EwfValidation validation ) {
 			( (ValidationList)dataModification ).AddValidation( validation );
@@ -130,6 +136,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					actionGetter != null ? new Tuple<Action, Action>( () => action = actionGetter(), () => actionSetter( action ) ) : null );
 		}
 
-		internal DataModification ValidationDm { get { return validationDm; } }
+		internal DataModification ValidationDm => validationDm;
 	}
 }

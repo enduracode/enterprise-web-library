@@ -487,7 +487,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\EwfValidation.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\PostBackValueDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationList.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationSetupState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ElementId.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ElementIdSet.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EntitySetupBase.cs" />
@@ -495,6 +494,10 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormState.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\NonPostBackFormAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\PostBackFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />

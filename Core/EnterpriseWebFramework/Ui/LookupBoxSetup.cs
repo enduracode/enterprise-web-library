@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		public WebControl BuildLookupBoxPanel() {
 			var val = new DataValue<string>();
 			var postBack = PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( handler( val.Value ) ) );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
 				() => {
 					var textBox = FormItem.Create(

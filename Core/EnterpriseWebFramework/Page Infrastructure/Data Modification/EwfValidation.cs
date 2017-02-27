@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -7,6 +8,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	// We renamed this from just Validation because it conflicted with the Validation namespace in the System.Collections.Immutable package.
 	public class EwfValidation {
+		private static Func<Func<bool>> validationPredicateGetter;
+		private static Func<IReadOnlyCollection<DataModification>> dataModificationGetter;
+		private static Func<HashSet<DataModification>> otherElementDataModificationGetter;
+		private static Action validationCreationReporter;
+
+		internal static void Init(
+			Func<Func<bool>> validationPredicateGetter, Func<IReadOnlyCollection<DataModification>> dataModificationGetter,
+			Func<HashSet<DataModification>> otherElementDataModificationGetter, Action validationCreationReporter ) {
+			EwfValidation.validationPredicateGetter = validationPredicateGetter;
+			EwfValidation.dataModificationGetter = dataModificationGetter;
+			EwfValidation.otherElementDataModificationGetter = otherElementDataModificationGetter;
+			EwfValidation.validationCreationReporter = validationCreationReporter;
+		}
+
 		private readonly Action<Validator> method;
 
 		/// <summary>
@@ -16,13 +31,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// modification methods to outside lists; this adds confusion and commonly leads to modification methods being skipped or executing in the wrong order.
 		/// </param>
 		public EwfValidation( Action<Validator> method ) {
-			var setupState = ValidationSetupState.Current;
-			var dataModifications = setupState.DataModifications;
-
-			if( setupState.DataModificationsWithValidationsFromOtherElements.Overlaps( dataModifications ) )
+			var dataModifications = dataModificationGetter();
+			if( otherElementDataModificationGetter().Overlaps( dataModifications ) )
 				throw new ApplicationException( "One or more of the data modifications contain validations from other page elements." );
 
-			var predicate = setupState.ValidationPredicate;
+			var predicate = validationPredicateGetter();
 			this.method = validator => {
 				if( predicate() )
 					method( validator );
@@ -30,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			foreach( var i in dataModifications )
 				( (ValidationList)i ).AddValidation( this );
-			setupState.AddDataModificationsWithValidations( dataModifications );
+			validationCreationReporter();
 		}
 
 		/// <summary>

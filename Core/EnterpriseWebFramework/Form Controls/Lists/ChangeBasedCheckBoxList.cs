@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="includeSelectAndDeselectAllButtons"></param>
 		/// <param name="numberOfColumns"></param>
 		/// <param name="uiSelectedItemIds"></param>
-		/// <param name="postBack"></param>
+		/// <param name="action"></param>
 		/// <param name="cellSpan"></param>
 		/// <param name="textAlignment"></param>
 		/// <param name="validationPredicate"></param>
@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static FormItem GetFormItem<ItemIdType>(
 			FormItemLabel label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
 			string caption = "", bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null,
-			PostBack postBack = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
+			FormAction action = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
 			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>(
 				items,
 				selectedItemIds,
@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				includeSelectAndDeselectAllButtons,
 				numberOfColumns,
 				uiSelectedItemIds ?? selectedItemIds,
-				postBack );
+				action );
 			modificationMethod = checkBoxList.ModifyData;
 			return FormItem.Create(
 				label,
@@ -65,14 +65,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="caption"></param>
 		/// <param name="includeSelectAndDeselectAllButtons"></param>
 		/// <param name="numberOfColumns"></param>
-		/// <param name="postBack"></param>
+		/// <param name="action"></param>
 		/// <param name="cellSpan"></param>
 		/// <param name="textAlignment"></param>
 		/// <param name="validationPredicate"></param>
 		/// <returns></returns>
 		public static FormItem GetFormItem<ItemIdType>(
 			FormItemLabel label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, string caption = "",
-			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, PostBack postBack = null, int? cellSpan = null,
+			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, FormAction action = null, int? cellSpan = null,
 			TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
 			var itemArray = items.ToArray();
 			var selectedItemIds = itemArray.Where( i => i.IsSelected ).Select( i => i.Item.Item.Id );
@@ -84,7 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				includeSelectAndDeselectAllButtons,
 				numberOfColumns,
 				uiSelectedItemIds,
-				postBack );
+				action );
 			modificationMethod = checkBoxList.ModifyData;
 			return FormItem.Create(
 				label,
@@ -109,7 +109,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal ChangeBasedCheckBoxList(
 			IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption, bool includeSelectAndDeselectAllButtons,
-			byte numberOfColumns, IEnumerable<ItemIdType> uiSelectedItemIds, PostBack postBack ) {
+			byte numberOfColumns, IEnumerable<ItemIdType> uiSelectedItemIds, FormAction action ) {
 			this.items = items.ToArray();
 			this.selectedItemIds = selectedItemIds.ToArray();
 
@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					caption: caption,
 					includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,
 					numberOfColumns: numberOfColumns,
-					postBack: postBack ) );
+					action: action ) );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

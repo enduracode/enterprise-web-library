@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private bool usesSubmitBehavior;
 		private ModalWindow confirmationWindow;
-		private readonly PostBack postBack;
+		private readonly PostBackFormAction postBackAction;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public PostBackButton( ActionControlStyle actionControlStyle, bool usesSubmitBehavior = true, PostBack postBack = null ) {
 			ActionControlStyle = actionControlStyle;
 			this.usesSubmitBehavior = usesSubmitBehavior;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			postBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() => {
@@ -64,10 +64,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						throw new ApplicationException(
 							"Multiple buttons with submit behavior were detected. There may only be one per page. The button IDs are " +
 							StringTools.ConcatenateWithDelimiter( ", ", submitButtons.Select( control => control.UniqueID ).ToArray() ) + "." );
-					EwfPage.Instance.SubmitButtonPostBack = this.postBack;
+					EwfPage.Instance.SubmitButtonPostBack = postBackAction.PostBack;
 				} );
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		[ Obsolete( "Guaranteed through 31 October 2016. Use the constructor in which the post-back is optional." ) ]
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public PostBackButton( PostBack postBack = null ): this( new ButtonActionControlStyle( "" ), postBack: postBack ) {}
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					if( TagKey == HtmlTextWriterTag.Button ) {
@@ -91,15 +91,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						Attributes.Add( "type", usesSubmitBehavior ? "submit" : "button" );
 					}
 
-					EwfPage.Instance.AddPostBack( postBack );
+					FormAction action = postBackAction;
+					action.AddToPageIfNecessary();
 
 					if( ConfirmationWindowContentControl != null ) {
 						if( usesSubmitBehavior )
 							throw new ApplicationException( "PostBackButton cannot be the submit button and also have a confirmation message." );
-						confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBack );
+						confirmationWindow = new ModalWindow( this, ConfirmationWindowContentControl, title: "Confirmation", postBack: postBackAction.PostBack );
 					}
 					else if( !usesSubmitBehavior )
-						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, EwfPage.GetPostBackScript( postBack ) ); };
+						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, action.GetJsStatements() + " return false" ); };
 
 					CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
 					ActionControlStyle.SetUpControl( this, "" );

@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBoxList(
 			IEnumerable<SelectListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption = "", bool includeSelectAndDeselectAllButtons = false,
-			byte numberOfColumns = 1, PostBack postBack = null ) {
+			byte numberOfColumns = 1, FormAction action = null ) {
 			this.items = items.ToArray();
 			selectedItemIds = selectedItemIds.ToArray();
 
@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						selectedItemIds.Contains( item.Id ),
 						( postBackValue, validator ) => { },
 						label: item.Label,
-						setup: new BlockCheckBoxSetup( highlightedWhenChecked: true, postBack: postBack ) );
+						setup: new BlockCheckBoxSetup( highlightedWhenChecked: true, action: action ) );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}

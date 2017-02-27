@@ -47,14 +47,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// selected if the selected item ID has the default value and none of the list items do.</param>
 		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
 		/// violates the HTML specification.</param>
-		/// <param name="postBack">The post-back that will occur when the user hits Enter on a radio button.</param>
-		/// <param name="autoPostBack">Pass true if you want a post-back to occur when the selection changes.</param>
+		/// <param name="action">The action that will occur when the user hits Enter on a radio button.</param>
+		/// <param name="autoPostBack">Pass true if you want an action to occur when the selection changes.</param>
 		/// <param name="itemIdPageModificationValue"></param>
 		/// <param name="itemMatchPageModificationSetups"></param>
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, bool useHorizontalLayout = false,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string defaultValueItemLabel = "", bool disableSingleButtonDetection = false,
-			PostBack postBack = null, bool autoPostBack = false, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
+			FormAction action = null, bool autoPostBack = false, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
 			return new SelectList<ItemIdType>(
 				useHorizontalLayout,
@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				items,
 				disableSingleButtonDetection,
 				selectedItemId,
-				postBack,
+				action,
 				autoPostBack,
 				itemIdPageModificationValue,
 				itemMatchPageModificationSetups );
@@ -90,14 +90,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 		/// case the placeholder will not be considered a valid selection.</param>
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
-		/// <param name="postBack">The post-back that will occur when the user hits Enter on the drop-down list.</param>
-		/// <param name="autoPostBack">Pass true if you want a post-back to occur when the selection changes.</param>
+		/// <param name="action">The action that will occur when the user hits Enter on the drop-down list.</param>
+		/// <param name="autoPostBack">Pass true if you want an action to occur when the selection changes.</param>
 		/// <param name="itemIdPageModificationValue"></param>
 		/// <param name="itemMatchPageModificationSetups"></param>
 		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, System.Web.UI.WebControls.Unit? width = null,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string defaultValueItemLabel = "", bool placeholderIsValid = false,
-			string placeholderText = "Please select", PostBack postBack = null, bool autoPostBack = false,
+			string placeholderText = "Please select", FormAction action = null, bool autoPostBack = false,
 			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
 			return new SelectList<ItemIdType>(
@@ -110,7 +110,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				items,
 				null,
 				selectedItemId,
-				postBack,
+				action,
 				autoPostBack,
 				itemIdPageModificationValue,
 				itemMatchPageModificationSetups ?? ImmutableArray<ListItemMatchPageModificationSetup<ItemIdType>>.Empty );
@@ -153,7 +153,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
 		private readonly bool? disableSingleRadioButtonDetection;
 		private readonly ItemIdType selectedItemId;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly bool autoPostBack;
 		private readonly PageModificationValue<ItemIdType> itemIdPageModificationValue;
 		private readonly IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups;
@@ -169,7 +169,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal SelectList(
 			bool? useHorizontalRadioLayout, System.Web.UI.WebControls.Unit? width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel,
 			bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection,
-			ItemIdType selectedItemId, PostBack postBack, bool autoPostBack, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			ItemIdType selectedItemId, FormAction action, bool autoPostBack, PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
@@ -188,7 +188,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			this.disableSingleRadioButtonDetection = disableSingleRadioButtonDetection;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			this.action = action ?? FormState.Current.DefaultAction;
 			this.autoPostBack = autoPostBack;
 			this.itemIdPageModificationValue = itemIdPageModificationValue;
 			this.itemMatchPageModificationSetups = itemMatchPageModificationSetups;
@@ -237,7 +237,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var radioButtons =
 					items.Where( i => i.IsValid )
-						.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, postBack: postBack, autoPostBack: autoPostBack ) )
+						.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: autoPostBack ) )
 						.ToArray();
 				firstRadioButton = radioButtons.First();
 
@@ -254,9 +254,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					rawValue != null && itemsByStringId.ContainsKey( rawValue )
 						? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
 						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
-				EwfPage.Instance.AddPostBack( postBack );
+				action.AddToPageIfNecessary();
 
-				PreRender += delegate { SubmitButton.EnsureImplicitSubmission( this, postBack, true ); };
+				PreRender += delegate { SubmitButton.EnsureImplicitSubmissionAction( this, action, true ); };
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
@@ -273,7 +273,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									selectControl.ClientID ) );
 					}
 					if( autoPostBack )
-						changeHandler += EwfPage.GetPostBackScript( postBack );
+						changeHandler += action.GetJsStatements() + " return false";
 					if( changeHandler.Any() )
 						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
 				};

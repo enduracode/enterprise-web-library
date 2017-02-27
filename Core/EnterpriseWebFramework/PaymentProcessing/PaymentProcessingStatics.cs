@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var hiddenFieldId = new HiddenFieldId();
 			List<EtherealComponentOrElement> hiddenFields = new List<EtherealComponentOrElement>();
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
 				() => hiddenFields.Add( new EwfHiddenField( "", ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
 
@@ -81,14 +81,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 				} );
 
-			EwfPage.Instance.AddPostBack( postBack );
+			FormAction action = new PostBackFormAction( postBack );
+			action.AddToPageIfNecessary();
 			return Tuple.Create<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>>(
 				hiddenFields,
 				() => {
 					if( hiddenFieldId.Id.Length == 0 )
 						throw new ApplicationException( "The credit-card-collection hidden fields must be on the page." );
-					var jsTokenHandler = "function( res ) { $( '#" + hiddenFieldId.Id + "' ).val( res.id ); " +
-					                     EwfPage.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }";
+					var jsTokenHandler = "function( res ) { $( '#" + hiddenFieldId.Id + "' ).val( res.id ); " + action.GetJsStatements() + " }";
 					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
 					       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
 					       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";

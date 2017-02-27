@@ -16,9 +16,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new HyperlinkBehavior( destination, "" );
 		}
 
-		internal static PostBack GetHyperlinkPostBack( ResourceInfo destination ) {
+		internal static FormAction GetHyperlinkPostBackAction( ResourceInfo destination ) {
 			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
-			return EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) );
+			return new PostBackFormAction( EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) ) );
 		}
 
 		private readonly ResourceInfo destination;
@@ -37,14 +37,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Url = destination != null ? destination.GetUrl( true, false, true ) : "";
 			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
 			                          EwfPage.Instance.IsAutoDataUpdater;
-			PostBack postBack = null;
+			FormAction postBackAction = null;
 			AttributeGetter =
 				() =>
 				( Url.Any() ? Tuple.Create( "href", Url ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() ).Concat(
 					target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 					.Concat(
 						isPostBackHyperlink
-							? Tuple.Create( JsWritingMethods.onclick, EwfPage.GetPostBackScript( postBack ) ).ToCollection()
+							? Tuple.Create( JsWritingMethods.onclick, postBackAction.GetJsStatements() + " return false" ).ToCollection()
 							: Enumerable.Empty<Tuple<string, string>>() )
 					.ToImmutableArray();
 
@@ -65,8 +65,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( isPostBackHyperlink )
 				PostBackAdder = () => {
-					postBack = GetHyperlinkPostBack( destination );
-					EwfPage.Instance.AddPostBack( postBack );
+					postBackAction = GetHyperlinkPostBackAction( destination );
+					postBackAction.AddToPageIfNecessary();
 				};
 			else
 				PostBackAdder = () => { };

@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private readonly bool disableBrowserAutoComplete;
 		private readonly bool? suggestSpellCheck;
 		private readonly FormValue<string> formValue;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly bool autoPostBack;
 		private ResourceInfo autoCompleteService;
 		private AutoCompleteOption autoCompleteOption;
@@ -85,11 +85,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="suggestSpellCheck">By default, Firefox does not spell check single-line text boxes. By default, Firefox does spell check multi-line text
 		/// boxes. Setting this parameter to a value will set the spellcheck attribute on the text box to enable/disable spell checking, if the user agent supports
 		/// it.</param>
-		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the text box or selects an auto-complete item.</param>
-		/// <param name="autoPostBack">Pass true to cause an automatic post-back when the text box loses focus.</param>
+		/// <param name="action">The action that will be performed when the user hits Enter on the text box or selects an auto-complete item.</param>
+		/// <param name="autoPostBack">Pass true to cause an action when the text box loses focus.</param>
 		public EwfTextBox(
 			string value, int rows = 1, bool masksCharacters = false, int? maxLength = null, bool readOnly = false, bool disableBrowserAutoComplete = false,
-			bool? suggestSpellCheck = null, PostBack postBack = null, bool autoPostBack = false ) {
+			bool? suggestSpellCheck = null, FormAction action = null, bool autoPostBack = false ) {
 			this.rows = rows;
 			this.masksCharacters = masksCharacters;
 			this.maxLength = maxLength;
@@ -108,7 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					? PostBackValueValidationResult<string>.CreateValid( rawValue )
 					: PostBackValueValidationResult<string>.CreateInvalid() );
 
-			this.postBack = postBack ?? EwfPage.PostBack;
+			this.action = action ?? FormState.Current.DefaultAction;
 			this.autoPostBack = autoPostBack;
 		}
 
@@ -172,22 +172,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			if( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) )
-				EwfPage.Instance.AddPostBack( postBack );
+				action.AddToPageIfNecessary();
 			if( !isTextarea )
 				PreRender +=
 					delegate {
-						SubmitButton.EnsureImplicitSubmission(
+						SubmitButton.EnsureImplicitSubmissionAction(
 							this,
-							postBack,
+							action,
 							autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
 					};
 
 			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) )
 				PreRender += delegate {
 					// Use setTimeout to prevent keypress and change from *both* triggering post-backs at the same time when Enter is pressed after a text change.
-					textBox.AddJavaScriptEventScript(
-						JsWritingMethods.onchange,
-						"setTimeout( function() { " + EwfPage.GetPostBackScript( postBack, includeReturnFalse: false ) + "; }, 0 )" );
+					textBox.AddJavaScriptEventScript( JsWritingMethods.onchange, "setTimeout( function() { " + action.GetJsStatements() + " }, 0 )" );
 				};
 
 			if( ToolTip != null || ToolTipControl != null )
@@ -215,7 +213,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteService.GetUrl() + "'" ) );
 
 				if( autoCompleteOption != AutoCompleteOption.NoPostBack ) {
-					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1}; }}".FormatWith( textBox.ClientID, EwfPage.GetPostBackScript( postBack ) );
+					var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1} return false; }}".FormatWith( textBox.ClientID, action.GetJsStatements() );
 					autocompleteOptions.Add( Tuple.Create( "select", handler ) );
 				}
 

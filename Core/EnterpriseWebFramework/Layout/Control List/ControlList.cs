@@ -75,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			IsStandard = true;
 			SpacerCellSetup = new ControlListSpacerCellSetup();
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					var table = new DynamicTable { IsStandard = false };

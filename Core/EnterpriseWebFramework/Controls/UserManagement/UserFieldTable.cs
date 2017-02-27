@@ -75,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								                             genPassword( true );
 						                             } ) );
 
-				var providePassword = ValidationSetupState.ExecuteWithValidationPredicate(
+				var providePassword = FormState.ExecuteWithValidationPredicate(
 					validationShouldRun,
 					() => {
 						var providePasswordSelected = new DataValue<bool>();
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
 								label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
 								nestedControlListGetter: () => {
-									return ValidationSetupState.ExecuteWithValidationPredicate(
+									return FormState.ExecuteWithValidationPredicate(
 										() => providePasswordSelected.Value,
 										() => {
 											var password = new DataValue<string>();
@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					validationGetter: control => new EwfValidation(
 						                             ( pbv, validator ) => {
 							                             if( validationShouldRun() )
-								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default ( int );
+								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
 						                             } ) ) );
 
 			Controls.Add( b );

@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 			PreRender += ewfTable_PreRender;
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -312,7 +312,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public bool HasContentRows { get { return dataRowCount > 0; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					var modifiedCaption = caption;
@@ -386,7 +386,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							if( rowSetup.UniqueIdentifier != null ) {
 								var firstDm = selectedRowDataModificationsToMethods.First().Key;
 								var pb = firstDm as PostBack;
-								cell.Controls.Add( new EwfCheckBox( false, postBack: pb ?? EwfPage.Instance.DataUpdatePostBack ) );
+								cell.Controls.Add( new EwfCheckBox( false, action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ) );
 							}
 							rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
 						}

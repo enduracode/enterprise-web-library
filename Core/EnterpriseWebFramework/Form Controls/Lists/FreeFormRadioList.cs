@@ -116,9 +116,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an in-line radio button that is part of the list.
 		/// </summary>
-		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false ) {
+		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", FormAction action = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new EwfCheckBox( formValue, label, postBack, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
+			var checkBox = new EwfCheckBox( formValue, label, action, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
 				{
 					AutoPostBack = autoPostBack
 				};
@@ -130,12 +130,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a block-level radio button that is part of the list.
 		/// </summary>
 		public BlockCheckBox CreateBlockRadioButton(
-			ItemIdType listItemId, string label = "", PostBack postBack = null, bool autoPostBack = false, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
+			ItemIdType listItemId, string label = "", FormAction action = null, bool autoPostBack = false, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			validateListItem( listItemId );
 			var checkBox = new BlockCheckBox(
 				formValue,
 				label,
-				new BlockCheckBoxSetup( postBack: postBack, triggersPostBackWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
+				new BlockCheckBoxSetup( action: action, triggersActionWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
 				() => ImmutableArray<string>.Empty,
 				null,
 				listItemId: getStringId( listItemId ) );

@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private DateTime? minDate;
 		private DateTime? maxDate;
 		private bool constrainToSqlSmallDateTimeRange = true;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		private EwfTextBox textBox;
@@ -34,12 +34,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a date picker.
 		/// </summary>
 		/// <param name="value"></param>
-		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the date picker.</param>
-		public DatePicker( DateTime? value, PostBack postBack = null ) {
+		/// <param name="action">The action that will be performed when the user hits Enter on the date picker.</param>
+		public DatePicker( DateTime? value, FormAction action = null ) {
 			this.value = value.HasValue ? value.Value.Date as DateTime? : null;
-			this.postBack = postBack;
+			this.action = action;
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -73,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public bool ConstrainToSqlSmallDateTimeRange { set { constrainToSqlSmallDateTimeRange = value; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					textBox = new EwfTextBox(
 						value.HasValue ? value.Value.ToMonthDayYearString() : "",
 						disableBrowserAutoComplete: true,
-						postBack: postBack,
+						action: action,
 						autoPostBack: autoPostBack );
 
 					Controls.Add( new ControlLine( textBox, getIconButton() ) );

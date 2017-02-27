@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
 		public static ClickScript CreatePostBackScript( PostBack postBack = null ) {
-			return new ClickScript { postBack = postBack ?? EwfPage.PostBack };
+			return new ClickScript { action = new PostBackFormAction( postBack ?? FormState.Current.PostBack ) };
 		}
 
 		/// <summary>
@@ -31,28 +31,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private ResourceInfo resource;
-		private PostBack postBack;
+		private FormAction action;
 		private string script = "";
 
 		private ClickScript() {}
 
 		internal void SetUpClickableControl( WebControl clickableControl ) {
-			if( resource == null && postBack == null && script == "" )
+			if( resource == null && action == null && script == "" )
 				return;
 
 			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( "ewfClickable" );
 
 			if( resource != null && EwfPage.Instance.IsAutoDataUpdater ) {
-				postBack = HyperlinkBehavior.GetHyperlinkPostBack( resource );
+				action = HyperlinkBehavior.GetHyperlinkPostBackAction( resource );
 				resource = null;
 			}
 
 			Func<string> scriptGetter;
 			if( resource != null )
 				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( resource.GetUrl() ) + "'; return false";
-			else if( postBack != null ) {
-				EwfPage.Instance.AddPostBack( postBack );
-				scriptGetter = () => EwfPage.GetPostBackScript( postBack );
+			else if( action != null ) {
+				action.AddToPageIfNecessary();
+				scriptGetter = () => action.GetJsStatements() + " return false";
 			}
 			else
 				scriptGetter = () => script;

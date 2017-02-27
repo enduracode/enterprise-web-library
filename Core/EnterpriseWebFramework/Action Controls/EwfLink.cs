@@ -116,9 +116,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			if( isPostBackButton && url.Any() ) {
-				var postBack = HyperlinkBehavior.GetHyperlinkPostBack( destinationResourceInfo );
-				EwfPage.Instance.AddPostBack( postBack );
-				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, EwfPage.GetPostBackScript( postBack ) ); };
+				var postBackAction = HyperlinkBehavior.GetHyperlinkPostBackAction( destinationResourceInfo );
+				postBackAction.AddToPageIfNecessary();
+				PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, postBackAction.GetJsStatements() + " return false" ); };
 			}
 			if( navigatesInNewWindow )
 				Attributes.Add( "target", "_blank" );

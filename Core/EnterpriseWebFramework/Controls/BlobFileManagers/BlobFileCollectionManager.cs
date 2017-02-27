@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.sortByName = sortByName;
 			this.postBackIdBase = PostBack.GetCompositeId( "ewfFileCollection", postBackIdBase );
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					CssClass = CssClass.ConcatenateWithSpace( "ewfStandardFileCollectionManager" );
@@ -119,7 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
 								EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 						} );
-					ValidationSetupState.ExecuteWithDataModifications(
+					FormState.ExecuteWithDataModificationsAndDefaultAction(
 						deletePb.ToCollection(),
 						() => {
 							foreach( var file in files )
@@ -200,7 +200,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					NewFileNotificationMethod?.Invoke( newFileId );
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} );
-			return ValidationSetupState.ExecuteWithDataModifications(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dm.ToCollection(),
 				() => {
 					var fi = FormItem.Create(

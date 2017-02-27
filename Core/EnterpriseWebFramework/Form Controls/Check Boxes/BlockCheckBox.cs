@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string radioButtonListItemId;
 		private readonly string label;
 		private readonly BlockCheckBoxSetup setup;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private readonly EwfValidation validation;
 		private readonly IReadOnlyCollection<Control> nestedControls;
@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
 
 			this.label = label;
-			postBack = this.setup.PostBack ?? EwfPage.PostBack;
+			action = this.setup.Action ?? FormState.Current.DefaultAction;
 
 			validation = checkBoxFormValue.CreateValidation( validationMethod );
 
@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			radioButtonListItemId = listItemId;
 			this.label = label;
 			this.setup = setup;
-			postBack = setup.PostBack ?? EwfPage.PostBack;
+			action = setup.Action ?? FormState.Current.DefaultAction;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 
 			this.validation = validation;
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			EwfPage.Instance.AddPostBack( postBack );
+			action.AddToPageIfNecessary();
 
 			PreRender += delegate {
 				if( setup.HighlightedWhenChecked && checkBoxFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
@@ -115,7 +115,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						checkBoxFormValue,
 						radioButtonFormValue,
 						radioButtonListItemId,
-						postBack,
+						action,
 						setup.TriggersPostBackWhenCheckedOrUnchecked,
 						jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				};

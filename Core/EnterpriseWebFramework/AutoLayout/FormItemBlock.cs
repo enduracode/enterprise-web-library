@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.verticalAlignment = verticalAlignment;
 			this.formItems = ( formItems ?? new FormItem[ 0 ] ).ToList();
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					if( hideIfEmpty && !formItems.Any() ) {

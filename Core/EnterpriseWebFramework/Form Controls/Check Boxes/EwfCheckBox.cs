@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static void AddCheckBoxAttributes(
 			WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue, FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId,
-			PostBack postBack, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
+			FormAction action, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
 			checkBoxElement.Attributes.Add( "type", checkBoxFormValue != null ? "checkbox" : "radio" );
 			checkBoxElement.Attributes.Add( "name", checkBoxFormValue != null ? checkBox.UniqueID : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() );
 			if( radioButtonFormValue != null )
@@ -57,12 +57,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			SubmitButton.EnsureImplicitSubmission( checkBoxElement, postBack, false );
+			SubmitButton.EnsureImplicitSubmissionAction( checkBoxElement, action, false );
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
-			var postBackScript = autoPostBack && !isSelectedRadioButton
-				                     ? EwfPage.GetPostBackScript( postBack ?? EwfPage.Instance.DataUpdatePostBack, includeReturnFalse: false )
-				                     : "";
+			var postBackScript = autoPostBack && !isSelectedRadioButton ? action.GetJsStatements() : "";
 			var customScript = StringTools.ConcatenateWithDelimiter( "; ", onClickJsMethods.ToArray() );
 			checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onclick, StringTools.ConcatenateWithDelimiter( "; ", postBackScript, customScript ) );
 		}
@@ -71,28 +69,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
 		private readonly string label;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
 		private WebControl checkBox;
 
 		/// <summary>
 		/// Creates a check box. Do not pass null for label.
 		/// </summary>
-		public EwfCheckBox( bool isChecked, string label = "", PostBack postBack = null ) {
+		public EwfCheckBox( bool isChecked, string label = "", FormAction action = null ) {
 			checkBoxFormValue = GetFormValue( isChecked, this );
 			this.label = label;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			this.action = action ?? FormState.Current.DefaultAction;
 		}
 
 		/// <summary>
 		/// Creates a radio button.
 		/// </summary>
 		internal EwfCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, PostBack postBack, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
+			FormValue<CommonCheckBox> formValue, string label, FormAction action, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
-			this.postBack = postBack ?? EwfPage.PostBack;
+			this.action = action ?? FormState.Current.DefaultAction;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 		}
 
@@ -128,7 +126,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			EwfPage.Instance.AddPostBack( postBack );
+			action.AddToPageIfNecessary();
 
 			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
 
@@ -140,7 +138,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					checkBoxFormValue,
 					radioButtonFormValue,
 					radioButtonListItemId,
-					postBack,
+					action,
 					AutoPostBack,
 					jsClickHandlerStatementLists.SelectMany( i => i() ) );
 				checkBox.Attributes.Add( "class", CssElementCreator.CssClass );

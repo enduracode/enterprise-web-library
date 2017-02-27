@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private TimeSpan? value;
 		private bool autoPostBack;
 		private readonly int minuteInterval;
-		private readonly PostBack postBack;
+		private readonly FormAction action;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		private EwfTextBox textBox;
@@ -34,13 +34,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="minuteInterval"></param>
-		/// <param name="postBack">The post-back that will be performed when the user hits Enter on the time picker.</param>
-		public TimePicker( TimeSpan? value, int minuteInterval = 15, PostBack postBack = null ) {
+		/// <param name="action">The post-back that will be performed when the user hits Enter on the time picker.</param>
+		public TimePicker( TimeSpan? value, int minuteInterval = 15, FormAction action = null ) {
 			this.value = value;
 			this.minuteInterval = minuteInterval;
-			this.postBack = postBack;
+			this.action = action;
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public Control ToolTipControl { get; set; }
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						textBox = new EwfTextBox(
 							value.HasValue ? value.Value.ToTimeOfDayHourAndMinuteString() : "",
 							disableBrowserAutoComplete: true,
-							postBack: postBack,
+							action: action,
 							autoPostBack: autoPostBack );
 						Controls.Add( new ControlLine( textBox, getIconButton() ) );
 					}
@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							width: Unit.Percentage( 100 ),
 							placeholderIsValid: true,
 							placeholderText: "",
-							postBack: postBack,
+							action: action,
 							autoPostBack: autoPostBack );
 						Controls.Add( selectList );
 					}

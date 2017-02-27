@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.value = value;
 			this.minuteInterval = minuteInterval;
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public Control ToolTipControl { get; set; }
 
 		void ControlTreeDataLoader.LoadData() {
-			ValidationSetupState.ExecuteWithDataModifications(
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dataModifications,
 				() => {
 					CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );

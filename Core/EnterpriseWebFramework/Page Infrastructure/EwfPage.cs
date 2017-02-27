@@ -29,13 +29,35 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
 
 		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
-			ValidationSetupState.Init(
-				() => Instance.validationSetupState,
+			EwfValidation.Init(
+				() => Instance.formState.ValidationPredicate,
+				() => Instance.formState.DataModifications,
+				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
+				() => Instance.formState.ReportValidationCreated() );
+			PostBack.Init( () => Instance.formState.DataModifications );
+			PostBackFormAction.Init(
+				postBack => {
+					PostBack existingPostBack;
+					if( !Instance.postBacksById.TryGetValue( postBack.Id, out existingPostBack ) )
+						Instance.postBacksById.Add( postBack.Id, postBack );
+					else if( existingPostBack != postBack )
+						throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
+				},
+				postBack => {
+					if( Instance.GetPostBack( postBack.Id ) != postBack )
+						throw new ApplicationException( "The post-back must have been added to the page." );
+					var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
+					if( validationPostBack != null && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+						throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
+				} );
+			FormState.Init(
+				() => Instance.formState,
 				dataModifications => {
 					if( dataModifications.Contains( Instance.dataUpdate ) && dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
 						throw new ApplicationException(
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
-				} );
+				},
+				dataModification => dataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)dataModification );
 			EwfPage.cssInfoCreator = cssInfoCreator;
 		}
 
@@ -45,16 +67,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfPage Instance { get { return HttpContext.Current.CurrentHandler as EwfPage; } }
 
 		/// <summary>
-		/// Gets the post-back corresponding to the first of the current data modifications.
-		/// </summary>
-		internal static PostBack PostBack {
-			get {
-				var firstDataModification = ValidationSetupState.Current.DataModifications.First();
-				return firstDataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)firstDataModification;
-			}
-		}
-
-		/// <summary>
 		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
 		/// tags as part of the text.
 		/// </summary>
@@ -62,28 +74,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, messageHtml ) );
 		}
 
-		internal static string GetPostBackScript( PostBack postBack, bool includeReturnFalse = true ) {
-			if( Instance.GetPostBack( postBack.Id ) != postBack )
-				throw new ApplicationException( "The post-back must have been added to the page." );
-			var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
-			if( validationPostBack != null && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
-				throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
-			return "postBack( '{0}' )".FormatWith( postBack.Id ) + ( includeReturnFalse ? "; return false" : "" );
-		}
-
 		internal static void AssertPageTreeNotBuilt() {
-			if( Instance.validationSetupState == null )
+			if( Instance.formState == null )
 				throw new ApplicationException( "The page tree has already been built." );
 		}
 
 		internal static void AssertPageTreeBuilt() {
-			if( Instance.validationSetupState != null )
+			if( Instance.formState != null )
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
 		private Control contentContainer;
 		private Control etherealPlace;
-		private ValidationSetupState validationSetupState;
+		private FormState formState;
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent = new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
@@ -580,8 +583,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Form.Controls.Add( etherealPlace = new PlaceHolder() );
 
-			validationSetupState = new ValidationSetupState();
-			ValidationSetupState.ExecuteWithDataModifications(
+			formState = new FormState();
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				DataUpdate.ToCollection(),
 				() => {
 					if( EsAsBaseType != null )
@@ -592,7 +595,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
 				loadDataForControlAndChildren( this );
-			validationSetupState = null;
+			formState = null;
 
 			foreach( var i in controlTreeValidations )
 				i();
@@ -716,11 +719,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void loadDataForControlAndChildren( Control control ) {
 			var controlTreeDataLoader = control as ControlTreeDataLoader;
 			if( controlTreeDataLoader != null ) {
-				ValidationSetupState.Current.SetForNextElement();
+				FormState.Current.SetForNextElement();
 
 				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
 				if( control is MasterPage )
-					ValidationSetupState.ExecuteWithDataModifications( DataUpdate.ToCollection(), controlTreeDataLoader.LoadData );
+					FormState.ExecuteWithDataModificationsAndDefaultAction( DataUpdate.ToCollection(), controlTreeDataLoader.LoadData );
 				else
 					controlTreeDataLoader.LoadData();
 			}
@@ -773,14 +776,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				etherealControlsByControl.Add( parent, etherealControls );
 			}
 			etherealControls.Add( etherealControl );
-		}
-
-		internal void AddPostBack( PostBack postBack ) {
-			PostBack existingPostBack;
-			if( !postBacksById.TryGetValue( postBack.Id, out existingPostBack ) )
-				postBacksById.Add( postBack.Id, postBack );
-			else if( existingPostBack != postBack )
-				throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
 		}
 
 		internal PostBack GetPostBack( string id ) {

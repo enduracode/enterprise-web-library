@@ -341,7 +341,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.itemGroups = itemGroups.ToImmutableArray();
 			this.tailUpdateRegions = tailUpdateRegions?.ToImmutableArray() ?? ImmutableArray<TailUpdateRegion>.Empty;
 
-			dataModifications = ValidationSetupState.Current.DataModifications;
+			dataModifications = FormState.Current.DataModifications;
 		}
 
 		/// <summary>
@@ -376,7 +376,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		void ControlTreeDataLoader.LoadData() {
 			using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
-				ValidationSetupState.ExecuteWithDataModifications(
+				FormState.ExecuteWithDataModificationsAndDefaultAction(
 					dataModifications,
 					() => {
 						if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
