@@ -56,7 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					new ToolTip(
 						( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponent().ToCollection(),
 						out toolTipInitStatementGetter ).ToCollection();
-				JsInitStatementGetter = id => "$( '#{0}' ).click( function( e ) { e.preventDefault(); } );".FormatWith( id ) + toolTipInitStatementGetter( id );
+				JsInitStatementGetter = id => "$( '#{0}' ).click( function( e ) {{ e.preventDefault(); }} );".FormatWith( id ) + toolTipInitStatementGetter( id );
 			}
 			else {
 				EtherealChildren = ImmutableArray<EtherealComponent>.Empty;
