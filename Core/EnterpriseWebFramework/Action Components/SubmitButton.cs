@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
@@ -57,8 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() =>
 						new DisplayableElementLocalData(
 							"button",
-							attributes:
-							Tuple.Create( "type", "button" ).ToCollection().Concat( new[] { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) } ),
+							attributes: new[] { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) },
 							jsInitStatements: style.GetJsInitStatements( context.Id ) ),
 						classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
 						children: elementChildren );
