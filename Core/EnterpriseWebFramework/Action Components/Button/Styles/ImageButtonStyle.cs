@@ -39,8 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				       ? StringTools.ConcatenateWithDelimiter(
 					       " ",
 					       "new Image().src = '{0}';".FormatWith( rolloverImageInfo.GetUrl() ),
-					       "$( '#{0}' ).mouseover( function() { $( this ).children().attr( 'src', '{1}' ); } );".FormatWith( id, rolloverImageInfo.GetUrl() ),
-					       "$( '#{0}' ).mouseout( function() { $( this ).children().attr( 'src', '{1}' ); } );".FormatWith( id, imageInfo.GetUrl() ) )
+					       "$( '#{0}' ).mouseover( function() {{ $( this ).children().attr( 'src', '{1}' ); }} );".FormatWith( id, rolloverImageInfo.GetUrl() ),
+					       "$( '#{0}' ).mouseout( function() {{ $( this ).children().attr( 'src', '{1}' ); }} );".FormatWith( id, imageInfo.GetUrl() ) )
 				       : "";
 		}
 	}
