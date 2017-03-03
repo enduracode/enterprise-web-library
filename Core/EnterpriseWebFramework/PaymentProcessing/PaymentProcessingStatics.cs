@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
-using Stripe;
+using ServiceStack.Stripe;
+using ServiceStack.Stripe.Types;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -32,10 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
-			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
-				typeof( PaymentProcessingStatics ),
-				"Stripe Checkout",
-				"https://checkout.stripe.com/v2/checkout.js" );
+			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ), "Stripe Checkout", "https://checkout.stripe.com/checkout.js" );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
@@ -58,20 +56,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( !amountInDollars.HasValue )
 						throw new ApplicationException( "Only simple charges are supported at this time." );
 
-					var apiKey = ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey;
-					dynamic response = new StripeClient( apiKey ).CreateCharge(
-						amountInDollars.Value,
-						"usd",
-						new CreditCardToken( token.Value ),
-						description: description.Any() ? description : null );
-					if( response.IsError ) {
-						if( response.error.type == "card_error" )
-							throw new DataModificationException( response.error.message );
-						throw new ApplicationException( "Stripe error: " + response );
+					StripeCharge response;
+					try {
+						response =
+							new StripeGateway( ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey ).Post(
+								new ChargeStripeCustomer
+									{
+										Amount = (int)( amountInDollars.Value * 100 ),
+										Currency = "usd",
+										Description = description.Any() ? description : null,
+										Card = token.Value
+									} );
+					}
+					catch( StripeException e ) {
+						if( e.Type == "card_error" )
+							throw new DataModificationException( e.Message );
+						throw new ApplicationException( "A credit-card charge failed.", e );
 					}
 
 					try {
-						var messageAndDestination = successHandler( (string)response.id, amountInDollars.Value );
+						var messageAndDestination = successHandler( response.Id, amountInDollars.Value );
 						if( messageAndDestination.Message.Any() )
 							EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndDestination.Message );
 						successDestination = messageAndDestination.Destination;
@@ -88,10 +92,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => {
 					if( hiddenFieldId.Id.Length == 0 )
 						throw new ApplicationException( "The credit-card-collection hidden fields must be on the page." );
-					var jsTokenHandler = "function( res ) { $( '#" + hiddenFieldId.Id + "' ).val( res.id ); " + action.GetJsStatements() + " }";
-					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', name: '" + name +
-					       "', description: '" + description + "', " + ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "token: " +
-					       jsTokenHandler + ", email: '" + ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
+					var jsTokenHandler = "function( token, args ) { $( '#" + hiddenFieldId.Id + "' ).val( token.id ); " + action.GetJsStatements() + " }";
+					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
+					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
+					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
+					       ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
 				} );
 		}
 	}
