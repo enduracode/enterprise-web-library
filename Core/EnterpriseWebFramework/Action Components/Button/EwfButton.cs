@@ -12,11 +12,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a button.
 		/// </summary>
-		/// <param name="behavior">The behavior.</param>
 		/// <param name="style">The style.</param>
 		/// <param name="displaySetup"></param>
+		/// <param name="behavior">The behavior. Pass null to use the form default action.</param>
 		/// <param name="classes">The classes on the button.</param>
-		public EwfButton( ButtonBehavior behavior, ButtonStyle style, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+		public EwfButton( ButtonStyle style, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ElementClassSet classes = null ) {
+			behavior = behavior ?? new FormActionBehavior( FormState.Current.DefaultAction );
 			var elementChildren = style.GetChildren();
 			var elementEtherealChildren = behavior.GetEtherealChildren();
 			children = new DisplayableElement(
