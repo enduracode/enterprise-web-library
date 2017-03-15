@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the EwfApp object for the current HTTP context.
 		/// </summary>
-		public static EwfApp Instance { get { return NetTools.IsWebApp() ? HttpContext.Current.ApplicationInstance as EwfApp : null; } }
+		public static EwfApp Instance => NetTools.IsWebApp() ? HttpContext.Current.ApplicationInstance as EwfApp : null;
 
 		/// <summary>
 		/// Registers event handlers for certain application events.
@@ -211,7 +211,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var resource = resolver.Function();
 				if( resource == null )
-					throw new AccessDeniedException( false, resolver.LogInPageGetter != null ? resolver.LogInPageGetter() : null );
+					throw new AccessDeniedException( false, resolver.LogInPageGetter?.Invoke() );
 				if( resource is ExternalResourceInfo )
 					NetTools.Redirect( resource.GetUrl() );
 				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
@@ -261,17 +261,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the favicon to be used for Chrome Application shortcuts.
 		/// </summary>
-		public virtual ResourceInfo FaviconPng48X48 { get { return null; } }
+		public virtual ResourceInfo FaviconPng48X48 => null;
 
 		/// <summary>
 		/// Gets the favicon. See http://en.wikipedia.org/wiki/Favicon.
 		/// </summary>
-		public virtual ResourceInfo Favicon { get { return null; } }
+		public virtual ResourceInfo Favicon => null;
 
 		/// <summary>
 		/// Gets the Typekit Kit ID. Never returns null.
 		/// </summary>
-		public virtual string TypekitId { get { return ""; } }
+		public virtual string TypekitId => "";
 
 		/// <summary>
 		/// Creates and returns a list of custom style sheets that should be used on all EWF pages, including those not using the EWF user interface.
@@ -283,7 +283,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the Google Analytics Web Property ID, which should always start with "UA-". Never returns null.
 		/// </summary>
-		public virtual string GoogleAnalyticsWebPropertyId { get { return ""; } }
+		public virtual string GoogleAnalyticsWebPropertyId => "";
 
 		/// <summary>
 		/// Creates and returns a list of JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
@@ -295,12 +295,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the display name of the application, which will be included in the title of all pages.
 		/// </summary>
-		public virtual string AppDisplayName { get { return ""; } }
+		public virtual string AppDisplayName => "";
 
 		/// <summary>
 		/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.
 		/// </summary>
-		protected internal virtual string JavaScriptDocumentReadyFunctionCall { get { return ""; } }
+		protected internal virtual string JavaScriptDocumentReadyFunctionCall => "";
 
 		/// <summary>
 		/// Standard library use only.
@@ -319,7 +319,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if Spanish should be used. Default is false.
 		/// </summary>
-		public virtual bool UseSpanishLanguage { get { return false; } }
+		public virtual bool UseSpanishLanguage => false;
 
 		private void handleEndRequest( object sender, EventArgs e ) {
 			if( !FrameworkInitialized || RequestState == null )
@@ -400,7 +400,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
 								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
 									transferRequest( MetaLogicFactory.CreateSelectUserPageInfo( RequestState.Url ), true );
-								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled ) {
+								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
 									if( accessDeniedException.LogInPage != null ) {
 										// We pass false here to avoid complicating things with ThreadAbortExceptions.
 										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
@@ -409,7 +409,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									}
 									else
 										transferRequest( MetaLogicFactory.CreateLogInPageInfo( RequestState.Url ), true );
-								}
 								else
 									transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );
 							}
@@ -505,6 +504,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the page that users will be redirected to when errors occur in the application.
 		/// </summary>
-		protected virtual PageInfo errorPage { get { return null; } }
+		protected virtual PageInfo errorPage => null;
 	}
 }

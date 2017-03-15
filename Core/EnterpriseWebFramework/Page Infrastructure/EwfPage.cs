@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				postBack => {
 					if( Instance.GetPostBack( postBack.Id ) != postBack )
 						throw new ApplicationException( "The post-back must have been added to the page." );
-					var validationPostBack = postBack is ActionPostBack ? ( (ActionPostBack)postBack ).ValidationDm as PostBack : null;
+					var validationPostBack = ( postBack as ActionPostBack )?.ValidationDm as PostBack;
 					if( validationPostBack != null && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
 						throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
 				} );
@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
 		/// </summary>
-		public static EwfPage Instance { get { return HttpContext.Current.CurrentHandler as EwfPage; } }
+		public static EwfPage Instance => HttpContext.Current.CurrentHandler as EwfPage;
 
 		/// <summary>
 		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the page state for this page.
 		/// </summary>
-		public PageState PageState { get { return AppRequestState.Instance.EwfPageRequestState.PageState; } }
+		public PageState PageState => AppRequestState.Instance.EwfPageRequestState.PageState;
 
 		/// <summary>
 		/// Creates a new page. Do not call this yourself.
@@ -262,8 +262,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Re-create info objects. A big reason to do this is that some info objects execute database queries or other code in order to prime the data-access
 				// cache. The code above resets the cache and we want to re-prime it right away.
-				if( EsAsBaseType != null )
-					EsAsBaseType.ClearInfo();
+				EsAsBaseType?.ClearInfo();
 				clearInfo();
 				AppRequestState.Instance.UserDisabledByPage = true;
 				try {
@@ -374,7 +373,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return () => {
 				Action userUpdater = () => {
-					var externalAuthProvider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
 					if( FormsAuthStatics.FormsAuthEnabled ) {
 						var formsAuthCapableUser = (FormsAuthCapableUser)user;
 						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
@@ -386,8 +384,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							formsAuthCapableUser.SaltedPassword,
 							formsAuthCapableUser.MustChangePassword );
 					}
-					else if( externalAuthProvider != null )
-						externalAuthProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, DateTime.Now );
+					else
+						( UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider )?.InsertOrUpdateUser(
+							user.UserId,
+							user.Email,
+							user.Role.RoleId,
+							DateTime.Now );
 				};
 				if( ConfigurationStatics.DatabaseExists )
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -757,17 +759,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item
 		/// page before entering any data.
 		/// </summary>
-		public DataModification DataUpdate { get { return dataUpdate; } }
+		public DataModification DataUpdate => dataUpdate;
 
 		/// <summary>
 		/// Gets a post-back that updates the page's data without performing any other actions.
 		/// </summary>
-		public PostBack DataUpdatePostBack { get { return dataUpdatePostBack; } }
+		public PostBack DataUpdatePostBack => dataUpdatePostBack;
 
 		/// <summary>
 		/// Gets whether the page forces a post-back when a link is clicked.
 		/// </summary>
-		public virtual bool IsAutoDataUpdater { get { return false; } }
+		public virtual bool IsAutoDataUpdater => false;
 
 		internal void AddEtherealControl( Control parent, EtherealControl etherealControl ) {
 			List<EtherealControl> etherealControls;
@@ -832,9 +834,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only. Gets the status messages.
 		/// </summary>
-		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages {
-			get { return StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages ); }
-		}
+		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages => StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages );
 
 		/// <summary>
 		/// Standard Library use only.
@@ -922,12 +922,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// The desired scroll position of the browser when this response is received.
 		/// </summary>
-		protected virtual ScrollPosition scrollPositionForThisResponse { get { return ScrollPosition.LastPositionOrStatusBar; } }
+		protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
 
 		/// <summary>
 		/// Gets the function call that should be executed when the jQuery document ready event is fired.
 		/// </summary>
-		protected virtual string javaScriptDocumentReadyFunctionCall { get { return ""; } }
+		protected virtual string javaScriptDocumentReadyFunctionCall => "";
 
 		private void setFocus() {
 			// A SetFocus call takes precedence over a control specified via the controlWithInitialFocus property.
