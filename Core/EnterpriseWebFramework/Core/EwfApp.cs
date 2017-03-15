@@ -286,6 +286,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public virtual string GoogleAnalyticsWebPropertyId => "";
 
 		/// <summary>
+		/// Gets the Google Analytics User ID. Never returns null.
+		/// </summary>
+		public virtual string GetGoogleAnalyticsUserId() => "";
+
+		/// <summary>
 		/// Creates and returns a list of JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
 		/// </summary>
 		protected internal virtual List<ResourceInfo> GetJavaScriptFiles() {

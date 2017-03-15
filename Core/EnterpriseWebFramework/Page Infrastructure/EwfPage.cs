@@ -698,7 +698,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
 				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
 				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
-				sw.WriteLine( "ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto');" );
+
+				var userId = EwfApp.Instance.GetGoogleAnalyticsUserId();
+				sw.WriteLine(
+					"ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto'{0});",
+					userId.Any() ? ", {{'userId': '{0}'}}".FormatWith( userId ) : "" );
+
 				sw.WriteLine( "ga('send', 'pageview');" );
 				sw.WriteLine( "</script>" );
 				Header.Controls.Add( new Literal { Text = sw.ToString() } );
