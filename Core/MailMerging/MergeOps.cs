@@ -54,10 +54,9 @@ namespace EnterpriseWebLibrary.MailMerging {
 					string value = null;
 					if( mergeValue is MergeValue<string> )
 						value = ( mergeValue as MergeValue<string> ).Evaluate( ensureAllFieldsHaveValues );
-					if( value == null ) {
+					if( value == null )
 						// When we add support for multiple rows, there should be no more than one of these errors for each field.
 						throw new MailMergingException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-					}
 
 					// The $ replacement prevents it trying to match groups and do backreferencing when it sees a dollar sign.
 					template = regex.Replace( template, value.Replace( "$", "$$" ) );
@@ -207,10 +206,9 @@ namespace EnterpriseWebLibrary.MailMerging {
 				return;
 
 			foreach( var fieldName in fieldNames ) {
-				if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) ) {
+				if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) )
 					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 					throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-				}
 			}
 
 			var writer = useTabAsSeparator ? (TabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
@@ -255,10 +253,9 @@ namespace EnterpriseWebLibrary.MailMerging {
 			var excelFile = new ExcelFileWriter();
 			if( rowTree.Rows.Any() ) {
 				foreach( var fieldName in fieldNames ) {
-					if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) ) {
+					if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) )
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-					}
 				}
 
 				var sheet = excelFile.DefaultWorksheet;
@@ -275,10 +272,9 @@ namespace EnterpriseWebLibrary.MailMerging {
 								string value = null;
 								if( mergeValueAsString != null )
 									value = mergeValueAsString.Evaluate( false );
-								if( value == null ) {
+								if( value == null )
 									// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 									throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-								}
 
 								return value;
 							} ).ToArray() );
@@ -319,27 +315,24 @@ namespace EnterpriseWebLibrary.MailMerging {
 				writer.WriteStartElement( rowTree.XmlRowElementName );
 				foreach( var fieldName in fieldNameTree.FieldNames ) {
 					var mergeValue = row.Values.SingleOrDefault( i => i.Name == fieldName );
-					if( mergeValue == null ) {
+					if( mergeValue == null )
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-					}
 
 					writer.WriteStartElement( mergeValue.Name );
 					if( mergeValue is MergeValue<string> )
 						writer.WriteValue( ( mergeValue as MergeValue<string> ).Evaluate( false ) );
-					else {
-						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+					else
+					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-					}
 					writer.WriteEndElement();
 				}
 
 				foreach( var childNameAndFieldNameTree in fieldNameTree.ChildNamesAndChildren ) {
 					var childRowTree = row.Children.SingleOrDefault( i => i.NodeName == childNameAndFieldNameTree.Item1 );
-					if( childRowTree == null ) {
+					if( childRowTree == null )
 						// Use ApplicationException instead of MailMergingException because the child names can easily be validated before this method is called.
 						throw new ApplicationException( "Child " + childNameAndFieldNameTree.Item1 + " is invalid." );
-					}
 					writeRowTreeXmlElement( childRowTree, childNameAndFieldNameTree.Item2, writer );
 				}
 
