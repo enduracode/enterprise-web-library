@@ -97,6 +97,13 @@ namespace EnterpriseWebLibrary.MailMerging {
 		}
 
 		/// <summary>
+		/// Returns the specified template string with the merge fields converted to Silverpop personalized tags.
+		/// </summary>
+		public static string GetSilverpopTemplateString( string template ) {
+			return Regex.Replace( template, @"@@(\w+)", "%%$1%%", RegexOptions.Multiline );
+		}
+
+		/// <summary>
 		/// Merges a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in the input file to have
 		/// a page break before it.
 		/// </summary>
