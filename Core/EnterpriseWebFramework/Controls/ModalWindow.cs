@@ -8,13 +8,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// An element that hovers over the page in the center of the browser window and prevents interaction with the page. There can only be one modal window
 	/// visible at a time. This control is intended to be used with LaunchWindowLink.
 	/// </summary>
-	// NOTE: Prohibit form controls from existing in a modal window.
-	// NOTE: Prevent a modal window from opening another modal window, probably by prohibiting LaunchWindowLink controls from existing in a modal window.
-	// NOTE: Answer these questions and make the necessary implementation changes:
-	//       1. Should modal windows have a gigantic close button?
-	//       2. Should clicking outside of a modal window close it? What if it's a modal confirmation?
-	//       3. Should modal windows be able to contain post back buttons that require [modal] confirmation?
-	//       4. Should modal windows be able to contain action controls that don't open another modal, such as EwfLink?
 	public class ModalWindow: EtherealControl {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfModal";
@@ -53,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return table.ToCollection();
 		}
 
-		WebControl EtherealControl.Control { get { return control; } }
+		WebControl EtherealControl.Control => control;
 
 		string EtherealControl.GetJsInitStatements() {
 			return open ? GetJsOpenStatement() : "";

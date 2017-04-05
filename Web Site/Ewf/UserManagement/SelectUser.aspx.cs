@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			if( ConfigurationStatics.IsLiveInstallation )
 				ph.AddControlsReturnThis(
-					new Paragraph(
+					new LegacyParagraph(
 						new Strong( "Warning:" ),
 						" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".GetLiteralControl() ) );
 
@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									                             if( user.Value == null )
 										                             validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 								                             } ) ).ToControl(),
-						new Paragraph(
+						new LegacyParagraph(
 							new PostBackButton(
 								new ButtonActionControlStyle( AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) ) ) );
 				} );

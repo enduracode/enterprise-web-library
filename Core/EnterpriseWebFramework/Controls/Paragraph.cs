@@ -1,29 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A paragraph.
 	/// </summary>
-	public class Paragraph: WebControl, ControlTreeDataLoader {
+	public class LegacyParagraph: WebControl, ControlTreeDataLoader {
 		private readonly List<Control> codeControls = new List<Control>();
 
 		/// <summary>
 		/// Creates a paragraph with no child controls.
 		/// </summary>
-		public Paragraph() {}
+		public LegacyParagraph() {}
 
 		/// <summary>
 		/// Creates a paragraph with the given text as a Literal control.
 		/// </summary>
-		public Paragraph( string text ): this( text.GetLiteralControl() ) {}
+		public LegacyParagraph( string text ): this( text.GetLiteralControl() ) {}
 
 		/// <summary>
 		/// Creates a paragraph with the specified child controls.
 		/// </summary>
-		public Paragraph( params Control[] childControls ): this() {
+		public LegacyParagraph( params Control[] childControls ): this() {
 			codeControls.AddRange( childControls );
 		}
 
@@ -53,6 +52,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the p tag.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.P; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.P;
 	}
 }

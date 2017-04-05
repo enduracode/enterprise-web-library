@@ -16,6 +16,6 @@
 		/// <summary>
 		/// Gets the hidden-field ID, or the empty string if no ID exists. Not available until after the page tree has been built.
 		/// </summary>
-		public string Id { get { return id.Id; } }
+		public string Id => id.Id;
 	}
 }

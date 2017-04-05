@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			                                                     true,
 			                                                     useHorizontalLayout: true );
 
-			var dragFilesHerePanel = new Panel { CssClass = "dropZone" }.AddControlsReturnThis( new Paragraph( "Drop files here" ) { CssClass = "dropFilesHereMessage" } );
+			var dragFilesHerePanel = new Panel { CssClass = "dropZone" }.AddControlsReturnThis( new LegacyParagraph( "Drop files here" ) { CssClass = "dropFilesHereMessage" } );
 
 			// Not using an ASP.NET control because I want full control without any magic.
 			var browseForFiles = new WebControl( HtmlTextWriterTag.Input );
@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				"Files to be uploaded",
 				new Control[]
 					{
-						new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new Paragraph( "No files are currently in the queue." ) ),
+						new Panel { CssClass = "queuedFilesContentArea" }.AddControlsReturnThis( new LegacyParagraph( "No files are currently in the queue." ) ),
 						new Panel { CssClass = "upload-count" }
 					},
 				style: SectionStyle.Box ) { CssClass = "queuedFiles" };

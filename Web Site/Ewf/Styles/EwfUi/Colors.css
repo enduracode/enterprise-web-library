@@ -44,6 +44,10 @@ ewfActionControlAllButtonStylesAllStates {
 	color: white;
 }
 
+ewfModalBoxBackdrop {
+	background-color: hsla( 0, 0%, 0%, .75 );
+}
+
 /* error messages */
 ewfErrorMessageControlListBlock {
 	color: hsla( 0, 100%, 47%, 1 );

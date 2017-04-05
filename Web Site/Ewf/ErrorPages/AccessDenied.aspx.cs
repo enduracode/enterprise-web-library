@@ -12,10 +12,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override void loadData() {
 			accessDenied.InnerText = Translation.AccessIsDenied;
 
-			if( info.ShowHomeLink ) {
+			if( info.ShowHomeLink )
 				ph.AddControlsReturnThis(
-					new Paragraph( EwfLink.Create( new ExternalResourceInfo( NetTools.HomeUrl ), new TextActionControlStyle( Translation.ClickHereToGoToHomePage ) ) ) );
-			}
+					new LegacyParagraph( EwfLink.Create( new ExternalResourceInfo( NetTools.HomeUrl ), new TextActionControlStyle( Translation.ClickHereToGoToHomePage ) ) ) );
 
 			Response.StatusCode = 403;
 			Response.TrySkipIisCustomErrors = true;

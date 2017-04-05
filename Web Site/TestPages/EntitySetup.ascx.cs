@@ -48,9 +48,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		void EntitySetupBase.LoadData() {
 			ph.AddControlsReturnThis(
-				new Paragraph( "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
+				new LegacyParagraph(
+					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
 
-			one = new ModalWindow( this, new Paragraph( "Test!" ) );
+			one = new ModalWindow( this, new LegacyParagraph( "Test!" ) );
 			two = new ModalWindow(
 				this,
 				new PlaceHolder().AddControlsReturnThis(

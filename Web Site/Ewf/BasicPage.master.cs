@@ -203,13 +203,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			return
 				new Block(
-					new Paragraph(
+					new LegacyParagraph(
 						spinnerParent,
 						Translation.Processing.GetLiteralControl(),
 						getProcessingDialogEllipsisDot( 1 ),
 						getProcessingDialogEllipsisDot( 2 ),
 						getProcessingDialogEllipsisDot( 3 ) ) { CssClass = processingDialogProcessingParagraphClass },
-					new Paragraph(
+					new LegacyParagraph(
 						new CustomButton( () => "stopPostBackRequest()" ) { ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile ) } )
 						{
 							CssClass = processingDialogTimeOutParagraphClass

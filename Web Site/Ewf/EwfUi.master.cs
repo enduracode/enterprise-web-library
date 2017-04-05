@@ -455,7 +455,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
 				controls.Add(
-					new Paragraph(
+					new LegacyParagraph(
 						"Powered by the ".GetLiteralControl(),
 						EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( EwlStatics.EwlName ) ),
 						( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).GetLiteralControl() )

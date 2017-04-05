@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private readonly DataValue<string> body = new DataValue<string>();
 
 		protected override void loadData() {
-			ph.AddControlsReturnThis( new Paragraph( "You may report any problems, make suggestions, or ask for help here." ) );
+			ph.AddControlsReturnThis( new LegacyParagraph( "You may report any problems, make suggestions, or ask for help here." ) );
 
 			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(

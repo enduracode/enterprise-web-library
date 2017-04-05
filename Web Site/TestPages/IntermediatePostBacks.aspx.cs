@@ -55,7 +55,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private IEnumerable<Control> getBasicRegionBlocks() {
 			var rs = new UpdateRegionSet();
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: "basic" );
-			yield return new Paragraph( new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
+			yield return
+				new LegacyParagraph( new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
@@ -69,7 +70,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								new EwfTextBox( "This was just added!" ),
 								validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ) ) ).ToControl() );
 					else
-						regionControls.Add( new Paragraph( "Nothing here yet." ) );
+						regionControls.Add( new LegacyParagraph( "Nothing here yet." ) );
 				} );
 			yield return
 				new NamingPlaceholder( new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(), updateRegionSets: rs.ToCollection() );

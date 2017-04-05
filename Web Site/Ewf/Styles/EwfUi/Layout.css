@@ -187,7 +187,7 @@ ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
 }
 
 /* modal windows */
-ewfModalSectionContainer {
+ewfModalBox, ewfModalSectionContainer {
 	width: 35em;
 }
 ewfModalSectionContainer > ewfSectionNormalStyleBothStates > ewfSectionContentContainer:first-child {

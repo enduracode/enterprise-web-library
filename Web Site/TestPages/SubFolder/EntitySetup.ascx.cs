@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 		}
 
 		void EntitySetupBase.LoadData() {
-			ph.AddControlsReturnThis( new Paragraph( "Awesome content goes here." ) );
+			ph.AddControlsReturnThis( new LegacyParagraph( "Awesome content goes here." ) );
 		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {

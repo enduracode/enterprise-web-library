@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
-				new Paragraph(
+				new LegacyParagraph(
 					StringTools.ConcatenateWithDelimiter(
 						" ",
 						"Click \"Reset Password\" to email yourself a new password.",
