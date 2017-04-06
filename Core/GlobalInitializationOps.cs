@@ -56,11 +56,12 @@ namespace EnterpriseWebLibrary {
 			}
 
 			try {
-				var asposeLicense = ConfigurationStatics.SystemGeneralProvider.AsposeLicenseName;
-				if( asposeLicense.Any() ) {
-					new Aspose.Pdf.License().SetLicense( asposeLicense );
-					new Aspose.Words.License().SetLicense( asposeLicense );
-				}
+				var asposePdfLicense = ConfigurationStatics.SystemGeneralProvider.AsposePdfLicenseName;
+				if( asposePdfLicense.Any() )
+					new Aspose.Pdf.License().SetLicense( asposePdfLicense );
+				var asposeWordsLicense = ConfigurationStatics.SystemGeneralProvider.AsposeWordsLicenseName;
+				if( asposeWordsLicense.Any() )
+					new Aspose.Words.License().SetLicense( asposeWordsLicense );
 
 				AppMemoryCache.Init();
 				BlobFileOps.Init();
@@ -87,15 +88,14 @@ namespace EnterpriseWebLibrary {
 			}
 		}
 
-		internal static bool SecondaryInitFailed { get { return secondaryInitFailed; } }
+		internal static bool SecondaryInitFailed => secondaryInitFailed;
 
 		/// <summary>
 		/// Performs cleanup activities so the application can be shut down.
 		/// </summary>
 		public static void CleanUpStatics() {
 			try {
-				if( globalInitializer != null )
-					globalInitializer.CleanUpStatics();
+				globalInitializer?.CleanUpStatics();
 
 				AppMemoryCache.CleanUp();
 			}

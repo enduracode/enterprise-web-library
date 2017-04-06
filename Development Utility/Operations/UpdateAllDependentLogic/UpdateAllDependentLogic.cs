@@ -25,10 +25,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// Configuration repository. Remember to fix the CruiseControl.NET config generator and the place in ExportLogic where we reference the batch file name when
 	// packaging general files.
 	internal class UpdateAllDependentLogic: Operation {
-		private const string asposeLicenseFileName = "Aspose.Total.lic";
+		private static readonly IReadOnlyCollection<string> asposeLicenseFileNames = new[] { "Aspose.Total.lic", "Aspose.Pdf.lic", "Aspose.Words.lic" };
 
 		private static readonly Operation instance = new UpdateAllDependentLogic();
-		public static Operation Instance { get { return instance; } }
+		public static Operation Instance => instance;
 		private UpdateAllDependentLogic() {}
 
 		bool Operation.IsValid( Installation installation ) {
@@ -132,16 +132,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 			else {
 				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
-				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) {
-					var asposeLicenseFilePath = EwlStatics.CombinePaths( ConfigurationStatics.ConfigurationFolderPath, asposeLicenseFileName );
-					if( File.Exists( asposeLicenseFilePath ) )
-						IoMethods.CopyFile(
-							asposeLicenseFilePath,
-							EwlStatics.CombinePaths(
-								InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-								InstallationFileStatics.FilesFolderName,
-								asposeLicenseFileName ) );
-				}
+				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator )
+					foreach( var asposeLicenseFileName in asposeLicenseFileNames ) {
+						var asposeLicenseFilePath = EwlStatics.CombinePaths( ConfigurationStatics.ConfigurationFolderPath, asposeLicenseFileName );
+						if( File.Exists( asposeLicenseFilePath ) )
+							IoMethods.CopyFile(
+								asposeLicenseFilePath,
+								EwlStatics.CombinePaths(
+									InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+									InstallationFileStatics.FilesFolderName,
+									asposeLicenseFileName ) );
+					}
 
 				// If web projects exist for this installation, copy appropriate files into them.
 				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null )
@@ -651,7 +652,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "Library/bin/" );
 				writer.WriteLine( "Library/obj/" );
 				writer.WriteLine( "Library/Generated Code/" );
-				writer.WriteLine( "Library/" + InstallationFileStatics.FilesFolderName + "/" + asposeLicenseFileName );
+				foreach( var asposeLicenseFileName in asposeLicenseFileNames )
+					writer.WriteLine( "Library/" + InstallationFileStatics.FilesFolderName + "/" + asposeLicenseFileName );
 
 				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
 					writer.WriteLine();
