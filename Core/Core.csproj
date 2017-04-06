@@ -273,6 +273,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIconPlacement.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\ChangeValueBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\CustomButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\FormActionBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\MenuButtonBehavior.cs" />

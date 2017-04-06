@@ -1,4 +1,8 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using System;
+using System.Linq;
+using Humanizer;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class HiddenFieldId {
 		private readonly ElementId id;
 
@@ -14,8 +18,17 @@
 		}
 
 		/// <summary>
-		/// Gets the hidden-field ID, or the empty string if no ID exists. Not available until after the page tree has been built.
+		/// Returns the JavaScript statements that should be executed to change the field value. Not available until after the page tree has been built.
 		/// </summary>
-		public string Id => id.Id;
+		public string GetJsValueModificationStatements( string valueExpression ) {
+			if( !id.Id.Any() )
+				throw new ApplicationException( "The hidden field must be on the page." );
+			return "$( '#{0}' ).val( {1} ).change();".FormatWith( id.Id, valueExpression );
+		}
+
+		/// <summary>
+		/// ToggleButton use only.
+		/// </summary>
+		internal ElementId ElementId => id;
 	}
 }

@@ -13,11 +13,6 @@ function toggleElementDisplay( id ) {
 	setElementDisplay( id, !$( '#' + id ).is( ":visible" ) );
 }
 
-function getClientUtcOffset( id ) {
-	var timeString = new Date().toUTCString();
-	$( "#" + id ).val( timeString );
-}
-
 // Supports DurationPicker
 // Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
 var maxValueLength = 6;

@@ -90,9 +90,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return Tuple.Create<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>>(
 				hiddenFields,
 				() => {
-					if( hiddenFieldId.Id.Length == 0 )
-						throw new ApplicationException( "The credit-card-collection hidden fields must be on the page." );
-					var jsTokenHandler = "function( token, args ) { $( '#" + hiddenFieldId.Id + "' ).val( token.id ); " + action.GetJsStatements() + " }";
+					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() + " }";
 					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
 					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
 					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +

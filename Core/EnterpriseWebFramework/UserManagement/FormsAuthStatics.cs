@@ -200,14 +200,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 			HiddenFieldId utcOffsetHiddenFieldId = new HiddenFieldId();
 			var utcOffsetHiddenField = new EwfHiddenField( "", ( postBackValue, validator ) => utcOffset.Value = postBackValue.Value, id: utcOffsetHiddenFieldId );
-			EwfPage.Instance.PreRender += delegate {
-				if( utcOffsetHiddenFieldId.Id.Length == 0 )
-					throw new ApplicationException( "The log-in hidden fields must be on the page." );
-				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
-					typeof( UserManagementStatics ),
-					"formSubmitEventHandler",
-					"getClientUtcOffset( '{0}' )".FormatWith( utcOffsetHiddenFieldId.Id ) );
-			};
+			EwfPage.Instance.PreRender +=
+				delegate {
+					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
+						typeof( UserManagementStatics ),
+						"formSubmitEventHandler",
+						utcOffsetHiddenFieldId.GetJsValueModificationStatements( "new Date().toUTCString()" ) );
+				};
 
 			return utcOffsetHiddenField.PageComponent.ToCollection();
 		}

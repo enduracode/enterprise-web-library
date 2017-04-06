@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "function " + handlerName + "() {" );
 
-				sw.WriteLine( "var controlsToggled = document.getElementById( '" + hiddenFieldId.Id + "' );" );
+				sw.WriteLine( "var controlsToggled = document.getElementById( '" + hiddenFieldId.ElementId.Id + "' );" );
 				if( textControl != null )
 					sw.WriteLine( "var textElement = document.getElementById( '" + textControl.ClientID + "' );" );
 
