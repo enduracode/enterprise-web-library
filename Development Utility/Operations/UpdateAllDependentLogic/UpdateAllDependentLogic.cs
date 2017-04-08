@@ -13,6 +13,7 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
+using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -222,6 +223,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
@@ -250,6 +252,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				generateServerSideConsoleAppStatics( writer, installation );
 				generateDataAccessCode( writer, installation );
+
+				var emailTemplateFolderPath = EwlStatics.CombinePaths(
+					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+					InstallationFileStatics.FilesFolderName,
+					EmailTemplate.TemplateFolderName );
+				if( Directory.Exists( emailTemplateFolderPath ) ) {
+					writer.WriteLine();
+					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+					writer.WriteLine( "public static class EmailTemplates {" );
+					foreach( var i in IoMethods.GetFileNamesInFolder( emailTemplateFolderPath, searchPattern: "*.html" ) ) {
+						writer.WriteLine(
+							"public static readonly EmailTemplateName {0} = new EmailTemplateName( \"{1}\" );".FormatWith(
+								EwlStatics.GetCSharpIdentifier( Path.GetFileNameWithoutExtension( i ).EnglishToPascal() ),
+								i ) );
+					}
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				}
 			}
 		}
 

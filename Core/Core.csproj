@@ -269,6 +269,8 @@
     <Compile Include="DatabaseSpecification\Databases\SqlServerInfo.cs" />
     <Compile Include="DoNotEmailOrLogException.cs" />
     <Compile Include="Email\EmailStatics.cs" />
+    <Compile Include="Email\EmailTemplate.cs" />
+    <Compile Include="Email\EmailTemplateName.cs" />
     <Compile Include="Encryption\SystemEncryptionProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIcon.cs" />
