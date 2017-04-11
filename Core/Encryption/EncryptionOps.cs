@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.Encryption {
 		}
 
 		/// <summary>
-		/// Encrypts the specified string and returns a base64 string that contains both the init vector as well as the encrypted data. This can be used to encrypt
+		/// Encrypts the specified string and returns a hex string that contains both the init vector as well as the encrypted data. This can be used to encrypt
 		/// query parameters or to store the value in a page or cookie. If you want to repeatedly get the same encrypted string for a specified value, be sure to
 		/// use the same initialization vector.
 		/// 
