@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
@@ -56,6 +57,8 @@ namespace EnterpriseWebLibrary {
 			}
 
 			try {
+				CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
+
 				var asposePdfLicense = ConfigurationStatics.SystemGeneralProvider.AsposePdfLicenseName;
 				if( asposePdfLicense.Any() )
 					new Aspose.Pdf.License().SetLicense( asposePdfLicense );
