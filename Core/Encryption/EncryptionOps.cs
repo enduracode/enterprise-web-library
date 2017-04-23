@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.Encryption {
 		}
 
 		/// <summary>
-		/// Encrypts the specified string and returns a base64 string that contains both the init vector as well as the encrypted data. This can be used to encrypt
+		/// Encrypts the specified string and returns a hex string that contains both the init vector as well as the encrypted data. This can be used to encrypt
 		/// query parameters or to store the value in a page or cookie. If you want to repeatedly get the same encrypted string for a specified value, be sure to
 		/// use the same initialization vector.
 		/// 
@@ -78,6 +78,9 @@ namespace EnterpriseWebLibrary.Encryption {
 		/// resulting string) because what keeps the data truly secure is the key used to encrypt. Init vectors are used to insure variety when encrypting
 		/// the same data with the same key (providing you pass a different init vector each time), thus preventing rainbow table attacks.
 		/// </summary>
+		[ Obsolete(
+			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString."
+			) ]
 		public static string GetEncryptedString( byte[] initVector, string value ) {
 			return ( BitConverter.ToString( initVector ) + BitConverter.ToString( EncryptString( initVector, value ) ) ).Replace( "-", "" );
 		}
@@ -85,6 +88,9 @@ namespace EnterpriseWebLibrary.Encryption {
 		/// <summary>
 		/// This returns the encrypted string that was encrypted via the GetEncryptedString method.
 		/// </summary>
+		[ Obsolete(
+			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString."
+			) ]
 		public static string GetDecryptedString( string encryptedString ) {
 			// IV is the first part of the parmater, which is 16 bytes/32 hex characters
 			var pairs = new List<string>();
