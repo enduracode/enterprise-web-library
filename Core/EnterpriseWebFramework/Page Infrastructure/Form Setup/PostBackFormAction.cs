@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -29,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		string FormAction.GetJsStatements() {
 			postBackAsserter( PostBack );
-			return "postBack( '{0}' );".FormatWith( PostBack.Id );
+			return "postBack( '{0}' );".FormatWith( HttpUtility.JavaScriptStringEncode( PostBack.Id ) );
 		}
 	}
 }
