@@ -26,6 +26,6 @@
 		/// <summary>
 		/// Performs tasks that have emerged since the last call to this method.
 		/// </summary>
-		void Tick();
+		void Tick( TickInterval interval );
 	}
 }

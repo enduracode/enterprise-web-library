@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.WindowsServiceFramework {
 	/// <summary>
@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 	public sealed class ServiceBaseAdapter: ServiceBase {
 		private const int tickInterval = 10000;
 
-		private DateTime lastHealthCheckDateAndTime;
+		private Instant lastTickInstant;
 		private readonly WindowsServiceBase service;
 		private Timer timer;
 
@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 			}
 
 			Action method = () => {
-				lastHealthCheckDateAndTime = DateTime.Now;
+				lastTickInstant = SystemClock.Instance.GetCurrentInstant();
 				service.Init();
 
 				timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
@@ -70,13 +70,15 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
 					// exception stack traces.
 					try {
-						var now = DateTime.Now;
-						if( ConfigurationStatics.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
-						    new[] { lastHealthCheckDateAndTime, now }.Any( dt => dt.Date.IsBetweenDateTimes( lastHealthCheckDateAndTime, now ) ) )
-							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
-						lastHealthCheckDateAndTime = now;
+						var currentInstant = SystemClock.Instance.GetCurrentInstant();
+						var interval = new TickInterval( new Interval( lastTickInstant, currentInstant ) );
+						lastTickInstant = currentInstant;
 
-						service.Tick();
+						if( ConfigurationStatics.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
+						    interval.FitsPattern( OperationRecurrencePattern.CreateDaily( 0, 0 ) ) )
+							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
+
+						service.Tick( interval );
 					}
 					finally {
 						try {

@@ -741,9 +741,11 @@
     <Compile Include="WebTestingFramework\Name.cs" />
     <Compile Include="WebTestingFramework\OneTimeInstall.cs" />
     <Compile Include="WebTestingFramework\WebTester.cs" />
+    <Compile Include="WindowsServiceFramework\OperationRecurrencePattern.cs" />
     <Compile Include="WindowsServiceFramework\ServiceBaseAdapter.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="WindowsServiceFramework\TickInterval.cs" />
     <Compile Include="WindowsServiceFramework\WindowsServiceBase.cs" />
     <Compile Include="WindowsServiceFramework\WindowsServiceMethods.cs" />
     <Compile Include="WpfInitializationOps.cs" />
