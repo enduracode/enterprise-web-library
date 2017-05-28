@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 
@@ -10,9 +11,9 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 	/// </summary>
 	public interface MergeDataTreeChild<in ParentRowType> {
 		/// <summary>
-		/// Creates a merge row tree for the specified parent row. Data Tree subsystem use only.
+		/// Creates merge row trees for the specified parent row. Data Tree subsystem use only.
 		/// </summary>
-		MergeRowTree CreateRowTreeForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping );
+		IEnumerable<MergeRowTree> CreateRowTreesForParentRow( ParentRowType parentRow, MergeDataTreeRemapping parentRemapping );
 	}
 
 	/// <summary>
@@ -36,11 +37,11 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 			this.children = children;
 		}
 
-		MergeRowTree MergeDataTreeChild<ParentRowType>.CreateRowTreeForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping ) {
-			remapping = remapping != null && remapping.ChildRemappingsByChildName.ContainsKey( name )
-				            ? remapping.ChildRemappingsByChildName[ name ]
-				            : new MergeDataTreeRemapping();
-			return MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping );
+		IEnumerable<MergeRowTree> MergeDataTreeChild<ParentRowType>.CreateRowTreesForParentRow( ParentRowType parentRow, MergeDataTreeRemapping parentRemapping ) {
+			var remappings = parentRemapping != null && parentRemapping.ChildRemappingsByChildName.ContainsKey( name )
+				                 ? parentRemapping.ChildRemappingsByChildName[ name ]
+				                 : new MergeDataTreeRemapping().ToCollection();
+			return from remapping in remappings select MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping );
 		}
 	}
 }

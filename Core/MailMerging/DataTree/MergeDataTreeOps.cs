@@ -26,8 +26,10 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 				dataRows.Select(
 					row =>
 					new MergeRow(
-						fields.Select( i => i.CreateValue( remapping.GetFieldName( i.Name ), i.MsWordName, i.GetDescription, () => row ) ),
-						children?.Select( i => i.CreateRowTreeForParentRow( row, remapping ) ) ?? new MergeRowTree[ 0 ] ) ),
+						from field in fields
+						from name in remapping.GetFieldNames( field.Name )
+						select field.CreateValue( name, field.MsWordName, field.GetDescription, () => row ),
+						children?.SelectMany( child => child.CreateRowTreesForParentRow( row, remapping ) ) ?? new MergeRowTree[ 0 ] ) ),
 				remapping.XmlRowElementName.Any() ? remapping.XmlRowElementName : "Row" );
 		}
 	}
