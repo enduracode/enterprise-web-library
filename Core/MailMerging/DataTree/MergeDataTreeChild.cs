@@ -27,8 +27,9 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 		/// <summary>
 		/// Create a merge data tree child node. The data row selector is a function that returns the rows that are children of the specified parent row.
 		/// </summary>
-		public MergeDataTreeChild( string name, ReadOnlyCollection<MergeField<RowType>> fields, Func<ParentRowType, IEnumerable<RowType>> dataRowSelector,
-		                           ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null ) {
+		public MergeDataTreeChild(
+			string name, ReadOnlyCollection<MergeField<RowType>> fields, Func<ParentRowType, IEnumerable<RowType>> dataRowSelector,
+			ReadOnlyCollection<MergeDataTreeChild<RowType>> children = null ) {
 			this.name = name;
 			this.fields = fields;
 			this.dataRowSelector = dataRowSelector;
@@ -37,8 +38,8 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 
 		MergeRowTree MergeDataTreeChild<ParentRowType>.CreateRowTreeForParentRow( ParentRowType parentRow, MergeDataTreeRemapping remapping ) {
 			remapping = remapping != null && remapping.ChildRemappingsByChildName.ContainsKey( name )
-			            	? remapping.ChildRemappingsByChildName[ name ]
-			            	: new MergeDataTreeRemapping();
+				            ? remapping.ChildRemappingsByChildName[ name ]
+				            : new MergeDataTreeRemapping();
 			return MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping );
 		}
 	}

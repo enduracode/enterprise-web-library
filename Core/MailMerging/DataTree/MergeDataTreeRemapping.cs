@@ -13,21 +13,22 @@ namespace EnterpriseWebLibrary.MailMerging.DataTree {
 		/// <summary>
 		/// Creates a merge data tree remapping.
 		/// </summary>
-		public MergeDataTreeRemapping( string nodeNameOverride = "", Dictionary<string, string> oldToNewFieldNames = null,
-		                               Dictionary<string, MergeDataTreeRemapping> childRemappingsByChildName = null, string xmlRowElementName = "" ) {
+		public MergeDataTreeRemapping(
+			string nodeNameOverride = "", Dictionary<string, string> oldToNewFieldNames = null,
+			Dictionary<string, MergeDataTreeRemapping> childRemappingsByChildName = null, string xmlRowElementName = "" ) {
 			this.nodeNameOverride = nodeNameOverride;
 			this.oldToNewFieldNames = oldToNewFieldNames ?? new Dictionary<string, string>();
 			this.childRemappingsByChildName = childRemappingsByChildName ?? new Dictionary<string, MergeDataTreeRemapping>();
 			this.xmlRowElementName = xmlRowElementName;
 		}
 
-		internal string NodeNameOverride { get { return nodeNameOverride; } }
+		internal string NodeNameOverride => nodeNameOverride;
 
 		internal string GetFieldName( string fieldName ) {
 			return oldToNewFieldNames.ContainsKey( fieldName ) ? oldToNewFieldNames[ fieldName ] : fieldName;
 		}
 
-		internal Dictionary<string, MergeDataTreeRemapping> ChildRemappingsByChildName { get { return childRemappingsByChildName; } }
-		internal string XmlRowElementName { get { return xmlRowElementName; } }
+		internal Dictionary<string, MergeDataTreeRemapping> ChildRemappingsByChildName => childRemappingsByChildName;
+		internal string XmlRowElementName => xmlRowElementName;
 	}
 }
