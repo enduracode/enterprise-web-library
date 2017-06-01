@@ -208,7 +208,8 @@ namespace EnterpriseWebLibrary.MailMerging {
 		/// Creates a comma-separated values (CSV) or tab-separated values file from the top level of a row tree. There will be one column for each merge field
 		/// specified in the list of field names.
 		/// </summary>
-		public static void CreateTabularTextFile( MergeRowTree rowTree, IEnumerable<string> fieldNames, TextWriter destinationWriter, bool useTabAsSeparator = false ) {
+		public static void CreateTabularTextFile(
+			MergeRowTree rowTree, IEnumerable<string> fieldNames, TextWriter destinationWriter, bool useTabAsSeparator = false, bool includeHeaderRow = true ) {
 			if( !rowTree.Rows.Any() )
 				return;
 
@@ -219,6 +220,13 @@ namespace EnterpriseWebLibrary.MailMerging {
 			}
 
 			var writer = useTabAsSeparator ? (TabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
+
+			if( includeHeaderRow ) {
+				writer.AddValuesToLine(
+					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) ).Select( mergeValue => (object)mergeValue.Name ).ToArray() );
+				writer.WriteCurrentLineToFile( destinationWriter );
+			}
+
 			foreach( var row in rowTree.Rows ) {
 				writer.AddValuesToLine(
 					fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select(
