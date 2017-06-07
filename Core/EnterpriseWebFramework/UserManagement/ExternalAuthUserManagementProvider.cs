@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -25,6 +25,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( int? userId, string email, int roleId, DateTime? lastRequestDateTime );
+		void InsertOrUpdateUser( int? userId, string email, int roleId, Instant? lastRequestTime );
 	}
 }

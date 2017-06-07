@@ -7,8 +7,8 @@ using EnterpriseWebLibrary.WebSessionState;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
 	partial class Page: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return ""; } }
-			protected override bool userCanAccessResource { get { return AppTools.User != null; } }
+			public override string ResourceName => "";
+			protected override bool userCanAccessResource => AppTools.User != null;
 		}
 
 		private DataValue<string> newPassword;
@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				AppTools.User.UserId,
 				AppTools.User.Email,
 				AppTools.User.Role.RoleId,
-				AppTools.User.LastRequestDateTime,
+				AppTools.User.LastRequestTime,
 				password.Salt,
 				password.ComputeSaltedHash(),
 				false );

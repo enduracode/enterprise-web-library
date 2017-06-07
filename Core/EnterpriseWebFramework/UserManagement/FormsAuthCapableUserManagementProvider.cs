@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters.
 		/// </summary>
-		void InsertOrUpdateUser( int? userId, string email, int roleId, DateTime? lastRequestDateTime, int salt, byte[] saltedPassword, bool mustChangePassword );
+		void InsertOrUpdateUser( int? userId, string email, int roleId, Instant? lastRequestTime, int salt, byte[] saltedPassword, bool mustChangePassword );
 
 		/// <summary>
 		/// Gets the subject and body of the message that will be sent to the specified user when a password reset is requested.

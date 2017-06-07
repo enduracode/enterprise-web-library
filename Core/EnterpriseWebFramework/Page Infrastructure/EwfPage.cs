@@ -14,6 +14,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using NodaTime;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -355,20 +356,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private Action getLastPageRequestTimeUpdateMethod( User user ) {
 			// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
 			// people rapidly assigning tasks to one another in the System Manager or similar situations.
-			if( ( DateTime.Now - user.LastRequestDateTime ) < TimeSpan.FromMinutes( 60 ) )
+			if( AppRequestState.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
 				return null;
 
 			// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
 			// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
 			// in another browser window while the first one is still running.
-			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestDatetime, even if
+			// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestTime, even if
 			// another transaction has modified its value during this transaction.
 			var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
 				() => {
 					Func<User> userGetter = () => UserManagementStatics.GetUser( user.UserId, false );
 					return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( userGetter ) : userGetter();
 				} );
-			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestDateTime > user.LastRequestDateTime )
+			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
 				return null;
 
 			return () => {
@@ -379,7 +380,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							user.UserId,
 							user.Email,
 							user.Role.RoleId,
-							DateTime.Now,
+							AppRequestState.RequestTime,
 							formsAuthCapableUser.Salt,
 							formsAuthCapableUser.SaltedPassword,
 							formsAuthCapableUser.MustChangePassword );
@@ -389,7 +390,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							user.UserId,
 							user.Email,
 							user.Role.RoleId,
-							DateTime.Now );
+							AppRequestState.RequestTime );
 				};
 				if( ConfigurationStatics.DatabaseExists )
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(

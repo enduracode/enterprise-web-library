@@ -1,4 +1,4 @@
-﻿using System;
+﻿using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// The last time the user made a request to the system.
 		/// </summary>
-		DateTime? LastRequestDateTime { get; }
+		Instant? LastRequestTime { get; }
 
 		/// <summary>
 		/// The real-world name of the user ("Greg Smalter"). May be the empty string.

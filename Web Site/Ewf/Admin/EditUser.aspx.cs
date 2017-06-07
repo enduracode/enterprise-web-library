@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return new SystemUsers.Info( esInfo );
 			}
 
-			public override string ResourceName { get { return User == null ? "New User" : User.Email; } }
+			public override string ResourceName => User == null ? "New User" : User.Email;
 		}
 
 		private UserFieldTable userFieldTable;
@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						info.User.UserId,
 						userFieldTable.Email,
 						userFieldTable.RoleId,
-						info.User.LastRequestDateTime,
+						info.User.LastRequestTime,
 						userFieldTable.Salt,
 						userFieldTable.SaltedPassword,
 						userFieldTable.MustChangePassword );
@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email, userFieldTable.RoleId, info.User != null ? info.User.LastRequestDateTime : null );
+				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email, userFieldTable.RoleId, info.User?.LastRequestTime );
 			}
 			userFieldTable.SendEmailIfNecessary();
 		}

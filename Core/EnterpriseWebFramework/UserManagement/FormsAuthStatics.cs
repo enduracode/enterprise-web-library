@@ -32,12 +32,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static bool FormsAuthEnabled { get { return providerGetter() is FormsAuthCapableUserManagementProvider; } }
+		public static bool FormsAuthEnabled => providerGetter() is FormsAuthCapableUserManagementProvider;
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static FormsAuthCapableUserManagementProvider SystemProvider { get { return (FormsAuthCapableUserManagementProvider)providerGetter(); } }
+		public static FormsAuthCapableUserManagementProvider SystemProvider => (FormsAuthCapableUserManagementProvider)providerGetter();
 
 		internal static IEnumerable<FormsAuthCapableUser> GetUsers() {
 			return SystemProvider.GetUsers();
@@ -303,7 +303,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			CookieStatics.ClearCookie( FormsAuthCookieName );
 		}
 
-		internal static string FormsAuthCookieName { get { return "User"; } }
+		internal static string FormsAuthCookieName => "User";
 
 
 		// Password Reset
@@ -340,7 +340,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 			// reset the password
 			var newPassword = new Password();
-			SystemProvider.InsertOrUpdateUser( userId, user.Email, user.Role.RoleId, user.LastRequestDateTime, newPassword.Salt, newPassword.ComputeSaltedHash(), true );
+			SystemProvider.InsertOrUpdateUser( userId, user.Email, user.Role.RoleId, user.LastRequestTime, newPassword.Salt, newPassword.ComputeSaltedHash(), true );
 
 			// send the email
 			SendPassword( user.Email, newPassword.PasswordText );
