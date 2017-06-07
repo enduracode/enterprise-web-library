@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the app request state object for the current request.
 		/// </summary>
-		public static AppRequestState Instance { get { return EwfApp.Instance.RequestState; } }
+		public static AppRequestState Instance => EwfApp.Instance.RequestState;
 
 		/// <summary>
 		/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
@@ -72,14 +72,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
 		/// </summary>
-		public string Url { get { return url; } }
+		public string Url => url;
 
-		internal bool HomeUrlRequest { get { return homeUrlRequest; } }
+		internal bool HomeUrlRequest => homeUrlRequest;
 
 		/// <summary>
 		/// EwfApp.ewfApplicationStart use only.
 		/// </summary>
-		internal DataAccessState DataAccessState { get { return dataAccessState; } }
+		internal DataAccessState DataAccessState => dataAccessState;
 
 		private void initDatabaseConnection( DBConnection connection ) {
 			if( connection.DatabaseInfo.SecondaryDatabaseName.Any()
@@ -139,22 +139,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public bool ImpersonatorExists { get { return UserAndImpersonator.Item2 != null; } }
+		public bool ImpersonatorExists => UserAndImpersonator.Item2 != null;
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public User ImpersonatorUser { get { return UserAndImpersonator.Item2.Item1; } }
+		public User ImpersonatorUser => UserAndImpersonator.Item2.Item1;
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public int? ProfilingUserId {
-			get {
-				var profilingUser = ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1;
-				return profilingUser != null ? (int?)profilingUser.UserId : null;
-			}
-		}
+		public int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
 
 		/// <summary>
 		/// AppTools.User and private use only.
@@ -178,9 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public bool UserAccessible {
-			get { return !EwfConfigurationStatics.AppSupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ); }
-		}
+		public bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request );
 
 		internal void ClearUserAndImpersonator() {
 			userAndImpersonator = null;
