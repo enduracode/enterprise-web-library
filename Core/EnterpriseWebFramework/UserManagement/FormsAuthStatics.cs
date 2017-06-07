@@ -169,7 +169,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		public static bool UserCredentialsAreCorrect( string userEmailAddress, string providedPassword ) {
 			// NOTE: With the exception of the password trimming, this is similar to the logic in GetLogInMethod.
 			var user = SystemProvider.GetUser( userEmailAddress );
-			return user != null && user.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
+			return user?.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
 		}
 
 		/// <summary>
@@ -221,7 +221,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
 
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-				var authenticationDuration = strictProvider != null && strictProvider.AuthenticationTimeoutInMinutes.HasValue
+				var authenticationDuration = ( strictProvider?.AuthenticationTimeoutInMinutes ).HasValue
 					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
 					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
