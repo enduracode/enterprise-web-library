@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Humanizer;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CookieStatics {
@@ -12,14 +13,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void SetCookie(
-			string name, string value, DateTime? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
+			string name, string value, Instant? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
 			var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
 			HttpContext.Current.Response.Cookies.Add(
 				new HttpCookie( nameAndDomainAndPath.Item1, value )
 					{
 						Domain = nameAndDomainAndPath.Item2,
 						Path = nameAndDomainAndPath.Item3,
-						Expires = expires ?? DateTime.MinValue,
+						Expires = expires?.ToDateTimeUtc() ?? DateTime.MinValue,
 						Secure = secure,
 						HttpOnly = httpOnly
 					} );
@@ -32,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					{
 						Domain = nameAndDomainAndPath.Item2,
 						Path = nameAndDomainAndPath.Item3,
-						Expires = DateTime.Now.AddDays( -1 )
+						Expires = SystemClock.Instance.GetCurrentInstant().Minus( Duration.FromDays( 1 ) ).ToDateTimeUtc()
 					} );
 		}
 

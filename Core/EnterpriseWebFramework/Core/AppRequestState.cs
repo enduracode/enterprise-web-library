@@ -20,6 +20,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static AppRequestState Instance => EwfApp.Instance.RequestState;
 
 		/// <summary>
+		/// Gets the time instant for the current request.
+		/// </summary>
+		public static Instant RequestTime => Instance.beginInstant;
+
+		/// <summary>
 		/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 		/// </summary>
 		public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {

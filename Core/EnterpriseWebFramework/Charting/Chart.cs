@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using JetBrains.Annotations;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -254,7 +255,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												                          csv.WriteCurrentLineToFile( writer );
 											                          }
 										                          } ),
-										                    () => "{0} {1}".FormatWith( setup.ExportFileName, DateTime.Now ) + FileExtensions.Csv ) ) ) ) ) );
+										                    () =>
+										                    "{0} {1}".FormatWith(
+											                    setup.ExportFileName,
+											                    AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
+										                    FileExtensions.Csv ) ) ) ) ) );
 			block.Style.Add( "text-align", "right" );
 			return block;
 		}

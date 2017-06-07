@@ -1,4 +1,4 @@
-﻿using System;
+﻿using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static void SetCookie() {
 			// The intermediate user cookie is secure to make it harder for unauthorized users to access intermediate installations, which often are placed on the
 			// Internet with no additional security.
-			CookieStatics.SetCookie( cookieName, cookieValue, DateTime.Now.AddMonths( 1 ), true, true );
+			CookieStatics.SetCookie( cookieName, cookieValue, SystemClock.Instance.GetCurrentInstant() + Duration.FromDays( 30 ), true, true );
 		}
 
 		/// <summary>
