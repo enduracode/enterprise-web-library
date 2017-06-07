@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using NodaTime;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -25,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.addNonTransactionalModificationMethod( modificationMethod );
 		}
 
-		private readonly DateTime beginTime;
+		private readonly Instant beginInstant;
 		private readonly string url;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
@@ -55,7 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public HttpBrowserCapabilities Browser { get; private set; }
 
 		internal AppRequestState( string url ) {
-			beginTime = DateTime.Now;
+			beginInstant = SystemClock.Instance.GetCurrentInstant();
 			MiniProfiler.Start();
 			this.url = url;
 
@@ -211,12 +212,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				MiniProfiler.Stop();
 			}
 			else {
-				var duration = DateTime.Now - beginTime;
+				var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
 				MiniProfiler.Stop();
 				if( MiniProfiler.Current != null )
-					duration = TimeSpan.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
+					duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 				const int thresholdInSeconds = 30;
-				if( duration > new TimeSpan( 0, 0, thresholdInSeconds ) && !ConfigurationStatics.IsDevelopmentInstallation )
+				if( duration > Duration.FromSeconds( thresholdInSeconds ) && !ConfigurationStatics.IsDevelopmentInstallation )
 					TelemetryStatics.ReportError( "Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.", null );
 			}
 		}
