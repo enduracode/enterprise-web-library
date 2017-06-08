@@ -49,7 +49,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.7/dialog-polyfill.min.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryModal_v1.JquerymodalCss.Info() );
 			infos.Add( new Styles.BasicCss.Info() );
-			infos.Add( new Styles.ToDeleteOrMoveCss.Info() );
 			return infos;
 		}
 

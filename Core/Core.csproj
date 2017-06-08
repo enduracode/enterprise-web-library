@@ -323,7 +323,6 @@
     <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\DisplayLinkingOps.cs" />
     <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\FormThirdColCheckBoxesToFourthColCellsDisplayLink.cs" />
     <Compile Include="EnterpriseWebFramework\Component Display\DisplaySetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\FancyFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AccessDeniedException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AppMetaLogicFactory.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AppRequestState.cs" />

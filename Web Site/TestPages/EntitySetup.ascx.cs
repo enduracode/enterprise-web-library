@@ -20,12 +20,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			protected override List<ResourceGroup> createResourceInfos() {
 				return new List<ResourceGroup>
 					{
-						new ResourceGroup(
-							"Working Stuff",
-							new ActionControls.Info( this ),
-							new OptionalParameters.Info( this ),
-							new Html5FileUpload.Info( this ),
-							new OmniDemo.Info( this ) ),
+						new ResourceGroup( "Working Stuff", new ActionControls.Info( this ), new OptionalParameters.Info( this ), new OmniDemo.Info( this ) ),
 						new ResourceGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new StatusMessages.Info( this ) ),
 						new ResourceGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ), new DynamicTableDemo.Info( this ) ),
 						new ResourceGroup( "Layout", new BoxDemo.Info( this ) ),

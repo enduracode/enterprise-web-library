@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Upload.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.FileUploader.Upload" %>

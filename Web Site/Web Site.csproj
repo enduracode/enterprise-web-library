@@ -160,13 +160,6 @@
     <Compile Include="Ewf\EwfUi.master.designer.cs">
       <DependentUpon>EwfUi.master</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\FileUploader\Upload.aspx.cs">
-      <DependentUpon>Upload.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\FileUploader\Upload.aspx.designer.cs">
-      <DependentUpon>Upload.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\IntermediateLogIn.aspx.cs">
       <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -257,13 +250,6 @@
     </Compile>
     <Compile Include="TestPages\EwfTextBoxDemo.aspx.designer.cs">
       <DependentUpon>EwfTextBoxDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Html5FileUpload.aspx.cs">
-      <DependentUpon>Html5FileUpload.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\Html5FileUpload.aspx.designer.cs">
-      <DependentUpon>Html5FileUpload.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\HtmlEditing.aspx.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
@@ -461,18 +447,12 @@
     <Content Include="Ewf\Admin\SystemUsers.aspx" />
     <Content Include="Ewf\ContactSupport.aspx" />
     <Content Include="Ewf\ErrorPages\PageDisabled.aspx" />
-    <Content Include="Ewf\FileUploader\ClientSide.js" />
-    <Content Include="Ewf\FileUploader\jquery.progressbar.min.js" />
-    <Content Include="Ewf\FileUploader\progressbar.gif" />
-    <Content Include="Ewf\FileUploader\progressbg_orange.gif" />
-    <Content Include="Ewf\FileUploader\Upload.aspx" />
     <Content Include="Ewf\Modernizr.js" />
     <Content Include="Ewf\PreBuiltResponse.aspx" />
     <Content Include="Ewf\Styles\Basic.css" />
     <Content Include="Ewf\Styles\EwfUi\Colors.css" />
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
-    <Content Include="Ewf\Styles\ToDeleteOrMove.css" />
     <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
@@ -564,7 +544,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\EwfTextBoxDemo.aspx" />
-    <Content Include="TestPages\Html5FileUpload.aspx" />
     <Content Include="TestPages\HtmlEditing.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
