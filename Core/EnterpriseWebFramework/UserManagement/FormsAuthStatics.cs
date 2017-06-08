@@ -246,7 +246,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static void addStatusMessageIfClockNotSynchronized( DataValue<string> clientTime ) {
-			var clientParseResult = InstantPattern.General.Parse( clientTime.Value );
+			var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );
 			if( !clientParseResult.Success )
 				throw new DataModificationException( "Your browser did not submit the current time." );
 
