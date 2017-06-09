@@ -9,9 +9,6 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 	public class EqualityCondition: InlineDbCommandCondition {
 		private readonly InlineDbCommandColumnValue columnValue;
 
-		// IMPORTANT: If we implement Not Equals in this class, then it is extremely important that we modify the generated code to not use the value of the Not Equals condition
-		// to initialize mod object data.
-
 		/// <summary>
 		/// EWL use only.
 		/// </summary>

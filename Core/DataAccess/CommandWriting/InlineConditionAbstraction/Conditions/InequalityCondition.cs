@@ -13,6 +13,11 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 		/// </summary>
 		public enum Operator {
 			/// <summary>
+			/// !=
+			/// </summary>
+			NotEqualTo,
+
+			/// <summary>
 			/// &gt;
 			/// </summary>
 			GreaterThan,
@@ -47,13 +52,26 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstract
 
 		void InlineDbCommandCondition.AddToCommand( IDbCommand command, DatabaseInfo databaseInfo, string parameterName ) {
 			var parameter = columnValue.GetParameter( name: parameterName );
-			var operatorString = "<=";
-			if( op == Operator.GreaterThan )
-				operatorString = ">";
-			if( op == Operator.GreaterThanOrEqualTo )
-				operatorString = ">=";
-			if( op == Operator.LessThan )
-				operatorString = "<";
+			string operatorString;
+			switch( op ) {
+				case Operator.NotEqualTo:
+					operatorString = "!=";
+					break;
+				case Operator.LessThan:
+					operatorString = "<";
+					break;
+				case Operator.GreaterThan:
+					operatorString = ">";
+					break;
+				case Operator.LessThanOrEqualTo:
+					operatorString = "<=";
+					break;
+				case Operator.GreaterThanOrEqualTo:
+					operatorString = ">=";
+					break;
+				default:
+					throw new ApplicationException( "unknown operator" );
+			}
 
 			command.CommandText += columnValue.ColumnName + " " + operatorString + " " + parameter.GetNameForCommandText( databaseInfo );
 			command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
