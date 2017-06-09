@@ -209,7 +209,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 		/// specified in the list of field names.
 		/// </summary>
 		public static void CreateTabularTextFile(
-			MergeRowTree rowTree, IEnumerable<string> fieldNames, TextWriter destinationWriter, bool useTabAsSeparator = false, bool includeHeaderRow = true ) {
+			MergeRowTree rowTree, IEnumerable<string> fieldNames, TextWriter destinationWriter, bool useTabAsSeparator = false, bool omitHeaderRow = false ) {
 			if( !rowTree.Rows.Any() )
 				return;
 
@@ -221,7 +221,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 
 			var writer = useTabAsSeparator ? (TabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
 
-			if( includeHeaderRow ) {
+			if( !omitHeaderRow ) {
 				writer.AddValuesToLine(
 					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) ).Select( mergeValue => (object)mergeValue.Name ).ToArray() );
 				writer.WriteCurrentLineToFile( destinationWriter );
