@@ -242,11 +242,6 @@ namespace EnterpriseWebLibrary {
 			TestStatics.RunTests();
 		}
 
-		[ Obsolete( "Guaranteed through 31 March 2017. Use ToCollection instead." ) ]
-		public static T[] ToSingleElementArray<T>( this T item ) {
-			return new[] { item };
-		}
-
 		/// <summary>
 		/// Creates a collection containing only this item.
 		/// </summary>

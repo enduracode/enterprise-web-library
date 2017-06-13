@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
 		/// </summary>
 		public void AddOnClickJsMethod( string jsMethodInvocation ) {
-			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToSingleElementArray );
+			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToCollection );
 		}
 
 		public EwfValidation Validation { get { return validation; } }

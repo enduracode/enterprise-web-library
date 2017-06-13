@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new LegacyUpdateRegionLinker(
 					this,
 					"",
-					new LegacyPreModificationUpdateRegion( updateRegionSets, this.ToSingleElementArray, () => "" ).ToCollection(),
+					new LegacyPreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(),
 					arg => this.ToCollection() ) );
 		}
 	}
