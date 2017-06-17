@@ -53,10 +53,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a response containing a comma-separated values (CSV) file created from the top level of a row tree. There will be one column for each merge
 		/// field specified in the list of field names.
 		/// </summary>
-		public static EwfResponse CreateMergedCsvResponse( Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames ) {
+		public static EwfResponse CreateMergedCsvResponse(
+			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) {
 			return Create(
 				ContentTypes.Csv,
-				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer ) ),
+				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, omitHeaderRow: omitHeaderRow ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Csv );
 		}
 
@@ -65,10 +66,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// specified in the list of field names.
 		/// </summary>
 		public static EwfResponse CreateMergedTabSeparatedValuesResponse(
-			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames ) {
+			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) {
 			return Create(
 				ContentTypes.TabSeparatedValues,
-				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true ) ),
+				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );
 		}
 
