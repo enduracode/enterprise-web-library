@@ -75,12 +75,13 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 										previousRevisionAndTransactionAndUser = previousRevisionsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId );
 								}
 								return previousRevisionAndTransactionAndUser == null
-									       ? new RevisionIdDelta<UserType>( revision.RevisionId, null, null, default( UserType ) )
+									       ? new RevisionIdDelta<UserType>( revision.RevisionId, null )
 									       : new RevisionIdDelta<UserType>(
 										         revision.RevisionId,
-										         previousRevisionAndTransactionAndUser.Item1.RevisionId,
-										         previousRevisionAndTransactionAndUser.Item2,
-										         previousRevisionAndTransactionAndUser.Item3 );
+										         Tuple.Create(
+											         previousRevisionAndTransactionAndUser.Item1.RevisionId,
+											         previousRevisionAndTransactionAndUser.Item2,
+											         previousRevisionAndTransactionAndUser.Item3 ) );
 							} ) );
 				} );
 

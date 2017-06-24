@@ -5,16 +5,16 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// A revision identifier and and the previous revision's identifier, if a previous revision exists.
 	/// </summary>
 	public class RevisionIdDelta<UserType> {
-		private readonly RevisionDelta<int?, UserType> revisionDelta;
+		private readonly RevisionDelta<int, UserType> revisionDelta;
 
-		internal RevisionIdDelta( int newRevisionId, int? oldRevisionId, UserTransaction oldTransaction, UserType oldUser ) {
-			revisionDelta = new RevisionDelta<int?, UserType>( newRevisionId, oldRevisionId, oldTransaction, oldUser );
+		internal RevisionIdDelta( int newRevisionId, Tuple<int, UserTransaction, UserType> oldRevisionIdAndTransactionAndUser ) {
+			revisionDelta = new RevisionDelta<int, UserType>( newRevisionId, oldRevisionIdAndTransactionAndUser );
 		}
 
 		/// <summary>
 		/// Gets the revision identifier.
 		/// </summary>
-		public int New => revisionDelta.New.Value;
+		public int New => revisionDelta.New;
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Gets the previous revision's identifier, if a previous revision exists.
 		/// </summary>
-		public int Old => revisionDelta.Old.Value;
+		public int Old => revisionDelta.Old;
 
 		/// <summary>
 		/// Gets the previous revision's transaction, if a previous revision exists.
@@ -42,9 +42,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		public RevisionDelta<RevisionDataType, UserType> ToFullDelta<RevisionDataType>( Func<int, RevisionDataType> revisionDataSelector ) {
 			return new RevisionDelta<RevisionDataType, UserType>(
 				revisionDataSelector( New ),
-				HasOld ? revisionDataSelector( Old ) : default( RevisionDataType ),
-				OldTransaction,
-				OldUser );
+				HasOld ? Tuple.Create( revisionDataSelector( Old ), OldTransaction, OldUser ) : null );
 		}
 	}
 }
