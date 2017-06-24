@@ -18,26 +18,26 @@
 		/// <summary>
 		/// Gets the revision.
 		/// </summary>
-		public RevisionDataType New { get { return newRevision; } }
+		public RevisionDataType New => newRevision;
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
 		/// </summary>
-		public bool HasOld { get { return !EwlStatics.AreEqual( oldRevision, default( RevisionDataType ) ); } }
+		public bool HasOld => !EwlStatics.AreEqual( oldRevision, default( RevisionDataType ) );
 
 		/// <summary>
 		/// Gets the previous revision, if one exists.
 		/// </summary>
-		public RevisionDataType Old { get { return oldRevision; } }
+		public RevisionDataType Old => oldRevision;
 
 		/// <summary>
 		/// Gets the previous revision's transaction, if a previous revision exists.
 		/// </summary>
-		public UserTransaction OldTransaction { get { return oldTransaction; } }
+		public UserTransaction OldTransaction => oldTransaction;
 
 		/// <summary>
 		/// Gets the previous revision's user, if a previous revision exists.
 		/// </summary>
-		public UserType OldUser { get { return oldUser; } }
+		public UserType OldUser => oldUser;
 	}
 }

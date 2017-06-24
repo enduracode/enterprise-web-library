@@ -14,27 +14,27 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Gets the revision identifier.
 		/// </summary>
-		public int New { get { return revisionDelta.New.Value; } }
+		public int New => revisionDelta.New.Value;
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
 		/// </summary>
-		public bool HasOld { get { return revisionDelta.HasOld; } }
+		public bool HasOld => revisionDelta.HasOld;
 
 		/// <summary>
 		/// Gets the previous revision's identifier, if a previous revision exists.
 		/// </summary>
-		public int Old { get { return revisionDelta.Old.Value; } }
+		public int Old => revisionDelta.Old.Value;
 
 		/// <summary>
 		/// Gets the previous revision's transaction, if a previous revision exists.
 		/// </summary>
-		public UserTransaction OldTransaction { get { return revisionDelta.OldTransaction; } }
+		public UserTransaction OldTransaction => revisionDelta.OldTransaction;
 
 		/// <summary>
 		/// Gets the previous revision's user, if a previous revision exists.
 		/// </summary>
-		public UserType OldUser { get { return revisionDelta.OldUser; } }
+		public UserType OldUser => revisionDelta.OldUser;
 
 		/// <summary>
 		/// Returns a full revision-delta object that is created using the specified revision-data selector.

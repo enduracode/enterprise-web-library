@@ -32,11 +32,10 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 			revisionDictionariesByEntityType =
 				new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
 					() => {
-						if( previous == null ) {
+						if( previous == null )
 							return cachedEntityTypeAndRevisionSetPairs.Value.ToImmutableDictionary(
 								entityTypeAndRevisions => entityTypeAndRevisions.Item1,
 								entityTypeAndRevisions => entityTypeAndRevisions.Item2.ToImmutableDictionary( i => i.LatestRevisionId, i => Tuple.Create( i, transaction, user ) ) );
-						}
 
 						var newEntityTypeAndRevisionDictionaryPairs =
 							new List<KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
@@ -93,37 +92,37 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Gets the revision's conceptual-entity ID, i.e. the latest-revision ID of the main entity.
 		/// </summary>
-		public int ConceptualEntityId { get { return conceptualEntityId; } }
+		public int ConceptualEntityId => conceptualEntityId;
 
 		/// <summary>
 		/// Gets the conceptual-entity state at this revision. This can be null if you are using that to represent no data at a particular revision.
 		/// </summary>
-		public ConceptualEntityStateType ConceptualEntityState { get { return conceptualEntityState.Value; } }
+		public ConceptualEntityStateType ConceptualEntityState => conceptualEntityState.Value;
 
 		/// <summary>
 		/// Gets the conceptual-entity-delta object for this revision and the previous revision, if one exists. This can be null if you are using that to represent
 		/// no data for a particular revision.
 		/// </summary>
-		public ConceptualEntityDeltaType ConceptualEntityDelta { get { return conceptualEntityDelta.Value; } }
+		public ConceptualEntityDeltaType ConceptualEntityDelta => conceptualEntityDelta.Value;
 
 		/// <summary>
 		/// Gets the transaction.
 		/// </summary>
-		public UserTransaction Transaction { get { return transaction; } }
+		public UserTransaction Transaction => transaction;
 
 		/// <summary>
 		/// Gets the user.
 		/// </summary>
-		public UserType User { get { return user; } }
+		public UserType User => user;
 
 		/// <summary>
 		/// Gets whether there is a previous revision.
 		/// </summary>
-		public bool HasPrevious { get { return previous != null; } }
+		public bool HasPrevious => previous != null;
 
 		/// <summary>
 		/// Gets the previous revision, or null if this is the first revision.
 		/// </summary>
-		public ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> Previous { get { return previous; } }
+		public ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> Previous => previous;
 	}
 }
