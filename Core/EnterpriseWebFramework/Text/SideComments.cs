@@ -4,7 +4,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An HTML small element. See https://html.spec.whatwg.org/multipage/semantics.html#the-small-element.
 	/// </summary>
-	public class SideComments: FlowComponent {
+	public class SideComments: PhrasingComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> children;
 
 		/// <summary>
