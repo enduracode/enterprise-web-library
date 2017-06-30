@@ -565,6 +565,8 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
     <Compile Include="EnterpriseWebFramework\Text\SideComments.cs" />
     <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
