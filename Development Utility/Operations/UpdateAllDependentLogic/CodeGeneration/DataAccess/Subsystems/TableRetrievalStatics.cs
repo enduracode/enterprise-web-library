@@ -97,6 +97,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
 					writeToIdDictionaryMethod( writer, columns );
 
+				if( isRevisionHistoryTable )
+					DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table ), columns.DataColumns );
+
 				writer.WriteLine( "}" ); // class
 			}
 			writer.WriteLine( "}" ); // namespace

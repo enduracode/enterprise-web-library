@@ -184,5 +184,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
 						: "PrimaryDatabaseConnection" );
 		}
+
+		internal static void WriteRevisionDeltaExtensionMethods( TextWriter writer, string retrievalClassName, IEnumerable<Column> columns ) {
+			foreach( var column in columns ) {
+				writer.WriteLine(
+					"public static ValueDelta<{0}> Get{1}Delta( this RevisionDelta<{2}.Row> revisionDelta, string valueName = \"{3}\" ) {{".FormatWith(
+						column.DataTypeName,
+						column.PascalCasedName,
+						retrievalClassName,
+						column.PascalCasedName.CamelToEnglish() ) );
+				writer.WriteLine(
+					"return revisionDelta.GetValueDelta( valueName, i => i.{0} );".FormatWith( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) );
+				writer.WriteLine( "}" );
+			}
+		}
 	}
 }

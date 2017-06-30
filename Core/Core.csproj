@@ -248,6 +248,7 @@
     <Compile Include="DataAccess\RevisionHistory\RevisionId.cs" />
     <Compile Include="DataAccess\RevisionHistory\RevisionIdDelta.cs" />
     <Compile Include="DataAccess\RevisionHistory\UserTransaction.cs" />
+    <Compile Include="DataAccess\RevisionHistory\ValueDelta.cs" />
     <Compile Include="DataAccess\SystemDataAccessProvider.cs" />
     <Compile Include="DatabaseSpecification\Databases\MySqlInfo.cs" />
     <Compile Include="DataValue.cs" />

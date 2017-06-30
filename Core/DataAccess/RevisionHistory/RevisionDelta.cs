@@ -4,7 +4,17 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
 	/// A revision and the previous revision, if one exists.
 	/// </summary>
-	public class RevisionDelta<RevisionDataType, UserType> {
+	public interface RevisionDelta<out RevisionDataType> {
+		/// <summary>
+		/// Returns a value-delta object that is created using the specified value selector.
+		/// </summary>
+		ValueDelta<T> GetValueDelta<T>( string valueName, Func<RevisionDataType, T> valueSelector );
+	}
+
+	/// <summary>
+	/// A revision and the previous revision, if one exists.
+	/// </summary>
+	public class RevisionDelta<RevisionDataType, UserType>: RevisionDelta<RevisionDataType> {
 		private readonly RevisionDataType newRevision;
 		private readonly Tuple<RevisionDataType, UserTransaction, UserType> oldRevisionAndTransactionAndUser;
 
@@ -37,5 +47,14 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// Gets the previous revision's user, if a previous revision exists.
 		/// </summary>
 		public UserType OldUser => oldRevisionAndTransactionAndUser.Item3;
+
+		/// <summary>
+		/// Returns a value-delta object that is created using the specified value selector.
+		/// </summary>
+		public ValueDelta<T> GetValueDelta<T>( string valueName, Func<RevisionDataType, T> valueSelector ) {
+			if( !HasOld )
+				throw new ApplicationException( "A previous revision does not exist." );
+			return new ValueDelta<T>( valueName, valueSelector( New ), valueSelector( Old ) );
+		}
 	}
 }

@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class QueryRetrievalStatics {
@@ -29,7 +30,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				}
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object holds the values returned from a " + query.name + " query." );
-				writer.WriteLine( "public static partial class " + query.name + "Retrieval {" );
+				var className = "{0}Retrieval".FormatWith( query.name );
+				writer.WriteLine( "public static partial class " + className + " {" );
 
 				// Write nested classes.
 				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => { }, localWriter => { } );
@@ -39,6 +41,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				foreach( var postSelectFromClause in query.postSelectFromClauses )
 					writeQueryMethod( writer, database, query, postSelectFromClause );
 				writer.WriteLine( "static partial void updateSingleRowCaches( Row row );" );
+
+				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, className, columns );
+
 				writer.WriteLine( "}" ); // class
 			}
 			writer.WriteLine( "}" ); // namespace
