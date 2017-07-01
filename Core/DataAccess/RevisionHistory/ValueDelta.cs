@@ -13,6 +13,6 @@
 			Old = old;
 		}
 
-		public bool ValueChanged => EwlStatics.AreEqual( New, Old );
+		public bool ValueChanged => !EwlStatics.AreEqual( New, Old );
 	}
 }
