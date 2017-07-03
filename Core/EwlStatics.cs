@@ -181,9 +181,7 @@ namespace EnterpriseWebLibrary {
 			return b ? 1 : 0;
 		}
 
-		/// <summary>
-		/// Converts a boolean to a a user-friendly "Yes/No" equivalent.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017. Use ToYesOrNo or ToYesOrEmpty instead." ) ]
 		public static string BooleanToYesNo( this bool b, bool blankForNo ) {
 			return b ? "Yes" : blankForNo ? "" : "No";
 		}
