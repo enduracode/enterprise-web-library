@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Func<string, string> toolTipInitStatementGetter;
 				EtherealChildren =
 					new ToolTip(
-						( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponent().ToCollection(),
+						( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponents(),
 						out toolTipInitStatementGetter ).ToCollection();
 				JsInitStatementGetter = id => "$( '#{0}' ).click( function( e ) {{ e.preventDefault(); }} );".FormatWith( id ) + toolTipInitStatementGetter( id );
 			}

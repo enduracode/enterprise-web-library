@@ -25,10 +25,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									new EwfButton(
 										new StandardButtonStyle( "Cancel" ),
-										behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) ),
-									" ".ToComponent(),
-									new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) )
-								} ).ToCollection() ) ).ToCollection();
+										behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) )
+								}.Concat(
+									" ".ToComponents() )
+								.Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ).ToCollection() ) ).ToCollection() ) )
+					.ToCollection();
 		}
 
 		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {

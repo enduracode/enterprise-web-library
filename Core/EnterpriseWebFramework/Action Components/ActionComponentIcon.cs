@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static IReadOnlyCollection<PhrasingComponent> GetIconAndTextComponents( ActionComponentIcon icon, string text ) {
 			// Use a container because our CSS selectors for icons include first-child and last-child and these do not take into account "text nodes", i.e. text that
 			// is interspersed with elements.
-			var textComponent = new GenericPhrasingContainer( text.ToComponent().ToCollection() );
+			var textComponent = new GenericPhrasingContainer( text.ToComponents() );
 
 			if( icon == null )
 				return textComponent.ToCollection();

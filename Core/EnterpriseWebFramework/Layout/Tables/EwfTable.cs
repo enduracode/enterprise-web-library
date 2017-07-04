@@ -122,7 +122,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				return;
 			var subCaptionControls = new List<Control>();
 			if( subCaption.Length > 0 )
-				subCaptionControls.AddRange( new PhrasingComponent[] { new LineBreak(), subCaption.ToComponent() }.GetControls() );
+				subCaptionControls.AddRange( new PhrasingComponent[] { new LineBreak() }.Concat( subCaption.ToComponents() ).GetControls() );
 			table.Controls.Add(
 				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( new Control[] { caption.GetLiteralControl() }.Concat( subCaptionControls ) ) );
 		}
