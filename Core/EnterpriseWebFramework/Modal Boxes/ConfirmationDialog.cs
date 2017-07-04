@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -21,15 +22,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					id.ModalBoxId,
 					content.Concat(
 						new Paragraph(
-							new PhrasingComponent[]
-								{
-									new EwfButton(
-										new StandardButtonStyle( "Cancel" ),
-										behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) )
-								}.Concat(
-									" ".ToComponents() )
-								.Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ).ToCollection() ) ).ToCollection() ) )
-					.ToCollection();
+							new EwfButton(
+								new StandardButtonStyle( "Cancel" ),
+								behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) ).Concat(
+									" ".ToComponents() ).Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ) ) )
+							.ToCollection() ) ).ToCollection();
 		}
 
 		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
