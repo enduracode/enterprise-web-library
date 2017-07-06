@@ -52,9 +52,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// Returns a value-delta object that is created using the specified value selector.
 		/// </summary>
 		public ValueDelta<T> GetValueDelta<T>( string valueName, Func<RevisionDataType, T> valueSelector ) {
-			if( !HasOld )
-				throw new ApplicationException( "A previous revision does not exist." );
-			return new ValueDelta<T>( valueName, valueSelector( New ), valueSelector( Old ) );
+			return new ValueDelta<T>( valueName, valueSelector( New ), HasOld ? Tuple.Create( valueSelector( Old ) ) : null );
 		}
 	}
 }
