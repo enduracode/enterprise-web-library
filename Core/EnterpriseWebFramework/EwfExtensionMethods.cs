@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,18 +13,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Useful methods that require a web context.
 	/// </summary>
 	public static class EwfExtensionMethods {
-		/// <summary>
-		/// Returns a System.Web.UI.WebControls.Literal that contains an HTML encoded version of this string.
-		/// // NOTE: This should be renamed to "ToControl."
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public static Literal GetLiteralControl( this string s, bool returnNonBreakingSpaceIfEmpty = true ) {
 			return new Literal { Text = s.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: returnNonBreakingSpaceIfEmpty ) };
 		}
 
-		/// <summary>
-		/// Returns an EWF label control with the given text.
-		/// EWF Labels automatically HTML encode text.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public static EwfLabel GetLabelControl( this string s ) {
 			return new EwfLabel { Text = s };
 		}
