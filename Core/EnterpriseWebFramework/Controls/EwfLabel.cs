@@ -1,17 +1,13 @@
-﻿using System.Web.UI;
+﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// A label that automatically HTML encodes its contents, and supports EWF ToolTips.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 	public class EwfLabel: WebControl, ControlTreeDataLoader {
 		private readonly Literal label = new Literal();
 
-		/// <summary>
-		/// Sets the text on the label. Text will be automatically HTML encoded.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public string Text { set { label.Text = value.GetTextAsEncodedHtml(); } }
 
 		/// <summary>

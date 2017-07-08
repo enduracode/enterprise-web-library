@@ -1,19 +1,14 @@
-﻿using System.Web.UI;
+﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// A control to semantically represent langauge with importance.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 	public sealed class Strong: WebControl {
-		/// <summary>
-		/// Constructs a control with the given text.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public Strong( string text ): this( text.GetLiteralControl() ) {}
 
-		/// <summary>
-		/// Constructs a control with the given child controls.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public Strong( params Control[] controls ) {
 			foreach( var c in controls )
 				Controls.Add( c );

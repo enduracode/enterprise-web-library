@@ -1,19 +1,14 @@
-﻿using System.Web.UI;
+﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// A control to semantically represent language with emphasis.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 	public sealed class Emphasis: WebControl {
-		/// <summary>
-		/// Constructs this control with the given text.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public Emphasis( string text ): this( text.GetLiteralControl() ) {}
 
-		/// <summary>
-		/// Constructs this control with the given child controls.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
 		public Emphasis( params Control[] controls ) {
 			foreach( var c in controls )
 				Controls.Add( c );
