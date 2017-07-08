@@ -373,8 +373,6 @@
     <Compile Include="Encryption\EncryptionOps.cs" />
     <Compile Include="EnterpriseWebFramework\ActionButtonSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Subscript.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Superscript.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClass.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClassSet.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\ElementComponent.cs" />
@@ -578,6 +576,8 @@
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
     <Compile Include="EnterpriseWebFramework\Text\SideComments.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\Subscript.cs" />
+    <Compile Include="EnterpriseWebFramework\Text\Superscript.cs" />
     <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
