@@ -344,12 +344,12 @@ ewfProcessingDialogBlockAllStates {
 	font-size: .8rem;
 	top: 50%;
 	left: 50%;
-	margin-top: -4rem;
+	margin-top: -4.5rem;
 	margin-left: -9rem;
 	box-shadow: 0 0 15px black;
 	border-radius: 15px;
 	background-color: white;
-	padding: 0 .5rem;
+	padding: .5rem;
 	width: 17rem;
 	text-align: center;
 	color: black;
@@ -378,7 +378,9 @@ ewfProcessingDialogProcessingParagraph {
 	align-items: center;
 	cursor: default;
 }
-#ewfEllipsis1, #ewfEllipsis2, #ewfEllipsis3 {
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis1,
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis2,
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
 	-webkit-animation: pulse 2s infinite;
 	animation: pulse 2s infinite;
 }
@@ -404,15 +406,15 @@ ewfProcessingDialogProcessingParagraph {
 		opacity: 1;
 	}
 }
-#ewfEllipsis1 {
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis1 {
 	-webkit-animation-delay: 0;
 	animation-delay: 0;
 }
-#ewfEllipsis2 {
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis2 {
 	-webkit-animation-delay: 200ms;
 	animation-delay: 200ms;
 }
-#ewfEllipsis3 {
+ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
 	-webkit-animation-delay: 300ms;
 	animation-delay: 300ms;
 }

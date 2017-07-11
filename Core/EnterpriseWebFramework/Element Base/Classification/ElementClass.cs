@@ -1,6 +1,6 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ElementClass {
-		internal readonly string ClassName;
+		public readonly string ClassName;
 
 		/// <summary>
 		/// Creates an element class.

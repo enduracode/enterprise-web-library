@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -9,6 +10,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.U
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
@@ -16,17 +18,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private const string topWarningBlockCssClass = "ewfTopWarning";
 		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
 		private const string clickBlockerActiveClass = "ewfClickBlockerA";
-		private const string processingDialogBlockInactiveClass = "ewfProcessingDialogI";
-		private const string processingDialogBlockActiveClass = "ewfProcessingDialogA";
-		private const string processingDialogBlockTimeOutClass = "ewfProcessingDialogTo";
-		private const string processingDialogProcessingParagraphClass = "ewfProcessingP";
-		private const string processingDialogTimeOutParagraphClass = "ewfTimeOutP";
+		private static readonly ElementClass processingDialogBlockInactiveClass = new ElementClass( "ewfProcessingDialogI" );
+		private static readonly ElementClass processingDialogBlockActiveClass = new ElementClass( "ewfProcessingDialogA" );
+		private static readonly ElementClass processingDialogBlockTimeOutClass = new ElementClass( "ewfProcessingDialogTo" );
+		private static readonly ElementClass processingDialogProcessingParagraphClass = new ElementClass( "ewfProcessingP" );
+		private static readonly ElementClass processingDialogTimeOutParagraphClass = new ElementClass( "ewfTimeOutP" );
 		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
 		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
 		private const string notificationSpacerClass = "ewfNotificationSpacer";
 		private const string infoMessageContainerClass = "ewfInfoMsg";
 		private const string warningMessageContainerClass = "ewfWarnMsg";
-		private const string statusMessageTextClass = "ewfStatusText";
+		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
 
 		internal class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
@@ -47,9 +49,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private IEnumerable<CssElement> getProcessingDialogElements() {
 				var elements = new List<CssElement>();
 
-				const string blockInactiveSelector = "div." + processingDialogBlockInactiveClass;
-				const string blockActiveSelector = "div." + processingDialogBlockActiveClass;
-				const string blockTimeOutSelector = "div." + processingDialogBlockTimeOutClass;
+				var blockInactiveSelector = "div." + processingDialogBlockInactiveClass.ClassName;
+				var blockActiveSelector = "div." + processingDialogBlockActiveClass.ClassName;
+				var blockTimeOutSelector = "div." + processingDialogBlockTimeOutClass.ClassName;
 				var allBlockSelectors = new[] { blockInactiveSelector, blockActiveSelector, blockTimeOutSelector };
 				elements.AddRange(
 					new[]
@@ -59,9 +61,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						} );
 
 				elements.Add(
-					new CssElement( "ProcessingDialogProcessingParagraph", allBlockSelectors.Select( i => i + " > p." + processingDialogProcessingParagraphClass ).ToArray() ) );
+					new CssElement(
+						"ProcessingDialogProcessingParagraph",
+						allBlockSelectors.Select( i => i + " > p." + processingDialogProcessingParagraphClass.ClassName ).ToArray() ) );
 
-				const string timeOutParagraphSelector = "p." + processingDialogTimeOutParagraphClass;
+				var timeOutParagraphSelector = "p." + processingDialogTimeOutParagraphClass.ClassName;
 				elements.AddRange(
 					new[]
 						{
@@ -91,9 +95,45 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass ) );
 				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass ) );
 				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass ) );
-				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass ) );
+				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
 
 				return elements;
+			}
+		}
+
+		// We can remove this and just use Font Awesome as soon as https://github.com/FortAwesome/Font-Awesome/issues/671 is fixed.
+		private class Spinner: PhrasingComponent {
+			private readonly IReadOnlyCollection<FlowComponent> children;
+
+			public Spinner() {
+				children =
+					new ElementComponent( context =>
+					                      new ElementData( () =>
+					                                       new ElementLocalData( "span",
+						                                       attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
+						                                       includeIdAttribute: true,
+						                                       jsInitStatements: @"new Spinner( {
+	lines: 13, // The number of lines to draw
+	length: 8, // The length of each line
+	width: 5, // The line thickness
+	radius: 9, // The radius of the inner circle
+	corners: 1, // Corner roundness (0..1)
+	rotate: 0, // The rotation offset
+	direction: 1, // 1: clockwise, -1: counterclockwise
+	color: ""#000"", // #rgb or #rrggbb or array of colors
+	speed: 1.2, // Rounds per second
+	trail: 71, // Afterglow percentage
+	shadow: false, // Whether to render a shadow
+	hwaccel: true, // Whether to use hardware acceleration
+	className: ""spinner"", // The CSS class to assign to the spinner
+	zIndex: 2e9, // The z-index (defaults to 2000000000)
+	top: ""50%"", // Top position relative to parent
+	left: ""50%"" // Left position relative to parent
+} ).spin( document.getElementById( """ + context.Id + "\" ) );" ) ) ).ToCollection();
+			}
+
+			IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+				return children;
 			}
 		}
 
@@ -122,7 +162,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !ConfigurationStatics.IsLiveInstallation ) {
 				var children = new List<Control>();
 				children.AddRange( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection().GetControls() );
-				children.Add( " This is not the live system. Changes made here will be lost and are not recoverable. ".GetLiteralControl() );
+				children.AddRange( " This is not the live system. Changes made here will be lost and are not recoverable. ".ToComponents().GetControls() );
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
 					children.Add(
 						new PostBackButton(
@@ -139,27 +179,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
 						new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection()
-							.GetControls()
 							.Concat(
-								" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".GetLiteralControl()
-									.ToCollection() ) ) );
+								" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".ToComponents() )
+							.GetControls() ) );
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
 			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )
 				warningControls.Add(
 					new PlaceHolder().AddControlsReturnThis(
-						"User impersonation is in effect. ".GetLiteralControl(),
-						EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ),
-						" ".GetLiteralControl(),
-						new PostBackButton(
-							new ButtonActionControlStyle( "End Impersonation", ButtonSize.ShrinkWrap ),
-							usesSubmitBehavior: false,
-							postBack:
-								PostBack.CreateFull(
-									id: "ewfEndImpersonation",
-									firstModificationMethod: UserImpersonationStatics.EndImpersonation,
-									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) );
+						"User impersonation is in effect. ".ToComponents()
+							.GetControls()
+							.Concat( EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ) )
+							.Concat( " ".ToComponents().GetControls() )
+							.Concat(
+								new PostBackButton(
+									new ButtonActionControlStyle( "End Impersonation", ButtonSize.ShrinkWrap ),
+									usesSubmitBehavior: false,
+									postBack:
+										PostBack.CreateFull(
+											id: "ewfEndImpersonation",
+											firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+											actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) ) );
 
 			if( warningControls.Any() ) {
 				var warningControl = warningControls.Count > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
@@ -171,57 +212,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			ph2.AddControlsReturnThis(
 				new Block { ClientIDMode = ClientIDMode.Static, ID = clickBlockerId, CssClass = clickBlockerInactiveClass },
-				getProcessingDialog(),
+				new PlaceHolder().AddControlsReturnThis( getProcessingDialog().GetControls() ),
 				new NamingPlaceholder( getStatusMessageControl() ) );
 
 			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
-		private Control getProcessingDialog() {
-			/*
-			 * We switched from an animated GIF to a JavaScript-based spinner due to a number of benefits.
-			 * First, IE stops animating all GIFs when a request is made, even with the latest version. They do not believe this is a bug.
-			 * Firefox stops animating GIFs in other situations, such as when we hide the processing dialog when the user wants to attempt
-			 * the request again.
-			 * In both of the above situations, there are a number of convoluted hacks that fix the problem in some situations, but not all. One example is
-			 * enumerating the images in the document in JavaScript and setting the src attribute to the value of the src attribute.
-			 * The above problems still exist even if you use CSS to display the image, using the background-image style.
-			 * An alternate situation may be to use a PNG and use CSS3 animations to rotate the image, making it spin. However browser support still
-			 * isn't solid for CSS3 animations, such as all IE versions before IE10. 
-			 * Another point against images is that you have to prevent dragging and disable selection, to make the interface look more professional.
-			 * Spin.js also has the benefit of being fully compatible with all browsers across the board.
-			 */
-
-			// These are used by the EWF JavaScript file.
-			const string dialogId = "ewfProcessingDialog";
-			const string spinnerId = "ewfSpinner";
-
-			var spinnerParent = new EwfLabel { ClientIDMode = ClientIDMode.Static, ID = spinnerId };
-			spinnerParent.Style.Add( HtmlTextWriterStyle.Position, "relative" );
-			spinnerParent.Style.Add( HtmlTextWriterStyle.MarginLeft, "25px" );
-			spinnerParent.Style.Add( HtmlTextWriterStyle.MarginRight, "40px" );
+		private IReadOnlyCollection<FlowComponent> getProcessingDialog() {
+			// This is used by the EWF JavaScript file.
+			var dialogClass = new ElementClass( "ewfProcessingDialog" );
 
 			return
-				new Block(
-					new LegacyParagraph(
-						spinnerParent,
-						Translation.Processing.GetLiteralControl(),
-						getProcessingDialogEllipsisDot( 1 ),
-						getProcessingDialogEllipsisDot( 2 ),
-						getProcessingDialogEllipsisDot( 3 ) ) { CssClass = processingDialogProcessingParagraphClass },
-					new LegacyParagraph(
-						new CustomButton( () => "stopPostBackRequest()" ) { ActionControlStyle = new TextActionControlStyle( Translation.ThisSeemsToBeTakingAWhile ) } )
-						{
-							CssClass = processingDialogTimeOutParagraphClass
-						} ) { ClientIDMode = ClientIDMode.Static, ID = dialogId, CssClass = processingDialogBlockInactiveClass };
+				new GenericFlowContainer(
+					new Paragraph(
+						new Spinner().ToCollection<PhrasingComponent>()
+							.Concat( Translation.Processing.ToComponents() )
+							.Concat( getProcessingDialogEllipsisDot( 1 ) )
+							.Concat( getProcessingDialogEllipsisDot( 2 ) )
+							.Concat( getProcessingDialogEllipsisDot( 3 ) ),
+						classes: processingDialogProcessingParagraphClass ).ToCollection()
+						.Concat(
+							new Paragraph(
+								new EwfButton(
+									new StandardButtonStyle( Translation.ThisSeemsToBeTakingAWhile, buttonSize: ButtonSize.ShrinkWrap ),
+									behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
+								classes: processingDialogTimeOutParagraphClass ) ),
+					classes: dialogClass.Add( processingDialogBlockInactiveClass ) ).ToCollection();
 		}
 
 		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
-		private Control getProcessingDialogEllipsisDot( int dotNumber ) {
-			// This is used by the Basic style sheet.
-			const string id = "ewfEllipsis";
+		private IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
+			// This is used by EWF CSS files.
+			var dotClass = new ElementClass( $"ewfProcessingEllipsis{dotNumber}" );
 
-			return new EwfLabel { ClientIDMode = ClientIDMode.Static, ID = "{0}{1}".FormatWith( id, dotNumber ), Text = "." };
+			return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 		}
 
 		private IEnumerable<Control> getStatusMessageControl() {
@@ -252,11 +276,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					EwfPage.Instance.StatusMessages.Select(
 						i =>
 						new Block(
-							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ).ToCollection()
-							.GetControls()
-							.Concat( new EwfLabel { CssClass = statusMessageTextClass, Text = i.Item2 }.ToCollection() )
-							.ToArray() ) { CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass } as Control ).ToArray() )
-					.ToCollection();
+							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ).ToCollection<PhrasingComponent>
+							().Concat( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) ).GetControls().ToArray() )
+							{
+								CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass
+							} as Control ).ToArray() ).ToCollection();
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
