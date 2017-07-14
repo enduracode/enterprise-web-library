@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
+using MoreLinq;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -120,11 +121,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private static void addCaptionIfNecessary( WebControl table, string caption, string subCaption ) {
 			if( caption.Length == 0 )
 				return;
-			var subCaptionControls = new List<Control>();
+			var subCaptionComponents = new List<PhrasingComponent>();
 			if( subCaption.Length > 0 )
-				subCaptionControls.AddRange( new PhrasingComponent[] { new LineBreak() }.Concat( subCaption.ToComponents() ).GetControls() );
+				subCaptionComponents.AddRange( new LineBreak().ToCollection().Concat( subCaption.ToComponents() ) );
 			table.Controls.Add(
-				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( new Control[] { caption.GetLiteralControl() }.Concat( subCaptionControls ) ) );
+				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( caption.ToComponents().Concat( subCaptionComponents ).GetControls() ) );
 		}
 
 		internal static IReadOnlyCollection<EwfTableField> GetFields(
@@ -548,31 +549,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				return new EwfTableItem[ 0 ];
 
 			var itemCount = itemGroups.Sum( i => i.Items.Count );
-			var cl =
-				new ControlLine(
-					new NamingPlaceholder(
-						"Item".ToQuantity( itemCount ).GetLiteralControl().ToCollection(),
-						updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ),
-					"".GetLiteralControl(),
-					"Show:".GetLiteralControl() );
-			cl.AddControls( getItemLimitButton( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) );
-			cl.AddControls( getItemLimitButton( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) );
-			cl.AddControls( getItemLimitButton( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) );
-			return new EwfTableItem( cl.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+			var list =
+				new LineList(
+					( (LineListItem)
+					  new PhrasingIdContainer(
+						  "Item".ToQuantity( itemCount ).ToComponents(),
+						  updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) )
+						  .ToCollection().ToComponentListItem() ).ToCollection()
+						.Concat( "".ToComponents().ToComponentListItem() )
+						.Concat( "Show:".ToComponents().ToComponentListItem() )
+						.Concat( getItemLimitButtonItem( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
+						.Concat( getItemLimitButtonItem( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
+						.Concat( getItemLimitButtonItem( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
+			return new EwfTableItem( list.ToCollection().GetControls().ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
-		private Control getItemLimitButton( DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
+		private ComponentListItem getItemLimitButtonItem( DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 			if( itemLimit == (DataRowLimit)CurrentItemLimit )
-				return text.GetLiteralControl();
-			return new PostBackButton(
-				new TextActionControlStyle( text ),
-				usesSubmitBehavior: false,
-				postBack:
-					PostBack.CreateIntermediate(
-						updateRegionSet.ToCollection(),
-						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ) );
+				return text.ToComponents().ToComponentListItem();
+			return
+				new EwfButton(
+					new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+					behavior:
+						new PostBackBehavior(
+							postBack:
+								PostBack.CreateIntermediate(
+									updateRegionSet.ToCollection(),
+									id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
+									firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ) ) ).ToCollection()
+					.ToComponentListItem();
 		}
 
 		private EwfTableItem[] getItemActionsItem( int fieldCount ) {
