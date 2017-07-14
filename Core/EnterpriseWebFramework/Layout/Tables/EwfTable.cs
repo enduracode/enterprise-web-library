@@ -342,6 +342,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			this.itemGroups = itemGroups.ToImmutableArray();
 			this.tailUpdateRegions = tailUpdateRegions?.ToImmutableArray() ?? ImmutableArray<TailUpdateRegion>.Empty;
 
+			// When we migrate EwfTable to the new component model, consider having ElementComponent (or ElementNode) store the current DMs and execute the
+			// elementDataGetter with them. This would save developers from having to manually do this when creating intermediate post-backs for click scripts.
 			dataModifications = FormState.Current.DataModifications;
 		}
 
@@ -526,7 +528,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								itemLimitingRowGroup,
 								updateRegionSets:
 									itemLimitingUpdateRegionSet.ToCollection()
-										.Concat( itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ) ) );
+										.Concat(
+											itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).ToImmutableArray().Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) ) ) );
 
 						// Assert that every visible item in the table has the same number of cells and store a data structure for below.
 						var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
@@ -554,7 +557,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					( (LineListItem)
 					  new PhrasingIdContainer(
 						  "Item".ToQuantity( itemCount ).ToComponents(),
-						  updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) )
+						  updateRegionSets:
+						  itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).ToImmutableArray().Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) )
 						  .ToCollection().ToComponentListItem() ).ToCollection()
 						.Concat( "".ToComponents().ToComponentListItem() )
 						.Concat( "Show:".ToComponents().ToComponentListItem() )
