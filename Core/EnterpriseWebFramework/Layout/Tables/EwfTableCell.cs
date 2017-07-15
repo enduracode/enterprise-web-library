@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal EwfTableCell( TableCellSetup setup, string text ) {
 			Setup = setup;
-			Controls = ( text ?? "" ).GetLiteralControl().ToCollection();
+			Controls = ( text ?? "" ).ToComponents().GetControls().ToImmutableArray();
 			simpleText = text;
 		}
 
@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Setup = setup;
 
 			Controls = controls.ToImmutableArray();
-			Controls = Controls.Any() ? Controls : "".GetLiteralControl().ToCollection();
+			Controls = Controls.Any() ? Controls : "".ToComponents().GetControls().ToImmutableArray();
 
 			simpleText = null;
 		}

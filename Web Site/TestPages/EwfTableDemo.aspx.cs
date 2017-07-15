@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				package.FirstGroupItemCount = 45;
 			}
 
-			public override string ResourceName { get { return "EWF Table"; } }
+			public override string ResourceName => "EWF Table";
 		}
 
 		protected override void loadData() {
@@ -56,7 +56,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new EwfTableItemGroup(
 					() =>
 					new EwfTableItemGroupRemainingData(
-						"Group {0}".FormatWith( groupNumber ).GetLiteralControl(),
+						new PlaceHolder().AddControlsReturnThis( "Group {0}".FormatWith( groupNumber ).ToComponents().GetControls() ),
 						groupHeadClickScript:
 						ClickScript.CreatePostBackScript(
 							PostBack.CreateIntermediate(
@@ -77,8 +77,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								  PostBack.CreateIntermediate(
 									  updateRegionSet.ToCollection(),
 									  id: "addRow",
-									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) )
-							  .ToCollection() )
+									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) ).ToCollection() )
 						: getItems( 250 ) );
 		}
 

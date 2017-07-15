@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -12,7 +13,7 @@ using Humanizer;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	partial class ContactSupport: EwfPage {
 		partial class Info {
-			protected override bool userCanAccessResource { get { return AppTools.User != null; } }
+			protected override bool userCanAccessResource => AppTools.User != null;
 		}
 
 		private readonly DataValue<string> body = new DataValue<string>();
@@ -26,12 +27,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				() => {
 					var table = FormItemBlock.CreateFormItemTable();
 					table.AddFormItems(
-						FormItem.Create( "From", new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress().ToString().GetLiteralControl() ),
+						FormItem.Create(
+							"From",
+							new PlaceHolder().AddControlsReturnThis(
+								new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress().ToString().ToComponents().GetControls() ) ),
 						FormItem.Create(
 							"To",
-							"{0} ({1} for this system)".FormatWith(
-								StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
-								"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) ).GetLiteralControl() ),
+							new PlaceHolder().AddControlsReturnThis(
+								"{0} ({1} for this system)".FormatWith(
+									StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
+									"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
+									.ToComponents()
+									.GetControls() ) ),
 						FormItem.Create(
 							"Message",
 							new EwfTextBox( "", rows: 10 ),

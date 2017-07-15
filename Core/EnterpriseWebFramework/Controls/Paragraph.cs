@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -17,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a paragraph with the given text as a Literal control.
 		/// </summary>
-		public LegacyParagraph( string text ): this( text.GetLiteralControl() ) {}
+		public LegacyParagraph( string text ): this( text.ToComponents().GetControls().ToArray() ) {}
 
 		/// <summary>
 		/// Creates a paragraph with the specified child controls.

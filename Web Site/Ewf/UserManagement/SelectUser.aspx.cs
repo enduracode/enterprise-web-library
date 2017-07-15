@@ -31,9 +31,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			if( ConfigurationStatics.IsLiveInstallation )
 				ph.AddControlsReturnThis(
-					new LegacyParagraph(
-						new Strong( "Warning:" ),
-						" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".GetLiteralControl() ) );
+					new Paragraph(
+						new ImportantContent( "Warning:".ToComponents() ).ToCollection()
+							.Concat( " Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() ) )
+						.ToCollection().GetControls() );
 
 			DataValue<User> user = new DataValue<User>();
 			var pb = PostBack.CreateFull(

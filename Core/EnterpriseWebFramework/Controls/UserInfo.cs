@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// EWL use only. Do not call if there is no authenticated user.
 		/// </summary>
 		public void LoadData( PageInfo changePasswordPage ) {
-			this.AddControlsReturnThis( ( "Logged in as " + AppTools.User.Email ).GetLiteralControl() );
+			this.AddControlsReturnThis( ( "Logged in as " + AppTools.User.Email ).ToComponents().GetControls() );
 			if( !FormsAuthStatics.FormsAuthEnabled )
 				return;
 			this.AddControlsReturnThis(

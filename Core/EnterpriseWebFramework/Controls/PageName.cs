@@ -15,10 +15,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns true if this control will not display any content.
 		/// </summary>
-		public bool IsEmpty { get { return !getPageName().Any(); } }
+		public bool IsEmpty => !getPageName().Any();
 
 		void ControlTreeDataLoader.LoadData() {
-			Controls.Add( getPageName().GetLiteralControl() );
+			Controls.Add( new PlaceHolder().AddControlsReturnThis( getPageName().ToComponents().GetControls() ) );
 		}
 
 		private string getPageName() {
@@ -30,6 +30,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the h1 tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.H1; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.H1;
 	}
 }

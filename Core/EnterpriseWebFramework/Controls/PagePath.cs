@@ -52,14 +52,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns true if this control will not display any content.
 		/// </summary>
-		public bool IsEmpty { get { return EwfPage.Instance.InfoAsBaseType.ResourcePath.Count() == 1 && ( pageName == null || pageName.IsEmpty ); } }
+		public bool IsEmpty => EwfPage.Instance.InfoAsBaseType.ResourcePath.Count() == 1 && ( pageName == null || pageName.IsEmpty );
 
 		void ControlTreeDataLoader.LoadData() {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 			var pagePath = EwfPage.Instance.InfoAsBaseType.ResourcePath;
 			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
 				Controls.Add( EwfLink.Create( resource, new ButtonActionControlStyle( resource.ResourceFullName, buttonSize: ButtonSize.ShrinkWrap ) ) );
-				Controls.Add( ResourceInfo.ResourcePathSeparator.GetLiteralControl() );
+				Controls.Add( new PlaceHolder().AddControlsReturnThis( ResourceInfo.ResourcePathSeparator.ToComponents().GetControls() ) );
 			}
 			if( pageName != null )
 				Controls.Add( pageName );
@@ -70,6 +70,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

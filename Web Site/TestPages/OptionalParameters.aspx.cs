@@ -64,10 +64,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			table.AddItem(
 				new EwfTableItem(
 					url,
-					( !validator.ErrorsOccurred ).BooleanToYesNo( false )
+					( !validator.ErrorsOccurred ).ToYesOrEmpty()
 						.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );
 		}
 
-		public override bool IsAutoDataUpdater { get { return true; } }
+		public override bool IsAutoDataUpdater => true;
 	}
 }

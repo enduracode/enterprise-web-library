@@ -94,7 +94,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( IncludeButtonWithThisText != null ) {
 						// We need to do logic to get the button to be on the right of the row.
 						if( useFormItemListMode && numberOfColumns.HasValue ) {
-							var widthOfLastRowWithButton = getFormItemRows( formItems, numberOfColumns.Value ).Last().Sum( fi => getCellSpan( fi ) ) + defaultFormItemCellSpan;
+							var widthOfLastRowWithButton = getFormItemRows( formItems, numberOfColumns.Value ).Last().Sum( getCellSpan ) + defaultFormItemCellSpan;
 							var numberOfPlaceholdersRequired = 0;
 							if( widthOfLastRowWithButton < numberOfColumns.Value )
 								numberOfPlaceholdersRequired = numberOfColumns.Value - widthOfLastRowWithButton;
@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private WebControl getTableForFormItemList() {
-			var actualNumberOfColumns = numberOfColumns ?? formItems.Sum( fi => getCellSpan( fi ) );
+			var actualNumberOfColumns = numberOfColumns ?? formItems.Sum( getCellSpan );
 			if( actualNumberOfColumns < 1 )
 				throw new ApplicationException( "There must be at least one column." );
 
@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// NOTE: Make control list use an implementation more like this?
 			foreach( var row in getFormItemRows( formItems, actualNumberOfColumns ) ) {
 				var items = row.ToList();
-				( actualNumberOfColumns - row.Sum( r => getCellSpan( r ) ) ).Times( () => items.Add( getPlaceholderFormItem() ) );
+				( actualNumberOfColumns - row.Sum( getCellSpan ) ).Times( () => items.Add( getPlaceholderFormItem() ) );
 
 				table.AddItem(
 					new EwfTableItem(
@@ -148,7 +148,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			while( formItems.Any() ) {
 				var items = new List<FormItem>();
 				foreach( var formItem in formItems ) {
-					if( items.Sum( i => getCellSpan( i ) ) + getCellSpan( formItem ) <= numberOfColumns )
+					if( items.Sum( getCellSpan ) + getCellSpan( formItem ) <= numberOfColumns )
 						items.Add( formItem );
 					else
 						break;
@@ -159,8 +159,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return results;
 		}
 
-		private FormItem<Literal> getPlaceholderFormItem() {
-			return FormItem.Create( "", "".GetLiteralControl(), cellSpan: 1 );
+		private FormItem getPlaceholderFormItem() {
+			return FormItem.Create( "", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ), cellSpan: 1 );
 		}
 
 		private int getCellSpan( FormItem formItem ) {
@@ -192,6 +192,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the tag that represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }

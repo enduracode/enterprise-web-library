@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( textControl != null )
 					if( getAlternateText().Any() ) {
 						textControl.Controls.Clear();
-						textControl.Controls.Add( getAlternateText().GetLiteralControl() );
+						textControl.Controls.Add( new PlaceHolder().AddControlsReturnThis( getAlternateText().ToComponents().GetControls() ) );
 					}
 					else
 						this.SetInitialDisplay( false );

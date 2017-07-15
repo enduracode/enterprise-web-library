@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using Aspose.Pdf.Facades;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InputValidation;
@@ -118,7 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public static Control GetFileLink( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
 			var file = GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
-				return textIfNoFile.GetLiteralControl();
+				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
 			return new PostBackButton(
 				new TextActionControlStyle( labelOverride ?? file.FileName ),
 				usesSubmitBehavior: false,
@@ -138,7 +139,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public static Control GetFileLinkFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
 			var file = SystemProvider.GetFile( fileId );
 			if( file == null )
-				return textIfNoFile.GetLiteralControl();
+				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
 			return new PostBackButton(
 				new TextActionControlStyle( labelOverride ?? file.FileName ),
 				usesSubmitBehavior: false,

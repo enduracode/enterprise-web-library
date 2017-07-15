@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	internal class ToolTip: EtherealControl {
 		internal static Control GetToolTipTextControl( string toolTip ) {
-			return toolTip.GetLiteralControl();
+			return new PlaceHolder().AddControlsReturnThis( toolTip.ToComponents().GetControls() );
 		}
 
 		private readonly WebControl control;
@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			EwfPage.Instance.AddEtherealControl( targetControl, this );
 		}
 
-		WebControl EtherealControl.Control { get { return control; } }
+		WebControl EtherealControl.Control => control;
 
 		string EtherealControl.GetJsInitStatements() {
 			// If changing this, note that the Basic style sheet may contain qTip2-specific rules.

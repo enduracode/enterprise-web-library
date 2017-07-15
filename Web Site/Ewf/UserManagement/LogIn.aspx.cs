@@ -4,6 +4,7 @@ using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using MoreLinq;
 
 // Parameter: string returnUrl
 
@@ -50,11 +51,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						registeredTable.AddItem(
 							new EwfTableItem(
 								new PlaceHolder().AddControlsReturnThis(
-									"If you are a first-time user and do not know your password, or if you have forgotten your password, ".GetLiteralControl(),
-									new PostBackButton(
-										new TextActionControlStyle( "click here to immediately send yourself a new password." ),
-										usesSubmitBehavior: false,
-										postBack: newPasswordPb ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+									"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
+										.GetControls()
+										.Concat(
+											new PostBackButton(
+												new TextActionControlStyle( "click here to immediately send yourself a new password." ),
+												usesSubmitBehavior: false,
+												postBack: newPasswordPb ) ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 					ph.AddControlsReturnThis( registeredTable );
 

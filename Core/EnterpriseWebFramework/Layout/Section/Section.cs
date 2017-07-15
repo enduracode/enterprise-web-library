@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,8 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private const string boxClosedClass = "ewfSecBoxClosed";
 		private const string boxExpandedClass = "ewfSecBoxExpanded";
 		private const string headingClass = "ewfSecHeading";
-		private const string closeClass = "ewfSecClose";
-		private const string expandClass = "ewfSecExpand";
+		private static readonly ElementClass closeClass = new ElementClass( "ewfSecClose" );
+		private static readonly ElementClass expandClass = new ElementClass( "ewfSecExpand" );
 		private const string contentClass = "ewfSecContent";
 
 		internal class CssElementCreator: ControlCssElementCreator {
@@ -36,8 +37,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "SectionNormalStyleClosedState", normalClosedSelector ), new CssElement( "SectionNormalStyleExpandedState", normalExpandedSelector ),
 						new CssElement( "SectionBoxStyleBothStates", boxClosedSelector, boxExpandedSelector ), new CssElement( "SectionBoxStyleClosedState", boxClosedSelector ),
 						new CssElement( "SectionBoxStyleExpandedState", boxExpandedSelector ), new CssElement( "SectionHeadingContainer", "* > div." + headingClass ),
-						new CssElement( "SectionHeading", "h1." + headingClass ), new CssElement( "SectionExpandLabel", "span." + closeClass ),
-						new CssElement( "SectionCloseLabel", "span." + expandClass ), new CssElement( "SectionContentContainer", "div." + contentClass )
+						new CssElement( "SectionHeading", "h1." + headingClass ), new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ),
+						new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ), new CssElement( "SectionContentContainer", "div." + contentClass )
 					};
 			}
 		}
@@ -67,8 +68,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public Section(
 			SectionStyle style, string heading, IEnumerable<Control> postHeadingControls, IEnumerable<Control> contentControls, bool? expanded,
 			bool disableStatePersistence ): base( "section" ) {
-			postHeadingControls = postHeadingControls != null ? postHeadingControls.ToArray() : new Control[ 0 ];
-			contentControls = contentControls != null ? contentControls.ToArray() : new Control[ 0 ];
+			postHeadingControls = postHeadingControls?.ToArray() ?? new Control[ 0 ];
+			contentControls = contentControls?.ToArray() ?? new Control[ 0 ];
 
 			CssClass =
 				CssClass.ConcatenateWithSpace(
@@ -79,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( heading.Any() ) {
 				var headingControls =
-					new WebControl( HtmlTextWriterTag.H1 ) { CssClass = headingClass }.AddControlsReturnThis( heading.GetLiteralControl() )
+					new WebControl( HtmlTextWriterTag.H1 ) { CssClass = headingClass }.AddControlsReturnThis( heading.ToComponents().GetControls() )
 						.ToCollection()
 						.Concat( postHeadingControls );
 				if( expanded.HasValue ) {
@@ -87,8 +88,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					var headingContainer =
 						new Block(
-							new[] { new EwfLabel { Text = "Click to Expand", CssClass = closeClass }, new EwfLabel { Text = "Click to Close", CssClass = expandClass } }.Concat(
-								headingControls ).ToArray() ) { CssClass = headingClass };
+							new GenericPhrasingContainer( "Click to Expand".ToComponents(), classes: closeClass ).ToCollection()
+								.Concat( new GenericPhrasingContainer( "Click to Close".ToComponents(), classes: expandClass ) )
+								.GetControls()
+								.Concat( headingControls )
+								.ToArray() ) { CssClass = headingClass };
 					var actionControlStyle = new CustomActionControlStyle( c => c.AddControlsReturnThis( headingContainer ) );
 
 					this.AddControlsReturnThis(
@@ -97,8 +101,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									ActionControlStyle = actionControlStyle
 								}
-							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as
-							  Control );
+							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as Control );
 				}
 				else {
 					var headingContainer = new Block( headingControls.ToArray() ) { CssClass = headingClass };

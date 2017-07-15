@@ -16,7 +16,7 @@ using Humanizer;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class EwfTextBoxDemo: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return "Text Box"; } }
+			public override string ResourceName => "Text Box";
 		}
 
 		protected override void loadData() {
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private void addMessageIfNotNull( Control control, string s ) {
 			if( s != null )
-				control.AddControlsReturnThis( "The value posted from this box was '{0}'".FormatWith( s ).GetLiteralControl() );
+				control.AddControlsReturnThis( "The value posted from this box was '{0}'".FormatWith( s ).ToComponents().GetControls() );
 		}
 
 		private Section test1( Action<string> setValue ) {

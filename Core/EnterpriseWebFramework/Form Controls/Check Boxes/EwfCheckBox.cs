@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -22,14 +21,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An in-line check box with the label vertically centered on the box.
 	/// </summary>
 	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithCustomFocusLogic {
-		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string CssClass = "ewfCheckBox";
+		private static readonly ElementClass elementClass = new ElementClass( "ewfCheckBox" );
 
+		internal class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[]
 					{
-						new CssElement( "InlineCheckBox", "label." + CssClass ), new CssElement( "InlineCheckBoxBox", "input." + CssClass ),
-						new CssElement( "InlineCheckBoxLabel", "span." + CssClass )
+						new CssElement( "InlineCheckBox", "label." + elementClass.ClassName ), new CssElement( "InlineCheckBoxBox", "input." + elementClass.ClassName ),
+						new CssElement( "InlineCheckBoxLabel", "span." + elementClass.ClassName )
 					};
 			}
 		}
@@ -94,22 +93,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 		}
 
-		string CommonCheckBox.GroupName { get { return checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey(); } }
+		string CommonCheckBox.GroupName => checkBoxFormValue != null ? "" : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey();
 
 		/// <summary>
 		/// Gets or sets whether or not the check box automatically posts the page back to the server when it is checked or unchecked.
 		/// </summary>
 		public bool AutoPostBack { get; set; }
-
-		/// <summary>
-		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
-		/// </summary>
-		public override string ToolTip { get; set; }
-
-		/// <summary>
-		/// Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.
-		/// </summary>
-		public Control ToolTipControl { get; set; }
 
 		/// <summary>
 		/// Adds a javascript method to be called when the check box is clicked.  Example: AddOnClickJsMethod( "changeCheckBoxColor( this )" ).
@@ -118,17 +107,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			jsClickHandlerStatementLists.Add( jsMethodInvocation.ToCollection );
 		}
 
-		public bool IsRadioButton { get { return radioButtonFormValue != null; } }
+		public bool IsRadioButton => radioButtonFormValue != null;
 
 		/// <summary>
 		/// Gets whether the box was created in a checked state.
 		/// </summary>
-		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
+		public bool IsChecked => checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this;
 
 		void ControlTreeDataLoader.LoadData() {
 			action.AddToPageIfNecessary();
 
-			CssClass = CssElementCreator.CssClass.ConcatenateWithSpace( CssClass );
+			CssClass = elementClass.ClassName.ConcatenateWithSpace( CssClass );
 
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
 			PreRender += delegate {
@@ -141,21 +130,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					action,
 					AutoPostBack,
 					jsClickHandlerStatementLists.SelectMany( i => i() ) );
-				checkBox.Attributes.Add( "class", CssElementCreator.CssClass );
+				checkBox.Attributes.Add( "class", elementClass.ClassName );
 			};
 			Controls.Add( checkBox );
 
-			EwfLabel labelControl = null;
-			if( label.Any() ) {
-				labelControl = new EwfLabel { Text = label, CssClass = CssElementCreator.CssClass };
-				Controls.Add( labelControl );
-			}
-
-			if( ToolTip != null || ToolTipControl != null )
-				new Controls.ToolTip( ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ), label.Any() ? labelControl : checkBox );
+			if( label.Any() )
+				this.AddControlsReturnThis( new GenericPhrasingContainer( label.ToComponents(), classes: elementClass ).ToCollection().GetControls() );
 		}
 
-		FormValue FormValueControl.FormValue { get { return (FormValue)checkBoxFormValue ?? radioButtonFormValue; } }
+		FormValue FormValueControl.FormValue => (FormValue)checkBoxFormValue ?? radioButtonFormValue;
 
 		/// <summary>
 		/// Gets whether the box is checked in the post back.
@@ -178,6 +161,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Label; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Label;
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -16,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static FormItem<ControlType> Create<ControlType>(
 			FormItemLabel label, ControlType control, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 			Func<ControlType, EwfValidation> validationGetter = null ) where ControlType: Control {
-			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter != null ? validationGetter( control ) : null );
+			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter?.Invoke( control ) );
 		}
 
 		private readonly FormItemLabel label;
@@ -45,20 +46,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual Control Label { get { return label.Text != null ? label.Text.Any() ? label.Text.GetLiteralControl() : null : label.Control; } }
+		public virtual Control Label
+			=> label.Text != null ? label.Text.Any() ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() ) : null : label.Control;
 
 		/// <summary>
 		/// Gets the control.
 		/// </summary>
-		public virtual Control Control { get { return control; } }
+		public virtual Control Control => control;
 
-		internal int? CellSpan { get { return cellSpan; } }
-		internal TextAlignment TextAlignment { get { return textAlignment; } }
+		internal int? CellSpan => cellSpan;
+		internal TextAlignment TextAlignment => textAlignment;
 
 		/// <summary>
 		/// Gets the validation.
 		/// </summary>
-		public virtual EwfValidation Validation { get { return validation; } }
+		public virtual EwfValidation Validation => validation;
 
 		/// <summary>
 		/// Creates a labeled control for this form item.
@@ -83,6 +85,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the control.
 		/// </summary>
-		public new ControlType Control { get { return control; } }
+		public new ControlType Control => control;
 	}
 }

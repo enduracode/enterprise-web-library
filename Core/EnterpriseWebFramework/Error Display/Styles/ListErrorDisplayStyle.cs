@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -51,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							i =>
 							(Control)
 							new PlaceHolder().AddControlsReturnThis(
-								new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection().GetControls().Concat( new[] { " ".GetLiteralControl(), new Literal { Text = i } } ) ) )
+								new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection().Concat( " ".ToComponents() ).GetControls().Concat( new Literal { Text = i } ) ) )
 							.ToArray() ) )
 					{
 						CssClass = StringTools.ConcatenateWithDelimiter( " ", CssElementCreator.CssClass.ToCollection().Concat( additionalClasses ).ToArray() )

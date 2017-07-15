@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var interleavedList = new List<Control>();
 			foreach( var control in controls.Take( controls.Count() - 1 ) ) {
 				interleavedList.Add( control );
-				interleavedList.Add( "|".GetLiteralControl() );
+				interleavedList.AddRange( "|".ToComponents().GetControls() );
 			}
 			interleavedList.Add( controls.Last() );
 			return interleavedList;
