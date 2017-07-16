@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
-using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Application-specific configuration for the EWF UI.
 	/// </summary>
@@ -15,9 +15,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// Gets the logo control to be shown at the top of the EWF user interface.
+		/// Gets the logo to be shown at the top of the EWF user interface. Returns null if the application display name should be used instead.
 		/// </summary>
-		public virtual WebControl GetLogoControl() {
+		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() {
 			return null;
 		}
 

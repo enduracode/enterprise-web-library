@@ -14,13 +14,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public class CssElementCreator: ControlCssElementCreator {
 			internal static readonly ElementClass Class = new ElementClass( "ewfImage" );
 
-			/// <summary>
-			/// EWL use only.
-			/// </summary>
-			public static readonly IReadOnlyCollection<string> Selectors = "img.{0}".FormatWith( Class.ClassName ).ToCollection();
-
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "Image", Selectors.ToArray() ) };
+				return new[] { new CssElement( "Image", "img.{0}".FormatWith( Class.ClassName ) ) };
 			}
 		}
 

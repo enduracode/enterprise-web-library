@@ -9,13 +9,14 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 using EnterpriseWebLibrary.WebSessionState;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string GlobalBlockId = "ewfUiGlobal";
 			internal const string AppLogoAndUserInfoBlockCssClass = "ewfUiAppLogoAndUserInfo";
-			internal const string AppLogoBlockCssClass = "ewfUiAppLogo";
+			internal static readonly ElementClass AppLogoClass = new ElementClass( "ewfUiAppLogo" );
 			internal const string UserInfoListCssClass = "ewfUiUserInfo";
 			internal const string GlobalNavBlockCssClass = "ewfUiGlobalNav";
 
@@ -36,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string SideTabAndContentBlockCssClass = "ewfUiTabsAndContent";
 
 			internal const string SideTabCssClass = "ewfUiSideTab";
-			internal const string SideTabGroupHeadCssClass = "ewfEditorTabSeparator";
+			internal static readonly ElementClass SideTabGroupHeadClass = new ElementClass( "ewfEditorTabSeparator" );
 
 			internal const string CurrentTabCssClass = "ewfEditorSelectedTab";
 			internal const string DisabledTabCssClass = "ewfUiDisabledTab";
@@ -46,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string ContentFootActionListCssClass = "ewfUiCfActions";
 
 			internal const string GlobalFootBlockId = "ewfUiGlobalFoot";
-			internal const string PoweredByEwlFooterCssClass = "ewfUiPoweredBy";
+			internal static readonly ElementClass PoweredByEwlFooterClass = new ElementClass( "ewfUiPoweredBy" );
 
 
 			// Some of the elements below cover a subset of other CSS elements in a more specific way. For example, UiGlobalNavControlList selects the control list
@@ -69,9 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement(
 							"UiAppLogoAndUserInfoBlock",
 							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockCssClass ).ToArray() ),
-						new CssElement(
-							"UiAppLogoBlock",
-							ImageSetup.CssElementCreator.Selectors.Concat( "div".ToCollection() ).Select( i => globalBlockSelector + " " + i + "." + AppLogoBlockCssClass ).ToArray() ),
+						new CssElement( "UiAppLogoContainer", globalBlockSelector + " " + "div." + AppLogoClass.ClassName ),
 						new CssElement(
 							"UiUserInfoControlList",
 							ControlStack.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + UserInfoListCssClass ).ToArray() ),
@@ -123,7 +122,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
-						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadCssClass ),
+						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadClass.ClassName ),
 						new CssElement( "UiPageActionAndContentAndContentFootCell", pageActionAndContentAndContentFootCellSelector ),
 						new CssElement(
 							"UiPageActionControlList",
@@ -151,7 +150,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return new[]
 					{
 						new CssElement( "UiGlobalFootBlock", globalFootBlockSelector ),
-						new CssElement( "UiPoweredByEwlFooterBlock", globalFootBlockSelector + " ." + PoweredByEwlFooterCssClass )
+						new CssElement( "UiPoweredByEwlFooterBlock", globalFootBlockSelector + " ." + PoweredByEwlFooterClass.ClassName )
 					};
 			}
 		}
@@ -234,12 +233,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private Control getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToCollection() );
 
-			var appLogoBlock = ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
-				                     ? EwfUiStatics.AppProvider.GetLogoControl()
-				                     : null ) ??
-			                   new Panel().AddControlsReturnThis(
-				                   ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).GetLiteralControl() );
-			appLogoBlock.CssClass = CssElementCreator.AppLogoBlockCssClass;
+			var appLogo =
+				new GenericFlowContainer(
+					( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ? EwfUiStatics.AppProvider.GetLogoComponent() : null ) ??
+					( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).ToComponents(),
+					classes: CssElementCreator.AppLogoClass );
 
 			ControlStack userInfoList = null;
 			if( AppRequestState.Instance.UserAccessible ) {
@@ -252,7 +250,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				}
 			}
 
-			table.AddItem( () => new EwfTableItem( appLogoBlock, userInfoList ) );
+			table.AddItem( () => new EwfTableItem( new PlaceHolder().AddControlsReturnThis( appLogo.ToCollection().GetControls() ), userInfoList ) );
 			return table;
 		}
 
@@ -377,7 +375,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			foreach( var resourceGroup in EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType.Resources ) {
 				var tabs = getTabControlsForResources( resourceGroup, true );
 				if( tabs.Any() && resourceGroup.Name.Any() )
-					controls.Add( new Block( resourceGroup.Name.GetLiteralControl() ) { CssClass = CssElementCreator.SideTabGroupHeadCssClass } );
+					controls.AddRange(
+						new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: CssElementCreator.SideTabGroupHeadClass ).ToCollection().GetControls() );
 				controls.AddRange( tabs );
 			}
 			sideTabCell.AddControlsReturnThis( new Block( controls.ToArray() ) { CssClass = CssElementCreator.SideTabCssClass } );
@@ -454,18 +453,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
-				controls.Add(
-					new LegacyParagraph(
-						"Powered by the ".GetLiteralControl(),
-						EwfLink.CreateForNavigationInNewWindow( ewlWebSite, new TextActionControlStyle( EwlStatics.EwlName ) ),
-						( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).GetLiteralControl() )
-						{
-							CssClass = CssElementCreator.PoweredByEwlFooterCssClass
-						} );
+				controls.AddRange(
+					new Paragraph(
+						"Powered by the ".ToComponents()
+							.Concat( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
+							.Concat( ( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).ToComponents() ),
+						classes: CssElementCreator.PoweredByEwlFooterClass ).ToCollection().GetControls() );
 
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
 		}
 
-		private EntityDisplaySetup entityDisplaySetup { get { return EwfPage.Instance.EsAsBaseType as EntityDisplaySetup; } }
+		private EntityDisplaySetup entityDisplaySetup => EwfPage.Instance.EsAsBaseType as EntityDisplaySetup;
 	}
 }
