@@ -42,6 +42,10 @@ namespace EnterpriseWebLibrary {
 		/// if you do not wish to pass any input to the program.
 		/// Returns the output of the program if waitForExit is true.  Otherwise, returns the empty string.
 		/// </summary>
+		/// <param name="program"></param>
+		/// <param name="arguments">Do not pass null.</param>
+		/// <param name="input">Do not pass null.</param>
+		/// <param name="waitForExit"></param>
 		public static string RunProgram( string program, string arguments, string input, bool waitForExit ) {
 			var outputResult = "";
 			using( var p = new Process() ) {

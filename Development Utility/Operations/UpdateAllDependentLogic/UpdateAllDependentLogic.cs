@@ -287,13 +287,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
 			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
 				writer.WriteLine(
-					"public static void Start" + project.Name.EnglishToPascal() + "( string arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
+					"public static void Start" + project.Name.EnglishToPascal() +
+					"( IEnumerable<string> arguments, string input, string errorMessageIfAlreadyRunning = \"\" ) {" );
 				writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
 				writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
 
 				var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, \"" + project.Name +
 				                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
-				var runProgramExpression = "EwlStatics.RunProgram( " + programPath + ", arguments, input, false )";
+				var runProgramExpression = "EwlStatics.RunProgram( " + programPath +
+				                           ", \"\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )";
 
 				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
 				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
@@ -529,6 +531,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
 				writer.WriteLine( "using System;" );
+				writer.WriteLine( "using System.Collections.Generic;" );
+				writer.WriteLine( "using System.Collections.Immutable;" );
+				writer.WriteLine( "using System.IO;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
 				writer.WriteLine( "using System.Threading;" );
@@ -548,7 +553,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine(
 					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "try {" );
-				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => ewlMain( args ) );" );
+				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
+
+				// See https://stackoverflow.com/a/44135529/35349.
+				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
+
+				writer.WriteLine( "ewlMain( Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) );" );
+				writer.WriteLine( "} );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
 				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
@@ -556,7 +567,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 
 				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
-				writer.WriteLine( "static partial void ewlMain( string[] args );" );
+				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
 
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
