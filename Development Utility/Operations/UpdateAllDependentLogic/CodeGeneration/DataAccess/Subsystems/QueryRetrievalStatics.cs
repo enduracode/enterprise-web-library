@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					writeQueryMethod( writer, database, query, postSelectFromClause );
 				writer.WriteLine( "static partial void updateSingleRowCaches( Row row );" );
 
-				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, className, columns );
+				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, className, columns.Where( i => !i.IsRowVersion ) );
 
 				writer.WriteLine( "}" ); // class
 			}
