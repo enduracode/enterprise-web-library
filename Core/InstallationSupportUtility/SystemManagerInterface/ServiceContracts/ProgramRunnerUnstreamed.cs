@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.ServiceContracts {
 	[ ServiceContract ]
 	public interface ProgramRunnerUnstreamed {
 		[ OperationContract ]

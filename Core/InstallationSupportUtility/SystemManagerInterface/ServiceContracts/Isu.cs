@@ -2,7 +2,7 @@
 using System.ServiceModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.ServiceContracts {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.ServiceContracts {
 	[ ServiceContract ]
 	public interface Isu {
 		[ OperationContract ]

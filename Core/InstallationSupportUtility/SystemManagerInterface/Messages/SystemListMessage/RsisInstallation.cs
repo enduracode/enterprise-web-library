@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary.Configuration;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage {
 	public partial class RsisInstallation {
 		public string FullName { get { return InstallationConfiguration.GetFullNameFromSystemAndInstallationNames( SystemListStatics.RsisSystemList.GetSystemByInstallationId( Id ).Name, Name ); } }
 

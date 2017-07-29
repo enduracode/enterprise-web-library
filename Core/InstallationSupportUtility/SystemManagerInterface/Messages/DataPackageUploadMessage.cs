@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.ServiceModel;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages {
+namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages {
 	[ MessageContract ]
 	public class DataPackageUploadMessage {
 		[ MessageHeader ]
