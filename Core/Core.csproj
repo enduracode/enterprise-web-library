@@ -641,16 +641,16 @@
     <Compile Include="InstallationSupportUtility\IsuStatics.cs" />
     <Compile Include="InstallationSupportUtility\Operation.cs" />
     <Compile Include="InstallationSupportUtility\OperationResult.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\BuildUploadMessage.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\DataPackageUploadMessage.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\RsisInstallation.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\SystemList.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\Isu.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\ProgramRunner.cs" />
-    <Compile Include="InstallationSupportUtility\RsisInterface\ServiceContracts\ProgramRunnerUnstreamed.cs" />
     <Compile Include="InstallationSupportUtility\StatusStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemIsuProvider.cs" />
     <Compile Include="InstallationSupportUtility\SystemListStatics.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildUploadMessage.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\DataPackageUploadMessage.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\RsisInstallation.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\SystemList.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\Isu.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\ProgramRunner.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\ProgramRunnerUnstreamed.cs" />
     <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />
@@ -779,10 +779,10 @@
       </SubType>
     </None>
     <None Include="EnterpriseWebFramework\Controls\Readme.txt" />
-    <None Include="InstallationSupportUtility\RsisInterface\Messages\BuildMessage\Build.xsd">
+    <None Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildMessage\Build.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="InstallationSupportUtility\RsisInterface\Messages\SystemListMessage\System List.xsd">
+    <None Include="InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\System List.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
