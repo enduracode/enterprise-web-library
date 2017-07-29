@@ -6,6 +6,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 	[ ServiceContract ]
 	public interface Isu {
 		[ OperationContract ]
+		Stream DownloadServerConfiguration( string authenticationKey, string hostName );
+
+		[ OperationContract ]
+		void UploadBuild( BuildUploadMessage message );
+
+		[ OperationContract ]
 		Stream DownloadServerSideLogicPackage( string authenticationKey, int buildId );
 
 		[ OperationContract ]
@@ -23,8 +29,5 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 		/// </summary>
 		[ OperationContract ]
 		Stream GetNewTransactionLogs( string authenticationKey, int installationId, string lastTransactionLogDownloaded );
-
-		[ OperationContract ]
-		void UploadBuild( BuildUploadMessage message );
 	}
 }
