@@ -12,36 +12,30 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths(
-			ConfigurationStatics.RedStaplerFolderPath,
-			"Downloaded Data Packages" );
+		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Downloaded Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Web Site.
 		/// </summary>
-		public static string DataPackageRepositoryPath = EwlStatics.CombinePaths(
-			ConfigurationStatics.RedStaplerFolderPath,
-			"RSIS Web Site Data Packages" );
+		public static string DataPackageRepositoryPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
 
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedTransactionLogsFolderPath = EwlStatics.CombinePaths(
-			ConfigurationStatics.RedStaplerFolderPath,
-			"Downloaded Transaction Logs" );
+		public static string DownloadedTransactionLogsFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Downloaded Transaction Logs" );
 
 		public static string TransactionLogBackupsPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Transaction Log Backups" );
 
 		private static SystemIsuProvider provider;
 
-		private static ChannelFactory<RsisInterface.ServiceContracts.Isu> isuServiceFactory;
-		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
-		private static ChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
+		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
+		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
+		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
 		internal static void Init1() {
 			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemIsuProvider;
 
-			if( NDependIsPresent ) {
+			if( NDependIsPresent )
 				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
 					var assemblyName = new AssemblyName( args.Name ).Name;
 					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
@@ -54,13 +48,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 								"Lib",
 								assemblyName + ".dll" ) );
 				};
-			}
 		}
 
 		/// <summary>
 		/// EWL Core and Development Utility use only.
 		/// </summary>
-		public static bool SystemProviderExists { get { return provider != null; } }
+		public static bool SystemProviderExists => provider != null;
 
 		/// <summary>
 		/// EWL Core and Development Utility use only.
@@ -76,20 +69,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// EWL Core and Development Utility use only.
 		/// </summary>
-		public static bool NDependIsPresent {
-			get {
-				return SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
-				       Directory.Exists(
-					       EwlStatics.CombinePaths(
-						       Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-						       provider.NDependFolderPathInUserProfileFolder ) );
-			}
-		}
+		public static bool NDependIsPresent
+			=>
+				SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
+				Directory.Exists(
+					EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), provider.NDependFolderPathInUserProfileFolder ) );
 
 		public static void Init2() {
-			isuServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.Isu>( "Isu.svc" );
-			programRunnerServiceFactory = getNetTcpChannelFactory<RsisInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
-			programRunnerUnstreamedServiceFactory = getHttpChannelFactory<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed>( "ProgramRunnerUnstreamed.svc" );
+			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
+			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
+			programRunnerUnstreamedServiceFactory = getHttpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed>(
+				"ProgramRunnerUnstreamed.svc" );
 		}
 
 		private static ChannelFactory<T> getHttpChannelFactory<T>( string serviceFileName ) {
@@ -130,42 +120,44 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static void ExecuteIsuServiceMethod( Action<RsisInterface.ServiceContracts.Isu> method, string action ) {
+		public static void ExecuteIsuServiceMethod( Action<SystemManagerInterface.ServiceContracts.Isu> method, string action ) {
 			executeWebMethod( method, isuServiceFactory, action );
 		}
 
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static void ExecuteProgramRunnerServiceMethod( Action<RsisInterface.ServiceContracts.ProgramRunner> method, string action ) {
+		public static void ExecuteProgramRunnerServiceMethod( Action<SystemManagerInterface.ServiceContracts.ProgramRunner> method, string action ) {
 			executeWebMethod( method, programRunnerServiceFactory, action );
 		}
 
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static void ExecuteProgramRunnerUnstreamedServiceMethod( Action<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed> method, string action ) {
+		public static void ExecuteProgramRunnerUnstreamedServiceMethod(
+			Action<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed> method, string action ) {
 			executeWebMethod( method, programRunnerUnstreamedServiceFactory, action );
 		}
 
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static T ExecuteIsuServiceMethod<T>( Func<RsisInterface.ServiceContracts.Isu, T> method, string action ) {
+		public static T ExecuteIsuServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.Isu, T> method, string action ) {
 			return executeWebMethodWithResult( method, isuServiceFactory, action );
 		}
 
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static T ExecuteProgramRunnerServiceMethod<T>( Func<RsisInterface.ServiceContracts.ProgramRunner, T> method, string action ) {
+		public static T ExecuteProgramRunnerServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.ProgramRunner, T> method, string action ) {
 			return executeWebMethodWithResult( method, programRunnerServiceFactory, action );
 		}
 
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static T ExecuteProgramRunnerUnstreamedServiceMethod<T>( Func<RsisInterface.ServiceContracts.ProgramRunnerUnstreamed, T> method, string action ) {
+		public static T ExecuteProgramRunnerUnstreamedServiceMethod<T>(
+			Func<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed, T> method, string action ) {
 			return executeWebMethodWithResult( method, programRunnerUnstreamedServiceFactory, action );
 		}
 
@@ -198,17 +190,15 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 		private static Exception createWebServiceException( string action, Exception innerException ) {
 			var generalMessage = "Failed during " + action + ".";
-			if( innerException is EndpointNotFoundException ) {
+			if( innerException is EndpointNotFoundException )
 				throw new UserCorrectableException(
 					generalMessage + " The web service could not be reached - this could be due to a network error or a configuration error.",
 					innerException );
-			}
-			if( innerException is FaultException ) {
+			if( innerException is FaultException )
 				// We do not pass the fault exception as an inner exception because its message includes a big ugly stack trace.
 				throw new UserCorrectableException(
 					generalMessage +
 					" The web service was reachable but did not execute properly. This could be due to a database error on the server. Try again, as these types of errors usually do not persist." );
-			}
 
 			// EndpointNotFoundException and FaultException are derived from CommunicationException, so their conditions must be before this condition.
 			if( innerException is CommunicationException )

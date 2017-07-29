@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+﻿using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class KnownSystemLogic {
@@ -8,6 +8,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			this.rsisSystem = rsisSystem;
 		}
 
-		public SoftwareSystem RsisSystem { get { return rsisSystem; } }
+		public SoftwareSystem RsisSystem => rsisSystem;
 	}
 }

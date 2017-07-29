@@ -8,7 +8,6 @@ using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
-using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 
@@ -137,7 +136,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "</package>" );
 		}
 
-		public static Operation Instance { get { return instance; } }
+		public static Operation Instance => instance;
 		private ExportLogic() {}
 
 		bool Operation.IsValid( Installation installation ) {
@@ -151,7 +150,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			IoMethods.DeleteFolder( logicPackagesFolderPath );
 
 			// Set up the main (build) object in the build message.
-			var build = new InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build();
+			var build = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build();
 			build.SystemName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
@@ -169,7 +168,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// Set up the client side application object in the build message, if necessary.
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
-				build.ClientSideApp = new InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.ClientSideAppType();
+				build.ClientSideApp = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.ClientSideAppType();
 				build.ClientSideApp.Name = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name;
 				build.ClientSideApp.AssemblyName = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName;
 				var clientSideAppFolder = EwlStatics.CombinePaths( logicPackagesFolderPath, "Client Side Application" );
@@ -180,7 +179,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 
 			// Set up the list of installation objects in the build message.
-			build.Installations = new InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.InstallationsType();
+			build.Installations = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.InstallationsType();
 			foreach( var installationConfigurationFolderPath in
 				Directory.GetDirectories(
 					EwlStatics.CombinePaths(
@@ -188,7 +187,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						InstallationConfiguration.InstallationConfigurationFolderName,
 						InstallationConfiguration.InstallationsFolderName ) ) ) {
 				if( Path.GetFileName( installationConfigurationFolderPath ) != InstallationConfiguration.DevelopmentInstallationFolderName ) {
-					var buildMessageInstallation = new InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Installation();
+					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
 
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
 					var installationConfigurationFile =
@@ -224,7 +223,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						memoryStream.Position = 0;
 
 						ConfigurationLogic.ExecuteIsuServiceMethod(
-							channel => channel.UploadBuild( new BuildUploadMessage { AuthenticationKey = ConfigurationLogic.AuthenticationKey, BuildDocument = memoryStream } ),
+							channel =>
+							channel.UploadBuild(
+								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
+									{
+										AuthenticationKey = ConfigurationLogic.AuthenticationKey,
+										BuildDocument = memoryStream
+									} ),
 							"build upload" );
 					}
 				} );
@@ -312,9 +317,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				false );
 		}
 
-		private InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
+		private InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
 			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
-			var buildMessageNuGetPackages = new InstallationSupportUtility.RsisInterface.Messages.BuildMessage.Build.NuGetPackagesType();
+			var buildMessageNuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
 			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, true );
 			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;

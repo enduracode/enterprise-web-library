@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+﻿using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class KnownInstallationLogic {
@@ -11,6 +11,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		/// <summary>
 		/// Use only if this installation exists in RSIS. This information comes from the System List.
 		/// </summary>
-		public RsisInstallation RsisInstallation { get { return rsisInstallation; } }
+		public RsisInstallation RsisInstallation => rsisInstallation;
 	}
 }

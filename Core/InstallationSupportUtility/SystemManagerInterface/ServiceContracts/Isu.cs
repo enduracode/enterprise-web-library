@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.ServiceModel;
-using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages;
+using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.ServiceContracts {
 	[ ServiceContract ]
@@ -25,6 +25,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 		Stream GetNewTransactionLogs( string authenticationKey, int installationId, string lastTransactionLogDownloaded );
 
 		[ OperationContract ]
-		void UploadBuild( Messages.BuildUploadMessage message );
+		void UploadBuild( BuildUploadMessage message );
 	}
 }

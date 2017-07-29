@@ -2,7 +2,7 @@
 using System.IO;
 using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.InstallationSupportUtility.RsisInterface.Messages.SystemListMessage;
+using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
