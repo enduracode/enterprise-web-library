@@ -219,7 +219,7 @@ namespace EnterpriseWebLibrary {
 		/// Returns the host name of the local computer.
 		/// </summary>
 		public static string GetLocalHostName() {
-			return Dns.GetHostName();
+			return Dns.GetHostEntry( "" ).HostName;
 		}
 
 		internal static void CallEveryMethod( params Action[] methods ) {
