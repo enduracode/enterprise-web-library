@@ -8,18 +8,13 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary {
 	internal static class IisConfigurationStatics {
-		internal static void ConfigureIis( bool iisExpress ) {
+		internal delegate dynamic EnumGetter( string typeName, string valueName );
+
+		internal static void ExecuteInServerManagerTransaction( bool iisExpress, Action<dynamic, EnumGetter> method ) {
 			var assembly = getAssembly( iisExpress );
 			using( dynamic serverManager = assembly.CreateInstance( "Microsoft.Web.Administration.ServerManager" ) ) {
-				var config = serverManager.GetApplicationHostConfiguration();
-
-				var modulesSection = config.GetSection( "system.webServer/modules", "" );
-				foreach( var element in modulesSection.GetCollection() )
-					element.SetMetadata( "lockItem", null );
-
-				var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-				serverRuntimeSection.OverrideMode = (dynamic)Enum.Parse( assembly.GetType( "Microsoft.Web.Administration.OverrideMode" ), "Allow" );
-
+				EnumGetter enumGetter = ( typeName, valueName ) => Enum.Parse( assembly.GetType( typeName ), valueName );
+				method( serverManager, enumGetter );
 				serverManager.CommitChanges();
 			}
 		}

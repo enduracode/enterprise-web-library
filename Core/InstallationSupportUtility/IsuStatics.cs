@@ -1,18 +1,186 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public class IsuStatics {
 		/// <summary>
-		/// EWL Core and ISU use only.
+		/// ISU and internal use only.
 		/// </summary>
-		public static void ConfigureIis( bool iisExpress ) {
+		public static void ConfigureIis( bool iisExpress, bool useServerAppPoolSettings ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					iisExpress,
+					( serverManager, enumGetter ) => {
+						if( !iisExpress ) {
+							var poolDefaults = serverManager.ApplicationPoolDefaults;
+							poolDefaults.StartMode = enumGetter( "Microsoft.Web.Administration.StartMode", useServerAppPoolSettings ? "AlwaysRunning" : "OnDemand" );
+
+							// We use this because it's a consistent account name across all machines, which allows our SQL Server databases [which must grant access to the
+							// app pool] to be portable.
+							poolDefaults.ProcessModel.IdentityType = enumGetter( "Microsoft.Web.Administration.ProcessModelIdentityType", "NetworkService" );
+
+							// Disable idle time-out.
+							poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
+
+							// Disable regular time interval recycling.
+							poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
+
+							if( useServerAppPoolSettings )
+								poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
+							else
+								poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
+						}
+
+						var config = serverManager.GetApplicationHostConfiguration();
+
+						var modulesSection = config.GetSection( "system.webServer/modules", "" );
+						foreach( var element in modulesSection.GetCollection() )
+							element.SetMetadata( "lockItem", null );
+
+						var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+						serverRuntimeSection.OverrideMode = enumGetter( "Microsoft.Web.Administration.OverrideMode", "Allow" );
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void UpdateIisAppPool( string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var pool = serverManager.ApplicationPools[ name ] ?? serverManager.ApplicationPools.Add( name );
+						pool.AutoStart = false;
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void DeleteIisAppPool( string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var pool = serverManager.ApplicationPools[ name ];
+						if( pool != null )
+							serverManager.ApplicationPools.Remove( pool );
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void StartIisAppPool( string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var pool = serverManager.ApplicationPools[ name ];
+						pool.Start();
+						while( pool.State != enumGetter( "Microsoft.Web.Administration.ObjectState", "Started" ) )
+							Thread.Sleep( 1000 );
+
+						pool.AutoStart = true;
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void StopIisAppPool( string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var pool = serverManager.ApplicationPools[ name ];
+						if( pool != null ) {
+							pool.Stop();
+							while( pool.State != enumGetter( "Microsoft.Web.Administration.ObjectState", "Stopped" ) )
+								Thread.Sleep( 1000 );
+
+							pool.AutoStart = false;
+						}
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void UpdateIisSite( string name, string appPool, string physicalPath, IReadOnlyCollection<IisHostName> hostNames ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						const int dummyPort = 80;
+						var site = serverManager.Sites[ name ] ?? serverManager.Sites.Add( name, physicalPath, dummyPort );
+
+						var rootApp = site.Applications[ "/" ];
+						rootApp.ApplicationPoolName = appPool;
+						rootApp[ "preloadEnabled" ] = true;
+
+						var rootVd = rootApp.VirtualDirectories[ "/" ];
+						rootVd.PhysicalPath = physicalPath;
+
+						var bindings = hostNames.SelectMany(
+							i => {
+								var nonsecureBinding = Tuple.Create( false, i.NonsecurePortSpecified ? i.NonsecurePort : 80, i.Name );
+								return i.SecureBinding != null
+									       ? new[] { nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) }
+									       : nonsecureBinding.ToCollection();
+							} ).ToList();
+						var bindingsToDelete = new List<dynamic>();
+						foreach( var i in site.Bindings ) {
+							if( i.Protocol != "http" && i.Protocol != "https" )
+								continue;
+
+							var bindingInfo = ( (string)i.BindingInformation ).Separate( ":", false );
+							var binding = Tuple.Create( (string)i.Protocol == "https", int.Parse( bindingInfo[ 1 ] ), bindingInfo[ 2 ] );
+							if( bindings.Contains( binding ) && ( !binding.Item1 || i.SslFlags == enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) ) )
+								bindings.Remove( binding );
+							else
+								bindingsToDelete.Add( i );
+						}
+
+						foreach( var i in bindingsToDelete )
+							site.Bindings.Remove( i );
+
+						foreach( var i in bindings ) {
+							if( i.Item1 )
+								site.Bindings.Add( "*:{0}:{1}".FormatWith( i.Item2, i.Item3 ), (byte[])null, (string)null, enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) );
+							else
+								site.Bindings.Add( "*:{0}:{1}".FormatWith( i.Item2, i.Item3 ), "http" );
+						}
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void DeleteIisSite( string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var site = serverManager.Sites[ name ];
+						if( site != null )
+							serverManager.Sites.Remove( site );
+					} ) );
+		}
+
+		private static void executeInIisServerManagerTransaction( Action method ) {
 			// Overlapping commitment of changes to server manager do not end well.
 			EwlStatics.ExecuteAsCriticalRegion(
 				"{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
 				false,
 				delegate {
 					try {
-						IisConfigurationStatics.ConfigureIis( iisExpress );
+						method();
 					}
 					catch( Exception e ) {
 						const string message = "Failed to configure IIS.";
