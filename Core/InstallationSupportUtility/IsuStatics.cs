@@ -134,20 +134,20 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 									       ? new[] { nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) }
 									       : nonsecureBinding.ToCollection();
 							} ).ToList();
-						var bindingsToDelete = new List<dynamic>();
-						foreach( var i in site.Bindings ) {
-							if( i.Protocol != "http" && i.Protocol != "https" )
+						var unrecognizedBindings = new List<dynamic>();
+						foreach( var iisBinding in site.Bindings ) {
+							if( iisBinding.Protocol != "http" && iisBinding.Protocol != "https" )
 								continue;
 
-							var bindingInfo = ( (string)i.BindingInformation ).Separate( ":", false );
-							var binding = Tuple.Create( (string)i.Protocol == "https", int.Parse( bindingInfo[ 1 ] ), bindingInfo[ 2 ] );
-							if( bindings.Contains( binding ) && ( !binding.Item1 || i.SslFlags == enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) ) )
+							var bindingInfo = ( (string)iisBinding.BindingInformation ).Separate( ":", false );
+							var binding = Tuple.Create( (string)iisBinding.Protocol == "https", int.Parse( bindingInfo[ 1 ] ), bindingInfo[ 2 ] );
+							if( bindings.Contains( binding ) && ( !binding.Item1 || iisBinding.SslFlags == enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) ) )
 								bindings.Remove( binding );
 							else
-								bindingsToDelete.Add( i );
+								unrecognizedBindings.Add( iisBinding );
 						}
 
-						foreach( var i in bindingsToDelete )
+						foreach( var i in unrecognizedBindings )
 							site.Bindings.Remove( i );
 
 						foreach( var i in bindings ) {
@@ -170,6 +170,43 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 						var site = serverManager.Sites[ name ];
 						if( site != null )
 							serverManager.Sites.Remove( site );
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void UpdateIisVirtualDirectory( string site, string name, string appPool, string physicalPath ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var iisSite = serverManager.Sites[ site ];
+
+						var path = "/{0}".FormatWith( name );
+						var app = iisSite.Applications[ path ] ?? iisSite.Applications.Add( path, physicalPath );
+						app.ApplicationPoolName = appPool;
+						app[ "preloadEnabled" ] = true;
+
+						var rootVd = app.VirtualDirectories[ "/" ];
+						rootVd.PhysicalPath = physicalPath;
+					} ) );
+		}
+
+		/// <summary>
+		/// ISU and internal use only.
+		/// </summary>
+		public static void DeleteIisVirtualDirectory( string site, string name ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					false,
+					( serverManager, enumGetter ) => {
+						var iisSite = serverManager.Sites[ site ];
+
+						var path = "/{0}".FormatWith( name );
+						var app = iisSite.Applications[ path ];
+						if( app != null )
+							iisSite.Applications.Remove( app );
 					} ) );
 		}
 
