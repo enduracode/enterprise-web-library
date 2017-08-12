@@ -23,6 +23,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		public readonly string Path;
 
 		internal readonly bool SupportsSecureConnections;
+		internal readonly IisApplication IisApplication;
 		internal readonly BaseUrl DefaultBaseUrl;
 		internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
@@ -53,18 +54,21 @@ namespace EnterpriseWebLibrary.Configuration {
 				name,
 				installationPath,
 				supportsSecureConnections,
+				machineIsStandbyServer ? configuration.StandbyIisApplication : configuration.IisApplication,
 				machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl,
 				machineIsStandbyServer ? configuration.StandbyDefaultCookieAttributes : configuration.DefaultCookieAttributes ) {}
 
 		internal WebApplication( string name, string installationPath, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
-			: this( name, installationPath, supportsSecureConnections, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes ) {}
+			: this( name, installationPath, supportsSecureConnections, configuration.IisApplication, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes
+				) {}
 
 		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, InstallationStandardBaseUrl baseUrl,
+			string name, string installationPath, bool supportsSecureConnections, IisApplication iisApplication, InstallationStandardBaseUrl baseUrl,
 			InstallationStandardCookieAttributes cookieAttributes ) {
 			Name = name;
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
+			IisApplication = iisApplication;
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
@@ -81,6 +85,6 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Internal and Development Utility use only.
 		/// </summary>
-		public string WebConfigFilePath { get { return EwlStatics.CombinePaths( Path, WebConfigFileName ); } }
+		public string WebConfigFilePath => EwlStatics.CombinePaths( Path, WebConfigFileName );
 	}
 }

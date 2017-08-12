@@ -156,6 +156,8 @@
 	<complexType name="LiveInstallationWebApplication">
 		<sequence>
 			<element name="Name" type="string" />
+			<element name="IisApplication" type="rs:IisApplication" />
+			<element name="StandbyIisApplication" type="rs:IisApplication" />
 			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
 			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
 			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
@@ -165,9 +167,49 @@
 	<complexType name="IntermediateInstallationWebApplication">
 		<sequence>
 			<element name="Name" type="string" />
+			<element name="IisApplication" type="rs:IisApplication" />
 			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
 			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 		</sequence>
+	</complexType>
+	<complexType name="IisApplication" abstract="true" />
+	<complexType name="Site">
+		<complexContent>
+			<extension base="rs:IisApplication">
+				<sequence>
+					<element name="HostNames">
+						<complexType>
+							<sequence>
+								<element name="HostName" type="rs:IisHostName" maxOccurs="unbounded" />
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="IisHostName">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="NonsecurePort" type="int" minOccurs="0" />
+			<element name="SecureBinding" type="rs:SecureBinding" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="SecureBinding">
+		<sequence>
+			<element name="Port" type="int" minOccurs="0" />
+			<element name="CertificateId" type="int" />
+		</sequence>
+	</complexType>
+	<complexType name="VirtualDirectory">
+		<complexContent>
+			<extension base="rs:IisApplication">
+				<sequence>
+					<element name="Site" type="string" />
+					<element name="Name" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
 	</complexType>
 	<complexType name="InstallationStandardBaseUrl">
 		<sequence>

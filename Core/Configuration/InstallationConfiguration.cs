@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -70,7 +71,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		private readonly SystemGeneralConfiguration systemGeneralConfiguration;
 		private readonly SystemDevelopment.SystemDevelopmentConfiguration systemDevelopmentConfiguration;
 		private readonly InstallationStandardConfiguration installationStandardConfiguration;
-		private readonly IEnumerable<WebApplication> webApplications;
+		private readonly IReadOnlyCollection<WebApplication> webApplications;
 		private readonly string installationCustomConfigurationFilePath;
 
 		/// <summary>
@@ -97,12 +98,11 @@ namespace EnterpriseWebLibrary.Configuration {
 			systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
 			// system development configuration
-			if( isDevelopmentInstallation ) {
+			if( isDevelopmentInstallation )
 				systemDevelopmentConfiguration =
 					XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
 						EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
 						false );
-			}
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
 				                                          ? EwlStatics.CombinePaths(
@@ -118,31 +118,30 @@ namespace EnterpriseWebLibrary.Configuration {
 
 
 			var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ];
-			webApplications = from systemElement in systemWebApplicationElements
-			                  let name = systemElement.Name
-			                  let supportsSecureConnections = systemElement.SupportsSecureConnections
-			                  select
-				                  isDevelopmentInstallation
-					                  ? new WebApplication(
-						                    name,
-						                    installationPath,
-						                    supportsSecureConnections,
-						                    SystemShortName,
-						                    systemWebApplicationElements.Skip( 1 ).Any(),
-						                    systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
-					                  : InstallationType == InstallationType.Live
-						                    ? new WebApplication(
-							                      name,
-							                      installationPath,
-							                      supportsSecureConnections,
-							                      machineIsStandbyServer,
-							                      LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
-						                    : new WebApplication(
-							                      name,
-							                      installationPath,
-							                      supportsSecureConnections,
-							                      IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) );
-			webApplications = webApplications.ToArray();
+			webApplications = ( from systemElement in systemWebApplicationElements
+			                    let name = systemElement.Name
+			                    let supportsSecureConnections = systemElement.SupportsSecureConnections
+			                    select
+				                    isDevelopmentInstallation
+					                    ? new WebApplication(
+						                      name,
+						                      installationPath,
+						                      supportsSecureConnections,
+						                      SystemShortName,
+						                      systemWebApplicationElements.Skip( 1 ).Any(),
+						                      systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
+					                    : InstallationType == InstallationType.Live
+						                      ? new WebApplication(
+							                        name,
+							                        installationPath,
+							                        supportsSecureConnections,
+							                        machineIsStandbyServer,
+							                        LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
+						                      : new WebApplication(
+							                        name,
+							                        installationPath,
+							                        supportsSecureConnections,
+							                        IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) ) ).ToImmutableArray();
 
 			// installation custom configuration
 			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
@@ -171,7 +170,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Gets a list of the web applications in the system.
 		/// </summary>
-		public IEnumerable<WebApplication> WebApplications { get { return webApplications; } }
+		public IReadOnlyCollection<WebApplication> WebApplications { get { return webApplications; } }
 
 		/// <summary>
 		/// Gets a list of the services in the system.
