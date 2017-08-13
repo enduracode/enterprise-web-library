@@ -29,10 +29,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 							// Disable regular time interval recycling.
 							poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
 
+							poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
 							if( useServerAppPoolSettings )
 								poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
-							else
-								poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
 						}
 
 						var config = serverManager.GetApplicationHostConfiguration();
