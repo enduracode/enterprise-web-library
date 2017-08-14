@@ -269,18 +269,6 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 		/// <summary>
-		/// Only applicable for installed installations.  Returns a list of web sites associated with this installed installation.  This is
-		/// used for things like knowing which web sites to stop when upgrading.
-		/// </summary>
-		public string[] WebSiteNames {
-			get {
-				return ( isDevelopmentInstallation || installationStandardConfiguration.installedInstallation.webSiteNames == null )
-					       ? new string[ 0 ]
-					       : installationStandardConfiguration.installedInstallation.webSiteNames;
-			}
-		}
-
-		/// <summary>
 		/// Gets the type of the installation.
 		/// </summary>
 		public InstallationType InstallationType {

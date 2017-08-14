@@ -25,13 +25,6 @@
 					<sequence>
 						<element name="name" type="string" />
 						<element name="shortName" type="string" />
-						<element name="webSiteNames" minOccurs="0">
-							<complexType>
-								<sequence>
-									<element name="webSiteName" type="string" maxOccurs="unbounded" />
-								</sequence>
-							</complexType>
-						</element>
 						<element name="InstallationTypeConfiguration" type="rs:InstallationTypeConfiguration" />
 					</sequence>
 				</complexType>
@@ -158,8 +151,8 @@
 			<element name="Name" type="string" />
 			<element name="IisApplication" type="rs:IisApplication" />
 			<element name="StandbyIisApplication" type="rs:IisApplication" />
-			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
-			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" minOccurs="0" />
+			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" minOccurs="0" />
 			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 			<element name="StandbyDefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 		</sequence>
@@ -168,7 +161,7 @@
 		<sequence>
 			<element name="Name" type="string" />
 			<element name="IisApplication" type="rs:IisApplication" />
-			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" />
+			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" minOccurs="0" />
 			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
 		</sequence>
 	</complexType>

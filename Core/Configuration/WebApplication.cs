@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 
@@ -13,12 +14,12 @@ namespace EnterpriseWebLibrary.Configuration {
 		public const string WebConfigFileName = "Web.config";
 
 		/// <summary>
-		/// Internal and Development Utility use only.
+		/// Development Utility and internal use only.
 		/// </summary>
 		public readonly string Name;
 
 		/// <summary>
-		/// Development Utility use only.
+		/// Development Utility and internal use only.
 		/// </summary>
 		public readonly string Path;
 
@@ -70,12 +71,24 @@ namespace EnterpriseWebLibrary.Configuration {
 			SupportsSecureConnections = supportsSecureConnections;
 			IisApplication = iisApplication;
 
+			var site = iisApplication as Site;
+			var siteHostName = site?.HostNames.First();
+			var virtualDirectory = iisApplication as VirtualDirectory;
+
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
-			DefaultBaseUrl = new BaseUrl(
-				baseUrl.Host,
-				baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
-				baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
-				baseUrl.Path ?? "" );
+			DefaultBaseUrl = baseUrl != null
+				                 ? new BaseUrl(
+					                   baseUrl.Host,
+					                   baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
+					                   baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
+					                   baseUrl.Path ?? "" )
+				                 : site != null
+					                   ? new BaseUrl(
+						                     siteHostName.Name,
+						                     siteHostName.NonsecurePortSpecified ? siteHostName.NonsecurePort : 80,
+						                     siteHostName.SecureBinding != null && siteHostName.SecureBinding.PortSpecified ? siteHostName.SecureBinding.Port : 443,
+						                     "" )
+					                   : new BaseUrl( virtualDirectory.Site, 80, 443, virtualDirectory.Name );
 
 			DefaultCookieAttributes = cookieAttributes != null
 				                          ? new DefaultCookieAttributes( cookieAttributes.Domain, cookieAttributes.Path, cookieAttributes.NamePrefix )

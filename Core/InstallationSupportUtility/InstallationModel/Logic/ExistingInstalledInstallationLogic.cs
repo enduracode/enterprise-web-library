@@ -1,9 +1,67 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstalledInstallationLogic {
+		public static void UpdateIisApplications( ExistingInstalledInstallationLogic newLogic, ExistingInstalledInstallationLogic oldLogic ) {
+			var appGetter =
+				new Func<ExistingInstalledInstallationLogic, IEnumerable<WebApplication>>(
+					logic =>
+					logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisApplication != null ).ToImmutableArray() ??
+					Enumerable.Empty<WebApplication>() );
+			var newApps = appGetter( newLogic );
+			var oldApps = appGetter( oldLogic );
+
+			if( newApps.Any() )
+				IsuStatics.UpdateIisAppPool( newLogic.existingInstallationLogic.IisAppPoolName );
+
+			var newSiteNames = new HashSet<string>();
+			var newVirtualDirectoryNames = new HashSet<string>();
+			foreach( var app in newApps ) {
+				var site = app.IisApplication as Site;
+				if( site != null ) {
+					IsuStatics.UpdateIisSite( getIisSiteName( newLogic, app ), newLogic.existingInstallationLogic.IisAppPoolName, app.Path, site.HostNames );
+					newSiteNames.Add( getIisSiteName( newLogic, app ) );
+					continue;
+				}
+				var virtualDirectory = app.IisApplication as VirtualDirectory;
+				if( virtualDirectory != null ) {
+					IsuStatics.UpdateIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name, newLogic.existingInstallationLogic.IisAppPoolName, app.Path );
+					newVirtualDirectoryNames.Add( virtualDirectory.Name );
+					continue;
+				}
+				throw new ApplicationException( "unrecognized IIS application type" );
+			}
+
+			foreach( var app in oldApps ) {
+				var site = app.IisApplication as Site;
+				if( site != null && !newSiteNames.Contains( getIisSiteName( oldLogic, app ) ) ) {
+					IsuStatics.DeleteIisSite( getIisSiteName( oldLogic, app ) );
+					continue;
+				}
+				var virtualDirectory = app.IisApplication as VirtualDirectory;
+				if( virtualDirectory != null && !newVirtualDirectoryNames.Contains( virtualDirectory.Name ) ) {
+					IsuStatics.DeleteIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name );
+					continue;
+				}
+				throw new ApplicationException( "unrecognized IIS application type" );
+			}
+
+			if( !newApps.Any() && oldApps.Any() )
+				IsuStatics.DeleteIisAppPool( oldLogic.existingInstallationLogic.IisAppPoolName );
+		}
+
+		private static string getIisSiteName( ExistingInstalledInstallationLogic logic, WebApplication app ) {
+			return "{0} - {1}".FormatWith( logic.existingInstallationLogic.RuntimeConfiguration.FullShortName, app.Name );
+		}
+
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 
 		public ExistingInstalledInstallationLogic( ExistingInstallationLogic existingInstallationLogic ) {
@@ -12,7 +70,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		public void PatchLogicForEnvironment() {
 			var isWin7 = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 1;
-			if( isWin7 ) {
+			if( isWin7 )
 				foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications ) {
 					File.WriteAllText(
 						i.WebConfigFilePath,
@@ -20,7 +78,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 							.Replace( "<applicationInitialization doAppInitAfterRestart=\"true\" />", "<!--<applicationInitialization doAppInitAfterRestart=\"true\" />-->" )
 							.Replace( "<add name=\"ApplicationInitializationModule\" />", "<!--<add name=\"ApplicationInitializationModule\" />-->" ) );
 				}
-			}
 		}
 
 		/// <summary>
@@ -34,6 +91,16 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			var security = info.GetAccessControl();
 			security.AddAccessRule( new FileSystemAccessRule( "NETWORK SERVICE", FileSystemRights.FullControl, AccessControlType.Allow ) );
 			info.SetAccessControl( security );
+		}
+
+		public IReadOnlyCollection<Tuple<int, string>> GetWebApplicationCertificateIdAndHostNamePairs() {
+			return
+				existingInstallationLogic.RuntimeConfiguration.WebApplications.Select( i => i.IisApplication )
+					.OfType<Site>()
+					.SelectMany( i => i.HostNames )
+					.Where( i => i.SecureBinding != null )
+					.Select( i => Tuple.Create( i.SecureBinding.CertificateId, i.Name ) )
+					.ToImmutableArray();
 		}
 	}
 }
