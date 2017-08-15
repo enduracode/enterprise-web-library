@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 				throw new ApplicationException( "unrecognized IIS application type" );
 			}
 
-			if( !newApps.Any() && oldApps.Any() )
+			if( oldApps.Any() && ( !newApps.Any() || newLogic.existingInstallationLogic.IisAppPoolName != oldLogic.existingInstallationLogic.IisAppPoolName ) )
 				IsuStatics.DeleteIisAppPool( oldLogic.existingInstallationLogic.IisAppPoolName );
 		}
 
