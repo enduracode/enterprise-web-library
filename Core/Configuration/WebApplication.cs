@@ -50,22 +50,34 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration )
+			string name, string installationPath, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration,
+			string installationFullShortName, bool systemHasMultipleWebApplications )
 			: this(
 				name,
 				installationPath,
 				supportsSecureConnections,
 				machineIsStandbyServer ? configuration.StandbyIisApplication : configuration.IisApplication,
+				installationFullShortName,
+				systemHasMultipleWebApplications,
 				machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl,
 				machineIsStandbyServer ? configuration.StandbyDefaultCookieAttributes : configuration.DefaultCookieAttributes ) {}
 
-		internal WebApplication( string name, string installationPath, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration )
-			: this( name, installationPath, supportsSecureConnections, configuration.IisApplication, configuration.DefaultBaseUrl, configuration.DefaultCookieAttributes
-				) {}
+		internal WebApplication(
+			string name, string installationPath, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration, string installationFullShortName,
+			bool systemHasMultipleWebApplications )
+			: this(
+				name,
+				installationPath,
+				supportsSecureConnections,
+				configuration.IisApplication,
+				installationFullShortName,
+				systemHasMultipleWebApplications,
+				configuration.DefaultBaseUrl,
+				configuration.DefaultCookieAttributes ) {}
 
 		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, IisApplication iisApplication, InstallationStandardBaseUrl baseUrl,
-			InstallationStandardCookieAttributes cookieAttributes ) {
+			string name, string installationPath, bool supportsSecureConnections, IisApplication iisApplication, string installationFullShortName,
+			bool systemHasMultipleWebApplications, InstallationStandardBaseUrl baseUrl, InstallationStandardCookieAttributes cookieAttributes ) {
 			Name = name;
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
@@ -74,6 +86,9 @@ namespace EnterpriseWebLibrary.Configuration {
 			var site = iisApplication as Site;
 			var siteHostName = site?.HostNames.First();
 			var virtualDirectory = iisApplication as VirtualDirectory;
+
+			if( virtualDirectory != null && virtualDirectory.Name == null )
+				virtualDirectory.Name = installationFullShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = baseUrl != null

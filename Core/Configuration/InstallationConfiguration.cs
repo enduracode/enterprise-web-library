@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.IO;
+using MoreLinq;
 
 namespace EnterpriseWebLibrary.Configuration {
 	/// <summary>
@@ -128,7 +129,7 @@ namespace EnterpriseWebLibrary.Configuration {
 						                      installationPath,
 						                      supportsSecureConnections,
 						                      SystemShortName,
-						                      systemWebApplicationElements.Skip( 1 ).Any(),
+						                      systemWebApplicationElements.AtLeast( 2 ),
 						                      systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
 					                    : InstallationType == InstallationType.Live
 						                      ? new WebApplication(
@@ -136,12 +137,16 @@ namespace EnterpriseWebLibrary.Configuration {
 							                        installationPath,
 							                        supportsSecureConnections,
 							                        machineIsStandbyServer,
-							                        LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ) )
+							                        LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+							                        FullShortName,
+							                        systemWebApplicationElements.AtLeast( 2 ) )
 						                      : new WebApplication(
 							                        name,
 							                        installationPath,
 							                        supportsSecureConnections,
-							                        IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ) ) ).ToImmutableArray();
+							                        IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+							                        FullShortName,
+							                        systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
 
 			// installation custom configuration
 			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
