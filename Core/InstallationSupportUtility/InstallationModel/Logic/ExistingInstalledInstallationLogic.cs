@@ -42,13 +42,15 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 			foreach( var app in oldApps ) {
 				var site = app.IisApplication as Site;
-				if( site != null && !newSiteNames.Contains( getIisSiteName( oldLogic, app ) ) ) {
-					IsuStatics.DeleteIisSite( getIisSiteName( oldLogic, app ) );
+				if( site != null ) {
+					if( !newSiteNames.Contains( getIisSiteName( oldLogic, app ) ) )
+						IsuStatics.DeleteIisSite( getIisSiteName( oldLogic, app ) );
 					continue;
 				}
 				var virtualDirectory = app.IisApplication as VirtualDirectory;
-				if( virtualDirectory != null && !newVirtualDirectoryNames.Contains( virtualDirectory.Name ) ) {
-					IsuStatics.DeleteIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name );
+				if( virtualDirectory != null ) {
+					if( !newVirtualDirectoryNames.Contains( virtualDirectory.Name ) )
+						IsuStatics.DeleteIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name );
 					continue;
 				}
 				throw new ApplicationException( "unrecognized IIS application type" );
