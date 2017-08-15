@@ -99,7 +99,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 					( serverManager, enumGetter ) => {
 						var pool = serverManager.ApplicationPools[ name ];
 						if( pool != null ) {
-							pool.Stop();
+							// Stop throws an exception if the pool isn't started.
+							if( pool.State != enumGetter( "Microsoft.Web.Administration.ObjectState", "Stopped" ) &&
+							    pool.State != enumGetter( "Microsoft.Web.Administration.ObjectState", "Stopping" ) )
+								pool.Stop();
+
 							while( pool.State != enumGetter( "Microsoft.Web.Administration.ObjectState", "Stopped" ) )
 								Thread.Sleep( 1000 );
 
