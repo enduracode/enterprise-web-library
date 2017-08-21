@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
-			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
 						EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
@@ -130,7 +130,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							InstallationFileStatics.FilesFolderName,
 							fileName + FileExtensions.Xsd ) );
 				}
-			}
 			else {
 				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator )
@@ -622,7 +621,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateXmlSchemaLogic( string projectPath, string schemaPathInProject, string nameSpace, string codeFileName, bool useSvcUtil ) {
 			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( projectPath, "Generated Code" );
-			if( useSvcUtil ) {
+			if( useSvcUtil )
 				try {
 					EwlStatics.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
@@ -634,7 +633,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to generate XML schema logic using SvcUtil.", e );
 				}
-			}
 			else {
 				Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 				try {
@@ -670,7 +668,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( regionBegin );
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
-				writer.WriteLine( ".vs/{0}/v14/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v15/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v15/sqlite3/storage.ide".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 				writer.WriteLine( "Error Log.txt" );
