@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
@@ -69,15 +70,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							true ) );
 				} );
 
-			return
-				File.ReadAllBytes(
-					EwlStatics.CombinePaths(
-						outputFolderPath,
-						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-							installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
-							installation.CurrentMajorVersion,
-							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
-							localExportDateAndTime: localExportDateAndTime ) ) );
+			return File.ReadAllBytes(
+				EwlStatics.CombinePaths(
+					outputFolderPath,
+					EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+						installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
+						installation.CurrentMajorVersion,
+						!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+						localExportDateAndTime: localExportDateAndTime ) ) );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -108,8 +108,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine(
 				"<id>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) + "</id>" );
 			writer.WriteLine(
-				"<version>" +
-				EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
+				"<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 					installation.CurrentMajorVersion,
 					!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
 					localExportDateAndTime: localExportDateAndTime ) + "</version>" );
@@ -128,7 +127,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			            where trimmedLine.StartsWith( "<package " )
 			            select trimmedLine;
 			foreach( var line in lines )
-				writer.WriteLine( line.Replace( "package", "dependency" ).Replace( " targetFramework=\"net451\"", "" ) );
+				writer.WriteLine( Regex.Replace( line.Replace( "package", "dependency" ), @" targetFramework=""[\w]+""", "" ) );
 
 			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
@@ -180,20 +179,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			// Set up the list of installation objects in the build message.
 			build.Installations = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.InstallationsType();
-			foreach( var installationConfigurationFolderPath in
-				Directory.GetDirectories(
-					EwlStatics.CombinePaths(
-						installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-						InstallationConfiguration.InstallationConfigurationFolderName,
-						InstallationConfiguration.InstallationsFolderName ) ) ) {
+			foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
+				EwlStatics.CombinePaths(
+					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+					InstallationConfiguration.InstallationConfigurationFolderName,
+					InstallationConfiguration.InstallationsFolderName ) ) ) {
 				if( Path.GetFileName( installationConfigurationFolderPath ) != InstallationConfiguration.DevelopmentInstallationFolderName ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
 
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
-					var installationConfigurationFile =
-						XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
-							EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
-							false );
+					var installationConfigurationFile = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
+						EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+						false );
 
 					buildMessageInstallation.Id = installationConfigurationFile.rsisInstallationId;
 					buildMessageInstallation.Name = installationConfigurationFile.installedInstallation.name;
@@ -223,8 +220,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						memoryStream.Position = 0;
 
 						ConfigurationLogic.ExecuteIsuServiceMethod(
-							channel =>
-							channel.UploadBuild(
+							channel => channel.UploadBuild(
 								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
 									{
 										AuthenticationKey = ConfigurationLogic.AuthenticationKey,
