@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -12,37 +14,55 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static void ConfigureIis( bool iisExpress, bool useServerAppPoolSettings ) {
 			executeInIisServerManagerTransaction(
-				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
-					iisExpress,
-					( serverManager, enumGetter ) => {
-						if( !iisExpress ) {
-							var poolDefaults = serverManager.ApplicationPoolDefaults;
-							poolDefaults.StartMode = enumGetter( "Microsoft.Web.Administration.StartMode", useServerAppPoolSettings ? "AlwaysRunning" : "OnDemand" );
-
-							// We use this because it's a consistent account name across all machines, which allows our SQL Server databases [which must grant access to the
-							// app pool] to be portable.
-							poolDefaults.ProcessModel.IdentityType = enumGetter( "Microsoft.Web.Administration.ProcessModelIdentityType", "NetworkService" );
-
-							// Disable idle time-out.
-							poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
-
-							// Disable regular time interval recycling.
-							poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
-
-							poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
-							if( useServerAppPoolSettings )
-								poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
+				() => {
+					try {
+						configureIis( iisExpress, useServerAppPoolSettings );
+					}
+					catch( FileNotFoundException ) when( iisExpress ) {
+						using( var p = new Process() ) {
+							p.StartInfo.FileName = @"C:\Program Files (x86)\IIS Express\iisexpress";
+							p.Start();
+							Thread.Sleep( 2000 );
+							p.CloseMainWindow();
+							p.WaitForExit();
 						}
+						configureIis( true, useServerAppPoolSettings );
+					}
+				} );
+		}
 
-						var config = serverManager.GetApplicationHostConfiguration();
+		private static void configureIis( bool iisExpress, bool useServerAppPoolSettings ) {
+			IisConfigurationStatics.ExecuteInServerManagerTransaction(
+				iisExpress,
+				( serverManager, enumGetter ) => {
+					if( !iisExpress ) {
+						var poolDefaults = serverManager.ApplicationPoolDefaults;
+						poolDefaults.StartMode = enumGetter( "Microsoft.Web.Administration.StartMode", useServerAppPoolSettings ? "AlwaysRunning" : "OnDemand" );
 
-						var modulesSection = config.GetSection( "system.webServer/modules", "" );
-						foreach( var element in modulesSection.GetCollection() )
-							element.SetMetadata( "lockItem", null );
+						// We use this because it's a consistent account name across all machines, which allows our SQL Server databases [which must grant access to the
+						// app pool] to be portable.
+						poolDefaults.ProcessModel.IdentityType = enumGetter( "Microsoft.Web.Administration.ProcessModelIdentityType", "NetworkService" );
 
-						var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-						serverRuntimeSection.OverrideMode = enumGetter( "Microsoft.Web.Administration.OverrideMode", "Allow" );
-					} ) );
+						// Disable idle time-out.
+						poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
+
+						// Disable regular time interval recycling.
+						poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
+
+						poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
+						if( useServerAppPoolSettings )
+							poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
+					}
+
+					var config = serverManager.GetApplicationHostConfiguration();
+
+					var modulesSection = config.GetSection( "system.webServer/modules", "" );
+					foreach( var element in modulesSection.GetCollection() )
+						element.SetMetadata( "lockItem", null );
+
+					var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+					serverRuntimeSection.OverrideMode = enumGetter( "Microsoft.Web.Administration.OverrideMode", "Allow" );
+				} );
 		}
 
 		/// <summary>
@@ -131,12 +151,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 						rootVd.PhysicalPath = physicalPath;
 
 						var bindings = hostNames.SelectMany(
-							i => {
-								var nonsecureBinding = Tuple.Create( false, i.NonsecurePortSpecified ? i.NonsecurePort : 80, i.Name );
-								return i.SecureBinding != null
-									       ? new[] { nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) }
-									       : nonsecureBinding.ToCollection();
-							} ).ToList();
+								i => {
+									var nonsecureBinding = Tuple.Create( false, i.NonsecurePortSpecified ? i.NonsecurePort : 80, i.Name );
+									return i.SecureBinding != null
+										       ? new[] { nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) }
+										       : nonsecureBinding.ToCollection();
+								} )
+							.ToList();
 						var unrecognizedBindings = new List<dynamic>();
 						foreach( var iisBinding in site.Bindings ) {
 							if( iisBinding.Protocol != "http" && iisBinding.Protocol != "https" )
