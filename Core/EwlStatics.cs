@@ -322,8 +322,8 @@ namespace EnterpriseWebLibrary {
 		/// <summary>
 		/// Returns true if the specified objects are equal according to the default equality comparer.
 		/// </summary>
-		public static bool AreEqual<T>( T x, T y ) {
-			return EqualityComparer<T>.Default.Equals( x, y );
+		public static bool AreEqual<T>( T x, T y, IEqualityComparer<T> comparer = null ) {
+			return ( comparer ?? EqualityComparer<T>.Default ).Equals( x, y );
 		}
 
 		/// <summary>
