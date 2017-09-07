@@ -154,6 +154,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
+
+			var hgOutput = Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) )
+				               ? EwlStatics.RunProgram(
+						               @"C:\Program Files\TortoiseHg\hg",
+						               "--debug identify --id \"{0}\"".FormatWith( installation.GeneralLogic.Path ),
+						               "",
+						               true )
+					               .Trim()
+				               : "";
+			build.HgChangesetId = hgOutput.Length == 40 ? hgOutput : "";
+
 			build.LogicSize = ConfigurationLogic.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
 				                  ? GetLogicSize.GetNDependLocCount( installation, false ) as int?
 				                  : null;
