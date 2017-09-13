@@ -36,11 +36,11 @@ namespace EnterpriseWebLibrary.Email {
 				var sendGridService = service as Configuration.InstallationStandard.SendGrid;
 				var smtpServerService = service as Configuration.InstallationStandard.SmtpServer;
 				if( sendGridService != null ) {
-					var webTransport = new SendGrid.Web( sendGridService.ApiKey );
+					var client = new SendGrid.SendGridClient( new SendGrid.SendGridClientOptions { ApiKey = sendGridService.ApiKey } );
 					emailSender = message => {
 						var sendGridMessage = getSendGridMessage( message );
 						try {
-							Task.Run( () => webTransport.DeliverAsync( sendGridMessage ) ).Wait();
+							Task.Run( () => client.SendEmailAsync( sendGridMessage ) ).Wait();
 						}
 						catch( Exception e ) {
 							throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
@@ -54,29 +54,37 @@ namespace EnterpriseWebLibrary.Email {
 			}
 		}
 
-		private static SendGrid.SendGridMessage getSendGridMessage( EmailMessage message ) {
-			var m = new SendGrid.SendGridMessage();
+		private static SendGrid.Helpers.Mail.SendGridMessage getSendGridMessage( EmailMessage message ) {
+			var m = new SendGrid.Helpers.Mail.SendGridMessage();
 
-			m.From = message.From.ToMailAddress();
-			m.ReplyTo = message.ReplyToAddresses.Select( i => i.ToMailAddress() ).ToArray();
+			SendGrid.Helpers.Mail.EmailAddress getAddress( EmailAddress address ) => new SendGrid.Helpers.Mail.EmailAddress(
+				address.Address,
+				name: address.DisplayName.Any() ? address.DisplayName : null );
 
-			m.To = message.ToAddresses.Select( i => i.ToMailAddress() ).ToArray();
-			m.Cc = message.CcAddresses.Select( i => i.ToMailAddress() ).ToArray();
-			m.Bcc = message.BccAddresses.Select( i => i.ToMailAddress() ).ToArray();
+			m.From = getAddress( message.From );
+			// As of 12 September 2017 SendGrid does not support multiple reply-to addresses. See https://github.com/sendgrid/sendgrid-csharp/issues/339.
+			m.ReplyTo = getAddress( message.ReplyToAddresses.Single() );
+
+			m.AddTos( message.ToAddresses.Select( getAddress ).ToList() );
+			m.AddCcs( message.CcAddresses.Select( getAddress ).ToList() );
+			m.AddBccs( message.BccAddresses.Select( getAddress ).ToList() );
 
 			m.Subject = message.Subject;
 
 			foreach( var i in message.CustomHeaders )
 				m.Headers.Add( i.Item1, i.Item2 );
 
-			m.Text = htmlToPlainText( message.BodyHtml );
-			m.Html = message.BodyHtml;
+			m.PlainTextContent = htmlToPlainText( message.BodyHtml );
+			m.HtmlContent = message.BodyHtml;
 
 			foreach( var i in message.Attachments ) {
 				if( i.Stream == null )
-					m.AddAttachment( i.FilePath );
+					m.AddAttachment( Path.GetFileName( i.FilePath ), Convert.ToBase64String( File.ReadAllBytes( i.FilePath ) ) );
 				else
-					m.AddAttachment( i.Stream, i.AttachmentDisplayName );
+					using( var stream = new MemoryStream() ) {
+						i.Stream.CopyTo( stream );
+						m.AddAttachment( i.AttachmentDisplayName, Convert.ToBase64String( stream.ToArray() ) );
+					}
 			}
 
 			return m;
@@ -188,12 +196,11 @@ namespace EnterpriseWebLibrary.Email {
 					{ Environment.NewLine + @"\t+", Environment.NewLine + "\t" }
 				};
 
-			return
-				regexToReplacements.Cast<DictionaryEntry>()
-					.Aggregate(
-						html,
-						( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
-					.Trim();
+			return regexToReplacements.Cast<DictionaryEntry>()
+				.Aggregate(
+					html,
+					( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+				.Trim();
 		}
 
 		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
@@ -233,10 +240,10 @@ namespace EnterpriseWebLibrary.Email {
 		}
 
 		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
-			var originalInfoParagraph =
-				"Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-					m.From.ToMailAddress().ToString(),
-					m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine + Environment.NewLine;
+			var originalInfoParagraph = "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
+				                            m.From.ToMailAddress(),
+				                            m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine +
+			                            Environment.NewLine;
 
 			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
 			// bad idea to mix testing and demo mail into deliverability reports for live mail.
