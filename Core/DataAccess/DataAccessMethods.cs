@@ -5,7 +5,6 @@ using System.Threading;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.DataAccess {
@@ -56,11 +55,6 @@ namespace EnterpriseWebLibrary.DataAccess {
 				}
 
 				if( errorNumber.HasValue ) {
-					// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
-					// A nested BeginTransaction call can trigger this since it translates to a SAVE TRANSACTION statement, which fails for read-only databases.
-					if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
-						return CreateStandbyServerModificationException();
-
 					if( errorNumber.Value == 2 )
 						customMessage = "Failed to connect to SQL Server. Make sure the services are running.";
 					if( errorNumber.Value == 6005 )
@@ -70,19 +64,17 @@ namespace EnterpriseWebLibrary.DataAccess {
 					if( errorNumber.Value == -2 )
 						customMessage = "Failed to connect to SQL Server because of a connection timeout.";
 
-					if( errorNumber.Value == 258 ) {
+					if( errorNumber.Value == 258 )
 						customMessage =
 							"Failed to connect to SQL Server because of a connection timeout. SQL Server may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
-					}
 
 					if( errorNumber.Value == 4060 )
 						customMessage = "The " + sqlServerInfo.Database + " database does not exist. You may need to execute an Update Data operation.";
 
 					// We also handle this error at the command level.
-					if( errorNumber.Value == 233 ) {
+					if( errorNumber.Value == 233 )
 						customMessage =
 							"The connection with the server has probably been severed. This likely happened because we did not disable connection pooling and a connection was taken from the pool that was no longer valid.";
-					}
 
 					if( !customMessage.Any() )
 						generalMessage += " Error number: {0}.".FormatWith( errorNumber.Value );
@@ -92,10 +84,9 @@ namespace EnterpriseWebLibrary.DataAccess {
 			if( databaseInfo is MySqlInfo ) {
 				if( new[] { "ERROR 2003", "Unable to connect to any of the specified MySQL hosts" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage = "Failed to connect to MySQL. Make sure the service is running.";
-				if( innerException.Message.Contains( "ERROR 2013" ) ) {
+				if( innerException.Message.Contains( "ERROR 2013" ) )
 					customMessage =
 						"Failed to connect to MySQL. MySQL may be in the process of doing something else that is preventing the connection for some reason. Please try again.";
-				}
 				if( innerException.Message.Contains( "Timeout expired" ) )
 					customMessage = "Failed to connect to MySQL because of a connection timeout.";
 			}
@@ -121,10 +112,9 @@ namespace EnterpriseWebLibrary.DataAccess {
 					customMessage = "Failed to connect to Oracle because of a connection timeout. Check the Oracle configuration on the machine and in this system.";
 				if( new[] { "ORA-01017", "ORA-1017" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage = "Failed to connect to Oracle as " + oracleInfo.UserAndSchema + ". You may need to execute an Update Data operation.";
-				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) ) {
+				if( new[] { "ORA-03114", "ORA-12571" }.Any( i => innerException.Message.Contains( i ) ) )
 					customMessage =
 						"Failed to connect to Oracle or connection to Oracle was lost. This should not happen often and may be caused by a bug in the data access components or the database.";
-				}
 
 				// This error only happens when using tnsnames and only MIT servers do this.
 				if( innerException.Message.Contains( "ORA-12504" ) )
@@ -134,10 +124,6 @@ namespace EnterpriseWebLibrary.DataAccess {
 			return customMessage.Length > 0
 				       ? new DbConnectionFailureException( generalMessage + " " + customMessage, innerException )
 				       : new ApplicationException( generalMessage, innerException );
-		}
-
-		internal static Exception CreateStandbyServerModificationException() {
-			return new DataModificationException( "You cannot make changes to standby versions of a system." );
 		}
 
 		internal static string GetDbName( DatabaseInfo databaseInfo ) {

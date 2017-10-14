@@ -74,8 +74,7 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 						var interval = new TickInterval( new Interval( lastTickInstant, currentInstant ) );
 						lastTickInstant = currentInstant;
 
-						if( ConfigurationStatics.IsLiveInstallation && !ConfigurationStatics.MachineIsStandbyServer &&
-						    interval.FitsPattern( OperationRecurrencePattern.CreateDaily( 0, 0 ) ) )
+						if( ConfigurationStatics.IsLiveInstallation && interval.FitsPattern( OperationRecurrencePattern.CreateDaily( 0, 0 ) ) )
 							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 
 						service.Tick( interval );

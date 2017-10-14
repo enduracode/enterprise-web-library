@@ -175,14 +175,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) );
 				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
 			}
-			else if( ConfigurationStatics.MachineIsStandbyServer ) {
-				warningControls.Add(
-					new PlaceHolder().AddControlsReturnThis(
-						new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection()
-							.Concat(
-								" This is a standby system. It operates with a read-only database, and any attempt to make a modification will result in an error.".ToComponents() )
-							.GetControls() ) );
-			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
 			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )

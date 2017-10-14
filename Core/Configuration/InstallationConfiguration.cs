@@ -78,7 +78,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Creates a new installation configuration.
 		/// </summary>
-		public InstallationConfiguration( bool machineIsStandbyServer, string installationPath, bool isDevelopmentInstallation ) {
+		public InstallationConfiguration( string installationPath, bool isDevelopmentInstallation ) {
 			this.installationPath = installationPath;
 
 			// The EWL configuration folder is not inside any particular app's folder the way that Web.config and app.config are. This is for two reasons. First, EWL
@@ -100,10 +100,9 @@ namespace EnterpriseWebLibrary.Configuration {
 
 			// system development configuration
 			if( isDevelopmentInstallation )
-				systemDevelopmentConfiguration =
-					XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
-						EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
-						false );
+				systemDevelopmentConfiguration = XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
+					EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
+					false );
 
 			var installationConfigurationFolderPath = isDevelopmentInstallation
 				                                          ? EwlStatics.CombinePaths(
@@ -122,31 +121,29 @@ namespace EnterpriseWebLibrary.Configuration {
 			webApplications = ( from systemElement in systemWebApplicationElements
 			                    let name = systemElement.Name
 			                    let supportsSecureConnections = systemElement.SupportsSecureConnections
-			                    select
-				                    isDevelopmentInstallation
-					                    ? new WebApplication(
-						                      name,
-						                      installationPath,
-						                      supportsSecureConnections,
-						                      SystemShortName,
-						                      systemWebApplicationElements.AtLeast( 2 ),
-						                      systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
-					                    : InstallationType == InstallationType.Live
-						                      ? new WebApplication(
-							                        name,
-							                        installationPath,
-							                        supportsSecureConnections,
-							                        machineIsStandbyServer,
-							                        LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-							                        FullShortName,
-							                        systemWebApplicationElements.AtLeast( 2 ) )
-						                      : new WebApplication(
-							                        name,
-							                        installationPath,
-							                        supportsSecureConnections,
-							                        IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-							                        FullShortName,
-							                        systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
+			                    select isDevelopmentInstallation
+				                           ? new WebApplication(
+					                           name,
+					                           installationPath,
+					                           supportsSecureConnections,
+					                           SystemShortName,
+					                           systemWebApplicationElements.AtLeast( 2 ),
+					                           systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
+				                           : InstallationType == InstallationType.Live
+					                           ? new WebApplication(
+						                           name,
+						                           installationPath,
+						                           supportsSecureConnections,
+						                           LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+						                           FullShortName,
+						                           systemWebApplicationElements.AtLeast( 2 ) )
+					                           : new WebApplication(
+						                           name,
+						                           installationPath,
+						                           supportsSecureConnections,
+						                           IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+						                           FullShortName,
+						                           systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
 
 			// installation custom configuration
 			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
@@ -281,8 +278,8 @@ namespace EnterpriseWebLibrary.Configuration {
 				return isDevelopmentInstallation
 					       ? InstallationType.Development
 					       : installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
-						         ? InstallationType.Live
-						         : InstallationType.Intermediate;
+						       ? InstallationType.Live
+						       : InstallationType.Intermediate;
 			}
 		}
 

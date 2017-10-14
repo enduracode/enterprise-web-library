@@ -29,7 +29,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
 		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, string systemShortName, bool systemHasMultipleWebApplications, WebProject configuration ) {
+			string name, string installationPath, bool supportsSecureConnections, string systemShortName, bool systemHasMultipleWebApplications,
+			WebProject configuration ) {
 			Name = name;
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
@@ -50,30 +51,16 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, bool machineIsStandbyServer, LiveInstallationWebApplication configuration,
-			string installationFullShortName, bool systemHasMultipleWebApplications )
-			: this(
-				name,
-				installationPath,
-				supportsSecureConnections,
-				machineIsStandbyServer ? configuration.StandbyIisApplication : configuration.IisApplication,
-				installationFullShortName,
-				systemHasMultipleWebApplications,
-				machineIsStandbyServer ? configuration.StandbyDefaultBaseUrl : configuration.DefaultBaseUrl,
-				machineIsStandbyServer ? configuration.StandbyDefaultCookieAttributes : configuration.DefaultCookieAttributes ) {}
-
-		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, IntermediateInstallationWebApplication configuration, string installationFullShortName,
-			bool systemHasMultipleWebApplications )
-			: this(
-				name,
-				installationPath,
-				supportsSecureConnections,
-				configuration.IisApplication,
-				installationFullShortName,
-				systemHasMultipleWebApplications,
-				configuration.DefaultBaseUrl,
-				configuration.DefaultCookieAttributes ) {}
+			string name, string installationPath, bool supportsSecureConnections, InstallationStandardWebApplication configuration, string installationFullShortName,
+			bool systemHasMultipleWebApplications ): this(
+			name,
+			installationPath,
+			supportsSecureConnections,
+			configuration.IisApplication,
+			installationFullShortName,
+			systemHasMultipleWebApplications,
+			configuration.DefaultBaseUrl,
+			configuration.DefaultCookieAttributes ) {}
 
 		internal WebApplication(
 			string name, string installationPath, bool supportsSecureConnections, IisApplication iisApplication, string installationFullShortName,
@@ -93,17 +80,17 @@ namespace EnterpriseWebLibrary.Configuration {
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = baseUrl != null
 				                 ? new BaseUrl(
-					                   baseUrl.Host,
-					                   baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
-					                   baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
-					                   baseUrl.Path ?? "" )
+					                 baseUrl.Host,
+					                 baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
+					                 baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
+					                 baseUrl.Path ?? "" )
 				                 : site != null
-					                   ? new BaseUrl(
-						                     siteHostName.Name,
-						                     siteHostName.NonsecurePortSpecified ? siteHostName.NonsecurePort : 80,
-						                     siteHostName.SecureBinding != null && siteHostName.SecureBinding.PortSpecified ? siteHostName.SecureBinding.Port : 443,
-						                     "" )
-					                   : new BaseUrl( virtualDirectory.Site, 80, 443, virtualDirectory.Name );
+					                 ? new BaseUrl(
+						                 siteHostName.Name,
+						                 siteHostName.NonsecurePortSpecified ? siteHostName.NonsecurePort : 80,
+						                 siteHostName.SecureBinding != null && siteHostName.SecureBinding.PortSpecified ? siteHostName.SecureBinding.Port : 443,
+						                 "" )
+					                 : new BaseUrl( virtualDirectory.Site, 80, 443, virtualDirectory.Name );
 
 			DefaultCookieAttributes = cookieAttributes != null
 				                          ? new DefaultCookieAttributes( cookieAttributes.Domain, cookieAttributes.Path, cookieAttributes.NamePrefix )

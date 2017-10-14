@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -55,17 +54,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 		private static DevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );
-			var existingInstallationLogic = new ExistingInstallationLogic(
-				generalInstallationLogic,
-				new InstallationConfiguration( ConfigurationStatics.MachineIsStandbyServer, path, true ) );
+			var existingInstallationLogic = new ExistingInstallationLogic( generalInstallationLogic, new InstallationConfiguration( path, true ) );
 
 			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
 				ConfigurationLogic.Init2();
 				SystemListStatics.RefreshSystemList();
-				var knownSystemLogic =
-					new KnownSystemLogic(
-						SystemListStatics.RsisSystemList.Systems.Single(
-							i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
+				var knownSystemLogic = new KnownSystemLogic(
+					SystemListStatics.RsisSystemList.Systems.Single(
+						i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
 				var recognizedInstallationLogic = new RecognizedInstallationLogic( existingInstallationLogic, knownSystemLogic );
 				return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
 			}

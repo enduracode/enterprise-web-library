@@ -93,7 +93,7 @@
 					<element name="WebApplications" minOccurs="0">
 						<complexType>
 							<sequence>
-								<element name="Application" type="rs:LiveInstallationWebApplication" maxOccurs="unbounded" />
+								<element name="Application" type="rs:InstallationStandardWebApplication" maxOccurs="unbounded" />
 							</sequence>
 						</complexType>
 					</element>
@@ -111,7 +111,7 @@
 					<element name="WebApplications" minOccurs="0">
 						<complexType>
 							<sequence>
-								<element name="Application" type="rs:IntermediateInstallationWebApplication" maxOccurs="unbounded" />
+								<element name="Application" type="rs:InstallationStandardWebApplication" maxOccurs="unbounded" />
 							</sequence>
 						</complexType>
 					</element>
@@ -146,18 +146,7 @@
 			<element name="Password" type="string" />
 		</sequence>
 	</complexType>
-	<complexType name="LiveInstallationWebApplication">
-		<sequence>
-			<element name="Name" type="string" />
-			<element name="IisApplication" type="rs:IisApplication" />
-			<element name="StandbyIisApplication" type="rs:IisApplication" />
-			<element name="DefaultBaseUrl" type="rs:InstallationStandardBaseUrl" minOccurs="0" />
-			<element name="StandbyDefaultBaseUrl" type="rs:InstallationStandardBaseUrl" minOccurs="0" />
-			<element name="DefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
-			<element name="StandbyDefaultCookieAttributes" type="rs:InstallationStandardCookieAttributes" minOccurs="0" />
-		</sequence>
-	</complexType>
-	<complexType name="IntermediateInstallationWebApplication">
+	<complexType name="InstallationStandardWebApplication">
 		<sequence>
 			<element name="Name" type="string" />
 			<element name="IisApplication" type="rs:IisApplication" />

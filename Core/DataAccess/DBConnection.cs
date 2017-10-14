@@ -240,7 +240,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 						resetTransactionFields();
 					}
 					else {
-						if( !transactionDead ) {
+						if( !transactionDead )
 							if( databaseInfo is SqlServerInfo )
 								( (SqlTransaction)innerTx ).Rollback( saveName + nestLevel );
 							else if( databaseInfo is MySqlInfo )
@@ -249,7 +249,6 @@ namespace EnterpriseWebLibrary.DataAccess {
 								var rollbackMethod = innerTx.GetType().GetMethod( "Rollback", new[] { typeof( string ) } );
 								rollbackMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
 							}
-						}
 					}
 				}
 				catch( SqlException e ) {
@@ -416,10 +415,6 @@ namespace EnterpriseWebLibrary.DataAccess {
 				// a DDL statement in another transaction.
 				if( errorNumber == 1205 || errorNumber == 3960 || errorNumber == 3961 )
 					return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
-
-				// Failed to update database * because the database is read-only. This happens when you try to make a change to a live installation on a standby server.
-				if( errorNumber == 3906 && Configuration.ConfigurationStatics.MachineIsStandbyServer )
-					return DataAccessMethods.CreateStandbyServerModificationException();
 
 				// -2 is the code for a timeout.
 				if( errorNumber == -2 )

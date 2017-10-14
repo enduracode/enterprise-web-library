@@ -43,10 +43,9 @@ namespace EnterpriseWebLibrary.Configuration {
 
 			// Load machine configuration.
 			var machineConfigXmlFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
-			if( File.Exists( machineConfigXmlFilePath ) ) {
+			if( File.Exists( machineConfigXmlFilePath ) )
 				// Do not perform schema validation since the schema file won't be available on non-development machines.
 				MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( machineConfigXmlFilePath, false );
-			}
 
 			initializationLog += Environment.NewLine + "About to initialize stack trace";
 
@@ -78,7 +77,7 @@ namespace EnterpriseWebLibrary.Configuration {
 					installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 			}
 			initializationLog += Environment.NewLine + "Successfully determined installation path";
-			InstallationConfiguration = new InstallationConfiguration( MachineIsStandbyServer, installationPath, isDevelopmentInstallation );
+			InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 			initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
 			ConfigurationStatics.globalInitializerType = globalInitializerType;
@@ -88,10 +87,6 @@ namespace EnterpriseWebLibrary.Configuration {
 
 			AppName = appName;
 			IsClientSideProgram = isClientSideProgram;
-		}
-
-		public static bool MachineIsStandbyServer {
-			get { return MachineConfiguration != null && MachineConfiguration.IsStandbyServerSpecified && MachineConfiguration.IsStandbyServer; }
 		}
 
 		/// <summary>
@@ -138,12 +133,11 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// </summary>
 		public static string FilesFolderPath {
 			get {
-				return
-					EwlStatics.CombinePaths(
-						InstallationFileStatics.GetGeneralFilesFolderPath(
-							InstallationConfiguration.InstallationPath,
-							InstallationConfiguration.InstallationType == InstallationType.Development ),
-						InstallationFileStatics.FilesFolderName );
+				return EwlStatics.CombinePaths(
+					InstallationFileStatics.GetGeneralFilesFolderPath(
+						InstallationConfiguration.InstallationPath,
+						InstallationConfiguration.InstallationType == InstallationType.Development ),
+					InstallationFileStatics.FilesFolderName );
 			}
 		}
 
@@ -172,10 +166,9 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
-			return
-				new ApplicationException(
-					providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-					ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
+			return new ApplicationException(
+				providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
+				ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
 		}
 	}
 }

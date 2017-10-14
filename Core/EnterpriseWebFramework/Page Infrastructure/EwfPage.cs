@@ -228,20 +228,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
 			// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
-			if( requestState.StaticRegionContents == null ||
-			    ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
-			      new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 ) ) ) {
+			if( requestState.StaticRegionContents == null || ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
+			                                                   new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+				                                                   dmIdAndSecondaryOp.Item2 ) ) ) {
 				var modMethods = new List<Action>();
-				if( !ConfigurationStatics.MachineIsStandbyServer ) {
-					modMethods.Add( EwfApp.Instance.GetPageViewDataModificationMethod() );
-					if( AppRequestState.Instance.UserAccessible ) {
-						if( AppTools.User != null )
-							modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-						if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
-							modMethods.Add( getLastPageRequestTimeUpdateMethod( AppRequestState.Instance.ImpersonatorUser ) );
-					}
-					modMethods.Add( getPageViewDataModificationMethod() );
+				modMethods.Add( EwfApp.Instance.GetPageViewDataModificationMethod() );
+				if( AppRequestState.Instance.UserAccessible ) {
+					if( AppTools.User != null )
+						modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
+					if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
+						modMethods.Add( getLastPageRequestTimeUpdateMethod( AppRequestState.Instance.ImpersonatorUser ) );
 				}
+				modMethods.Add( getPageViewDataModificationMethod() );
 				modMethods = modMethods.Where( i => i != null ).ToList();
 
 				if( modMethods.Any() ) {
