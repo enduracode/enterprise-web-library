@@ -72,9 +72,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 				database.ExportToFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
 		}
 
-		public static void DeleteAndReCreateDatabaseFromFile( Database database, string dataPackageFolderPath, bool keepDbInStandbyMode ) {
+		public static void DeleteAndReCreateDatabaseFromFile( Database database, string dataPackageFolderPath ) {
 			if( !( database is NoDatabase ) )
-				database.DeleteAndReCreateFromFile( getDatabaseFilePath( dataPackageFolderPath, database ), keepDbInStandbyMode );
+				database.DeleteAndReCreateFromFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
 		}
 
 		private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {

@@ -22,12 +22,5 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 
 		[ OperationContract ]
 		Stream DownloadDataPackage( string authenticationKey, int installationId );
-
-		/// <summary>
-		/// Returns a zip file containing all new transaction log backups for the given installation. Returns null if there are no new transaction log files available.
-		/// You can pass null for lastTransactionLogDownloaded to get all available log files.
-		/// </summary>
-		[ OperationContract ]
-		Stream GetNewTransactionLogs( string authenticationKey, int installationId, string lastTransactionLogDownloaded );
 	}
 }

@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			}
 		}
 
-		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
+		void Database.DeleteAndReCreateFromFile( string filePath ) {
 			executeDbMethodWithSpecifiedDatabaseInfo(
 				new OracleInfo(
 					( info as DatabaseInfo ).SecondaryDatabaseName,
@@ -212,11 +212,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		}
 
 		private void throwUserCorrectableExceptionIfNecessary( Exception e ) {
-			if( e.Message.Contains( "ORA-04031" ) ) {
+			if( e.Message.Contains( "ORA-04031" ) )
 				throw new UserCorrectableException(
 					"Oracle has insufficient memory. You may need to follow the Oracle process to increase the memory_target parameters.",
 					e );
-			}
 		}
 
 		private string getDumpFilePath() {
@@ -232,28 +231,15 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				executeLongRunningCommand( cn, "DROP USER " + info.UserAndSchema + " CASCADE" );
 			}
 			catch( Exception e ) {
-				if( e.GetBaseException().Message.Contains( "ORA-01940" ) ) {
+				if( e.GetBaseException().Message.Contains( "ORA-01940" ) )
 					throw new UserCorrectableException(
 						"Failed to delete one of the Oracle user accounts for this installation. Please stop all web sites for this installation, close all Visual Studio Data Connections for this installation, and try the operation again.",
 						e );
-				}
 
 				// ORA-01918 means the user and schema did not exist. That's fine.
 				if( !e.GetBaseException().Message.Contains( "ORA-01918" ) )
 					throw;
 			}
-		}
-
-		void Database.BackupTransactionLog( string folderPath ) {
-			throw new NotSupportedException();
-		}
-
-		void Database.RestoreNewTransactionLogs( string folderPath ) {
-			throw new NotSupportedException();
-		}
-
-		public string GetLogSummary( string folderPath ) {
-			throw new NotSupportedException();
 		}
 
 		List<string> Database.GetTables() {
@@ -351,15 +337,14 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			executeMethodWithDbExceptionHandling(
 				delegate {
 					// Before we disabled pooling, we couldn't repeatedly perform Update Data operations since users with open connections can't be dropped.
-					var connection =
-						new DBConnection(
-							new OracleInfo(
-								( info as DatabaseInfo ).SecondaryDatabaseName,
-								info.DataSource,
-								info.UserAndSchema,
-								info.Password,
-								false,
-								info.SupportsLinguisticIndexes ) );
+					var connection = new DBConnection(
+						new OracleInfo(
+							( info as DatabaseInfo ).SecondaryDatabaseName,
+							info.DataSource,
+							info.UserAndSchema,
+							info.Password,
+							false,
+							info.SupportsLinguisticIndexes ) );
 
 					connection.ExecuteWithConnectionOpen( () => method( connection ) );
 				} );

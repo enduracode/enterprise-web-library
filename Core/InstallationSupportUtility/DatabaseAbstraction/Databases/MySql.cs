@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				} );
 		}
 
-		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {
+		void Database.DeleteAndReCreateFromFile( string filePath ) {
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "DROP DATABASE IF EXISTS {0};".FormatWith( info.Database ) );
 				sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
@@ -107,23 +107,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			}
 		}
 
-		private string binFolderPath
-			=> IoMethods.GetFirstExistingFolderPath( new[] { @"C:\Program Files\MySQL\MySQL Server 5.7\bin", @"C:\Program Files\MySQL\MySQL Server 5.5\bin" }, "MySQL" );
+		private string binFolderPath => IoMethods.GetFirstExistingFolderPath(
+			new[] { @"C:\Program Files\MySQL\MySQL Server 5.7\bin", @"C:\Program Files\MySQL\MySQL Server 5.5\bin" },
+			"MySQL" );
 
 		private string getHostAndAuthenticationArguments() {
 			return "--host=localhost --user=root --password=password";
-		}
-
-		void Database.BackupTransactionLog( string folderPath ) {
-			throw new NotSupportedException();
-		}
-
-		void Database.RestoreNewTransactionLogs( string folderPath ) {
-			throw new NotSupportedException();
-		}
-
-		string Database.GetLogSummary( string folderPath ) {
-			throw new NotSupportedException();
 		}
 
 		List<string> Database.GetTables() {
@@ -131,8 +120,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			ExecuteDbMethod(
 				delegate( DBConnection cn ) {
 					var command = cn.DatabaseInfo.CreateCommand();
-					command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{0}' AND TABLE_TYPE = 'BASE TABLE'".FormatWith(
-						info.Database );
+					command.CommandText =
+						"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{0}' AND TABLE_TYPE = 'BASE TABLE'".FormatWith( info.Database );
 					cn.ExecuteReaderCommand(
 						command,
 						reader => {

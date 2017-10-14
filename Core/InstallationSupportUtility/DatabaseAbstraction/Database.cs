@@ -24,14 +24,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 
 		// Data package support
 		void ExportToFile( string filePath );
-		void DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode );
-		void BackupTransactionLog( string folderPath );
-		void RestoreNewTransactionLogs( string folderPath );
-
-		/// <summary>
-		/// This method will never return null.
-		/// </summary>
-		string GetLogSummary( string folderPath );
+		void DeleteAndReCreateFromFile( string filePath );
 
 		// Other
 		List<string> GetTables();

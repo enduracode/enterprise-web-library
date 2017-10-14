@@ -4,7 +4,7 @@ using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	internal class NoDatabase: Database {
-		string Database.SecondaryDatabaseName { get { throw new NotSupportedException(); } }
+		string Database.SecondaryDatabaseName => throw new NotSupportedException();
 
 		void Database.ExecuteSqlScriptInTransaction( string script ) {
 			throw new NotSupportedException();
@@ -19,13 +19,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		}
 
 		void Database.ExportToFile( string filePath ) {}
-		void Database.DeleteAndReCreateFromFile( string filePath, bool keepDbInStandbyMode ) {}
-		void Database.BackupTransactionLog( string folderPath ) {}
-		void Database.RestoreNewTransactionLogs( string folderPath ) {}
-
-		string Database.GetLogSummary( string folderPath ) {
-			throw new NotSupportedException();
-		}
+		void Database.DeleteAndReCreateFromFile( string filePath ) {}
 
 		List<string> Database.GetTables() {
 			throw new NotSupportedException();
