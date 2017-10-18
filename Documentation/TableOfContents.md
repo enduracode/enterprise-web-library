@@ -1,8 +1,7 @@
 # Table of Contents
 
-**New users:** You may want to read [our Getting Started section in the ReadMe](../README.md#getting-started) before looking at the documentation here.
-
 * Guides
+	* [Getting started](Guides/GettingStarted.md)
 	* [Database migration](Guides/DatabaseMigration.md)
 *	Procedures
 	*	[Making an EWF-UI web site](Procedures/MakingEwfUiSite.md)
