@@ -24,11 +24,11 @@ The Enterprise Web Library (EWL) is an extremely-opinionated NuGet package desig
 
 ### Requirements
 
-*	Windows 8.1, .NET Framework 4.5.1, IIS Express 8.5 (.NET Core support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you're interested!)
-*	Visual Studio 2013 (recommended)
-* SQL Server 2012 or later, MySQL 5.5, or Oracle Database 12c (if you want a relational database)
+*	Windows 10, .NET Framework 4.6.2, IIS Express 10 (.NET Core support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you're interested!)
+*	Visual Studio 2017 (recommended)
+* SQL Server 2016 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
 
-For servers, the only requirement is Windows Server 2012 R2 with IIS enabled.
+For servers, the only requirement is Windows Server 2016 with IIS enabled.
 
 
 ### Creating a New System
