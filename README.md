@@ -3,7 +3,7 @@
 The Enterprise Web Library (EWL) is an extremely-opinionated NuGet package designed to help you build web-based enterprise software on the .NET Framework. See [our web site](http://enterpriseweblibrary.org/) for more information.
 
 
-## Table of Contents
+## Table of contents
 
 *	[Introduction](#introduction)
 *	[Documentation](#documentation)
@@ -25,24 +25,24 @@ Our documentation is included in this repository, in the Documentation directory
 
 ## Support
 
+**Please note:** The EWL Team provides support only to those with paid community membership. Please email contact@enterpriseweblibrary.org for more information. If you are not a member of our community, we most likely will not respond to your requests. Please read [Give Away Your Code, But Never Your Time](http://wgross.net/essays/give-away-your-code-but-never-your-time) to understand the rationale behind this.
+
 
 ###	Q & A
 
 We use the [enterprise-web-library tag](http://stackoverflow.com/questions/tagged/enterprise-web-library) on Stack Overflow for all Q&A. Please post your questions there.
 
 
-### Community Forum
+### Community forum
 
 Visit our [Community Forum](https://community.enterpriseweblibrary.org/), a place for EWL developers to hang out and talk about whatever is on their mind.
 
 
-### Bug Reports and Feature Requests
+### Bug reports and feature requests
 
-We currently use an internal task tracker, but please create an issue on GitHub if you encounter a bug or have a feature request.
+We currently use an internal task tracker, which is available to community members.
 
 
 ## Contributing
 
-Code contributions are welcome! We will accept easily-mergeable changes as quickly as possible. We're working on writing up some detailed expectations, but for now, please refer to the opening section of the [excellent Roslyn contribution page](https://github.com/dotnet/roslyn/wiki/Contributing-Code) and read [Don't "Push" Your Pull Requests](http://www.igvita.com/2011/12/19/dont-push-your-pull-requests/).
-
-Please see our [documentation wiki](https://enduracode.fogbugz.com/default.asp?W5) for more information.
+If you would like to contribute, please email contact@enterpriseweblibrary.org to become a paid member of our community. We generally do not accept contributions from non-members. Please read [Give Away Your Code, But Never Your Time](http://wgross.net/essays/give-away-your-code-but-never-your-time) to understand the rationale behind this.
