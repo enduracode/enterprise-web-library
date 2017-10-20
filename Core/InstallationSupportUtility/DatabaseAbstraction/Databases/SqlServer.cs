@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
@@ -25,7 +26,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			this.logLogicalFileName = logLogicalFileName;
 		}
 
-		string Database.SecondaryDatabaseName { get { return ( info as DatabaseInfo ).SecondaryDatabaseName; } }
+		string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
 
 		void Database.ExecuteSqlScriptInTransaction( string script ) {
 			executeMethodWithDbExceptionHandling(
@@ -82,9 +83,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private void deleteAndReCreateFromFile( DBConnection cn, string filePath ) {
 			// NOTE: Instead of catching exceptions, figure out if the database exists by querying.
 			try {
-				// Gets rid of existing connections. This doesn't need to be executed against the master database, but it's convenient because it saves us from needing
+				// Gets rid of existing connections. These don't need to be executed against the master database, but it's convenient because it saves us from needing
 				// a second database connection.
-				executeLongRunningCommand( cn, "ALTER DATABASE " + info.Database + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE" );
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
 
 				executeLongRunningCommand( cn, "DROP DATABASE " + info.Database );
 			}
@@ -158,7 +160,14 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			StatusStatics.SetStatus( "Waiting for ghost record cleanup." );
 			Thread.Sleep( TimeSpan.FromMinutes( 5 ) );
 
-			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( 0 )" ) );
+			ExecuteDbMethod(
+				cn => {
+					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
+					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+					executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( 0 )" );
+					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
+					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
+				} );
 		}
 
 		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
