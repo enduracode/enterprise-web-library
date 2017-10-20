@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						installation.GeneralLogic.Path,
 						AppStatics.CoreProjectName,
 						EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net451-full" );
+					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net462-full" );
 					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 						IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
