@@ -1,7 +1,8 @@
 syntax: glob
 
 .vs/Enterprise Web Library/v15/.suo
-.vs/Enterprise Web Library/v15/sqlite3/storage.ide
+.vs/Enterprise Web Library/v15/sqlite3/
+.vs/Enterprise Web Library/v15/Server/sqlite3/
 packages/
 _ReSharper*
 Enterprise Web Library.sln.DotSettings.user

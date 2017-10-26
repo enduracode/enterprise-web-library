@@ -348,9 +348,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
 			ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
-			tableNames =
-				tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
-					.ToImmutableArray();
+			tableNames = tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+				.ToImmutableArray();
 
 			database.ExecuteDbMethod(
 				delegate( DBConnection cn ) {
@@ -669,7 +668,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
 				writer.WriteLine( ".vs/{0}/v15/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( ".vs/{0}/v15/sqlite3/storage.ide".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v15/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v15/Server/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 				writer.WriteLine( "Error Log.txt" );
