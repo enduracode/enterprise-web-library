@@ -28,8 +28,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Add a data parameter.
 		/// </summary>
-		public void AddColumnModification( InlineDbCommandColumnValue columnModification ) {
-			columnModifications.Add( columnModification );
+		public void AddColumnModifications( IEnumerable<InlineDbCommandColumnValue> columnModifications ) {
+			this.columnModifications.AddRange( columnModifications );
 		}
 
 		/// <summary>

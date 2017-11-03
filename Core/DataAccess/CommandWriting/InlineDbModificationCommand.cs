@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 	/// <summary>
 	/// Not yet documented.
@@ -6,6 +8,6 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
 		/// <summary>
 		/// Not yet documented.
 		/// </summary>
-		void AddColumnModification( InlineDbCommandColumnValue columnModification );
+		void AddColumnModifications( IEnumerable<InlineDbCommandColumnValue> columnModifications );
 	}
 }

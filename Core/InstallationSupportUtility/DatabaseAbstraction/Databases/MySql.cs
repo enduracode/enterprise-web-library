@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			this.info = info;
 		}
 
-		string Database.SecondaryDatabaseName { get { return ( info as DatabaseInfo ).SecondaryDatabaseName; } }
+		string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
 
 		void Database.ExecuteSqlScriptInTransaction( string script ) {
 			using( var sw = new StringWriter() ) {
@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			ExecuteDbMethod(
 				delegate( DBConnection cn ) {
 					var command = new InlineUpdate( "global_ints" );
-					command.AddColumnModification( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ) );
+					command.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ).ToCollection() );
 					command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
 					command.Execute( cn );
 				} );

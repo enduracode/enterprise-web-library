@@ -21,8 +21,8 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Add a data parameter to the command. Value may be null.
 		/// </summary>
-		public void AddColumnModification( InlineDbCommandColumnValue columnModification ) {
-			columnModifications.Add( columnModification );
+		public void AddColumnModifications( IEnumerable<InlineDbCommandColumnValue> columnModifications ) {
+			this.columnModifications.AddRange( columnModifications );
 		}
 
 		/// <summary>

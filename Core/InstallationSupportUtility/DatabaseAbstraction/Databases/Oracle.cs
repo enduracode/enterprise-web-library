@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			this.latestTableSpaces = latestTableSpaces;
 		}
 
-		string Database.SecondaryDatabaseName { get { return ( info as DatabaseInfo ).SecondaryDatabaseName; } }
+		string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
 
 		void Database.ExecuteSqlScriptInTransaction( string script ) {
 			using( var sw = new StringWriter() ) {
@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			ExecuteDbMethod(
 				delegate( DBConnection cn ) {
 					var command = new InlineUpdate( "global_numbers" );
-					command.AddColumnModification( new InlineDbCommandColumnValue( "v", new DbParameterValue( value ) ) );
+					command.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( value ) ).ToCollection() );
 					command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ) ) );
 					command.Execute( cn );
 				} );
