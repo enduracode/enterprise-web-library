@@ -2,14 +2,21 @@
 using System.IO;
 using System.ServiceModel;
 using System.Web;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Humanizer;
+using NodaTime;
 
 namespace EnterpriseWebLibrary {
 	public static class TelemetryStatics {
+		private static RateLimiter errorEmailLimiter;
+
+		internal static void Init() {
+			errorEmailLimiter = new RateLimiter( Duration.FromMinutes( 5 ), 10 );
+		}
+
 		/// <summary>
 		/// Reports an error to the developers. The report includes the specified exception and additional information about the running program.
 		/// </summary>
@@ -70,8 +77,16 @@ namespace EnterpriseWebLibrary {
 				}
 
 				EwlStatics.CallEveryMethod(
-					delegate { EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ); },
-					delegate { logError( sw.ToString() ); } );
+					() => {
+						lock( errorEmailLimiter ) {
+							errorEmailLimiter.RequestAction(
+								() => EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ),
+								() => SendDeveloperNotification(
+									"An error occurred and the email rate-limit was reached! See the log file for this and any other errors that may occur in the near future." ),
+								() => {} );
+						}
+					},
+					() => logError( sw.ToString() ) );
 			}
 		}
 
@@ -149,9 +164,8 @@ namespace EnterpriseWebLibrary {
 		private static EmailMessage getErrorEmailMessage( string body ) {
 			return new EmailMessage
 				{
-					Subject =
-						"Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
-						( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
+					Subject = "Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
+					          ( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
 					BodyHtml = body.GetTextAsEncodedHtml()
 				};
 		}

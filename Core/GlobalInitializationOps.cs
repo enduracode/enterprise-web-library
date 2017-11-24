@@ -46,6 +46,8 @@ namespace EnterpriseWebLibrary {
 				// handling to depend on this.
 				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
 
+				TelemetryStatics.Init();
+
 				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
 				initialized = true;
 				initializationLog += Environment.NewLine + "Succeeded in primary init.";

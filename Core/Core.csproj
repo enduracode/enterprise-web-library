@@ -663,6 +663,7 @@
     <Compile Include="MailMerging\MergeFieldNameTree.cs" />
     <Compile Include="MailMerging\RowTree\MergeRowTree.cs" />
     <Compile Include="Randomness.cs" />
+    <Compile Include="RateLimiter.cs" />
     <Compile Include="StructuralEqualityComparer.cs" />
     <Compile Include="SystemGeneralProvider.cs" />
     <Compile Include="SystemInitializer.cs" />
