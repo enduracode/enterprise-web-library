@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary {
 				checked {
 					intervalsPassed = (uint)Math.Floor( ( currentTime - lastDecrementTime ) / interval );
 				}
-				count = Math.Min( count - intervalsPassed, 0 );
+				count = Math.Max( count - intervalsPassed, 0 );
 				lastDecrementTime += interval * intervalsPassed;
 			}
 
