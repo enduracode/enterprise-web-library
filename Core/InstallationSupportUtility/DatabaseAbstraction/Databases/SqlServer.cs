@@ -164,7 +164,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				cn => {
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( 0 )" );
+					executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
 				} );
