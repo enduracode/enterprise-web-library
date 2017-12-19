@@ -160,14 +160,32 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			StatusStatics.SetStatus( "Waiting for ghost record cleanup." );
 			Thread.Sleep( TimeSpan.FromMinutes( 5 ) );
 
-			executeDbMethodAgainstMaster(
-				cn => {
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
-				} );
+			using( var sw = new StringWriter() ) {
+				sw.WriteLine( "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
+				sw.WriteLine( "GO" );
+				sw.WriteLine( "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+				sw.WriteLine( "GO" );
+
+				sw.WriteLine( "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
+				sw.WriteLine( "GO" );
+
+				sw.WriteLine( "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
+				sw.WriteLine( "GO" );
+				sw.WriteLine( "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
+				sw.WriteLine( "GO" );
+
+				sw.WriteLine( "EXIT" );
+
+				executeMethodWithDbExceptionHandling(
+					delegate {
+						try {
+							EwlStatics.RunProgram( "sqlcmd", ( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b", sw.ToString(), true );
+						}
+						catch( Exception e ) {
+							throw DataAccessMethods.CreateDbConnectionException( info, "shrinking", e );
+						}
+					} );
+			}
 		}
 
 		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
