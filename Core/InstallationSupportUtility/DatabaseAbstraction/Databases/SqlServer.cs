@@ -160,7 +160,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			StatusStatics.SetStatus( "Waiting for ghost record cleanup." );
 			Thread.Sleep( TimeSpan.FromMinutes( 5 ) );
 
-			executeDbMethodAgainstMaster(
+			ExecuteDbMethod(
 				cn => {
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
