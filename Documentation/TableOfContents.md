@@ -3,6 +3,7 @@
 * Guides
 	* [Getting started](Guides/GettingStarted.md)
 	* [Database migration](Guides/DatabaseMigration.md)
+	* [Data access](Guides/DataAccess.md)
 	* [Web framework](Guides/WebFramework.md)
 *	Procedures
 	*	[Making an EWF-UI web site](Procedures/MakingEwfUiSite.md)
