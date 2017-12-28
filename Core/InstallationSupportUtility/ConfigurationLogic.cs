@@ -19,13 +19,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static string DataPackageRepositoryPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
 
-		/// <summary>
-		/// This should only be used by the Installation Support Utility.
-		/// </summary>
-		public static string DownloadedTransactionLogsFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Downloaded Transaction Logs" );
-
-		public static string TransactionLogBackupsPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Transaction Log Backups" );
-
 		private static SystemIsuProvider provider;
 
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
@@ -40,13 +33,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 					var assemblyName = new AssemblyName( args.Name ).Name;
 					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
 						return null;
-					return
-						Assembly.LoadFrom(
-							EwlStatics.CombinePaths(
-								Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-								provider.NDependFolderPathInUserProfileFolder,
-								"Lib",
-								assemblyName + ".dll" ) );
+					return Assembly.LoadFrom(
+						EwlStatics.CombinePaths(
+							Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+							provider.NDependFolderPathInUserProfileFolder,
+							"Lib",
+							assemblyName + ".dll" ) );
 				};
 		}
 
@@ -69,17 +61,16 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// EWL Core and Development Utility use only.
 		/// </summary>
-		public static bool NDependIsPresent
-			=>
-				SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
-				Directory.Exists(
-					EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), provider.NDependFolderPathInUserProfileFolder ) );
+		public static bool NDependIsPresent => SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
+			                                       EwlStatics.CombinePaths(
+				                                       Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+				                                       provider.NDependFolderPathInUserProfileFolder ) );
 
 		public static void Init2() {
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
-			programRunnerUnstreamedServiceFactory = getHttpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed>(
-				"ProgramRunnerUnstreamed.svc" );
+			programRunnerUnstreamedServiceFactory =
+				getHttpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed>( "ProgramRunnerUnstreamed.svc" );
 		}
 
 		private static ChannelFactory<T> getHttpChannelFactory<T>( string serviceFileName ) {
