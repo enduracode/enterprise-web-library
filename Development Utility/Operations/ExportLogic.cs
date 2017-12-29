@@ -165,7 +165,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				               : "";
 			build.HgChangesetId = hgOutput.Length == 40 ? hgOutput : "";
 
-			build.LogicSize = ConfigurationLogic.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
+			build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
 				                  ? GetLogicSize.GetNDependLocCount( installation, false ) as int?
 				                  : null;
 			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
@@ -234,7 +234,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							channel => channel.UploadBuild(
 								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
 									{
-										AuthenticationKey = ConfigurationLogic.AuthenticationKey,
+										AuthenticationKey = ConfigurationLogic.SystemManagerAccessToken,
 										BuildDocument = memoryStream
 									} ),
 							"build upload" );

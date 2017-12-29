@@ -15,7 +15,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
 					() => {
 						try {
-							if( args.Count() < 2 )
+							AppStatics.Init();
+
+							if( args.Length < 2 )
 								throw new UserCorrectableException( "You must specify the installation path as the first argument and the operation name as the second." );
 
 							// Get installation.

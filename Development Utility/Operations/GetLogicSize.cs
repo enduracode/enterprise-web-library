@@ -18,10 +18,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		internal static int GetNDependLocCount( DevelopmentInstallation installation, bool debug ) {
 			var servicesProvider = new NDependServicesProvider();
 			var projectManager = servicesProvider.ProjectManager;
-			var project =
-				projectManager.CreateTemporaryProject(
-					getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
-					TemporaryProjectMode.Temporary );
+			var project = projectManager.CreateTemporaryProject(
+				getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
+				TemporaryProjectMode.Temporary );
 
 			StatusStatics.SetStatus( "Performing NDepend analysis." );
 			var analysisResult = project.RunAnalysis();
@@ -44,10 +43,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private static IEnumerable<string> getAssemblyPaths( DevelopmentInstallation installation, bool debug ) {
-			return EwlStatics.CombinePaths(
-				installation.DevelopmentInstallationLogic.LibraryPath,
-				EwlStatics.GetProjectOutputFolderPath( debug ),
-				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
+			return EwlStatics
+				.CombinePaths(
+					installation.DevelopmentInstallationLogic.LibraryPath,
+					EwlStatics.GetProjectOutputFolderPath( debug ),
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
 				.ToCollection()
 				.Concat(
 					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ]
@@ -57,15 +57,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					select EwlStatics.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ), i.NamespaceAndAssemblyName + ".exe" ) )
 				.Concat(
 					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable
-					select
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, i.Name, EwlStatics.GetProjectOutputFolderPath( debug ), i.NamespaceAndAssemblyName + ".exe" ) )
+					select EwlStatics.CombinePaths(
+						installation.GeneralLogic.Path,
+						i.Name,
+						EwlStatics.GetProjectOutputFolderPath( debug ),
+						i.NamespaceAndAssemblyName + ".exe" ) )
 				.Concat(
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
 						? EwlStatics.CombinePaths(
-							installation.GeneralLogic.Path,
-							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-							EwlStatics.GetProjectOutputFolderPath( debug ),
-							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" ).ToCollection()
+								installation.GeneralLogic.Path,
+								installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
+								EwlStatics.GetProjectOutputFolderPath( debug ),
+								installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" )
+							.ToCollection()
 						: new string[ 0 ] );
 		}
 
@@ -78,7 +82,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
-			if( !ConfigurationLogic.NDependIsPresent )
+			if( !AppStatics.NDependIsPresent )
 				throw new UserCorrectableException( "NDepend is not present." );
 			var installation = genericInstallation as DevelopmentInstallation;
 			var locCount = GetNDependLocCount( installation, true );

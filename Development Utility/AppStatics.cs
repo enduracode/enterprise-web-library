@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
@@ -7,6 +11,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 		internal const string WebProjectFilesFolderName = "Web Project Files";
 		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
+
+		internal static bool NDependIsPresent;
+
+		internal static void Init() {
+			NDependIsPresent = ConfigurationLogic.SystemProviderExists && ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
+			                   Directory.Exists(
+				                   EwlStatics.CombinePaths(
+					                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+					                   ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder ) );
+			if( NDependIsPresent )
+				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
+					var assemblyName = new AssemblyName( args.Name ).Name;
+					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
+						return null;
+					return Assembly.LoadFrom(
+						EwlStatics.CombinePaths(
+							Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+							ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder,
+							"Lib",
+							assemblyName + ".dll" ) );
+				};
+		}
 
 		internal static string DotNetToolsFolderPath => IoMethods.GetFirstExistingFolderPath(
 			new[]

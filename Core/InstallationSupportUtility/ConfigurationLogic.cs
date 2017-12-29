@@ -1,7 +1,4 @@
 using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
 
@@ -14,11 +11,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Downloaded Data Packages" );
 
-		/// <summary>
-		/// This should only be used by the Web Site.
-		/// </summary>
-		public static string DataPackageRepositoryPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS Web Site Data Packages" );
-
 		private static SystemIsuProvider provider;
 
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
@@ -27,19 +19,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 		internal static void Init1() {
 			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemIsuProvider;
-
-			if( NDependIsPresent )
-				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
-					var assemblyName = new AssemblyName( args.Name ).Name;
-					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
-						return null;
-					return Assembly.LoadFrom(
-						EwlStatics.CombinePaths(
-							Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-							provider.NDependFolderPathInUserProfileFolder,
-							"Lib",
-							assemblyName + ".dll" ) );
-				};
 		}
 
 		/// <summary>
@@ -58,14 +37,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			}
 		}
 
-		/// <summary>
-		/// EWL Core and Development Utility use only.
-		/// </summary>
-		public static bool NDependIsPresent => SystemProviderExists && SystemProvider.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
-			                                       EwlStatics.CombinePaths(
-				                                       Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-				                                       provider.NDependFolderPathInUserProfileFolder ) );
-
 		public static void Init2() {
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
@@ -80,10 +51,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 			// This prevents certificate validation problems on dev machines with self-signed certificates.
 			// This can probably be done anywhere before we try to get the system list. 
-			if( SystemProvider.RsisHttpBaseUrl.StartsWith( "https://localhost" ) )
+			if( SystemManager.HttpBaseUrl.StartsWith( "https://localhost" ) )
 				System.Net.ServicePointManager.ServerCertificateValidationCallback = ( ( sender, certificate, chain, sslPolicyErrors ) => true );
 
-			return new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemProvider.RsisHttpBaseUrl, "Service/" + serviceFileName ) );
+			return new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemManager.HttpBaseUrl, "Service/" + serviceFileName ) );
 		}
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
@@ -102,9 +73,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			// Performance
 			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
 
-			var factory = new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemProvider.RsisTcpBaseUrl, "Service/" + serviceFileName ) );
-			factory.Credentials.Windows.ClientCredential.UserName = SystemProvider.RsisTcpUserName;
-			factory.Credentials.Windows.ClientCredential.Password = SystemProvider.RsisTcpPassword;
+			var factory = new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemManager.TcpBaseUrl, "Service/" + serviceFileName ) );
+			factory.Credentials.Windows.ClientCredential.UserName = SystemManager.TcpUsername;
+			factory.Credentials.Windows.ClientCredential.Password = SystemManager.TcpPassword;
 			return factory;
 		}
 
@@ -200,39 +171,22 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 				innerException );
 		}
 
-		public static string AuthenticationKey {
-			get {
-				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.RsisAuthenticationKey == null )
-					throw new UserCorrectableException( "Missing RSIS authentication key in machine configuration file." );
-				return ConfigurationStatics.MachineConfiguration.RsisAuthenticationKey;
-			}
-		}
+		public static string SystemManagerAccessToken => SystemManager.AccessToken;
 
-		/// <summary>
-		/// The path to installed installations on this machine.
-		/// </summary>
-		public static string InstallationsFolderPath {
+		public static Configuration.Machine.MachineConfigurationSystemManager SystemManager {
 			get {
-				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.InstallationsFolderPath != null )
-					return ConfigurationStatics.MachineConfiguration.InstallationsFolderPath;
-				return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Installations" );
+				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.SystemManager == null )
+					throw new UserCorrectableException( "Missing System Manager element in machine configuration file." );
+				return ConfigurationStatics.MachineConfiguration.SystemManager;
 			}
 		}
 
 		public static string RevisionControlFolderPath {
 			get {
-				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath != null )
-					return ConfigurationStatics.MachineConfiguration.VaultWorkingFolderPath;
+				if( ConfigurationStatics.MachineConfiguration != null && ConfigurationStatics.MachineConfiguration.RevisionControlFolderPath != null )
+					return ConfigurationStatics.MachineConfiguration.RevisionControlFolderPath;
 				return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
 			}
-		}
-
-		public static string GetBuildFilePath( int systemId ) {
-			return EwlStatics.CombinePaths(
-				DataPackageRepositoryPath
-				/*NOTE: Make this the generic web-site-accessible folder and change this and DataPackageRepositoryPath to be a subfolder of that.*/,
-				"Latest Builds",
-				systemId.ToString() );
 		}
 
 		public static string OracleSysPassword {

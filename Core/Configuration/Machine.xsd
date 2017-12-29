@@ -1,11 +1,21 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://redstapler.biz" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:rs="http://redstapler.biz" elementFormDefault="qualified">
-	<element name="MachineConfiguration" type="rs:MachineConfiguration" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="http://enterpriseweblibrary.org" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ewl="http://enterpriseweblibrary.org"
+        elementFormDefault="qualified">
+	<element name="MachineConfiguration" type="ewl:MachineConfiguration" />
 	<complexType name="MachineConfiguration">
 		<sequence>
-			<element name="RsisAuthenticationKey" type="string" minOccurs="0" />
-			<element name="InstallationsFolderPath" type="string" minOccurs="0" />
-			<element name="VaultWorkingFolderPath" type="string" minOccurs="0" />
+			<element name="SystemManager" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="HttpBaseUrl" type="string" />
+						<element name="TcpBaseUrl" type="string" />
+						<element name="TcpUsername" type="string" />
+						<element name="TcpPassword" type="string" />
+						<element name="AccessToken" type="string" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="RevisionControlFolderPath" type="string" minOccurs="0" />
 			<element name="OracleSysPassword" type="string" minOccurs="0" />
 		</sequence>
 	</complexType>

@@ -20,10 +20,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			// schema change. We also don't have access to the schema on non-development machines.
 			var cachedSystemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS System List.xml" );
 			try {
-				var serializedSystemList =
-					ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod(
-						channel => channel.GetSystemList( ConfigurationLogic.AuthenticationKey ),
-						"system list download" );
+				var serializedSystemList = ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod(
+					channel => channel.GetSystemList( ConfigurationLogic.SystemManagerAccessToken ),
+					"system list download" );
 				RsisSystemList = XmlOps.DeserializeFromString<SystemList>( serializedSystemList, false );
 
 				// Cache the system list so something is available in the future if the machine is offline.
