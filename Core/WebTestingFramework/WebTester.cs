@@ -98,8 +98,8 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						selenium.WaitForPageToLoad( "30000" );
 						Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
 						// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
-						selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInEmail );
-						selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInPassword );
+						//selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInEmail );
+						//selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInPassword );
 						SubmitForm( selenium );
 						selenium.WaitForPageToLoad( "30000" );
 					} );

@@ -14,19 +14,9 @@
 		string AsposeWordsLicenseName { get; }
 
 		/// <summary>
-		/// Password used for intermediate log in and some other things.
+		/// Gets the password used for intermediate log-in.
 		/// </summary>
 		string IntermediateLogInPassword { get; }
-
-		/// <summary>
-		/// Email address used for sanitized systems that use forms authentication.
-		/// </summary>
-		string FormsLogInEmail { get; }
-
-		/// <summary>
-		/// Password used for sanitized systems that use forms authentication.
-		/// </summary>
-		string FormsLogInPassword { get; }
 
 		/// <summary>
 		/// Gets the email default from name.
