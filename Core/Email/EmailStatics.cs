@@ -188,16 +188,15 @@ namespace EnterpriseWebLibrary.Email {
 					{ Environment.NewLine + @"\t+", Environment.NewLine + "\t" }
 				};
 
-			return
-				regexToReplacements.Cast<DictionaryEntry>()
-					.Aggregate(
-						html,
-						( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
-					.Trim();
+			return regexToReplacements.Cast<DictionaryEntry>()
+				.Aggregate(
+					html,
+					( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+				.Trim();
 		}
 
 		internal static void SendDeveloperNotificationEmail( EmailMessage message ) {
-			message.From = defaultFromEmailAddress;
+			message.From = new EmailAddress( "do-not-reply@notifications.enterpriseweblibrary.org", EwlStatics.EwlName );
 			message.ToAddresses.AddRange( getDeveloperEmailAddresses() );
 			sendEmail( message, true );
 		}
@@ -207,16 +206,10 @@ namespace EnterpriseWebLibrary.Email {
 		/// the config file.
 		/// </summary>
 		public static void SendEmailWithDefaultFromAddress( EmailMessage message ) {
-			message.From = defaultFromEmailAddress;
+			message.From = new EmailAddress(
+				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
+				ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
 			SendEmail( message );
-		}
-
-		private static EmailAddress defaultFromEmailAddress {
-			get {
-				return new EmailAddress(
-					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
-					ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
-			}
 		}
 
 		/// <summary>
@@ -233,10 +226,10 @@ namespace EnterpriseWebLibrary.Email {
 		}
 
 		private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
-			var originalInfoParagraph =
-				"Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-					m.From.ToMailAddress().ToString(),
-					m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine + Environment.NewLine;
+			var originalInfoParagraph = "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
+				                            m.From.ToMailAddress().ToString(),
+				                            m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine +
+			                            Environment.NewLine;
 
 			// Override the From address to enable and encourage developers to use a separate email sending service for intermediate installations. It is generally a
 			// bad idea to mix testing and demo mail into deliverability reports for live mail.
