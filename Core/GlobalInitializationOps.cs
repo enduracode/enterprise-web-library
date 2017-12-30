@@ -42,10 +42,9 @@ namespace EnterpriseWebLibrary {
 				if( globalInitializer == null )
 					throw new ApplicationException( "The system must have a global initializer." );
 
-				// Initialize ConfigurationStatics, including the general provider, before the exception handling block below because it's reasonable for the exception
-				// handling to depend on this.
+				// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
 				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
-
+				EmailStatics.Init();
 				TelemetryStatics.Init();
 
 				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
@@ -72,7 +71,6 @@ namespace EnterpriseWebLibrary {
 				BlobFileOps.Init();
 				DataAccessStatics.Init();
 				DataAccessState.Init( mainDataAccessStateGetter );
-				EmailStatics.Init();
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
 				InstallationSupportUtility.ConfigurationLogic.Init1();
