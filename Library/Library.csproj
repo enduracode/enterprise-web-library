@@ -66,6 +66,7 @@
     <Compile Include="Configuration\Providers\General.cs" />
     <Compile Include="Configuration\Providers\Isu.cs" />
     <Compile Include="Configuration\Providers\UserManagement.cs" />
+    <Compile Include="Generated Code\Installation Shared Configuration.cs" />
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="GlobalInitializer.cs" />
     <Compile Include="GlobalStatics.cs" />
@@ -78,6 +79,7 @@
     </Content>
     <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
+    <Content Include="Configuration\Installation\Installations\Shared.xml" />
     <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />
     <Content Include="Files\System Template\Library\Configuration\Development.xml" />
     <Content Include="Files\System Template\Library\Configuration\General.xml" />
@@ -103,6 +105,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Configuration\Aspose.Total.lic" />
+    <None Include="Configuration\Installation\Shared.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Files\System Template\Web Site\Web.config" />
     <None Include="Files\Template.config" />
     <None Include="packages.config" />

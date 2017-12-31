@@ -15,11 +15,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 		internal static bool NDependIsPresent;
 
 		internal static void Init() {
-			NDependIsPresent = ConfigurationLogic.SystemProviderExists && ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder.Any() &&
-			                   Directory.Exists(
+			NDependIsPresent = ConfigurationLogic.SystemProviderExists && GlobalStatics.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
 				                   EwlStatics.CombinePaths(
 					                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-					                   ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder ) );
+					                   GlobalStatics.NDependFolderPathInUserProfileFolder ) );
 			if( NDependIsPresent )
 				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
 					var assemblyName = new AssemblyName( args.Name ).Name;
@@ -28,7 +27,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 					return Assembly.LoadFrom(
 						EwlStatics.CombinePaths(
 							Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-							ConfigurationLogic.SystemProvider.NDependFolderPathInUserProfileFolder,
+							GlobalStatics.NDependFolderPathInUserProfileFolder,
 							"Lib",
 							assemblyName + ".dll" ) );
 				};

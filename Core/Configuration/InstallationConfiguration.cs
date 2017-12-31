@@ -46,6 +46,11 @@ namespace EnterpriseWebLibrary.Configuration {
 		public const string InstallationStandardConfigurationFileName = "Standard.xml";
 
 		/// <summary>
+		/// Development Utility and private use only.
+		/// </summary>
+		public const string InstallationSharedConfigurationFileName = "Shared" + FileExtensions.Xml;
+
+		/// <summary>
 		/// Returns true if an installed installation exists at the specified path.
 		/// </summary> 
 		public static bool InstalledInstallationExists( string installationPath ) {
@@ -74,6 +79,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		private readonly InstallationStandardConfiguration installationStandardConfiguration;
 		private readonly IReadOnlyCollection<WebApplication> webApplications;
 		private readonly string installationCustomConfigurationFilePath;
+		private readonly string installationSharedConfigurationFilePath;
 
 		/// <summary>
 		/// Creates a new installation configuration.
@@ -146,7 +152,14 @@ namespace EnterpriseWebLibrary.Configuration {
 						                           systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
 
 			// installation custom configuration
-			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom.xml" );
+			installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom" + FileExtensions.Xml );
+
+			// installation shared configuration
+			installationSharedConfigurationFilePath = EwlStatics.CombinePaths(
+				isDevelopmentInstallation
+					? EwlStatics.CombinePaths( ConfigurationFolderPath, InstallationConfigurationFolderName, InstallationsFolderName )
+					: installationConfigurationFolderPath,
+				InstallationSharedConfigurationFileName );
 		}
 
 		/// <summary>
@@ -302,7 +315,12 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// </summary>
 		public string ConfigurationFolderPath { get { return configurationFolderPath; } }
 
-		internal string InstallationCustomConfigurationFilePath { get { return installationCustomConfigurationFilePath; } }
+		internal string InstallationCustomConfigurationFilePath => installationCustomConfigurationFilePath;
+
+		/// <summary>
+		/// Development Utility and internal use only.
+		/// </summary>
+		public string InstallationSharedConfigurationFilePath => installationSharedConfigurationFilePath;
 
 		/// <summary>
 		/// The file path for the error log file for this installation. ("Error Log.txt" in the root of the installation folder).

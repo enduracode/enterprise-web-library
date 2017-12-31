@@ -148,16 +148,26 @@ namespace EnterpriseWebLibrary.Configuration {
 			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? EwlStatics.GetProjectOutputFolderPath( true ) : ""; }
 		}
 
+
+		// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not perform
+		// schema validation for development installations because we may create sample solutions and send them to tech support people for troubleshooting, and
+		// these people may not put the solution in the proper location on disk. In this case we would not have access to the schema since we use absolute paths in
+		// the XML files to refer to the schema files.
+
 		/// <summary>
 		/// Loads installation-specific custom configuration information.
 		/// </summary>
 		public static T LoadInstallationCustomConfiguration<T>() {
-			// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not
-			// perform schema validation for development installations because we may create sample solutions and send them to tech support people for
-			// troubleshooting, and these people may not put the solution in the proper location on disk. In this case we would not have access to the schema since
-			// we use absolute paths in the XML files to refer to the schema files.
 			return XmlOps.DeserializeFromFile<T>( InstallationConfiguration.InstallationCustomConfigurationFilePath, false );
 		}
+
+		/// <summary>
+		/// Loads installation configuration information that is shared across installations.
+		/// </summary>
+		public static T LoadInstallationSharedConfiguration<T>() {
+			return XmlOps.DeserializeFromFile<T>( InstallationConfiguration.InstallationSharedConfigurationFilePath, false );
+		}
+
 
 		internal static object GetSystemLibraryProvider( string providerName ) {
 			var systemLibraryAssembly = globalInitializerType.Assembly;

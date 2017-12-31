@@ -54,9 +54,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 							InstallationConfiguration.InstallationConfigurationFolderName,
 							InstallationConfiguration.InstallationsFolderName,
-							( !prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ) ),
+							!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
 						EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName, InstallationConfiguration.InstallationConfigurationFolderName ),
 						false );
+					if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+						IoMethods.CopyFile(
+							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+							EwlStatics.CombinePaths(
+								folderPath,
+								InstallationConfiguration.ConfigurationFolderName,
+								InstallationConfiguration.InstallationConfigurationFolderName,
+								InstallationConfiguration.InstallationSharedConfigurationFileName ) );
 
 					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
@@ -208,7 +216,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					buildMessageInstallation.ShortName = installationConfigurationFile.installedInstallation.shortName;
 					buildMessageInstallation.IsLiveInstallation =
 						installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
-					buildMessageInstallation.ConfigurationPackage = ZipOps.ZipFolderAsByteArray( installationConfigurationFolderPath );
+
+					var packageFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, $"{installationConfigurationFile.installedInstallation.name} Configuration" );
+					IoMethods.CopyFolder( installationConfigurationFolderPath, packageFolderPath, false );
+					if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+						IoMethods.CopyFile(
+							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+							EwlStatics.CombinePaths( packageFolderPath, InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+					buildMessageInstallation.ConfigurationPackage = ZipOps.ZipFolderAsByteArray( packageFolderPath );
+
 					build.Installations.Add( buildMessageInstallation );
 					operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;
 				}

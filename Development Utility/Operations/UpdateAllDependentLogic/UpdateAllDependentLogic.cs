@@ -113,8 +113,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writeAssemblyInfo( writer, installation, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
 					} );
 
-			generateXmlSchemaLogicForCustomInstallationConfigurationXsd( installation );
-			generateXmlSchemaLogicForOtherXsdFiles( installation );
+			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
+			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
+			generateXmlSchemaLogicForOtherFiles( installation );
 
 			if( !installation.DevelopmentInstallationLogic.SystemIsEwl && Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
 				updateMercurialIgnoreFile( installation );
@@ -595,18 +596,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "[ assembly: " + name + "( " + value + " ) ]" );
 		}
 
-		private void generateXmlSchemaLogicForCustomInstallationConfigurationXsd( DevelopmentInstallation installation ) {
-			const string customInstallationConfigSchemaPathInProject = @"Configuration\Installation\Custom.xsd";
-			if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, customInstallationConfigSchemaPathInProject ) ) )
+		private void generateXmlSchemaLogicForInstallationConfigurationFile( DevelopmentInstallation installation, string schemaFileName ) {
+			var schemaPathInProject = EwlStatics.CombinePaths( @"Configuration\Installation", schemaFileName + FileExtensions.Xsd );
+			if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, schemaPathInProject ) ) )
 				generateXmlSchemaLogic(
 					installation.DevelopmentInstallationLogic.LibraryPath,
-					customInstallationConfigSchemaPathInProject,
+					schemaPathInProject,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Installation",
-					"Installation Custom Configuration.cs",
+					$"Installation {schemaFileName} Configuration.cs",
 					true );
 		}
 
-		private void generateXmlSchemaLogicForOtherXsdFiles( DevelopmentInstallation installation ) {
+		private void generateXmlSchemaLogicForOtherFiles( DevelopmentInstallation installation ) {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null )
 				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
 					generateXmlSchemaLogic(
