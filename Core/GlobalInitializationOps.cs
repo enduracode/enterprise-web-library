@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
+using System.IO;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -60,12 +60,12 @@ namespace EnterpriseWebLibrary {
 			try {
 				CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
 
-				var asposePdfLicense = ConfigurationStatics.SystemGeneralProvider.AsposePdfLicenseName;
-				if( asposePdfLicense.Any() )
-					new Aspose.Pdf.License().SetLicense( asposePdfLicense );
-				var asposeWordsLicense = ConfigurationStatics.SystemGeneralProvider.AsposeWordsLicenseName;
-				if( asposeWordsLicense.Any() )
-					new Aspose.Words.License().SetLicense( asposeWordsLicense );
+				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
+				if( File.Exists( asposePdfLicensePath ) )
+					new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
+				var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
+				if( File.Exists( asposeWordsLicensePath ) )
+					new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
 
 				AppMemoryCache.Init();
 				BlobFileOps.Init();
@@ -73,7 +73,6 @@ namespace EnterpriseWebLibrary {
 				DataAccessState.Init( mainDataAccessStateGetter );
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
-				InstallationSupportUtility.ConfigurationLogic.Init1();
 				UserManagementStatics.Init();
 
 				GlobalInitializationOps.globalInitializer = globalInitializer;

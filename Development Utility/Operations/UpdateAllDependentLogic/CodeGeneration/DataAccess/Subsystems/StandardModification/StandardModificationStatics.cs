@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void Generate(
 			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
-			Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			StandardModificationStatics.writer = writer;
 			StandardModificationStatics.database = database;
 

@@ -64,7 +64,6 @@
   <ItemGroup>
     <Compile Include="Configuration\Providers\Encryption.cs" />
     <Compile Include="Configuration\Providers\General.cs" />
-    <Compile Include="Configuration\Providers\Isu.cs" />
     <Compile Include="Configuration\Providers\UserManagement.cs" />
     <Compile Include="Generated Code\Installation Shared Configuration.cs" />
     <Compile Include="Generated Code\ISU.cs" />
@@ -73,12 +72,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />
-    <Content Include="Configuration\EWL Package ID.txt" />
     <Content Include="Configuration\General.xml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
+    <Content Include="Configuration\Installation\Installations\Packaging.xml" />
     <Content Include="Configuration\Installation\Installations\Shared.xml" />
     <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />
     <Content Include="Files\System Template\Library\Configuration\Development.xml" />

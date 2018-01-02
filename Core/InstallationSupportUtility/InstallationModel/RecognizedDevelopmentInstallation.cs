@@ -38,7 +38,5 @@
 
 		int DevelopmentInstallation.CurrentMajorVersion { get { return knownSystemLogic.RsisSystem.CurrentMajorVersion; } }
 		int DevelopmentInstallation.NextBuildNumber { get { return knownSystemLogic.RsisSystem.NextBuildNumber; } }
-
-		public bool SystemIsEwlCacheCoordinator { get { return knownSystemLogic.RsisSystem.Id == 56; } }
 	}
 }

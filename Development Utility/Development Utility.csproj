@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AppStatics.cs" />
     <Compile Include="Generated Code\ISU.cs" />
+    <Compile Include="Generated Code\Packaging Configuration.cs" />
     <Compile Include="Operations\ExportEwlToLocalFeed.cs" />
     <Compile Include="Operations\ExportLogic.cs" />
     <Compile Include="Operations\GetLogicSize.cs" />
@@ -101,6 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Configuration\Packaging.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Package Manager Console Commands.ps1" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
@@ -15,7 +14,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 		internal static bool NDependIsPresent;
 
 		internal static void Init() {
-			NDependIsPresent = ConfigurationLogic.SystemProviderExists && GlobalStatics.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
+			NDependIsPresent = GlobalStatics.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
 				                   EwlStatics.CombinePaths(
 					                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
 					                   GlobalStatics.NDependFolderPathInUserProfileFolder ) );

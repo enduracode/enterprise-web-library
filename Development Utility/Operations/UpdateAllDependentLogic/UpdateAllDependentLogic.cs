@@ -26,8 +26,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	// Configuration repository. Remember to fix the CruiseControl.NET config generator and the place in ExportLogic where we reference the batch file name when
 	// packaging general files.
 	internal class UpdateAllDependentLogic: Operation {
-		private static readonly IReadOnlyCollection<string> asposeLicenseFileNames = new[] { "Aspose.Total.lic", "Aspose.Pdf.lic", "Aspose.Words.lic" };
-
 		private static readonly Operation instance = new UpdateAllDependentLogic();
 		public static Operation Instance => instance;
 		private UpdateAllDependentLogic() {}
@@ -122,6 +120,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
+			if( installation is RecognizedDevelopmentInstallation recognizedInstallation )
+				recognizedInstallation.KnownSystemLogic.DownloadAsposeLicenses( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath );
+
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
 					IoMethods.CopyFile(
@@ -132,19 +133,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							fileName + FileExtensions.Xsd ) );
 				}
 			else {
-				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
-				if( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator )
-					foreach( var asposeLicenseFileName in asposeLicenseFileNames ) {
-						var asposeLicenseFilePath = EwlStatics.CombinePaths( ConfigurationStatics.ConfigurationFolderPath, asposeLicenseFileName );
-						if( File.Exists( asposeLicenseFilePath ) )
-							IoMethods.CopyFile(
-								asposeLicenseFilePath,
-								EwlStatics.CombinePaths(
-									InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-									InstallationFileStatics.FilesFolderName,
-									asposeLicenseFileName ) );
-					}
-
 				// If web projects exist for this installation, copy appropriate files into them.
 				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null )
 					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
@@ -230,11 +218,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
-				writer.WriteLine();
-				var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
-				if( ConfigurationLogic.SystemProviderExists && !installation.DevelopmentInstallationLogic.SystemIsEwl &&
-				    ( recognizedInstallation == null || !recognizedInstallation.SystemIsEwlCacheCoordinator ) )
-					generateGeneralProvider( writer, installation );
 				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
 					writer.WriteLine();
 					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
@@ -271,15 +254,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "}" );
 				}
 			}
-		}
-
-		private void generateGeneralProvider( TextWriter writer, DevelopmentInstallation installation ) {
-			writer.WriteLine(
-				"namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".Configuration.Providers {" );
-			writer.WriteLine( "internal partial class General: SystemGeneralProvider {" );
-			ConfigurationLogic.SystemProvider.WriteGeneralProviderMembers( writer );
-			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
 		}
 
 		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
@@ -341,7 +315,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateDataAccessCodeForDatabase(
 			InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
-			Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			var tableNames = DatabaseOps.GetDatabaseTables( database ).ToImmutableArray();
 
 			ensureTablesExist( tableNames, configuration.SmallTables, "small" );
@@ -682,9 +656,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writer.WriteLine( "Library/bin/" );
 				writer.WriteLine( "Library/obj/" );
+				writer.WriteLine( $"Library/{InstallationConfiguration.ConfigurationFolderName}/{InstallationConfiguration.AsposeLicenseFolderName}" );
 				writer.WriteLine( "Library/Generated Code/" );
-				foreach( var asposeLicenseFileName in asposeLicenseFileNames )
-					writer.WriteLine( "Library/" + InstallationFileStatics.FilesFolderName + "/" + asposeLicenseFileName );
 
 				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
 					writer.WriteLine();

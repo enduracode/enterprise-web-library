@@ -4,16 +4,6 @@
 	/// </summary>
 	public interface SystemGeneralProvider {
 		/// <summary>
-		/// Gets the Aspose.Pdf license name. Returns the empty string if the system doesn't have an Aspose.Pdf license.
-		/// </summary>
-		string AsposePdfLicenseName { get; }
-
-		/// <summary>
-		/// Gets the Aspose.Words license name. Returns the empty string if the system doesn't have an Aspose.Words license.
-		/// </summary>
-		string AsposeWordsLicenseName { get; }
-
-		/// <summary>
 		/// Gets the password used for intermediate log-in.
 		/// </summary>
 		string IntermediateLogInPassword { get; }

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -16,7 +17,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
 		private static readonly Operation instance = new ExportLogic();
 
-		internal static byte[] CreateEwlNuGetPackage( DevelopmentInstallation installation, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
+		internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) =>
+			XmlOps.DeserializeFromFile<PackagingConfiguration>(
+				EwlStatics.CombinePaths(
+					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+					InstallationConfiguration.InstallationConfigurationFolderName,
+					InstallationConfiguration.InstallationsFolderName,
+					"Packaging" + FileExtensions.Xml ),
+				false );
+
+		internal static byte[] CreateEwlNuGetPackage(
+			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
 			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
 
 			IoMethods.ExecuteWithTempFolder(
@@ -68,7 +79,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-						writeNuGetPackageManifest( installation, prerelease, localExportDateAndTime, writer );
+						writeNuGetPackageManifest( installation, packagingConfiguration, prerelease, localExportDateAndTime, writer );
 
 					StatusStatics.SetStatus(
 						EwlStatics.RunProgram(
@@ -82,7 +93,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				EwlStatics.CombinePaths(
 					outputFolderPath,
 					EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-						installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName,
+						packagingConfiguration.SystemShortName,
 						installation.CurrentMajorVersion,
 						!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
 						localExportDateAndTime: localExportDateAndTime ) ) );
@@ -93,13 +104,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var configurationFolderPath = EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
 			IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
+			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
 			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
 			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, ConfigurationStatics.ProvidersFolderAndNamespaceName ) );
 			if( !includeDatabaseUpdates )
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
 			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
-			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, "Update All Dependent Logic.bat" ) ); // EWL has this file.
 
 			// other files
 			var filesFolderInInstallationPath = EwlStatics.CombinePaths(
@@ -109,12 +120,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.CopyFolder( filesFolderInInstallationPath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 		}
 
-		private static void writeNuGetPackageManifest( DevelopmentInstallation installation, bool? prerelease, DateTime? localExportDateAndTime, TextWriter writer ) {
+		private static void writeNuGetPackageManifest(
+			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool? prerelease, DateTime? localExportDateAndTime,
+			TextWriter writer ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
-			writer.WriteLine(
-				"<id>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName ) + "</id>" );
+			writer.WriteLine( "<id>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( packagingConfiguration.SystemShortName ) + "</id>" );
 			writer.WriteLine(
 				"<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 					installation.CurrentMajorVersion,
@@ -152,14 +164,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
+			var packagingConfiguration = installation.DevelopmentInstallationLogic.SystemIsEwl ? GetPackagingConfiguration( installation ) : null;
 
 			var logicPackagesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );
 			IoMethods.DeleteFolder( logicPackagesFolderPath );
 
 			// Set up the main (build) object in the build message.
 			var build = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build();
-			build.SystemName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
-			build.SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
+			build.SystemName = packagingConfiguration?.SystemName ?? installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
+			build.SystemShortName = packagingConfiguration?.SystemShortName ?? installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
 
@@ -231,7 +244,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
-				build.NuGetPackages = packageEwl( installation, logicPackagesFolderPath );
+				build.NuGetPackages = packageEwl( installation, packagingConfiguration, logicPackagesFolderPath );
 
 			var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 			if( recognizedInstallation == null )
@@ -341,10 +354,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
-			DevelopmentInstallation installation, string logicPackagesFolderPath ) {
+			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, string logicPackagesFolderPath ) {
 			var buildMessageNuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
-			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, true );
-			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, false, logicPackagesFolderPath, false );
+			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, packagingConfiguration, false, logicPackagesFolderPath, true );
+			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, packagingConfiguration, false, logicPackagesFolderPath, false );
 			return buildMessageNuGetPackages;
 		}
 	}

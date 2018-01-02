@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static DatabaseInfo info;
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			info = cn.DatabaseInfo;
 			if( configuration.customModifications != null ) {
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static void testQueries( DBConnection cn, Configuration.SystemDevelopment.CustomModification[] mods ) {
+		private static void testQueries( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) {
 			// We don't test commands in Oracle because:
 			// 1. There's no good junk value to pass in.
 			// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that unless absolutely necessary.
@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				foreach( var command in mod.commands ) {
 					var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, command );
 					try {
-						cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, r => { } );
+						cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, r => {} );
 					}
 					catch( Exception e ) {
 						throw new UserCorrectableException( "Custom modification " + mod.name + " failed.", e );
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		private static void writeMethod( TextWriter writer, Database database, Configuration.SystemDevelopment.CustomModification mod ) {
+		private static void writeMethod( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification mod ) {
 			writer.WriteLine(
 				"public static void " + mod.name + "( " +
 				DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );

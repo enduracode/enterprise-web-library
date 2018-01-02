@@ -51,6 +51,11 @@ namespace EnterpriseWebLibrary.Configuration {
 		public const string InstallationSharedConfigurationFileName = "Shared" + FileExtensions.Xml;
 
 		/// <summary>
+		/// Development Utility and internal use only.
+		/// </summary>
+		public const string AsposeLicenseFolderName = "Aspose Licenses";
+
+		/// <summary>
 		/// Returns true if an installed installation exists at the specified path.
 		/// </summary> 
 		public static bool InstalledInstallationExists( string installationPath ) {
@@ -321,6 +326,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// Development Utility and internal use only.
 		/// </summary>
 		public string InstallationSharedConfigurationFilePath => installationSharedConfigurationFilePath;
+
+		internal string AsposeLicenseFolderPath => EwlStatics.CombinePaths( configurationFolderPath, AsposeLicenseFolderName );
 
 		/// <summary>
 		/// The file path for the error log file for this installation. ("Error Log.txt" in the root of the installation folder).

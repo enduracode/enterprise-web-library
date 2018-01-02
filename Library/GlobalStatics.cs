@@ -12,6 +12,8 @@ namespace EnterpriseWebLibrary {
 		}
 
 		internal static string IntermediateLogInPassword => installationSharedConfiguration.IntermediateLogInPassword;
+		internal static string EmailDefaultFromName => installationSharedConfiguration.EmailDefaultFromName;
+		internal static string EmailDefaultFromAddress => installationSharedConfiguration.EmailDefaultFromAddress;
 
 		/// <summary>
 		/// Gets the NDepend folder path relative to the user profile folder. Returns the empty string if NDepend is not present.

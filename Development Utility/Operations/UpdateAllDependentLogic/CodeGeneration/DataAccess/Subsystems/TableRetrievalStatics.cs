@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal static void Generate(
 			DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
-			Configuration.SystemDevelopment.Database configuration ) {
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			writer.WriteLine( namespaceDeclaration );
 			foreach( var table in tableNames ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
@@ -48,8 +48,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 						writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
 						writer.WriteLine(
-							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " +
-							StringTools.ConcatenateWithDelimiter(
+							"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " + StringTools.ConcatenateWithDelimiter(
 								", ",
 								columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 						writer.WriteLine( "}" );
@@ -141,12 +140,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				"private readonly Dictionary<System.Tuple<{0}>, Row> rowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
 			if( isRevisionHistoryTable )
 				writer.WriteLine(
-					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();".FormatWith( pkTupleTypeArguments ) );
+					"private readonly Dictionary<System.Tuple<{0}>, Row> latestRevisionRowsByPk = new Dictionary<System.Tuple<{0}>, Row>();"
+						.FormatWith( pkTupleTypeArguments ) );
 			writer.WriteLine( "private Cache() {}" );
 			writer.WriteLine( "internal TableRetrievalQueryCache<Row> Queries { get { return queries; } }" );
 			writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> RowsByPk { get { return rowsByPk; } }" );
 			if( isRevisionHistoryTable )
-				writer.WriteLine( "internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> LatestRevisionRowsByPk { get { return latestRevisionRowsByPk; } }" );
+				writer.WriteLine(
+					"internal Dictionary<System.Tuple<" + pkTupleTypeArguments + ">, Row> LatestRevisionRowsByPk { get { return latestRevisionRowsByPk; } }" );
 			writer.WriteLine( "}" );
 		}
 
@@ -169,7 +170,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				"Retrieves the rows from the table that match the specified conditions, ordered in a stable way." +
 				( isSmallTable ? " Since the table is specified as small, you should only use this method if you cannot filter the rows in code." : "" ) );
 			writer.WriteLine(
-				"public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) + "[] conditions ) {" );
+				"public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
+				"[] conditions ) {" );
 
 
 			// body
@@ -221,13 +223,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "} );" );
 
 				var rowsByPkExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
-				var pkTupleCreationArguments = pkIsId
-					                               ? "id"
-					                               : StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.CamelCasedName ).ToArray() );
+				var pkTupleCreationArguments =
+					pkIsId ? "id" : StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.CamelCasedName ).ToArray() );
 				writer.WriteLine( "if( !returnNullIfNoMatch )" );
 				writer.WriteLine( "return {0}[ System.Tuple.Create( {1} ) ];".FormatWith( rowsByPkExpression, pkTupleCreationArguments ) );
 				writer.WriteLine( "Row row;" );
-				writer.WriteLine( "return {0}.TryGetValue( System.Tuple.Create( {1} ), out row ) ? row : null;".FormatWith( rowsByPkExpression, pkTupleCreationArguments ) );
+				writer.WriteLine(
+					"return {0}.TryGetValue( System.Tuple.Create( {1} ), out row ) ? row : null;".FormatWith( rowsByPkExpression, pkTupleCreationArguments ) );
 			}
 			else {
 				writer.WriteLine(
@@ -237,7 +239,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 							: StringTools.ConcatenateWithDelimiter(
 								", ",
 								tableColumns.KeyColumns.Select(
-									i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) ).ToArray() ) ) );
+										i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) )
+									.ToArray() ) ) );
 				writer.WriteLine( "return returnNullIfNoMatch ? rows.SingleOrDefault() : rows.Single();" );
 			}
 			writer.WriteLine( "}" );

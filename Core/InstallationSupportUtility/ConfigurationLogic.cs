@@ -1,43 +1,20 @@
 using System;
+using System.Net.Http;
 using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class ConfigurationLogic {
-		private const string providerName = "Isu";
-
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
 		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Downloaded Data Packages" );
 
-		private static SystemIsuProvider provider;
-
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
-		internal static void Init1() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemIsuProvider;
-		}
-
-		/// <summary>
-		/// EWL Core and Development Utility use only.
-		/// </summary>
-		public static bool SystemProviderExists => provider != null;
-
-		/// <summary>
-		/// EWL Core and Development Utility use only.
-		/// </summary>
-		public static SystemIsuProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
-
-		public static void Init2() {
+		public static void Init() {
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
 			programRunnerUnstreamedServiceFactory =
@@ -77,6 +54,16 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			factory.Credentials.Windows.ClientCredential.UserName = SystemManager.TcpUsername;
 			factory.Credentials.Windows.ClientCredential.Password = SystemManager.TcpPassword;
 			return factory;
+		}
+
+		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method ) {
+			using( var client = new HttpClient() ) {
+				client.Timeout = new TimeSpan( 0, 0, 10 );
+				client.BaseAddress = new Uri( SystemManager.HttpBaseUrl + "/" );
+				client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", SystemManager.AccessToken );
+
+				method( client );
+			}
 		}
 
 		/// <summary>

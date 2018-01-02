@@ -1,4 +1,8 @@
-﻿using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
+﻿using System.Net.Http;
+using System.Threading.Tasks;
+using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class KnownSystemLogic {
@@ -9,5 +13,21 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		}
 
 		public SoftwareSystem RsisSystem => rsisSystem;
+
+		public void DownloadAsposeLicenses( string configurationFolderPath ) {
+			ConfigurationLogic.ExecuteWithSystemManagerClient(
+				client => {
+					Task.Run(
+							async () => {
+								using( var response = await client.GetAsync( "Pages/Public/AsposeLicensePackage.aspx", HttpCompletionOption.ResponseHeadersRead ) ) {
+									response.EnsureSuccessStatusCode();
+									ZipOps.UnZipStreamAsFolder(
+										await response.Content.ReadAsStreamAsync(),
+										EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
+								}
+							} )
+						.Wait();
+				} );
+		}
 	}
 }

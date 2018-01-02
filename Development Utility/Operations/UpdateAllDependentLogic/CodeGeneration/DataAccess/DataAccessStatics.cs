@@ -94,7 +94,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				"return " + EwlStatics.GetCSharpIdentifier( columns.First( c => c.UseToUniquelyIdentifyRow ).PascalCasedNameExceptForOracle ) + ".GetHashCode();" );
 			writer.WriteLine( "}" ); // Object override of GetHashCode
 
-			writer.WriteLine( @"	public static bool operator == ( Row row1, Row row2 ) {
+			writer.WriteLine(
+				@"	public static bool operator == ( Row row1, Row row2 ) {
 				return Equals( row1, row2 );
 			}
 
@@ -144,7 +145,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object " + i ).ToArray() );
 		}
 
-		internal static void WriteAddParamBlockFromCommandText( TextWriter writer, string commandVariable, DatabaseInfo info, string commandText, Database database ) {
+		internal static void WriteAddParamBlockFromCommandText(
+			TextWriter writer, string commandVariable, DatabaseInfo info, string commandText, Database database ) {
 			foreach( var param in GetNamedParamList( info, commandText ) ) {
 				writer.WriteLine(
 					commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param + " ) ).GetAdoDotNetParameter( " +
@@ -152,7 +154,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			}
 		}
 
-		internal static bool IsRevisionHistoryTable( string table, Configuration.SystemDevelopment.Database configuration ) {
+		internal static bool IsRevisionHistoryTable( string table, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			return configuration.revisionHistoryTables != null &&
 			       configuration.revisionHistoryTables.Any( revisionHistoryTable => revisionHistoryTable.EqualsIgnoreCase( table ) );
 		}
@@ -178,11 +180,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal static string GetConnectionExpression( Database database ) {
-			return
-				"DataAccessState.Current.{0}".FormatWith(
-					database.SecondaryDatabaseName.Any()
-						? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
-						: "PrimaryDatabaseConnection" );
+			return "DataAccessState.Current.{0}".FormatWith(
+				database.SecondaryDatabaseName.Any()
+					? "GetSecondaryDatabaseConnection( SecondaryDatabaseNames.{0} )".FormatWith( database.SecondaryDatabaseName )
+					: "PrimaryDatabaseConnection" );
 		}
 
 		internal static void WriteRevisionDeltaExtensionMethods( TextWriter writer, string retrievalClassName, IEnumerable<Column> columns ) {

@@ -124,11 +124,6 @@ namespace EnterpriseWebLibrary.Configuration {
 		public static string InstallationPath { get { return InstallationConfiguration.InstallationPath; } }
 
 		/// <summary>
-		/// Development Utility use only.
-		/// </summary>
-		public static string ConfigurationFolderPath { get { return InstallationConfiguration.ConfigurationFolderPath; } }
-
-		/// <summary>
 		/// Gets the path of the Files folder for the system.
 		/// </summary>
 		public static string FilesFolderPath {

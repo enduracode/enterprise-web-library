@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private const string dictionaryName = "valuesAndNames";
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database, Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.rowConstantTables == null )
 				return;
 
@@ -49,7 +49,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException(
-						"Column or data retrieval failed for the " + table.tableName + " row constant table. Make sure the table and the value, name, and order by columns exist.",
+						"Column or data retrieval failed for the " + table.tableName +
+						" row constant table. Make sure the table and the value, name, and order by columns exist.",
 						e );
 				}
 
@@ -122,7 +123,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeFillListControlMethod( TextWriter writer, Column valueColumn ) {
 			writer.WriteLine( "public static IEnumerable<SelectListItem<" + valueColumn.NullableDataTypeName + ">> GetListItems() {" );
-			writer.WriteLine( "return from i in valuesAndNames.GetAllPairs() select SelectListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
+			writer.WriteLine(
+				"return from i in valuesAndNames.GetAllPairs() select SelectListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
 			writer.WriteLine( "}" );
 		}
 	}

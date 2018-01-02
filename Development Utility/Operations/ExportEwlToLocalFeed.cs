@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -7,13 +6,11 @@ using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportEwlToLocalFeed: Operation {
 		private static readonly Operation instance = new ExportEwlToLocalFeed();
-		public static Operation Instance { get { return instance; } }
+		public static Operation Instance => instance;
 		private ExportEwlToLocalFeed() {}
 
-		bool Operation.IsValid( Installation genericInstallation ) {
-			var installation = genericInstallation as RecognizedDevelopmentInstallation;
-			return installation != null && installation.DevelopmentInstallationLogic.SystemIsEwl;
-		}
+		bool Operation.IsValid( Installation genericInstallation ) =>
+			genericInstallation is RecognizedDevelopmentInstallation installation && installation.DevelopmentInstallationLogic.SystemIsEwl;
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
 			var installation = genericInstallation as RecognizedDevelopmentInstallation;
@@ -22,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// NuGet.exe has problems if the folder doesn't exist.
 			Directory.CreateDirectory( localNuGetFeedFolderPath );
 
-			ExportLogic.CreateEwlNuGetPackage( installation, true, localNuGetFeedFolderPath, null );
+			ExportLogic.CreateEwlNuGetPackage( installation, ExportLogic.GetPackagingConfiguration( installation ), true, localNuGetFeedFolderPath, null );
 		}
 	}
 }
