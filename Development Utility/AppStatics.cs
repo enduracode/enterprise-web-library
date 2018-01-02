@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
@@ -14,10 +15,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 		internal static bool NDependIsPresent;
 
 		internal static void Init() {
-			NDependIsPresent = GlobalStatics.NDependFolderPathInUserProfileFolder.Any() && Directory.Exists(
+			NDependIsPresent = ConfigurationStatics.MachineConfiguration.NDependFolderPathInUserProfileFolderNonNullable.Any() && Directory.Exists(
 				                   EwlStatics.CombinePaths(
 					                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-					                   GlobalStatics.NDependFolderPathInUserProfileFolder ) );
+					                   ConfigurationStatics.MachineConfiguration.NDependFolderPathInUserProfileFolderNonNullable ) );
 			if( NDependIsPresent )
 				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
 					var assemblyName = new AssemblyName( args.Name ).Name;
@@ -26,7 +27,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 					return Assembly.LoadFrom(
 						EwlStatics.CombinePaths(
 							Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-							GlobalStatics.NDependFolderPathInUserProfileFolder,
+							ConfigurationStatics.MachineConfiguration.NDependFolderPathInUserProfileFolderNonNullable,
 							"Lib",
 							assemblyName + ".dll" ) );
 				};

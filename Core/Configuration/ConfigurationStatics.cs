@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		public static string RedStaplerFolderPath { get; private set; }
 
 		/// <summary>
-		/// EWL Core and ISU use only.
+		/// EWL and ISU use only.
 		/// </summary>
 		public static MachineConfiguration MachineConfiguration { get; private set; }
 
