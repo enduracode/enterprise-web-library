@@ -103,7 +103,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Configuration\Aspose.Total.lic" />
     <None Include="Configuration\Installation\Shared.xsd">
       <SubType>Designer</SubType>
     </None>
