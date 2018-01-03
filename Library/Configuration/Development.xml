@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<systemDevelopmentConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemDevelopment">
+	<LibraryNamespaceAndAssemblyName>EnterpriseWebLibrary</LibraryNamespaceAndAssemblyName>
+	<webProjects>
+		<project>
+			<name>Web Site</name>
+			<NamespaceAndAssemblyName>EnterpriseWebLibrary.WebSite</NamespaceAndAssemblyName>
+		</project>
+	</webProjects>
+	<xmlSchemas>
+		<schema>
+			<project>Core</project>
+			<pathInProject>Configuration\Installation Standard.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.Configuration.InstallationStandard</namespace>
+			<codeFileName>Installation Standard Configuration.cs</codeFileName>
+			<useSvcUtil>false</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
+			<pathInProject>Configuration\Machine.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.Configuration.Machine</namespace>
+			<codeFileName>Machine Configuration.cs</codeFileName>
+			<useSvcUtil>false</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
+			<pathInProject>Configuration\System Development.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.Configuration.SystemDevelopment</namespace>
+			<codeFileName>System Development Configuration.cs</codeFileName>
+			<useSvcUtil>false</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
+			<pathInProject>Configuration\System General.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.Configuration.SystemGeneral</namespace>
+			<codeFileName>System General Configuration.cs</codeFileName>
+			<useSvcUtil>false</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
+			<pathInProject>InstallationSupportUtility\SystemManagerInterface\Messages\BuildMessage\Build.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage</namespace>
+			<codeFileName>Build Message.cs</codeFileName>
+			<useSvcUtil>true</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
+			<pathInProject>InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\System List.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage</namespace>
+			<codeFileName>System List Message.cs</codeFileName>
+			<useSvcUtil>true</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Development Utility</project>
+			<pathInProject>Configuration\Packaging.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging</namespace>
+			<codeFileName>Packaging Configuration.cs</codeFileName>
+			<useSvcUtil>false</useSvcUtil>
+		</schema>
+	</xmlSchemas>
+</systemDevelopmentConfiguration>
