@@ -110,7 +110,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( !includeDatabaseUpdates )
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
-			IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, ".hg" ) ); // EWL uses a nested repository for configuration.
 
 			// other files
 			var filesFolderInInstallationPath = EwlStatics.CombinePaths(
@@ -176,7 +175,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
 
-			var hgOutput = Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) )
+			var hgOutput = Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) )
 				               ? EwlStatics.RunProgram(
 						               @"C:\Program Files\TortoiseHg\hg",
 						               "--debug identify --id \"{0}\"".FormatWith( installation.GeneralLogic.Path ),
@@ -216,7 +215,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 					InstallationConfiguration.InstallationConfigurationFolderName,
 					InstallationConfiguration.InstallationsFolderName ) ) ) {
-				if( Path.GetFileName( installationConfigurationFolderPath ) != InstallationConfiguration.DevelopmentInstallationFolderName ) {
+				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName }.Contains(
+					Path.GetFileName( installationConfigurationFolderPath ) ) ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
 
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.

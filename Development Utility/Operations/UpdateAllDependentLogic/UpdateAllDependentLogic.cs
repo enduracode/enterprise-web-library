@@ -115,7 +115,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
 			generateXmlSchemaLogicForOtherFiles( installation );
 
-			if( !installation.DevelopmentInstallationLogic.SystemIsEwl && Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hg" ) ) )
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
+			    Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
 				updateMercurialIgnoreFile( installation );
 		}
 

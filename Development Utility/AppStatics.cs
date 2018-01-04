@@ -7,6 +7,8 @@ using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
+		internal const string MercurialRepositoryFolderName = ".hg";
+
 		internal const string CoreProjectName = "Core";
 
 		internal const string WebProjectFilesFolderName = "Web Project Files";
