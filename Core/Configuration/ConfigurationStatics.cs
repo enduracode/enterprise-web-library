@@ -42,10 +42,19 @@ namespace EnterpriseWebLibrary.Configuration {
 			initializationLog += Environment.NewLine + "About to load machine config";
 
 			// Load machine configuration.
-			var machineConfigXmlFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
-			if( File.Exists( machineConfigXmlFilePath ) )
+			var machineConfigFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
+			if( File.Exists( machineConfigFilePath ) )
 				// Do not perform schema validation since the schema file won't be available on non-development machines.
-				MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( machineConfigXmlFilePath, false );
+				try {
+					MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( machineConfigFilePath, false );
+				}
+				catch {
+					// The alt file allows us to smoothly transition all machines in the case of schema changes that break deserialization.
+					var altFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration Alt.xml" );
+					if( !File.Exists( altFilePath ) )
+						throw;
+					MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( altFilePath, false );
+				}
 
 			initializationLog += Environment.NewLine + "About to initialize stack trace";
 
