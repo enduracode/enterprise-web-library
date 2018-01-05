@@ -3,6 +3,6 @@
 		/// <summary>
 		/// Gets the NDepend folder path relative to the user profile folder.
 		/// </summary>
-		public string NDependFolderPathInUserProfileFolderEffective => NDependFolderPathInUserProfileFolder ?? "NDepend";
+		public string NDependFolderPathInUserProfileFolderEffective => Development?.NDependFolderPathInUserProfileFolder ?? "NDepend";
 	}
 }

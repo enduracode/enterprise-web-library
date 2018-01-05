@@ -15,9 +15,26 @@
 					</sequence>
 				</complexType>
 			</element>
+			<element name="OracleSysPassword" type="string" minOccurs="0" />
+			<element name="Server" type="ewl:Server" minOccurs="0" />
+			<element name="Development" type="ewl:Development" minOccurs="0" />
+			<element name="Workstation" type="ewl:Workstation" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="Server">
+		<sequence>
+			<element name="Username" type="string" />
+			<element name="Password" type="string" />
+		</sequence>
+	</complexType>
+	<complexType name="Development">
+		<sequence>
 			<element name="RevisionControlFolderPath" type="string" minOccurs="0" />
 			<element name="NDependFolderPathInUserProfileFolder" type="string" minOccurs="0" />
-			<element name="OracleSysPassword" type="string" minOccurs="0" />
+		</sequence>
+	</complexType>
+	<complexType name="Workstation">
+		<sequence>
 		</sequence>
 	</complexType>
 </schema>
