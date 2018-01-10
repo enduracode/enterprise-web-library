@@ -46,13 +46,15 @@ namespace EnterpriseWebLibrary {
 		/// <param name="arguments">Do not pass null.</param>
 		/// <param name="input">Do not pass null.</param>
 		/// <param name="waitForExit"></param>
-		public static string RunProgram( string program, string arguments, string input, bool waitForExit ) {
+		/// <param name="workingDirectory">Do not pass null. Pass the empty string for the current working directory.</param>
+		public static string RunProgram( string program, string arguments, string input, bool waitForExit, string workingDirectory = "" ) {
 			var outputResult = "";
 			using( var p = new Process() ) {
 				p.StartInfo.FileName = program;
 				p.StartInfo.Arguments = arguments;
 				p.StartInfo.CreateNoWindow = true; // prevents command window from appearing
 				p.StartInfo.UseShellExecute = false; // necessary for redirecting output
+				p.StartInfo.WorkingDirectory = workingDirectory;
 				p.StartInfo.RedirectStandardInput = true;
 				if( waitForExit ) {
 					// Set up output recording.
