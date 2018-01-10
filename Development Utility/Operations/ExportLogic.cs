@@ -17,14 +17,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
 		private static readonly Operation instance = new ExportLogic();
 
-		internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) =>
-			XmlOps.DeserializeFromFile<PackagingConfiguration>(
-				EwlStatics.CombinePaths(
-					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-					InstallationConfiguration.InstallationConfigurationFolderName,
-					InstallationConfiguration.InstallationsFolderName,
-					"Packaging" + FileExtensions.Xml ),
-				false );
+		internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) {
+			var filePath = EwlStatics.CombinePaths(
+				installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+				InstallationConfiguration.InstallationConfigurationFolderName,
+				InstallationConfiguration.InstallationsFolderName,
+				"Packaging" + FileExtensions.Xml );
+			return File.Exists( filePath )
+				       ? XmlOps.DeserializeFromFile<PackagingConfiguration>( filePath, false )
+				       : new PackagingConfiguration
+					       {
+						       SystemName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName,
+						       SystemShortName = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName
+					       };
+		}
 
 		internal static byte[] CreateEwlNuGetPackage(
 			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
@@ -163,15 +169,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
-			var packagingConfiguration = installation.DevelopmentInstallationLogic.SystemIsEwl ? GetPackagingConfiguration( installation ) : null;
+			var packagingConfiguration = GetPackagingConfiguration( installation );
 
 			var logicPackagesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );
 			IoMethods.DeleteFolder( logicPackagesFolderPath );
 
 			// Set up the main (build) object in the build message.
 			var build = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build();
-			build.SystemName = packagingConfiguration?.SystemName ?? installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName;
-			build.SystemShortName = packagingConfiguration?.SystemShortName ?? installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName;
+			build.SystemName = packagingConfiguration.SystemName;
+			build.SystemShortName = packagingConfiguration.SystemShortName;
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
 
