@@ -140,10 +140,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
-				"<description>The {0} ({1}) is an extremely opinionated library for web applications that trades off performance, scalability, and development flexibility for an ease of maintenance you won't find anywhere else.</description>"
+				"<description>The {0} ({1}), and its tailored infrastructure platform, are a complete and open solution for developing and operating web-based enterprise software.</description>"
 					.FormatWith( EwlStatics.EwlName, EwlStatics.EwlInitialism ) );
 			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
-			writer.WriteLine( "<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>" );
+			writer.WriteLine( "<licenseUrl>http://enterpriseweblibrary.org/license</licenseUrl>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
