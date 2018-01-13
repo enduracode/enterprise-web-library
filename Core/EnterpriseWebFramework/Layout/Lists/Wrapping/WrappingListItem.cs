@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,6 +18,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	}
 
 	public static class WrappingListItemExtensionCreators {
+		/// <summary>
+		/// Creates a wrapping-list-item collection containing only this general list item.
+		/// </summary>
+		/// <param name="item"></param>
+		public static IReadOnlyCollection<WrappingListItem> ToWrappingListItemCollection( this ComponentListItem item ) {
+			return ( (WrappingListItem)item ).ToCollection();
+		}
+
 		/// <summary>
 		/// Creates a wrapping-list item from this general list item. If you don't need to pass any arguments, don't use this method; general list items are
 		/// implicitly converted to wrapping-list items.

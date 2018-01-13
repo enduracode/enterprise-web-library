@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,6 +18,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	}
 
 	public static class LineListItemExtensionCreators {
+		/// <summary>
+		/// Creates a line-list-item collection containing only this general list item.
+		/// </summary>
+		/// <param name="item"></param>
+		public static IReadOnlyCollection<LineListItem> ToLineListItemCollection( this ComponentListItem item ) {
+			return ( (LineListItem)item ).ToCollection();
+		}
+
 		/// <summary>
 		/// Creates a line-list item from this general list item. If you don't need to pass any arguments, don't use this method; general list items are implicitly
 		/// converted to line-list items.
