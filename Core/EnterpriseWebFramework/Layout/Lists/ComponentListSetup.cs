@@ -19,56 +19,57 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the list.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		/// <param name="itemInsertionUpdateRegions"></param>
+		/// <param name="etherealChildren"></param>
 		public ComponentListSetup(
 			bool hideIfEmpty = false, DisplaySetup displaySetup = null, bool isOrdered = false, ElementClassSet classes = null,
-			IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
+			IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null,
+			IEnumerable<EtherealComponent> etherealChildren = null ) {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
 				var itemComponents = items.Select( i => i.Item2 ).ToImmutableArray();
 				var itemComponentsById = items.Where( i => i.Item1.Id.Any() ).ToDictionary( i => i.Item1.Id, i => i.Item2 );
 
-				return
-					new IdentifiedFlowComponent(
-						() =>
-						new IdentifiedComponentData<FlowComponentOrNode>(
-							"",
-							new[]
-								{
-									new UpdateRegionLinker(
-							"tail",
-							from region in tailUpdateRegions ?? ImmutableArray<TailUpdateRegion>.Empty
-							let staticItemCount = items.Count() - region.UpdatingItemCount
-							select new PreModificationUpdateRegion( region.Sets, () => itemComponents.Skip( staticItemCount ), staticItemCount.ToString ),
-							arg => itemComponents.Skip( int.Parse( arg ) ) ),
-									new UpdateRegionLinker(
-							"add",
-							from region in itemInsertionUpdateRegions ?? ImmutableArray<ItemInsertionUpdateRegion>.Empty
-							select
-								new PreModificationUpdateRegion(
-								region.Sets,
-								() => ImmutableArray<PageComponent>.Empty,
-								() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
-							arg => arg.Separate( ",", false ).Where( itemComponentsById.ContainsKey ).Select( i => itemComponentsById[ i ] ) ),
-									new UpdateRegionLinker(
-							"remove",
-							items.Select(
-								( item, index ) =>
-								new PreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemComponents.ElementAt( index ).ToCollection(), () => "" ) ),
-							arg => ImmutableArray<PageComponent>.Empty )
-								},
-							ImmutableArray<EwfValidation>.Empty,
-							errorsByValidation =>
-							hideIfEmpty && !items.Any()
-								? Enumerable.Empty<FlowComponentOrNode>()
-								: new DisplayableElement(
-									  context => {
-										  return new DisplayableElementData(
-											  displaySetup,
-											  () => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
-											  classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
-											  children: itemComponents );
-									  } ).ToCollection() ) ).ToCollection();
+				return new IdentifiedFlowComponent(
+					() => new IdentifiedComponentData<FlowComponentOrNode>(
+						"",
+						new[]
+							{
+								new UpdateRegionLinker(
+									"tail",
+									from region in tailUpdateRegions ?? ImmutableArray<TailUpdateRegion>.Empty
+									let staticItemCount = items.Count() - region.UpdatingItemCount
+									select new PreModificationUpdateRegion( region.Sets, () => itemComponents.Skip( staticItemCount ), staticItemCount.ToString ),
+									arg => itemComponents.Skip( int.Parse( arg ) ) ),
+								new UpdateRegionLinker(
+									"add",
+									from region in itemInsertionUpdateRegions ?? ImmutableArray<ItemInsertionUpdateRegion>.Empty
+									select new PreModificationUpdateRegion(
+										region.Sets,
+										() => ImmutableArray<PageComponent>.Empty,
+										() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
+									arg => arg.Separate( ",", false ).Where( itemComponentsById.ContainsKey ).Select( i => itemComponentsById[ i ] ) ),
+								new UpdateRegionLinker(
+									"remove",
+									items.Select(
+										( item, index ) => new PreModificationUpdateRegion(
+											item.Item1.RemovalUpdateRegionSets,
+											() => itemComponents.ElementAt( index ).ToCollection(),
+											() => "" ) ),
+									arg => ImmutableArray<PageComponent>.Empty )
+							},
+						ImmutableArray<EwfValidation>.Empty,
+						errorsByValidation => hideIfEmpty && !items.Any()
+							                      ? Enumerable.Empty<FlowComponentOrNode>()
+							                      : new DisplayableElement(
+								                      context => {
+									                      return new DisplayableElementData(
+										                      displaySetup,
+										                      () => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
+										                      classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
+										                      children: itemComponents,
+										                      etherealChildren: etherealChildren );
+								                      } ).ToCollection() ) ).ToCollection();
 			};
 		}
 
