@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public DisplayableElementData(
 			DisplaySetup displaySetup, Func<DisplayableElementLocalData> localDataGetter, ElementClassSet classes = null,
-			IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
+			IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			displaySetup = displaySetup ?? new DisplaySetup( true );
 			BaseDataGetter = context => {
 				displaySetup.AddJsShowStatements( "$( '#{0}' ).show( 200 );".FormatWith( context.Id ) );

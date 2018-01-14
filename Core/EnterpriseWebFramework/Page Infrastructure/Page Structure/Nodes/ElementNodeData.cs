@@ -8,16 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	internal sealed class ElementNodeData {
 		internal readonly IEnumerable<FlowComponentOrNode> Children;
-		internal readonly IEnumerable<EtherealComponent> EtherealChildren;
+		internal readonly IEnumerable<EtherealComponentOrElement> EtherealChildren;
 		internal readonly Func<ElementNodeLocalData> LocalDataGetter;
 
 		/// <summary>
 		/// Creates an element-node-data object.
 		/// </summary>
 		public ElementNodeData(
-			Func<ElementNodeLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
+			Func<ElementNodeLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null,
+			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			Children = children ?? Enumerable.Empty<FlowComponentOrNode>();
-			EtherealChildren = etherealChildren ?? Enumerable.Empty<EtherealComponent>();
+			EtherealChildren = etherealChildren ?? Enumerable.Empty<EtherealComponentOrElement>();
 			LocalDataGetter = localDataGetter;
 		}
 	}

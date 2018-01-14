@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this component will be a part of.</param>
 		public EtherealIdContainer( IEnumerable<EtherealComponent> children, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
 			this.children = new IdentifiedEtherealComponent(
-				() => new IdentifiedComponentData<EtherealComponent>(
+				() => new IdentifiedComponentData<EtherealComponentOrElement>(
 					"",
 					new UpdateRegionLinker( "", new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(), arg => this.ToCollection() )
 						.ToCollection(),

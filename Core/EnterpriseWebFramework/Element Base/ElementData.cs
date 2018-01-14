@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public ElementData(
 			Func<ElementLocalData> localDataGetter, ElementClassSet classes = null, IEnumerable<FlowComponentOrNode> children = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ) {
+			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
 			classes = classes ?? ElementClassSet.Empty;
 			NodeDataGetter = context => {
 				classes.AddElementId( context.Id );
