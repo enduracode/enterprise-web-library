@@ -781,7 +781,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( "bool", "useValueParameter" ) );
 			parameters.Add(
 				new CSharpParameter(
-					"System.Func<{0},string,System.Action<{1}>,FormControl<FlowComponentOrNode>>".FormatWith(
+					"System.Func<{0},string,System.Action<{1}>,FormControl<FlowComponent>>".FormatWith(
 						includeValueParams ? field.NullableTypeName : field.TypeName,
 						field.TypeName ),
 					"formControlGetter" ) );
