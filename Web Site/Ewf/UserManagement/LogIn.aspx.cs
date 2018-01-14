@@ -14,12 +14,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private FormsAuthCapableUser user;
 
 		protected override void loadData() {
-			Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
+			Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
 			var logInPb = PostBack.CreateFull(
 				firstModificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
-				actionGetter:
-					() =>
-					new PostBackAction( user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
+				actionGetter: () => new PostBackAction(
+					user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -34,8 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					emailAddress = new DataValue<string>();
 					FormState.ExecuteWithDataModificationsAndDefaultAction(
 						new[] { logInPb, newPasswordPb },
-						() =>
-						registeredTable.AddItem(
+						() => registeredTable.AddItem(
 							new EwfTableItem( "Email address", emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address." ).ToControl() ) ) );
 
 					var password = new DataValue<string>();
@@ -43,21 +41,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new EwfTableItem(
 							"Password",
 							FormItem.Create(
-								"",
-								new EwfTextBox( "", masksCharacters: true ),
-								validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ) ) ).ToControl() ) );
+									"",
+									new EwfTextBox( "", masksCharacters: true ),
+									validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ) ) )
+								.ToControl() ) );
 
 					if( FormsAuthStatics.PasswordResetEnabled )
 						registeredTable.AddItem(
 							new EwfTableItem(
 								new PlaceHolder().AddControlsReturnThis(
-									"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
-										.GetControls()
-										.Concat(
-											new PostBackButton(
-												new TextActionControlStyle( "click here to immediately send yourself a new password." ),
-												usesSubmitBehavior: false,
-												postBack: newPasswordPb ) ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+										"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
+											.GetControls()
+											.Concat(
+												new PostBackButton(
+													new TextActionControlStyle( "click here to immediately send yourself a new password." ),
+													usesSubmitBehavior: false,
+													postBack: newPasswordPb ) ) )
+									.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 					ph.AddControlsReturnThis( registeredTable );
 

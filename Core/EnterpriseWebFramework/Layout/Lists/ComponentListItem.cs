@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
 			this IEnumerable<FlowComponentOrNode> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
 			return children.ToComponentListItem(
 				"",
 				displaySetup: displaySetup,
@@ -61,49 +61,45 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ComponentListItem ToComponentListItem(
 			this IEnumerable<FlowComponentOrNode> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			IEnumerable<EtherealComponent> etherealChildren = null ) {
 			return new ComponentListItem(
 				( includeContentContainer, itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
-					component =
-						new IdentifiedFlowComponent(
-							() =>
-							new IdentifiedComponentData<FlowComponentOrNode>(
-								id,
-								new UpdateRegionLinker(
+					component = new IdentifiedFlowComponent(
+						() => new IdentifiedComponentData<FlowComponentOrNode>(
+							id,
+							new UpdateRegionLinker(
 								"",
 								new PreModificationUpdateRegion( updateRegionSets, component.ToCollection, () => "" ).ToCollection(),
 								arg => component.ToCollection() ).ToCollection(),
-								ImmutableArray<EwfValidation>.Empty,
-								errorsByValidation => new DisplayableElement(
-									                      context => {
-										                      var attributes = new List<Tuple<string, string>>();
-										                      if( visualOrderRank.HasValue || width != null )
-											                      attributes.Add(
-												                      Tuple.Create(
-													                      "style",
-													                      StringTools.ConcatenateWithDelimiter(
-														                      ", ",
-														                      visualOrderRank.HasValue ? "order: {0}".FormatWith( visualOrderRank.Value ) : "",
-														                      width != null ? "width: {0}".FormatWith( width.Value ) : "" ) ) );
+							ImmutableArray<EwfValidation>.Empty,
+							errorsByValidation => new DisplayableElement(
+								context => {
+									var attributes = new List<Tuple<string, string>>();
+									if( visualOrderRank.HasValue || width != null )
+										attributes.Add(
+											Tuple.Create(
+												"style",
+												StringTools.ConcatenateWithDelimiter(
+													", ",
+													visualOrderRank.HasValue ? "order: {0}".FormatWith( visualOrderRank.Value ) : "",
+													width != null ? "width: {0}".FormatWith( width.Value ) : "" ) ) );
 
-										                      return new DisplayableElementData(
-											                      displaySetup,
-											                      () => new DisplayableElementLocalData( "li", attributes: attributes ),
-											                      classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
-											                      children:
-												                      includeContentContainer
-													                      ? new DisplayableElement(
-														                        innerContext =>
-														                        new DisplayableElementData(
-															                        null,
-															                        () => new DisplayableElementLocalData( "div" ),
-															                        classes: CssElementCreator.ItemClass,
-															                        children: children,
-															                        etherealChildren: etherealChildren ) ).ToCollection()
-													                      : children,
-											                      etherealChildren: includeContentContainer ? null : etherealChildren );
-									                      } ).ToCollection() ) );
+									return new DisplayableElementData(
+										displaySetup,
+										() => new DisplayableElementLocalData( "li", attributes: attributes ),
+										classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
+										children: includeContentContainer
+											          ? new DisplayableElement(
+												          innerContext => new DisplayableElementData(
+													          null,
+													          () => new DisplayableElementLocalData( "div" ),
+													          classes: CssElementCreator.ItemClass,
+													          children: children,
+													          etherealChildren: etherealChildren ) ).ToCollection()
+											          : children,
+										etherealChildren: includeContentContainer ? null : etherealChildren );
+								} ).ToCollection() ) );
 					return component;
 				},
 				id,

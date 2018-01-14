@@ -7,8 +7,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A hidden field.
 	/// </summary>
-	public class EwfHiddenField: FormControl<EtherealComponentOrElement> {
-		private readonly EtherealComponentOrElement component;
+	public class EwfHiddenField: FormControl<EtherealComponent> {
+		private readonly EtherealComponent component;
 		private readonly EwfValidation validation;
 
 		/// <summary>
@@ -19,7 +19,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="id"></param>
 		/// <param name="pageModificationValue"></param>
 		public EwfHiddenField(
-			string value, Action<PostBackValue<string>, Validator> validationMethod, HiddenFieldId id = null, PageModificationValue<string> pageModificationValue = null ) {
+			string value, Action<PostBackValue<string>, Validator> validationMethod, HiddenFieldId id = null,
+			PageModificationValue<string> pageModificationValue = null ) {
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
 			var elementId = new ElementId();
@@ -44,10 +45,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"input",
 								attributes: attributes,
 								includeIdAttribute: id != null || pageModificationValue != null,
-								jsInitStatements:
-									pageModificationValue != null
-										? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
-										: "" );
+								jsInitStatements: pageModificationValue != null
+									                  ? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith(
+										                  context.Id,
+										                  pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
+									                  : "" );
 						} );
 				},
 				formValue: formValue );
@@ -57,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			formValue.AddPageModificationValue( pageModificationValue, v => v );
 		}
 
-		public EtherealComponentOrElement PageComponent => component;
+		public EtherealComponent PageComponent => component;
 		public EwfValidation Validation => validation;
 	}
 }

@@ -2,9 +2,9 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class IdentifiedEtherealComponent: EtherealComponentOrElement {
-		internal readonly Func<IdentifiedComponentData<EtherealComponentOrElement>> ComponentDataGetter;
+		internal readonly Func<IdentifiedComponentData<EtherealComponent>> ComponentDataGetter;
 
-		internal IdentifiedEtherealComponent( Func<IdentifiedComponentData<EtherealComponentOrElement>> componentDataGetter ) {
+		internal IdentifiedEtherealComponent( Func<IdentifiedComponentData<EtherealComponent>> componentDataGetter ) {
 			ComponentDataGetter = componentDataGetter;
 		}
 	}

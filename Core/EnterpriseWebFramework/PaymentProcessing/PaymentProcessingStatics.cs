@@ -28,12 +28,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can
 		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
 		/// email address).</param>
-		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
 			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
 			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
-			EwfPage.Instance.ClientScript.RegisterClientScriptInclude( typeof( PaymentProcessingStatics ), "Stripe Checkout", "https://checkout.stripe.com/checkout.js" );
+			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
+				typeof( PaymentProcessingStatics ),
+				"Stripe Checkout",
+				"https://checkout.stripe.com/checkout.js" );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
@@ -45,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var token = new DataValue<string>();
 
 			var hiddenFieldId = new HiddenFieldId();
-			List<EtherealComponentOrElement> hiddenFields = new List<EtherealComponentOrElement>();
+			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
 				() => hiddenFields.Add( new EwfHiddenField( "", ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
@@ -58,15 +61,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					StripeCharge response;
 					try {
-						response =
-							new StripeGateway( ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey ).Post(
-								new ChargeStripeCustomer
-									{
-										Amount = (int)( amountInDollars.Value * 100 ),
-										Currency = "usd",
-										Description = description.Any() ? description : null,
-										Card = token.Value
-									} );
+						response = new StripeGateway( ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey ).Post(
+							new ChargeStripeCustomer
+								{
+									Amount = (int)( amountInDollars.Value * 100 ),
+									Currency = "usd",
+									Description = description.Any() ? description : null,
+									Card = token.Value
+								} );
 					}
 					catch( StripeException e ) {
 						if( e.Type == "card_error" )
@@ -87,7 +89,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			FormAction action = new PostBackFormAction( postBack );
 			action.AddToPageIfNecessary();
-			return Tuple.Create<IReadOnlyCollection<EtherealComponentOrElement>, Func<string>>(
+			return Tuple.Create<IReadOnlyCollection<EtherealComponent>, Func<string>>(
 				hiddenFields,
 				() => {
 					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() + " }";

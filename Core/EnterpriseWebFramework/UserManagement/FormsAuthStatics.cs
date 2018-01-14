@@ -77,18 +77,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				firstLabel ?? "Password",
 				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
 				validationGetter: control => new EwfValidation(
-					                             ( pbv, v ) => {
-						                             password.Value = control.GetPostBackValue( pbv );
-						                             if( password.Value != passwordAgain.Value )
-							                             v.NoteErrorAndAddMessage( "Passwords do not match." );
-						                             else {
-							                             var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-							                             if( strictProvider != null )
-								                             strictProvider.ValidatePassword( v, password.Value );
-							                             else if( password.Value.Length < 7 )
-								                             v.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-						                             }
-					                             } ) );
+					( pbv, v ) => {
+						password.Value = control.GetPostBackValue( pbv );
+						if( password.Value != passwordAgain.Value )
+							v.NoteErrorAndAddMessage( "Passwords do not match." );
+						else {
+							var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
+							if( strictProvider != null )
+								strictProvider.ValidatePassword( v, password.Value );
+							else if( password.Value.Length < 7 )
+								v.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+						}
+					} ) );
 			if( textBoxWidth.HasValue )
 				passwordFormItem.Control.Width = textBoxWidth.Value;
 
@@ -106,19 +106,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			return FormItem.Create(
 				label,
 				new EwfTextBox( "" ),
-				validationGetter:
-					control =>
-					new EwfValidation(
-						( pbv, validator ) =>
-						emailAddress.Value =
-						validator.GetEmailAddress( new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ), control.GetPostBackValue( pbv ), false ) ) );
+				validationGetter: control => new EwfValidation(
+					( pbv, validator ) => emailAddress.Value = validator.GetEmailAddress(
+						                      new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ),
+						                      control.GetPostBackValue( pbv ),
+						                      false ) ) );
 		}
 
 		/// <summary>
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
 		/// does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
 			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var clientTime = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
@@ -178,7 +177,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
 		/// the system does not implement the forms-authentication-capable user-management provider.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponentOrElement>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
 			var clientTime = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
@@ -197,18 +196,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					} ) );
 		}
 
-		private static IReadOnlyCollection<EtherealComponentOrElement> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
+		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
 			HiddenFieldId timeHiddenFieldId = new HiddenFieldId();
 			var timeHiddenField = new EwfHiddenField( "", ( postBackValue, validator ) => clientTime.Value = postBackValue.Value, id: timeHiddenFieldId );
-			EwfPage.Instance.PreRender +=
-				delegate {
-					EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
-						typeof( UserManagementStatics ),
-						"formSubmitEventHandler",
-						timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) );
-				};
+			EwfPage.Instance.PreRender += delegate {
+				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
+					typeof( UserManagementStatics ),
+					"formSubmitEventHandler",
+					timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) );
+			};
 
 			return timeHiddenField.PageComponent.ToCollection();
 		}
@@ -225,7 +223,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
 				var authenticationDuration = ( strictProvider?.AuthenticationTimeoutInMinutes ).HasValue
 					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
-					                             : user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+					                             : user.Role.RequiresEnhancedSecurity
+						                             ? TimeSpan.FromMinutes( 12 )
+						                             : SessionDuration;
 
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
 				AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
