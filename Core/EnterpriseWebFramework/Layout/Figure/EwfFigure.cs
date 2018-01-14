@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a figure.
@@ -24,16 +24,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the figure.</param>
 		/// <param name="caption">The caption.</param>
-		public EwfFigure( IEnumerable<FlowComponentOrNode> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, FigureCaption caption = null ) {
-			children =
-				new DisplayableElement(
-					context =>
-					new DisplayableElementData(
+		public EwfFigure( IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, FigureCaption caption = null ) {
+			children = new DisplayableElement(
+					context => new DisplayableElementData(
 						displaySetup,
 						() => new DisplayableElementLocalData( "figure" ),
 						classes: CssElementCreator.Class.Add( classes ?? ElementClassSet.Empty ),
 						children: caption != null ? caption.FigureIsTextual ? caption.Components.Concat( content ) : content.Concat( caption.Components ) : content ) )
-					.ToCollection();
+				.ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

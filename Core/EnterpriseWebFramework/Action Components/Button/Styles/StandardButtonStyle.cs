@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ActionComponentCssElementCreator.AllStylesClass.Add( styleClass );
 		}
 
-		IEnumerable<FlowComponentOrNode> ButtonStyle.GetChildren() {
+		IEnumerable<FlowComponent> ButtonStyle.GetChildren() {
 			return ActionComponentIcon.GetIconAndTextComponents( icon, text );
 		}
 

@@ -15,20 +15,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal readonly bool FigureIsTextual;
-		internal readonly IReadOnlyCollection<FlowComponentOrNode> Components;
+		internal readonly IReadOnlyCollection<FlowComponent> Components;
 
 		/// <summary>
 		/// Creates a caption.
 		/// </summary>
 		/// <param name="components"></param>
 		/// <param name="figureIsTextual">Pass true to place the caption above the content.</param>
-		public FigureCaption( IEnumerable<FlowComponentOrNode> components, bool figureIsTextual = false ) {
+		public FigureCaption( IEnumerable<FlowComponent> components, bool figureIsTextual = false ) {
 			FigureIsTextual = figureIsTextual;
-			Components =
-				new DisplayableElement(
-					context =>
-					new DisplayableElementData( null, () => new DisplayableElementLocalData( "figcaption" ), classes: CssElementCreator.Class, children: components ) )
-					.ToCollection();
+			Components = new DisplayableElement(
+				context => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData( "figcaption" ),
+					classes: CssElementCreator.Class,
+					children: components ) ).ToCollection();
 		}
 	}
 }

@@ -3,7 +3,7 @@
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface ButtonStyle {
 		ElementClassSet GetClasses();
-		IEnumerable<FlowComponentOrNode> GetChildren();
+		IEnumerable<FlowComponent> GetChildren();
 		string GetJsInitStatements( string id );
 	}
 }

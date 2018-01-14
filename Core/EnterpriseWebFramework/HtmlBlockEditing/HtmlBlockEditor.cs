@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for editing an HTML block.
 	/// </summary>
-	public class HtmlBlockEditor: FormControl<FlowComponentOrNode> {
+	public class HtmlBlockEditor: FormControl<FlowComponent> {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfHtmlBlockEditor";
 
@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly HtmlBlockEditorModification mod;
-		private readonly FlowComponentOrNode component;
+		private readonly FlowComponent component;
 		private readonly EwfValidation validation;
 
 		/// <summary>
@@ -40,20 +40,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				},
 				setup: setup.WysiwygSetup );
 
-			component =
-				new DisplayableElement(
-					context => {
-						return new DisplayableElementData(
-							setup.DisplaySetup,
-							() => new DisplayableElementLocalData( "div" ),
-							classes: new ElementClass( CssElementCreator.CssClass ),
-							children: wysiwygEditor.PageComponent.ToCollection() );
-					} );
+			component = new DisplayableElement(
+				context => {
+					return new DisplayableElementData(
+						setup.DisplaySetup,
+						() => new DisplayableElementLocalData( "div" ),
+						classes: new ElementClass( CssElementCreator.CssClass ),
+						children: wysiwygEditor.PageComponent.ToCollection() );
+				} );
 
 			validation = wysiwygEditor.Validation;
 		}
 
-		public FlowComponentOrNode PageComponent => component;
+		public FlowComponent PageComponent => component;
 		public EwfValidation Validation => validation;
 
 		/// <summary>

@@ -5,7 +5,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A hyperlink.
 	/// </summary>
 	public sealed class EwfHyperlink: PhrasingComponent {
-		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a hyperlink.
@@ -22,8 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					behavior.PostBackAdder();
 					return new DisplayableElementData(
 						displaySetup,
-						() =>
-						new DisplayableElementLocalData(
+						() => new DisplayableElementLocalData(
 							"a",
 							attributes: behavior.AttributeGetter(),
 							includeIdAttribute: behavior.IncludeIdAttribute,

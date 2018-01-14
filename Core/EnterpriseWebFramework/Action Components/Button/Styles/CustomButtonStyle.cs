@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ActionComponentCssElementCreator.AllStylesClass.Add( classes ?? ElementClassSet.Empty );
 		}
 
-		IEnumerable<FlowComponentOrNode> ButtonStyle.GetChildren() {
+		IEnumerable<FlowComponent> ButtonStyle.GetChildren() {
 			return children;
 		}
 

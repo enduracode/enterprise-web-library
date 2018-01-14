@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal readonly Func<Func<string>, Func<string>, IReadOnlyCollection<FlowComponentOrNode>> ComponentGetter;
+		internal readonly Func<Func<string>, Func<string>, IReadOnlyCollection<FlowComponent>> ComponentGetter;
 
 		/// <summary>
 		/// Creates an image setup object.
@@ -33,21 +33,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			ComponentGetter = ( srcGetter, srcsetGetter ) => {
 				return new DisplayableElement(
 					context => new DisplayableElementData(
-						           displaySetup,
-						           () => {
-							           var attributes = new List<Tuple<string, string>>();
-							           attributes.Add( Tuple.Create( "src", srcGetter() ) );
-							           var srcset = srcsetGetter();
-							           if( srcset.Any() )
-								           attributes.Add( Tuple.Create( "srcset", srcset ) );
-							           if( alternativeText != null )
-								           attributes.Add( Tuple.Create( "alt", alternativeText ) );
+						displaySetup,
+						() => {
+							var attributes = new List<Tuple<string, string>>();
+							attributes.Add( Tuple.Create( "src", srcGetter() ) );
+							var srcset = srcsetGetter();
+							if( srcset.Any() )
+								attributes.Add( Tuple.Create( "srcset", srcset ) );
+							if( alternativeText != null )
+								attributes.Add( Tuple.Create( "alt", alternativeText ) );
 
-							           return new DisplayableElementLocalData( "img", attributes: attributes );
-						           },
-						           classes:
-						           CssElementCreator.Class.Add( sizesToAvailableWidth ? new ElementClass( "ewfAutoSizer" ) : ElementClassSet.Empty )
-						           .Add( classes ?? ElementClassSet.Empty ) ) ).ToCollection();
+							return new DisplayableElementLocalData( "img", attributes: attributes );
+						},
+						classes: CssElementCreator.Class.Add( sizesToAvailableWidth ? new ElementClass( "ewfAutoSizer" ) : ElementClassSet.Empty )
+							.Add( classes ?? ElementClassSet.Empty ) ) ).ToCollection();
 			};
 		}
 	}

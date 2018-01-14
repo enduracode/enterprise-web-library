@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IEnumerable<FlowComponentOrNode> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			this IEnumerable<FlowComponent> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
 			return children.ToComponentListItem(
 				"",
@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IEnumerable<FlowComponentOrNode> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			this IEnumerable<FlowComponent> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IEnumerable<EtherealComponent> etherealChildren = null ) {
 			return new ComponentListItem(

@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ActionComponentCssElementCreator.AllStylesClass.Add( classes ?? ElementClassSet.Empty );
 		}
 
-		IEnumerable<FlowComponentOrNode> HyperlinkStyle.GetChildren( string destinationUrl ) {
+		IEnumerable<FlowComponent> HyperlinkStyle.GetChildren( string destinationUrl ) {
 			return children;
 		}
 

@@ -5,7 +5,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An image.
 	/// </summary>
 	public class EwfImage: PhrasingComponent {
-		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a fixed-size image.

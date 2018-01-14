@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ActionComponentCssElementCreator.AllStylesClass.Add( ActionComponentCssElementCreator.ImageStyleClass );
 		}
 
-		IEnumerable<FlowComponentOrNode> ButtonStyle.GetChildren() {
+		IEnumerable<FlowComponent> ButtonStyle.GetChildren() {
 			return new EwfImage( new ImageSetup( alternativeText, sizesToAvailableWidth: sizesToAvailableWidth ), imageInfo ).ToCollection();
 		}
 

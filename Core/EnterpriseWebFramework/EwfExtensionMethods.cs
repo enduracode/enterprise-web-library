@@ -118,8 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								ph,
 								linker.KeySuffix,
 								linker.PreModificationRegions.Select(
-									region =>
-									new LegacyPreModificationUpdateRegion(
+									region => new LegacyPreModificationUpdateRegion(
 										region.Sets,
 										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
 										region.ArgumentGetter ) ),
@@ -149,11 +148,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		public static IReadOnlyCollection<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
 			return components.SelectMany(
-				i => {
-					var controls = addEtherealControls( parent, i );
-					EwfPage.Instance.ControlsByComponent.Add( i, controls );
-					return controls;
-				} ).ToImmutableArray();
+					i => {
+						var controls = addEtherealControls( parent, i );
+						EwfPage.Instance.ControlsByComponent.Add( i, controls );
+						return controls;
+					} )
+				.ToImmutableArray();
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
@@ -179,8 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								ph,
 								linker.KeySuffix,
 								linker.PreModificationRegions.Select(
-									region =>
-									new LegacyPreModificationUpdateRegion(
+									region => new LegacyPreModificationUpdateRegion(
 										region.Sets,
 										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
 										region.ArgumentGetter ) ),
@@ -215,7 +214,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
 		/// </summary>
 		public static FormItem ToFormItem(
-			this FormControl<FlowComponentOrNode> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			var webControl = formControl as WebControl;
 			if( webControl != null )
