@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -25,6 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// NOTE: We may want to bundle all display stuff into one class. How would we make that easy to use, though?
 		private readonly int? cellSpan;
+
 		private readonly TextAlignment textAlignment;
 
 		private readonly EwfValidation validation;
@@ -46,8 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual Control Label
-			=> label.Text != null ? label.Text.Any() ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() ) : null : label.Control;
+		public virtual Control Label => label.Text != null
+			                                ? label.Text.Any()
+				                                  ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() )
+				                                  : null
+			                                : label.Control;
 
 		/// <summary>
 		/// Gets the control.
@@ -77,8 +82,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FormItem<ControlType>: FormItem where ControlType: Control {
 		private readonly ControlType control;
 
-		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation )
-			: base( label, control, cellSpan, textAlignment, validation ) {
+		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation ): base(
+			label,
+			control,
+			cellSpan,
+			textAlignment,
+			validation ) {
 			this.control = control;
 		}
 
@@ -86,5 +95,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the control.
 		/// </summary>
 		public new ControlType Control => control;
+	}
+
+	public static class FormItemExtensionCreators {
+		/// <summary>
+		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
+		/// </summary>
+		public static FormItem ToFormItem(
+			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+			var webControl = formControl as WebControl;
+			if( webControl != null )
+				return new FormItem<Control>( label, webControl, cellSpan, textAlignment, formControl.Validation );
+
+			return formControl.PageComponent.ToCollection().ToFormItem( label, cellSpan: cellSpan, textAlignment: textAlignment, validation: formControl.Validation );
+		}
+
+		/// <summary>
+		/// Creates a form item with these components and the specified label. Cell span only applies to adjacent layouts.
+		/// </summary>
+		public static FormItem ToFormItem(
+			this IEnumerable<FlowComponent> content, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+			EwfValidation validation = null ) {
+			return new FormItem<Control>( label, new PlaceHolder().AddControlsReturnThis( content.GetControls() ), cellSpan, textAlignment, validation );
+		}
 	}
 }
