@@ -220,12 +220,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( webControl != null )
 				return new FormItem<Control>( label, webControl, cellSpan, textAlignment, formControl.Validation );
 
-			return new FormItem<Control>(
-				label,
-				new PlaceHolder().AddControlsReturnThis( formControl.PageComponent.ToCollection().GetControls() ),
-				cellSpan,
-				textAlignment,
-				formControl.Validation );
+			return formControl.PageComponent.ToCollection().ToFormItem( label, cellSpan: cellSpan, textAlignment: textAlignment, validation: formControl.Validation );
+		}
+
+		/// <summary>
+		/// Creates a form item with these components and the specified label. Cell span only applies to adjacent layouts.
+		/// </summary>
+		public static FormItem ToFormItem(
+			this IEnumerable<FlowComponent> content, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+			EwfValidation validation = null ) {
+			return new FormItem<Control>( label, new PlaceHolder().AddControlsReturnThis( content.GetControls() ), cellSpan, textAlignment, validation );
 		}
 	}
 }
