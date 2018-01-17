@@ -31,9 +31,10 @@ namespace EnterpriseWebLibrary {
 		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
 		/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 		/// available in the application.</param>
+		/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
 		public static void InitStatics(
 			SystemInitializer globalInitializer, string appName, bool isClientSideProgram, string assemblyFolderPath = "",
-			Func<DataAccessState> mainDataAccessStateGetter = null ) {
+			Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
@@ -70,7 +71,7 @@ namespace EnterpriseWebLibrary {
 				AppMemoryCache.Init();
 				BlobFileOps.Init();
 				DataAccessStatics.Init();
-				DataAccessState.Init( mainDataAccessStateGetter );
+				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
 				UserManagementStatics.Init();

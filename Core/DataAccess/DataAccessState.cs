@@ -9,10 +9,12 @@ namespace EnterpriseWebLibrary.DataAccess {
 	public class DataAccessState {
 		private static Func<DataAccessState> mainStateGetter;
 		private static ThreadLocal<Stack<DataAccessState>> mainStateOverrideStack;
+		private static bool useLongTimeouts;
 
-		internal static void Init( Func<DataAccessState> mainDataAccessStateGetter ) {
+		internal static void Init( Func<DataAccessState> mainDataAccessStateGetter, bool useLongTimeouts ) {
 			mainStateGetter = mainDataAccessStateGetter;
 			mainStateOverrideStack = new ThreadLocal<Stack<DataAccessState>>( () => new Stack<DataAccessState>() );
+			DataAccessState.useLongTimeouts = useLongTimeouts;
 		}
 
 		/// <summary>
@@ -50,29 +52,28 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// <param name="databaseConnectionInitializer">A method that is called whenever a database connection is requested. Can be used to initialize the
 		/// connection.</param>
 		public DataAccessState( Action<DBConnection> databaseConnectionInitializer = null ) {
-			connectionInitializer = databaseConnectionInitializer ?? ( connection => { } );
+			connectionInitializer = databaseConnectionInitializer ?? ( connection => {} );
 		}
 
 		/// <summary>
 		/// Gets the connection to the primary database.
 		/// </summary>
-		public DBConnection PrimaryDatabaseConnection {
-			get {
-				return initConnection( primaryConnection ?? ( primaryConnection = new DBConnection( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo ) ) );
-			}
-		}
+		public DBConnection PrimaryDatabaseConnection => initConnection(
+			primaryConnection ?? ( primaryConnection = new DBConnection(
+				                       ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo,
+				                       useLongTimeouts: useLongTimeouts ) ) );
 
 		/// <summary>
 		/// Gets the connection to the specified secondary database.
 		/// </summary>
 		public DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
-			DBConnection connection;
-			secondaryConnectionsByName.TryGetValue( databaseName, out connection );
-			if( connection == null ) {
+			secondaryConnectionsByName.TryGetValue( databaseName, out var connection );
+			if( connection == null )
 				secondaryConnectionsByName.Add(
 					databaseName,
-					connection = new DBConnection( ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ) ) );
-			}
+					connection = new DBConnection(
+						ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ),
+						useLongTimeouts: useLongTimeouts ) );
 			return initConnection( connection );
 		}
 

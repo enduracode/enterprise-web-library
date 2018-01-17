@@ -179,11 +179,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 
 		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
 			var command = cn.DatabaseInfo.CreateCommand();
-			command.CommandTimeout = 0; // This means the command can take as much time as it needs.
 			command.CommandText = commandText;
 
 			// NOTE: Not sure if this is the right execute method to use. NOTE: I think at this point we have to assume we are right to use this method.
-			cn.ExecuteNonQueryCommand( command );
+			cn.ExecuteNonQueryCommand( command, isLongRunning: true );
 		}
 
 		public void ExecuteDbMethod( Action<DBConnection> method ) {

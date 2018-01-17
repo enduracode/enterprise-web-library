@@ -33,54 +33,50 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 			this.fullTextCatalog = fullTextCatalog;
 		}
 
-		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
+		string DatabaseInfo.SecondaryDatabaseName => secondaryDatabaseName;
 
-		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
-		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "@@IDENTITY"; } }
+		string DatabaseInfo.ParameterPrefix => "@";
+		string DatabaseInfo.LastAutoIncrementValueExpression => "@@IDENTITY";
 
-		string DatabaseInfo.QueryCacheHint {
-			get {
-				// SQL Server doesn't have a query cache.
-				return "";
-			}
-		}
+		// SQL Server doesn't have a query cache.
+		string DatabaseInfo.QueryCacheHint => "";
 
 		/// <summary>
 		/// Gets the server. Returns null to represent the local machine.
 		/// </summary>
-		public string Server { get { return server; } }
+		public string Server => server;
 
 		/// <summary>
 		/// Gets the SQL Server Authentication login name. Returns null if SQL Server Authentication is not being used.
 		/// </summary>
-		public string LoginName { get { return loginName; } }
+		public string LoginName => loginName;
 
 		/// <summary>
 		/// Gets the SQL Server Authentication password. Returns null if SQL Server Authentication is not being used.
 		/// </summary>
-		public string Password { get { return password; } }
+		public string Password => password;
 
 		/// <summary>
 		/// Gets the database.
 		/// </summary>
-		public string Database { get { return database; } }
+		public string Database => database;
 
 		/// <summary>
 		/// Gets whether the database supports connection pooling.
 		/// </summary>
-		public bool SupportsConnectionPooling { get { return supportsConnectionPooling; } }
+		public bool SupportsConnectionPooling => supportsConnectionPooling;
 
 		/// <summary>
 		/// Gets the full text catalog name, if it exists.  Otherwise, returns null.
 		/// </summary>
-		public string FullTextCatalog { get { return fullTextCatalog; } }
+		public string FullTextCatalog => fullTextCatalog;
 
 		DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
 			return new SqlConnection( connectionString );
 		}
 
 		DbCommand DatabaseInfo.CreateCommand() {
-			return new ProfiledDbCommand( new SqlCommand { CommandTimeout = 15 }, null, MiniProfiler.Current );
+			return new ProfiledDbCommand( new SqlCommand(), null, MiniProfiler.Current );
 		}
 
 		DbParameter DatabaseInfo.CreateParameter() {

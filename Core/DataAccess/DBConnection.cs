@@ -22,6 +22,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 
 		private readonly DatabaseInfo databaseInfo;
 		private readonly ProfiledDbConnection cn;
+		private readonly int defaultCommandTimeout;
 
 		// transaction-related fields
 		private int nestLevel;
@@ -36,13 +37,13 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// <summary>
 		/// Creates a database connection based on the specified database information object.
 		/// </summary>
-		internal DBConnection( DatabaseInfo databaseInfo ) {
+		internal DBConnection( DatabaseInfo databaseInfo, bool useLongTimeouts = false ) {
 			this.databaseInfo = databaseInfo;
 
 			// Build the connection string.
+			var timeout = useLongTimeouts ? 60 : 15;
 			string connectionString;
-			if( databaseInfo is SqlServerInfo ) {
-				var sqlServerInfo = databaseInfo as SqlServerInfo;
+			if( databaseInfo is SqlServerInfo sqlServerInfo ) {
 				connectionString = "Data Source=" + ( sqlServerInfo.Server ?? "(local)" );
 				if( sqlServerInfo.LoginName != null ) {
 					connectionString += "; User ID=" + sqlServerInfo.LoginName;
@@ -53,30 +54,33 @@ namespace EnterpriseWebLibrary.DataAccess {
 				connectionString += "; Initial Catalog=" + sqlServerInfo.Database;
 				if( !sqlServerInfo.SupportsConnectionPooling )
 					connectionString += "; Pooling=false";
+				connectionString += "; Connect Timeout={0}".FormatWith( timeout );
 			}
-			else if( databaseInfo is MySqlInfo ) {
-				var mySqlInfo = databaseInfo as MySqlInfo;
+			else if( databaseInfo is MySqlInfo mySqlInfo ) {
 				connectionString = "Host=localhost; User Id=root; Password=password; Initial Catalog=" + mySqlInfo.Database;
 				if( !mySqlInfo.SupportsConnectionPooling )
 					connectionString += "; Pooling=false";
+				connectionString += "; Connect Timeout={0}".FormatWith( timeout );
 			}
-			else if( databaseInfo is OracleInfo ) {
-				var oracleInfo = databaseInfo as OracleInfo;
+			else if( databaseInfo is OracleInfo oracleInfo ) {
 				connectionString = "Data Source=" + oracleInfo.DataSource + "; User Id=" + oracleInfo.UserAndSchema + "; Password=" + oracleInfo.Password +
 				                   ( oracleInfo.UserAndSchema == "sys" ? "; DBA Privilege=SYSDBA" : "" );
 				if( !oracleInfo.SupportsConnectionPooling )
 					connectionString = StringTools.ConcatenateWithDelimiter( "; ", connectionString, "Pooling=false" );
+				connectionString += "; Connection Timeout={0}".FormatWith( timeout );
 			}
 			else
 				throw new ApplicationException( "Invalid database information object type." );
 
 			cn = new ProfiledDbConnection( databaseInfo.CreateConnection( connectionString ), MiniProfiler.Current );
+
+			defaultCommandTimeout = timeout;
 		}
 
 		/// <summary>
 		/// This should only be used by internal tools.
 		/// </summary>
-		public DatabaseInfo DatabaseInfo { get { return databaseInfo; } }
+		public DatabaseInfo DatabaseInfo => databaseInfo;
 
 		/// <summary>
 		/// Opens the connection, executes the specified method, and closes the connection.
@@ -116,9 +120,9 @@ namespace EnterpriseWebLibrary.DataAccess {
 				// to abort this line ourselves if it hangs.
 				cn.Open();
 
-				if( databaseInfo is OracleInfo ) {
+				if( databaseInfo is OracleInfo info ) {
 					// Make Oracle case-insensitive, like SQL Server.
-					if( ( databaseInfo as OracleInfo ).SupportsLinguisticIndexes ) {
+					if( info.SupportsLinguisticIndexes ) {
 						executeText( "ALTER SESSION SET NLS_COMP = LINGUISTIC" );
 						executeText( "ALTER SESSION SET NLS_SORT = BINARY_CI" );
 					}
@@ -342,12 +346,14 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// Execute a command and return number of rows affected.
 		/// </summary>
 		/// <param name="cmd">Command to execute</param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 		/// <returns>Number of rows affected.</returns>
-		public int ExecuteNonQueryCommand( DbCommand cmd ) {
+		public int ExecuteNonQueryCommand( DbCommand cmd, bool isLongRunning = false ) {
 			try {
 				cmd.Connection = cn;
 				if( tx != null )
 					cmd.Transaction = tx;
+				cmd.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
 				return cmd.ExecuteNonQuery();
 			}
 			catch( Exception e ) {
@@ -360,12 +366,14 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// in the query result.
 		/// </summary>
 		/// <param name="cmd">Command to execute</param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 		/// <returns>First column of the first row returned by the query. Null if there were no results.</returns>
-		public object ExecuteScalarCommand( DbCommand cmd ) {
+		public object ExecuteScalarCommand( DbCommand cmd, bool isLongRunning = false ) {
 			try {
 				cmd.Connection = cn;
 				if( tx != null )
 					cmd.Transaction = tx;
+				cmd.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
 				return cmd.ExecuteScalar();
 			}
 			catch( Exception e ) {
@@ -376,29 +384,33 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// <summary>
 		/// Executes the specified command to get a data reader and then executes the specified method with the reader.
 		/// </summary>
-		public void ExecuteReaderCommand( DbCommand cmd, Action<DbDataReader> readerMethod ) {
-			executeReaderCommand( cmd, CommandBehavior.Default, readerMethod );
+		/// <param name="cmd"></param>
+		/// <param name="readerMethod"></param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
+		public void ExecuteReaderCommand( DbCommand cmd, Action<DbDataReader> readerMethod, bool isLongRunning = false ) {
+			executeReaderCommand( cmd, CommandBehavior.Default, isLongRunning, readerMethod );
 		}
 
 		/// <summary>
 		/// Executes the specified command with SchemaOnly behavior to get a data reader and then executes the specified method with the reader.
 		/// </summary>
 		public void ExecuteReaderCommandWithSchemaOnlyBehavior( DbCommand cmd, Action<DbDataReader> readerMethod ) {
-			executeReaderCommand( cmd, CommandBehavior.SchemaOnly, readerMethod );
+			executeReaderCommand( cmd, CommandBehavior.SchemaOnly, false, readerMethod );
 		}
 
 		/// <summary>
 		/// Executes the specified command with SchemaOnly and KeyInfo behavior to get a data reader and then executes the specified method with the reader.
 		/// </summary>
 		public void ExecuteReaderCommandWithKeyInfoBehavior( DbCommand cmd, Action<DbDataReader> readerMethod ) {
-			executeReaderCommand( cmd, CommandBehavior.SchemaOnly | CommandBehavior.KeyInfo, readerMethod );
+			executeReaderCommand( cmd, CommandBehavior.SchemaOnly | CommandBehavior.KeyInfo, false, readerMethod );
 		}
 
-		private void executeReaderCommand( DbCommand command, CommandBehavior behavior, Action<DbDataReader> readerMethod ) {
+		private void executeReaderCommand( DbCommand command, CommandBehavior behavior, bool isLongRunning, Action<DbDataReader> readerMethod ) {
 			try {
 				command.Connection = cn;
 				if( tx != null )
 					command.Transaction = tx;
+				command.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
 				using( var reader = command.ExecuteReader( behavior ) )
 					readerMethod( reader );
 			}

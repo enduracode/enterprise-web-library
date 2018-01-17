@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 	/// </summary>
 	public class MySqlInfo: DatabaseInfo {
 		private static DbProviderFactory factoryField;
-		private static DbProviderFactory factory { get { return factoryField ?? ( factoryField = DbProviderFactories.GetFactory( "MySql.Data.MySqlClient" ) ); } }
+		private static DbProviderFactory factory => factoryField ?? ( factoryField = DbProviderFactories.GetFactory( "MySql.Data.MySqlClient" ) );
 
 		private readonly string secondaryDatabaseName;
 		private readonly string database;
@@ -24,21 +24,21 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 			this.supportsConnectionPooling = supportsConnectionPooling;
 		}
 
-		string DatabaseInfo.SecondaryDatabaseName { get { return secondaryDatabaseName; } }
+		string DatabaseInfo.SecondaryDatabaseName => secondaryDatabaseName;
 
-		string DatabaseInfo.ParameterPrefix { get { return "@"; } }
-		string DatabaseInfo.LastAutoIncrementValueExpression { get { return "LAST_INSERT_ID()"; } }
-		string DatabaseInfo.QueryCacheHint { get { return "SQL_CACHE"; } }
+		string DatabaseInfo.ParameterPrefix => "@";
+		string DatabaseInfo.LastAutoIncrementValueExpression => "LAST_INSERT_ID()";
+		string DatabaseInfo.QueryCacheHint => "SQL_CACHE";
 
 		/// <summary>
 		/// Gets the database.
 		/// </summary>
-		public string Database { get { return database; } }
+		public string Database => database;
 
 		/// <summary>
 		/// Gets whether the database supports connection pooling.
 		/// </summary>
-		public bool SupportsConnectionPooling { get { return supportsConnectionPooling; } }
+		public bool SupportsConnectionPooling => supportsConnectionPooling;
 
 		DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
 			var connection = factory.CreateConnection();
