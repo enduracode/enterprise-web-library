@@ -110,8 +110,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									{
 										Width = Unit.Percentage( 50 )
 									},
-								textAlignment: TextAlignment.Right,
-								cellSpan: defaultFormItemCellSpan ) );
+								setup: new FormItemSetup( cellSpan: defaultFormItemCellSpan, textAlignment: TextAlignment.Right ) ) );
 					}
 					Controls.Add( useFormItemListMode ? getTableForFormItemList() : getTableForFormItemTable() );
 				} );
@@ -134,7 +133,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				table.AddItem(
 					new EwfTableItem(
 						new EwfTableItemSetup( verticalAlignment: verticalAlignment ),
-						items.Select( i => i.ToControl().ToCell( new TableCellSetup( fieldSpan: getCellSpan( i ), textAlignment: i.TextAlignment ) ) ).ToArray() ) );
+						items.Select( i => i.ToControl().ToCell( new TableCellSetup( fieldSpan: getCellSpan( i ), textAlignment: i.Setup.TextAlignment ) ) ).ToArray() ) );
 			}
 			return table;
 		}
@@ -160,23 +159,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private FormItem getPlaceholderFormItem() {
-			return FormItem.Create( "", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ), cellSpan: 1 );
+			return FormItem.Create( "", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ), setup: new FormItemSetup( cellSpan: 1 ) );
 		}
 
 		private int getCellSpan( FormItem formItem ) {
-			return formItem.CellSpan ?? defaultFormItemCellSpan;
+			return formItem.Setup.CellSpan ?? defaultFormItemCellSpan;
 		}
 
 		private WebControl getTableForFormItemTable() {
 			var columnWidthSpecified = firstColumnWidth != null || secondColumnWidth != null;
 			var table = EwfTable.Create(
 				caption: heading,
-				fields:
-					new[]
-						{
-							new EwfTableField( size: columnWidthSpecified ? firstColumnWidth : Unit.Percentage( 1 ) ),
-							new EwfTableField( size: columnWidthSpecified ? secondColumnWidth : Unit.Percentage( 2 ) )
-						} );
+				fields: new[]
+					{
+						new EwfTableField( size: columnWidthSpecified ? firstColumnWidth : Unit.Percentage( 1 ) ),
+						new EwfTableField( size: columnWidthSpecified ? secondColumnWidth : Unit.Percentage( 2 ) )
+					} );
 			table.AddData(
 				formItems,
 				i => {
@@ -184,7 +182,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( i.Validation != null )
 						stack.AddModificationErrorItem( i.Validation, new ListErrorDisplayStyle() );
 					stack.AddControls( i.Control );
-					return new EwfTableItem( i.Label, stack.ToCell( new TableCellSetup( textAlignment: i.TextAlignment ) ) );
+					return new EwfTableItem( i.Label, stack.ToCell( new TableCellSetup( textAlignment: i.Setup.TextAlignment ) ) );
 				} );
 			return table;
 		}

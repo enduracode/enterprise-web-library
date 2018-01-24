@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						ActionControlStyle = new TextActionControlStyle( " (popup)" )
 					} );
 			omni.AddFormItems(
-				FormItem.Create( complexLabel, new EwfTextBox( "" ), cellSpan: 2 ),
+				FormItem.Create( complexLabel, new EwfTextBox( "" ), setup: new FormItemSetup( cellSpan: 2 ) ),
 				FormItem.Create( "Normal price", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
 				FormItem.Create( "Actual price", new EwfTextBox( "" ) ),
 				FormItem.Create( "Quantity", new EwfTextBox( "" ) ),

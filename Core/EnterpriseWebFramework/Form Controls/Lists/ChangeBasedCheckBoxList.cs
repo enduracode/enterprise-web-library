@@ -44,14 +44,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormItem.Create(
 				label,
 				checkBoxList,
-				cellSpan: cellSpan,
-				textAlignment: textAlignment,
+				setup: new FormItemSetup( cellSpan: cellSpan, textAlignment: textAlignment ),
 				validationGetter: control => new EwfValidation(
-					                             ( pbv, validator ) => {
-						                             if( validationPredicate != null && !validationPredicate() )
-							                             return;
-						                             control.Validate( pbv );
-					                             } ) );
+					( pbv, validator ) => {
+						if( validationPredicate != null && !validationPredicate() )
+							return;
+						control.Validate( pbv );
+					} ) );
 		}
 
 		/// <summary>
@@ -89,14 +88,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormItem.Create(
 				label,
 				checkBoxList,
-				cellSpan: cellSpan,
-				textAlignment: textAlignment,
+				setup: new FormItemSetup( cellSpan: cellSpan, textAlignment: textAlignment ),
 				validationGetter: control => new EwfValidation(
-					                             ( pbv, validator ) => {
-						                             if( validationPredicate != null && !validationPredicate() )
-							                             return;
-						                             control.Validate( pbv );
-					                             } ) );
+					( pbv, validator ) => {
+						if( validationPredicate != null && !validationPredicate() )
+							return;
+						control.Validate( pbv );
+					} ) );
 		}
 	}
 
@@ -114,8 +112,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.selectedItemIds = selectedItemIds.ToArray();
 
 			Controls.Add(
-				checkBoxList =
-				new EwfCheckBoxList<ItemIdType>(
+				checkBoxList = new EwfCheckBoxList<ItemIdType>(
 					this.items.Select( i => i.Item ),
 					uiSelectedItemIds,
 					caption: caption,

@@ -11,38 +11,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class FormItem {
 		/// <summary>
-		/// Creates a form item with the given label and control. Cell span only applies to adjacent layouts.
+		/// Creates a form item with the given label and control.
 		/// </summary>
 		// By taking a FormItemLabel instead of a Control for label, we retain the ability to implement additional behavior for string labels, such as automatically
 		// making them bold.
 		public static FormItem<ControlType> Create<ControlType>(
-			FormItemLabel label, ControlType control, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-			Func<ControlType, EwfValidation> validationGetter = null ) where ControlType: Control {
-			return new FormItem<ControlType>( label, control, cellSpan, textAlignment, validationGetter?.Invoke( control ) );
+			FormItemLabel label, ControlType control, FormItemSetup setup = null, Func<ControlType, EwfValidation> validationGetter = null ) where ControlType: Control {
+			return new FormItem<ControlType>( setup, label, control, validationGetter?.Invoke( control ) );
 		}
 
+		internal readonly FormItemSetup Setup;
 		private readonly FormItemLabel label;
 		private readonly Control control;
-
-		// NOTE: We may want to bundle all display stuff into one class. How would we make that easy to use, though?
-		private readonly int? cellSpan;
-
-		private readonly TextAlignment textAlignment;
-
-		private readonly EwfValidation validation;
+		public readonly EwfValidation Validation;
 
 		/// <summary>
 		/// Creates a form item.
 		/// </summary>
-		protected FormItem( FormItemLabel label, Control control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation ) {
-			if( label == null )
-				throw new ApplicationException( "The label cannot be a null FormItemLabel reference." );
-			this.label = label;
-
+		protected FormItem( FormItemSetup setup, FormItemLabel label, Control control, EwfValidation validation ) {
+			Setup = setup ?? new FormItemSetup();
+			this.label = label ?? throw new ApplicationException( "The label cannot be a null FormItemLabel reference." );
 			this.control = control;
-			this.cellSpan = cellSpan;
-			this.textAlignment = textAlignment;
-			this.validation = validation;
+			Validation = validation;
 		}
 
 		/// <summary>
@@ -59,20 +49,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public virtual Control Control => control;
 
-		internal int? CellSpan => cellSpan;
-		internal TextAlignment TextAlignment => textAlignment;
-
-		/// <summary>
-		/// Gets the validation.
-		/// </summary>
-		public virtual EwfValidation Validation => validation;
-
 		/// <summary>
 		/// Creates a labeled control for this form item.
 		/// This can be used to insert controls to a page without a <see cref="FormItemBlock"/> and display inline error messages.
 		/// </summary>
 		public LabeledControl ToControl( bool omitLabel = false ) {
-			return new LabeledControl( omitLabel ? null : Label, control, validation );
+			return new LabeledControl( omitLabel ? null : Label, control, Validation );
 		}
 	}
 
@@ -82,12 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FormItem<ControlType>: FormItem where ControlType: Control {
 		private readonly ControlType control;
 
-		internal FormItem( FormItemLabel label, ControlType control, int? cellSpan, TextAlignment textAlignment, EwfValidation validation ): base(
-			label,
-			control,
-			cellSpan,
-			textAlignment,
-			validation ) {
+		internal FormItem( FormItemSetup setup, FormItemLabel label, ControlType control, EwfValidation validation ): base( setup, label, control, validation ) {
 			this.control = control;
 		}
 
@@ -99,25 +76,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 	public static class FormItemExtensionCreators {
 		/// <summary>
-		/// Creates a form item with this form control and the specified label. Cell span only applies to adjacent layouts.
+		/// Creates a form item with this form control and the specified label.
 		/// </summary>
-		public static FormItem ToFormItem(
-			this FormControl<FlowComponent> formControl, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+		public static FormItem ToFormItem( this FormControl<FlowComponent> formControl, FormItemLabel label, FormItemSetup setup = null ) {
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-			var webControl = formControl as WebControl;
-			if( webControl != null )
-				return new FormItem<Control>( label, webControl, cellSpan, textAlignment, formControl.Validation );
+			if( formControl is WebControl webControl )
+				return new FormItem<Control>( setup, label, webControl, formControl.Validation );
 
-			return formControl.PageComponent.ToCollection().ToFormItem( label, cellSpan: cellSpan, textAlignment: textAlignment, validation: formControl.Validation );
+			return formControl.PageComponent.ToCollection().ToFormItem( label, setup: setup, validation: formControl.Validation );
 		}
 
 		/// <summary>
-		/// Creates a form item with these components and the specified label. Cell span only applies to adjacent layouts.
+		/// Creates a form item with these components and the specified label.
 		/// </summary>
 		public static FormItem ToFormItem(
-			this IEnumerable<FlowComponent> content, FormItemLabel label, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-			EwfValidation validation = null ) {
-			return new FormItem<Control>( label, new PlaceHolder().AddControlsReturnThis( content.GetControls() ), cellSpan, textAlignment, validation );
+			this IEnumerable<FlowComponent> content, FormItemLabel label, FormItemSetup setup = null, EwfValidation validation = null ) {
+			return new FormItem<Control>( setup, label, new PlaceHolder().AddControlsReturnThis( content.GetControls() ), validation );
 		}
 	}
 }
