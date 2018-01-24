@@ -18,11 +18,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeEnumerableFormItemGetters( writer, field );
 			writeGuidFormItemGetters( writer, field );
 
-			writeGenericGetterWithoutValueParams( writer, field );
+			writeGenericGettersWithoutValueParams( writer, field );
 			writeGenericGetterWithoutValueParams( writer, field, null );
 			writeGenericGetterWithoutValueParams( writer, field, false );
 			writeGenericGetterWithoutValueParams( writer, field, true );
-			writeGenericGetterWithValueParams( writer, field );
+			writeGenericGettersWithValueParams( writer, field );
 			writeGenericGetterWithValueParams( writer, field, null );
 			writeGenericGetterWithValueParams( writer, field, false );
 			writeGenericGetterWithValueParams( writer, field, true );
@@ -626,9 +626,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			           requiredControlParams.Concat( requiredValidationParams )
 				           .Select( i => ( i.MethodSignatureDeclaration.StartsWith( "out " ) ? "out " : "" ) + i.Name )
 				           .GetCommaDelimitedStringFromCollection()
-				           .AppendDelimiter( ", " ) + "labelAndSubject: labelAndSubject, labelOverride: labelOverride, " +
-			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().AppendDelimiter( ", " ) +
-			           "cellSpan: cellSpan, textAlignment: textAlignment" + ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
+				           .AppendDelimiter( ", " ) + "formItemSetup: formItemSetup, labelAndSubject: labelAndSubject, labelOverride: labelOverride" +
+			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
+			           ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
 			           ( includeValidationParams ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod" : "" ) +
 			           " );";
@@ -659,9 +659,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			var formItemGetterStatement = "var formItem = " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( useValueParameter, " +
 			                              "( {0} ) => {1}".FormatWith( controlType.Any() ? "v, ls" : "v, ls, vs", controlGetterExpressionOrBlock ) +
 			                              ( validationMethodExpressionOrBlock.Any() ? ", " + validationMethod : "" ) +
-			                              ", labelAndSubject: labelAndSubject, labelOverride: labelOverride" +
-			                              labelOverrideNullCoalescingExpression.PrependDelimiter( " ?? " ) +
-			                              ", value: value, cellSpan: cellSpan, textAlignment: textAlignment" +
+			                              ", setup: formItemSetup, labelAndSubject: labelAndSubject, labelOverride: labelOverride" +
+			                              labelOverrideNullCoalescingExpression.PrependDelimiter( " ?? " ) + ", value: value" +
 			                              ( validationMethodExpressionOrBlock.Any()
 				                                ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod"
 				                                : "" ) + " );";
@@ -699,13 +698,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				parameters.Add( new CSharpParameter( "bool", "useValueParameter" ) );
 			parameters.AddRange( requiredControlParams );
 			parameters.AddRange( requiredValidationParams );
+			parameters.Add( new CSharpParameter( "FormItemSetup", "formItemSetup", "null" ) );
 			parameters.Add( new CSharpParameter( "string", "labelAndSubject", "\"" + getDefaultLabelAndSubject( field ) + "\"" ) );
 			parameters.Add( new CSharpParameter( "FormItemLabel", "labelOverride", "null" ) );
 			if( valueParamTypeName.Length > 0 )
 				parameters.Add( new CSharpParameter( valueParamTypeName, "value", valueParamDefaultValue ) );
 			parameters.AddRange( optionalControlParams );
-			parameters.Add( new CSharpParameter( "int?", "cellSpan", "null" ) );
-			parameters.Add( new CSharpParameter( "TextAlignment", "textAlignment", "TextAlignment.NotSpecified" ) );
 			if( includeValidationParams )
 				parameters.Add( new CSharpParameter( "System.Func<bool>", "validationPredicate", "null" ) );
 			parameters.AddRange( optionalValidationParams );
@@ -726,35 +724,59 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			return new CSharpParameter( "bool", "allowEmpty", isOptional ? "true" : "" );
 		}
 
-		private static void writeGenericGetterWithoutValueParams( TextWriter writer, ModificationField field ) {
-			var formControlGetter = "( v, ls, vs ) => formControlGetter( {0}, ls, vs )".FormatWith( field.TypeName != field.NullableTypeName ? "v.Value" : "v" );
-			var body = "return " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( false, " + formControlGetter +
-			           ", labelAndSubject: labelAndSubject, labelOverride: labelOverride, cellSpan: cellSpan, textAlignment: textAlignment );";
-			writeGenericGetter( writer, field, false, body );
+		private static void writeGenericGettersWithoutValueParams( TextWriter writer, ModificationField field ) {
+			writeGenericGetter(
+				writer,
+				field,
+				false,
+				false,
+				"return {0}( false, {1}, setup: setup, labelAndSubject: labelAndSubject, labelOverride: labelOverride );".FormatWith(
+					EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ),
+					"( v, ls, vs ) => formControlGetter( {0}, ls, vs )".FormatWith( field.TypeName != field.NullableTypeName ? "v.Value" : "v" ) ) );
+			writeGenericGetter(
+				writer,
+				field,
+				false,
+				true,
+				"return {0}( false, {1}, setup: setup, labelAndSubject: labelAndSubject, labelOverride: labelOverride, validationGetter: validationGetter );".FormatWith(
+					EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ),
+					"( v, ls ) => contentGetter( {0}, ls )".FormatWith( field.TypeName != field.NullableTypeName ? "v.Value" : "v" ) ) );
 		}
 
 		private static void writeGenericGetterWithoutValueParams( TextWriter writer, ModificationField field, bool? includeValidationMethodReturnValue ) {
 			var controlGetter = "( v, ls ) => controlGetter( v" + ( field.TypeName != field.NullableTypeName ? ".Value" : "" ) + ", ls )";
 			var body = "return " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( false, " + controlGetter +
 			           ( includeValidationMethodReturnValue.HasValue ? ", validationMethod" : "" ) +
-			           ", labelAndSubject: labelAndSubject, labelOverride: labelOverride, cellSpan: cellSpan, textAlignment: textAlignment" +
+			           ", setup: setup, labelAndSubject: labelAndSubject, labelOverride: labelOverride" +
 			           ( includeValidationMethodReturnValue.HasValue
 				             ? ", validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod"
 				             : "" ) + " );";
 			writeGenericGetter( writer, field, false, includeValidationMethodReturnValue, body );
 		}
 
-		private static void writeGenericGetterWithValueParams( TextWriter writer, ModificationField field ) {
-			var formControl =
-				"formControlGetter( useValueParameter ? value : {0}, labelAndSubject, v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.PropertyName ) );
-			var body = "return ( " + formControl + " ).ToFormItem( labelOverride ?? labelAndSubject, cellSpan: cellSpan, textAlignment: textAlignment );";
-			writeGenericGetter( writer, field, true, body );
+		private static void writeGenericGettersWithValueParams( TextWriter writer, ModificationField field ) {
+			writeGenericGetter(
+				writer,
+				field,
+				true,
+				false,
+				"return {0}.ToFormItem( labelOverride ?? labelAndSubject, setup: setup );".FormatWith(
+					"formControlGetter( useValueParameter ? value : {0}, labelAndSubject, v => {0} = v )".FormatWith(
+						EwlStatics.GetCSharpIdentifier( field.PropertyName ) ) ) );
+			writeGenericGetter(
+				writer,
+				field,
+				true,
+				true,
+				"return {0}.ToFormItem( labelOverride ?? labelAndSubject, setup: setup, validation: {1} );".FormatWith(
+					"contentGetter( useValueParameter ? value : {0}, labelAndSubject )".FormatWith( EwlStatics.GetCSharpIdentifier( field.PropertyName ) ),
+					"validationGetter( labelAndSubject, v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.PropertyName ) ) ) );
 		}
 
 		private static void writeGenericGetterWithValueParams( TextWriter writer, ModificationField field, bool? includeValidationMethodReturnValue ) {
 			var control = "useValueParameter ? controlGetter( value, labelAndSubject ) : controlGetter( " + EwlStatics.GetCSharpIdentifier( field.PropertyName ) +
 			              ", labelAndSubject )";
-			var body = "return FormItem.Create( labelOverride ?? labelAndSubject, " + control + ", cellSpan: cellSpan, textAlignment: textAlignment" +
+			var body = "return FormItem.Create( labelOverride ?? labelAndSubject, " + control + ", setup: setup" +
 			           ( includeValidationMethodReturnValue.HasValue
 				             ? ", validationGetter: " + getValidationGetter( field, includeValidationMethodReturnValue.Value )
 				             : "" ) + " );";
@@ -773,24 +795,29 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) + " } )";
 		}
 
-		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, string body ) {
+		private static void writeGenericGetter( TextWriter writer, ModificationField field, bool includeValueParams, bool includeValidationParam, string body ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
 
 			var parameters = new List<CSharpParameter>();
 			if( includeValueParams )
 				parameters.Add( new CSharpParameter( "bool", "useValueParameter" ) );
 			parameters.Add(
-				new CSharpParameter(
-					"System.Func<{0},string,System.Action<{1}>,FormControl<FlowComponent>>".FormatWith(
-						includeValueParams ? field.NullableTypeName : field.TypeName,
-						field.TypeName ),
-					"formControlGetter" ) );
+				includeValidationParam
+					? new CSharpParameter(
+						"System.Func<{0},string,IEnumerable<FlowComponent>>".FormatWith( includeValueParams ? field.NullableTypeName : field.TypeName ),
+						"contentGetter" )
+					: new CSharpParameter(
+						"System.Func<{0},string,System.Action<{1}>,FormControl<FlowComponent>>".FormatWith(
+							includeValueParams ? field.NullableTypeName : field.TypeName,
+							field.TypeName ),
+						"formControlGetter" ) );
+			parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
 			parameters.Add( new CSharpParameter( "string", "labelAndSubject", "\"" + getDefaultLabelAndSubject( field ) + "\"" ) );
 			parameters.Add( new CSharpParameter( "FormItemLabel", "labelOverride", "null" ) );
 			if( includeValueParams )
 				parameters.Add( new CSharpParameter( field.NullableTypeName, "value", field.TypeIs( typeof( string ) ) ? "\"\"" : "null" ) );
-			parameters.Add( new CSharpParameter( "int?", "cellSpan", "null" ) );
-			parameters.Add( new CSharpParameter( "TextAlignment", "textAlignment", "TextAlignment.NotSpecified" ) );
+			if( includeValidationParam )
+				parameters.Add( new CSharpParameter( "System.Func<string,System.Action<{0}>,EwfValidation>".FormatWith( field.TypeName ), "validationGetter", "null" ) );
 
 			writer.WriteLine(
 				"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( " +
@@ -814,12 +841,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					includeValidationMethodReturnValue.Value
 						? new CSharpParameter( "System.Func<ControlType,PostBackValueDictionary,string,Validator," + field.TypeName + ">", "validationMethod" )
 						: new CSharpParameter( "System.Action<ControlType,PostBackValueDictionary,string,Validator>", "validationMethod" ) );
+			parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
 			parameters.Add( new CSharpParameter( "string", "labelAndSubject", "\"" + getDefaultLabelAndSubject( field ) + "\"" ) );
 			parameters.Add( new CSharpParameter( "FormItemLabel", "labelOverride", "null" ) );
 			if( includeValueParams )
 				parameters.Add( new CSharpParameter( field.NullableTypeName, "value", field.TypeIs( typeof( string ) ) ? "\"\"" : "null" ) );
-			parameters.Add( new CSharpParameter( "int?", "cellSpan", "null" ) );
-			parameters.Add( new CSharpParameter( "TextAlignment", "textAlignment", "TextAlignment.NotSpecified" ) );
 			if( includeValidationMethodReturnValue.HasValue ) {
 				parameters.Add( new CSharpParameter( "System.Func<bool>", "validationPredicate", "null" ) );
 				parameters.Add( new CSharpParameter( "System.Action", "validationErrorNotifier", "null" ) );
