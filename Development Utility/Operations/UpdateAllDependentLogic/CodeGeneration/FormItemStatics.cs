@@ -178,9 +178,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"\"\"",
 				getAllowEmptyParameter( false ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "WysiwygHtmlEditorSetup", "setup", "null" ).ToCollection(),
+				new CSharpParameter( "WysiwygHtmlEditorSetup", "editorSetup", "null" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				"new WysiwygHtmlEditor( v, allowEmpty, ( postBackValue, validator ) => vs( postBackValue ), setup: setup" +
+				"new WysiwygHtmlEditor( v, allowEmpty, ( postBackValue, validator ) => vs( postBackValue ), setup: editorSetup" +
 				( field.Size.HasValue ? ", maxLength: {0}".FormatWith( field.Size.Value ) : "" ) + " )",
 				"",
 				"",
@@ -354,9 +354,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"null",
 				new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "HtmlBlockEditorSetup", "setup", "null" ).ToCollection(),
+				new CSharpParameter( "HtmlBlockEditorSetup", "editorSetup", "null" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				"new HtmlBlockEditor( (int?)v, id => vs( id ), out m, setup: setup )",
+				"new HtmlBlockEditor( (int?)v, id => vs( id ), out m, setup: editorSetup )",
 				"",
 				"",
 				preFormItemGetterStatements: "HtmlBlockEditorModification m = null;",
@@ -423,12 +423,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				new[]
 					{
-						new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "BlockCheckBoxSetup", "setup", "null" ),
+						new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "BlockCheckBoxSetup", "checkBoxSetup", "null" ),
 						new CSharpParameter( "System.Action<Validator>", "additionalValidationMethod", "null" )
 					},
 				new CSharpParameter[ 0 ],
 				"new BlockCheckBox( v.Value" + toBoolSuffix + ", ( postBackValue, validator ) => { vs( postBackValue.Value" + fromBoolSuffix +
-				" ); if( additionalValidationMethod != null ) additionalValidationMethod( validator ); }, label: putLabelOnCheckBox ? ls : \"\", setup: setup )",
+				" ); if( additionalValidationMethod != null ) additionalValidationMethod( validator ); }, label: putLabelOnCheckBox ? ls : \"\", setup: checkBoxSetup )",
 				"",
 				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
 		}
