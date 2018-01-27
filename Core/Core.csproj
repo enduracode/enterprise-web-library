@@ -441,6 +441,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\MailMergingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationDialog.cs" />
@@ -480,7 +481,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\MergeFieldTree.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\PageName.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\PagePath.cs" />

@@ -275,6 +275,11 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 	overflow-y: auto;
 }
 
+/* mail merging */
+ewfMergeFieldTreeChildContainer {
+	margin-left: 2em;
+}
+
 /* EwfPage and master page */
 ewfTopWarningBlock {
 	z-index: 9998;
