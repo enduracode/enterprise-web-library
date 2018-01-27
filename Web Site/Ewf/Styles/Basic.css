@@ -276,7 +276,7 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 }
 
 /* mail merging */
-ewfMergeFieldTreeChildContainer {
+ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 	margin-left: 2em;
 }
 

@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Humanizer;
 using JetBrains.Annotations;
@@ -59,6 +63,73 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				writer.WriteLine( "MS Word field name: " + msWordName );
 				return writer.ToString();
 			}
+		}
+
+		/// <summary>
+		/// Creates a display from this row tree. The display is an ordered list of rows, in which each row is a form-item list of values and a section for each
+		/// child row-tree display.
+		/// </summary>
+		/// <param name="rowTree">The merge row tree.</param>
+		/// <param name="fieldNameTree">The fields that you want to include in the display. Pass null for all.</param>
+		/// <param name="omitListIfSingleRow">Pass true to omit the root ordered-list component if the tree has exactly one row.</param>
+		/// <param name="useSubtractiveMode">Pass true if you want the field-name tree to represent excluded fields, rather than included fields.</param>
+		public static Control ToRowTreeDisplay(
+			this MergeRowTree rowTree, MergeFieldNameTree fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) {
+			return new Block(
+				omitListIfSingleRow && rowTree.Rows.Count() == 1
+					? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode )
+					: ControlStack.CreateWithControls( true, rowTree.Rows.Select( i => getRow( i, fieldNameTree, useSubtractiveMode ) ).ToArray() ) )
+				{
+					CssClass = rowTreeClass.ClassName
+				};
+		}
+
+		private static Control getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
+			var values = FormItemBlock.CreateFormItemList(
+				hideIfEmpty: true,
+				numberOfColumns: 2,
+				formItems: ( useSubtractiveMode
+					             ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
+					             : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
+					mergeValue => {
+						IReadOnlyCollection<PhrasingComponent> value = null;
+						if( mergeValue is MergeValue<string> stringValue )
+							value = stringValue.Evaluate( false ).ToComponents();
+
+						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+						return value == null
+							       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
+							       : value.ToFormItem( mergeValue.Name );
+					} ) );
+
+			var children = ( useSubtractiveMode
+				                 ? row.Children.Select(
+						                 childRowTree => {
+							                 MergeFieldNameTree childFieldNameTree = null;
+							                 if( fieldNameTree != null ) {
+								                 var childNameAndFieldNameTree = fieldNameTree.ChildNamesAndChildren.SingleOrDefault( i => i.Item1 == childRowTree.NodeName );
+								                 childFieldNameTree = childNameAndFieldNameTree != null
+									                                      ? childNameAndFieldNameTree.Item2
+									                                      : new MergeFieldNameTree( Enumerable.Empty<string>() );
+							                 }
+							                 return new { rowTree = childRowTree, fieldNameTree = childFieldNameTree };
+						                 } )
+					                 .Where( i => i.fieldNameTree != null )
+				                 : fieldNameTree?.ChildNamesAndChildren.Select(
+					                   childNameAndFieldNameTree => new
+						                   {
+							                   rowTree = row.Children.Single( i => i.NodeName == childNameAndFieldNameTree.Item1 ),
+							                   fieldNameTree = childNameAndFieldNameTree.Item2
+						                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) ).Select(
+					child => new Section(
+						child.rowTree.NodeName,
+						ControlStack.CreateWithControls( true, child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ) ).ToArray() )
+							.ToCollection() ) )
+				.ToImmutableArray<Control>();
+
+			return children.Any()
+				       ? (Control)new PlaceHolder().AddControlsReturnThis( values, new Block( children.ToArray() ) { CssClass = rowTreeChildClass.ClassName } )
+				       : values;
 		}
 	}
 }
