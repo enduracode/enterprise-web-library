@@ -66,8 +66,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 							"Things",
 							childFields.AsReadOnly(),
 							pseudoTableRow =>
-								/*Randomness.FlipCoin()*/
-									false ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : Enumerable.Empty<PseudoChildRow>() )
+								Randomness.FlipCoin() ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : Enumerable.Empty<PseudoChildRow>() )
 					}.AsReadOnly() );
 		}
 	}
