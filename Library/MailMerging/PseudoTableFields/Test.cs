@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting.PseudoTableFields {
+namespace EnterpriseWebLibrary.MailMerging.PseudoTableFields {
 	internal class Test: BasicMergeFieldImplementation<PseudoTableRow, string> {
 		public string GetDescription() {
 			return "Just a test.";

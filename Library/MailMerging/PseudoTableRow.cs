@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
+﻿namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
 	/// Has fields in it like a table row would.
 	/// </summary>
@@ -9,7 +9,7 @@
 			this.num = num;
 		}
 
-		internal string FullName { get { return getString( "First Middle Last" ); } }
+		internal string FullName => getString( "First Middle Last" );
 
 		private string getString( string s ) {
 			return s + num;

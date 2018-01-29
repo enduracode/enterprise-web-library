@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 
-namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting.PsuedoChildFields {
+namespace EnterpriseWebLibrary.MailMerging.PsuedoChildFields {
 	public class TheValue: BasicMergeFieldImplementation<PseudoChildRow, string> {
 		public string GetDescription() {
 			return "The value";

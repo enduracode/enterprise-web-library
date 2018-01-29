@@ -7,7 +7,6 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
-using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
 using Humanizer;
 using NUnit.Framework;
 

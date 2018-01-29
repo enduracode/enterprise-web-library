@@ -5,11 +5,11 @@ using System.Linq;
 using EnterpriseWebLibrary.MailMerging.DataTree;
 using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 using EnterpriseWebLibrary.MailMerging.Fields;
-using EnterpriseWebLibrary.MailMerging.MailMergeTesting.PseudoTableFields;
-using EnterpriseWebLibrary.MailMerging.MailMergeTesting.PsuedoChildFields;
+using EnterpriseWebLibrary.MailMerging.PseudoTableFields;
+using EnterpriseWebLibrary.MailMerging.PsuedoChildFields;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 
-namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
+namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
 	/// A mock MergeStatics class as we have it in many systems.
 	/// </summary>
@@ -47,19 +47,16 @@ namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
 
 		public static MergeRowTree CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
 			var rand = new Random();
-			var children = new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>( "Things",
-			                                                                       childFields.AsReadOnly(),
-			                                                                       data => /*Randomness.FlipCoin()*/
-			                                                                       false
-			                                                                       	? new[]
-			                                                                       	  	{ new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) }
-			                                                                       	: new PseudoChildRow[ 0 ],
-			                                                                       null );
+			var children = new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
+				"Things",
+				childFields.AsReadOnly(),
+				data => /*Randomness.FlipCoin()*/ false ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : new PseudoChildRow[ 0 ],
+				null );
 			return MergeDataTreeOps.CreateRowTree( tableFields.AsReadOnly(), rows, new List<MergeDataTreeChild<PseudoTableRow>> { children }.AsReadOnly() );
 		}
 
 		public static MergeRowTree CreateEmptyPseudoTableRowTree() {
-			return CreatePseudoTableRowTree( new PseudoTableRow[] { } );
+			return CreatePseudoTableRowTree( new PseudoTableRow[] {} );
 		}
 	}
 }
