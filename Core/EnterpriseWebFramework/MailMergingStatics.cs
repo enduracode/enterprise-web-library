@@ -120,7 +120,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                   {
 							                   rowTree = row.Children.Single( i => i.NodeName == childNameAndFieldNameTree.Item1 ),
 							                   fieldNameTree = childNameAndFieldNameTree.Item2
-						                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) ).Select(
+						                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
+				.Where( child => child.rowTree.Rows.Any() )
+				.Select(
 					child => new Section(
 						child.rowTree.NodeName,
 						ControlStack.CreateWithControls( true, child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ) ).ToArray() )
