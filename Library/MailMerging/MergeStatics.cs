@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 		}
 
 		private static MergeField<PseudoChildRow>[] getNativeChildFields() {
-			return new BasicMergeFieldImplementation<PseudoChildRow, string>[] { new TheValue() }.Select( MergeFieldOps.CreateBasicField ).ToArray();
+			return new BasicMergeFieldImplementation<PseudoChildRow, string>[] { new TheValue(), new Another() }.Select( MergeFieldOps.CreateBasicField ).ToArray();
 		}
 
 		public static MergeRowTree CreateEmptyPseudoTableRowTree() {

@@ -74,6 +74,7 @@
     <Compile Include="MailMerging\PseudoTableFields\FullName.cs" />
     <Compile Include="MailMerging\PseudoTableFields\Test.cs" />
     <Compile Include="MailMerging\PseudoTableRow.cs" />
+    <Compile Include="MailMerging\PsuedoChildFields\Another.cs" />
     <Compile Include="MailMerging\PsuedoChildFields\TheValue.cs" />
   </ItemGroup>
   <ItemGroup>
