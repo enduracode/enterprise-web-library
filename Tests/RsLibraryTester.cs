@@ -224,7 +224,6 @@ namespace EnterpriseWebLibrary.Tests {
 			var wordDocx = EwlStatics.CombinePaths( inputTestFiles, "word.docx" );
 			var pdf = EwlStatics.CombinePaths( inputTestFiles, "pdf.pdf" );
 
-			MergeStatics.Init();
 			var singleTestRow = new PseudoTableRow( 1 ).ToCollection();
 			var testRows = new[] { new PseudoTableRow( 1 ), new PseudoTableRow( 2 ), new PseudoTableRow( 3 ) };
 			var singleRowTree = MergeStatics.CreatePseudoTableRowTree( singleTestRow );

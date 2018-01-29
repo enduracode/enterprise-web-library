@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
 							new DateAndTimePickers.Info( this ) ),
-						new ResourceGroup( "Other", new IntermediatePostBacks.Info( this ), new Charts.Info( this ) )
+						new ResourceGroup( "Other", new IntermediatePostBacks.Info( this ), new MailMerging.Info( this ), new Charts.Info( this ) )
 					};
 			}
 
@@ -51,8 +51,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				this,
 				new PlaceHolder().AddControlsReturnThis(
 					new EwfImage(
-						new ImageSetup( null ),
-						new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection().GetControls() ) );
+							new ImageSetup( null ),
+							new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection()
+						.GetControls() ) );
 		}
 
 		public List<ActionButtonSetup> CreateNavButtonSetups() {
@@ -64,24 +65,20 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					"Menu",
 					new ToolTipButton(
 						EwfTable.CreateWithItems(
-							items:
-								new Func<EwfTableItem>[]
-									{
-										() =>
-										new EwfTableItem(
-											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.apple.com" ) ) ),
-											"Apple" ),
-										() =>
-										new EwfTableItem(
-											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.microsoft.com" ) ) ),
-											"Microsoft" ),
-										() =>
-										new EwfTableItem(
-											new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.google.com" ) ) ),
-											"Google" ),
-										() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script" ),
-										() => new EwfTableItem( new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
-									} ) ) ) );
+							items: new Func<EwfTableItem>[]
+								{
+									() => new EwfTableItem(
+										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.apple.com" ) ) ),
+										"Apple" ),
+									() => new EwfTableItem(
+										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.microsoft.com" ) ) ),
+										"Microsoft" ),
+									() => new EwfTableItem(
+										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.google.com" ) ) ),
+										"Google" ),
+									() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script" ),
+									() => new EwfTableItem( new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
+								} ) ) ) );
 
 			navButtonSetups.Add( new ActionButtonSetup( "Modal Window", new LaunchWindowLink( two ) ) );
 			return navButtonSetups;

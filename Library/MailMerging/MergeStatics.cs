@@ -45,18 +45,30 @@ namespace EnterpriseWebLibrary.MailMerging {
 			return new BasicMergeFieldImplementation<PseudoChildRow, string>[] { new TheValue() }.Select( MergeFieldOps.CreateBasicField ).ToArray();
 		}
 
-		public static MergeRowTree CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
-			var rand = new Random();
-			var children = new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
-				"Things",
-				childFields.AsReadOnly(),
-				data => /*Randomness.FlipCoin()*/ false ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : new PseudoChildRow[ 0 ],
-				null );
-			return MergeDataTreeOps.CreateRowTree( tableFields.AsReadOnly(), rows, new List<MergeDataTreeChild<PseudoTableRow>> { children }.AsReadOnly() );
+		public static MergeRowTree CreateEmptyPseudoTableRowTree() {
+			return MergeDataTreeOps.CreateRowTree(
+				tableFields.AsReadOnly(),
+				new PseudoTableRow[] { null },
+				children: new List<MergeDataTreeChild<PseudoTableRow>>
+					{
+						new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>( "Things", childFields.AsReadOnly(), pseudoTableRow => ( (PseudoChildRow)null ).ToCollection() )
+					}.AsReadOnly() );
 		}
 
-		public static MergeRowTree CreateEmptyPseudoTableRowTree() {
-			return CreatePseudoTableRowTree( new PseudoTableRow[] {} );
+		public static MergeRowTree CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
+			var rand = new Random();
+			return MergeDataTreeOps.CreateRowTree(
+				tableFields.AsReadOnly(),
+				rows,
+				new List<MergeDataTreeChild<PseudoTableRow>>
+					{
+						new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
+							"Things",
+							childFields.AsReadOnly(),
+							pseudoTableRow =>
+								/*Randomness.FlipCoin()*/
+									false ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : Enumerable.Empty<PseudoChildRow>() )
+					}.AsReadOnly() );
 		}
 	}
 }
