@@ -13,14 +13,14 @@ namespace EnterpriseWebLibrary.MailMerging.MailMergeTesting {
 	/// <summary>
 	/// A mock MergeStatics class as we have it in many systems.
 	/// </summary>
-	internal static class MergeStatics {
+	public static class MergeStatics {
 		private static readonly List<MergeField<PseudoTableRow>> tableFields = new List<MergeField<PseudoTableRow>>();
 		private static readonly List<MergeField<PseudoChildRow>> childFields = new List<MergeField<PseudoChildRow>>();
 
 		/// <summary>
 		/// Must be called before other methods in this class.
 		/// </summary>
-		internal static void Init() {
+		public static void Init() {
 			var nativeTableFields = getNativeTableFields().ToList().AsReadOnly();
 			var nativeChildFields = getNativeChildFields().ToList().AsReadOnly();
 

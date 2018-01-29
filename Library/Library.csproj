@@ -69,6 +69,12 @@
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="GlobalInitializer.cs" />
     <Compile Include="GlobalStatics.cs" />
+    <Compile Include="MailMerging\MergeStatics.cs" />
+    <Compile Include="MailMerging\PseudoChildRow.cs" />
+    <Compile Include="MailMerging\PseudoTableFields\FullName.cs" />
+    <Compile Include="MailMerging\PseudoTableFields\Test.cs" />
+    <Compile Include="MailMerging\PseudoTableRow.cs" />
+    <Compile Include="MailMerging\PsuedoChildFields\TheValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configuration\Development.xml" />

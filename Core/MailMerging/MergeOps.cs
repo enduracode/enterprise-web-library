@@ -6,9 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.Reporting;
 using EnterpriseWebLibrary.IO;
-using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
 using EnterpriseWebLibrary.MailMerging.RowTree;
-using Humanizer;
 
 namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
@@ -223,21 +221,26 @@ namespace EnterpriseWebLibrary.MailMerging {
 
 			if( !omitHeaderRow ) {
 				writer.AddValuesToLine(
-					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) ).Select( mergeValue => (object)mergeValue.Name ).ToArray() );
+					fieldNames.Select( fieldName => rowTree.Rows.First().Values.Single( i => i.Name == fieldName ) )
+						.Select( mergeValue => (object)mergeValue.Name )
+						.ToArray() );
 				writer.WriteCurrentLineToFile( destinationWriter );
 			}
 
 			foreach( var row in rowTree.Rows ) {
 				writer.AddValuesToLine(
-					fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select(
-						mergeValue => {
-							var mergeValueAsString = mergeValue as MergeValue<string>;
-							if( mergeValueAsString != null )
-								return mergeValueAsString.Evaluate( false );
+					fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) )
+						.Select(
+							mergeValue => {
+								var mergeValueAsString = mergeValue as MergeValue<string>;
+								if( mergeValueAsString != null )
+									return mergeValueAsString.Evaluate( false );
 
-							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-							throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-						} ).Cast<object>().ToArray() );
+								// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+								throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+							} )
+						.Cast<object>()
+						.ToArray() );
 
 				writer.WriteCurrentLineToFile( destinationWriter );
 			}
@@ -281,18 +284,20 @@ namespace EnterpriseWebLibrary.MailMerging {
 				sheet.FreezeHeaderRow();
 				foreach( var row in rowTree.Rows ) {
 					sheet.AddRowToWorksheet(
-						fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ).Select(
-							mergeValue => {
-								var mergeValueAsString = mergeValue as MergeValue<string>;
-								string value = null;
-								if( mergeValueAsString != null )
-									value = mergeValueAsString.Evaluate( false );
-								if( value == null )
-									// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-									throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+						fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) )
+							.Select(
+								mergeValue => {
+									var mergeValueAsString = mergeValue as MergeValue<string>;
+									string value = null;
+									if( mergeValueAsString != null )
+										value = mergeValueAsString.Evaluate( false );
+									if( value == null )
+										// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+										throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
 
-								return value;
-							} ).ToArray() );
+									return value;
+								} )
+							.ToArray() );
 				}
 			}
 			return excelFile;
@@ -338,7 +343,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 					if( mergeValue is MergeValue<string> )
 						writer.WriteValue( ( mergeValue as MergeValue<string> ).Evaluate( false ) );
 					else
-					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
 					writer.WriteEndElement();
 				}
@@ -368,90 +373,6 @@ namespace EnterpriseWebLibrary.MailMerging {
 
 		private static bool mergeValueTypeIsSupportedInXml( MergeValue mv ) {
 			return mv is MergeValue<string>;
-		}
-
-		internal static void Test() {
-			const string outputFolderName = "MergeOps";
-			var outputFolder = EwlStatics.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
-			IoMethods.DeleteFolder( outputFolder );
-			Directory.CreateDirectory( outputFolder );
-
-			var inputTestFiles = EwlStatics.CombinePaths( TestStatics.InputTestFilesFolderPath, outputFolderName );
-			var wordDocx = EwlStatics.CombinePaths( inputTestFiles, "word.docx" );
-			var pdf = EwlStatics.CombinePaths( inputTestFiles, "pdf.pdf" );
-
-			MergeStatics.Init();
-			var singleTestRow = new PseudoTableRow( 1 ).ToCollection();
-			var testRows = new[] { new PseudoTableRow( 1 ), new PseudoTableRow( 2 ), new PseudoTableRow( 3 ) };
-			var singleRowTree = MergeStatics.CreatePseudoTableRowTree( singleTestRow );
-			var pseudoTableRowTree = MergeStatics.CreatePseudoTableRowTree( testRows );
-
-			var explanations = new List<Tuple<String, String>>();
-
-			// Single row to merge against
-
-			// Word files
-
-			const string singleRowWordDoc = "SingleRowMsWordDoc" + FileExtensions.WordDocx;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDoc ) ) ) {
-				using( var word = File.OpenRead( wordDocx ) )
-					CreateMsWordDoc( singleRowTree, false, word, outputFile );
-				explanations.Add( Tuple.Create( singleRowWordDoc, "Should be {0} with only one page, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
-			}
-
-			const string singleRowWordDocAsPdf = "SingleRowMsWordDoc" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDocAsPdf ) ) )
-				CreatePdfFromMsWordDoc( singleRowTree, false, wordDocx, outputFile );
-			explanations.Add(
-				Tuple.Create( singleRowWordDocAsPdf, "Should be {0} with only one page, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
-
-			//Excel
-			const string singleRowExcel = "SingleRowExcel" + FileExtensions.ExcelXlsx;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowExcel ) ) )
-				CreateExcelWorkbook( singleRowTree, GetExcelSupportedMergeFields( singleRowTree ), outputFile );
-			explanations.Add(
-				Tuple.Create(
-					singleRowExcel,
-					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. One more row with data should be present." ) );
-
-			// Pdf
-			const string singleRowPdf = "SingleRowPdf" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowPdf ) ) )
-				CreatePdf( singleRowTree, false, pdf, outputFile );
-			explanations.Add( Tuple.Create( singleRowPdf, "Should be {0} with only one page, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
-
-			// Multiple rows to merge against
-
-			// Word files
-			const string multipleRowsWordDoc = "MultipleRowMsWordDoc" + FileExtensions.WordDocx;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDoc ) ) ) {
-				using( var word = File.OpenRead( wordDocx ) )
-					CreateMsWordDoc( pseudoTableRowTree, false, word, outputFile );
-				explanations.Add( Tuple.Create( multipleRowsWordDoc, "Should be {0} with three pages, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
-			}
-
-			const string multipleRowsWordDocAsPdf = "MultipleRowMsWordDoc" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDocAsPdf ) ) )
-				CreatePdfFromMsWordDoc( pseudoTableRowTree, false, wordDocx, outputFile );
-			explanations.Add(
-				Tuple.Create( multipleRowsWordDocAsPdf, "Should be {0} with three pages, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
-
-			// Excel
-			const string multipleRowExcel = "MultipleRowExcel" + FileExtensions.ExcelXlsx;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowExcel ) ) )
-				CreateExcelWorkbook( pseudoTableRowTree, GetExcelSupportedMergeFields( pseudoTableRowTree ), outputFile );
-			explanations.Add(
-				Tuple.Create(
-					multipleRowExcel,
-					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. Three more row with data should be present." ) );
-
-			// Pdf
-			const string multipleRowPdf = "MultipleRowPdf" + FileExtensions.Pdf;
-			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowPdf ) ) )
-				CreatePdf( pseudoTableRowTree, false, pdf, outputFile );
-			explanations.Add( Tuple.Create( multipleRowPdf, "Should be {0} with three pages, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
-
-			TestStatics.OutputReadme( outputFolder, explanations );
 		}
 	}
 }

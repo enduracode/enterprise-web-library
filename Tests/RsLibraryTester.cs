@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
-using NUnit.Framework;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.MailMerging;
+using EnterpriseWebLibrary.MailMerging.MailMergeTesting;
+using Humanizer;
+using NUnit.Framework;
 
 namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
@@ -14,6 +18,7 @@ namespace EnterpriseWebLibrary.Tests {
 			GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Tester", false );
 
 			EwlStatics.RunStandardLibraryTests();
+			testMailMerging();
 
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteSecondString() );
 			Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteString() );
@@ -208,6 +213,90 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine();
 
 			Console.WriteLine( "SSN length: " + EncryptionOps.EncryptString( EncryptionOps.GenerateInitVector(), "987654321" ).Length );
+		}
+
+		private static void testMailMerging() {
+			const string outputFolderName = "MergeOps";
+			var outputFolder = EwlStatics.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
+			IoMethods.DeleteFolder( outputFolder );
+			Directory.CreateDirectory( outputFolder );
+
+			var inputTestFiles = EwlStatics.CombinePaths( TestStatics.InputTestFilesFolderPath, outputFolderName );
+			var wordDocx = EwlStatics.CombinePaths( inputTestFiles, "word.docx" );
+			var pdf = EwlStatics.CombinePaths( inputTestFiles, "pdf.pdf" );
+
+			MergeStatics.Init();
+			var singleTestRow = new PseudoTableRow( 1 ).ToCollection();
+			var testRows = new[] { new PseudoTableRow( 1 ), new PseudoTableRow( 2 ), new PseudoTableRow( 3 ) };
+			var singleRowTree = MergeStatics.CreatePseudoTableRowTree( singleTestRow );
+			var pseudoTableRowTree = MergeStatics.CreatePseudoTableRowTree( testRows );
+
+			var explanations = new List<Tuple<String, String>>();
+
+			// Single row to merge against
+
+			// Word files
+
+			const string singleRowWordDoc = "SingleRowMsWordDoc" + FileExtensions.WordDocx;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDoc ) ) ) {
+				using( var word = File.OpenRead( wordDocx ) )
+					MergeOps.CreateMsWordDoc( singleRowTree, false, word, outputFile );
+				explanations.Add( Tuple.Create( singleRowWordDoc, "Should be {0} with only one page, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
+			}
+
+			const string singleRowWordDocAsPdf = "SingleRowMsWordDoc" + FileExtensions.Pdf;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowWordDocAsPdf ) ) )
+				MergeOps.CreatePdfFromMsWordDoc( singleRowTree, false, wordDocx, outputFile );
+			explanations.Add(
+				Tuple.Create( singleRowWordDocAsPdf, "Should be {0} with only one page, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
+
+			//Excel
+			const string singleRowExcel = "SingleRowExcel" + FileExtensions.ExcelXlsx;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowExcel ) ) )
+				MergeOps.CreateExcelWorkbook( singleRowTree, MergeOps.GetExcelSupportedMergeFields( singleRowTree ), outputFile );
+			explanations.Add(
+				Tuple.Create(
+					singleRowExcel,
+					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. One more row with data should be present." ) );
+
+			// Pdf
+			const string singleRowPdf = "SingleRowPdf" + FileExtensions.Pdf;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, singleRowPdf ) ) )
+				MergeOps.CreatePdf( singleRowTree, false, pdf, outputFile );
+			explanations.Add( Tuple.Create( singleRowPdf, "Should be {0} with only one page, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
+
+			// Multiple rows to merge against
+
+			// Word files
+			const string multipleRowsWordDoc = "MultipleRowMsWordDoc" + FileExtensions.WordDocx;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDoc ) ) ) {
+				using( var word = File.OpenRead( wordDocx ) )
+					MergeOps.CreateMsWordDoc( pseudoTableRowTree, false, word, outputFile );
+				explanations.Add( Tuple.Create( multipleRowsWordDoc, "Should be {0} with three pages, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
+			}
+
+			const string multipleRowsWordDocAsPdf = "MultipleRowMsWordDoc" + FileExtensions.Pdf;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDocAsPdf ) ) )
+				MergeOps.CreatePdfFromMsWordDoc( pseudoTableRowTree, false, wordDocx, outputFile );
+			explanations.Add(
+				Tuple.Create( multipleRowsWordDocAsPdf, "Should be {0} with three pages, FullName merged in the upper left, saved as a PDF.".FormatWith( wordDocx ) ) );
+
+			// Excel
+			const string multipleRowExcel = "MultipleRowExcel" + FileExtensions.ExcelXlsx;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowExcel ) ) )
+				MergeOps.CreateExcelWorkbook( pseudoTableRowTree, MergeOps.GetExcelSupportedMergeFields( pseudoTableRowTree ), outputFile );
+			explanations.Add(
+				Tuple.Create(
+					multipleRowExcel,
+					"An Excel file with the first row frozen and bold with the merge field names. Note that only supported field types may be dispalyed. Three more row with data should be present." ) );
+
+			// Pdf
+			const string multipleRowPdf = "MultipleRowPdf" + FileExtensions.Pdf;
+			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowPdf ) ) )
+				MergeOps.CreatePdf( pseudoTableRowTree, false, pdf, outputFile );
+			explanations.Add( Tuple.Create( multipleRowPdf, "Should be {0} with three pages, FullName filled in and 'Test' displayed.".FormatWith( pdf ) ) );
+
+			TestStatics.OutputReadme( outputFolder, explanations );
 		}
 
 		private static void errorWriter( Validator validator, ErrorCondition validationResult ) {

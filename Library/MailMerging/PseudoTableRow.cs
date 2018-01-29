@@ -2,7 +2,7 @@
 	/// <summary>
 	/// Has fields in it like a table row would.
 	/// </summary>
-	internal class PseudoTableRow {
+	public class PseudoTableRow {
 		private readonly int num;
 
 		public PseudoTableRow( int num ) {
