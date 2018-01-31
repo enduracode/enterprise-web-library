@@ -309,8 +309,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
 							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
-								  ? "Form controls outside of update regions may not change on an intermediate post-back."
-								  : "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
+								? "Form controls outside of update regions may not change on an intermediate post-back."
+								: "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
 			}
 
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
@@ -321,18 +321,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var navigationNeeded = true;
 				executeWithDataModificationExceptionHandling(
 					() => {
-						if( secondaryDm == dataUpdate ) {
+						if( secondaryDm == dataUpdate )
 							navigationNeeded = dataUpdate.Execute(
 								true,
 								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
 								handleValidationErrors,
 								performValidationOnly: true );
-						}
 						else {
-							var formValuesChanged =
-								GetDescendants( contentContainer )
-									.OfType<FormValueControl>()
-									.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							var formValuesChanged = GetDescendants( contentContainer )
+								.OfType<FormValueControl>()
+								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
 						}
 
@@ -480,7 +478,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( postBack == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 					var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
-						                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
+						                            ? lastPostBackFailingDmId.Any()
+							                              ? GetPostBack( lastPostBackFailingDmId ) as DataModification
+							                              : dataUpdate
 						                            : null;
 					if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
@@ -502,10 +502,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// Execute the post-back.
 					var actionPostBack = postBack as ActionPostBack;
 					if( actionPostBack != null ) {
-						var formValuesChanged =
-							GetDescendants( contentContainer )
-								.OfType<FormValueControl>()
-								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+						var formValuesChanged = GetDescendants( contentContainer )
+							.OfType<FormValueControl>()
+							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						try {
 							dmExecuted |= actionPostBack.Execute(
 								formValuesChanged,
@@ -536,19 +535,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					if( postBack.IsIntermediate ) {
 						var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
-						var preModRegions =
-							updateRegionLinkers.SelectMany(
+						var preModRegions = updateRegionLinkers.SelectMany(
 								i => i.PreModificationRegions,
 								( linker, region ) => new { region.Sets, region.ControlGetter, linker.Key, region.ArgumentGetter } )
-								.Where( i => regionSets.Overlaps( i.Sets ) )
-								.ToArray();
+							.Where( i => regionSets.Overlaps( i.Sets ) )
+							.ToArray();
 						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
 						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
 						requestState.DmIdAndSecondaryOp = Tuple.Create(
 							actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
 							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
-						requestState.SetStaticAndUpdateRegionState( staticRegionContents.Item1, preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
+						requestState.SetStaticAndUpdateRegionState(
+							staticRegionContents.Item1,
+							preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 					}
 					else
 						requestState.PostBackValues = null;
@@ -662,9 +662,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Header.Controls.Add(
 					new Literal
 						{
-							Text =
-								"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( Request ) ? "s" : "" ) + "://use.typekit.com/" +
-								EwfApp.Instance.TypekitId + ".js\"></script>"
+							Text = "<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( Request ) ? "s" : "" ) + "://use.typekit.com/" +
+							       EwfApp.Instance.TypekitId + ".js\"></script>"
 						} );
 				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
 			}
@@ -681,9 +680,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Header.Controls.Add(
 				new Literal
 					{
-						Text =
-							"<script type=\"text/javascript\" src=\"" + this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) +
-							"\"></script>"
+						Text = "<script type=\"text/javascript\" src=\"" +
+						       this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) + "\"></script>"
 					} );
 		}
 
@@ -874,10 +872,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
-			             ( !requestState.ModificationErrorsExist ||
-			               ( requestState.DmIdAndSecondaryOp != null &&
-			                 new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-				                 requestState.DmIdAndSecondaryOp.Item2 ) ) );
+			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
+			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
+				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
 
 			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
 			var scrollStatement = "";
@@ -907,16 +904,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			ClientScript.RegisterClientScriptBlock(
 				GetType(),
 				"jQueryDocumentReadyBlock",
-				"$( document ).ready( function() { " +
-				StringTools.ConcatenateWithDelimiter(
+				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
 					" ",
 					"OnDocumentReady();",
 					controlInitStatements,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
-					.PrependDelimiter( "window.onload = function() { " )
-					.AppendDelimiter( " };" ) ) + " } );",
+						.PrependDelimiter( "window.onload = function() { " )
+						.AppendDelimiter( " };" ) ) + " } );",
 				true );
 
 			setFocus();
@@ -979,7 +975,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			var webFormsHiddenFields = new[]
-				{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
+					{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
@@ -987,8 +983,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				requestState.PostBackValues.AddFromRequest(
 					Request.Form.Cast<string>().Except( new[] { postBackHiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
 					postBackValueKeys.Contains,
-					key => Request.Form[ key ] ) |
-				requestState.PostBackValues.AddFromRequest( Request.Files.Cast<string>(), postBackValueKeys.Contains, key => Request.Files[ key ] );
+					key => Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
+					Request.Files.Cast<string>(),
+					postBackValueKeys.Contains,
+					key => Request.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist = activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
@@ -1024,14 +1022,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var contents = new StringBuilder();
 
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
-			var staticFormValues =
-				GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
-					.OfType<FormValueControl>()
-					.Select( i => i.FormValue )
-					.Where( i => i != null )
-					.Distinct()
-					.OrderBy( i => i.GetPostBackValueKey() )
-					.ToArray();
+			var staticFormValues = GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
+				.OfType<FormValueControl>()
+				.Select( i => i.FormValue )
+				.Where( i => i != null )
+				.Distinct()
+				.OrderBy( i => i.GetPostBackValueKey() )
+				.ToArray();
 			foreach( var formValue in staticFormValues ) {
 				contents.Append( formValue.GetPostBackValueKey() );
 				contents.Append( formValue.GetDurableValueAsString() );
@@ -1156,10 +1153,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected sealed override void SavePageStateToPersistenceMedium( object state ) {
 			var rs = AppRequestState.Instance.EwfPageRequestState;
-			var failingDmId = rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null &&
-			                  rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
-				                  ? rs.DmIdAndSecondaryOp.Item1
-				                  : null;
+			var failingDmId =
+				rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
+					? rs.DmIdAndSecondaryOp.Item1
+					: null;
 			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new object[] { generateFormValueHash(), failingDmId } ) );
 		}
 
