@@ -407,10 +407,10 @@
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingComponent.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\GenericPhrasingContainer.cs" />
+    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockContainer.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditor.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorModification.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
@@ -553,6 +553,7 @@
     </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeLocalData.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\MarkupBlockNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
