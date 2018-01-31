@@ -68,11 +68,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfPage Instance => HttpContext.Current.CurrentHandler as EwfPage;
 
 		/// <summary>
-		/// Add a status message of the given type to the status message collection. Message is not HTML-encoded. It is possible to have
-		/// tags as part of the text.
+		/// Add a status message of the given type to the status message collection.
 		/// </summary>
-		public static void AddStatusMessage( StatusMessageType type, string messageHtml ) {
-			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, messageHtml ) );
+		public static void AddStatusMessage( StatusMessageType type, string message ) {
+			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, message ) );
 		}
 
 		internal static void AssertPageTreeNotBuilt() {

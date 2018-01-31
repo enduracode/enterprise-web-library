@@ -12,42 +12,38 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				EwfTable.CreateWithItems(
-					items:
-						getStatusTests()
-							.Select(
-								tests => new EwfTableItem( tests.Item1, new PostBackButton( new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false, postBack: tests.Item2 ) ) )
-							.ToFunctions() ) );
+					items: getStatusTests()
+						.Select(
+							tests => new EwfTableItem(
+								tests.Item1,
+								new PostBackButton( new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false, postBack: tests.Item2 ) ) )
+						.ToFunctions() ) );
 		}
 
 		private IEnumerable<Tuple<string, ActionPostBack>> getStatusTests() {
-			yield return
-				Tuple.Create(
-					"One info message",
-					PostBack.CreateFull( id: "oneInfo", firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "This is one info message." ) ) );
+			yield return Tuple.Create(
+				"One info message",
+				PostBack.CreateFull( id: "oneInfo", firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "This is one info message." ) ) );
 
-			yield return
-				Tuple.Create(
-					"One warning message",
-					PostBack.CreateFull( id: "oneWarning", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, "This is the warning message" ); } ) )
-				;
+			yield return Tuple.Create(
+				"One warning message",
+				PostBack.CreateFull( id: "oneWarning", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, "This is the warning message" ); } ) );
 
-			yield return
-				Tuple.Create(
-					"Modification error message",
-					PostBack.CreateFull( id: "valError", firstModificationMethod: () => { throw new ApplicationException( "This is the validation error" ); } ) );
+			yield return Tuple.Create(
+				"Modification error message",
+				PostBack.CreateFull( id: "valError", firstModificationMethod: () => throw new ApplicationException( "This is the validation error" ) ) );
 
-			yield return
-				Tuple.Create(
-					"EwfException error message",
-					PostBack.CreateFull( id: "exception", firstModificationMethod: () => new DataModificationException( "This is the EwfException." ) ) );
+			yield return Tuple.Create(
+				"EwfException error message",
+				PostBack.CreateFull( id: "exception", firstModificationMethod: () => throw new DataModificationException( "This is the EwfException." ) ) );
 
-			yield return
-				Tuple.Create( "Long-running operation: 2 seconds.", PostBack.CreateFull( id: "longRunning", firstModificationMethod: () => Thread.Sleep( 2000 ) ) );
+			yield return Tuple.Create(
+				"Long-running operation: 2 seconds.",
+				PostBack.CreateFull( id: "longRunning", firstModificationMethod: () => Thread.Sleep( 2000 ) ) );
 
-			yield return
-				Tuple.Create(
-					"Very Long-running operation: 15 seconds.",
-					PostBack.CreateFull( id: "veryLongRunning", firstModificationMethod: () => Thread.Sleep( 15000 ) ) );
+			yield return Tuple.Create(
+				"Very Long-running operation: 15 seconds.",
+				PostBack.CreateFull( id: "veryLongRunning", firstModificationMethod: () => Thread.Sleep( 15000 ) ) );
 
 			yield return Tuple.Create(
 				"Two info messages",
@@ -81,15 +77,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						AddStatusMessage( StatusMessageType.Warning, "This is third warning message" );
 					} ) );
 
-			yield return
-				Tuple.Create(
-					"Very long info message",
-					PostBack.CreateFull( id: "veryLongInfo", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Info, longMessage() ); } ) );
+			yield return Tuple.Create(
+				"Very long info message",
+				PostBack.CreateFull( id: "veryLongInfo", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Info, longMessage() ); } ) );
 
-			yield return
-				Tuple.Create(
-					"Very long warning message",
-					PostBack.CreateFull( id: "veryLongWarning", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, longMessage() ); } ) );
+			yield return Tuple.Create(
+				"Very long warning message",
+				PostBack.CreateFull( id: "veryLongWarning", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, longMessage() ); } ) );
 
 			yield return Tuple.Create(
 				"Many info messages",
