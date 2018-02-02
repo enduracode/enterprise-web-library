@@ -106,13 +106,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private readonly IReadOnlyCollection<FlowComponent> children;
 
 			public Spinner() {
-				children =
-					new ElementComponent( context =>
-					                      new ElementData( () =>
-					                                       new ElementLocalData( "span",
-						                                       attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
-						                                       includeIdAttribute: true,
-						                                       jsInitStatements: @"new Spinner( {
+				children = new ElementComponent(
+					context => new ElementData(
+						() => new ElementLocalData(
+							"span",
+							attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
+							includeIdAttribute: true,
+							jsInitStatements: @"new Spinner( {
 	lines: 13, // The number of lines to draw
 	length: 8, // The length of each line
 	width: 5, // The line thickness
@@ -168,11 +168,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new PostBackButton(
 							new ButtonActionControlStyle( "Log Out", ButtonSize.ShrinkWrap ),
 							usesSubmitBehavior: false,
-							postBack:
-								PostBack.CreateFull(
-									id: "ewfIntermediateLogOut",
-									firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) );
+							postBack: PostBack.CreateFull(
+								id: "ewfIntermediateLogOut",
+								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
+								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) );
 				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
 			}
 
@@ -188,11 +187,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								new PostBackButton(
 									new ButtonActionControlStyle( "End Impersonation", ButtonSize.ShrinkWrap ),
 									usesSubmitBehavior: false,
-									postBack:
-										PostBack.CreateFull(
-											id: "ewfEndImpersonation",
-											firstModificationMethod: UserImpersonationStatics.EndImpersonation,
-											actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) ) );
+									postBack: PostBack.CreateFull(
+										id: "ewfEndImpersonation",
+										firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+										actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) ) );
 
 			if( warningControls.Any() ) {
 				var warningControl = warningControls.Count > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
@@ -214,22 +212,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			// This is used by the EWF JavaScript file.
 			var dialogClass = new ElementClass( "ewfProcessingDialog" );
 
-			return
-				new GenericFlowContainer(
-					new Paragraph(
+			return new GenericFlowContainer(
+				new Paragraph(
 						new Spinner().ToCollection<PhrasingComponent>()
 							.Concat( Translation.Processing.ToComponents() )
 							.Concat( getProcessingDialogEllipsisDot( 1 ) )
 							.Concat( getProcessingDialogEllipsisDot( 2 ) )
 							.Concat( getProcessingDialogEllipsisDot( 3 ) ),
 						classes: processingDialogProcessingParagraphClass ).ToCollection()
-						.Concat(
-							new Paragraph(
-								new EwfButton(
-									new StandardButtonStyle( Translation.ThisSeemsToBeTakingAWhile, buttonSize: ButtonSize.ShrinkWrap ),
-									behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
-								classes: processingDialogTimeOutParagraphClass ) ),
-					classes: dialogClass.Add( processingDialogBlockInactiveClass ) ).ToCollection();
+					.Concat(
+						new Paragraph(
+							new EwfButton(
+								new StandardButtonStyle( Translation.ThisSeemsToBeTakingAWhile, buttonSize: ButtonSize.ShrinkWrap ),
+								behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
+							classes: processingDialogTimeOutParagraphClass ) ),
+				classes: dialogClass.Add( processingDialogBlockInactiveClass ) ).ToCollection();
 		}
 
 		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
@@ -262,17 +259,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private IEnumerable<Control> getStatusMessageControlList() {
-			return
-				ControlStack.CreateWithControls(
+			return ControlStack.CreateWithControls(
 					true,
 					EwfPage.Instance.StatusMessages.Select(
-						i =>
-						new Block(
-							new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" ).ToCollection<PhrasingComponent>
-							().Concat( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) ).GetControls().ToArray() )
-							{
-								CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass
-							} as Control ).ToArray() ).ToCollection();
+							i => new Block(
+								     new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
+									     .ToCollection<PhrasingComponent>()
+									     .Concat( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
+									     .GetControls()
+									     .ToArray() ) { CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass } as Control )
+						.ToArray() )
+				.ToCollection();
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
