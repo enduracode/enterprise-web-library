@@ -38,8 +38,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
 			                          EwfPage.Instance.IsAutoDataUpdater;
 			FormAction postBackAction = null;
-			AttributeGetter = () => ( Url.Any() ? Tuple.Create( "href", Url ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
-				.Concat( target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+				.Concat( destination != null && target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 				.Concat(
 					isPostBackHyperlink
 						? Tuple.Create( JsWritingMethods.onclick, postBackAction.GetJsStatements() + " return false" ).ToCollection()
