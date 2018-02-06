@@ -27,9 +27,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal const string ButtonElementName = "ewfButton";
 
+		private static Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator;
 		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
 
-		internal new static void Init( Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+		internal new static void Init( Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator, Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
 			EwfValidation.Init(
 				() => Instance.formState.ValidationPredicate,
 				() => Instance.formState.DataModifications,
@@ -38,8 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PostBack.Init( () => Instance.formState.DataModifications );
 			PostBackFormAction.Init(
 				postBack => {
-					PostBack existingPostBack;
-					if( !Instance.postBacksById.TryGetValue( postBack.Id, out existingPostBack ) )
+					if( !Instance.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )
 						Instance.postBacksById.Add( postBack.Id, postBack );
 					else if( existingPostBack != postBack )
 						throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
@@ -47,8 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				postBack => {
 					if( Instance.GetPostBack( postBack.Id ) != postBack )
 						throw new ApplicationException( "The post-back must have been added to the page." );
-					var validationPostBack = ( postBack as ActionPostBack )?.ValidationDm as PostBack;
-					if( validationPostBack != null && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+					if( ( postBack as ActionPostBack )?.ValidationDm is PostBack validationPostBack && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
 						throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
 				} );
 			FormState.Init(
@@ -59,6 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
 				dataModification => dataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)dataModification );
+			EwfPage.browsingModalBoxCreator = browsingModalBoxCreator;
 			EwfPage.cssInfoCreator = cssInfoCreator;
 		}
 
@@ -87,6 +87,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private Control contentContainer;
 		private Control etherealPlace;
 		private FormState formState;
+		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent = new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
@@ -584,6 +585,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Form.Controls.Add( etherealPlace = new PlaceHolder() );
 
 			formState = new FormState();
+			browsingModalBoxCreator().AddEtherealControls( Form );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				DataUpdate.ToCollection(),
 				() => {

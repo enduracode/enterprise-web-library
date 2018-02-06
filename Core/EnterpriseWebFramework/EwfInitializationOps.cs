@@ -33,12 +33,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					globalInitializer,
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 					false,
-					mainDataAccessStateGetter:
-						() => {
-							return EwfApp.Instance != null
-								       ? EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
-								       : System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
-						} );
+					mainDataAccessStateGetter: () => {
+						return EwfApp.Instance != null
+							       ? EwfApp.Instance.RequestState != null
+								         ? EwfApp.Instance.RequestState.DataAccessState
+								         : initTimeDataAccessState.Value
+							       : System.ServiceModel.OperationContext.Current != null
+								       ? wcfDataAccessState.Value
+								       : null;
+					} );
 			}
 			catch {
 				// Suppress all exceptions since there is no way to report them.
@@ -47,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			ewlInitialized = true;
 
 			// Initialize web application.
-			if( !GlobalInitializationOps.SecondaryInitFailed ) {
+			if( !GlobalInitializationOps.SecondaryInitFailed )
 				EwfApp.ExecuteWithBasicExceptionHandling(
 					() => {
 						EwfConfigurationStatics.Init();
@@ -58,13 +61,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
 						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
-						var metaLogicFactory =
-							globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) as AppMetaLogicFactory;
-						if( metaLogicFactory == null )
+						if( !( globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) is
+							       AppMetaLogicFactory metaLogicFactory ) )
 							throw new ApplicationException( "Meta logic factory not found." );
 						EwfApp.Init( globalType, metaLogicFactory );
 
 						EwfPage.Init(
+							ModalBox.CreateBrowsingModalBox,
 							() => {
 								var cssInfos = new List<ResourceInfo>();
 								cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateBasicCssInfos() );
@@ -76,18 +79,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								return cssInfos;
 							} );
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
+						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						EwfUiStatics.Init( globalType );
 
 						EwfInitializationOps.appInitializer = appInitializer;
-						if( appInitializer != null )
-							appInitializer.InitStatics();
+						appInitializer?.InitStatics();
 
 						initTimeDataAccessState = null;
 						EwfApp.FrameworkInitialized = true;
 					},
 					false,
 					false );
-			}
 
 			// If initialization failed, unload and restart the application after a reasonable delay.
 			if( !EwfApp.FrameworkInitialized ) {
@@ -104,7 +106,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							//
 							// Disable server certificate validation so that this request gets through even for web sites that don't use a certificate that is trusted by
 							// default. There is no security risk since we're not sending any sensitive information and we're not using the response.
-							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => { }, disableCertificateValidation: true );
+							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => {}, disableCertificateValidation: true );
 						},
 						false,
 						false ),
@@ -121,15 +123,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !ewlInitialized )
 				return;
 
-			if( !GlobalInitializationOps.SecondaryInitFailed ) {
-				EwfApp.ExecuteWithBasicExceptionHandling(
-					() => {
-						if( appInitializer != null )
-							appInitializer.CleanUpStatics();
-					},
-					false,
-					false );
-			}
+			if( !GlobalInitializationOps.SecondaryInitFailed )
+				EwfApp.ExecuteWithBasicExceptionHandling( () => appInitializer?.CleanUpStatics(), false, false );
 
 			GlobalInitializationOps.CleanUpStatics();
 

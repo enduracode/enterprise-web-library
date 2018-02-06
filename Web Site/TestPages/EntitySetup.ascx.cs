@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
 							new DateAndTimePickers.Info( this ) ),
-						new ResourceGroup( "Other", new IntermediatePostBacks.Info( this ), new MailMerging.Info( this ), new Charts.Info( this ) )
+						new ResourceGroup( "Other", new IntermediatePostBacks.Info( this ), new ModalBoxes.Info( this ), new MailMerging.Info( this ), new Charts.Info( this ) )
 					};
 			}
 

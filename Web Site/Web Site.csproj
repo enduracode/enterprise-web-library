@@ -213,6 +213,13 @@
     <Compile Include="TestPages\ActionControls.aspx.designer.cs">
       <DependentUpon>ActionControls.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\Basic\ModalContent.aspx.cs">
+      <DependentUpon>ModalContent.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\Basic\ModalContent.aspx.designer.cs">
+      <DependentUpon>ModalContent.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\BoxDemo.aspx.cs">
       <DependentUpon>BoxDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -310,6 +317,13 @@
     </Compile>
     <Compile Include="TestPages\MailMerging.aspx.designer.cs">
       <DependentUpon>MailMerging.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TestPages\ModalBoxes.aspx.cs">
+      <DependentUpon>ModalBoxes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\ModalBoxes.aspx.designer.cs">
+      <DependentUpon>ModalBoxes.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\OmniDemo.aspx.cs">
       <DependentUpon>OmniDemo.aspx</DependentUpon>
@@ -544,6 +558,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\ActionControls.aspx" />
+    <Content Include="TestPages\Basic\ModalContent.aspx" />
     <Content Include="TestPages\BoxDemo.aspx" />
     <Content Include="TestPages\Charts.aspx" />
     <Content Include="TestPages\CheckBox.aspx" />
@@ -559,6 +574,7 @@
     <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
     <Content Include="TestPages\MailMerging.aspx" />
+    <Content Include="TestPages\ModalBoxes.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />

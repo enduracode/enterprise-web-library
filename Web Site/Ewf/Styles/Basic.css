@@ -275,6 +275,37 @@ ewfActionControlAllStylesActionlessState, .ewfNotClickable {
 	overflow-y: auto;
 }
 
+/* modal boxes */
+ewfModalBoxContainer {
+	border-style: none;
+	padding: 0;
+}
+ewfModalBox {
+	display: flex;
+	max-width: 80vw;
+	max-height: 80vh;
+	flex-direction: column;
+}
+ewfModalBox > ewfModalBoxCloseButtonContainer {
+	flex: none;
+	padding-bottom: .5em;
+	text-align: right;
+}
+ewfModalBox > ewfModalBoxContentContainer {
+	padding: 1em;
+	max-width: 35em;
+	overflow: auto;
+}
+ewfModalBox > iframe {
+	flex: auto;
+	border-style: none;
+	width: 35em;
+	height: 35em;
+}
+ewfModalBoxBackdrop {
+	background-color: hsla( 0, 0%, 0%, .65 );
+}
+
 /* mail merging */
 ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 	margin-left: 2em;

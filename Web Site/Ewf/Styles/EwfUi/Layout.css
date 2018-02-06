@@ -192,8 +192,11 @@ ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
 	overflow: hidden;
 }
 
-/* modal windows */
-ewfModalBox, ewfModalSectionContainer {
+/* modal boxes */
+ewfModalBox > ewfModalBoxCloseButtonContainer > ewfActionControlNormalButtonStyleAllStates {
+	border-radius: 0 0 0 .5em;
+}
+ewfModalSectionContainer {
 	width: 35em;
 }
 ewfModalSectionContainer > ewfSectionNormalStyleBothStates > ewfSectionContentContainer:first-child {

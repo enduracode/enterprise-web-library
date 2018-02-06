@@ -298,6 +298,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\CustomButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\ImageButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\StandardButtonStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\BrowsingContextSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\EwfHyperlink.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkStyle.cs" />
@@ -448,7 +449,6 @@
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationDialogId.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ModalBox.cs" />
-    <Compile Include="EnterpriseWebFramework\Modal Boxes\ModalBoxId.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\OpenModalBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
@@ -537,6 +537,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedFlowComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\WebForms.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ModalBoxId.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponentOrElement.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />
