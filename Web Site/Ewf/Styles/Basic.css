@@ -295,6 +295,7 @@ ewfModalBox > ewfModalBoxContentContainer {
 	padding: 1em;
 	max-width: 35em;
 	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 }
 ewfModalBox > iframe {
 	flex: auto;
