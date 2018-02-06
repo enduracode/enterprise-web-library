@@ -110,6 +110,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Creates a behavior object that navigates to this resource in the parent browsing context.
+		/// </summary>
+		/// <param name="destination">Where to navigate. Specify null if you don't want the link to do anything.</param>
+		public static HyperlinkBehavior ToHyperlinkParentContextBehavior( this ResourceInfo destination ) {
+			return new HyperlinkBehavior( destination, "_parent", null );
+		}
+
+		/// <summary>
 		/// Creates a behavior object that will create an email message to this address.
 		/// </summary>
 		/// <param name="toAddress">Address to appear in the To: field. Do not pass null or the empty string.</param>
