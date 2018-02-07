@@ -32,17 +32,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static string GetBrowsingModalBoxOpenStatements( BrowsingContextSetup browsingContextSetup, string url ) {
 			browsingContextSetup = browsingContextSetup ?? new BrowsingContextSetup();
-			return StringTools.ConcatenateWithDelimiter(
-				" ",
-				"var dl = document.getElementById( '{0}' );".FormatWith( EwfPage.Instance.BrowsingModalBoxId.ElementId.Id ),
-				"var dv = dl.firstElementChild;",
-				"$( dv ).children( 'iframe' ).remove();",
-				"var fr = document.createElement( 'iframe' );",
-				"fr.src = '{0}';".FormatWith( url ),
-				"fr.style.width = '{0}';".FormatWith( browsingContextSetup.Width?.Value ?? "" ),
-				"fr.style.height = '{0}';".FormatWith( browsingContextSetup.Height?.Value ?? "" ),
-				"dv.insertAdjacentElement( 'beforeend', fr );",
-				"dl.showModal();" );
+
+			// As of February 2018, iOS ignores iframe width and height styles, and sizes them to fit their content. See
+			// http://andyshora.com/iframes-responsive-web-apps-tips.html.
+			return "if( !!navigator.platform && /iPad|iPhone|iPod/.test( navigator.platform ) ) window.location = '{0}'; else {{ {1} }}".FormatWith(
+				url,
+				StringTools.ConcatenateWithDelimiter(
+					" ",
+					"var dl = document.getElementById( '{0}' );".FormatWith( EwfPage.Instance.BrowsingModalBoxId.ElementId.Id ),
+					"var dv = dl.firstElementChild;",
+					"$( dv ).children( 'iframe' ).remove();",
+					"var fr = document.createElement( 'iframe' );",
+					"fr.src = '{0}';".FormatWith( url ),
+					"fr.style.width = '{0}';".FormatWith( browsingContextSetup.Width?.Value ?? "" ),
+					"fr.style.height = '{0}';".FormatWith( browsingContextSetup.Height?.Value ?? "" ),
+					"dv.insertAdjacentElement( 'beforeend', fr );",
+					"dl.showModal();" ) );
 		}
 
 		private readonly IReadOnlyCollection<EtherealComponent> children;
