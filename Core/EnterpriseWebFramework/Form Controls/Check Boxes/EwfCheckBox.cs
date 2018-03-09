@@ -38,15 +38,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => isChecked,
 				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
 				v => v.ToString(),
-				rawValue =>
-				rawValue == null
-					? PostBackValueValidationResult<bool>.CreateValid( false )
-					: rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValid( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
+				rawValue => rawValue == null
+					            ? PostBackValueValidationResult<bool>.CreateValid( false )
+					            : rawValue == "on"
+						            ? PostBackValueValidationResult<bool>.CreateValid( true )
+						            : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
 		internal static void AddCheckBoxAttributes(
-			WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue, FormValue<CommonCheckBox> radioButtonFormValue, string radioButtonListItemId,
-			FormAction action, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
+			WebControl checkBoxElement, Control checkBox, FormValue<bool> checkBoxFormValue, FormValue<CommonCheckBox> radioButtonFormValue,
+			string radioButtonListItemId, FormAction action, bool autoPostBack, IEnumerable<string> onClickJsMethods ) {
 			checkBoxElement.Attributes.Add( "type", checkBoxFormValue != null ? "checkbox" : "radio" );
 			checkBoxElement.Attributes.Add( "name", checkBoxFormValue != null ? checkBox.UniqueID : ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() );
 			if( radioButtonFormValue != null )
@@ -56,7 +57,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			SubmitButton.EnsureImplicitSubmissionAction( checkBoxElement, action, false );
+			var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false );
+			if( implicitSubmissionStatements.Any() )
+				checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
+
 			var isSelectedRadioButton = radioButtonFormValue != null &&
 			                            radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox;
 			var postBackScript = autoPostBack && !isSelectedRadioButton ? action.GetJsStatements() : "";
@@ -85,7 +89,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a radio button.
 		/// </summary>
 		internal EwfCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, FormAction action, Func<IEnumerable<string>> jsClickHandlerStatementListGetter, string listItemId = null ) {
+			FormValue<CommonCheckBox> formValue, string label, FormAction action, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
+			string listItemId = null ) {
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
@@ -151,7 +156,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return checkBoxFormValue != null ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues ) : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
+			return checkBoxFormValue != null
+				       ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues )
+				       : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		void ControlWithCustomFocusLogic.SetFocus() {

@@ -6,6 +6,7 @@ using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -167,9 +168,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private System.Web.UI.WebControls.WebControl selectControl;
 
 		internal SelectList(
-			bool? useHorizontalRadioLayout, System.Web.UI.WebControls.Unit? width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel,
-			bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection,
-			ItemIdType selectedItemId, FormAction action, bool autoPostBack, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			bool? useHorizontalRadioLayout, System.Web.UI.WebControls.Unit? width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
+			string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems,
+			bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, FormAction action, bool autoPostBack,
+			PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
@@ -213,11 +215,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				yield break;
 
 			var isPlaceholder = !useHorizontalRadioLayout.HasValue && !defaultValueItemLabel.Any();
-			yield return
-				new ListItem(
-					SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
-					includeDefaultValueItemOrValidPlaceholder,
-					isPlaceholder );
+			yield return new ListItem(
+				SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
+				includeDefaultValueItemOrValidPlaceholder,
+				isPlaceholder );
 		}
 
 		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<System.Web.UI.WebControls.WebControl> controls ) {
@@ -235,10 +236,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				foreach( var i in displayLinks )
 					radioList.AddDisplayLink( i.Item1, i.Item2, i.Item3 );
 
-				var radioButtons =
-					items.Where( i => i.IsValid )
-						.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: autoPostBack ) )
-						.ToArray();
+				var radioButtons = items.Where( i => i.IsValid )
+					.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: autoPostBack ) )
+					.ToArray();
 				firstRadioButton = radioButtons.First();
 
 				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
@@ -250,13 +250,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => selectedItemId,
 					() => UniqueID,
 					v => v.ObjectToString( true ),
-					rawValue =>
-					rawValue != null && itemsByStringId.ContainsKey( rawValue )
-						? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
-						: PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
+					rawValue => rawValue != null && itemsByStringId.ContainsKey( rawValue )
+						            ? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
+						            : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
 				action.AddToPageIfNecessary();
 
-				PreRender += delegate { SubmitButton.EnsureImplicitSubmissionAction( this, action, true ); };
+				PreRender += delegate {
+					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, true );
+					if( implicitSubmissionStatements.Any() )
+						this.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
+				};
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
 				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
@@ -266,11 +269,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( itemIdPageModificationValue != null )
 						changeHandler += itemIdPageModificationValue.GetJsModificationStatements( "$( '#{0}' ).val()".FormatWith( selectControl.ClientID ) );
 					foreach( var setup in itemMatchPageModificationSetups ) {
-						changeHandler +=
-							setup.PageModificationValue.GetJsModificationStatements(
-								"[ {0} ].indexOf( $( '#{1}' ).val() ) != -1".FormatWith(
-									StringTools.ConcatenateWithDelimiter( ", ", setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-									selectControl.ClientID ) );
+						changeHandler += setup.PageModificationValue.GetJsModificationStatements(
+							"[ {0} ].indexOf( $( '#{1}' ).val() ) != -1".FormatWith(
+								StringTools.ConcatenateWithDelimiter( ", ", setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
+								selectControl.ClientID ) );
 					}
 					if( autoPostBack )
 						changeHandler += action.GetJsStatements() + " return false";
@@ -302,10 +304,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private Control getOption( string value, ItemIdType id, string label ) {
 			return new System.Web.UI.WebControls.Literal
 				{
-					Text =
-						"<option value=\"" + value + "\"" +
-						( EwlStatics.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
-						label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
+					Text = "<option value=\"" + value + "\"" +
+					       ( EwlStatics.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
+					       label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
 				};
 		}
 
@@ -321,10 +322,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		void DisplayLink.AddJavaScript() {
 			foreach( var displayLink in displayLinks ) {
 				var scripts = from control in displayLink.Item3
-				              select
-					              "setElementDisplay( '" + control.ClientID + "', [ " +
-					              StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) +
-					              " ].indexOf( $( '#" + selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
+				              select "setElementDisplay( '" + control.ClientID + "', [ " +
+				                     StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) +
+				                     " ].indexOf( $( '#" + selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
 				selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
 			}
 		}
@@ -364,7 +364,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Both radioList and formValue will be null if this SelectList is never added to the page.
 			var selectedItemIdInPostBack = radioList != null
 				                               ? radioList.GetSelectedItemIdInPostBack( postBackValues )
-				                               : formValue != null ? formValue.GetValue( postBackValues ) : selectedItemId;
+				                               : formValue != null
+					                               ? formValue.GetValue( postBackValues )
+					                               : selectedItemId;
 
 			if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
 				validator.NoteErrorAndAddMessage( "Please make a selection." );

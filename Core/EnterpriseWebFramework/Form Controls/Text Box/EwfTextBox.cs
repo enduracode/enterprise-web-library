@@ -103,10 +103,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				() => value,
 				() => this.IsOnPage() ? UniqueID : "",
 				v => v,
-				rawValue =>
-				rawValue != null && ( !readOnly || rawValue == formValue.GetDurableValue() )
-					? PostBackValueValidationResult<string>.CreateValid( rawValue )
-					: PostBackValueValidationResult<string>.CreateInvalid() );
+				rawValue => rawValue != null && ( !readOnly || rawValue == formValue.GetDurableValue() )
+					            ? PostBackValueValidationResult<string>.CreateValid( rawValue )
+					            : PostBackValueValidationResult<string>.CreateInvalid() );
 
 			this.action = action ?? FormState.Current.DefaultAction;
 			this.autoPostBack = autoPostBack;
@@ -174,13 +173,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( !isTextarea || autoPostBack || ( autoCompleteService != null && autoCompleteOption != AutoCompleteOption.NoPostBack ) )
 				action.AddToPageIfNecessary();
 			if( !isTextarea )
-				PreRender +=
-					delegate {
-						SubmitButton.EnsureImplicitSubmissionAction(
-							this,
-							action,
-							autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
-					};
+				PreRender += delegate {
+					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements(
+						action,
+						autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
+					if( implicitSubmissionStatements.Any() )
+						NetTools.AddJavaScriptEventScript( this, JsWritingMethods.onkeypress, implicitSubmissionStatements );
+				};
 
 			if( autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) )
 				PreRender += delegate {
@@ -218,8 +217,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				}
 
 				script.Append(
-					@"$( '#" + textBox.ClientID +
-					"' ).autocomplete( {{ {0} }} );".FormatWith(
+					@"$( '#" + textBox.ClientID + "' ).autocomplete( {{ {0} }} );".FormatWith(
 						autocompleteOptions.Select( o => "{0}: {1}".FormatWith( o.Item1, o.Item2 ) ).GetCommaDelimitedStringFromCollection() ) );
 			}
 

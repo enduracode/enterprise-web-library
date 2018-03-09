@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.JavaScriptWriting;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -9,24 +7,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class SubmitButton: PhrasingComponent {
 		/// <summary>
-		/// Ensures that the specified control will trigger the specified action when the enter key is pressed while the control has focus. If you specify the
-		/// submit-button post-back, this method relies on HTML's built-in implicit submission behavior, which will simulate a click on the submit button.
+		/// Returns the JavaScript statements that should be executed on keypress to ensure that a form control will trigger the specified action when the enter key
+		/// is pressed while the control has focus. If you specify the submit-button post-back, this method relies on HTML's built-in implicit submission behavior,
+		/// which will simulate a click on the submit button.
 		/// </summary>
-		/// <param name="control"></param>
 		/// <param name="action">Do not pass null.</param>
 		/// <param name="forceJsHandling"></param>
 		/// <param name="predicate"></param>
-		internal static void EnsureImplicitSubmissionAction( WebControl control, FormAction action, bool forceJsHandling, string predicate = "" ) {
-			var postBackAction = action as PostBackFormAction;
-
+		internal static string GetImplicitSubmissionKeyPressStatements( FormAction action, bool forceJsHandling, string predicate = "" ) {
 			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
 			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
-			// https://html.spec.whatwg.org/multipage/forms.html#implicit-submission. Second, we don't want the implicit submission behavior of form controls to
-			// unpredictably change if a submit button is added or removed.
-			if( postBackAction == null || postBackAction.PostBack != EwfPage.Instance.SubmitButtonPostBack || forceJsHandling )
-				control.AddJavaScriptEventScript(
-					JsWritingMethods.onkeypress,
-					"if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + action.GetJsStatements() + " return false; }" );
+			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don't want the implicit submission behavior of
+			// form controls to unpredictably change if a submit button is added or removed.
+			return action is PostBackFormAction postBackAction && postBackAction.PostBack == EwfPage.Instance.SubmitButtonPostBack && !forceJsHandling
+				       ? ""
+				       : "if( event.which == 13 " + predicate.PrependDelimiter( " && " ) + " ) { " + action.GetJsStatements() + " return false; }";
 		}
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
@@ -53,8 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					return new DisplayableElementData(
 						displaySetup,
-						() =>
-						new DisplayableElementLocalData(
+						() => new DisplayableElementLocalData(
 							"button",
 							attributes: new[] { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) },
 							jsInitStatements: style.GetJsInitStatements( context.Id ) ),

@@ -402,9 +402,12 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ListItemMatchPageModificationSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\FragmentMarker.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Ethereal\EtherealIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Flow\FlowIdContainer.cs" />
+    <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\CustomPhrasingComponent.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingComponent.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\GenericPhrasingContainer.cs" />
