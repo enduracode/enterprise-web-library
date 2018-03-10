@@ -255,13 +255,6 @@
     <Compile Include="TestPages\DateAndTimePickers.aspx.designer.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\EwfTextBoxDemo.aspx.cs">
-      <DependentUpon>EwfTextBoxDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\EwfTextBoxDemo.aspx.designer.cs">
-      <DependentUpon>EwfTextBoxDemo.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\HtmlEditing.aspx.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -462,6 +455,13 @@
     <Compile Include="TestPages\TestService.aspx.designer.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\TextControlDemo.aspx.cs">
+      <DependentUpon>TextControlDemo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\TextControlDemo.aspx.designer.cs">
+      <DependentUpon>TextControlDemo.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="CreateSystem.aspx" />
@@ -569,7 +569,6 @@
     <Content Include="TestPages\EntitySetup.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestPages\EwfTextBoxDemo.aspx" />
     <Content Include="TestPages\HtmlEditing.aspx" />
     <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
@@ -602,6 +601,7 @@
     <Content Include="TestPages\SubFolder\General.aspx" />
     <Content Include="TestPages\SubFolder\New.aspx" />
     <Content Include="TestPages\TestService.aspx" />
+    <Content Include="TestPages\TextControlDemo.aspx" />
     <Content Include="Web.config" />
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />

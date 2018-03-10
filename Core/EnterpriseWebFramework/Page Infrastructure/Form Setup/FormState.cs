@@ -10,7 +10,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Func<DataModification, PostBack> postBackSelector;
 
 		internal static void Init(
-			Func<FormState> formStateGetter, Action<IReadOnlyCollection<DataModification>> dataModificationAsserter, Func<DataModification, PostBack> postBackSelector ) {
+			Func<FormState> formStateGetter, Action<IReadOnlyCollection<DataModification>> dataModificationAsserter,
+			Func<DataModification, PostBack> postBackSelector ) {
 			stateGetter = formStateGetter;
 			FormState.dataModificationAsserter = dataModificationAsserter;
 			FormState.postBackSelector = postBackSelector;
@@ -37,12 +38,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="method"></param>
 		/// <param name="defaultActionOverride">Pass null to use the post-back corresponding to the first of the data modifications.</param>
 		public static void ExecuteWithDataModificationsAndDefaultAction(
-			IReadOnlyCollection<DataModification> dataModifications, Action method, NonPostBackFormAction defaultActionOverride = null ) {
-			if( dataModifications.Count == 0 )
+			IEnumerable<DataModification> dataModifications, Action method, NonPostBackFormAction defaultActionOverride = null ) {
+			IReadOnlyCollection<DataModification> dmCollection = dataModifications.ToImmutableArray();
+			if( dmCollection.Count == 0 )
 				throw new ApplicationException( "There must be at least one data modification." );
-			dataModificationAsserter( dataModifications );
+			dataModificationAsserter( dmCollection );
 
-			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dataModifications ) );
+			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
 			try {
 				method();
 			}
@@ -59,12 +61,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="method"></param>
 		/// <param name="defaultActionOverride">Pass null to use the post-back corresponding to the first of the data modifications.</param>
 		public static T ExecuteWithDataModificationsAndDefaultAction<T>(
-			IReadOnlyCollection<DataModification> dataModifications, Func<T> method, NonPostBackFormAction defaultActionOverride = null ) {
-			if( dataModifications.Count == 0 )
+			IEnumerable<DataModification> dataModifications, Func<T> method, NonPostBackFormAction defaultActionOverride = null ) {
+			IReadOnlyCollection<DataModification> dmCollection = dataModifications.ToImmutableArray();
+			if( dmCollection.Count == 0 )
 				throw new ApplicationException( "There must be at least one data modification." );
-			dataModificationAsserter( dataModifications );
+			dataModificationAsserter( dmCollection );
 
-			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dataModifications ) );
+			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
 			try {
 				return method();
 			}
