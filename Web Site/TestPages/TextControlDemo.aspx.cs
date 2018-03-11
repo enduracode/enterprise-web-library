@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -18,7 +17,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					PostBack.CreateFull().ToCollection(),
 					() => {
 						var table = FormItemBlock.CreateFormItemTable( formItems: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ) );
-						table.AddFormItems( FormItem.Create( "Masked Input", new EwfTextBox( "This should not appear in the markup!", masksCharacters: true ) ) );
 						table.IncludeButtonWithThisText = "Submit";
 						return table;
 					} ),
@@ -52,7 +50,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							"Multiline with separate value-changed action",
 							TextControlSetup.Create( numberOfRows: 3, valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 				},
-				get( "Multiline read-only", TextControlSetup.CreateReadOnly( numberOfRows: 3 ) )
+				get( "Multiline read-only", TextControlSetup.CreateReadOnly( numberOfRows: 3 ) ), get( "Obscured", TextControlSetup.CreateObscured() ),
+				get( "Obscured with placeholder", TextControlSetup.CreateObscured( placeholder: "Type here" ) ),
+				get( "Obscured auto-fill", TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) ), id => {
+					var pb = PostBack.CreateIntermediate( null, id: id );
+					return FormState.ExecuteWithDataModificationsAndDefaultAction(
+						FormState.Current.DataModifications.Append( pb ),
+						() => get( "Obscured with separate value-changed action", TextControlSetup.CreateObscured( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
+				}
 			};
 
 		private IReadOnlyCollection<Func<string, FormItem>> getIndependentControls() => new Func<string, FormItem>[]

@@ -116,10 +116,46 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				validationErrorNotifier );
 		}
 
+		/// <summary>
+		/// Creates a setup object for an obscured (i.e. password) text control.
+		/// </summary>
+		/// <param name="displaySetup"></param>
+		/// <param name="classes">The classes on the control.</param>
+		/// <param name="placeholder">The hint word or phrase that will appear when the control has an empty value. Do not pass null.</param>
+		/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
+		/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
+		/// (see https://stackoverflow.com/a/23234498/35349 for an explanation of why this could be ignored). Do not pass null.</param>
+		/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action.</param>
+		/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
+		/// <param name="pageModificationValue"></param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
+		/// <returns></returns>
+		public static TextControlSetup CreateObscured(
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "", FormAction action = null,
+			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
+			Action validationErrorNotifier = null ) {
+			return new TextControlSetup(
+				displaySetup,
+				null,
+				false,
+				classes,
+				placeholder,
+				autoFillTokens,
+				null,
+				null,
+				action,
+				null,
+				valueChangedAction,
+				pageModificationValue,
+				validationPredicate,
+				validationErrorNotifier );
+		}
+
 		internal readonly Func<string, bool, int?, Action<string, Validator>, (PhrasingComponent, EwfValidation)> ComponentAndValidationGetter;
 
 		private TextControlSetup(
-			DisplaySetup displaySetup, int numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
+			DisplaySetup displaySetup, int? numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
 			ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
 			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			action = action ?? FormState.Current.DefaultAction;
@@ -141,7 +177,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							id.AddId( context.Id );
 
 							if( !isReadOnly ) {
-								if( numberOfRows == 1 || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
+								if( !numberOfRows.HasValue || numberOfRows.Value == 1 || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
 									action.AddToPageIfNecessary();
 								valueChangedAction?.AddToPageIfNecessary();
 							}
@@ -150,14 +186,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								displaySetup,
 								() => {
 									var attributes = new List<Tuple<string, string>>();
-									if( numberOfRows == 1 )
+									if( !numberOfRows.HasValue )
+										attributes.Add( Tuple.Create( "type", "password" ) );
+									else if( numberOfRows.Value == 1 )
 										attributes.Add( Tuple.Create( "type", "text" ) );
 									else
 										attributes.Add( Tuple.Create( "rows", numberOfRows.ToString() ) );
 									if( !isReadOnly )
 										attributes.Add( Tuple.Create( "name", context.Id ) );
-									if( numberOfRows == 1 )
-										attributes.Add( Tuple.Create( "value", pageModificationValue.Value ) );
+									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
+										attributes.Add( Tuple.Create( "value", numberOfRows.HasValue ? pageModificationValue.Value : "" ) );
 									if( isReadOnly )
 										attributes.Add( Tuple.Create( "disabled", "disabled" ) );
 									if( !isReadOnly && maxLength.HasValue )
@@ -193,7 +231,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									var jsInitStatements = StringTools.ConcatenateWithDelimiter(
 										" ",
-										numberOfRows == 1 && !isReadOnly
+										( !numberOfRows.HasValue || numberOfRows.Value == 1 ) && !isReadOnly
 											? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, valueChangedAction != null )
 												.Surround( "$( '#{0}' ).keypress( function() {{ ".FormatWith( context.Id ), " } );" )
 											: "",
@@ -208,13 +246,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										autoCompleteStatements );
 
 									return new DisplayableElementLocalData(
-										numberOfRows == 1 ? "input" : "textarea",
+										!numberOfRows.HasValue || numberOfRows.Value == 1 ? "input" : "textarea",
 										attributes: attributes,
 										includeIdAttribute: jsInitStatements.Any(),
 										jsInitStatements: jsInitStatements );
 								},
 								classes: classes,
-								children: numberOfRows == 1 ? null : new TextNode( () => Controls.EwfTextBox.GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
+								children: !numberOfRows.HasValue || numberOfRows.Value == 1
+									          ? null
+									          : new TextNode( () => Controls.EwfTextBox.GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 						},
 						formValue: formValue ).ToCollection() ), formValue.CreateValidation(
 					( postBackValue, validator ) => {
