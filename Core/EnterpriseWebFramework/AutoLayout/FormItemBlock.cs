@@ -106,10 +106,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						formItems.Add(
 							FormItem.Create(
 								"",
-								new PostBackButton( new ButtonActionControlStyle( IncludeButtonWithThisText ), postBack: EwfPage.Instance.DataUpdatePostBack )
-									{
-										Width = Unit.Percentage( 50 )
-									},
+								new PostBackButton( new ButtonActionControlStyle( IncludeButtonWithThisText ) ) { Width = Unit.Percentage( 50 ) },
 								setup: new FormItemSetup( cellSpan: defaultFormItemCellSpan, textAlignment: TextAlignment.Right ) ) );
 					}
 					Controls.Add( useFormItemListMode ? getTableForFormItemList() : getTableForFormItemTable() );
