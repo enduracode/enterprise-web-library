@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() => new[]
 			{
-				get( "Standard", null ), get( "Placeholder", TextControlSetup.Create( placeholder: "Type here" ) ),
+				get( "Standard", null ), get( "Max length 25", null, maxLength: 25 ), get( "Placeholder", TextControlSetup.Create( placeholder: "Type here" ) ),
 				get( "Name auto-fill", TextControlSetup.Create( autoFillTokens: "name" ) ),
 				get( "Auto-complete", TextControlSetup.CreateAutoComplete( TestService.GetInfo() ) ),
 				get( "Spell-checking disabled", TextControlSetup.Create( checksSpellingAndGrammar: false ) ),
@@ -38,6 +38,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						() => get( "Separate value-changed action", TextControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 				},
 				get( "Read-only", TextControlSetup.CreateReadOnly() ), get( "Multiline", TextControlSetup.Create( numberOfRows: 3 ) ),
+				get( "Multiline, max length 25", TextControlSetup.Create( numberOfRows: 3 ), maxLength: 25 ),
 				get( "Multiline with placeholder", TextControlSetup.Create( numberOfRows: 3, placeholder: "Type longer text here" ) ),
 				get( "Multiline auto-fill", TextControlSetup.Create( numberOfRows: 3, autoFillTokens: "street-address" ) ),
 				get( "Multiline auto-complete", TextControlSetup.CreateAutoComplete( TestService.GetInfo(), numberOfRows: 3 ) ),
@@ -51,6 +52,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							TextControlSetup.Create( numberOfRows: 3, valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 				},
 				get( "Multiline read-only", TextControlSetup.CreateReadOnly( numberOfRows: 3 ) ), get( "Obscured", TextControlSetup.CreateObscured() ),
+				get( "Obscured, max length 25", TextControlSetup.CreateObscured(), maxLength: 25 ),
 				get( "Obscured with placeholder", TextControlSetup.CreateObscured( placeholder: "Type here" ) ),
 				get( "Obscured auto-fill", TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );

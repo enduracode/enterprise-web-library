@@ -132,6 +132,17 @@ img.ewfAutoSizer {
 	width: 100%;
 }
 
+/* text control */
+ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
+	font-size: inherit;
+	font-family: inherit;
+	box-sizing: border-box;
+	max-width: 100%;
+	padding: .2em;
+}
+ewfMultilineTextControlAllStates {
+	width: 35em;
+}
 /* Text boxes. If we change the border or padding below, we also need to change the Width property on EwfTextBox. */
 div.textBoxWrapper {
 	border-color: #8E8E8E #B8B8B8 #B8B8B8 #8E8E8E;

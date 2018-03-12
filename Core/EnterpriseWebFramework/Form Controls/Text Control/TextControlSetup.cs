@@ -3,12 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a text control.
 	/// </summary>
 	public class TextControlSetup {
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
+				return new[]
+					{
+						new CssElement( "SingleLineTextControlAllStates", getSingleLineSelectors( new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" } ).ToArray() ),
+						new CssElement( "SingleLineTextControlNormalState", getSingleLineSelectors( ":enabled:not(:focus)".ToCollection() ).ToArray() ),
+						new CssElement( "SingleLineTextControlFocusState", getSingleLineSelectors( ":enabled:focus".ToCollection() ).ToArray() ),
+						new CssElement( "SingleLineTextControlReadOnlyState", getSingleLineSelectors( ":disabled".ToCollection() ).ToArray() ),
+						new CssElement(
+							"MultilineTextControlAllStates",
+							new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" }.Select( getMultilineSelector ).ToArray() ),
+						new CssElement( "MultilineTextControlNormalState", getMultilineSelector( ":enabled:not(:focus)" ) ),
+						new CssElement( "MultilineTextControlFocusState", getMultilineSelector( ":enabled:focus" ) ),
+						new CssElement( "MultilineTextControlReadOnlyState", getMultilineSelector( ":disabled" ) )
+					};
+			}
+
+			private IEnumerable<string> getSingleLineSelectors( IEnumerable<string> suffixes ) =>
+				from control in new[] { "input[type=\"text\"]", "input[type=\"password\"]" } from suffix in suffixes select control + suffix;
+
+			private string getMultilineSelector( string suffix ) => "textarea" + suffix;
+		}
+
 		/// <summary>
 		/// Creates a setup object for a standard text control.
 		/// </summary>
@@ -186,14 +211,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								displaySetup,
 								() => {
 									var attributes = new List<Tuple<string, string>>();
+
 									if( !numberOfRows.HasValue )
 										attributes.Add( Tuple.Create( "type", "password" ) );
 									else if( numberOfRows.Value == 1 )
 										attributes.Add( Tuple.Create( "type", "text" ) );
-									else
-										attributes.Add( Tuple.Create( "rows", numberOfRows.ToString() ) );
+
 									if( !isReadOnly )
 										attributes.Add( Tuple.Create( "name", context.Id ) );
+
+									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
+										attributes.Add( Tuple.Create( "size", ( maxLength ?? 1000 ).ToString() ) );
+									else
+										attributes.Add( Tuple.Create( "rows", numberOfRows.ToString() ) );
+
 									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
 										attributes.Add( Tuple.Create( "value", numberOfRows.HasValue ? pageModificationValue.Value : "" ) );
 									if( isReadOnly )
@@ -208,6 +239,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										attributes.Add( Tuple.Create( "inputmode", "text" ) );
 									if( checksSpellingAndGrammar.HasValue )
 										attributes.Add( Tuple.Create( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
+
 
 									var autoCompleteStatements = "";
 									if( autoCompleteResource != null ) {
