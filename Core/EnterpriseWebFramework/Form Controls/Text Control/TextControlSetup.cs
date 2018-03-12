@@ -265,7 +265,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										" ",
 										( !numberOfRows.HasValue || numberOfRows.Value == 1 ) && !isReadOnly
 											? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, valueChangedAction != null )
-												.Surround( "$( '#{0}' ).keypress( function() {{ ".FormatWith( context.Id ), " } );" )
+												.Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( context.Id ), " } );" )
 											: "",
 										valueChangedAction != null
 											?

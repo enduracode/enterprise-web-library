@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    : radioButtonFormValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) == checkBox )
 				checkBoxElement.Attributes.Add( "checked", "checked" );
 
-			var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false );
+			var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false, legacy: true );
 			if( implicitSubmissionStatements.Any() )
 				checkBoxElement.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
 

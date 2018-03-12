@@ -256,7 +256,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				action.AddToPageIfNecessary();
 
 				PreRender += delegate {
-					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, true );
+					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, true, legacy: true );
 					if( implicitSubmissionStatements.Any() )
 						this.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
 				};

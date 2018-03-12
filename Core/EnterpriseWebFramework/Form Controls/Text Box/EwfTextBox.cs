@@ -176,7 +176,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				PreRender += delegate {
 					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements(
 						action,
-						autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ) );
+						autoPostBack || ( autoCompleteService != null && autoCompleteOption == AutoCompleteOption.PostBackOnTextChangeAndItemSelect ),
+						legacy: true );
 					if( implicitSubmissionStatements.Any() )
 						NetTools.AddJavaScriptEventScript( this, JsWritingMethods.onkeypress, implicitSubmissionStatements );
 				};
