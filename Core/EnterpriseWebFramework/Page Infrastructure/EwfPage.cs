@@ -835,95 +835,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages => StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages );
 
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		public IEnumerable<Control> GetDescendants( Control control, Func<Control, bool> predicate = null ) {
-			return from i in getDescendants( control, predicate ?? ( i => true ) ) select i.Item1;
-		}
-
-		private IEnumerable<Tuple<Control, Func<string>>> getDescendants( Control control, Func<Control, bool> predicate ) {
-			var normalChildren = from i in control.Controls.Cast<Control>()
-			                     where i != etherealPlace
-			                     let jsControl = i as ControlWithJsInitLogic
-			                     select Tuple.Create( i, jsControl != null ? new Func<string>( jsControl.GetJsInitStatements ) : null );
-
-			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
-				etherealControls = new List<EtherealControl>();
-			var etherealChildren = etherealControls.Select( i => Tuple.Create( (Control)i.Control, new Func<string>( i.GetJsInitStatements ) ) );
-
-			var descendants = new List<Tuple<Control, Func<string>>>();
-			foreach( var child in normalChildren.Concat( etherealChildren ).Where( i => predicate( i.Item1 ) ) ) {
-				descendants.Add( child );
-				descendants.AddRange( getDescendants( child.Item1, predicate ) );
-			}
-			return descendants;
-		}
-
-		private void addJavaScriptStartUpLogic( ElementNode focusedElement ) {
-			focusedElement.SetIsFocused();
-			var controlInitStatements = getDescendants( this, i => true )
-				.Where( i => i.Item2 != null )
-				.Select( i => i.Item2() )
-				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
-
-			MaintainScrollPositionOnPostBack = true;
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
-			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
-			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
-				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
-
-			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
-			var scrollStatement = "";
-			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
-				scrollStatement = "window.scrollTo(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
-
-			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
-			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideNavigationUrl;
-			bool clientSideNavigationInNewWindow;
-			int? clientSideNavigationDelay;
-			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
-				out clientSideNavigationUrl,
-				out clientSideNavigationInNewWindow,
-				out clientSideNavigationDelay );
-			var clientSideNavigationStatements = "";
-			if( clientSideNavigationUrl.Any() ) {
-				var url = this.GetClientUrl( clientSideNavigationUrl );
-				if( clientSideNavigationInNewWindow )
-					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
-				else
-					clientSideNavigationStatements = "location.replace( '" + url + "' );";
-				if( clientSideNavigationDelay.HasValue )
-					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
-			}
-
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"jQueryDocumentReadyBlock",
-				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
-					" ",
-					"OnDocumentReady();",
-					controlInitStatements,
-					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
-						.PrependDelimiter( "window.onload = function() { " )
-						.AppendDelimiter( " };" ) ) + " } );",
-				true );
-		}
-
-		/// <summary>
-		/// The desired scroll position of the browser when this response is received.
-		/// </summary>
-		protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
-
-		/// <summary>
-		/// Gets the function call that should be executed when the jQuery document ready event is fired.
-		/// </summary>
-		protected virtual string javaScriptDocumentReadyFunctionCall => "";
-
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
 				method();
@@ -1123,6 +1034,95 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return autofocusInfo;
 		}
+
+		private void addJavaScriptStartUpLogic( ElementNode focusedElement ) {
+			focusedElement.SetIsFocused();
+			var controlInitStatements = getDescendants( this, i => true )
+				.Where( i => i.Item2 != null )
+				.Select( i => i.Item2() )
+				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
+
+			MaintainScrollPositionOnPostBack = true;
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
+			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
+			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
+				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
+
+			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
+			var scrollStatement = "";
+			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
+				scrollStatement = "window.scrollTo(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
+
+			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
+			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
+			string clientSideNavigationUrl;
+			bool clientSideNavigationInNewWindow;
+			int? clientSideNavigationDelay;
+			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+				out clientSideNavigationUrl,
+				out clientSideNavigationInNewWindow,
+				out clientSideNavigationDelay );
+			var clientSideNavigationStatements = "";
+			if( clientSideNavigationUrl.Any() ) {
+				var url = this.GetClientUrl( clientSideNavigationUrl );
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				if( clientSideNavigationDelay.HasValue )
+					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
+			}
+
+			ClientScript.RegisterClientScriptBlock(
+				GetType(),
+				"jQueryDocumentReadyBlock",
+				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
+					" ",
+					"OnDocumentReady();",
+					controlInitStatements,
+					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
+						.PrependDelimiter( "window.onload = function() { " )
+						.AppendDelimiter( " };" ) ) + " } );",
+				true );
+		}
+
+		/// <summary>
+		/// Standard Library use only.
+		/// </summary>
+		public IEnumerable<Control> GetDescendants( Control control, Func<Control, bool> predicate = null ) {
+			return from i in getDescendants( control, predicate ?? ( i => true ) ) select i.Item1;
+		}
+
+		private IEnumerable<Tuple<Control, Func<string>>> getDescendants( Control control, Func<Control, bool> predicate ) {
+			var normalChildren = from i in control.Controls.Cast<Control>()
+			                     where i != etherealPlace
+			                     let jsControl = i as ControlWithJsInitLogic
+			                     select Tuple.Create( i, jsControl != null ? new Func<string>( jsControl.GetJsInitStatements ) : null );
+
+			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
+				etherealControls = new List<EtherealControl>();
+			var etherealChildren = etherealControls.Select( i => Tuple.Create( (Control)i.Control, new Func<string>( i.GetJsInitStatements ) ) );
+
+			var descendants = new List<Tuple<Control, Func<string>>>();
+			foreach( var child in normalChildren.Concat( etherealChildren ).Where( i => predicate( i.Item1 ) ) ) {
+				descendants.Add( child );
+				descendants.AddRange( getDescendants( child.Item1, predicate ) );
+			}
+			return descendants;
+		}
+
+		/// <summary>
+		/// The desired scroll position of the browser when this response is received.
+		/// </summary>
+		protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
+
+		/// <summary>
+		/// Gets the function call that should be executed when the jQuery document ready event is fired.
+		/// </summary>
+		protected virtual string javaScriptDocumentReadyFunctionCall => "";
 
 		/// <summary>
 		/// Saves view state.
