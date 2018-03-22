@@ -410,6 +410,7 @@
     <Compile Include="EnterpriseWebFramework\General Content Models\Ethereal\EtherealIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Flow\FlowIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\CustomPhrasingComponent.cs" />
+    <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingComponent.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Phrasing\PhrasingIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\GenericPhrasingContainer.cs" />
