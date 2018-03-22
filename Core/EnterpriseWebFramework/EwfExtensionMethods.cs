@@ -76,13 +76,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private static IReadOnlyCollection<Control> getControls( FlowComponentOrNode component ) {
-			var control = component as Control;
-			if( control != null )
+			if( component is Control control )
 				return control.ToCollection();
 
-			var flowComponent = component as FlowComponent;
-			if( flowComponent != null )
-				return flowComponent.GetChildren().GetControls().ToImmutableArray();
+			if( component is FlowComponent flowComponent ) {
+				var controls = flowComponent.GetChildren().GetControls().ToImmutableArray();
+				if( component is FlowAutofocusRegion autofocusRegion )
+					foreach( var i in controls ) {
+						if( !EwfPage.Instance.AutofocusConditionsByControl.TryGetValue( i, out var conditions ) ) {
+							conditions = new List<AutofocusCondition>();
+							EwfPage.Instance.AutofocusConditionsByControl.Add( i, conditions );
+						}
+						conditions.Add( autofocusRegion.Condition );
+					}
+				return controls;
+			}
 
 			var identifiedComponent = (IdentifiedFlowComponent)component;
 			var componentData = identifiedComponent.ComponentDataGetter();
@@ -135,15 +143,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private static IReadOnlyCollection<Control> addEtherealControls( Control parent, EtherealComponentOrElement component ) {
-			var element = component as ElementNode;
-			if( element != null ) {
+			if( component is ElementNode element ) {
 				EwfPage.Instance.AddEtherealControl( parent, element );
 				return ( (EtherealControl)element ).Control.ToCollection();
 			}
 
-			var etherealComponent = component as EtherealComponent;
-			if( etherealComponent != null )
-				return etherealComponent.GetChildren().AddEtherealControls( parent );
+			if( component is EtherealComponent etherealComponent ) {
+				var controls = etherealComponent.GetChildren().AddEtherealControls( parent );
+				if( component is EtherealAutofocusRegion autofocusRegion )
+					foreach( var i in controls ) {
+						if( !EwfPage.Instance.AutofocusConditionsByControl.TryGetValue( i, out var conditions ) ) {
+							conditions = new List<AutofocusCondition>();
+							EwfPage.Instance.AutofocusConditionsByControl.Add( i, conditions );
+						}
+						conditions.Add( autofocusRegion.Condition );
+					}
+				return controls;
+			}
 
 			var identifiedComponent = (IdentifiedEtherealComponent)component;
 			var componentData = identifiedComponent.ComponentDataGetter();

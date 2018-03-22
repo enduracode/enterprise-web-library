@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using Humanizer;
@@ -30,23 +29,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets whether this display setup uses the JavaScript statements that are added.
 		/// </summary>
-		public bool UsesJsStatements { get { return jsShowAndHideStatementAdders != null; } }
+		public bool UsesJsStatements => jsShowAndHideStatementAdders != null;
 
 		/// <summary>
 		/// Adds the JavaScript statements that show the components.
 		/// </summary>
-		public void AddJsShowStatements( string statements ) {
-			if( jsShowAndHideStatementAdders != null )
-				jsShowAndHideStatementAdders.Item1( statements );
-		}
+		public void AddJsShowStatements( string statements ) => jsShowAndHideStatementAdders?.Item1( statements );
 
 		/// <summary>
 		/// Adds the JavaScript statements that hide the components.
 		/// </summary>
-		public void AddJsHideStatements( string statements ) {
-			if( jsShowAndHideStatementAdders != null )
-				jsShowAndHideStatementAdders.Item2( statements );
-		}
+		public void AddJsHideStatements( string statements ) => jsShowAndHideStatementAdders?.Item2( statements );
 
 		/// <summary>
 		/// Gets whether components are displayed. Not available until after the page tree has been built.
@@ -79,82 +72,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a display setup object for display that depends on this page-modification value.
+		/// Creates a display setup object for display that depends on this page-modification-value condition.
 		/// </summary>
-		public static DisplaySetup ToDisplaySetup( this PageModificationValue<bool> pageModificationValue, bool componentsDisplayedWhenValueSet = true ) {
-			return
-				new DisplaySetup(
-					Tuple.Create<Action<string>, Action<string>>(
-						statements =>
-						pageModificationValue.AddJsModificationStatement(
-							valueExpression =>
-							"if( {0} )".FormatWith( componentsDisplayedWhenValueSet ? valueExpression : "!( {0} )".FormatWith( valueExpression ) ) + " { " + statements + " }" ),
-						statements =>
-						pageModificationValue.AddJsModificationStatement(
-							valueExpression =>
-							"if( {0} )".FormatWith( componentsDisplayedWhenValueSet ? "!( {0} )".FormatWith( valueExpression ) : valueExpression ) + " { " + statements + " }" ) ),
-					() => pageModificationValue.Value ^ !componentsDisplayedWhenValueSet );
-		}
-
-		/// <summary>
-		/// Creates a display setup object for display that depends on this page-modification value.
-		/// </summary>
-		public static DisplaySetup ToDisplaySetup<T>(
-			this PageModificationValue<T> pageModificationValue, IEnumerable<T> values, bool componentsDisplayedOnMatch = true ) {
-			values = values.ToImmutableArray();
-			return
-				new DisplaySetup(
-					Tuple.Create<Action<string>, Action<string>>(
-						statements =>
-						pageModificationValue.AddJsModificationStatement(
-							valueExpression =>
-							"if( [ {0} ].indexOf( {1} ) {2} -1 )".FormatWith(
-								StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-								valueExpression,
-								componentsDisplayedOnMatch ? "!=" : "==" ) + " { " + statements + " }" ),
-						statements =>
-						pageModificationValue.AddJsModificationStatement(
-							valueExpression =>
-							"if( [ {0} ].indexOf( {1} ) {2} -1 )".FormatWith(
-								StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-								valueExpression,
-								componentsDisplayedOnMatch ? "==" : "!=" ) + " { " + statements + " }" ) ),
-					() => values.Contains( pageModificationValue.Value ) ^ !componentsDisplayedOnMatch );
+		public static DisplaySetup ToDisplaySetup( this PageModificationValueCondition pageModificationValueCondition ) {
+			return new DisplaySetup(
+				Tuple.Create<Action<string>, Action<string>>(
+					statements => pageModificationValueCondition.AddJsModificationStatement( expression => "if( {0} )".FormatWith( expression ) + " { " + statements + " }" ),
+					statements => pageModificationValueCondition.AddJsModificationStatement(
+						expression => "if( !( {0} ) )".FormatWith( expression ) + " { " + statements + " }" ) ),
+				() => pageModificationValueCondition.IsTrue );
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static void AddDisplayLink(
-			this PageModificationValue<bool> pageModificationValue, IEnumerable<WebControl> controls, bool controlsDisplayedWhenValueSet = true ) {
+		public static void AddDisplayLink( this PageModificationValueCondition pageModificationValueCondition, IEnumerable<WebControl> controls ) {
 			controls = controls.ToImmutableArray();
 
-			foreach( var control in controls ) {
-				pageModificationValue.AddJsModificationStatement(
-					valueExpression =>
-					"setElementDisplay( '{0}', {1} );".FormatWith(
-						control.ClientID,
-						controlsDisplayedWhenValueSet ? valueExpression : "!( {0} )".FormatWith( valueExpression ) ) );
-			}
+			foreach( var control in controls )
+				pageModificationValueCondition.AddJsModificationStatement( expression => "setElementDisplay( '{0}', {1} );".FormatWith( control.ClientID, expression ) );
 
-			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => pageModificationValue.Value ^ !controlsDisplayedWhenValueSet ) );
-		}
-
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static void AddDisplayLink<T>(
-			this PageModificationValue<T> pageModificationValue, IEnumerable<T> values, IEnumerable<WebControl> controls, bool controlsDisplayedOnMatch = true ) {
-			values = values.ToImmutableArray();
-			controls = controls.ToImmutableArray();
-
-			foreach( var control in controls ) {
-				pageModificationValue.AddJsModificationStatement(
-					valueExpression =>
-					"setElementDisplay( '{0}', [ {1} ].indexOf( {2} ) {3} -1 );".FormatWith(
-						control.ClientID,
-						StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-						valueExpression,
-						controlsDisplayedOnMatch ? "!=" : "==" ) );
-			}
-
-			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => values.Contains( pageModificationValue.Value ) ^ !controlsDisplayedOnMatch ) );
+			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => pageModificationValueCondition.IsTrue ) );
 		}
 	}
 }

@@ -97,6 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
+		internal readonly Dictionary<Control, List<AutofocusCondition>> AutofocusConditionsByControl = new Dictionary<Control, List<AutofocusCondition>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
@@ -620,9 +621,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var displayLink in displayLinks )
 				displayLink.AddJavaScript();
 
-			// This must be after LoadData is called on all controls since certain logic, e.g. setting the focused control, can depend on the results of LoadData.
-			addJavaScriptStartUpLogic();
-
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
 		}
@@ -736,8 +734,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
 				loadDataForControlAndChildren( child );
 
-			List<EtherealControl> etherealControls;
-			if( !etherealControlsByControl.TryGetValue( control, out etherealControls ) )
+			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
 				etherealControls = new List<EtherealControl>();
 			if( etherealControls.Any() ) {
 				var np = new NamingPlaceholder(
@@ -775,8 +772,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public virtual bool IsAutoDataUpdater => false;
 
 		internal void AddEtherealControl( Control parent, EtherealControl etherealControl ) {
-			List<EtherealControl> etherealControls;
-			if( !etherealControlsByControl.TryGetValue( parent, out etherealControls ) ) {
+			if( !etherealControlsByControl.TryGetValue( parent, out var etherealControls ) ) {
 				etherealControls = new List<EtherealControl>();
 				etherealControlsByControl.Add( parent, etherealControls );
 			}
@@ -852,8 +848,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			                     let jsControl = i as ControlWithJsInitLogic
 			                     select Tuple.Create( i, jsControl != null ? new Func<string>( jsControl.GetJsInitStatements ) : null );
 
-			List<EtherealControl> etherealControls;
-			if( !etherealControlsByControl.TryGetValue( control, out etherealControls ) )
+			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
 				etherealControls = new List<EtherealControl>();
 			var etherealChildren = etherealControls.Select( i => Tuple.Create( (Control)i.Control, new Func<string>( i.GetJsInitStatements ) ) );
 
@@ -865,7 +860,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return descendants;
 		}
 
-		private void addJavaScriptStartUpLogic() {
+		private void addJavaScriptStartUpLogic( ElementNode focusedElement ) {
+			focusedElement.SetIsFocused();
 			var controlInitStatements = getDescendants( this, i => true )
 				.Where( i => i.Item2 != null )
 				.Select( i => i.Item2() )
@@ -916,8 +912,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.PrependDelimiter( "window.onload = function() { " )
 						.AppendDelimiter( " };" ) ) + " } );",
 				true );
-
-			setFocus();
 		}
 
 		/// <summary>
@@ -929,34 +923,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired.
 		/// </summary>
 		protected virtual string javaScriptDocumentReadyFunctionCall => "";
-
-		private void setFocus() {
-			// A SetFocus call takes precedence over a control specified via the controlWithInitialFocus property.
-			var controlWithInitialFocusId = AppRequestState.Instance.EwfPageRequestState.ControlWithInitialFocusId;
-
-			// If there was no control specified with SetFocus, default to showing the control with initial focus.
-			if( controlWithInitialFocusId == null ) {
-				var cachedControlWithInitialFocus = controlWithInitialFocus;
-				if( cachedControlWithInitialFocus != null )
-					controlWithInitialFocusId = cachedControlWithInitialFocus.UniqueID;
-			}
-
-			if( controlWithInitialFocusId != null ) {
-				// We use FindControl because it will actually blow up if the control can't be found. Using the string overload of SetFocus, on the other hand, will
-				// silently do nothing.
-				var control = FindControl( controlWithInitialFocusId );
-
-				if( control is ControlWithCustomFocusLogic )
-					( control as ControlWithCustomFocusLogic ).SetFocus();
-				else
-					base.SetFocus( control );
-			}
-		}
-
-		/// <summary>
-		/// The control that receives focus when the page is loaded by the browser.
-		/// </summary>
-		protected virtual Control controlWithInitialFocus { get { return GetDescendants( contentContainer ).FirstOrDefault( i => i is FormValueControl ); } }
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -1009,15 +975,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
 				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
 			}
-		}
-
-		/// <summary>
-		/// Sets the focus to the specified control. Call this only during event handlers, and use the controlWithInitialFocus property instead if you wish to set
-		/// the focus to the same control on all requests. Do not call this during LoadData; it uses the UniqueID of the specified control, which may not be defined
-		/// in LoadData if the control hasn't been added to the page.
-		/// </summary>
-		public new void SetFocus( Control control ) {
-			AppRequestState.Instance.EwfPageRequestState.ControlWithInitialFocusId = control.UniqueID;
 		}
 
 		private Tuple<string, IEnumerable<FormValue>> getStaticRegionContents( IEnumerable<Control> updateRegionControls ) {
@@ -1127,8 +1084,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
-			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+			var autofocusInfo = getAutofocusInfo( this, false );
+			if( autofocusInfo.activeRegionsExist && autofocusInfo.focusedElement == null )
+				throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
+
+			addJavaScriptStartUpLogic( autofocusInfo.focusedElement );
 
 
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
@@ -1137,6 +1097,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
 			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
+
+
+			StandardLibrarySessionState.Instance.StatusMessages.Clear();
+			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+		}
+
+		private ( bool activeRegionsExist, ElementNode focusedElement ) getAutofocusInfo( Control control, bool inActiveRegion ) {
+			if( !inActiveRegion && AutofocusConditionsByControl.TryGetValue( control, out var conditions ) )
+				inActiveRegion = conditions.Any( i => i.IsTrue( AppRequestState.Instance.EwfPageRequestState.FocusKey ) );
+
+			if( inActiveRegion && control is ElementNode element && element.IsFocusable )
+				return ( true, element );
+
+			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
+				etherealControls = new List<EtherealControl>();
+			var autofocusInfo = ( activeRegionsExist: inActiveRegion, focusedElement: (ElementNode)null );
+			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ).Concat( from i in etherealControls select i.Control ) ) {
+				var childInfo = getAutofocusInfo( child, inActiveRegion );
+				autofocusInfo.activeRegionsExist = autofocusInfo.activeRegionsExist || childInfo.activeRegionsExist;
+				autofocusInfo.focusedElement = childInfo.focusedElement;
+				if( autofocusInfo.focusedElement != null )
+					break;
+			}
+
+			return autofocusInfo;
 		}
 
 		/// <summary>

@@ -4,14 +4,16 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal sealed class ElementNode: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic,
-		EtherealControl {
+	internal sealed class ElementNode: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl,
+		ControlWithJsInitLogic, EtherealControl {
 		internal readonly Func<ElementContext, ElementNodeData> ElementDataGetter;
 		internal readonly FormValue FormValue;
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private Func<ElementNodeLocalData> webFormsLocalDataGetter;
 		private ElementNodeLocalData webFormsLocalData;
+		private bool isFocused;
+		private ElementNodeFocusDependentData webFormsFocusDependentData;
 
 		public ElementNode( Func<ElementContext, ElementNodeData> elementDataGetter, FormValue formValue = null ): base( HtmlTextWriterTag.Unknown ) {
 			ElementDataGetter = elementDataGetter;
@@ -30,6 +32,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		WebControl EtherealControl.Control => this;
 
+		internal bool IsFocusable {
+			get {
+				if( webFormsLocalDataGetter == null )
+					throw new ApplicationException( "webFormsLocalDataGetter not set" );
+				webFormsLocalData = webFormsLocalDataGetter();
+				return webFormsLocalData.IsFocusable;
+			}
+		}
+
+		internal void SetIsFocused() {
+			isFocused = true;
+		}
+
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return getJsInitStatements();
 		}
@@ -39,10 +54,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private string getJsInitStatements() {
-			if( webFormsLocalDataGetter == null )
-				throw new ApplicationException( "webFormsLocalDataGetter not set" );
-			webFormsLocalData = webFormsLocalDataGetter();
-			return webFormsLocalData.JsInitStatements;
+			if( webFormsLocalData == null )
+				throw new ApplicationException( "webFormsLocalData not set" );
+			webFormsFocusDependentData = webFormsLocalData.FocusDependentDataGetter( isFocused );
+			return webFormsFocusDependentData.JsInitStatements;
 		}
 
 		FormValue FormValueControl.FormValue => FormValue;
@@ -57,12 +72,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		protected override void AddAttributesToRender( HtmlTextWriter writer ) {
-			if( webFormsLocalData == null )
-				throw new ApplicationException( "webFormsLocalData not set" );
-			foreach( var i in webFormsLocalData.Attributes )
+			if( webFormsFocusDependentData == null )
+				throw new ApplicationException( "webFormsFocusDependentData not set" );
+			foreach( var i in webFormsFocusDependentData.Attributes )
 				writer.AddAttribute( i.Item1, i.Item2 );
-			if( webFormsLocalData.Id != null )
-				writer.AddAttribute( HtmlTextWriterAttribute.Id, webFormsLocalData.Id.Any() ? webFormsLocalData.Id : ClientID );
+			if( webFormsFocusDependentData.Id != null )
+				writer.AddAttribute( HtmlTextWriterAttribute.Id, webFormsFocusDependentData.Id.Any() ? webFormsFocusDependentData.Id : ClientID );
 		}
 
 		protected override string TagName {

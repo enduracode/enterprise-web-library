@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -11,19 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Func<ElementClassSet, ElementNodeLocalData> NodeDataGetter;
 
 		/// <summary>
-		/// Creates an element-local-data object.
+		/// Creates a local-data object for a nonfocusable element.
 		/// </summary>
-		public ElementLocalData(
-			string elementName, IEnumerable<Tuple<string, string>> attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
-			NodeDataGetter = classSet => {
-				var classValue = StringTools.ConcatenateWithDelimiter( " ", classSet.GetClassNames().ToArray() );
-				return new ElementNodeLocalData(
-					elementName,
-					( classValue.Any() ? Tuple.Create( "class", classValue ).ToCollection() : ImmutableArray<Tuple<string, string>>.Empty ).Concat(
-						attributes ?? ImmutableArray<Tuple<string, string>>.Empty ),
-					classSet.UsesElementIds || includeIdAttribute,
-					jsInitStatements );
-			};
+		public ElementLocalData( string elementName, ElementFocusDependentData focusDependentData = null ) {
+			NodeDataGetter = classSet => new ElementNodeLocalData( elementName, ( focusDependentData ?? new ElementFocusDependentData() ).NodeDataGetter( classSet ) );
+		}
+
+		/// <summary>
+		/// Creates a local-data object for a focusable element.
+		/// </summary>
+		public ElementLocalData( string elementName, Func<bool, ElementFocusDependentData> focusDependentDataGetter ) {
+			NodeDataGetter = classSet => new ElementNodeLocalData( elementName, isFocused => focusDependentDataGetter( isFocused ).NodeDataGetter( classSet ) );
 		}
 	}
 }

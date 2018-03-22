@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -11,18 +8,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Func<DisplaySetup, ElementLocalData> BaseDataGetter;
 
 		/// <summary>
-		/// Creates a displayable-element-local-data object.
+		/// Creates a local-data object for a nonfocusable displayable element.
 		/// </summary>
-		public DisplayableElementLocalData(
-			string elementName, IEnumerable<Tuple<string, string>> attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
-			BaseDataGetter =
-				displaySetup =>
-				new ElementLocalData(
-					elementName,
-					( attributes ?? ImmutableArray<Tuple<string, string>>.Empty ).Concat(
-						!displaySetup.ComponentsDisplayed ? Tuple.Create( "style", "display: none" ).ToCollection() : ImmutableArray<Tuple<string, string>>.Empty ),
-					displaySetup.UsesJsStatements || includeIdAttribute,
-					jsInitStatements );
+		public DisplayableElementLocalData( string elementName, DisplayableElementFocusDependentData focusDependentData = null ) {
+			BaseDataGetter = displaySetup => new ElementLocalData(
+				elementName,
+				( focusDependentData ?? new DisplayableElementFocusDependentData() ).BaseDataGetter( displaySetup ) );
+		}
+
+		/// <summary>
+		/// Creates a local-data object for a focusable displayable element.
+		/// </summary>
+		public DisplayableElementLocalData( string elementName, Func<bool, DisplayableElementFocusDependentData> focusDependentDataGetter ) {
+			BaseDataGetter = displaySetup => new ElementLocalData( elementName, isFocused => focusDependentDataGetter( isFocused ).BaseDataGetter( displaySetup ) );
 		}
 	}
 }

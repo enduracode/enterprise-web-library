@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -8,28 +6,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	internal sealed class ElementNodeLocalData {
 		internal readonly string ElementName;
-		internal readonly IEnumerable<Tuple<string, string>> Attributes;
-		internal readonly string Id;
-		internal readonly string JsInitStatements;
+		internal readonly bool IsFocusable;
+		internal readonly Func<bool, ElementNodeFocusDependentData> FocusDependentDataGetter;
 
 		/// <summary>
-		/// Creates an element-node-local-data object.
+		/// Creates a local-data object for a nonfocusable element node.
 		/// </summary>
-		public ElementNodeLocalData( string elementName, IEnumerable<Tuple<string, string>> attributes, bool includeIdAttribute, string jsInitStatements )
-			: this( elementName, attributes, includeIdAttribute ? "" : null, jsInitStatements ) {}
-
-		/// <summary>
-		/// FragmentMarker use only.
-		/// </summary>
-		internal ElementNodeLocalData( string elementName, IEnumerable<Tuple<string, string>> attributes, string id, string jsInitStatements ) {
+		public ElementNodeLocalData( string elementName, ElementNodeFocusDependentData focusDependentData ) {
 			ElementName = elementName;
+			IsFocusable = false;
+			FocusDependentDataGetter = isFocused => focusDependentData;
+		}
 
-			if( attributes.Any( i => i.Item1.EqualsIgnoreCase( "id" ) ) )
-				throw new ApplicationException( "The framework manages element IDs." );
-			Attributes = attributes;
-
-			Id = id;
-			JsInitStatements = jsInitStatements;
+		/// <summary>
+		/// Creates a local-data object for a focusable element node.
+		/// </summary>
+		internal ElementNodeLocalData( string elementName, Func<bool, ElementNodeFocusDependentData> focusDependentDataGetter ) {
+			ElementName = elementName;
+			IsFocusable = true;
+			FocusDependentDataGetter = focusDependentDataGetter;
 		}
 	}
 }

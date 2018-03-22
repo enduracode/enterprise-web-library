@@ -12,10 +12,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal PostBackValueDictionary PostBackValues { get; set; }
 
 		// set during modifications
-		internal string ControlWithInitialFocusId { get; set; }
+		internal string FocusKey { get; set; }
 		internal Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
 		internal IEnumerable<string> TopModificationErrors { get; set; }
-		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; private set; }
+		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; }
 
 		// set before navigation and used to detect possible developer mistakes
 		internal string StaticRegionContents { get; private set; }
@@ -29,12 +29,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
 		}
 
-		internal PageState PageState { get { return pageState; } }
+		internal PageState PageState => pageState;
 
-		internal string ScrollPositionX { get { return scrollPositionX; } }
-		internal string ScrollPositionY { get { return scrollPositionY; } }
+		internal string ScrollPositionX => scrollPositionX;
+		internal string ScrollPositionY => scrollPositionY;
 
-		internal bool ModificationErrorsExist { get { return TopModificationErrors.Any(); } }
+		internal bool ModificationErrorsExist => TopModificationErrors.Any();
 
 		internal void SetStaticAndUpdateRegionState( string staticRegionContents, IEnumerable<Tuple<string, string>> updateRegionKeysAndArguments ) {
 			StaticRegionContents = staticRegionContents;
