@@ -5,7 +5,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A phrasing component that can be autofocused.
 	/// </summary>
 	public class PhrasingAutofocusRegion: PhrasingComponent {
-		internal readonly AutofocusCondition Condition;
 		private readonly IEnumerable<FlowComponentOrNode> children;
 
 		/// <summary>
@@ -14,8 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="condition">Do not pass null.</param>
 		/// <param name="children"></param>
 		public PhrasingAutofocusRegion( AutofocusCondition condition, IEnumerable<PhrasingComponent> children ) {
-			Condition = condition;
-			this.children = children;
+			this.children = new FlowAutofocusRegion( condition, children ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
