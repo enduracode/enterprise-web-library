@@ -44,13 +44,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
 		/// are included in this post-back.</param>
 		/// <param name="firstModificationMethod"></param>
-		/// <param name="secondaryResponseGetter">A method that returns the secondary response EWF will send, in a new window/tab or as an attachment, if there were
-		/// no modification errors.</param>
+		/// <param name="reloadBehaviorGetter">A method that returns the reload behavior, if there were no modification errors. If you do pass a method, the page
+		/// will block interaction even for async post-backs. This prevents an abrupt focus change for the user when the page reloads.</param>
 		/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
 		/// first of the current data modifications.</param>
 		public static ActionPostBack CreateIntermediate(
 			IEnumerable<UpdateRegionSet> updateRegions, bool forceFullPagePostBack = false, string id = "main", bool skipModificationIfNoChanges = false,
-			Action firstModificationMethod = null, Func<SecondaryResponse> secondaryResponseGetter = null, DataModification validationDm = null ) {
+			Action firstModificationMethod = null, Func<PageReloadBehavior> reloadBehaviorGetter = null, DataModification validationDm = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
 			return new ActionPostBack(
@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				null,
 				skipModificationIfNoChanges,
 				firstModificationMethod,
-				secondaryResponseGetter != null ? new Func<PostBackAction>( () => new PostBackAction( secondaryResponseGetter() ) ) : null,
+				reloadBehaviorGetter != null ? new Func<PostBackAction>( () => new PostBackAction( reloadBehaviorGetter() ) ) : null,
 				validationDm ?? dataModificationGetter().First() );
 		}
 
@@ -132,8 +132,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				formValuesChanged,
 				validationErrorHandler,
 				performValidationOnly: actionSetter == null,
-				actionMethodAndPostModificationMethod:
-					actionGetter != null ? new Tuple<Action, Action>( () => action = actionGetter(), () => actionSetter( action ) ) : null );
+				actionMethodAndPostModificationMethod: actionGetter != null
+					                                       ? new Tuple<Action, Action>( () => action = actionGetter(), () => actionSetter( action ) )
+					                                       : null );
 		}
 
 		internal DataModification ValidationDm => validationDm;

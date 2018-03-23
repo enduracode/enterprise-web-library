@@ -1,7 +1,7 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class PostBackAction {
 		internal ResourceInfo Resource { get; }
-		internal SecondaryResponse SecondaryResponse { get; }
+		internal PageReloadBehavior ReloadBehavior { get; }
 
 		/// <summary>
 		/// Creates an action that will navigate to the specified resource.
@@ -12,11 +12,11 @@
 		}
 
 		/// <summary>
-		/// Creates an action that will send a secondary response in a new window/tab or as an attachment.
+		/// Creates an action that will reload the page.
 		/// </summary>
-		/// <param name="response">The secondary response.</param>
-		public PostBackAction( SecondaryResponse response ) {
-			SecondaryResponse = response;
+		/// <param name="reloadBehavior">The reload behavior.</param>
+		public PostBackAction( PageReloadBehavior reloadBehavior ) {
+			ReloadBehavior = reloadBehavior;
 		}
 	}
 }

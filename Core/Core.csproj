@@ -540,6 +540,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\NonPostBackFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\PostBackFormAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PageReloadBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\SecondaryResponse.cs" />

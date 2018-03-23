@@ -461,6 +461,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
+				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 				resetPage();
 			}
@@ -497,7 +498,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								handleValidationErrors );
 						}
 						catch {
-							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
+							requestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
 							throw;
 						}
 
@@ -507,20 +508,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						var formValuesChanged = GetDescendants( contentContainer )
 							.OfType<FormValueControl>()
 							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
+						requestState.FocusKey = "";
 						try {
 							dmExecuted |= actionPostBack.Execute(
 								formValuesChanged,
 								handleValidationErrors,
 								postBackAction => {
-									if( postBackAction == null )
-										return;
-									redirectInfo = postBackAction.Resource;
-									if( postBackAction.SecondaryResponse != null )
-										fullSecondaryResponse = postBackAction.SecondaryResponse.GetFullResponse();
+									redirectInfo = postBackAction?.Resource;
+									requestState.FocusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
+									fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
 								} );
 						}
 						catch {
-							AppRequestState.Instance.EwfPageRequestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
+							requestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
 							throw;
 						}
 					}
@@ -843,6 +843,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var ewfException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
 				if( ewfException == null )
 					throw;
+				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
 					getStaticRegionContents( new Control[ 0 ] ).Item1,
