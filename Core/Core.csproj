@@ -540,6 +540,9 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\NonPostBackFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\PostBackFormAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBack.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBackAction.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\SecondaryResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
@@ -575,11 +578,8 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionSet.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBack.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryResponse.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />

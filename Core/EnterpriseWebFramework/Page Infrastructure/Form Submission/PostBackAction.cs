@@ -1,14 +1,14 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class PostBackAction {
-		private readonly ResourceInfo resource;
-		private readonly SecondaryResponse secondaryResponse;
+		internal ResourceInfo Resource { get; }
+		internal SecondaryResponse SecondaryResponse { get; }
 
 		/// <summary>
 		/// Creates an action that will navigate to the specified resource.
 		/// </summary>
 		/// <param name="resource">Pass null for no navigation.</param>
 		public PostBackAction( ResourceInfo resource ) {
-			this.resource = resource;
+			Resource = resource;
 		}
 
 		/// <summary>
@@ -16,10 +16,7 @@
 		/// </summary>
 		/// <param name="response">The secondary response.</param>
 		public PostBackAction( SecondaryResponse response ) {
-			secondaryResponse = response;
+			SecondaryResponse = response;
 		}
-
-		internal ResourceInfo Resource { get { return resource; } }
-		internal SecondaryResponse SecondaryResponse { get { return secondaryResponse; } }
 	}
 }
