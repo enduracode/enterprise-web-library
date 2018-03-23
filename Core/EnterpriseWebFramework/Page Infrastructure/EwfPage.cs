@@ -996,6 +996,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
+			foreach( var i in GetDescendants( this ) )
+				( i as ElementNode )?.InitLocalData();
+
 			var autofocusInfo = getAutofocusInfo( this, false );
 			if( autofocusInfo.activeRegionsExist && autofocusInfo.focusedElement == null )
 				throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
@@ -1037,7 +1040,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptStartUpLogic( ElementNode focusedElement ) {
-			focusedElement.SetIsFocused();
+			focusedElement?.SetIsFocused();
 			var controlInitStatements = getDescendants( this, i => true )
 				.Where( i => i.Item2 != null )
 				.Select( i => i.Item2() )

@@ -32,11 +32,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		WebControl EtherealControl.Control => this;
 
+		internal void InitLocalData() {
+			if( webFormsLocalDataGetter == null )
+				throw new ApplicationException( "webFormsLocalDataGetter not set" );
+			webFormsLocalData = webFormsLocalDataGetter();
+		}
+
 		internal bool IsFocusable {
 			get {
-				if( webFormsLocalDataGetter == null )
-					throw new ApplicationException( "webFormsLocalDataGetter not set" );
-				webFormsLocalData = webFormsLocalDataGetter();
+				if( webFormsLocalData == null )
+					throw new ApplicationException( "webFormsLocalData not set" );
 				return webFormsLocalData.IsFocusable;
 			}
 		}
