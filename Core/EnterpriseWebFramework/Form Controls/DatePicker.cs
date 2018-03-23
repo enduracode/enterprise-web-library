@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A date picker.
 	/// </summary>
-	public class DatePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class DatePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDatePicker";
 
@@ -111,10 +111,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return "$( '#" + textBox.TextBoxClientId + "' ).datepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
 			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ) } );";
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			( textBox as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
 		/// <summary>

@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( alternativeText != null )
 								attributes.Add( Tuple.Create( "alt", alternativeText ) );
 
-							return new DisplayableElementLocalData( "img", attributes: attributes );
+							return new DisplayableElementLocalData( "img", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) );
 						},
 						classes: CssElementCreator.Class.Add( sizesToAvailableWidth ? new ElementClass( "ewfAutoSizer" ) : ElementClassSet.Empty )
 							.Add( classes ?? ElementClassSet.Empty ) ) ).ToCollection();

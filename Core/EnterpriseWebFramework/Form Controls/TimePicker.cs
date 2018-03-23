@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A time picker.
 	/// </summary>
-	public class TimePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class TimePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfTimePicker";
 
@@ -105,13 +105,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			if( textBox == null )
 				return "";
 			return "$( '#" + textBox.TextBoxClientId + "' ).timepicker( { timeFormat: 'h:mmt', stepMinute: " + minuteInterval + ", showButtonPanel: false } );";
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			if( textBox != null )
-				( (ControlWithCustomFocusLogic)textBox ).SetFocus();
-			else
-				( (ControlWithCustomFocusLogic)selectList ).SetFocus();
 		}
 
 		/// <summary>

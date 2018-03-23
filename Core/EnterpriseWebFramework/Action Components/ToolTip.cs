@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					id.AddId( context.Id );
 					return new DisplayableElementData(
 						new DisplaySetup( false ),
-						() => new DisplayableElementLocalData( "div", includeIdAttribute: true ),
+						() => new DisplayableElementLocalData( "div", focusDependentData: new DisplayableElementFocusDependentData( includeIdAttribute: true ) ),
 						children: content );
 				} ).ToCollection();
 			jsInitStatementGetter = targetId => id.Id.Any()

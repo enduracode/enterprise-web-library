@@ -128,8 +128,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup">The setup object for the chart.</param>
 		/// <param name="series">The data series.</param>
 		/// <param name="color">The color to use for the data series.</param>
-		public Chart( ChartSetup setup, DataSeries series, Color? color = null )
-			: this( setup, series.ToCollection(), colors: color != null ? color.Value.ToCollection() : null ) {}
+		public Chart( ChartSetup setup, DataSeries series, Color? color = null ): this( setup, series.ToCollection(), colors: color?.ToCollection() ) {}
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -161,7 +160,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				case ChartType.Bar:
 					datasetSelector = ( series, color ) => new BaseDataset( color, series.Values.TakeLast( setup.MaxXValues ) );
 					// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-					options = new BarOptions { };
+					options = new BarOptions {};
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
@@ -188,13 +187,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						"Key",
 						new ControlLine(
 							chartData.datasets.Select(
-								( dataset, i ) =>
-								new Literal
-									{
-										Text =
-											@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-									.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
-									} as Control ).ToArray() ).ToCollection(),
+									( dataset, i ) => new Literal
+										{
+											Text =
+												@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
+													.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
+										} as Control )
+								.ToArray() ).ToCollection(),
 						style: SectionStyle.Box ) );
 
 			// Remove this when ColumnPrimaryTable supports Excel export.
@@ -208,11 +207,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var table = new ColumnPrimaryTable(
 				firstDataFieldIndex: 1,
-				items:
-					new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select (EwfTableCell)i ).ToCollection()
-						.Concat(
-							from series in seriesCollection
-							select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
+				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select (EwfTableCell)i ).ToCollection()
+					.Concat(
+						from series in seriesCollection
+						select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
 			Controls.Add( table );
 
 			jsInitStatementGetter = () => {
@@ -233,33 +231,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private Block getExportButton( IEnumerable<object> headers, List<IEnumerable<object>> tableData ) {
-			var block =
-				new Block(
-					new PostBackButton(
-						new TextActionControlStyle( "Export" ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateFull(
-								id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
-								actionGetter: () => new PostBackAction(
-									                    new SecondaryResponse(
-									                    () => EwfResponse.Create(
-										                    ContentTypes.Csv,
-										                    new EwfResponseBodyCreator(
-										                          writer => {
-											                          var csv = new CsvFileWriter();
-											                          csv.AddValuesToLine( headers.ToArray() );
-											                          csv.WriteCurrentLineToFile( writer );
-											                          foreach( var td in tableData ) {
-												                          csv.AddValuesToLine( td.ToArray() );
-												                          csv.WriteCurrentLineToFile( writer );
-											                          }
-										                          } ),
-										                    () =>
-										                    "{0} {1}".FormatWith(
-											                    setup.ExportFileName,
-											                    AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
-										                    FileExtensions.Csv ) ) ) ) ) );
+			var block = new Block(
+				new PostBackButton(
+					new TextActionControlStyle( "Export" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateFull(
+						id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
+						actionGetter: () => new PostBackAction(
+							new PageReloadBehavior(
+								secondaryResponse: new SecondaryResponse(
+									() => EwfResponse.Create(
+										ContentTypes.Csv,
+										new EwfResponseBodyCreator(
+											writer => {
+												var csv = new CsvFileWriter();
+												csv.AddValuesToLine( headers.ToArray() );
+												csv.WriteCurrentLineToFile( writer );
+												foreach( var td in tableData ) {
+													csv.AddValuesToLine( td.ToArray() );
+													csv.WriteCurrentLineToFile( writer );
+												}
+											} ),
+										() => "{0} {1}".FormatWith(
+											      setup.ExportFileName,
+											      AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
+										      FileExtensions.Csv ) ) ) ) ) ) );
 			block.Style.Add( "text-align", "right" );
 			return block;
 		}

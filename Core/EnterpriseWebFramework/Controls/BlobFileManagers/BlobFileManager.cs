@@ -45,9 +45,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 						actionGetter: () => {
 							// Refresh the file here in case a new one was uploaded on the same post-back.
-							return
-								new PostBackAction(
-									new SecondaryResponse( new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ), false ) );
+							return new PostBackAction(
+								new PageReloadBehavior(
+									secondaryResponse: new SecondaryResponse(
+										new BlobFileResponse( BlobFileOps.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ),
+										false ) ) );
 						} ) );
 				controlStack.AddControls( download );
 			}
@@ -61,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					uploadedFile.ToCollection(),
 					new TextActionControlStyle( Translation.ClickHereToReplaceExistingFile ),
 					false,
-					( postBackValue, validator ) => { } ) { AlternateText = "" };
+					( postBackValue, validator ) => {} ) { AlternateText = "" };
 				controlStack.AddControls( replaceExistingFileLink );
 			}
 
@@ -75,14 +77,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Call this during ValidateFormValues.
 		/// </summary>
 		public void ValidateFormValues( Validator validator, string subject, bool requireUploadIfNoFile ) {
-			validateFormValues( validator, subject, requireUploadIfNoFile, delegate { }, false );
+			validateFormValues( validator, subject, requireUploadIfNoFile, delegate {}, false );
 		}
 
 		/// <summary>
 		/// Performs validate form values, but also forces the file to be an image.
 		/// </summary>
 		public void ValidateAsImage( Validator validator, string subject, bool requireUploadIfNoFile ) {
-			ValidateAsImage( validator, subject, requireUploadIfNoFile, delegate { } );
+			ValidateAsImage( validator, subject, requireUploadIfNoFile, delegate {} );
 		}
 
 		/// <summary>

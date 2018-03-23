@@ -8,10 +8,10 @@
 		/// </summary>
 		/// <param name="focusKey">The focus key, which you can use to autofocus on a region of the reloaded page by referencing the key from autofocus conditions.
 		/// Do not pass null. Pass the empty string for no autofocus.</param>
-		/// <param name="response">A secondary response, which will load in a new window/tab or as an attachment.</param>
-		public PageReloadBehavior( string focusKey = "", SecondaryResponse response = null ) {
+		/// <param name="secondaryResponse">A secondary response, which will load in a new window/tab or as an attachment.</param>
+		public PageReloadBehavior( string focusKey = "", SecondaryResponse secondaryResponse = null ) {
 			FocusKey = focusKey;
-			SecondaryResponse = response;
+			SecondaryResponse = secondaryResponse;
 		}
 	}
 }

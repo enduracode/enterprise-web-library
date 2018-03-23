@@ -25,12 +25,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					behavior.AddPostBack();
 					return new DisplayableElementData(
 						displaySetup,
-						() =>
-						new DisplayableElementLocalData(
+						() => new DisplayableElementLocalData(
 							"button",
-							attributes: Tuple.Create( "type", "button" ).ToCollection().Concat( behavior.GetAttributes() ),
-							includeIdAttribute: behavior.IncludesIdAttribute(),
-							jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) ),
+							focusDependentData: new DisplayableElementFocusDependentData(
+								attributes: Tuple.Create( "type", "button" ).ToCollection().Concat( behavior.GetAttributes() ),
+								includeIdAttribute: behavior.IncludesIdAttribute(),
+								jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) ) ),
 						classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
 						children: elementChildren,
 						etherealChildren: elementEtherealChildren );

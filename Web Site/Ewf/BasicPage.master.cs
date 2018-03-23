@@ -110,9 +110,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					context => new ElementData(
 						() => new ElementLocalData(
 							"span",
-							attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
-							includeIdAttribute: true,
-							jsInitStatements: @"new Spinner( {
+							focusDependentData: new ElementFocusDependentData(
+								attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
+								includeIdAttribute: true,
+								jsInitStatements: @"new Spinner( {
 	lines: 13, // The number of lines to draw
 	length: 8, // The length of each line
 	width: 5, // The line thickness
@@ -129,7 +130,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 	zIndex: 2e9, // The z-index (defaults to 2000000000)
 	top: ""50%"", // Top position relative to parent
 	left: ""50%"" // Left position relative to parent
-} ).spin( document.getElementById( """ + context.Id + "\" ) );" ) ) ).ToCollection();
+} ).spin( document.getElementById( """ + context.Id + "\" ) );" ) ) ) ).ToCollection();
 			}
 
 			IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

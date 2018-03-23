@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
 	/// the given value. Widths less than 6 pixels are not supported.
 	/// </summary>
-	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic {
 		internal static string GetTextareaValue( string value ) {
 			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
 			// does in their System.Web.UI.WebControls.TextBox implementation.
@@ -239,10 +239,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return formValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			Page.SetFocus( textBox );
 		}
 
 		/// <summary>

@@ -87,7 +87,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									return new DisplayableElementData(
 										displaySetup,
-										() => new DisplayableElementLocalData( "li", attributes: attributes ),
+										() => new DisplayableElementLocalData( "li", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) ),
 										classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
 										children: includeContentContainer
 											          ? new DisplayableElement(

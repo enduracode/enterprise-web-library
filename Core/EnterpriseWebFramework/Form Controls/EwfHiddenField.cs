@@ -43,13 +43,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							return new ElementLocalData(
 								"input",
-								attributes: attributes,
-								includeIdAttribute: id != null || pageModificationValue != null,
-								jsInitStatements: pageModificationValue != null
-									                  ? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith(
-										                  context.Id,
-										                  pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
-									                  : "" );
+								focusDependentData: new ElementFocusDependentData(
+									attributes: attributes,
+									includeIdAttribute: id != null || pageModificationValue != null,
+									jsInitStatements: pageModificationValue != null
+										                  ? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith(
+											                  context.Id,
+											                  pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
+										                  : "" ) );
 						} );
 				},
 				formValue: formValue );

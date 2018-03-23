@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A date and time picker.
 	/// </summary>
-	public class DateTimePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, ControlWithCustomFocusLogic {
+	public class DateTimePicker: WebControl, ControlTreeDataLoader, ControlWithJsInitLogic {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string CssClass = "ewfDateAndTimePicker";
 
@@ -102,13 +102,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private WebControl getIconButton() {
 			return new CustomButton( () => "$( '#{0}' ).datetimepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) )
 				{
-					ActionControlStyle =
-						new CustomActionControlStyle(
-							control =>
-							control.AddControlsReturnThis(
-								new GenericPhrasingContainer(
-								new[] { new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" ), new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" ) },
-								classes: new ElementClass( "fa-stack" ).Add( new ElementClass( "datetimepickerIcon" ) ) ).ToCollection().GetControls() ) ),
+					ActionControlStyle = new CustomActionControlStyle(
+						control => control.AddControlsReturnThis(
+							new GenericPhrasingContainer(
+									new[] { new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" ), new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" ) },
+									classes: new ElementClass( "fa-stack" ).Add( new ElementClass( "datetimepickerIcon" ) ) ).ToCollection()
+								.GetControls() ) ),
 					CssClass = "icon"
 				};
 		}
@@ -116,10 +115,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return "$( '#" + textBox.TextBoxClientId + "' ).datetimepicker( { minDate: new Date( " + min.Year + ", " + min.Month + " - 1, " + min.Day +
 			       " ), maxDate: new Date( " + max.Year + ", " + max.Month + " - 1, " + max.Day + " ), timeFormat: 'h:mmt', stepMinute: " + minuteInterval + " } );";
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			( textBox as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
 		/// <summary>

@@ -98,7 +98,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 	}
 
-	internal sealed class ChangeBasedCheckBoxList<ItemIdType>: WebControl, ControlWithCustomFocusLogic {
+	internal sealed class ChangeBasedCheckBoxList<ItemIdType>: WebControl {
 		private readonly IEnumerable<ChangeBasedListItem<ItemIdType>> items;
 		private readonly IEnumerable<ItemIdType> selectedItemIds;
 
@@ -119,10 +119,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,
 					numberOfColumns: numberOfColumns,
 					action: action ) );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			( checkBoxList as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
 		internal void Validate( PostBackValueDictionary postBackValues ) {

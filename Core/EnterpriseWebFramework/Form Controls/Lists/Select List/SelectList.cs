@@ -121,8 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl,
-		ControlWithCustomFocusLogic, DisplayLink {
+	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl, DisplayLink {
 		private class ListItem {
 			private readonly SelectListItem<ItemIdType> item;
 			private readonly bool isValid;
@@ -344,13 +343,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// We previously used "!Modernizr.touch" as the condition. One reason this didn't work: Windows 8 always identifies as "touch" even if it's desktop.
 			return "if( true ) " + select2Statement + touchStatement.PrependDelimiter( " else " );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			if( useHorizontalRadioLayout.HasValue )
-				( firstRadioButton as ControlWithCustomFocusLogic ).SetFocus();
-			else
-				Page.SetFocus( this );
 		}
 
 		FormValue FormValueControl.FormValue { get { return formValue; } }

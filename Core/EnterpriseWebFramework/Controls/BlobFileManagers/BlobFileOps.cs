@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				if( !ContentTypes.IsImageType( GetContentTypeForPostedFile( file ) ) )
 					validator.NoteErrorAndAddMessage( "Please upload a valid image file." );
 				else
-				// Make sure it is an image type that we understand. Also perform optional custom validation.
+					// Make sure it is an image type that we understand. Also perform optional custom validation.
 					try {
 						using( var stream = new MemoryStream( file.Contents ) ) {
 							var image = System.Drawing.Image.FromStream( stream );
@@ -123,11 +123,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return new PostBackButton(
 				new TextActionControlStyle( labelOverride ?? file.FileName ),
 				usesSubmitBehavior: false,
-				postBack:
-					PostBack.CreateFull(
-						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter:
-							() => new PostBackAction( new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ) );
+				postBack: PostBack.CreateFull(
+					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+					actionGetter: () => new PostBackAction(
+						new PageReloadBehavior(
+							secondaryResponse: new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ) ) );
 		}
 
 		/// <summary>
@@ -143,10 +143,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return new PostBackButton(
 				new TextActionControlStyle( labelOverride ?? file.FileName ),
 				usesSubmitBehavior: false,
-				postBack:
-					PostBack.CreateFull(
-						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) );
+				postBack: PostBack.CreateFull(
+					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+					actionGetter: () =>
+						new PostBackAction( new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) ) );
 		}
 
 		/// <summary>

@@ -2,14 +2,14 @@
 using System.Text.RegularExpressions;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.JavaScriptWriting;
 using EnterpriseWebLibrary.InputValidation;
+using EnterpriseWebLibrary.JavaScriptWriting;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A time duration picker.
 	/// </summary>
-	public class DurationPicker: WebControl, ControlTreeDataLoader, ControlWithCustomFocusLogic {
+	public class DurationPicker: WebControl, ControlTreeDataLoader {
 		private const int maxValueLength = 6; // Also defined in JavaScript
 		private readonly EwfTextBox durationPicker;
 
@@ -84,10 +84,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return durationPicker.ValueChangedOnPostBack( postBackValues );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			( durationPicker as ControlWithCustomFocusLogic ).SetFocus();
 		}
 	}
 }

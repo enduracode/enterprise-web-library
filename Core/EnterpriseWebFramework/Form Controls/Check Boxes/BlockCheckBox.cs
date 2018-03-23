@@ -14,8 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A block-level check box with the label vertically centered on the box.
 	/// </summary>
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
-	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, ControlWithCustomFocusLogic,
-		FormControl<FlowComponent> {
+	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, FormControl<FlowComponent> {
 		private readonly FormValue<bool> checkBoxFormValue;
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
@@ -107,18 +106,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			table.CssClass = "ewfBlockCheckBox";
 
 			checkBox = new WebControl( HtmlTextWriterTag.Input );
-			PreRender +=
-				delegate {
-					EwfCheckBox.AddCheckBoxAttributes(
-						checkBox,
-						this,
-						checkBoxFormValue,
-						radioButtonFormValue,
-						radioButtonListItemId,
-						action,
-						setup.TriggersPostBackWhenCheckedOrUnchecked,
-						jsClickHandlerStatementLists.SelectMany( i => i() ) );
-				};
+			PreRender += delegate {
+				EwfCheckBox.AddCheckBoxAttributes(
+					checkBox,
+					this,
+					checkBoxFormValue,
+					radioButtonFormValue,
+					radioButtonListItemId,
+					action,
+					setup.TriggersPostBackWhenCheckedOrUnchecked,
+					jsClickHandlerStatementLists.SelectMany( i => i() ) );
+			};
 
 			var checkBoxCell = new TableCell().AddControlsReturnThis( checkBox );
 			checkBoxCell.Style.Add( "width", "13px" );
@@ -166,11 +164,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns true if the value changed on this post back.
 		/// </summary>
 		public bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return checkBoxFormValue != null ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues ) : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			Page.SetFocus( checkBox );
+			return checkBoxFormValue != null
+				       ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues )
+				       : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>

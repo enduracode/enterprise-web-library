@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private string[] acceptableFileExtensions;
 		private readonly bool sortByName;
 		private readonly string postBackIdBase;
-		private Action<Validator, System.Drawing.Image> validateImage = delegate { };
+		private Action<Validator, System.Drawing.Image> validateImage = delegate {};
 		private IEnumerable<BlobFile> files;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
@@ -157,17 +157,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							if( fileIsUnread )
 								markFileAsReadMethod?.Invoke( file.FileId );
 						},
-						actionGetter: () => new PostBackAction( new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) { ToolTip = file.FileName } );
+						actionGetter: () =>
+							new PostBackAction( new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) )
+					{
+						ToolTip = file.FileName
+					} );
 
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
 			var delete = false;
-			var deleteCheckBox =
-				FormItem.Create(
+			var deleteCheckBox = FormItem.Create(
 					"",
 					new EwfCheckBox( false ),
-					validationGetter: control => new EwfValidation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); } ) ).ToControl();
+					validationGetter: control => new EwfValidation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); } ) )
+				.ToControl();
 			cells.Add( ReadOnly ? null : deleteCheckBox );
 			deleteModMethods.Add(
 				() => {
@@ -207,10 +211,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						"",
 						new EwfFileUpload(),
 						validationGetter: control => new EwfValidation(
-							                             ( pbv, validator ) => {
-								                             BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
-								                             file = control.GetPostBackValue( pbv );
-							                             } ) );
+							( pbv, validator ) => {
+								BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
+								file = control.GetPostBackValue( pbv );
+							} ) );
 
 					return ControlList.CreateWithControls(
 						true,

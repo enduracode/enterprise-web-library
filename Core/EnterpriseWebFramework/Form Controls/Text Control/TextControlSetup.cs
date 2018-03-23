@@ -279,9 +279,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									return new DisplayableElementLocalData(
 										!numberOfRows.HasValue || numberOfRows.Value == 1 ? "input" : "textarea",
-										attributes: attributes,
-										includeIdAttribute: jsInitStatements.Any(),
-										jsInitStatements: jsInitStatements );
+										isFocused => {
+											if( isFocused )
+												attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+											return new DisplayableElementFocusDependentData(
+												attributes: attributes,
+												includeIdAttribute: jsInitStatements.Any(),
+												jsInitStatements: jsInitStatements );
+										} );
 								},
 								classes: classes,
 								children: !numberOfRows.HasValue || numberOfRows.Value == 1

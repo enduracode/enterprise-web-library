@@ -291,11 +291,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			foreach( var rowColumnSpanPair in previousRowColumnSpans )
 				rowColumnSpanPair.RowSpan--;
 
-			previousRowColumnSpans =
-				( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 )
-					.Concat(
-						cells.Where( c => c.Setup.ItemSpan != 1 )
-							.Select( rowSpanCell => new RowColumnSpanPair { RowSpan = rowSpanCell.Setup.ItemSpan - 1, ColumnSpan = rowSpanCell.Setup.FieldSpan } ) ) ).ToList();
+			previousRowColumnSpans = ( previousRowColumnSpans.Where( rowSpan => rowSpan.RowSpan > 0 )
+					                         .Concat(
+						                         cells.Where( c => c.Setup.ItemSpan != 1 )
+							                         .Select(
+								                         rowSpanCell => new RowColumnSpanPair
+									                         {
+										                         RowSpan = rowSpanCell.Setup.ItemSpan - 1,
+										                         ColumnSpan = rowSpanCell.Setup.FieldSpan
+									                         } ) ) ).ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
 			TableOps.DrawRow( table, rowSetup, cellPlaceHolders, columnSetups, false );
@@ -403,20 +407,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							var upButton = new PostBackButton(
 								new ButtonActionControlStyle( @"/\", ButtonSize.ShrinkWrap ),
 								usesSubmitBehavior: false,
-								postBack:
-									PostBack.CreateFull(
-										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
-										firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) );
+								postBack: PostBack.CreateFull(
+									id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
+									firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) );
 							controlLine.AddControls( upButton );
 						}
 						if( nextRowSetup != null ) {
 							var downButton = new PostBackButton(
 								new ButtonActionControlStyle( @"\/", ButtonSize.ShrinkWrap ),
 								usesSubmitBehavior: false,
-								postBack:
-									PostBack.CreateFull(
-										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
-										firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) );
+								postBack: PostBack.CreateFull(
+									id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
+									firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) );
 							controlLine.AddControls( downButton );
 						}
 
@@ -441,19 +443,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public PostBackAction ExportToExcel() {
 			return new PostBackAction(
-				new SecondaryResponse(
-					() => EwfResponse.CreateExcelWorkbookResponse(
-						() => caption.Any() ? caption : "Excel export",
-						() => {
-							var workbook = new ExcelFileWriter();
-							foreach( var rowSetup in rowSetups ) {
-								if( rowSetup.IsHeader )
-									workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
-								else
-									workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
-							}
-							return workbook;
-						} ) ) );
+				new PageReloadBehavior(
+					secondaryResponse: new SecondaryResponse(
+						() => EwfResponse.CreateExcelWorkbookResponse(
+							() => caption.Any() ? caption : "Excel export",
+							() => {
+								var workbook = new ExcelFileWriter();
+								foreach( var rowSetup in rowSetups ) {
+									if( rowSetup.IsHeader )
+										workbook.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
+									else
+										workbook.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
+								}
+								return workbook;
+							} ) ) ) );
 		}
 
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
@@ -462,10 +465,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return new PostBackButton(
 				new TextActionControlStyle( getDataRowLimitText( dataRowLimit ) ),
 				usesSubmitBehavior: false,
-				postBack:
-					PostBack.CreateFull(
-						id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
-						firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ) );
+				postBack: PostBack.CreateFull(
+					id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
+					firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ) );
 		}
 
 		private string getDataRowLimitText( DataRowLimit dataRowLimit ) {

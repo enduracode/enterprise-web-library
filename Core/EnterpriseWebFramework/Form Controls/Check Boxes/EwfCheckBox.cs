@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An in-line check box with the label vertically centered on the box.
 	/// </summary>
-	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithCustomFocusLogic {
+	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl {
 		private static readonly ElementClass elementClass = new ElementClass( "ewfCheckBox" );
 
 		internal class CssElementCreator: ControlCssElementCreator {
@@ -159,10 +159,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return checkBoxFormValue != null
 				       ? checkBoxFormValue.ValueChangedOnPostBack( postBackValues )
 				       : radioButtonFormValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			Page.SetFocus( checkBox );
 		}
 
 		/// <summary>

@@ -66,10 +66,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return new ElementData(
 						() => new ElementLocalData(
 							"dialog",
-							includeIdAttribute: true,
-							jsInitStatements: ( includeCloseButton
-								                    ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id )
-								                    : "" ).ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ),
+							focusDependentData: new ElementFocusDependentData(
+								includeIdAttribute: true,
+								jsInitStatements: ( includeCloseButton
+									                    ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id )
+									                    : "" ).ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ) ),
 						classes: boxClass,
 						children: new GenericFlowContainer(
 							( includeCloseButton

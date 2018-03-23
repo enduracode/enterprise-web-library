@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A check box list that allows multiple items to be selected.
 	/// NOTE: Consider using something like the multi select feature of http://harvesthq.github.com/chosen/ to provide a space-saving mode for this control.
 	/// </summary>
-	public sealed class EwfCheckBoxList<ItemIdType>: WebControl, ControlWithCustomFocusLogic {
+	public sealed class EwfCheckBoxList<ItemIdType>: WebControl {
 		private readonly IEnumerable<SelectListItem<ItemIdType>> items;
 
 		private readonly Dictionary<SelectListItem<ItemIdType>, BlockCheckBox> checkBoxesByItem = new Dictionary<SelectListItem<ItemIdType>, BlockCheckBox>();
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var item = this.items.ElementAt( j );
 					var checkBox = new BlockCheckBox(
 						selectedItemIds.Contains( item.Id ),
-						( postBackValue, validator ) => { },
+						( postBackValue, validator ) => {},
 						label: item.Label,
 						setup: new BlockCheckBoxSetup( highlightedWhenChecked: true, action: action ) );
 					place.Controls.Add( checkBox );
@@ -60,11 +60,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			table.AddRow( cells.ToArray() );
 			Controls.Add( table );
-		}
-
-		void ControlWithCustomFocusLogic.SetFocus() {
-			if( items.Any() )
-				( checkBoxesByItem[ items.First() ] as ControlWithCustomFocusLogic ).SetFocus();
 		}
 
 		/// <summary>

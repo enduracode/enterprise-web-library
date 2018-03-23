@@ -25,9 +25,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"a",
-							attributes: behavior.AttributeGetter(),
-							includeIdAttribute: behavior.IncludeIdAttribute,
-							jsInitStatements: behavior.JsInitStatementGetter( context.Id ) + style.GetJsInitStatements( context.Id ) ),
+							focusDependentData: new DisplayableElementFocusDependentData(
+								attributes: behavior.AttributeGetter(),
+								includeIdAttribute: behavior.IncludeIdAttribute,
+								jsInitStatements: behavior.JsInitStatementGetter( context.Id ) + style.GetJsInitStatements( context.Id ) ) ),
 						classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
 						children: style.GetChildren( behavior.Url ),
 						etherealChildren: behavior.EtherealChildren );
