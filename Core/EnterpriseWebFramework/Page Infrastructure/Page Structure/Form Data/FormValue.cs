@@ -45,6 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.stringValueSelector = stringValueSelector;
 			this.stringPostBackValueValidator = stringPostBackValueValidator;
 
+			// This dependency on EwfPage should not exist.
 			EwfPage.Instance.AddFormValue( this );
 		}
 
@@ -64,6 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.stringValueSelector = stringValueSelector;
 			this.filePostBackValueValidator = filePostBackValueValidator;
 
+			// This dependency on EwfPage should not exist.
 			EwfPage.Instance.AddFormValue( this );
 		}
 
@@ -72,14 +74,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="validationMethod">The method that will be called by the data modification(s) to which this validation is added.</param>
 		public EwfValidation CreateValidation( Action<PostBackValue<T>, Validator> validationMethod ) {
-			return
-				new EwfValidation(
-					validator =>
-					validationMethod(
-						new PostBackValue<T>(
+			return new EwfValidation(
+				validator => validationMethod(
+					new PostBackValue<T>(
 						GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
 						ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
-						validator ) );
+					validator ) );
 		}
 
 		/// <summary>

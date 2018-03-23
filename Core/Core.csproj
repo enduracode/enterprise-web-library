@@ -541,7 +541,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\NonPostBackFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\PostBackFormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedFlowComponent.cs" />
@@ -557,6 +556,9 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlTreeDataLoader.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\EtherealControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\FormValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValue.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\FormValueControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementContext.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNode.cs">
@@ -575,8 +577,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackAction.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackValue.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PostBackValueValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryResponse.cs" />

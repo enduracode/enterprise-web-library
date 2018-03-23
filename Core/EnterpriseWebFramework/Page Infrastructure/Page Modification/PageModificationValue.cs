@@ -21,7 +21,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="statementGetter">A function that takes the value expression and returns a complete statement. Do not pass null.</param>
 		public void AddJsModificationStatement( Func<string, string> statementGetter ) {
+			// This dependency on EwfPage should not exist.
 			EwfPage.AssertPageTreeNotBuilt();
+
 			jsModificationStatements.Add( statementGetter );
 		}
 
@@ -36,7 +38,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public T Value {
 			get {
+				// This dependency on EwfPage should not exist.
 				EwfPage.AssertPageTreeBuilt();
+
 				return value.Value;
 			}
 		}
@@ -45,7 +49,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the JavaScript statements that should be executed when the value changes. Not available until after the page tree has been built.
 		/// </summary>
 		public string GetJsModificationStatements( string valueExpression ) {
+			// This dependency on EwfPage should not exist.
 			EwfPage.AssertPageTreeBuilt();
+
 			return jsModificationStatements.Aggregate(
 				new StringBuilder(),
 				( builder, statementGetter ) => builder.Append( statementGetter( valueExpression ) ),
