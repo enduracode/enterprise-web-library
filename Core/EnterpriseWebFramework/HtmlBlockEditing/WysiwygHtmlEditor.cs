@@ -50,8 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					id.AddId( context.Id );
 
 					var displaySetup = setup.DisplaySetup ?? new DisplaySetup( true );
-					var jsShowStatements = getJsShowStatements( context.Id, setup.CkEditorConfiguration );
-					displaySetup.AddJsShowStatements( jsShowStatements );
+					displaySetup.AddJsShowStatements( getJsShowStatements( context.Id, false, setup.CkEditorConfiguration ) );
 					displaySetup.AddJsHideStatements( "CKEDITOR.instances.{0}.destroy(); $( '#{0}' ).css( 'display', 'none' );".FormatWith( context.Id ) );
 
 					return new ElementData(
@@ -66,10 +65,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							return new ElementLocalData(
 								"textarea",
-								focusDependentData: new ElementFocusDependentData(
+								isFocused => new ElementFocusDependentData(
 									attributes: attributes,
 									includeIdAttribute: true,
-									jsInitStatements: displaySetup.ComponentsDisplayed ? jsShowStatements : "" ) );
+									jsInitStatements: displaySetup.ComponentsDisplayed ? getJsShowStatements( context.Id, isFocused, setup.CkEditorConfiguration ) : "" ) );
 						},
 						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
 				},
@@ -95,11 +94,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			formValue.AddPageModificationValue( modificationValue, v => v );
 		}
 
-		private string getJsShowStatements( string id, string ckEditorConfiguration ) {
+		private string getJsShowStatements( string id, bool ckEditorIsFocused, string ckEditorConfiguration ) {
+			var startupFocus = "startupFocus: {0}".FormatWith( ckEditorIsFocused ? "true" : "false" );
+
 			const string toolbar =
 				"[ 'Source', '-', 'Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'Image', 'Table', 'HorizontalRule', '-', 'Link', 'Unlink', 'Styles' ]";
 			var configuration = ckEditorConfiguration.Any() ? ckEditorConfiguration : "toolbar: [ " + toolbar + " ]";
-			return "CKEDITOR.replace( '" + id + "', { " + configuration + " } );";
+
+			return "CKEDITOR.replace( '" + id + "', { " + startupFocus + ", " + configuration + " } );";
 		}
 
 		public FlowComponent PageComponent => component;
