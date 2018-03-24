@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -27,10 +26,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"button",
-							focusDependentData: new DisplayableElementFocusDependentData(
-								attributes: Tuple.Create( "type", "button" ).ToCollection().Concat( behavior.GetAttributes() ),
-								includeIdAttribute: behavior.IncludesIdAttribute(),
-								jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) ) ),
+							isFocused => {
+								var attributes = new List<Tuple<string, string>> { Tuple.Create( "type", "button" ) };
+								attributes.AddRange( behavior.GetAttributes() );
+								if( isFocused )
+									attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+
+								return new DisplayableElementFocusDependentData(
+									attributes: attributes,
+									includeIdAttribute: behavior.IncludesIdAttribute(),
+									jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) );
+							} ),
 						classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
 						children: elementChildren,
 						etherealChildren: elementEtherealChildren );

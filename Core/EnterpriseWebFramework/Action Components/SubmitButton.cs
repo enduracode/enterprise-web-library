@@ -56,9 +56,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"button",
-							focusDependentData: new DisplayableElementFocusDependentData(
-								attributes: new[] { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) },
-								jsInitStatements: style.GetJsInitStatements( context.Id ) ) ),
+							isFocused => {
+								var attributes = new List<Tuple<string, string>> { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) };
+								if( isFocused )
+									attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+
+								return new DisplayableElementFocusDependentData( attributes: attributes, jsInitStatements: style.GetJsInitStatements( context.Id ) );
+							} ),
 						classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
 						children: elementChildren );
 				} ).ToCollection();

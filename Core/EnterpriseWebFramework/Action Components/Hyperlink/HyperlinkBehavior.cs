@@ -28,6 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly bool IncludeIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
 		internal readonly Func<string, string> JsInitStatementGetter;
+		internal readonly bool IsFocusable;
 		internal readonly Action PostBackAdder;
 
 		internal HyperlinkBehavior( ResourceInfo destination, string target, Func<string, string> actionStatementGetter ) {
@@ -54,13 +55,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				EtherealChildren = new ToolTip(
 					( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponents(),
 					out var toolTipInitStatementGetter ).ToCollection();
-				JsInitStatementGetter = id => getActionInitStatements( id, "" ) + toolTipInitStatementGetter( id );
+				JsInitStatementGetter = id => getActionInitStatements( id, "" ) + " " + toolTipInitStatementGetter( id );
 			}
 			else {
 				IncludeIdAttribute = destination != null && actionStatementGetter != null;
 				EtherealChildren = ImmutableArray<EtherealComponent>.Empty;
 				JsInitStatementGetter = id => destination != null && actionStatementGetter != null ? getActionInitStatements( id, actionStatementGetter( Url ) ) : "";
 			}
+
+			IsFocusable = destination != null;
 
 			if( isPostBackHyperlink )
 				PostBackAdder = () => {
@@ -77,6 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AttributeGetter = () => Tuple.Create( "href", Url ).ToCollection();
 			EtherealChildren = ImmutableArray<EtherealComponent>.Empty;
 			JsInitStatementGetter = id => "";
+			IsFocusable = true;
 			PostBackAdder = () => {};
 		}
 

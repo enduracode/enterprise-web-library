@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -23,12 +24,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					behavior.PostBackAdder();
 					return new DisplayableElementData(
 						displaySetup,
-						() => new DisplayableElementLocalData(
-							"a",
-							focusDependentData: new DisplayableElementFocusDependentData(
+						() => {
+							DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) => new DisplayableElementFocusDependentData(
 								attributes: behavior.AttributeGetter(),
-								includeIdAttribute: behavior.IncludeIdAttribute,
-								jsInitStatements: behavior.JsInitStatementGetter( context.Id ) + style.GetJsInitStatements( context.Id ) ) ),
+								includeIdAttribute: behavior.IncludeIdAttribute || isFocused,
+								jsInitStatements: StringTools.ConcatenateWithDelimiter(
+									" ",
+									behavior.JsInitStatementGetter( context.Id ),
+									style.GetJsInitStatements( context.Id ),
+									isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
+
+							return behavior.IsFocusable
+								       ? new DisplayableElementLocalData( "a", getFocusDependentData )
+								       : new DisplayableElementLocalData( "a", focusDependentData: getFocusDependentData( false ) );
+						},
 						classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
 						children: style.GetChildren( behavior.Url ),
 						etherealChildren: behavior.EtherealChildren );
