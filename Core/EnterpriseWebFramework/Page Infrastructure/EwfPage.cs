@@ -97,6 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
+		internal readonly HashSet<EwfValidation> ValidationsWithErrors = new HashSet<EwfValidation>();
 		internal readonly Dictionary<Control, List<AutofocusCondition>> AutofocusConditionsByControl = new Dictionary<Control, List<AutofocusCondition>>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
@@ -999,8 +1000,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var i in GetDescendants( this ) )
 				( i as ElementNode )?.InitLocalData();
 
-			var autofocusInfo = getAutofocusInfo( this, false );
-			if( autofocusInfo.activeRegionsExist && autofocusInfo.focusedElement == null )
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
+			                                 ( requestState.DmIdAndSecondaryOp == null ||
+			                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+				                                   requestState.DmIdAndSecondaryOp.Item2 ) );
+
+			Func<FocusabilityCondition, bool> isFocusablePredicate;
+			if( modificationErrorsOccurred )
+				isFocusablePredicate = condition => condition.ErrorFocusabilityValidations.Any( i => ValidationsWithErrors.Contains( i ) ) ||
+				                                    ( condition.IsFocusableOnTopModificationError &&
+				                                      AppRequestState.Instance.EwfPageRequestState.TopModificationErrors.Any() );
+			else
+				isFocusablePredicate = condition => condition.IsNormallyFocusable;
+
+			var autofocusInfo = getAutofocusInfo( this, modificationErrorsOccurred, isFocusablePredicate );
+			if( !modificationErrorsOccurred && autofocusInfo.activeRegionsExist && autofocusInfo.focusedElement == null )
 				throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
 
 			addJavaScriptStartUpLogic( autofocusInfo.focusedElement );
@@ -1018,18 +1033,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 		}
 
-		private ( bool activeRegionsExist, ElementNode focusedElement ) getAutofocusInfo( Control control, bool inActiveRegion ) {
+		private ( bool activeRegionsExist, ElementNode focusedElement ) getAutofocusInfo(
+			Control control, bool inActiveRegion, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
 			if( !inActiveRegion && AutofocusConditionsByControl.TryGetValue( control, out var conditions ) )
 				inActiveRegion = conditions.Any( i => i.IsTrue( AppRequestState.Instance.EwfPageRequestState.FocusKey ) );
 
-			if( inActiveRegion && control is ElementNode element && element.IsFocusable )
+			if( inActiveRegion && control is ElementNode element && isFocusablePredicate( element.FocusabilityCondition ) )
 				return ( true, element );
 
 			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
 				etherealControls = new List<EtherealControl>();
 			var autofocusInfo = ( activeRegionsExist: inActiveRegion, focusedElement: (ElementNode)null );
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ).Concat( from i in etherealControls select i.Control ) ) {
-				var childInfo = getAutofocusInfo( child, inActiveRegion );
+				var childInfo = getAutofocusInfo( child, inActiveRegion, isFocusablePredicate );
 				autofocusInfo.activeRegionsExist = autofocusInfo.activeRegionsExist || childInfo.activeRegionsExist;
 				autofocusInfo.focusedElement = childInfo.focusedElement;
 				if( autofocusInfo.focusedElement != null )

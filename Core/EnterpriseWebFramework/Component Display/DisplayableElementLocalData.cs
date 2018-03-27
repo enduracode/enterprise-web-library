@@ -19,8 +19,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a local-data object for a focusable displayable element.
 		/// </summary>
-		public DisplayableElementLocalData( string elementName, Func<bool, DisplayableElementFocusDependentData> focusDependentDataGetter ) {
-			BaseDataGetter = displaySetup => new ElementLocalData( elementName, isFocused => focusDependentDataGetter( isFocused ).BaseDataGetter( displaySetup ) );
+		public DisplayableElementLocalData(
+			string elementName, FocusabilityCondition focusabilityCondition, Func<bool, DisplayableElementFocusDependentData> focusDependentDataGetter ) {
+			BaseDataGetter = displaySetup => new ElementLocalData(
+				elementName,
+				focusabilityCondition,
+				isFocused => focusDependentDataGetter( isFocused ).BaseDataGetter( displaySetup ) );
 		}
 	}
 }

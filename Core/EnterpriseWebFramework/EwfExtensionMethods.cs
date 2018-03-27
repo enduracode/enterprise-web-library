@@ -113,7 +113,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
 					foreach( var i in componentData.Validations ) {
-						errorDictionary.Add( i, EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray() );
+						var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray();
+						errorDictionary.Add( i, errors );
+						if( errors.Any() )
+							EwfPage.Instance.ValidationsWithErrors.Add( i );
 						validationIndex += 1;
 					}
 
@@ -182,7 +185,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
 					foreach( var i in componentData.Validations ) {
-						errorDictionary.Add( i, EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray() );
+						var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray();
+						errorDictionary.Add( i, errors );
+						if( errors.Any() )
+							EwfPage.Instance.ValidationsWithErrors.Add( i );
 						validationIndex += 1;
 					}
 

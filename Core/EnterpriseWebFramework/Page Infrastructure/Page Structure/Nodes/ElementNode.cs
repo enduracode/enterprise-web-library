@@ -38,11 +38,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			webFormsLocalData = webFormsLocalDataGetter();
 		}
 
-		internal bool IsFocusable {
+		internal FocusabilityCondition FocusabilityCondition {
 			get {
 				if( webFormsLocalData == null )
 					throw new ApplicationException( "webFormsLocalData not set" );
-				return webFormsLocalData.IsFocusable;
+				return webFormsLocalData.FocusabilityCondition;
 			}
 		}
 

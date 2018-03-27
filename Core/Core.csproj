@@ -560,6 +560,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlTreeDataLoader.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\EtherealControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\FocusabilityCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValueValidationResult.cs" />

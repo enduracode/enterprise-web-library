@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
 
 							return behavior.IsFocusable
-								       ? new DisplayableElementLocalData( "a", getFocusDependentData )
+								       ? new DisplayableElementLocalData( "a", new FocusabilityCondition( true ), getFocusDependentData )
 								       : new DisplayableElementLocalData( "a", focusDependentData: getFocusDependentData( false ) );
 						},
 						classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),

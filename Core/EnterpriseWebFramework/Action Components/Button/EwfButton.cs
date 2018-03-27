@@ -26,6 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"button",
+							new FocusabilityCondition( true ),
 							isFocused => {
 								var attributes = new List<Tuple<string, string>> { Tuple.Create( "type", "button" ) };
 								attributes.AddRange( behavior.GetAttributes() );

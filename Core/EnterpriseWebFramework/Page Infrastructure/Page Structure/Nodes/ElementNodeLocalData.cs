@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	internal sealed class ElementNodeLocalData {
 		internal readonly string ElementName;
-		internal readonly bool IsFocusable;
+		internal readonly FocusabilityCondition FocusabilityCondition;
 		internal readonly Func<bool, ElementNodeFocusDependentData> FocusDependentDataGetter;
 
 		/// <summary>
@@ -14,16 +14,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public ElementNodeLocalData( string elementName, ElementNodeFocusDependentData focusDependentData ) {
 			ElementName = elementName;
-			IsFocusable = false;
+			FocusabilityCondition = new FocusabilityCondition( false );
 			FocusDependentDataGetter = isFocused => focusDependentData;
 		}
 
 		/// <summary>
 		/// Creates a local-data object for a focusable element node.
 		/// </summary>
-		internal ElementNodeLocalData( string elementName, Func<bool, ElementNodeFocusDependentData> focusDependentDataGetter ) {
+		internal ElementNodeLocalData(
+			string elementName, FocusabilityCondition focusabilityCondition, Func<bool, ElementNodeFocusDependentData> focusDependentDataGetter ) {
 			ElementName = elementName;
-			IsFocusable = true;
+			FocusabilityCondition = focusabilityCondition;
 			FocusDependentDataGetter = focusDependentDataGetter;
 		}
 	}

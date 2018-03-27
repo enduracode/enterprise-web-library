@@ -56,6 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"button",
+							new FocusabilityCondition( true ),
 							isFocused => {
 								var attributes = new List<Tuple<string, string>> { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) };
 								if( isFocused )
