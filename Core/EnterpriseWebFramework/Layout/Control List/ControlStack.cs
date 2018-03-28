@@ -105,13 +105,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Adds an item for the error messages from the specified validation. If there aren't any error messages, the control getter is not called and no item is
 		/// added.
 		/// </summary>
-		public void AddModificationErrorItem( EwfValidation validation, ErrorDisplayStyle displayStyle ) {
+		public void AddModificationErrorItem( EwfValidation validation, ErrorDisplayStyle<FlowComponent> displayStyle ) {
 			items.Add(
 				Tuple.Create(
 					new Func<ControlListItem>(
 						() => {
 							var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
-							return new ControlListItem( displayStyle.GetControls( errors ) );
+							return new ControlListItem( new PlaceHolder().AddControlsReturnThis( displayStyle.GetComponents( errors ).GetControls() ).ToCollection() );
 						} ),
 					true ) );
 		}
@@ -144,17 +144,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					select new LegacyPreModificationUpdateRegion( region.Sets, () => itemControls.Skip( staticItemCount ), staticItemCount.ToString ),
 					arg => itemControls.Skip( int.Parse( arg ) ) ) );
 
-			var itemControlsById =
-				itemControls.Select( ( control, index ) => new { visibleItems.ElementAt( index ).Item1.Id, control } )
-					.Where( i => i.Id != null )
-					.ToDictionary( i => i.Id, i => i.control );
+			var itemControlsById = itemControls.Select( ( control, index ) => new { visibleItems.ElementAt( index ).Item1.Id, control } )
+				.Where( i => i.Id != null )
+				.ToDictionary( i => i.Id, i => i.control );
 			EwfPage.Instance.AddUpdateRegionLinker(
 				new LegacyUpdateRegionLinker(
 					this,
 					"add",
 					from region in itemInsertionUpdateRegions
-					select
-						new LegacyPreModificationUpdateRegion(
+					select new LegacyPreModificationUpdateRegion(
 						region.Sets,
 						() => new Control[ 0 ],
 						() => StringTools.ConcatenateWithDelimiter( ",", region.NewItemIdGetter().ToArray() ) ),
@@ -165,8 +163,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					this,
 					"remove",
 					visibleItems.Select(
-						( item, index ) =>
-						new LegacyPreModificationUpdateRegion( item.Item1.RemovalUpdateRegionSets, () => itemControls.ElementAt( index ).ToCollection(), () => "" ) ),
+						( item, index ) => new LegacyPreModificationUpdateRegion(
+							item.Item1.RemovalUpdateRegionSets,
+							() => itemControls.ElementAt( index ).ToCollection(),
+							() => "" ) ),
 					arg => new Control[ 0 ] ) );
 		}
 

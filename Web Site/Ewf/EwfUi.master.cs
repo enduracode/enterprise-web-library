@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string UserInfoListCssClass = "ewfUiUserInfo";
 			internal const string GlobalNavBlockCssClass = "ewfUiGlobalNav";
 
-			internal const string TopErrorMessageListBlockCssClass = "ewfUiStatus";
+			internal static readonly ElementClass TopErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
 
 			internal const string EntityAndTabAndContentBlockId = "ewfUiEntityAndTabsAndContent";
 
@@ -77,8 +77,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiGlobalNavBlock", globalNavBlockSelector ),
 						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
 						new CssElement(
-							"UiTopErrorMessageControlListBlock",
-							ListErrorDisplayStyle.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListBlockCssClass ).ToArray() )
+							"UiTopErrorMessageListContainer",
+							ListErrorDisplayStyle.CssSelectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListContainerClass ).ToArray() )
 					};
 			}
 
@@ -201,8 +201,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						NetTools.BuildBasicLink(
 							"Click here to get Chrome (it's free)",
 							new ExternalResourceInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
-							true ) + "<br />" +
-						NetTools.BuildBasicLink(
+							true ) + "<br />" + NetTools.BuildBasicLink(
 							"Click here to get the latest Internet Explorer (it's free)",
 							new ExternalResourceInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
 							true ) );
@@ -214,30 +213,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			// ReSharper disable once SuspiciousTypeConversion.Global
 			var appLogoAndUserInfoControlOverrider = EwfUiStatics.AppProvider as AppLogoAndUserInfoControlOverrider;
 
-			return
-				new Block(
-					new[]
+			return new Block(
+				new[]
 						{
 							appLogoAndUserInfoControlOverrider != null ? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl() : getAppLogoAndUserInfoBlock(),
 							getGlobalNavBlock(),
-							new ModificationErrorPlaceholder(
-								null,
-								new ListErrorDisplayStyle( additionalClasses: CssElementCreator.TopErrorMessageListBlockCssClass.ToCollection() ) )
-						}.Where( i => i != null ).ToArray() )
-					{
-						ClientIDMode = ClientIDMode.Static,
-						ID = CssElementCreator.GlobalBlockId
-					};
+							new PlaceHolder().AddControlsReturnThis(
+								new FlowErrorContainer(
+										new ErrorSourceSet( includeGeneralErrors: true ),
+										new ListErrorDisplayStyle( classes: CssElementCreator.TopErrorMessageListContainerClass ) ).ToCollection()
+									.GetControls() )
+						}.Where( i => i != null )
+					.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
 		}
 
 		private Control getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockCssClass.ToCollection() );
 
-			var appLogo =
-				new GenericFlowContainer(
-					( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ? EwfUiStatics.AppProvider.GetLogoComponent() : null ) ??
-					( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).ToComponents(),
-					classes: CssElementCreator.AppLogoClass );
+			var appLogo = new GenericFlowContainer(
+				( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
+					  ? EwfUiStatics.AppProvider.GetLogoComponent()
+					  : null ) ?? ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).ToComponents(),
+				classes: CssElementCreator.AppLogoClass );
 
 			ControlStack userInfoList = null;
 			if( AppRequestState.Instance.UserAccessible ) {
@@ -261,10 +258,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
 				return null;
 
-			var controls =
-				getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActionControls() )
-					.Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups() select i.BuildLookupBoxPanel() )
-					.ToArray();
+			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActionControls() )
+				.Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups() select i.BuildLookupBoxPanel() )
+				.ToArray();
 			if( !controls.Any() )
 				return null;
 			return new Block( new ControlLine( controls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe() } )
@@ -293,12 +289,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private Control getPagePath() {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
-			var pagePath =
-				new PagePath(
-					currentPageBehavior:
-						entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.Resources.Any()
-							? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
-							: PagePathCurrentPageBehavior.IncludeCurrentPage );
+			var pagePath = new PagePath(
+				currentPageBehavior: entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.Resources.Any()
+					                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+					                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? null : pagePath;
 		}
 
@@ -314,10 +308,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private EwfTableCell getEntityNavCell() {
 			if( entityDisplaySetup == null )
 				return null;
-			var controls =
-				getActionControls( entityDisplaySetup.CreateNavButtonSetups() )
-					.Concat( ( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) )
-					.ToArray();
+			var controls = getActionControls( entityDisplaySetup.CreateNavButtonSetups() )
+				.Concat( ( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) )
+				.ToArray();
 			if( !controls.Any() )
 				return null;
 			return new ControlLine( controls )
@@ -333,13 +326,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
 			if( !actionControls.Any() )
 				return null;
-			return
-				new ControlLine( actionControls )
-					{
-						CssClass = CssElementCreator.EntityActionListCssClass,
-						ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					}.ToCell(
-						new TableCellSetup( textAlignment: TextAlignment.Right ) );
+			return new ControlLine( actionControls )
+				{
+					CssClass = CssElementCreator.EntityActionListCssClass,
+					ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+				}.ToCell( new TableCellSetup( textAlignment: TextAlignment.Right ) );
 		}
 
 		private Control getEntitySummaryBlock() {
@@ -347,21 +338,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			//
 			// It's a hack to call GetDescendants this early in the life cycle, but we should be able to fix it when we separate EWF from Web Forms. This is
 			// EnduraCode goal 790. What we are essentially doing here is determining whether there is at least one "component" in the entity summary.
-			var entitySummary = EwfPage.Instance.EsAsBaseType as Control;
-			if( entitySummary != null && EwfPage.Instance.GetDescendants( entitySummary ).Any( i => !( i is PlaceHolder ) ) )
+			if( EwfPage.Instance.EsAsBaseType is Control entitySummary && EwfPage.Instance.GetDescendants( entitySummary ).Any( i => !( i is PlaceHolder ) ) )
 				return new Block( entitySummary ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass };
 
 			return null;
 		}
 
 		private Control getTopTabBlock( ResourceGroup resourceGroup ) {
-			return
-				new Block(
-					new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() )
-						{
-							CssClass = CssElementCreator.TopTabCssClass,
-							VerticalAlignment = TableCellVerticalAlignment.Bottom
-						} ) { CssClass = CssElementCreator.TopTabCssClass };
+			return new Block(
+				new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() )
+					{
+						CssClass = CssElementCreator.TopTabCssClass,
+						VerticalAlignment = TableCellVerticalAlignment.Bottom
+					} ) { CssClass = CssElementCreator.TopTabCssClass };
 		}
 
 		private bool entityUsesTabMode( TabMode tabMode ) {
@@ -393,7 +382,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 				tab.CssClass = resource.IsIdenticalToCurrent()
 					               ? CssElementCreator.CurrentTabCssClass
-					               : resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabCssClass : "";
+					               : resource.AlternativeMode is DisabledResourceMode
+						               ? CssElementCreator.DisabledTabCssClass
+						               : "";
 				tabs.Add( tab );
 			}
 			return tabs;
@@ -439,7 +430,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockCssClass.ToCollection() );
 			table.AddItem(
 				new EwfTableItem(
-					controls.ToCell( new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );
+					controls.ToCell(
+						new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );
 			return table;
 		}
 
@@ -455,10 +447,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
 				controls.AddRange(
 					new Paragraph(
-						"Powered by the ".ToComponents()
-							.Concat( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
-							.Concat( ( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).ToComponents() ),
-						classes: CssElementCreator.PoweredByEwlFooterClass ).ToCollection().GetControls() );
+							"Powered by the ".ToComponents()
+								.Concat( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
+								.Concat( ( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).ToComponents() ),
+							classes: CssElementCreator.PoweredByEwlFooterClass ).ToCollection()
+						.GetControls() );
 
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
 		}

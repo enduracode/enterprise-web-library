@@ -112,7 +112,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
-					foreach( var i in componentData.Validations ) {
+					foreach( var i in componentData.ErrorSources.Validations ) {
 						var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray();
 						errorDictionary.Add( i, errors );
 						if( errors.Any() )
@@ -120,7 +120,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						validationIndex += 1;
 					}
 
-					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) ).GetControls();
+					var children = componentData.ChildGetter(
+							new ModificationErrorDictionary(
+								errorDictionary.ToImmutableDictionary(),
+								componentData.ErrorSources.IncludeGeneralErrors
+									? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
+									: ImmutableArray<string>.Empty ) )
+						.GetControls();
 					if( componentData.Id == null )
 						return children;
 					var np = new NamingPlaceholder( children );
@@ -184,7 +190,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
-					foreach( var i in componentData.Validations ) {
+					foreach( var i in componentData.ErrorSources.Validations ) {
 						var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( ph, validationIndex.ToString(), i ).ToImmutableArray();
 						errorDictionary.Add( i, errors );
 						if( errors.Any() )
@@ -192,7 +198,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						validationIndex += 1;
 					}
 
-					var children = componentData.ChildGetter( new ModificationErrorDictionary( errorDictionary.ToImmutableDictionary() ) );
+					var children = componentData.ChildGetter(
+						new ModificationErrorDictionary(
+							errorDictionary.ToImmutableDictionary(),
+							componentData.ErrorSources.IncludeGeneralErrors
+								? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
+								: ImmutableArray<string>.Empty ) );
 					if( componentData.Id == null ) {
 						children.AddEtherealControls( ph );
 						return ImmutableArray<Control>.Empty;

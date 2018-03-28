@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -14,8 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// set during modifications
 		internal string FocusKey { get; set; }
 		internal Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
-		internal IEnumerable<string> TopModificationErrors { get; set; }
 		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; }
+		internal IReadOnlyCollection<string> GeneralModificationErrors { get; set; }
 
 		// set before navigation and used to detect possible developer mistakes
 		internal string StaticRegionContents { get; private set; }
@@ -25,8 +26,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.pageState = pageState;
 			this.scrollPositionX = scrollPositionX;
 			this.scrollPositionY = scrollPositionY;
-			TopModificationErrors = new string[ 0 ];
 			InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
+			GeneralModificationErrors = ImmutableArray<string>.Empty;
 		}
 
 		internal PageState PageState => pageState;
@@ -34,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal string ScrollPositionX => scrollPositionX;
 		internal string ScrollPositionY => scrollPositionY;
 
-		internal bool ModificationErrorsExist => TopModificationErrors.Any();
+		internal bool ModificationErrorsExist => InLineModificationErrorsByDisplay.Any() || GeneralModificationErrors.Any();
 
 		internal void SetStaticAndUpdateRegionState( string staticRegionContents, IEnumerable<Tuple<string, string>> updateRegionKeysAndArguments ) {
 			StaticRegionContents = staticRegionContents;

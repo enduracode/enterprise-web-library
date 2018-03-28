@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -72,8 +71,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"",
 								new PreModificationUpdateRegion( updateRegionSets, component.ToCollection, () => "" ).ToCollection(),
 								arg => component.ToCollection() ).ToCollection(),
-							ImmutableArray<EwfValidation>.Empty,
-							errorsByValidation => new DisplayableElement(
+							new ErrorSourceSet(),
+							errorsBySource => new DisplayableElement(
 								context => {
 									var attributes = new List<Tuple<string, string>>();
 									if( visualOrderRank.HasValue || width != null )

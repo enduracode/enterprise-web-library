@@ -204,7 +204,7 @@ ewfModalSectionContainer > ewfSectionNormalStyleBothStates > ewfSectionContentCo
 }
 
 /* error messages */
-ewfErrorMessageControlListBlock {
+ewfErrorMessageListContainer {
 	font-weight: bold;
 }
 
@@ -216,7 +216,7 @@ ewfUiUserInfoControlList > ewfControlStackItem {
 	text-align: right;
 }
 ewfUiGlobalNavBlock,
-ewfUiTopErrorMessageControlListBlock,
+ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
 ewfUiSideTabGroupHead,
@@ -225,7 +225,7 @@ ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	padding-right: .5rem;
 }
 ewfUiGlobalNavBlock,
-ewfUiTopErrorMessageControlListBlock,
+ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
 ewfUiSideTabBlock {
@@ -240,7 +240,7 @@ ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalStates,
 ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllVisitedStates {
 	text-decoration: none;
 }
-ewfUiTopErrorMessageControlListBlock {
+ewfUiTopErrorMessageListContainer {
 	font-size: 1.4em;
 	margin: 1rem 0;
 }
@@ -313,7 +313,7 @@ ewfUiPoweredByEwlFooterBlock {
 @media print {
 	ewfUiUserInfoControlList,
 	ewfUiGlobalNavBlock,
-	ewfUiTopErrorMessageControlListBlock,
+	ewfUiTopErrorMessageListContainer,
 	ewfUiEntityNavAndActionBlock,
 	ewfUiSideTabBlockCell,
 	ewfUiContentFootBlock {

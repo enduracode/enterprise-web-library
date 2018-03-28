@@ -463,7 +463,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
+				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 				resetPage();
 			}
 
@@ -845,7 +845,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( ewfException == null )
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-				AppRequestState.Instance.EwfPageRequestState.TopModificationErrors = ewfException.Messages;
+				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = ewfException.Messages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
 					getStaticRegionContents( new Control[ 0 ] ).Item1,
 					new Tuple<string, string>[ 0 ] );
@@ -1008,9 +1008,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Func<FocusabilityCondition, bool> isFocusablePredicate;
 			if( modificationErrorsOccurred )
-				isFocusablePredicate = condition => condition.ErrorFocusabilityValidations.Any( i => ValidationsWithErrors.Contains( i ) ) ||
-				                                    ( condition.IsFocusableOnTopModificationError &&
-				                                      AppRequestState.Instance.EwfPageRequestState.TopModificationErrors.Any() );
+				isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => ValidationsWithErrors.Contains( i ) ) ||
+				                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors &&
+				                                      AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors.Any() );
 			else
 				isFocusablePredicate = condition => condition.IsNormallyFocusable;
 

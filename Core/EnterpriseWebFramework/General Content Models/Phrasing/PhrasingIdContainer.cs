@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -14,15 +13,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="children"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this component will be a part of.</param>
 		public PhrasingIdContainer( IEnumerable<PhrasingComponent> children, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
-			this.children =
-				new IdentifiedFlowComponent(
-					() =>
-					new IdentifiedComponentData<FlowComponentOrNode>(
-						"",
-						new UpdateRegionLinker( "", new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(), arg => this.ToCollection() )
+			this.children = new IdentifiedFlowComponent(
+				() => new IdentifiedComponentData<FlowComponentOrNode>(
+					"",
+					new UpdateRegionLinker( "", new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(), arg => this.ToCollection() )
 						.ToCollection(),
-						ImmutableArray<EwfValidation>.Empty,
-						errorsByValidation => children ) ).ToCollection();
+					new ErrorSourceSet(),
+					errorsBySource => children ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

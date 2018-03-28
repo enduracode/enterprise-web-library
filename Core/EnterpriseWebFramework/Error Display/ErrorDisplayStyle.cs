@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A display style for modification errors.
 	/// </summary>
-	public interface ErrorDisplayStyle {
+	public interface ErrorDisplayStyle<out ComponentType> where ComponentType: PageComponent {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		IEnumerable<Control> GetControls( IEnumerable<string> errors );
+		IReadOnlyCollection<ComponentType> GetComponents( IEnumerable<string> errors );
 	}
 }

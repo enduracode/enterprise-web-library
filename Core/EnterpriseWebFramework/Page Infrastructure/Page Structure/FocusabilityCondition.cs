@@ -1,20 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A condition that determines whether an element is focusable.
 	/// </summary>
 	public sealed class FocusabilityCondition {
 		internal bool IsNormallyFocusable { get; }
-		internal IReadOnlyCollection<EwfValidation> ErrorFocusabilityValidations { get; }
-		internal bool IsFocusableOnTopModificationError { get; }
+		internal ErrorSourceSet ErrorFocusabilitySources { get; }
 
-		public FocusabilityCondition(
-			bool isNormallyFocusable, IEnumerable<EwfValidation> errorFocusabilityValidations = null, bool isFocusableOnTopModificationError = false ) {
+		public FocusabilityCondition( bool isNormallyFocusable, ErrorSourceSet errorFocusabilitySources = null ) {
 			IsNormallyFocusable = isNormallyFocusable;
-			ErrorFocusabilityValidations = errorFocusabilityValidations?.ToImmutableArray() ?? ImmutableArray<EwfValidation>.Empty;
-			IsFocusableOnTopModificationError = isFocusableOnTopModificationError;
+			ErrorFocusabilitySources = errorFocusabilitySources ?? new ErrorSourceSet();
 		}
 	}
 }

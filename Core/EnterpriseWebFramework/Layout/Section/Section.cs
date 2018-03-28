@@ -9,6 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An HTML section.
 	/// </summary>
+	// When we convert this to a component, uncomment and fix SectionErrorDisplayStyle.
 	public sealed class Section: WebControl {
 		// This class allows us to use just one selector in the SectionAllStylesBothStates element.
 		private const string allStylesBothStatesClass = "ewfSec";

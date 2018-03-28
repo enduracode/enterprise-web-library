@@ -383,9 +383,7 @@
     <Compile Include="EnterpriseWebFramework\Element Base\ElementLocalData.cs" />
     <Compile Include="EnterpriseWebFramework\EmailSendingFormItems.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\ErrorDisplayStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Error Display\ModificationErrorPlaceholder.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="EnterpriseWebFramework\Error Display\FlowErrorContainer.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\Styles\CustomErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\Styles\ListErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\Styles\SectionErrorDisplayStyle.cs" />
@@ -559,6 +557,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlTreeDataLoader.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlWithJsInitLogic.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ErrorSourceSet.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\FocusabilityCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\FormValue.cs" />

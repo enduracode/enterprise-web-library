@@ -58,18 +58,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											() => "" ) ),
 									arg => ImmutableArray<PageComponent>.Empty )
 							},
-						ImmutableArray<EwfValidation>.Empty,
-						errorsByValidation => hideIfEmpty && !items.Any()
-							                      ? Enumerable.Empty<FlowComponentOrNode>()
-							                      : new DisplayableElement(
-								                      context => {
-									                      return new DisplayableElementData(
-										                      displaySetup,
-										                      () => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
-										                      classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
-										                      children: itemComponents,
-										                      etherealChildren: etherealChildren );
-								                      } ).ToCollection() ) ).ToCollection();
+						new ErrorSourceSet(),
+						errorsBySource => hideIfEmpty && !items.Any()
+							                  ? Enumerable.Empty<FlowComponentOrNode>()
+							                  : new DisplayableElement(
+								                  context => {
+									                  return new DisplayableElementData(
+										                  displaySetup,
+										                  () => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
+										                  classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
+										                  children: itemComponents,
+										                  etherealChildren: etherealChildren );
+								                  } ).ToCollection() ) ).ToCollection();
 			};
 		}
 

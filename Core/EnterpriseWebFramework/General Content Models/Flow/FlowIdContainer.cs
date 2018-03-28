@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -19,8 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					"",
 					new UpdateRegionLinker( "", new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(), arg => this.ToCollection() )
 						.ToCollection(),
-					ImmutableArray<EwfValidation>.Empty,
-					errorsByValidation => children ) ).ToCollection();
+					new ErrorSourceSet(),
+					errorsBySource => children ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

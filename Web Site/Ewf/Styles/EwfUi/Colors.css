@@ -45,10 +45,10 @@ ewfActionControlAllButtonStylesAllStates {
 }
 
 /* error messages */
-ewfErrorMessageControlListBlock {
+ewfErrorMessageListContainer {
 	color: hsla( 0, 100%, 47%, 1 );
 }
-ewfUiTopErrorMessageControlListBlock {
+ewfUiTopErrorMessageListContainer {
 	background-color: hsla( 0, 100%, 47%, 1 );
 }
 
@@ -59,7 +59,7 @@ ewfUiGlobalNavBlock {
 ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates {
 	color: hsla( 193, 27%, 90%, 1 );
 }
-ewfUiTopErrorMessageControlListBlock {
+ewfUiTopErrorMessageListContainer {
 	color: white;
 }
 ewfUiEntityBlock {
