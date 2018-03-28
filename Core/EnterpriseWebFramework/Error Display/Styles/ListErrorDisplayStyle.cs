@@ -23,22 +23,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly Func<IEnumerable<string>, IReadOnlyCollection<FlowComponent>> componentGetter;
+		private readonly Func<ErrorSourceSet, IEnumerable<string>, bool, IReadOnlyCollection<FlowComponent>> componentGetter;
 
 		/// <summary>
 		/// Creates a list error-display style.
 		/// </summary>
 		/// <param name="classes">The classes on the list container.</param>
 		public ListErrorDisplayStyle( ElementClassSet classes = null ) {
-			componentGetter = errors => new GenericFlowContainer(
-				new StackList(
-					from i in errors
-					select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
-						.Concat( " {0}".FormatWith( i ).ToComponents() )
-						.ToComponentListItem() ).ToCollection(),
-				classes: containerClass.Add( classes ?? ElementClassSet.Empty ) ).ToCollection();
+			componentGetter = ( errorSources, errors, componentsFocusableOnError ) => new DisplayableElement(
+				context => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData(
+						"div",
+						new FocusabilityCondition( false, errorFocusabilitySources: componentsFocusableOnError ? errorSources : null ),
+						isFocused => new DisplayableElementFocusDependentData() ),
+					classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
+					children: new StackList(
+						from i in errors
+						select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
+							.Concat( " {0}".FormatWith( i ).ToComponents() )
+							.ToComponentListItem() ).ToCollection() ) ).ToCollection();
 		}
 
-		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents( IEnumerable<string> errors ) => componentGetter( errors );
+		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents(
+			ErrorSourceSet errorSources, IEnumerable<string> errors, bool componentsFocusableOnError ) =>
+			componentGetter( errorSources, errors, componentsFocusableOnError );
 	}
 }

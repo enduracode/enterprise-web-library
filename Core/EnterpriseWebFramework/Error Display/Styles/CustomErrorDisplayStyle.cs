@@ -6,18 +6,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A style that displays errors in a custom way.
 	/// </summary>
 	public class CustomErrorDisplayStyle: ErrorDisplayStyle<FlowComponent> {
-		private readonly Func<IEnumerable<string>, IReadOnlyCollection<FlowComponent>> componentGetter;
+		private readonly Func<ErrorSourceSet, IEnumerable<string>, bool, IReadOnlyCollection<FlowComponent>> componentGetter;
 
 		/// <summary>
 		/// Creates a custom error-display style.
 		/// </summary>
 		/// <param name="componentGetter"></param>
-		public CustomErrorDisplayStyle( Func<IEnumerable<string>, IReadOnlyCollection<FlowComponent>> componentGetter ) {
+		public CustomErrorDisplayStyle( Func<ErrorSourceSet, IEnumerable<string>, bool, IReadOnlyCollection<FlowComponent>> componentGetter ) {
 			this.componentGetter = componentGetter;
 		}
 
-		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents( IEnumerable<string> errors ) {
-			return componentGetter( errors );
-		}
+		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents(
+			ErrorSourceSet errorSources, IEnumerable<string> errors, bool componentsFocusableOnError ) =>
+			componentGetter( errorSources, errors, componentsFocusableOnError );
 	}
 }

@@ -13,13 +13,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public FlowErrorContainer( ErrorSourceSet errorSources, ErrorDisplayStyle<FlowComponent> displayStyle ) {
 			children = new IdentifiedFlowComponent(
-					() => new IdentifiedComponentData<FlowComponentOrNode>(
-						"",
-						Enumerable.Empty<UpdateRegionLinker>(),
+				() => new IdentifiedComponentData<FlowComponentOrNode>(
+					"",
+					Enumerable.Empty<UpdateRegionLinker>(),
+					errorSources,
+					errorsBySource => displayStyle.GetComponents(
 						errorSources,
-						errorsBySource =>
-							displayStyle.GetComponents( errorSources.Validations.SelectMany( errorsBySource.GetValidationErrors ).Concat( errorsBySource.GetGeneralErrors() ) ) ) )
-				.ToCollection();
+						errorSources.Validations.SelectMany( errorsBySource.GetValidationErrors ).Concat( errorsBySource.GetGeneralErrors() ),
+						true ) ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

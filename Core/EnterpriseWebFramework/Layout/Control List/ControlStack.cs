@@ -111,7 +111,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					new Func<ControlListItem>(
 						() => {
 							var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
-							return new ControlListItem( new PlaceHolder().AddControlsReturnThis( displayStyle.GetComponents( errors ).GetControls() ).ToCollection() );
+							return new ControlListItem(
+								new PlaceHolder()
+									.AddControlsReturnThis( displayStyle.GetComponents( new ErrorSourceSet( validations: validation.ToCollection() ), errors, true ).GetControls() )
+									.ToCollection() );
 						} ),
 					true ) );
 		}
