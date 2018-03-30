@@ -111,10 +111,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					new Func<ControlListItem>(
 						() => {
 							var errors = EwfPage.Instance.AddModificationErrorDisplayAndGetErrors( this, modErrorDisplayKeySuffix++.ToString(), validation );
+							if( errors.Any() )
+								EwfPage.Instance.ValidationsWithErrors.Add( validation );
 							return new ControlListItem(
-								new PlaceHolder()
-									.AddControlsReturnThis( displayStyle.GetComponents( new ErrorSourceSet( validations: validation.ToCollection() ), errors, true ).GetControls() )
-									.ToCollection() );
+								errors.Any()
+									? new PlaceHolder()
+										.AddControlsReturnThis( displayStyle.GetComponents( new ErrorSourceSet( validations: validation.ToCollection() ), errors, true ).GetControls() )
+										.ToCollection()
+									: Enumerable.Empty<Control>() );
 						} ),
 					true ) );
 		}
