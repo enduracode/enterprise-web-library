@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal string FocusKey { get; set; }
 		internal Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
 		internal Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; }
-		internal IReadOnlyCollection<string> GeneralModificationErrors { get; set; }
+		internal IReadOnlyCollection<TrustedHtmlString> GeneralModificationErrors { get; set; }
 
 		// set before navigation and used to detect possible developer mistakes
 		internal string StaticRegionContents { get; private set; }
@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.scrollPositionX = scrollPositionX;
 			this.scrollPositionY = scrollPositionY;
 			InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
-			GeneralModificationErrors = ImmutableArray<string>.Empty;
+			GeneralModificationErrors = ImmutableArray<TrustedHtmlString>.Empty;
 		}
 
 		internal PageState PageState => pageState;

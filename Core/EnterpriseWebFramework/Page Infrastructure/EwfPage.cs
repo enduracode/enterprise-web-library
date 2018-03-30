@@ -845,7 +845,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( dmException == null )
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.Messages;
+				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.HtmlMessages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
 					getStaticRegionContents( new Control[ 0 ] ).Item1,
 					new Tuple<string, string>[ 0 ] );
@@ -877,7 +877,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid( requestState.PostBackValues ) select i.GetPostBackValueKey();
 				requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 
-				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml );
+				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
 			}
 		}
 

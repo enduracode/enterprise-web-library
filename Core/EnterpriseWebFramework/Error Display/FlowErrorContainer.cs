@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -19,7 +20,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					errorSources,
 					errorsBySource => displayStyle.GetComponents(
 						errorSources,
-						errorSources.Validations.SelectMany( errorsBySource.GetValidationErrors ).Concat( errorsBySource.GetGeneralErrors() ),
+						errorSources.Validations.SelectMany( errorsBySource.GetValidationErrors )
+							.Select( i => new TrustedHtmlString( HttpUtility.HtmlEncode( i ) ) )
+							.Concat( errorsBySource.GetGeneralErrors() ),
 						true ) ) ).ToCollection();
 		}
 

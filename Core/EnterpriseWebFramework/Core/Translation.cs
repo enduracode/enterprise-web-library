@@ -20,30 +20,21 @@
 			}
 		}
 
-		internal static string ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction {
-			get {
-				return getCorrectTranslation(
-					"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
-					"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." );
-			}
-		}
+		internal static TrustedHtmlString ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction => new TrustedHtmlString(
+			getCorrectTranslation(
+				"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
+				"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." ) );
 
-		internal static string AnotherUserHasModifiedPageHtml {
-			get {
-				return getCorrectTranslation(
-					       "Another user has modified this page since the last time you saw it.",
-					       "Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " + getCorrectTranslation(
-					       "Please either " + NetTools.BuildBasicLink( "load the latest version", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
-					       " or repeat your last action to save this version.",
-					       "Por favor, " + NetTools.BuildBasicLink( "carga la última versión", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
-					       " o repita la última acción para guardar a esta versión." ) + " " + getCorrectTranslation(
-					       "You can also " + NetTools.BuildBasicLink( "load the latest version in another window", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + ".",
-					       "También puede " + NetTools.BuildBasicLink(
-						       "cargar la versión más reciente en otra ventana",
-						       EwfPage.Instance.InfoAsBaseType.GetUrl(),
-						       true ) + "." );
-			}
-		}
+		internal static TrustedHtmlString AnotherUserHasModifiedPageHtml => new TrustedHtmlString(
+			getCorrectTranslation(
+				"Another user has modified this page since the last time you saw it.",
+				"Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " + getCorrectTranslation(
+				"Please either " + NetTools.BuildBasicLink( "load the latest version", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+				" or repeat your last action to save this version.",
+				"Por favor, " + NetTools.BuildBasicLink( "carga la última versión", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+				" o repita la última acción para guardar a esta versión." ) + " " + getCorrectTranslation(
+				"You can also " + NetTools.BuildBasicLink( "load the latest version in another window", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + ".",
+				"También puede " + NetTools.BuildBasicLink( "cargar la versión más reciente en otra ventana", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + "." ) );
 
 		internal static string AnotherUserHasModifiedPageAndWeCouldNotInterpretAction {
 			get {

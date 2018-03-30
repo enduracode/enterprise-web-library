@@ -4,10 +4,10 @@ using System.Collections.Immutable;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ModificationErrorDictionary {
 		private readonly ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> errorsByValidation;
-		private readonly IReadOnlyCollection<string> generalErrors;
+		private readonly IReadOnlyCollection<TrustedHtmlString> generalErrors;
 
 		internal ModificationErrorDictionary(
-			ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> errorsByValidation, IReadOnlyCollection<string> generalErrors ) {
+			ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> errorsByValidation, IReadOnlyCollection<TrustedHtmlString> generalErrors ) {
 			this.errorsByValidation = errorsByValidation;
 			this.generalErrors = generalErrors;
 		}
@@ -20,6 +20,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the general errors.
 		/// </summary>
-		public IReadOnlyCollection<string> GetGeneralErrors() => generalErrors;
+		public IReadOnlyCollection<TrustedHtmlString> GetGeneralErrors() => generalErrors;
 	}
 }

@@ -8,6 +8,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		IReadOnlyCollection<ComponentType> GetComponents( ErrorSourceSet errorSources, IEnumerable<string> errors, bool componentsFocusableOnError );
+		IReadOnlyCollection<ComponentType> GetComponents( ErrorSourceSet errorSources, IEnumerable<TrustedHtmlString> errors, bool componentsFocusableOnError );
 	}
 }

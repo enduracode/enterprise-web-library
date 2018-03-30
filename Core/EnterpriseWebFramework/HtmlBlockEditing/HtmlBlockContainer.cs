@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					displaySetup,
 					() => new DisplayableElementLocalData( "div" ),
 					classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
-					children: new MarkupBlockNode( () => html ).ToCollection() ) ).ToCollection();
+					children: new TrustedHtmlString( html ).ToComponent().ToCollection() ) ).ToCollection();
 		}
 
 		/// <summary>

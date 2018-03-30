@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -115,8 +116,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								EwfPage.Instance.ValidationsWithErrors.Add( validation );
 							return new ControlListItem(
 								errors.Any()
-									? new PlaceHolder()
-										.AddControlsReturnThis( displayStyle.GetComponents( new ErrorSourceSet( validations: validation.ToCollection() ), errors, true ).GetControls() )
+									? new PlaceHolder().AddControlsReturnThis(
+											displayStyle.GetComponents(
+													new ErrorSourceSet( validations: validation.ToCollection() ),
+													errors.Select( i => new TrustedHtmlString( HttpUtility.HtmlEncode( i ) ) ),
+													true )
+												.GetControls() )
 										.ToCollection()
 									: Enumerable.Empty<Control>() );
 						} ),

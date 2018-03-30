@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								errorDictionary.ToImmutableDictionary(),
 								componentData.ErrorSources.IncludeGeneralErrors
 									? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
-									: ImmutableArray<string>.Empty ) )
+									: ImmutableArray<TrustedHtmlString>.Empty ) )
 						.GetControls();
 					if( componentData.Id == null )
 						return children;
@@ -203,7 +203,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							errorDictionary.ToImmutableDictionary(),
 							componentData.ErrorSources.IncludeGeneralErrors
 								? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
-								: ImmutableArray<string>.Empty ) );
+								: ImmutableArray<TrustedHtmlString>.Empty ) );
 					if( componentData.Id == null ) {
 						children.AddEtherealControls( ph );
 						return ImmutableArray<Control>.Empty;

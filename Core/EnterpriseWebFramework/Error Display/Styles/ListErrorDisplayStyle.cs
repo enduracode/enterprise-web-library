@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly Func<ErrorSourceSet, IEnumerable<string>, bool, IReadOnlyCollection<FlowComponent>> componentGetter;
+		private readonly Func<ErrorSourceSet, IEnumerable<TrustedHtmlString>, bool, IReadOnlyCollection<FlowComponent>> componentGetter;
 
 		/// <summary>
 		/// Creates a list error-display style.
@@ -49,13 +49,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						children: new StackList(
 							from i in errors
 							select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
-								.Concat( " {0}".FormatWith( i ).ToComponents() )
+								.Concat( " ".ToComponents() )
+								.Append( i.ToComponent() )
 								.ToComponentListItem() ).ToCollection() ) ).ToCollection();
 			};
 		}
 
 		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents(
-			ErrorSourceSet errorSources, IEnumerable<string> errors, bool componentsFocusableOnError ) =>
+			ErrorSourceSet errorSources, IEnumerable<TrustedHtmlString> errors, bool componentsFocusableOnError ) =>
 			componentGetter( errorSources, errors, componentsFocusableOnError );
 	}
 }
+
+// NOTE: Spent :44 on this so far (24 mar).

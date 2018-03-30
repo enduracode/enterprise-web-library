@@ -447,6 +447,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\MailMergingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\MarkupBlockComponent.cs" />
     <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationDialog.cs" />
@@ -711,6 +712,7 @@
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="Tools\TimeSpanTools.cs" />
+    <Compile Include="TrustedHtmlString.cs" />
     <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="UnitTestingInitializationOps.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
