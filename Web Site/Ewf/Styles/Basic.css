@@ -325,6 +325,11 @@ ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 	margin-left: 2em;
 }
 
+/* error messages */
+ewfErrorMessageListContainer:focus {
+	outline: none;
+}
+
 /* EwfPage and master page */
 ewfTopWarningBlock {
 	z-index: 9998;

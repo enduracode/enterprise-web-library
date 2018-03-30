@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -30,19 +31,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="classes">The classes on the list container.</param>
 		public ListErrorDisplayStyle( ElementClassSet classes = null ) {
-			componentGetter = ( errorSources, errors, componentsFocusableOnError ) => new DisplayableElement(
-				context => new DisplayableElementData(
-					null,
-					() => new DisplayableElementLocalData(
-						"div",
-						new FocusabilityCondition( false, errorFocusabilitySources: componentsFocusableOnError ? errorSources : null ),
-						isFocused => new DisplayableElementFocusDependentData() ),
-					classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
-					children: new StackList(
-						from i in errors
-						select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
-							.Concat( " {0}".FormatWith( i ).ToComponents() )
-							.ToComponentListItem() ).ToCollection() ) ).ToCollection();
+			componentGetter = ( errorSources, errors, componentsFocusableOnError ) => {
+				if( !errors.Any() )
+					return ImmutableArray<FlowComponent>.Empty;
+
+				return new DisplayableElement(
+					context => new DisplayableElementData(
+						null,
+						() => new DisplayableElementLocalData(
+							"div",
+							new FocusabilityCondition( false, errorFocusabilitySources: componentsFocusableOnError ? errorSources : null ),
+							isFocused => new DisplayableElementFocusDependentData(
+								attributes: isFocused ? Tuple.Create( "tabindex", "-1" ).ToCollection() : null,
+								includeIdAttribute: isFocused,
+								jsInitStatements: isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) ),
+						classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
+						children: new StackList(
+							from i in errors
+							select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
+								.Concat( " {0}".FormatWith( i ).ToComponents() )
+								.ToComponentListItem() ).ToCollection() ) ).ToCollection();
+			};
 		}
 
 		IReadOnlyCollection<FlowComponent> ErrorDisplayStyle<FlowComponent>.GetComponents(
