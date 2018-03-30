@@ -22,45 +22,42 @@
 
 		internal static string ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction {
 			get {
-				return
-					getCorrectTranslation(
-						"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
-						"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." );
+				return getCorrectTranslation(
+					"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
+					"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." );
 			}
 		}
 
 		internal static string AnotherUserHasModifiedPageHtml {
 			get {
-				return
-					getCorrectTranslation( "Another user has modified this page since the last time you saw it.",
-					                       "Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " +
-					getCorrectTranslation(
-						"Please either " + NetTools.BuildBasicLink( "load the latest version", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
-						" or repeat your last action to save this version.",
-						"Por favor, " + NetTools.BuildBasicLink( "carga la última versión", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
-						" o repita la última acción para guardar a esta versión." ) + " " +
-					getCorrectTranslation(
-						"You can also " + NetTools.BuildBasicLink( "load the latest version in another window", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + ".",
-						"También puede " + NetTools.BuildBasicLink( "cargar la versión más reciente en otra ventana", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + "." );
+				return getCorrectTranslation(
+					       "Another user has modified this page since the last time you saw it.",
+					       "Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " + getCorrectTranslation(
+					       "Please either " + NetTools.BuildBasicLink( "load the latest version", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+					       " or repeat your last action to save this version.",
+					       "Por favor, " + NetTools.BuildBasicLink( "carga la última versión", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+					       " o repita la última acción para guardar a esta versión." ) + " " + getCorrectTranslation(
+					       "You can also " + NetTools.BuildBasicLink( "load the latest version in another window", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) + ".",
+					       "También puede " + NetTools.BuildBasicLink(
+						       "cargar la versión más reciente en otra ventana",
+						       EwfPage.Instance.InfoAsBaseType.GetUrl(),
+						       true ) + "." );
 			}
 		}
 
 		internal static string AnotherUserHasModifiedPageAndWeCouldNotInterpretAction {
 			get {
-				return
-					getCorrectTranslation( "Another user has modified this page since the last time you saw it and we couldn't interpret your last action. Please repeat it.",
-					                       "Otro usuario ha modificado esta página desde la última vez que lo vio y no pudo interpretar su última acción. Por favor, repita la misma." );
+				return getCorrectTranslation(
+					"Another user has modified this page since the last time you saw it and we couldn't interpret your last action. Please repeat it.",
+					"Otro usuario ha modificado esta página desde la última vez que lo vio y no pudo interpretar su última acción. Por favor, repita la misma." );
 			}
-		}
-
-		internal static string PleaseCorrectTheErrorsShownBelow {
-			get { return getCorrectTranslation( "Please correct the errors shown below.", "Por favor, corrija los errores que se muestran a continuación." ); }
 		}
 
 		internal static string YourBrowserHasCookiesDisabled {
 			get {
-				return getCorrectTranslation( "Your browser has cookies disabled. Cookies must be enabled in order for you to successfully log on.",
-				                              "Su navegador tiene deshabilitadas las cookies. Las cookies deben estar habilitadas para que usted pueda iniciar la sesión." );
+				return getCorrectTranslation(
+					"Your browser has cookies disabled. Cookies must be enabled in order for you to successfully log on.",
+					"Su navegador tiene deshabilitadas las cookies. Las cookies deben estar habilitadas para que usted pueda iniciar la sesión." );
 			}
 		}
 
@@ -69,10 +66,9 @@
 		/// </summary>
 		internal static string YourClockIsWrong {
 			get {
-				return
-					getCorrectTranslation(
-						"Your computer's clock is significantly off. This may prevent you from logging in or cause you to be logged out prematurely. The correct time is",
-						"El reloj de su ordenador está muy retrasada. Esto puede impedir que se puedan conectar o hacer que se cierre la sesión antes de tiempo. La hora exacta es" );
+				return getCorrectTranslation(
+					"Your computer's clock is significantly off. This may prevent you from logging in or cause you to be logged out prematurely. The correct time is",
+					"El reloj de su ordenador está muy retrasada. Esto puede impedir que se puedan conectar o hacer que se cierre la sesión antes de tiempo. La hora exacta es" );
 			}
 		}
 
@@ -120,8 +116,9 @@
 		/// </summary>
 		public static string YouWillBeSentToTheHomePage {
 			get {
-				return getCorrectTranslation( "You will be sent to the home page of the site in five seconds.",
-				                              "Se le enviará a la página principal del sitio web en cinco segundos." );
+				return getCorrectTranslation(
+					"You will be sent to the home page of the site in five seconds.",
+					"Se le enviará a la página principal del sitio web en cinco segundos." );
 			}
 		}
 

@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					validationErrorHandler( validation, validator.ErrorMessages );
 				}
 				if( errorsOccurred )
-					throw new DataModificationException( Translation.PleaseCorrectTheErrorsShownBelow );
+					throw new DataModificationException();
 			}
 
 			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !formValuesChanged );

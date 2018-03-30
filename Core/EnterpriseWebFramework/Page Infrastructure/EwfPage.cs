@@ -841,11 +841,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				method();
 			}
 			catch( Exception e ) {
-				var ewfException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
-				if( ewfException == null )
+				var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
+				if( dmException == null )
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = ewfException.Messages;
+				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.Messages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
 					getStaticRegionContents( new Control[ 0 ] ).Item1,
 					new Tuple<string, string>[ 0 ] );
