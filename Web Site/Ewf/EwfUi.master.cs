@@ -78,7 +78,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
 						new CssElement(
 							"UiTopErrorMessageListContainer",
-							ListErrorDisplayStyle.CssSelectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListContainerClass ).ToArray() )
+							ListErrorDisplayStyle.CssSelectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListContainerClass.ClassName ).ToArray() )
 					};
 			}
 
