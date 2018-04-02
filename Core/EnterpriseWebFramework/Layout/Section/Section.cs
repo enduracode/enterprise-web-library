@@ -72,18 +72,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			postHeadingControls = postHeadingControls?.ToArray() ?? new Control[ 0 ];
 			contentControls = contentControls?.ToArray() ?? new Control[ 0 ];
 
-			CssClass =
-				CssClass.ConcatenateWithSpace(
-					allStylesBothStatesClass + " " +
-					( style == SectionStyle.Normal
-						  ? getSectionClass( expanded, normalClosedClass, normalExpandedClass )
-						  : getSectionClass( expanded, boxClosedClass, boxExpandedClass ) ) );
+			CssClass = CssClass.ConcatenateWithSpace(
+				allStylesBothStatesClass + " " + ( style == SectionStyle.Normal
+					                                   ? getSectionClass( expanded, normalClosedClass, normalExpandedClass )
+					                                   : getSectionClass( expanded, boxClosedClass, boxExpandedClass ) ) );
 
 			if( heading.Any() ) {
-				var headingControls =
-					new WebControl( HtmlTextWriterTag.H1 ) { CssClass = headingClass }.AddControlsReturnThis( heading.ToComponents().GetControls() )
-						.ToCollection()
-						.Concat( postHeadingControls );
+				var headingControls = new WebControl( HtmlTextWriterTag.H1 ) { CssClass = headingClass }.AddControlsReturnThis( heading.ToComponents().GetControls() )
+					.ToCollection()
+					.Concat( postHeadingControls );
 				if( expanded.HasValue ) {
 					var toggleClasses = style == SectionStyle.Normal ? new[] { normalClosedClass, normalExpandedClass } : new[] { boxClosedClass, boxExpandedClass };
 
@@ -102,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									ActionControlStyle = actionControlStyle
 								}
-							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => { }, toggleClasses: toggleClasses ) as Control );
+							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => {}, toggleClasses: toggleClasses ) as Control );
 				}
 				else {
 					var headingContainer = new Block( headingControls.ToArray() ) { CssClass = headingClass };
