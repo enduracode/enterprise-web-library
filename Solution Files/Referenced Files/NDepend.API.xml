@@ -824,7 +824,7 @@
             It is extracted automatically from assemblies analyzed at analysis time.<br />
             A code rule gathered from a <see cref="T:NDepend.Attributes.CodeRuleAttribute" /> appears under a group named: "Rules extracted from Source Code".<br />
             Under this rule, code rules are grouped under the parent namespaces of code elements tagged by <see cref="T:NDepend.Attributes.CodeRuleAttribute" />.<br />
-            More information at <a href="http://www.ndepend.com/docs/declare-cqlinq-rules-in-csharp-or-vbnet-code">Rules extracted from code</a></remarks>
+            More information at <a href="https://www.ndepend.com/docs/declare-cqlinq-rules-in-csharp-or-vbnet-code">Rules extracted from code</a></remarks>
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.HasAttribute(NDepend.CodeModel.IAttributeTarget,System.String)" />
       <seealso cref="M:NDepend.CodeModel.IAttributeTarget.HasAttribute(NDepend.CodeModel.IType)" />
       <seealso cref="P:NDepend.CodeQuery.IQuery.IsExtractedFromCode" />
@@ -895,7 +895,7 @@
       <remarks>
             The default value is false.<br />
             A critical code rule is useful to break the build process once the rule is violated.<br />
-            More information at: <a href="http://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
+            More information at: <a href="https://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
     </member>
     <member name="T:NDepend.Attributes.ImmutableAttribute">
       <summary>
@@ -2620,6 +2620,68 @@
       <returns />
       <requires description="x1 is strictly lower than x2" csharp="x1 &lt; x2" vb="x1 &lt; x2">x1 &lt; x2</requires>
     </member>
+    <member name="T:NDepend.Helpers.ExtensionMethodsMisc">
+      <summary>
+            Presents miscellaneous helpers extension methods.
+            </summary>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0)">
+      <summary>
+            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" /> or <paramref name="item2" />.
+            </summary>
+      <typeparam name="T">The generic parameter value type of items.</typeparam>
+      <param name="item">
+        <i>this</i> items.</param>
+      <param name="item1">First item to compare to.</param>
+      <param name="item2">Second item to compare to.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0,``0)">
+      <summary>
+            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" />, <paramref name="item2" /> or <paramref name="item3" />.
+            </summary>
+      <typeparam name="T">The generic parameter value type of items.</typeparam>
+      <param name="item">
+        <i>this</i> items.</param>
+      <param name="item1">First item to compare to.</param>
+      <param name="item2">Second item to compare to.</param>
+      <param name="item3">Third item to compare to.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0,``0,``0)">
+      <summary>
+            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" />, <paramref name="item2" />, <paramref name="item3" /> or <paramref name="item4" />.
+            </summary>
+      <typeparam name="T">The generic parameter value type of items.</typeparam>
+      <param name="item">
+        <i>this</i> items.</param>
+      <param name="item1">First item to compare to.</param>
+      <param name="item2">Second item to compare to.</param>
+      <param name="item3">Third item to compare to.</param>
+      <param name="item4">Fourth item to compare to.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0[])">
+      <summary>
+            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals any item in <paramref name="items" />.
+            </summary>
+      <typeparam name="T">The generic parameter value type of items.</typeparam>
+      <param name="item">
+        <i>this</i> items.</param>
+      <param name="items">An array of items.</param>
+      <requires description="items must not be null" csharp="items != null" vb="items &lt;&gt; Nothing">items != null</requires>
+      <requires description="items must not be empty" csharp="items.Length &gt; 0" vb="items.Length &gt; 0">items.Length &gt; 0</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.ToNullableDouble(System.Object)">
+      <summary>
+            If <paramref name="obj" /> is a numeric primitive type, returns its value converted as double. else returns null.
+            </summary>
+      <param name="obj">The object</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.GetImage(NDepend.Helpers.TrendIcon)">
+      <summary>
+            Return the image corresponding to the trend icon value.
+            </summary>
+      <param name="trendIcon">The trend icon value</param>
+      <ensures description="returned image reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="T:NDepend.Helpers.TrendIcon">
       <summary>
             Value of this enumeration can be used in code query result to show a trend image that conveys meaning for both [Up,Down] and [Red,Green] indications.
@@ -2829,68 +2891,6 @@
       <summary>
             Indicates whether this code query relies on <seealso cref="F:NDepend.CodeQuery.QueryRelyOn.IssuesSet" /> or on <see cref="F:NDepend.CodeQuery.QueryRelyOn.IssuesSetDiff" />.
             </summary>
-    </member>
-    <member name="T:NDepend.Helpers.ExtensionMethodsMisc">
-      <summary>
-            Presents miscellaneous helpers extension methods.
-            </summary>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.ToNullableDouble(System.Object)">
-      <summary>
-            If <paramref name="obj" /> is a numeric primitive type, returns its value converted as double. else returns null.
-            </summary>
-      <param name="obj">The object</param>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0)">
-      <summary>
-            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" /> or <paramref name="item2" />.
-            </summary>
-      <typeparam name="T">The generic parameter value type of items.</typeparam>
-      <param name="item">
-        <i>this</i> items.</param>
-      <param name="item1">First item to compare to.</param>
-      <param name="item2">Second item to compare to.</param>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0,``0)">
-      <summary>
-            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" />, <paramref name="item2" /> or <paramref name="item3" />.
-            </summary>
-      <typeparam name="T">The generic parameter value type of items.</typeparam>
-      <param name="item">
-        <i>this</i> items.</param>
-      <param name="item1">First item to compare to.</param>
-      <param name="item2">Second item to compare to.</param>
-      <param name="item3">Third item to compare to.</param>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0,``0,``0,``0)">
-      <summary>
-            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals <paramref name="item1" />, <paramref name="item2" />, <paramref name="item3" /> or <paramref name="item4" />.
-            </summary>
-      <typeparam name="T">The generic parameter value type of items.</typeparam>
-      <param name="item">
-        <i>this</i> items.</param>
-      <param name="item1">First item to compare to.</param>
-      <param name="item2">Second item to compare to.</param>
-      <param name="item3">Third item to compare to.</param>
-      <param name="item4">Fourth item to compare to.</param>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.EqualsAny``1(``0,``0[])">
-      <summary>
-            Returns <i>true</i> if <i>this</i><paramref name="item" /> equals any item in <paramref name="items" />.
-            </summary>
-      <typeparam name="T">The generic parameter value type of items.</typeparam>
-      <param name="item">
-        <i>this</i> items.</param>
-      <param name="items">An array of items.</param>
-      <requires description="items must not be null" csharp="items != null" vb="items &lt;&gt; Nothing">items != null</requires>
-      <requires description="items must not be empty" csharp="items.Length &gt; 0" vb="items.Length &gt; 0">items.Length &gt; 0</requires>
-    </member>
-    <member name="M:NDepend.Helpers.ExtensionMethodsMisc.GetImage(NDepend.Helpers.TrendIcon)">
-      <summary>
-            Return the image corresponding to the trend icon value.
-            </summary>
-      <param name="trendIcon">The trend icon value</param>
-      <ensures description="returned image reference is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
     <member name="T:NDepend.Issue.IIssuesSet">
       <summary>
@@ -5313,6 +5313,9 @@
             (this is the <paramref name="annualInterest" />) then the breaking point is equal to 5 years from now.<br />
             Notice that a breaking point <i>lower than</i> a year means that during the next 12 monthes, it would be cheaper to fix the debt than not to fix it.<br />
             This method accepts <see cref="T:NDepend.TechnicalDebt.AnnualInterest" />.<see cref="F:NDepend.TechnicalDebt.AnnualInterest.Zero" /> value for <paramref name="annualInterest" />, in which case it returns <see cref="T:System.TimeSpan" />.<see cref="F:System.TimeSpan.Zero" />.
+            If <paramref name="annualInterest" /> is zero, then this method returns a zero <see cref="T:System.TimeSpan" />.<br />
+            If the division leads to a too large value to be handled by <see cref="T:System.TimeSpan" />, this method will return <see cref="T:System.TimeSpan" />.<see cref="F:System.TimeSpan.MaxValue" /> or <see cref="T:System.TimeSpan" />.<see cref="F:System.TimeSpan.MinValue" />
+            depending on the sign of the too large value.
             </remarks>
       <param name="debt">The estimated cost-to-fix a set of issues, it can be negative in case of debt-diff value.</param>
       <param name="annualInterest">The estimated cost-to-not-fix per year a set of issue, it can be negative in case of annual-interest-diff value.</param>
@@ -6101,6 +6104,9 @@
     <member name="F:NDepend.DotNet.DotNetProfile.AspNetMvc">
       <summary>AspNetMvc</summary>
     </member>
+    <member name="F:NDepend.DotNet.DotNetProfile.DotNetCore">
+      <summary>DotNetCore</summary>
+    </member>
     <member name="T:NDepend.Helpers.ExtensionMethodsFailure">
       <summary>
             Presents helpers to deal with exceptions.
@@ -6349,6 +6355,18 @@
       <requires description="seq must not be null" csharp="seq != null" vb="seq &lt;&gt; Nothing">seq != null</requires>
       <ensures description="returned hashset object is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsSet.ToHashSet``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+      <summary>
+            Creates an hashset from a <i>IEnumerable&lt;T&gt;</i>.
+            </summary>
+      <typeparam name="T">The type of the elements of <paramref name="seq" />.</typeparam>
+      <param name="seq">An <i>IEnumerable&lt;T&gt;</i> to create an hashset from.</param>
+      <param name="equalityComparer">The equality comparer on elements.</param>
+      <returns>An hashset that contains the elements from the input sequence.</returns>
+      <requires description="seq must not be null" csharp="seq != null" vb="seq &lt;&gt; Nothing">seq != null</requires>
+      <requires description="equalityComparer must not be null" csharp="equalityComparer != null" vb="equalityComparer &lt;&gt; Nothing">equalityComparer != null</requires>
+      <ensures description="returned hashset object is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsSet.Intersect``1(System.Collections.Generic.HashSet{``0},System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Produces the set of elements, intersection of this <paramref name="hashset" /> and <paramref name="seq" />. This method is an optimized version of <i>Enumerable.Intersect&lt;T&gt;</i>.
@@ -6510,6 +6528,13 @@
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
       <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
     </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.EqualsAny(System.String,System.String[])">
+      <summary>Gets a value indicating whether this string is equal <i>case sensitive</i> to any of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="array">An array containing possible values for <paramref name="thisString" />.</param>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
+    </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EqualsAny(System.String,System.Collections.Generic.HashSet{System.String})">
       <summary>Gets a value indicating whether <paramref name="hashset" /> contains the string <paramref name="thisString" />.</summary>
       <remarks>This <see cref="M:NDepend.Helpers.ExtensionMethodsString.EqualsAny(System.String,System.String,System.String)" /> overload can be used to check the value of <paramref name="thisString" /> against a large number of strings, in a constant time.</remarks>
@@ -6518,8 +6543,74 @@
       <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
       <requires description="hashset must not be null" csharp="hashset != null" vb="hashset &lt;&gt; Nothing">hashset != null</requires>
     </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.ContainsAny(System.String,System.String,System.String)">
+      <summary>Gets a value indicating whether this string contains any <i>case sensitive</i> of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="str0">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str1">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="str0 must not be null" csharp="str0 != null" vb="str0 &lt;&gt; Nothing">str0 != null</requires>
+      <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.ContainsAny(System.String,System.String,System.String,System.String)">
+      <summary>Gets a value indicating whether this string contains any <i>case sensitive</i> of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="str0">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str1">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str2">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="str0 must not be null" csharp="str0 != null" vb="str0 &lt;&gt; Nothing">str0 != null</requires>
+      <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
+      <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.ContainsAny(System.String,System.String,System.String,System.String,System.String)">
+      <summary>Gets a value indicating whether this string contains any <i>case sensitive</i> of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="str0">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str1">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str2">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str3">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="str0 must not be null" csharp="str0 != null" vb="str0 &lt;&gt; Nothing">str0 != null</requires>
+      <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
+      <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
+      <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.ContainsAny(System.String,System.String,System.String,System.String,System.String,System.String)">
+      <summary>Gets a value indicating whether this string contains any <i>case sensitive</i> of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="str0">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str1">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str2">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str3">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str4">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="str0 must not be null" csharp="str0 != null" vb="str0 &lt;&gt; Nothing">str0 != null</requires>
+      <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
+      <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
+      <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
+      <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.ContainsAny(System.String,System.String,System.String,System.String,System.String,System.String,System.String[])">
+      <summary>Gets a value indicating whether this string contains any <i>case sensitive</i> of the strings specified.</summary>
+      <param name="thisString">This string.</param>
+      <param name="str0">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str1">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str2">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str3">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="str4">One of the string that might be contained by <paramref name="thisString" />.</param>
+      <param name="array">An array of possible strings contained by <paramref name="thisString" />.</param>
+      <exception cref="T:System.NullReferenceException">null string reference in <paramref name="array" /> not accepted.</exception>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="str0 must not be null" csharp="str0 != null" vb="str0 &lt;&gt; Nothing">str0 != null</requires>
+      <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
+      <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
+      <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
+      <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
+      <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
+    </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible start string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible start string for <paramref name="thisString" />.</param>
@@ -6528,7 +6619,7 @@
       <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible start string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible start string for <paramref name="thisString" />.</param>
@@ -6539,7 +6630,7 @@
       <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible start string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible start string for <paramref name="thisString" />.</param>
@@ -6552,7 +6643,7 @@
       <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String,System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible start string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible start string for <paramref name="thisString" />.</param>
@@ -6567,7 +6658,7 @@
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String,System.String,System.String,System.String,System.String,System.String[])">
-      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible start string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible start string for <paramref name="thisString" />.</param>
@@ -6584,8 +6675,16 @@
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
       <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
     </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.StartsWithAny(System.String,System.String[])">
+      <summary>Gets a value indicating whether this string starts with <i>case sensitive</i> any of the strings in <paramref name="array" />.</summary>
+      <param name="thisString">This string.</param>
+      <param name="array">An array containing possible start strings for <paramref name="thisString" />.</param>
+      <exception cref="T:System.NullReferenceException">null string reference in <paramref name="array" /> not accepted.</exception>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
+    </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible end string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible end string for <paramref name="thisString" />.</param>
@@ -6594,7 +6693,7 @@
       <requires description="str1 must not be null" csharp="str1 != null" vb="str1 &lt;&gt; Nothing">str1 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible end string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible end string for <paramref name="thisString" />.</param>
@@ -6605,7 +6704,7 @@
       <requires description="str2 must not be null" csharp="str2 != null" vb="str2 &lt;&gt; Nothing">str2 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible end string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible end string for <paramref name="thisString" />.</param>
@@ -6618,7 +6717,7 @@
       <requires description="str3 must not be null" csharp="str3 != null" vb="str3 &lt;&gt; Nothing">str3 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String,System.String,System.String,System.String,System.String)">
-      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible end string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible end string for <paramref name="thisString" />.</param>
@@ -6633,7 +6732,7 @@
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
     </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String,System.String,System.String,System.String,System.String,System.String[])">
-      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> to any of the strings specified.</summary>
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings specified.</summary>
       <param name="thisString">This string.</param>
       <param name="str0">One of the possible end string for <paramref name="thisString" />.</param>
       <param name="str1">One of the possible end string for <paramref name="thisString" />.</param>
@@ -6650,6 +6749,24 @@
       <requires description="str4 must not be null" csharp="str4 != null" vb="str4 &lt;&gt; Nothing">str4 != null</requires>
       <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
     </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.EndsWithAny(System.String,System.String[])">
+      <summary>Gets a value indicating whether this string ends with <i>case sensitive</i> any of the strings in <paramref name="array" />.</summary>
+      <param name="thisString">This string.</param>
+      <param name="array">An array containing possible end strings for <paramref name="thisString" />.</param>
+      <exception cref="T:System.NullReferenceException">null string reference in <paramref name="array" /> not accepted.</exception>
+      <requires description="str must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
+      <requires description="strs must not be null" csharp="array != null" vb="array &lt;&gt; Nothing">array != null</requires>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.Aggregate(System.Collections.Generic.IEnumerable{System.String},System.String)">
+      <summary>
+            Aggregate string in this <paramref name="seq" />, with the string <paramref name="separator" /> between each strings.
+            </summary>
+      <param name="seq">The sequence of strings to aggregate.</param>
+      <param name="separator">The separator string in between each string aggregated.</param>
+      <requires description="seq must not be null but can be empty" csharp="seq != null" vb="seq &lt;&gt; Nothing">seq != null</requires>
+      <requires description="separator must not be null but can be empty" csharp="separator != null" vb="separator &lt;&gt; Nothing">separator != null</requires>
+      <ensures description="returned string is not null but can be empty" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="M:NDepend.Helpers.ExtensionMethodsString.Get4BytesHashCodeFast(System.String)">
       <summary>
             Get a 4 bytes string hash code, case-sensitive.
@@ -6657,7 +6774,7 @@
       <param name="thisString">The string to get hash code for.</param>
       <remarks>
             This method is about 4 times more performant than <i>StringComparer.OrdinalIgnoreCase.GetHashCode(str)</i>.<br />
-            It treats characters two by two by using pointers.
+            It processes characters two by two by using pointers.
             </remarks>
       <requires description="thisString must not be null" csharp="thisString != null" vb="thisString &lt;&gt; Nothing">thisString != null</requires>
     </member>
@@ -6676,6 +6793,35 @@
             An alternative to <i>string.IsNullOrEmpty()</i> with less characters.
             </remarks>
       <param name="str">The string reference.</param>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.GetNullOrEmptyDescElseGetString(System.String)">
+      <summary>
+            If <paramref name="str" /> is null, returns the string "null".<br />
+            If <paramref name="str" /> is empty, returns the string "empty".<br />
+            Else return <paramref name="str" />.
+            </summary>
+      <param name="str">The string reference.</param>
+      <ensures description="returned string is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      <ensures description="returned string is not empty" csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
+    </member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.GetWords(System.String)">
+      <summary>
+            Get the words in a code <paramref name="identifier" />.
+            </summary>
+      <param name="identifier">The code <paramref name="identifier" /></param> to extract words from.
+            <remarks>
+            Typically the <paramref name="identifier" /> is the <see cref="T:NDepend.CodeModel.ICodeElement" />.<see cref="P:NDepend.CodeModel.ICodeElement.SimpleName" />.<br />
+            For a complete behavior description, see this method source code and tests here: https://stackoverflow.com/a/48185710/27194
+            </remarks><ensures description="returned array of string is not null but can be empty" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures></member>
+    <member name="M:NDepend.Helpers.ExtensionMethodsString.FirstCharToUpper(System.String)">
+      <summary>
+            Return <paramref name="word" /> with first char as upper case.
+            </summary>
+      <param name="word">The word to get first char as upper case.</param>
+      <returns />
+      <requires description="word must not be null" csharp="word != null" vb="word &lt;&gt; Nothing">word != null</requires>
+      <ensures description="returned string is not null" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+      <ensures description="returned string length is equal to word length" csharp="result.Length == word.Length" vb="result.Length = word.Length">result.Length == word.Length</ensures>
     </member>
     <member name="T:NDepend.Helpers.ExtensionMethodsTimeSpan">
       <summary>
@@ -8049,17 +8195,20 @@
       <summary>
             This tag is replaced by the string obtained from the method <see cref="T:NDepend.TechnicalDebt.IDebtFormatter" />.<see cref="M:NDepend.TechnicalDebt.IDebtFormatter.ToMoneyStringDetailled(System.TimeSpan)" />.
             </summary>
+      <remarks>There is a typo in the field name on 'Detailed' but we prefer to not set this field as obsolete just for a typo.</remarks>
       <seealso cref="M:NDepend.TechnicalDebt.IDebtFormatter.ToMoney(System.TimeSpan)" />
     </member>
     <member name="F:NDepend.TechnicalDebt.DebtStringFormat.TAG_MAN_DAY_DOUBLE">
       <summary>
             This tag is replaced by the total double number of man-days represented by the duration.
             </summary>
+      <remarks>There is a typo on 'detailed' with on 'L' we prefer to not set this field as obsolete just for a typo.</remarks>
     </member>
     <member name="F:NDepend.TechnicalDebt.DebtStringFormat.TAG_MAN_DAY_DETAILLED">
       <summary>
             This tag is replaced by the string obtained from the method <see cref="T:NDepend.TechnicalDebt.IDebtFormatter" />.<see cref="M:NDepend.TechnicalDebt.IDebtFormatter.ToManDayStringDetailled(System.TimeSpan)" />.
             </summary>
+      <remarks>There is a typo in the field name on 'Detailed' but we prefer to not set this field as obsolete just for a typo.</remarks>
     </member>
     <member name="F:NDepend.TechnicalDebt.DebtStringFormat.TAG_MAN_DAY">
       <summary>
@@ -8075,6 +8224,7 @@
       <summary>
             This tag is replaced by the string obtained from the method <see cref="T:NDepend.TechnicalDebt.IDebtFormatter" />.<see cref="M:NDepend.TechnicalDebt.IDebtFormatter.ToManMonthStringDetailled(System.TimeSpan)" />.
             </summary>
+      <remarks>There is a typo in the field name on 'Detailed' but we prefer to not set this field as obsolete just for a typo.</remarks>
     </member>
     <member name="F:NDepend.TechnicalDebt.DebtStringFormat.TAG_MAN_MONTH">
       <summary>
@@ -8090,6 +8240,7 @@
       <summary>
             This tag is replaced by the string obtained from the method <see cref="T:NDepend.TechnicalDebt.IDebtFormatter" />.<see cref="M:NDepend.TechnicalDebt.IDebtFormatter.ToManYearStringDetailled(System.TimeSpan)" />.
             </summary>
+      <remarks>There is a typo in the field name on 'Detailed' but we prefer to not set this field as obsolete just for a typo.</remarks>
     </member>
     <member name="F:NDepend.TechnicalDebt.DebtStringFormat.TAG_MAN_YEAR">
       <summary>
@@ -8318,6 +8469,8 @@
       <remarks>
             This <see cref="T:NDepend.TechnicalDebt.IDebtFormatter" /> object has been created from a <see cref="P:NDepend.TechnicalDebt.IDebtFormatter.DebtSettings" /> object.<br />
             The amount of money is expressed in <i>this</i>.<see cref="P:NDepend.TechnicalDebt.IDebtFormatter.DebtSettings" />.<see cref="P:NDepend.TechnicalDebt.DebtSettings.Currency" /> and is computed from the setting <i>this</i>.<see cref="P:NDepend.TechnicalDebt.IDebtFormatter.DebtSettings" />.<see cref="P:NDepend.TechnicalDebt.DebtSettings.MoneyPerManHour" />.
+            <br />
+            There is a typo in the method name on 'Detailed' but we prefer to not set this method as obsolete just for a typo.
             </remarks>
       <param name="duration">The duration to evaluate as money</param>
       <ensures description="returned string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
@@ -8402,6 +8555,8 @@
             "1 234d  2:02:43" <br />  
             "2:02:43" if duration is less than a man-days<br />
             "2min 43s" if duration is less than an hour
+            <br />
+            There is a typo in the method name on 'Detailed' but we prefer to not set this method as obsolete just for a typo.
             </remarks>
       <ensures description="returned string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
@@ -8486,7 +8641,9 @@
             "1m  12d  2:02:43" if duration is at least a man-month<br />
             "12d  2:02:43" if duration is less than a man-month<br />  
             "2:02:43" if duration is less than a man-day<br />
-            "2min 43s" if duration is less than an hour<br /></remarks>
+            "2min 43s" if duration is less than an hour<br /><br />
+            There is a typo in the method name on 'Detailed' but we prefer to not set this method as obsolete just for a typo.
+            </remarks>
       <ensures description="returned string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
     </member>
@@ -8572,7 +8729,9 @@
             "1m  12d  2:02:43" if duration is at least a man-month<br />
             "12d  2:02:43" if duration is less than a man-month<br />  
             "2:02:43" if duration is less than a man-day<br />
-            "2min 43s" if duration is less than an hour<br /></remarks>
+            "2min 43s" if duration is less than an hour<br /><br />
+            There is a typo in the method name on 'Detailed' but we prefer to not set this method as obsolete just for a typo.
+            </remarks>
       <ensures description="returned string is not null." csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       <ensures description="returned string is not empty." csharp="result.Length &gt; 0" vb="result.Length &gt; 0">result.Length &gt; 0</ensures>
     </member>
@@ -17118,12 +17277,6 @@
       <summary>
             Gets a value indicating whether this method is asynchronous, declared with the keyword <i>async</i>.
             </summary>
-      <remarks>
-            A method that calls an async method has this flag set.<br />
-            This is because in both situatiosn (<i>async keyword usage and call of an async method)</i>
-            a type that implements <i>System.Runtime.CompilerServices.IAsyncStateMachine</i> is generated by the compiler
-            and NDepend relies on this fact, to determine if the method is <i>async</i> or not.
-            </remarks>
     </member>
     <member name="P:NDepend.CodeModel.IMethod.IsUsingPinning">
       <summary>
@@ -17185,7 +17338,7 @@
       <returns>
         <i>null</i> if this method is declared in a third-party assembly.<br /><i>null</i> if this method is abstract or is a default constructor.<br /><i>null</i> if the PDB file of this method parent's assembly, hasen't been found.<br /><i>null</i> if the source code file path referenced from the PDB file cannot be found.<br /><i>null</i> if the source code of this method is written with a programming language different than C#.<br />
             Otherwise returns this method body complexity computed from source code.<br />
-            More information on this can be found at: <a href="http://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a><br />
+            More information on this can be found at: <a href="https://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a><br />
             If source code CC is not available for a non-abstract method, the code metric <see cref="T:NDepend.CodeModel.IMethod" />.<see cref="P:NDepend.CodeModel.IMethod.ILCyclomaticComplexity" /> can be used instead.
             </returns>
     </member>
@@ -17569,6 +17722,7 @@
       <seealso cref="M:NDepend.CodeModel.ExtensionMethodsSequenceUsage.DepthOfDeriveFromAny(System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType},System.Collections.Generic.IEnumerable{NDepend.CodeModel.IType})" />
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.DeriveFrom(NDepend.CodeModel.IType,System.String)" />
       <seealso cref="M:NDepend.Reserved.CQLinq.ExtensionMethodsCQLinqDependency.DepthOfDeriveFrom(NDepend.CodeModel.IType,System.String)" />
+      <requires description="the baseClass object must not null" csharp="baseClass != null" vb="baseClass &lt;&gt; Nothing">baseClass != null</requires>
     </member>
     <member name="M:NDepend.CodeModel.IType.Implement(NDepend.CodeModel.IType)">
       <summary>Returns a value indicating whether this type implements <paramref name="interface" />.</summary>
@@ -18071,7 +18225,7 @@
       <returns>
         <i>null</i> if this type is declared in a third-party assembly.<br /><i>null</i> if this type has no method where <see cref="T:NDepend.CodeModel.IMethod" />.<see cref="P:NDepend.CodeModel.IMethod.CyclomaticComplexity" /> is available.<br /><i>null</i> if the PDB file of this type parent's assembly, hasen't been found.<br /><i>null</i> if the source code file path referenced from the PDB file cannot be found.<br /><i>null</i> if the source code of this type is written with a programming language different than C#.<br />
             Otherwise returns this type child methods additive source code complexity.<br />
-            More information on this can be found at: <a href="http://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a></returns>
+            More information on this can be found at: <a href="https://www.ndepend.com/docs/ndepend-analysis-inputs-explanation" target="_blank">Understanding NDepend Analysis Inputs</a></returns>
     </member>
     <member name="P:NDepend.CodeModel.IType.ILCyclomaticComplexity">
       <summary>
@@ -19165,7 +19319,7 @@
       <remarks>
             The default value is false.<br />
             A critical code rule is useful to break the build process once the rule is violated.<br />
-            More information at: <a href="http://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
+            More information at: <a href="https://www.ndepend.com/docs/critical-cqlinq-rule">Critical Rules and Build Failure</a></remarks>
     </member>
     <member name="P:NDepend.CodeQuery.IQuery.QueryString">
       <summary>
@@ -19904,7 +20058,9 @@
             Some directories paths are returned even if <paramref name="version" /> of <paramref name="dotNetProfile" /> is not installed. In such case these directories doesn't exist.
             </returns>
       <remarks>
-            Only the version major and minor numbers are taken account.<br /></remarks>
+            Only the version major and minor numbers are taken account.<br />
+            Returns an empty set of directories if the <paramref name="version" /> is not a valid version.
+            </remarks>
       <param name="dotNetProfile">The .NET profile target.</param>
       <param name="version">The version demanded, only the version major and minor numbers are taken account.</param>
       <requires description="version must not be null" csharp="version != (System.Version)null" vb="version &lt;&gt; ((System.Version)Nothing) ">version != (System.Version)null</requires>
@@ -20084,6 +20240,31 @@
             Maximum record arity is fixed to 16, meaning a code query cannot returns records with more than 16 cells.
             </summary>
     </member>
+    <member name="M:NDepend.CodeQuery.RecordBase.CreateBrotherInstance(System.Object[])">
+      <summary>
+            Create a new instance of the same record class as this record, initialized from the array <paramref name="parameters" />.
+            </summary>
+      <remarks>
+            The method <see cref="M:NDepend.CodeQuery.RecordBase.CreateBrotherInstance(System.Object[])" /> is faster than using System.Activator.CreateInstance(T, parameters).
+            </remarks>
+      <exception cref="T:System.ArgumentNullException">
+        <paramref name="parameters" /> is a null array reference.</exception>
+      <exception cref="T:System.ArgumentException">
+        <paramref name="parameters" />.Length is not equals to this.<see cref="P:NDepend.CodeQuery.RecordBase.RecordArity" />.</exception>
+      <exception cref="T:System.InvalidCastException">
+        <paramref name="parameters" /> has one or several elements not typed exactly as this record class <see cref="F:NDepend.CodeQuery.RecordBase.MAX_ARITY" /> generic parameters types.</exception>
+    </member>
+    <member name="F:NDepend.CodeQuery.RecordBase.RecordTypes">
+      <summary>
+            This read-only field contains <see cref="F:NDepend.CodeQuery.RecordBase.MAX_ARITY" /> System.Type objects representing the <see cref="F:NDepend.CodeQuery.RecordBase.MAX_ARITY" /> record generic classes.
+            </summary>
+    </member>
+    <member name="M:NDepend.CodeQuery.RecordBase.AlreadyAccessed(System.Int32)">
+      <summary>
+            This method is only for internal usages.
+            </summary>
+      <param name="index">index</param>
+    </member>
     <member name="P:NDepend.CodeQuery.RecordBase.RecordArity">
       <summary>
             Returns this record class number of cells, from one to 16 cells, this limit is defined by <see cref="F:NDepend.CodeQuery.RecordBase.MAX_ARITY" />.
@@ -20147,8 +20328,8 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`2.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`2.RecordArity">
       <summary>
@@ -20185,12 +20366,12 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`3.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`3.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`3.RecordArity">
       <summary>
@@ -20228,16 +20409,16 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`4.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`4.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`4.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`4.RecordArity">
       <summary>
@@ -20276,20 +20457,20 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`5.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`5.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`5.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`5.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`5.RecordArity">
       <summary>
@@ -20329,24 +20510,24 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`6.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`6.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`6.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`6.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`6.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`6.RecordArity">
       <summary>
@@ -20387,28 +20568,28 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`7.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`7.RecordArity">
       <summary>
@@ -20450,32 +20631,32 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`8.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`8.RecordArity">
       <summary>
@@ -20518,36 +20699,36 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`9.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`9.RecordArity">
       <summary>
@@ -20591,40 +20772,40 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`10.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`10.RecordArity">
       <summary>
@@ -20669,44 +20850,44 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`11.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`11.RecordArity">
       <summary>
@@ -20752,48 +20933,48 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`12.m_P11">
-      <summary>This read-only field represents the record' cell' value of at index 11.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 11.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`12.RecordArity">
       <summary>
@@ -20840,52 +21021,52 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P11">
-      <summary>This read-only field represents the record' cell' value of at index 11.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 11.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`13.m_P12">
-      <summary>This read-only field represents the record' cell' value of at index 12.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 12.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`13.RecordArity">
       <summary>
@@ -20933,56 +21114,56 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P11">
-      <summary>This read-only field represents the record' cell' value of at index 11.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 11.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P12">
-      <summary>This read-only field represents the record' cell' value of at index 12.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 12.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`14.m_P13">
-      <summary>This read-only field represents the record' cell' value of at index 13.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 13.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`14.RecordArity">
       <summary>
@@ -21031,60 +21212,60 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P11">
-      <summary>This read-only field represents the record' cell' value of at index 11.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 11.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P12">
-      <summary>This read-only field represents the record' cell' value of at index 12.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 12.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P13">
-      <summary>This read-only field represents the record' cell' value of at index 13.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 13.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`15.m_P14">
-      <summary>This read-only field represents the record' cell' value of at index 14.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 14.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`15.RecordArity">
       <summary>
@@ -21134,64 +21315,64 @@
       <remarks>This field has no property getter for optimization reason.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P1">
-      <summary>This read-only field represents the record' cell' value of at index 1.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 1.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P2">
-      <summary>This read-only field represents the record' cell' value of at index 2.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 2.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P3">
-      <summary>This read-only field represents the record' cell' value of at index 3.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 3.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P4">
-      <summary>This read-only field represents the record' cell' value of at index 4.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 4.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P5">
-      <summary>This read-only field represents the record' cell' value of at index 5.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 5.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P6">
-      <summary>This read-only field represents the record' cell' value of at index 6.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 6.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P7">
-      <summary>This read-only field represents the record' cell' value of at index 7.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 7.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P8">
-      <summary>This read-only field represents the record' cell' value of at index 8.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 8.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P9">
-      <summary>This read-only field represents the record' cell' value of at index 9.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 9.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P10">
-      <summary>This read-only field represents the record' cell' value of at index 10.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 10.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P11">
-      <summary>This read-only field represents the record' cell' value of at index 11.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 11.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P12">
-      <summary>This read-only field represents the record' cell' value of at index 12.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 12.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P13">
-      <summary>This read-only field represents the record' cell' value of at index 13.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 13.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P14">
-      <summary>This read-only field represents the record' cell' value of at index 14.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 14.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="F:NDepend.CodeQuery.Record`16.m_P15">
-      <summary>This read-only field represents the record' cell' value of at index 15.</summary>
-      <remarks>This field has no property getter for optimization reason.</remarks>
+      <summary>This represents the record' cell' value of at index 15.</summary>
+      <remarks>This field has no property getter for optimization reason.<br />It is not read-only because when accessing it through <see cref="T:NDepend.CodeQuery.RecordCellValue" />, a sequence is getting transformed into an array and the array is assigned to this field.</remarks>
     </member>
     <member name="P:NDepend.CodeQuery.Record`16.RecordArity">
       <summary>
@@ -22837,6 +23018,9 @@
         <ensures description="returned string is not null" inheritedFrom="M:NDepend.Path.IFilePath.get_FileExtension" inheritedFromTypeName="IFilePath" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
     </member>
+    <member name="M:NDepend.Reserved.Linq.CodeQueryExpressionVisitor.ToString">
+      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
+    </member>
     <member name="M:NDepend.Reserved.Linq.QueryableImpl`1.System#Linq#IQueryable#get_Expression">
       <ensures inheritedFrom="M:System.Linq.IQueryable.get_Expression" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
@@ -22865,9 +23049,6 @@
       <getter>
         <ensures inheritedFrom="M:System.Linq.IQueryable.get_Provider" inheritedFromTypeName="IQueryable" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
       </getter>
-    </member>
-    <member name="M:NDepend.Reserved.Linq.CodeQueryExpressionVisitor.ToString">
-      <ensures inheritedFrom="M:System.Object.ToString" inheritedFromTypeName="Object" csharp="result != null" vb="result &lt;&gt; Nothing">result != null</ensures>
     </member>
   </members>
 </doc>
