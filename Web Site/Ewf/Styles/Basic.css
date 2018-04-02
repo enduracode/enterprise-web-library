@@ -142,6 +142,7 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 }
 ewfMultilineTextControlAllStates {
 	width: 35em;
+	resize: vertical;
 }
 /* Text boxes. If we change the border or padding below, we also need to change the Width property on EwfTextBox. */
 div.textBoxWrapper {
