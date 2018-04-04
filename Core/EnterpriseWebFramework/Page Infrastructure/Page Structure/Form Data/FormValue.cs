@@ -70,6 +70,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Adds the specified page-modification value.
+		/// </summary>
+		public void AddPageModificationValue<ModificationValueType>(
+			PageModificationValue<ModificationValueType> pageModificationValue, Func<T, ModificationValueType> modificationValueSelector ) {
+			pageModificationValueAdders.Add( value => pageModificationValue.AddValue( modificationValueSelector( value ) ) );
+		}
+
+		/// <summary>
 		/// Creates a validation with the specified method and adds it to the current data modifications.
 		/// </summary>
 		/// <param name="validationMethod">The method that will be called by the data modification(s) to which this validation is added.</param>
@@ -80,14 +88,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
 						ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
 					validator ) );
-		}
-
-		/// <summary>
-		/// Adds the specified page-modification value.
-		/// </summary>
-		public void AddPageModificationValue<ModificationValueType>(
-			PageModificationValue<ModificationValueType> pageModificationValue, Func<T, ModificationValueType> modificationValueSelector ) {
-			pageModificationValueAdders.Add( value => pageModificationValue.AddValue( modificationValueSelector( value ) ) );
 		}
 
 		public T GetDurableValue() {

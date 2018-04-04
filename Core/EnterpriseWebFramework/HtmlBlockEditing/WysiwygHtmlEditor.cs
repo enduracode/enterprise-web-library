@@ -75,6 +75,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				},
 				formValue: formValue );
 
+			formValue.AddPageModificationValue( modificationValue, v => v );
+
 			validation = formValue.CreateValidation(
 				( postBackValue, validator ) => {
 					if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
@@ -91,8 +93,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					validationMethod( validatedValue, validator );
 				} );
-
-			formValue.AddPageModificationValue( modificationValue, v => v );
 		}
 
 		private string getJsShowStatements( string id, bool ckEditorIsFocused, string ckEditorConfiguration ) {
