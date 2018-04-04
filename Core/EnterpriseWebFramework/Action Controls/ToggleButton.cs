@@ -49,10 +49,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var hiddenField = new EwfHiddenField(
 				controlsToggled.ToString(),
-				( postBackValue, validator ) =>
-				validationMethod( new PostBackValue<bool>( getControlsToggled( postBackValue.Value ), postBackValue.ChangedOnPostBack ), validator ),
 				id: hiddenFieldId,
-				pageModificationValue: hiddenFieldValue );
+				pageModificationValue: hiddenFieldValue,
+				validationMethod: ( postBackValue, validator ) => validationMethod(
+					new PostBackValue<bool>( getControlsToggled( postBackValue.Value ), postBackValue.ChangedOnPostBack ),
+					validator ) );
 			hiddenField.PageComponent.ToCollection().AddEtherealControls( this );
 		}
 

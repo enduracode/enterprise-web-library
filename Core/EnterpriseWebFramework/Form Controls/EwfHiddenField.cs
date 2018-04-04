@@ -15,12 +15,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a hidden field.
 		/// </summary>
 		/// <param name="value">Do not pass null.</param>
-		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="id"></param>
 		/// <param name="pageModificationValue"></param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		public EwfHiddenField(
-			string value, Action<PostBackValue<string>, Validator> validationMethod, HiddenFieldId id = null,
-			PageModificationValue<string> pageModificationValue = null ) {
+			string value, HiddenFieldId id = null, PageModificationValue<string> pageModificationValue = null,
+			Action<PostBackValue<string>, Validator> validationMethod = null ) {
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
 			var elementId = new ElementId();
@@ -55,9 +55,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				},
 				formValue: formValue );
 
-			validation = formValue.CreateValidation( validationMethod );
-
 			formValue.AddPageModificationValue( pageModificationValue, v => v );
+
+			if( validationMethod != null )
+				validation = formValue.CreateValidation( validationMethod );
 		}
 
 		public EtherealComponent PageComponent => component;

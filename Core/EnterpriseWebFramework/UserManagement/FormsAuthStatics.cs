@@ -200,7 +200,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
 			HiddenFieldId timeHiddenFieldId = new HiddenFieldId();
-			var timeHiddenField = new EwfHiddenField( "", ( postBackValue, validator ) => clientTime.Value = postBackValue.Value, id: timeHiddenFieldId );
+			var timeHiddenField = new EwfHiddenField(
+				"",
+				id: timeHiddenFieldId,
+				validationMethod: ( postBackValue, validator ) => clientTime.Value = postBackValue.Value );
 			EwfPage.Instance.PreRender += delegate {
 				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
 					typeof( UserManagementStatics ),

@@ -51,7 +51,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
-				() => hiddenFields.Add( new EwfHiddenField( "", ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
+				() => hiddenFields.Add(
+					new EwfHiddenField( "", validationMethod: ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
 
 			postBack.AddModificationMethod(
 				() => {
