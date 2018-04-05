@@ -275,6 +275,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												context.Id,
 												"setTimeout( function() { " + valueChangedAction.GetJsStatements() + " }, 0 );" )
 											: "",
+										pageModificationValue.GetJsModificationStatements( "$( this ).val()" )
+											.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
 										autoCompleteStatements );
 
 									return new DisplayableElementLocalData(
