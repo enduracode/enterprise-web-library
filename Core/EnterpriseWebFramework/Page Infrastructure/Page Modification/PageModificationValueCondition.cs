@@ -48,10 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			values = values.ToImmutableArray();
 			return new PageModificationValueCondition(
 				statementGetter => pageModificationValue.AddJsModificationStatement(
-					valueExpression => "[ {0} ].indexOf( {1} ) {2} -1".FormatWith(
-						StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-						valueExpression,
-						isTrueOnMatch ? "!=" : "==" ) ),
+					valueExpression => statementGetter(
+						"[ {0} ].indexOf( {1} ) {2} -1".FormatWith(
+							StringTools.ConcatenateWithDelimiter( ", ", values.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
+							valueExpression,
+							isTrueOnMatch ? "!=" : "==" ) ) ),
 				() => values.Contains( pageModificationValue.Value ) ^ !isTrueOnMatch );
 		}
 	}
