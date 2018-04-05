@@ -44,7 +44,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							isFocused => new DisplayableElementFocusDependentData(
 								attributes: isFocused ? Tuple.Create( "tabindex", "-1" ).ToCollection() : null,
 								includeIdAttribute: isFocused,
-								jsInitStatements: isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) ),
+								jsInitStatements: isFocused
+									                  ? "document.getElementById( '{0}' ).focus(); document.getElementById( '{0}' ).scrollIntoView( {{ behavior: 'smooth', block: 'start' }} );"
+										                  .FormatWith( context.Id )
+									                  : "" ) ),
 						classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
 						children: new StackList(
 							from i in errors
