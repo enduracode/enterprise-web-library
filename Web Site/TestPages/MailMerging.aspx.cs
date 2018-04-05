@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				MergeStatics.CreateEmptyPseudoTableRowTree().ToFieldTreeDisplay( "Merge Fields" ),
-				new Section(
+				new LegacySection(
 					"A Pseudo Row",
 					MergeStatics.CreatePseudoTableRowTree( new PseudoTableRow( 4 ).ToCollection() )
 						.ToRowTreeDisplay(

@@ -9,7 +9,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class SelectListDemo: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return "Select List"; } }
+			public override string ResourceName => "Select List";
 		}
 
 		protected override void loadData() {
@@ -27,27 +27,25 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {
-			foreach( var items in
-				new[]
-					{
-						new[]
-							{
-								SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ),
-								SelectListItem.Create( 3 as int?, "Three" )
-							},
-						new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
-					} ) {
+			foreach( var items in new[]
+				{
+					new[]
+						{
+							SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ),
+							SelectListItem.Create( 3 as int?, "Three" )
+						},
+					new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
+				} ) {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {
 					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
-						yield return
-							FormItem.Create(
-								StringTools.ConcatenateWithDelimiter(
-									", ",
-									items.Length == 4 ? "Default in list" : "Default not in list",
-									selectedItemId.HasValue ? "One selected" : "default selected",
-									defaultValueItemLabel.Any() ? "default label" : "no default label" ),
-								SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
-								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
+						yield return FormItem.Create(
+							StringTools.ConcatenateWithDelimiter(
+								", ",
+								items.Length == 4 ? "Default in list" : "Default not in list",
+								selectedItemId.HasValue ? "One selected" : "default selected",
+								defaultValueItemLabel.Any() ? "default label" : "no default label" ),
+							SelectList.CreateRadioList( items, selectedItemId, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel ),
+							validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
 					}
 				}
 			}
@@ -62,40 +60,38 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				"When a dropdown is focused with the options expanded, press enter. This should select the option and not submit the page. NOTE: Currently this isn't consistent. In FF this selects and submits, in Chrome this just selects." );
 			bullets.Add( "When a dropdown is focused with the options collapsed, press enter. This should submit the page." );
 
-			return new Section(
+			return new LegacySection(
 				"What to look for after updating Select2",
 				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToCollection(),
 				style: SectionStyle.Box );
 		}
 
 		private IEnumerable<FormItem> getDropDownItems() {
-			foreach( var items in
-				new[]
-					{
-						new[]
-							{
-								SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "This is item One" ),
-								SelectListItem.Create( 2 as int?, "This is item Two" ), SelectListItem.Create( 3 as int?, "This is item Three" )
-							},
-						new[]
-							{
-								SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
-								SelectListItem.Create( 3 as int?, "This is item Three" )
-							}
-					} ) {
+			foreach( var items in new[]
+				{
+					new[]
+						{
+							SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "This is item One" ),
+							SelectListItem.Create( 2 as int?, "This is item Two" ), SelectListItem.Create( 3 as int?, "This is item Three" )
+						},
+					new[]
+						{
+							SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
+							SelectListItem.Create( 3 as int?, "This is item Three" )
+						}
+				} ) {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {
 					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
 						foreach( var placeholderIsValid in new[] { false, true } ) {
-							yield return
-								FormItem.Create(
-									StringTools.ConcatenateWithDelimiter(
-										", ",
-										items.Length == 4 ? "Default in list" : "Default not in list",
-										selectedItemId.HasValue ? "One selected" : "default selected",
-										defaultValueItemLabel.Any() ? "default label" : "no default label",
-										placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
-									SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
-									validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
+							yield return FormItem.Create(
+								StringTools.ConcatenateWithDelimiter(
+									", ",
+									items.Length == 4 ? "Default in list" : "Default not in list",
+									selectedItemId.HasValue ? "One selected" : "default selected",
+									defaultValueItemLabel.Any() ? "default label" : "no default label",
+									placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
+								SelectList.CreateDropDown( items, selectedItemId, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid ),
+								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
 						}
 					}
 				}

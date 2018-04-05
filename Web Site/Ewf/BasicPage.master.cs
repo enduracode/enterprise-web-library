@@ -250,7 +250,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()
-				       ? new Block( new Section( SectionStyle.Box, "Messages", null, getStatusMessageControlList(), false, true ) )
+				       ? new Block( new LegacySection( SectionStyle.Box, "Messages", null, getStatusMessageControlList(), false, true ) )
 					       {
 						       ClientIDMode = ClientIDMode.Static,
 						       ID = notificationSectionContainerId,

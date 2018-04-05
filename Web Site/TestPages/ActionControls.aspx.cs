@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new WebControl[ 0 ],
 						new ButtonActionControlStyle( "Tiny Toggle Button", buttonSize: ButtonSize.ShrinkWrap ),
 						false,
-						( postBackValue, validator ) => { } ) ) );
+						( postBackValue, validator ) => {} ) ) );
 
 			ph.AddControlsReturnThis(
 				getBox(
@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						} ) );
 			ph.AddControlsReturnThis( getBox( EwfLink.Create( EwfTableDemo.GetInfo(), new ButtonActionControlStyle( "EWF Link" ) ) ) );
 			ph.AddControlsReturnThis(
-				getBox( new ToggleButton( new WebControl[ 0 ], new ButtonActionControlStyle( "Toggle button" ), false, ( postBackValue, validator ) => { } ) ) );
+				getBox( new ToggleButton( new WebControl[ 0 ], new ButtonActionControlStyle( "Toggle button" ), false, ( postBackValue, validator ) => {} ) ) );
 
 			ph.AddControlsReturnThis(
 				getBox(
@@ -45,11 +45,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new WebControl[ 0 ],
 						new ButtonActionControlStyle( "Large Toggle Button", ButtonSize.Large ),
 						false,
-						( postBackValue, validator ) => { } ) ) );
+						( postBackValue, validator ) => {} ) ) );
 		}
 
 		private Control getBox( Control contentControl ) {
-			return new Section( contentControl.ToCollection(), style: SectionStyle.Box );
+			return new LegacySection( contentControl.ToCollection(), style: SectionStyle.Box );
 		}
 	}
 }

@@ -123,7 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
 				.Where( child => child.rowTree.Rows.Any() )
 				.Select(
-					child => new Section(
+					child => new LegacySection(
 						child.rowTree.NodeName,
 						ControlStack.CreateWithControls( true, child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ) ).ToArray() )
 							.ToCollection() ) )

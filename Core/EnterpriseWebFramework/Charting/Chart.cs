@@ -183,7 +183,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( seriesCollection.Count() > 1 )
 				Controls.Add(
-					new Section(
+					new LegacySection(
 						"Key",
 						new ControlLine(
 							chartData.datasets.Select(

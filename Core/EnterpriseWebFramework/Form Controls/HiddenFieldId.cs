@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// ToggleButton use only.
+		/// Section use only.
 		/// </summary>
 		internal ElementId ElementId => id;
 	}

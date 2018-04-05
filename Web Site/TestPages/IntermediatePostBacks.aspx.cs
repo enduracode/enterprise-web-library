@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				package.ItemIds = new[] { 0, 1, 2 };
 			}
 
-			public override string ResourceName { get { return "Intermediate Post-Backs"; } }
+			public override string ResourceName => "Intermediate Post-Backs";
 		}
 
 		protected override void loadData() {
@@ -31,10 +31,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					"Static Field",
 					new EwfTextBox( "Edit this one to get a validation error" ),
 					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( control.ValueChangedOnPostBack( pbv ) )
-								                             validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
-						                             } ) ) );
+						( pbv, validator ) => {
+							if( control.ValueChangedOnPostBack( pbv ) )
+								validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
+						} ) ) );
 			staticTable.IncludeButtonWithThisText = "Submit";
 			ph.AddControlsReturnThis( staticTable );
 
@@ -55,8 +55,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private IEnumerable<Control> getBasicRegionBlocks() {
 			var rs = new UpdateRegionSet();
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: "basic" );
-			yield return
-				new LegacyParagraph( new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
+			yield return new LegacyParagraph(
+				new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
 
 			var regionControls = new List<Control>();
 			var dynamicFieldValue = new DataValue<string>();
@@ -66,43 +66,43 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					if( info.Toggled )
 						regionControls.Add(
 							FormItem.Create(
-								"Dynamic Field",
-								new EwfTextBox( "This was just added!" ),
-								validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ) ) ).ToControl() );
+									"Dynamic Field",
+									new EwfTextBox( "This was just added!" ),
+									validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ) ) )
+								.ToControl() );
 					else
 						regionControls.Add( new LegacyParagraph( "Nothing here yet." ) );
 				} );
-			yield return
-				new NamingPlaceholder( new Section( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(), updateRegionSets: rs.ToCollection() );
+			yield return new NamingPlaceholder(
+				new LegacySection( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(),
+				updateRegionSets: rs.ToCollection() );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
 			pb.AddModificationMethod(
-				() =>
-				AddStatusMessage( StatusMessageType.Info, info.Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." ) );
+				() => AddStatusMessage(
+					StatusMessageType.Info,
+					info.Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." ) );
 		}
 
 		private IEnumerable<Control> getNonIdListRegionBlocks() {
 			var addRs = new UpdateRegionSet();
 			var removeRs = new UpdateRegionSet();
-			yield return
-				new ControlLine(
-					new PostBackButton(
-						new ButtonActionControlStyle( "Add Two Items" ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateIntermediate(
-								addRs.ToCollection(),
-								id: "nonIdAdd",
-								firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ),
-					new PostBackButton(
-						new ButtonActionControlStyle( "Remove Two Items" ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateIntermediate(
-								removeRs.ToCollection(),
-								id: "nonIdRemove",
-								firstModificationMethod:
-									() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) );
+			yield return new ControlLine(
+				new PostBackButton(
+					new ButtonActionControlStyle( "Add Two Items" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateIntermediate(
+						addRs.ToCollection(),
+						id: "nonIdAdd",
+						firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ),
+				new PostBackButton(
+					new ButtonActionControlStyle( "Remove Two Items" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateIntermediate(
+						removeRs.ToCollection(),
+						id: "nonIdRemove",
+						firstModificationMethod: () =>
+							parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) );
 
 			var stack = ControlStack.Create(
 				true,
@@ -110,7 +110,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			for( var i = 0; i < info.NonIdItemStates.Count(); i += 1 )
 				stack.AddItem( getNonIdItem( i ) );
 
-			yield return new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box );
+			yield return new LegacySection( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getNonIdItem( int i ) {
@@ -126,35 +126,33 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new PostBackButton( new ButtonActionControlStyle( "Toggle", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 
 			pb.AddModificationMethod(
-				() => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
+				() => parametersModification.NonIdItemStates =
+					      parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) );
 
 			return new ControlListItem( itemStack.ToCollection(), updateRegionSets: rs.ToCollection() );
 		}
 
 		private IEnumerable<Control> getIdListRegionBlocks() {
 			var rs = new UpdateRegionSet();
-			yield return
-				new ControlLine(
-					new PostBackButton(
-						new ButtonActionControlStyle( "Add Item" ),
-						usesSubmitBehavior: false,
-						postBack:
-							PostBack.CreateIntermediate(
-								rs.ToCollection(),
-								id: "idAdd",
-								firstModificationMethod:
-									() =>
-									parametersModification.ItemIds =
-									( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection().Concat( parametersModification.ItemIds ) ) ) );
+			yield return new ControlLine(
+				new PostBackButton(
+					new ButtonActionControlStyle( "Add Item" ),
+					usesSubmitBehavior: false,
+					postBack: PostBack.CreateIntermediate(
+						rs.ToCollection(),
+						id: "idAdd",
+						firstModificationMethod: () => parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 )
+							                               .ToCollection()
+							                               .Concat( parametersModification.ItemIds ) ) ) );
 
 			var stack = ControlStack.Create(
 				true,
-				itemInsertionUpdateRegions:
-					new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() ).ToCollection() );
+				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
+					.ToCollection() );
 			foreach( var i in info.ItemIds )
 				stack.AddItem( getIdItem( i ) );
 
-			yield return new Section( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box );
+			yield return new LegacySection( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box );
 		}
 
 		private ControlListItem getIdItem( int id ) {
