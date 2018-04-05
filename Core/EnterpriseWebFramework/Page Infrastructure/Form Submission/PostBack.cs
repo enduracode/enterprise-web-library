@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a full post-back, which updates the page's data before executing itself.
 		/// </summary>
-		/// <param name="id">The ID of this post-back. Must be unique for every post-back in the page. Do not pass null or the empty string.</param>
+		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
 		/// <param name="forcePageDataUpdate">Pass true to force the page's data update to execute even if no form values changed.</param>
 		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
 		/// are included in this post-back.</param>
@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="forceFullPagePostBack">Pass true to force a full-page post-back instead of attempting an async post-back. Note that an async post-back will
 		/// automatically fall back to a full-page post-back if the page has changed in any way since it was last sent. This parameter currently has no effect since
 		/// async post-backs are not yet implemented; see RSIS goal 478.</param>
-		/// <param name="id">The ID of this post-back. Must be unique for every post-back in the page. Do not pass null or the empty string.</param>
+		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
 		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
 		/// are included in this post-back.</param>
 		/// <param name="firstModificationMethod"></param>
