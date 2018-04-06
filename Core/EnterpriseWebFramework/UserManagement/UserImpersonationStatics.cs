@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
@@ -10,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static void BeginImpersonation( User userBeingImpersonated ) {
 			SetCookie( userBeingImpersonated );
-			AppRequestState.Instance.SetUserAndImpersonator( Tuple.Create( userBeingImpersonated ) );
+			AppRequestState.Instance.SetUserAndImpersonator( new SpecifiedValue<User>( userBeingImpersonated ) );
 		}
 
 		/// <summary>
@@ -23,10 +21,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		internal static void SetCookie( User userBeingImpersonated ) {
 			AppRequestState.AddNonTransactionalModificationMethod(
-				() =>
-				CookieStatics.SetCookie(
+				() => CookieStatics.SetCookie(
 					CookieName,
-					userBeingImpersonated != null ? userBeingImpersonated.UserId.ToString() : "",
+					userBeingImpersonated?.UserId.ToString() ?? "",
 					null,
 					EwfConfigurationStatics.AppSupportsSecureConnections,
 					true ) );
@@ -36,6 +33,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( CookieName ) );
 		}
 
-		internal static string CookieName { get { return "UserBeingImpersonated"; } }
+		internal static string CookieName => "UserBeingImpersonated";
 	}
 }

@@ -1,15 +1,13 @@
-﻿using System;
-
-namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
+﻿namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
 	/// A value and the previous revision's value.
 	/// </summary>
 	public class ValueDelta<T> {
 		public readonly string ValueName;
 		public readonly T New;
-		private readonly Tuple<T> old;
+		private readonly SpecifiedValue<T> old;
 
-		internal ValueDelta( string valueName, T @new, Tuple<T> old ) {
+		internal ValueDelta( string valueName, T @new, SpecifiedValue<T> old ) {
 			ValueName = valueName;
 			New = @new;
 			this.old = old;
@@ -20,7 +18,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// </summary>
 		public bool HasOld => old != null;
 
-		public T Old => old.Item1;
+		public T Old => old.Value;
 
 		public bool ValueChanged => !EwlStatics.AreEqual( New, Old );
 	}

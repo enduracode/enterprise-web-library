@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Humanizer;
 using EnterpriseWebLibrary.Configuration;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
@@ -78,35 +78,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		/// <summary>
-		/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a tuple with a null user if impersonation is taking
-		/// place with an impersonator who doesn't correspond to a user, or (3) a tuple containing the impersonator.
+		/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking
+		/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
 		/// </summary>
-		internal static Tuple<User, Tuple<User>> GetUserAndImpersonatorFromRequest() {
+		internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
 			var userLazy = new Func<User>[]
-				{
-					() => {
-						var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
-						if( cookie == null )
-							return null;
-						var ticket = FormsAuthStatics.GetFormsAuthTicket( cookie );
-						return ticket != null ? GetUser( int.Parse( ticket.Name ), false ) : null;
-					},
-					() => {
-						var identity = HttpContext.Current.User.Identity;
-						return identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType
-							       ? GetUser( identity.Name )
-							       : null;
-					}
-				}.Select( i => new Lazy<User>( i ) ).FirstOrDefault( i => i.Value != null );
+					{
+						() => {
+							var cookie = CookieStatics.GetCookie( FormsAuthStatics.FormsAuthCookieName );
+							if( cookie == null )
+								return null;
+							var ticket = FormsAuthStatics.GetFormsAuthTicket( cookie );
+							return ticket != null ? GetUser( int.Parse( ticket.Name ), false ) : null;
+						},
+						() => {
+							var identity = HttpContext.Current.User.Identity;
+							return identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType
+								       ? GetUser( identity.Name )
+								       : null;
+						}
+					}.Select( i => new Lazy<User>( i ) )
+				.FirstOrDefault( i => i.Value != null );
 			var user = userLazy != null ? userLazy.Value : null;
 
 			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation ) {
 				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
 				if( cookie != null )
-					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, Tuple.Create( user ) );
+					return Tuple.Create( cookie.Value.Any() ? GetUser( int.Parse( cookie.Value ), false ) : null, new SpecifiedValue<User>( user ) );
 			}
 
-			return Tuple.Create( user, (Tuple<User>)null );
+			return Tuple.Create( user, (SpecifiedValue<User>)null );
 		}
 	}
 }

@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private bool userEnabled;
 		internal bool UserDisabledByPage { get; set; }
-		private Tuple<User, Tuple<User>> userAndImpersonator;
+		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
 		private Exception errorException;
@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Do not use. This exists to support legacy behavior.
 		/// </summary>
-		public HttpBrowserCapabilities Browser { get; private set; }
+		public HttpBrowserCapabilities Browser { get; }
 
 		internal AppRequestState( string url ) {
 			beginInstant = SystemClock.Instance.GetCurrentInstant();
@@ -150,7 +150,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public User ImpersonatorUser => UserAndImpersonator.Item2.Item1;
+		public User ImpersonatorUser => UserAndImpersonator.Item2.Value;
 
 		/// <summary>
 		/// EWL use only.
@@ -160,7 +160,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// AppTools.User and private use only.
 		/// </summary>
-		internal Tuple<User, Tuple<User>> UserAndImpersonator {
+		internal Tuple<User, SpecifiedValue<User>> UserAndImpersonator {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -171,7 +171,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( userAndImpersonator == null )
 					userAndImpersonator = UserManagementStatics.UserManagementEnabled
 						                      ? UserManagementStatics.GetUserAndImpersonatorFromRequest()
-						                      : Tuple.Create<User, Tuple<User>>( null, null );
+						                      : Tuple.Create<User, SpecifiedValue<User>>( null, null );
 				return userAndImpersonator;
 			}
 		}
@@ -195,12 +195,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// For use by impersonation post back logic only. Assumes the user and impersonator (if one exists) are loaded.
 		/// </summary>
-		/// <param name="user">Pass null to end impersonation. Pass a tuple to begin impersonation for the specified user or an anonymous user.</param>
-		internal void SetUserAndImpersonator( Tuple<User> user ) {
+		/// <param name="user">Pass null to end impersonation. Pass a value to begin impersonation for the specified user or an anonymous user.</param>
+		internal void SetUserAndImpersonator( SpecifiedValue<User> user ) {
 			var impersonator = userAndImpersonator.Item2;
 			userAndImpersonator = user != null
-				                      ? Tuple.Create( user.Item1, impersonator ?? Tuple.Create( userAndImpersonator.Item1 ) )
-				                      : Tuple.Create( impersonator.Item1, (Tuple<User>)null );
+				                      ? Tuple.Create( user.Value, impersonator ?? new SpecifiedValue<User>( userAndImpersonator.Item1 ) )
+				                      : Tuple.Create( impersonator.Value, (SpecifiedValue<User>)null );
 		}
 
 		internal void SetError( string prefix, Exception exception ) {
@@ -223,7 +223,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 				const int thresholdInSeconds = 30;
 				if( duration > Duration.FromSeconds( thresholdInSeconds ) && !ConfigurationStatics.IsDevelopmentInstallation )
-					TelemetryStatics.ReportError( "Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.", null );
+					TelemetryStatics.ReportError(
+						"Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.",
+						null );
 			}
 		}
 
