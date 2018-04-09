@@ -61,6 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				validation = formValue.CreateValidation( validationMethod );
 		}
 
+		FormControlLabeler FormControl<EtherealComponent>.Labeler => null;
 		public EtherealComponent PageComponent => component;
 		public EwfValidation Validation => validation;
 	}

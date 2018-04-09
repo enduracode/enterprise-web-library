@@ -52,6 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			validation = wysiwygEditor.Validation;
 		}
 
+		FormControlLabeler FormControl<FlowComponent>.Labeler => null;
 		public FlowComponent PageComponent => component;
 		public EwfValidation Validation => validation;
 

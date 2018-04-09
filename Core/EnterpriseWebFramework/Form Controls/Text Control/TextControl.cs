@@ -6,8 +6,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A plain-text edit control.
 	/// </summary>
 	public class TextControl: FormControl<PhrasingComponent> {
-		private readonly PhrasingComponent component;
-		private readonly EwfValidation validation;
+		public FormControlLabeler Labeler { get; }
+		public PhrasingComponent PageComponent { get; }
+		public EwfValidation Validation { get; }
 
 		/// <summary>
 		/// Creates a text control.
@@ -19,10 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="maxLength">The maximum number of characters a user can input.</param>
 		public TextControl( string value, bool allowEmpty, Action<string, Validator> validationMethod, TextControlSetup setup = null, int? maxLength = null ) {
 			setup = setup ?? TextControlSetup.Create();
-			(component, validation) = setup.ComponentAndValidationGetter( value, allowEmpty, maxLength, validationMethod );
+			( Labeler, PageComponent, Validation ) = setup.LabelerAndComponentAndValidationGetter( value, allowEmpty, maxLength, validationMethod );
 		}
-
-		public PhrasingComponent PageComponent => component;
-		public EwfValidation Validation => validation;
 	}
 }

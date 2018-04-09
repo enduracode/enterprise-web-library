@@ -177,16 +177,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				validationErrorNotifier );
 		}
 
-		internal readonly Func<string, bool, int?, Action<string, Validator>, (PhrasingComponent, EwfValidation)> ComponentAndValidationGetter;
+		internal readonly Func<string, bool, int?, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+			LabelerAndComponentAndValidationGetter;
 
 		private TextControlSetup(
 			DisplaySetup displaySetup, int? numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
 			ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
 			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+			var labeler = new FormControlLabeler();
 			action = action ?? FormState.Current.DefaultAction;
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
-			ComponentAndValidationGetter = ( value, allowEmpty, maxLength, validationMethod ) => {
+			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, maxLength, validationMethod ) => {
 				var id = new ElementId();
 				var formValue = new FormValue<string>(
 					() => value,
@@ -196,10 +198,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				formValue.AddPageModificationValue( pageModificationValue, v => v );
 
-				return ( new CustomPhrasingComponent(
+				return ( labeler, new CustomPhrasingComponent(
 					new DisplayableElement(
 						context => {
 							id.AddId( context.Id );
+							labeler.AddControlId( context.Id );
 
 							if( !isReadOnly ) {
 								if( !numberOfRows.HasValue || numberOfRows.Value == 1 || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )

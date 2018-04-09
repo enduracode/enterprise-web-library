@@ -34,6 +34,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="label">Do not pass null.</param>
 		/// <param name="setup">The setup object for the check box.</param>
 		public BlockCheckBox( bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", BlockCheckBoxSetup setup = null ) {
+			Labeler = new FormControlLabeler();
+
 			this.setup = setup ?? new BlockCheckBoxSetup();
 
 			checkBoxFormValue = EwfCheckBox.GetFormValue( isChecked, this );
@@ -52,6 +54,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal BlockCheckBox(
 			FormValue<CommonCheckBox> formValue, string label, BlockCheckBoxSetup setup, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
 			EwfValidation validation, string listItemId = null ) {
+			Labeler = new FormControlLabeler();
+
 			radioButtonFormValue = formValue;
 			radioButtonListItemId = listItemId;
 			this.label = label;
@@ -63,6 +67,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			nestedControls = setup.NestedControlListGetter != null ? setup.NestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
 		}
+
+		public FormControlLabeler Labeler { get; }
 
 		FlowComponent FormControl<FlowComponent>.PageComponent { get { throw new ApplicationException( "not implemented" ); } }
 
@@ -95,6 +101,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
+			PreRender += ( s, e ) => Labeler.AddControlId( checkBox.ClientID );
+
 			action.AddToPageIfNecessary();
 
 			PreRender += delegate {

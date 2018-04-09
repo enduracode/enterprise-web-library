@@ -10,8 +10,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A WYSIWYG HTML editor.
 	/// </summary>
 	public class WysiwygHtmlEditor: FormControl<FlowComponent> {
-		private readonly FlowComponent component;
-		private readonly EwfValidation validation;
+		public FlowComponent PageComponent { get; }
+		public EwfValidation Validation { get; }
 
 		/// <summary>
 		/// Creates a simple HTML editor.
@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var modificationValue = new PageModificationValue<string>();
 
-			component = new ElementComponent(
+			PageComponent = new ElementComponent(
 				context => {
 					id.AddId( context.Id );
 
@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			formValue.AddPageModificationValue( modificationValue, v => v );
 
-			validation = formValue.CreateValidation(
+			Validation = formValue.CreateValidation(
 				( postBackValue, validator ) => {
 					if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
 						return;
@@ -105,7 +105,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return "CKEDITOR.replace( '" + id + "', { " + startupFocus + ", " + configuration + " } );";
 		}
 
-		public FlowComponent PageComponent => component;
-		public EwfValidation Validation => validation;
+		FormControlLabeler FormControl<FlowComponent>.Labeler => null;
 	}
 }
