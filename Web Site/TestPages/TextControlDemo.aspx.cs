@@ -95,6 +95,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				true,
 				( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ),
 				setup: setup,
-				maxLength: maxLength ).ToFormItem( "{0}. {1}".FormatWith( id, label ) );
+				maxLength: maxLength ).ToFormItem( "{0}. {1}".FormatWith( id, label ).ToComponents() );
 	}
 }

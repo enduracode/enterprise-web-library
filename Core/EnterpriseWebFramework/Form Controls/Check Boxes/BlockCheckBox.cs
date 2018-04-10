@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly FormValue<bool> checkBoxFormValue;
 		private readonly FormValue<CommonCheckBox> radioButtonFormValue;
 		private readonly string radioButtonListItemId;
-		private readonly string label;
+		private readonly IEnumerable<PhrasingComponent> label;
 		private readonly BlockCheckBoxSetup setup;
 		private readonly FormAction action;
 		private readonly List<Func<IEnumerable<string>>> jsClickHandlerStatementLists = new List<Func<IEnumerable<string>>>();
@@ -33,7 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="label">Do not pass null.</param>
 		/// <param name="setup">The setup object for the check box.</param>
-		public BlockCheckBox( bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", BlockCheckBoxSetup setup = null ) {
+		public BlockCheckBox(
+			bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, BlockCheckBoxSetup setup = null, IEnumerable<PhrasingComponent> label = null ) {
 			Labeler = new FormControlLabeler();
 
 			this.setup = setup ?? new BlockCheckBoxSetup();
@@ -52,8 +53,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a radio button.
 		/// </summary>
 		internal BlockCheckBox(
-			FormValue<CommonCheckBox> formValue, string label, BlockCheckBoxSetup setup, Func<IEnumerable<string>> jsClickHandlerStatementListGetter,
-			EwfValidation validation, string listItemId = null ) {
+			FormValue<CommonCheckBox> formValue, BlockCheckBoxSetup setup, IEnumerable<PhrasingComponent> label,
+			Func<IEnumerable<string>> jsClickHandlerStatementListGetter, EwfValidation validation, string listItemId = null ) {
 			Labeler = new FormControlLabeler();
 
 			radioButtonFormValue = formValue;
@@ -132,7 +133,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var row = new TableRow();
 			row.Cells.Add( checkBoxCell );
 
-			var labelControl = new HtmlGenericControl( "label" ) { InnerText = label };
+			var labelControl = new HtmlGenericControl( "label" ).AddControlsReturnThis( label.GetControls() );
 			row.Cells.Add( new TableCell().AddControlsReturnThis( labelControl ) );
 			PreRender += ( s, e ) => labelControl.Attributes.Add( "for", checkBox.ClientID );
 
@@ -152,7 +153,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( ToolTip != null || ToolTipControl != null )
 				new Controls.ToolTip(
 					ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ),
-					label.Length > 0 ? (Control)labelControl : checkBox );
+					label.Any() ? (Control)labelControl : checkBox );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {

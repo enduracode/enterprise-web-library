@@ -65,8 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				            select itemIdAndCheckBox.Item2 );
 
 			EwfPage.Instance.AddControlTreeValidation(
-				() =>
-				RadioButtonGroup.ValidateControls(
+				() => RadioButtonGroup.ValidateControls(
 					allowNoSelection,
 					EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
 					itemIdsAndCheckBoxes.Select( i => i.Item2 ),
@@ -118,10 +117,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfCheckBox CreateInlineRadioButton( ItemIdType listItemId, string label = "", FormAction action = null, bool autoPostBack = false ) {
 			validateListItem( listItemId );
-			var checkBox = new EwfCheckBox( formValue, label, action, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) )
-				{
-					AutoPostBack = autoPostBack
-				};
+			var checkBox =
+				new EwfCheckBox( formValue, label, action, () => ImmutableArray<string>.Empty, listItemId: getStringId( listItemId ) ) { AutoPostBack = autoPostBack };
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
 		}
@@ -134,8 +131,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			validateListItem( listItemId );
 			var checkBox = new BlockCheckBox(
 				formValue,
-				label,
 				new BlockCheckBoxSetup( action: action, triggersActionWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
+				label.ToComponents(),
 				() => ImmutableArray<string>.Empty,
 				null,
 				listItemId: getStringId( listItemId ) );

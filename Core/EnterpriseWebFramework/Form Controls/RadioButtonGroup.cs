@@ -78,8 +78,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				            select checkBoxAndSelectionState.Item1 );
 
 			EwfPage.Instance.AddControlTreeValidation(
-				() =>
-				ValidateControls(
+				() => ValidateControls(
 					allowNoSelection,
 					checkBoxesAndSelectionStatesAndPageModificationValues.All( i => !i.Item2 ),
 					checkBoxesAndSelectionStatesAndPageModificationValues.Select( i => i.Item1 ),
@@ -96,8 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				formValue,
 				label,
 				action,
-				() =>
-				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
+				() => checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
 					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ) ) { AutoPostBack = autoPostBack };
 			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
 				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );
@@ -123,16 +121,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool isSelected, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", FormAction action = null, bool autoPostBack = false,
 			PageModificationValue<bool> pageModificationValue = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			BlockCheckBox checkBox = null;
-			var validation =
-				formValue.CreateValidation(
-					( postBackValue, validator ) => validationMethod( new PostBackValue<bool>( postBackValue.Value == checkBox, postBackValue.ChangedOnPostBack ), validator ) );
+			var validation = formValue.CreateValidation(
+				( postBackValue, validator ) => validationMethod(
+					new PostBackValue<bool>( postBackValue.Value == checkBox, postBackValue.ChangedOnPostBack ),
+					validator ) );
 
 			checkBox = new BlockCheckBox(
 				formValue,
-				label,
 				new BlockCheckBoxSetup( action: action, triggersActionWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
-				() =>
-				checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
+				label.ToComponents(),
+				() => checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
 					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ),
 				validation );
 			checkBoxesAndSelectionStatesAndPageModificationValues.Add(

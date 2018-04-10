@@ -99,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						return value == null
 							       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
-							       : value.ToFormItem( mergeValue.Name );
+							       : value.ToFormItem( mergeValue.Name.ToComponents() );
 					} ) );
 
 			var children = ( useSubtractiveMode

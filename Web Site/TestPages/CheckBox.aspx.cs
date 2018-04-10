@@ -8,9 +8,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ControlStack.CreateWithControls(
 					true,
 					new EwfCheckBox( false, label: "Inline Check Box" ),
-					new BlockCheckBox( false, ( postBackValue, validator ) => { }, label: "Block Check Box" ) ) );
+					new BlockCheckBox( false, ( postBackValue, validator ) => {}, label: "Block Check Box".ToComponents() ) ) );
 		}
 
-		public override bool IsAutoDataUpdater { get { return true; } }
+		public override bool IsAutoDataUpdater => true;
 	}
 }
