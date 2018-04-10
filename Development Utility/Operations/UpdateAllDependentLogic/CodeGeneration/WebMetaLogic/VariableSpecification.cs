@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.CSharp;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using Microsoft.CSharp;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	/// <summary>
@@ -29,9 +28,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				// We need to compile some fake code because it's the only way to evaluate C# type alias such as "string" and "int?".
 				// This code block has a known memory leak because it is impossible to unload the assembly we create. Also, most people would think the performance
 				// here is inexcusably awful.
-				var compilerResults =
-					provider.CompileAssemblyFromSource( new CompilerParameters { GenerateInMemory = true, GenerateExecutable = false, IncludeDebugInformation = false },
-					                                    "using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" );
+				var compilerResults = provider.CompileAssemblyFromSource(
+					new CompilerParameters { GenerateInMemory = true, GenerateExecutable = false, IncludeDebugInformation = false },
+					"using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" );
 
 				if( compilerResults.Errors.HasErrors || compilerResults.Errors.HasWarnings )
 					throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
@@ -60,15 +59,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static bool isSupportedValueType( Type type ) {
-			return isSupportedIntegralType( type ) ||
-			       new[] { typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan ) }
-				       .Contains( type ) || type.IsEnum;
+			return isSupportedIntegralType( type ) || new[]
+					       { typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan ) }.Contains(
+				       type ) || type.IsEnum;
 		}
 
 		private static bool isSupportedIntegralType( Type type ) {
-			return
-				new[] { typeof( sbyte ), typeof( byte ), typeof( char ), typeof( short ), typeof( ushort ), typeof( int ), typeof( uint ), typeof( long ), typeof( ulong ) }
-					.Contains( type );
+			return new[]
+				{
+					typeof( sbyte ), typeof( byte ), typeof( char ), typeof( short ), typeof( ushort ), typeof( int ), typeof( uint ), typeof( long ), typeof( ulong )
+				}.Contains( type );
 		}
 
 		private static bool isSupportedNullableType( Type type, Func<Type, bool> underlyingTypePredicate ) {
@@ -115,10 +115,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( IsString )
 				return valueExpression;
 
-			if( IsEnumerable ) {
+			if( IsEnumerable )
 				return valueExpression + ".Separate( \",\", true ).Select( i => (" + normalizedElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
 				       normalizedElementTypeName + " ) ) ).ToArray()";
-			}
 
 			// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
 			var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
@@ -132,7 +131,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( type.IsValueType && Nullable.GetUnderlyingType( type ) == null )
 				nullableTypeName += "?";
 
-			return new ModificationField( type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, PropertyName, PropertyName, null );
+			return new ModificationField( PropertyName, PropertyName, name, type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, null );
 		}
 	}
 }

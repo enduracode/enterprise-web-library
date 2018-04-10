@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal class Column {
@@ -113,18 +113,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				       : getValueExpression;
 		}
 
-		internal ModificationField GetModificationField() {
+		internal ModificationField GetModificationField( string privateFieldName ) {
 			var type = valueContainer.DataTypeName != valueContainer.DataType.ToString()
 				           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 				           : valueContainer.DataType;
 			return new ModificationField(
+				valueContainer.Name,
+				valueContainer.PascalCasedName,
+				valueContainer.CamelCasedName,
 				type,
 				valueContainer.DataTypeName,
 				valueContainer.NullableDataTypeName,
 				"",
-				valueContainer.Name,
-				valueContainer.PascalCasedName,
-				valueContainer.Size );
+				valueContainer.Size,
+				privateFieldNameOverride: privateFieldName );
 		}
 	}
 }

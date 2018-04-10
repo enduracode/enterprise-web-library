@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class ParametersModificationStatics {
@@ -10,24 +11,26 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			writer.WriteLine( "internal class ParametersModification: ParametersModificationBase {" );
 			foreach( var parameter in parameters ) {
+				writer.WriteLine( "private readonly DataValue<{0}> {1} = new DataValue<{0}>();".FormatWith( parameter.TypeName, parameter.Name ) );
 				if( parameter.IsString || parameter.IsEnumerable ) {
-					writer.WriteLine( "private " + parameter.TypeName + " " + parameter.Name + ";" );
 					writePropertyDocComment( writer, parameter );
 					writer.WriteLine( "internal " + parameter.TypeName + " " + parameter.PropertyName + " {" );
-					writer.WriteLine( "get { return " + parameter.Name + "; }" );
+					writer.WriteLine( "get { return " + parameter.Name + ".Value; }" );
 
 					// setter
 					writer.WriteLine( "set {" );
 					writer.WriteLine( "if( value == null )" );
 					writer.WriteLine( "throw new ApplicationException( \"You cannot specify null for the value of a string or an IEnumerable.\" );" );
-					writer.WriteLine( parameter.Name + " = value;" );
+					writer.WriteLine( parameter.Name + ".Value = value;" );
 					writer.WriteLine( "}" );
 
 					writer.WriteLine( "}" );
 				}
 				else {
 					writePropertyDocComment( writer, parameter );
-					writer.WriteLine( "internal " + parameter.TypeName + " " + parameter.PropertyName + " { get; set; }" );
+					writer.WriteLine(
+						"internal " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.Name + ".Value; } set { " + parameter.Name +
+						".Value = value; } }" );
 				}
 
 				FormItemStatics.WriteFormItemGetters( writer, parameter.GetModificationField() );
@@ -36,9 +39,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void writePropertyDocComment( TextWriter writer, VariableSpecification parameter ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer,
-			                                            "Gets or sets the new value for the " + parameter.Name + " parameter." +
-			                                            ( parameter.IsString || parameter.IsEnumerable ? " The value cannot be null." : "" ) );
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Gets or sets the new value for the " + parameter.Name + " parameter." +
+				( parameter.IsString || parameter.IsEnumerable ? " The value cannot be null." : "" ) );
 		}
 	}
 }

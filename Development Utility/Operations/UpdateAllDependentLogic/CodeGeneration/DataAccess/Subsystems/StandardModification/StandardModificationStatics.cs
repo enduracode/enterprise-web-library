@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writeFieldsAndPropertiesForColumn( column );
 
 			foreach( var column in columns.DataColumns.Where( i => !columns.KeyColumns.Contains( i ) ) )
-				FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
+				FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField( getColumnFieldName( column ) ) );
 
 			// Write constructors.
 			writeCreateForInsertMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
