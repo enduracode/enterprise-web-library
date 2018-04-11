@@ -882,8 +882,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
-			if( !modErrorDisplaysByValidation.ContainsKey( validation ) || !errorMessages.Any() )
+			if( !errorMessages.Any() )
 				return;
+			if( !modErrorDisplaysByValidation.ContainsKey( validation ) )
+				throw new ApplicationException( "An undisplayed validation produced errors." );
 			foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
 				var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
 				errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;

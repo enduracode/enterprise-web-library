@@ -30,8 +30,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				foreach( var validation in validations ) {
 					var validator = new Validator();
 					validation.Method( validator );
-					if( validator.ErrorsOccurred )
+					if( validator.ErrorsOccurred ) {
 						errorsOccurred = true;
+						if( !validator.ErrorMessages.Any() )
+							throw new ApplicationException( "Validation errors occurred but there are no messages." );
+					}
 					validationErrorHandler( validation, validator.ErrorMessages );
 				}
 				if( errorsOccurred )
