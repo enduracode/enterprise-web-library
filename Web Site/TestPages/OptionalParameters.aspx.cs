@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var fib = FormItemBlock.CreateFormItemTable();
-			fib.AddFormItems( parametersModification.GetField1TextFormItem( true ), parametersModification.GetField2TextFormItem( true ) );
+			fib.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
 			ph.AddControlsReturnThis( fib );
 
 			ph.AddControlsReturnThis(
@@ -48,12 +48,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					}
 				}
 
-				foreach( var additionalUrl in
-					new[]
-						{
-							"//example.org/scheme-relative/URI/with/absolute/path/to/resource.txt", "/relative/URI/with/absolute/path/to/resource.txt",
-							"relative/path/to/resource.txt", "../../../resource.txt", "./resource.txt#frag01", "resource.txt", "#frag01", "www.world.com"
-						} )
+				foreach( var additionalUrl in new[]
+					{
+						"//example.org/scheme-relative/URI/with/absolute/path/to/resource.txt", "/relative/URI/with/absolute/path/to/resource.txt",
+						"relative/path/to/resource.txt", "../../../resource.txt", "./resource.txt#frag01", "resource.txt", "#frag01", "www.world.com"
+					} )
 					testUrl( table, additionalUrl );
 			}
 		}
@@ -65,7 +64,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new EwfTableItem(
 					url,
 					( !validator.ErrorsOccurred ).ToYesOrEmpty()
-						.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );
+					.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );
 		}
 
 		public override bool IsAutoDataUpdater => true;
