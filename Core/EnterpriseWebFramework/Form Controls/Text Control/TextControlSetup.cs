@@ -309,7 +309,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                     ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
 							                     : validator.GetString( errorHandler, postBackValue.Value, allowEmpty );
 						if( errorHandler.LastResult != ErrorCondition.NoError ) {
-							validationErrorNotifier();
+							validationErrorNotifier?.Invoke();
 							return;
 						}
 
