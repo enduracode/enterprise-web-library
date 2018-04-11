@@ -102,8 +102,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsChecked { get { return checkBoxFormValue != null ? checkBoxFormValue.GetDurableValue() : radioButtonFormValue.GetDurableValue() == this; } }
 
 		void ControlTreeDataLoader.LoadData() {
-			PreRender += ( s, e ) => Labeler.AddControlId( checkBox.ClientID );
-
 			action.AddToPageIfNecessary();
 
 			PreRender += delegate {
@@ -154,6 +152,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new Controls.ToolTip(
 					ToolTipControl ?? EnterpriseWebFramework.Controls.ToolTip.GetToolTipTextControl( ToolTip ),
 					label.Any() ? (Control)labelControl : checkBox );
+
+			Labeler.AddControlId( checkBox.ClientID );
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
