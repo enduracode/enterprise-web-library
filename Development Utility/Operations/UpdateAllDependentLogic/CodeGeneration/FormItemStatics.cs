@@ -30,27 +30,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			if( !field.TypeIs( typeof( string ) ) )
 				return;
 
-			writeFormItemGetters(
+			writeFormItemGetter(
 				writer,
 				field,
-				"EwfTextBox",
-				"Text",
-				"string",
-				"\"\"",
-				new CSharpParameter[ 0 ],
+				"TextControl",
 				getAllowEmptyParameter( false ).ToCollection(),
-				new[]
-					{
-						new CSharpParameter( "int", "textBoxRows", "1" ), new CSharpParameter( "bool", "masksCharacters", "false" ),
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "bool?", "suggestSpellCheck", "null" ),
-						new CSharpParameter( "FormAction", "action", "null" ), new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfTextBox( v, rows: textBoxRows, masksCharacters: masksCharacters, " + ( field.Size.HasValue ? "maxLength: " + field.Size.Value + ", " : "" ) +
-				"readOnly: readOnly, suggestSpellCheck: suggestSpellCheck, action: action, autoPostBack: autoPostBack )",
-				"validator.GetString( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
-				( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
-				"" );
+				false,
+				new CSharpParameter( "TextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string",
+				Enumerable.Empty<CSharpParameter>(),
+				true,
+				dv =>
+					"{0}.ToTextControlFormItem( label, allowEmpty, formItemSetup: formItemSetup, controlSetup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
 				field,
