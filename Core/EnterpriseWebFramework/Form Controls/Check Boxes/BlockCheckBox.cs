@@ -44,9 +44,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.label = label;
 			action = this.setup.Action ?? FormState.Current.DefaultAction;
 
-			validation = checkBoxFormValue.CreateValidation( validationMethod );
+			var isCheckedDv = new DataValue<bool>();
+			validation = checkBoxFormValue.CreateValidation(
+				( postBackValue, validator ) => {
+					isCheckedDv.Value = postBackValue.Value;
+					validationMethod( postBackValue, validator );
+				} );
 
-			nestedControls = this.setup.NestedControlListGetter != null ? this.setup.NestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = this.setup.NestedControlListGetter != null
+				                 ? FormState.ExecuteWithValidationPredicate(
+						                 () => isCheckedDv.Value || this.setup.NestedControlsAlwaysVisible,
+						                 this.setup.NestedControlListGetter )
+					                 .ToImmutableArray()
+				                 : ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
