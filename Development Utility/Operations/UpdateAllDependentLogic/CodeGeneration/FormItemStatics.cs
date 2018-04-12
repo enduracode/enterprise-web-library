@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
-					"{0}.ToTextControlFormItem( label, allowEmpty, formItemSetup: formItemSetup, controlSetup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
+					"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
@@ -170,7 +170,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToHtmlEditorFormItem( label, allowEmpty, formItemSetup: formItemSetup, editorSetup: editorSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
+					"{0}.ToHtmlEditor( allowEmpty, setup: editorSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ),
 				additionalSummarySentences: new[]
 					{
@@ -344,7 +344,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				false,
 				dv =>
-					"new HtmlBlockEditor( (int?)( value != null ? value.Value : {0}.Value ), id => {0}.Value = id, out m, setup: editorSetup ).ToFormItem( label, setup: formItemSetup )"
+					"new HtmlBlockEditor( (int?)( value != null ? value.Value : {0}.Value ), id => {0}.Value = id, out m, setup: editorSetup ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv ),
 				preFormItemStatements: "HtmlBlockEditorModification m = null;",
 				postFormItemStatements: "mod = m;" );
@@ -410,7 +410,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToBlockCheckboxFormItem( label, formItemSetup: formItemSetup, formItemLabel: formItemLabel, checkboxSetup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod )"
+					"{0}.ToBlockCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
 						.FormatWith( dv ) );
 		}
 
@@ -590,8 +590,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( " +
 				parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );
 			writer.WriteLine( "label = label ?? \"{0}\".ToComponents();".FormatWith( getDefaultLabel( field ) ) );
-			if( controlIsLabeled )
-				writer.WriteLine( "formItemLabel = formItemLabel ?? Enumerable.Empty<PhrasingComponent>();" );
 			writer.WriteLine(
 				StringTools.ConcatenateWithDelimiter(
 					Environment.NewLine,
