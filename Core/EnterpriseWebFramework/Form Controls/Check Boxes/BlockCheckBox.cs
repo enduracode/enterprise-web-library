@@ -27,14 +27,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private WebControl checkBox;
 
 		/// <summary>
-		/// Creates a check box.
+		/// Creates a checkbox.
 		/// </summary>
 		/// <param name="isChecked"></param>
+		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
 		/// <param name="validationMethod">The validation method. Do not pass null.</param>
-		/// <param name="label">Do not pass null.</param>
-		/// <param name="setup">The setup object for the check box.</param>
+		/// <param name="setup">The setup object for the checkbox.</param>
 		public BlockCheckBox(
-			bool isChecked, Action<PostBackValue<bool>, Validator> validationMethod, BlockCheckBoxSetup setup = null, IEnumerable<PhrasingComponent> label = null ) {
+			bool isChecked, IEnumerable<PhrasingComponent> label, Action<PostBackValue<bool>, Validator> validationMethod, BlockCheckBoxSetup setup = null ) {
 			Labeler = new FormControlLabeler();
 
 			this.setup = setup ?? new BlockCheckBoxSetup();

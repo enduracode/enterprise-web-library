@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
 				() => {
-					ph.AddControlsReturnThis( new HtmlBlockEditor( null, id => {}, out mod ).ToFormItem( Enumerable.Empty<PhrasingComponent>() ).ToControl() );
+					ph.AddControlsReturnThis( new HtmlBlockEditor( null, id => {}, out mod ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>() ).ToControl() );
 					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Post Back", new PostBackButton() ) );
 				} );
 		}

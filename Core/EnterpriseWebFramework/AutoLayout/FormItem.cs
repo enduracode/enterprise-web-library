@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -76,71 +75,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	}
 
 	public static class FormItemExtensionCreators {
-		public static FormItem ToTextControlFormItem(
-			this DataValue<string> dataValue, IEnumerable<PhrasingComponent> label, bool allowEmpty, FormItemSetup formItemSetup = null,
-			TextControlSetup controlSetup = null, string value = null, int? maxLength = null, Action<Validator> additionalValidationMethod = null ) {
-			return new TextControl(
-				value ?? dataValue.Value,
-				allowEmpty,
-				( postBackValue, validator ) => {
-					dataValue.Value = postBackValue;
-					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: controlSetup,
-				maxLength: maxLength ).ToFormItem( label, setup: formItemSetup );
-		}
-
-		public static FormItem ToHtmlEditorFormItem(
-			this DataValue<string> dataValue, IEnumerable<PhrasingComponent> label, bool allowEmpty, FormItemSetup formItemSetup = null,
-			WysiwygHtmlEditorSetup editorSetup = null, string value = null, int? maxLength = null, Action<Validator> additionalValidationMethod = null ) {
-			return new WysiwygHtmlEditor(
-				value ?? dataValue.Value,
-				allowEmpty,
-				( postBackValue, validator ) => {
-					dataValue.Value = postBackValue;
-					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: editorSetup,
-				maxLength: maxLength ).ToFormItem( label, setup: formItemSetup );
-		}
-
-		public static FormItem ToBlockCheckboxFormItem(
-			this DataValue<bool> dataValue, IEnumerable<PhrasingComponent> label, FormItemSetup formItemSetup = null,
-			IEnumerable<PhrasingComponent> formItemLabel = null, BlockCheckBoxSetup checkboxSetup = null, bool? value = null,
-			Action<Validator> additionalValidationMethod = null ) {
-			return new BlockCheckBox(
-				value ?? dataValue.Value,
-				( postBackValue, validator ) => {
-					dataValue.Value = postBackValue.Value;
-					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: checkboxSetup,
-				label: label ).ToFormItem( formItemLabel, setup: formItemSetup );
-		}
-
-		public static FormItem ToBlockCheckboxFormItem(
-			this DataValue<decimal> dataValue, IEnumerable<PhrasingComponent> label, FormItemSetup formItemSetup = null,
-			IEnumerable<PhrasingComponent> formItemLabel = null, BlockCheckBoxSetup checkboxSetup = null, decimal? value = null,
-			Action<Validator> additionalValidationMethod = null ) {
-			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
-			return boolValue.ToBlockCheckboxFormItem(
-				label,
-				formItemSetup: formItemSetup,
-				formItemLabel: formItemLabel,
-				checkboxSetup: checkboxSetup,
-				additionalValidationMethod: validator => {
-					dataValue.Value = boolValue.Value.BooleanToDecimal();
-					additionalValidationMethod?.Invoke( validator );
-				} );
-		}
-
 		/// <summary>
-		/// Creates a form item with this form control and the specified label.
+		/// Creates a form item with this form control.
 		/// </summary>
 		/// <param name="formControl"></param>
-		/// <param name="label">Do not pass null.</param>
+		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
-		public static FormItem ToFormItem( this FormControl<FlowComponent> formControl, IEnumerable<PhrasingComponent> label, FormItemSetup setup = null ) {
+		public static FormItem ToFormItem( this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IEnumerable<PhrasingComponent> label = null ) {
+			label = label ?? Enumerable.Empty<PhrasingComponent>();
+
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			if( formControl is WebControl webControl )
 				return new FormItem<Control>(
@@ -153,18 +96,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					formControl.Validation );
 
 			return formControl.PageComponent.ToCollection()
-				.ToFormItem( formControl.Labeler != null ? formControl.Labeler.CreateLabel( label ) : label, setup: setup, validation: formControl.Validation );
+				.ToFormItem(
+					setup: setup,
+					label: label.Any() && formControl.Labeler != null ? formControl.Labeler.CreateLabel( label ) : label,
+					validation: formControl.Validation );
 		}
 
 		/// <summary>
-		/// Creates a form item with these components and the specified label.
+		/// Creates a form item with these components.
 		/// </summary>
 		/// <param name="content"></param>
-		/// <param name="label">Do not pass null.</param>
+		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
 		/// <param name="validation"></param>
 		public static FormItem ToFormItem(
-			this IEnumerable<FlowComponent> content, IEnumerable<PhrasingComponent> label, FormItemSetup setup = null, EwfValidation validation = null ) {
+			this IEnumerable<FlowComponent> content, FormItemSetup setup = null, IEnumerable<PhrasingComponent> label = null, EwfValidation validation = null ) {
+			label = label ?? Enumerable.Empty<PhrasingComponent>();
 			return new FormItem<Control>(
 				setup,
 				label.Any() ? (FormItemLabel)new PlaceHolder().AddControlsReturnThis( label.GetControls() ) : "",

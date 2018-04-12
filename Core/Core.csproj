@@ -394,8 +394,12 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\FormControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\FormControlExtensionCreators.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FormControlLabeler.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\HiddenFieldId.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\HTML Editor\WysiwygHtmlEditor.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\HTML Editor\WysiwygHtmlEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ChangeBasedCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
@@ -419,8 +423,6 @@
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\HtmlBlockStatics.cs" />
     <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\SystemHtmlBlockEditingProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditor.cs" />
-    <Compile Include="EnterpriseWebFramework\HtmlBlockEditing\WysiwygHtmlEditorSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\EwfImage.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\FixedSizeImageSourceSet.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\FlexibleImageSourceSet.cs" />
@@ -544,7 +546,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBack.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\PostBackAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Submission\SecondaryResponse.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedFlowComponent.cs" />
