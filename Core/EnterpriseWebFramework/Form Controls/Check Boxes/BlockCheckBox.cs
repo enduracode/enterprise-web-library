@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		internal BlockCheckBox(
 			FormValue<CommonCheckBox> formValue, BlockCheckBoxSetup setup, IEnumerable<PhrasingComponent> label,
-			Func<IEnumerable<string>> jsClickHandlerStatementListGetter, EwfValidation validation, string listItemId = null ) {
+			Func<IEnumerable<string>> jsClickHandlerStatementListGetter, Action<PostBackValue<bool>, Validator> validationMethod, string listItemId = null ) {
 			Labeler = new FormControlLabeler();
 
 			radioButtonFormValue = formValue;
@@ -74,9 +74,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			action = setup.Action ?? FormState.Current.DefaultAction;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 
-			this.validation = validation;
+			var isCheckedDv = new DataValue<bool>();
+			validation = formValue.CreateValidation(
+				( postBackValue, validator ) => {
+					isCheckedDv.Value = postBackValue.Value == this;
+					validationMethod( new PostBackValue<bool>( postBackValue.Value == this, postBackValue.ChangedOnPostBack ), validator );
+				} );
 
-			nestedControls = setup.NestedControlListGetter != null ? setup.NestedControlListGetter().ToImmutableArray() : ImmutableArray<Control>.Empty;
+			nestedControls = setup.NestedControlListGetter != null
+				                 ? FormState.ExecuteWithValidationPredicate(
+						                 () => isCheckedDv.Value || this.setup.NestedControlsAlwaysVisible,
+						                 setup.NestedControlListGetter )
+					                 .ToImmutableArray()
+				                 : ImmutableArray<Control>.Empty;
 		}
 
 		public FormControlLabeler Labeler { get; }

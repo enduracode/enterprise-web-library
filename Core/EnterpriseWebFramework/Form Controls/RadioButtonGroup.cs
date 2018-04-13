@@ -121,18 +121,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool isSelected, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", FormAction action = null, bool autoPostBack = false,
 			PageModificationValue<bool> pageModificationValue = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			BlockCheckBox checkBox = null;
-			var validation = formValue.CreateValidation(
-				( postBackValue, validator ) => validationMethod(
-					new PostBackValue<bool>( postBackValue.Value == checkBox, postBackValue.ChangedOnPostBack ),
-					validator ) );
-
 			checkBox = new BlockCheckBox(
 				formValue,
 				new BlockCheckBoxSetup( action: action, triggersActionWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
 				label.ToComponents(),
 				() => checkBoxesAndSelectionStatesAndPageModificationValues.Where( i => i.Item3 != null )
 					.Select( i => i.Item3.GetJsModificationStatements( i.Item1 == checkBox ? "true" : "false" ) ),
-				validation );
+				validationMethod );
 			checkBoxesAndSelectionStatesAndPageModificationValues.Add(
 				Tuple.Create<CommonCheckBox, bool, PageModificationValue<bool>>( checkBox, isSelected, pageModificationValue ) );
 
