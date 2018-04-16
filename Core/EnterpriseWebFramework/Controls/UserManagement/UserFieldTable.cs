@@ -42,10 +42,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"Email address",
 					new EwfTextBox( user != null ? user.Email : "" ),
 					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( validationShouldRun() )
-								                             Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
-						                             } ) ) );
+						( pbv, validator ) => {
+							if( validationShouldRun() )
+								Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
+						} ) ) );
 
 			if( includePasswordControls() ) {
 				var group = new RadioButtonGroup( false );
@@ -54,26 +54,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					"",
 					group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
-								                             return;
-							                             if( user != null ) {
-								                             Salt = facUser.Salt;
-								                             SaltedPassword = facUser.SaltedPassword;
-								                             MustChangePassword = facUser.MustChangePassword;
-							                             }
-							                             else
-								                             genPassword( false );
-						                             } ) );
+						( pbv, validator ) => {
+							if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
+								return;
+							if( user != null ) {
+								Salt = facUser.Salt;
+								SaltedPassword = facUser.SaltedPassword;
+								MustChangePassword = facUser.MustChangePassword;
+							}
+							else
+								genPassword( false );
+						} ) );
 
 				var generatePassword = FormItem.Create(
 					"",
 					group.CreateInlineRadioButton( false, label: "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" ),
 					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
-								                             genPassword( true );
-						                             } ) );
+						( pbv, validator ) => {
+							if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
+								genPassword( true );
+						} ) );
 
 				var providePassword = FormState.ExecuteWithValidationPredicate(
 					validationShouldRun,
@@ -83,8 +83,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							"",
 							group.CreateBlockRadioButton(
 								false,
-								( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
 								label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
+								validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
 								nestedControlListGetter: () => {
 									return FormState.ExecuteWithValidationPredicate(
 										() => providePasswordSelected.Value,
@@ -109,7 +109,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					} );
 
 				b.AddFormItems(
-					FormItem.Create( "Password", ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
+					FormItem.Create(
+						"Password",
+						ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
 			}
 
 			b.AddFormItems(
@@ -119,10 +121,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ),
 						user != null ? user.Role.RoleId as int? : null ),
 					validationGetter: control => new EwfValidation(
-						                             ( pbv, validator ) => {
-							                             if( validationShouldRun() )
-								                             RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
-						                             } ) ) );
+						( pbv, validator ) => {
+							if( validationShouldRun() )
+								RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
+						} ) ) );
 
 			Controls.Add( b );
 		}

@@ -110,16 +110,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a block-level radio button that is part of the group.
 		/// </summary>
 		/// <param name="isSelected"></param>
-		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="label"></param>
 		/// <param name="action"></param>
 		/// <param name="autoPostBack"></param>
 		/// <param name="pageModificationValue"></param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		/// <param name="nestedControlListGetter"></param>
 		/// <returns></returns>
 		public BlockCheckBox CreateBlockRadioButton(
-			bool isSelected, Action<PostBackValue<bool>, Validator> validationMethod, string label = "", FormAction action = null, bool autoPostBack = false,
-			PageModificationValue<bool> pageModificationValue = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
+			bool isSelected, string label = "", FormAction action = null, bool autoPostBack = false, PageModificationValue<bool> pageModificationValue = null,
+			Action<PostBackValue<bool>, Validator> validationMethod = null, Func<IEnumerable<Control>> nestedControlListGetter = null ) {
 			BlockCheckBox checkBox = null;
 			checkBox = new BlockCheckBox(
 				formValue,

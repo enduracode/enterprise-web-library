@@ -46,11 +46,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new BlockCheckBox(
 				value ?? dataValue.Value,
 				label,
-				( postBackValue, validator ) => {
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
 					dataValue.Value = postBackValue.Value;
 					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: setup );
+				} );
 		}
 
 		/// <summary>

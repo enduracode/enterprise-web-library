@@ -51,8 +51,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var checkBox = new BlockCheckBox(
 						selectedItemIds.Contains( item.Id ),
 						item.Label.ToComponents(),
-						( postBackValue, validator ) => {},
-						setup: new BlockCheckBoxSetup( highlightedWhenChecked: true, action: action ) );
+						setup: new BlockCheckBoxSetup( highlightedWhenChecked: true, action: action ),
+						validationMethod: ( postBackValue, validator ) => {} );
 					place.Controls.Add( checkBox );
 					checkBoxesByItem.Add( item, checkBox );
 				}

@@ -31,10 +31,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="isChecked"></param>
 		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
-		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="setup">The setup object for the checkbox.</param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		public BlockCheckBox(
-			bool isChecked, IEnumerable<PhrasingComponent> label, Action<PostBackValue<bool>, Validator> validationMethod, BlockCheckBoxSetup setup = null ) {
+			bool isChecked, IEnumerable<PhrasingComponent> label, BlockCheckBoxSetup setup = null, Action<PostBackValue<bool>, Validator> validationMethod = null ) {
 			Labeler = new FormControlLabeler();
 
 			this.setup = setup ?? new BlockCheckBoxSetup();
@@ -44,19 +44,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.label = label;
 			action = this.setup.Action ?? FormState.Current.DefaultAction;
 
-			var isCheckedDv = new DataValue<bool>();
-			validation = checkBoxFormValue.CreateValidation(
-				( postBackValue, validator ) => {
-					isCheckedDv.Value = postBackValue.Value;
-					validationMethod( postBackValue, validator );
-				} );
+			if( validationMethod != null )
+				validation = checkBoxFormValue.CreateValidation( validationMethod );
 
-			nestedControls = this.setup.NestedControlListGetter != null
-				                 ? FormState.ExecuteWithValidationPredicate(
-						                 () => isCheckedDv.Value || this.setup.NestedControlsAlwaysVisible,
-						                 this.setup.NestedControlListGetter )
-					                 .ToImmutableArray()
-				                 : ImmutableArray<Control>.Empty;
+			nestedControls = setup.NestedControlListGetter?.Invoke().ToImmutableArray() ?? ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
@@ -74,19 +65,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			action = setup.Action ?? FormState.Current.DefaultAction;
 			jsClickHandlerStatementLists.Add( jsClickHandlerStatementListGetter );
 
-			var isCheckedDv = new DataValue<bool>();
-			validation = formValue.CreateValidation(
-				( postBackValue, validator ) => {
-					isCheckedDv.Value = postBackValue.Value == this;
-					validationMethod( new PostBackValue<bool>( postBackValue.Value == this, postBackValue.ChangedOnPostBack ), validator );
-				} );
+			if( validationMethod != null )
+				validation = formValue.CreateValidation(
+					( postBackValue, validator ) => validationMethod( new PostBackValue<bool>( postBackValue.Value == this, postBackValue.ChangedOnPostBack ), validator ) );
 
-			nestedControls = setup.NestedControlListGetter != null
-				                 ? FormState.ExecuteWithValidationPredicate(
-						                 () => isCheckedDv.Value || this.setup.NestedControlsAlwaysVisible,
-						                 setup.NestedControlListGetter )
-					                 .ToImmutableArray()
-				                 : ImmutableArray<Control>.Empty;
+			nestedControls = setup.NestedControlListGetter?.Invoke().ToImmutableArray() ?? ImmutableArray<Control>.Empty;
 		}
 
 		public FormControlLabeler Labeler { get; }

@@ -134,7 +134,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new BlockCheckBoxSetup( action: action, triggersActionWhenCheckedOrUnchecked: autoPostBack, nestedControlListGetter: nestedControlListGetter ),
 				label.ToComponents(),
 				() => ImmutableArray<string>.Empty,
-				( postBackValue, validator ) => {},
+				null,
 				listItemId: getStringId( listItemId ) );
 			itemIdsAndCheckBoxes.Add( Tuple.Create<ItemIdType, CommonCheckBox>( listItemId, checkBox ) );
 			return checkBox;
