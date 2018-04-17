@@ -224,7 +224,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										attributes.Add( Tuple.Create( "name", context.Id ) );
 
 									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
-										attributes.Add( Tuple.Create( "size", ( maxLength ?? 1000 ).ToString() ) );
+										attributes.Add( Tuple.Create( "size", ( maxLength.HasValue && maxLength.Value < 1000 ? maxLength : 1000 ).ToString() ) );
 									else
 										attributes.Add( Tuple.Create( "rows", numberOfRows.ToString() ) );
 
