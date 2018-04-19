@@ -52,9 +52,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Aspose.Pdf, Version=17.3.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
-      <HintPath>..\packages\Aspose.Pdf.17.3.0\lib\net40-client\Aspose.Pdf.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Aspose.PDF, Version=18.4.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aspose.PDF.18.4.1\lib\net40-client\Aspose.PDF.dll</HintPath>
     </Reference>
     <Reference Include="Aspose.Words, Version=14.5.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
