@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary {
 			try {
 				CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
 
-				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
+				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.PDF.lic" );
 				if( File.Exists( asposePdfLicensePath ) )
 					new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
 				var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
