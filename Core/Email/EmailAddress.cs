@@ -6,16 +6,18 @@
 		/// <summary>
 		/// The email address.
 		/// </summary>
-		public string Address { get; set; }
+		public readonly string Address;
 
 		/// <summary>
 		/// The friendly name that gets shown in email clients.
 		/// </summary>
-		public string DisplayName { get; set; }
+		public readonly string DisplayName;
 
 		/// <summary>
 		/// Creates an email address with the given address and display name.
 		/// </summary>
+		/// <param name="address">Do not pass null.</param>
+		/// <param name="displayName">Do not pass null.</param>
 		public EmailAddress( string address, string displayName ) {
 			Address = address;
 			DisplayName = displayName;
@@ -24,6 +26,7 @@
 		/// <summary>
 		/// Creates an email address with the given address.
 		/// </summary>
+		/// <param name="address">Do not pass null.</param>
 		public EmailAddress( string address ): this( address, address ) {}
 
 		/// <summary>
