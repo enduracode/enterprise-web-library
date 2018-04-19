@@ -63,7 +63,9 @@ namespace EnterpriseWebLibrary.Email {
 
 			m.From = getAddress( message.From );
 			// As of 12 September 2017 SendGrid does not support multiple reply-to addresses. See https://github.com/sendgrid/sendgrid-csharp/issues/339.
-			m.ReplyTo = getAddress( message.ReplyToAddresses.Single() );
+			var replyToAddress = message.ReplyToAddresses.SingleOrDefault();
+			if( replyToAddress != null )
+				m.ReplyTo = getAddress( replyToAddress );
 
 			m.AddTos( message.ToAddresses.Select( getAddress ).ToList() );
 			m.AddCcs( message.CcAddresses.Select( getAddress ).ToList() );
