@@ -40,7 +40,13 @@ namespace EnterpriseWebLibrary.Email {
 					emailSender = message => {
 						var sendGridMessage = getSendGridMessage( message );
 						try {
-							Task.Run( () => client.SendEmailAsync( sendGridMessage ) ).Wait();
+							Task.Run(
+									async () => {
+										var response = await client.SendEmailAsync( sendGridMessage );
+										if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
+											throw new ApplicationException( await response.Body.ReadAsStringAsync() );
+									} )
+								.Wait();
 						}
 						catch( Exception e ) {
 							throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
@@ -67,14 +73,17 @@ namespace EnterpriseWebLibrary.Email {
 			if( replyToAddress != null )
 				m.ReplyTo = getAddress( replyToAddress );
 
-			m.AddTos( message.ToAddresses.Select( getAddress ).ToList() );
-			m.AddCcs( message.CcAddresses.Select( getAddress ).ToList() );
-			m.AddBccs( message.BccAddresses.Select( getAddress ).ToList() );
+			foreach( var i in message.ToAddresses.Select( getAddress ) )
+				m.AddTo( i );
+			foreach( var i in message.CcAddresses.Select( getAddress ) )
+				m.AddCc( i );
+			foreach( var i in message.BccAddresses.Select( getAddress ) )
+				m.AddBcc( i );
 
 			m.Subject = message.Subject;
 
 			foreach( var i in message.CustomHeaders )
-				m.Headers.Add( i.Item1, i.Item2 );
+				m.AddHeader( i.Item1, i.Item2 );
 
 			m.PlainTextContent = htmlToPlainText( message.BodyHtml );
 			m.HtmlContent = message.BodyHtml;
