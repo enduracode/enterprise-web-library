@@ -18,6 +18,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeEnumerableFormItemGetters( writer, field );
 			writeGuidFormItemGetters( writer, field );
 
+			writeGenericGetter( writer, field );
 			writeGenericGetterWithoutValueParams( writer, field, null );
 			writeGenericGetterWithoutValueParams( writer, field, false );
 			writeGenericGetterWithoutValueParams( writer, field, true );
@@ -774,6 +775,34 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
 				};
 			return "control => new EwfValidation( ( postBackValues, validator ) => { " + StringTools.ConcatenateWithDelimiter( " ", statements ) + " } )";
+		}
+
+		private static void writeGenericGetter( TextWriter writer, ModificationField field ) {
+			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
+
+			var parameters = new List<CSharpParameter>();
+			parameters.Add( new CSharpParameter( "System.Func<{0},IEnumerable<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
+			parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
+			parameters.Add( new CSharpParameter( "IEnumerable<PhrasingComponent>", "label", "null" ) );
+			parameters.Add(
+				new CSharpParameter(
+					field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					"value",
+					"null" ) );
+			parameters.Add( new CSharpParameter( "System.Func<System.Action<{0}>,EwfValidation>".FormatWith( field.TypeName ), "validationGetter", "null" ) );
+
+			writer.WriteLine(
+				"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( " +
+				parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );
+			writer.WriteLine( "label = label ?? \"{0}\".ToComponents();".FormatWith( getDefaultLabel( field ) ) );
+			writer.WriteLine(
+				"return {0}.ToFormItem( setup: setup, label: label, validation: {1} );".FormatWith(
+					"contentGetter( {0} )".FormatWith(
+						field.TypeIs( typeof( string ) )
+							? "value ?? {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) )
+							: "value != null ? value.Value : {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ),
+					"validationGetter?.Invoke( v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ) );
+			writer.WriteLine( "}" );
 		}
 
 		private static void writeGenericGetter(
