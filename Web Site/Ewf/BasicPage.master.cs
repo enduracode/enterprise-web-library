@@ -205,8 +205,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				new Block { ClientIDMode = ClientIDMode.Static, ID = clickBlockerId, CssClass = clickBlockerInactiveClass },
 				new PlaceHolder().AddControlsReturnThis( getProcessingDialog().GetControls() ),
 				new NamingPlaceholder( getStatusMessageControl() ) );
-
-			EwfPage.Instance.ClientScript.RegisterOnSubmitStatement( GetType(), "formSubmitEventHandler", "postBackRequestStarted()" );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getProcessingDialog() {

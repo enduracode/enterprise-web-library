@@ -608,10 +608,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( duplicatePostBackValueKeys.Any() )
 				throw new ApplicationException( "Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
 
-			// Using this approach of initializing the hidden field to the submit button's post-back gives the enter key good behavior with Internet Explorer when
-			// there is one text box on the page.
-			// The empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted.
-			ClientScript.RegisterHiddenField( postBackHiddenFieldName, SubmitButtonPostBack != null ? SubmitButtonPostBack.Id : "" );
+			ClientScript.RegisterHiddenField( postBackHiddenFieldName, "" );
 
 			foreach( var i in formValues )
 				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
@@ -1102,6 +1099,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
 					" ",
 					"OnDocumentReady();",
+					"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );".FormatWith(
+						SubmitButtonPostBack != null
+							? SubmitButtonPostBack.Id
+							: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
 					controlInitStatements,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),

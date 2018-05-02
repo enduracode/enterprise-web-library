@@ -113,14 +113,17 @@ function RemoveClickScriptBinding() {
 }
 
 function postBack( postBackId ) {
-	var theForm = document.getElementById( "aspnetForm" );
-	if( !theForm.onsubmit || ( theForm.onsubmit() != false ) ) {
-		$( "#ewfPostBack" ).val( postBackId );
-		theForm.submit();
-	}
+	$( "#aspnetForm" ).trigger( "submit", postBackId );
 }
 
-function postBackRequestStarted() {
+function postBackRequestStarting( e, postBackId ) {
+	if( $( "#ewfClickBlocker" ).hasClass( "ewfClickBlockerA" ) ) {
+		e.preventDefault();
+		return;
+	}
+
+	$( "#ewfPostBack" ).val( postBackId );
+
 	// see http://stackoverflow.com/a/9924844/35349
 	for( var i in CKEDITOR.instances )
 		CKEDITOR.instances[i].updateElement();
