@@ -18,9 +18,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="id"></param>
 		/// <param name="pageModificationValue"></param>
 		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
+		/// <param name="jsInitStatementGetter">A function that takes the field’s ID and returns the JavaScript statements that should be executed when the DOM is
+		/// loaded. Do not return null.</param>
 		public EwfHiddenField(
 			string value, HiddenFieldId id = null, PageModificationValue<string> pageModificationValue = null,
-			Action<PostBackValue<string>, Validator> validationMethod = null ) {
+			Action<PostBackValue<string>, Validator> validationMethod = null, Func<string, string> jsInitStatementGetter = null ) {
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
 			var elementId = new ElementId();
@@ -45,12 +47,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"input",
 								focusDependentData: new ElementFocusDependentData(
 									attributes: attributes,
-									includeIdAttribute: id != null || pageModificationValue != null,
-									jsInitStatements: pageModificationValue != null
-										                  ? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith(
-											                  context.Id,
-											                  pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
-										                  : "" ) );
+									includeIdAttribute: id != null || pageModificationValue != null || jsInitStatementGetter != null,
+									jsInitStatements: StringTools.ConcatenateWithDelimiter(
+										" ",
+										pageModificationValue != null
+											? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
+											: "",
+										jsInitStatementGetter?.Invoke( context.Id ) ?? "" ) ) );
 						} );
 				},
 				formValue: formValue );

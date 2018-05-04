@@ -199,19 +199,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
 			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
 
-			HiddenFieldId timeHiddenFieldId = new HiddenFieldId();
-			var timeHiddenField = new EwfHiddenField(
+			var timeHiddenFieldId = new HiddenFieldId();
+			return new EwfHiddenField(
 				"",
 				id: timeHiddenFieldId,
-				validationMethod: ( postBackValue, validator ) => clientTime.Value = postBackValue.Value );
-			EwfPage.Instance.PreRender += delegate {
-				EwfPage.Instance.ClientScript.RegisterOnSubmitStatement(
-					typeof( UserManagementStatics ),
-					"formSubmitEventHandler",
-					timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) );
-			};
-
-			return timeHiddenField.PageComponent.ToCollection();
+				validationMethod: ( postBackValue, validator ) => clientTime.Value = postBackValue.Value,
+				jsInitStatementGetter: id => "$( document.getElementById( '{0}' ).form ).submit( function() {{ {1} }} );".FormatWith(
+					id,
+					timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) ) ).PageComponent.ToCollection();
 		}
 
 		/// <summary>
