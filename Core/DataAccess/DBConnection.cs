@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 				connectionString += "; Connect Timeout={0}".FormatWith( timeout );
 			}
 			else if( databaseInfo is MySqlInfo mySqlInfo ) {
-				connectionString = "Host=localhost; User Id=root; Password=password; Initial Catalog=" + mySqlInfo.Database;
+				connectionString = "Host=localhost; SSL Mode=None; User Id=root; Password=password; Initial Catalog=" + mySqlInfo.Database;
 				if( !mySqlInfo.SupportsConnectionPooling )
 					connectionString += "; Pooling=false";
 				connectionString += "; Connect Timeout={0}".FormatWith( timeout );
