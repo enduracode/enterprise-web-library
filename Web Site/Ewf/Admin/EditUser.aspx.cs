@@ -29,7 +29,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new ActionButtonSetup(
 						"Delete User",
 						new PostBackButton(
-							PostBack.CreateFull( id: "delete", firstModificationMethod: deleteUser, actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
+							PostBack.CreateFull(
+								id: "delete",
+								firstModificationMethod: deleteUser,
+								actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
 
 			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( info.ParentResource ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -47,29 +50,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private void modifyData() {
-			if( FormsAuthStatics.FormsAuthEnabled ) {
+			if( FormsAuthStatics.FormsAuthEnabled )
 				if( info.UserId.HasValue )
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						info.User.UserId,
-						userFieldTable.Email,
-						userFieldTable.RoleId,
+						userFieldTable.Email.Value,
+						userFieldTable.RoleId.Value,
 						info.User.LastRequestTime,
-						userFieldTable.Salt,
-						userFieldTable.SaltedPassword,
-						userFieldTable.MustChangePassword );
+						userFieldTable.Salt.Value,
+						userFieldTable.SaltedPassword.Value,
+						userFieldTable.MustChangePassword.Value );
 				else
 					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
 						null,
-						userFieldTable.Email,
-						userFieldTable.RoleId,
+						userFieldTable.Email.Value,
+						userFieldTable.RoleId.Value,
 						null,
-						userFieldTable.Salt,
-						userFieldTable.SaltedPassword,
-						userFieldTable.MustChangePassword );
-			}
+						userFieldTable.Salt.Value,
+						userFieldTable.SaltedPassword.Value,
+						userFieldTable.MustChangePassword.Value );
 			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
 				var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email, userFieldTable.RoleId, info.User?.LastRequestTime );
+				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email.Value, userFieldTable.RoleId.Value, info.User?.LastRequestTime );
 			}
 			userFieldTable.SendEmailIfNecessary();
 		}

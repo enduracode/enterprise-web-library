@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -15,8 +13,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// NOTE: Convert this to use FormItems and take additional FormItems to allow customization of this control?
 	/// </summary>
 	public class UserFieldTable: WebControl {
-		private User user;
-		private FormsAuthCapableUser facUser;
+		/// <summary>
+		/// The validated email address.
+		/// </summary>
+		public readonly DataValue<string> Email = new DataValue<string>();
+
+		/// <summary>
+		/// Only valid for systems which are forms authentication capable.
+		/// </summary>
+		public readonly DataValue<int> Salt = new DataValue<int>();
+
+		/// <summary>
+		/// Only valid for systems which are forms authentication capable.
+		/// </summary>
+		public readonly DataValue<byte[]> SaltedPassword = new DataValue<byte[]>();
+
+		/// <summary>
+		/// Only valid for systems which are forms authentication capable.
+		/// </summary>
+		public readonly DataValue<bool> MustChangePassword = new DataValue<bool>();
+
+		/// <summary>
+		/// The validated role ID.
+		/// </summary>
+		public readonly DataValue<int> RoleId = new DataValue<int>();
+
 		private string passwordToEmail;
 
 		/// <summary>
@@ -25,27 +46,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="userId"></param>
 		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available 
 		/// in the System Provider are used.</param>
-		/// <param name="validationPredicate">If the function returns true, validation continues.</param>
-		public void LoadData( int? userId, List<Role> availableRoles = null, Func<bool> validationPredicate = null ) {
-			availableRoles = ( availableRoles != null ? availableRoles.OrderBy( r => r.Name ) : UserManagementStatics.SystemProvider.GetRoles() ).ToList();
+		public void LoadData( int? userId, List<Role> availableRoles = null ) {
+			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
-			user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
-			if( includePasswordControls() && user != null )
-				facUser = FormsAuthStatics.GetUser( user.UserId, true );
-
-			Func<bool> validationShouldRun = () => validationPredicate == null || validationPredicate();
+			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
+			var facUser = includePasswordControls() && user != null ? FormsAuthStatics.GetUser( user.UserId, true ) : null;
 
 			var b = FormItemBlock.CreateFormItemTable( heading: "Security Information" );
 
-			b.AddFormItems(
-				FormItem.Create(
-					"Email address",
-					new EwfTextBox( user != null ? user.Email : "" ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => {
-							if( validationShouldRun() )
-								Email = validator.GetEmailAddress( new ValidationErrorHandler( "email address" ), control.GetPostBackValue( pbv ), false );
-						} ) ) );
+			b.AddFormItems( Email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
 
 			if( includePasswordControls() ) {
 				var group = new RadioButtonGroup( false );
@@ -55,12 +64,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
 					validationGetter: control => new EwfValidation(
 						( pbv, validator ) => {
-							if( !validationShouldRun() || !control.IsCheckedInPostBack( pbv ) )
+							if( !control.IsCheckedInPostBack( pbv ) )
 								return;
 							if( user != null ) {
-								Salt = facUser.Salt;
-								SaltedPassword = facUser.SaltedPassword;
-								MustChangePassword = facUser.MustChangePassword;
+								Salt.Value = facUser.Salt;
+								SaltedPassword.Value = facUser.SaltedPassword;
+								MustChangePassword.Value = facUser.MustChangePassword;
 							}
 							else
 								genPassword( false );
@@ -71,42 +80,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					group.CreateInlineRadioButton( false, label: "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" ),
 					validationGetter: control => new EwfValidation(
 						( pbv, validator ) => {
-							if( validationShouldRun() && control.IsCheckedInPostBack( pbv ) )
+							if( control.IsCheckedInPostBack( pbv ) )
 								genPassword( true );
 						} ) );
 
-				var providePassword = FormState.ExecuteWithValidationPredicate(
-					validationShouldRun,
-					() => {
-						var providePasswordSelected = new DataValue<bool>();
-						return FormItem.Create(
-							"",
-							group.CreateBlockRadioButton(
-								false,
-								label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
-								validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
-								nestedControlListGetter: () => {
-									return FormState.ExecuteWithValidationPredicate(
-										() => providePasswordSelected.Value,
-										() => {
-											var password = new DataValue<string>();
-											var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
-											foreach( var i in password.GetPasswordModificationFormItems( textBoxWidth: Unit.Pixel( 200 ) ) )
-												newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
+				var providePasswordSelected = new DataValue<bool>();
+				var providePassword = FormItem.Create(
+					"",
+					group.CreateBlockRadioButton(
+						false,
+						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
+						validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
+						nestedControlListGetter: () => {
+							return FormState.ExecuteWithValidationPredicate(
+								() => providePasswordSelected.Value,
+								() => {
+									var password = new DataValue<string>();
+									var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
+									foreach( var i in password.GetPasswordModificationFormItems( textBoxWidth: Unit.Pixel( 200 ) ) )
+										newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
 
-											new EwfValidation(
-												validator => {
-													var p = new Password( password.Value );
-													Salt = p.Salt;
-													SaltedPassword = p.ComputeSaltedHash();
-													MustChangePassword = false;
-												} );
-
-											return newPasswordTable.ToCollection();
+									new EwfValidation(
+										validator => {
+											var p = new Password( password.Value );
+											Salt.Value = p.Salt;
+											SaltedPassword.Value = p.ComputeSaltedHash();
+											MustChangePassword.Value = false;
 										} );
-								} ),
-							validationGetter: control => control.Validation );
-					} );
+
+									return newPasswordTable.ToCollection();
+								} );
+						} ),
+					validationGetter: control => control.Validation );
 
 				b.AddFormItems(
 					FormItem.Create(
@@ -117,14 +122,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems(
 				FormItem.Create(
 					"Role",
-					SelectList.CreateDropDown(
-						from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ),
-						user != null ? user.Role.RoleId as int? : null ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => {
-							if( validationShouldRun() )
-								RoleId = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int );
-						} ) ) );
+					SelectList.CreateDropDown( from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ), user?.Role.RoleId ),
+					validationGetter: control =>
+						new EwfValidation( ( pbv, validator ) => RoleId.Value = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ) ) ) );
 
 			Controls.Add( b );
 		}
@@ -135,37 +135,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private void genPassword( bool emailPassword ) {
 			var password = new Password();
-			Salt = password.Salt;
-			SaltedPassword = password.ComputeSaltedHash();
-			MustChangePassword = true;
+			Salt.Value = password.Salt;
+			SaltedPassword.Value = password.ComputeSaltedHash();
+			MustChangePassword.Value = true;
 			if( emailPassword )
 				passwordToEmail = password.PasswordText;
 		}
-
-		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData to retrieve the validated email address.
-		/// </summary>
-		public string Email { get; private set; }
-
-		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
-		/// </summary>
-		public int Salt { get; private set; }
-
-		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
-		/// </summary>
-		public byte[] SaltedPassword { get; private set; }
-
-		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData. Only valid for systems which are forms authentication capable.
-		/// </summary>
-		public bool MustChangePassword { get; private set; }
-
-		/// <summary>
-		/// Call this during ValidateFormValues or ModifyData to retrieve the validated role ID.
-		/// </summary>
-		public int RoleId { get; private set; }
 
 		/// <summary>
 		/// Call this during ModifyData.
@@ -175,13 +150,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public void SendEmailIfNecessary() {
 			if( passwordToEmail == null )
 				return;
-			FormsAuthStatics.SendPassword( Email, passwordToEmail );
+			FormsAuthStatics.SendPassword( Email.Value, passwordToEmail );
 			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 
 		/// <summary>
 		/// Returns the div tag, which represents this control in HTML.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
 	}
 }
