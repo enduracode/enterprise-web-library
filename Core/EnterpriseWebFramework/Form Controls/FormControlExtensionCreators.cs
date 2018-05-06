@@ -18,6 +18,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				maxLength: maxLength );
 		}
 
+		public static EmailAddressControl ToEmailAddressControl(
+			this DataValue<string> dataValue, bool allowEmpty, EmailAddressControlSetup setup = null, string value = null, int? maxLength = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new EmailAddressControl(
+				value ?? dataValue.Value,
+				allowEmpty,
+				( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				},
+				setup: setup,
+				maxLength: maxLength );
+		}
+
 		public static WysiwygHtmlEditor ToHtmlEditor(
 			this DataValue<string> dataValue, bool allowEmpty, WysiwygHtmlEditorSetup setup = null, string value = null, int? maxLength = null,
 			Action<Validator> additionalValidationMethod = null ) {
