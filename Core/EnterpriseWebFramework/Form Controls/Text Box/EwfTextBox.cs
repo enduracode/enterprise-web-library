@@ -29,18 +29,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		PostBackOnTextChangeAndItemSelect
 	}
 
-	/// <summary>
-	/// A text box automatically placed in a wrapper so that it is styled consistently across all browsers.
-	/// If the width is set in pixels, this control automatically adjusts it, subtracting 6, to make the final resultant width be
-	/// the given value. Widths less than 6 pixels are not supported.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 31 July 2018. Use TextControl instead." ) ]
 	public class EwfTextBox: WebControl, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic {
-		internal static string GetTextareaValue( string value ) {
-			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
-			// does in their System.Web.UI.WebControls.TextBox implementation.
-			return Environment.NewLine + value;
-		}
-
 		private readonly int rows;
 		private readonly bool masksCharacters;
 		private int? maxLength;
@@ -155,7 +145,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				var value = formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 				var valueOrWatermark = watermarkText.Any() && !value.Any() ? watermarkText : value;
 				if( isTextarea )
-					textBox.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( GetTextareaValue( valueOrWatermark ) ) } );
+					textBox.Controls.Add( new Literal { Text = HttpUtility.HtmlEncode( TextControlSetup.GetTextareaValue( valueOrWatermark ) ) } );
 				else if( !masksCharacters )
 					textBox.Attributes.Add( "value", valueOrWatermark );
 			};

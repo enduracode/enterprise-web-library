@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
 
@@ -71,7 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									includeIdAttribute: true,
 									jsInitStatements: displaySetup.ComponentsDisplayed ? getJsShowStatements( context.Id, isFocused, setup.CkEditorConfiguration ) : "" ) );
 						},
-						children: new TextNode( () => EwfTextBox.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
+						children: new TextNode( () => TextControlSetup.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
 				},
 				formValue: formValue );
 

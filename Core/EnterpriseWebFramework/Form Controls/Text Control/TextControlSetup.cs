@@ -34,6 +34,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			private string getMultilineSelector( string suffix ) => "textarea" + suffix;
 		}
 
+		internal static string GetTextareaValue( string value ) {
+			// The initial NewLine is here because of http://haacked.com/archive/2008/11/18/new-line-quirk-with-html-textarea.aspx and because this is what Microsoft
+			// does in their System.Web.UI.WebControls.TextBox implementation.
+			return Environment.NewLine + value;
+		}
+
 		/// <summary>
 		/// Creates a setup object for a standard text control.
 		/// </summary>
@@ -297,7 +303,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								classes: classes,
 								children: !numberOfRows.HasValue || numberOfRows.Value == 1
 									          ? null
-									          : new TextNode( () => Controls.EwfTextBox.GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
+									          : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 						},
 						formValue: formValue ).ToCollection() ), formValue.CreateValidation(
 					( postBackValue, validator ) => {
