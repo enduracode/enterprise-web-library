@@ -378,6 +378,8 @@
     <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBoxSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />

@@ -10,15 +10,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The configuration for a text control.
 	/// </summary>
 	public class TextControlSetup {
+		private static readonly ElementClass elementClass = new ElementClass( "ewfTextC" );
+
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				return new[]
 					{
-						new CssElement( "SingleLineTextControlAllStates", getSingleLineSelectors( new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" } ).ToArray() ),
-						new CssElement( "SingleLineTextControlNormalState", getSingleLineSelectors( ":enabled:not(:focus)".ToCollection() ).ToArray() ),
-						new CssElement( "SingleLineTextControlFocusState", getSingleLineSelectors( ":enabled:focus".ToCollection() ).ToArray() ),
-						new CssElement( "SingleLineTextControlReadOnlyState", getSingleLineSelectors( ":disabled".ToCollection() ).ToArray() ),
+						new CssElement(
+							"SingleLineTextControlAllStates",
+							new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" }.Select( getSingleLineSelector ).ToArray() ),
+						new CssElement( "SingleLineTextControlNormalState", getSingleLineSelector( ":enabled:not(:focus)" ) ),
+						new CssElement( "SingleLineTextControlFocusState", getSingleLineSelector( ":enabled:focus" ) ),
+						new CssElement( "SingleLineTextControlReadOnlyState", getSingleLineSelector( ":disabled" ) ),
 						new CssElement(
 							"MultilineTextControlAllStates",
 							new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" }.Select( getMultilineSelector ).ToArray() ),
@@ -28,10 +32,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					};
 			}
 
-			private IEnumerable<string> getSingleLineSelectors( IEnumerable<string> suffixes ) =>
-				from control in new[] { "input[type=\"text\"]", "input[type=\"password\"]" } from suffix in suffixes select control + suffix;
-
-			private string getMultilineSelector( string suffix ) => "textarea" + suffix;
+			private string getSingleLineSelector( string suffix ) => "input.{0}".FormatWith( elementClass.ClassName ) + suffix;
+			private string getMultilineSelector( string suffix ) => "textarea.{0}".FormatWith( elementClass.ClassName ) + suffix;
 		}
 
 		internal static string GetTextareaValue( string value ) {
@@ -63,6 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
+				numberOfRows == 1 ? "text" : "",
 				numberOfRows,
 				false,
 				classes,
@@ -104,6 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
+				numberOfRows == 1 ? "text" : "",
 				numberOfRows,
 				false,
 				classes,
@@ -132,6 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
+				numberOfRows == 1 ? "text" : "",
 				numberOfRows,
 				true,
 				classes,
@@ -168,6 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
+				"password",
 				null,
 				false,
 				classes,
@@ -183,18 +189,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				validationErrorNotifier );
 		}
 
-		internal readonly Func<string, bool, int?, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+		internal readonly
+			Func<string, bool, int?, Func<string, Validator, string>, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
 			LabelerAndComponentAndValidationGetter;
 
-		private TextControlSetup(
-			DisplaySetup displaySetup, int? numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
+		internal TextControlSetup(
+			DisplaySetup displaySetup, string inputElementType, int? numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
 			ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
 			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			var labeler = new FormControlLabeler();
 			action = action ?? FormState.Current.DefaultAction;
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
-			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, maxLength, validationMethod ) => {
+			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, maxLength, internalValidationMethod, externalValidationMethod ) => {
 				var id = new ElementId();
 				var formValue = new FormValue<string>(
 					() => value,
@@ -211,7 +218,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							labeler.AddControlId( context.Id );
 
 							if( !isReadOnly ) {
-								if( !numberOfRows.HasValue || numberOfRows.Value == 1 || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
+								if( inputElementType.Any() || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
 									action.AddToPageIfNecessary();
 								valueChangedAction?.AddToPageIfNecessary();
 							}
@@ -220,22 +227,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								displaySetup,
 								() => {
 									var attributes = new List<Tuple<string, string>>();
-
-									if( !numberOfRows.HasValue )
-										attributes.Add( Tuple.Create( "type", "password" ) );
-									else if( numberOfRows.Value == 1 )
-										attributes.Add( Tuple.Create( "type", "text" ) );
-
+									if( inputElementType.Any() )
+										attributes.Add( Tuple.Create( "type", inputElementType ) );
 									if( !isReadOnly )
 										attributes.Add( Tuple.Create( "name", context.Id ) );
 
-									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
+									if( inputElementType.Any() )
 										attributes.Add( Tuple.Create( "size", ( maxLength.HasValue && maxLength.Value < 1000 ? maxLength : 1000 ).ToString() ) );
 									else
-										attributes.Add( Tuple.Create( "rows", numberOfRows.ToString() ) );
+										attributes.Add( Tuple.Create( "rows", numberOfRows.Value.ToString() ) );
 
-									if( !numberOfRows.HasValue || numberOfRows.Value == 1 )
-										attributes.Add( Tuple.Create( "value", numberOfRows.HasValue ? pageModificationValue.Value : "" ) );
+									if( inputElementType.Any() )
+										attributes.Add( Tuple.Create( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
 									if( isReadOnly )
 										attributes.Add( Tuple.Create( "disabled", "disabled" ) );
 									if( !isReadOnly && maxLength.HasValue )
@@ -245,7 +248,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									if( autoFillTokens.Any() )
 										attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
 									if( !isReadOnly )
-										attributes.Add( Tuple.Create( "inputmode", "text" ) );
+										attributes.Add( Tuple.Create( "inputmode", inputElementType == "email" ? "email" : "text" ) );
 									if( checksSpellingAndGrammar.HasValue )
 										attributes.Add( Tuple.Create( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
 
@@ -272,7 +275,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									var jsInitStatements = StringTools.ConcatenateWithDelimiter(
 										" ",
-										( !numberOfRows.HasValue || numberOfRows.Value == 1 ) && !isReadOnly
+										inputElementType.Any() && !isReadOnly
 											? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, valueChangedAction != null )
 												.Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( context.Id ), " } );" )
 											: "",
@@ -289,7 +292,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										autoCompleteStatements );
 
 									return new DisplayableElementLocalData(
-										!numberOfRows.HasValue || numberOfRows.Value == 1 ? "input" : "textarea",
+										inputElementType.Any() ? "input" : "textarea",
 										new FocusabilityCondition( true ),
 										isFocused => {
 											if( isFocused )
@@ -300,26 +303,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												jsInitStatements: jsInitStatements );
 										} );
 								},
-								classes: classes,
-								children: !numberOfRows.HasValue || numberOfRows.Value == 1
-									          ? null
-									          : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
+								classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
+								children: inputElementType.Any() ? null : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 						},
 						formValue: formValue ).ToCollection() ), formValue.CreateValidation(
 					( postBackValue, validator ) => {
 						if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
 							return;
 
-						var errorHandler = new ValidationErrorHandler( "text" );
-						var validatedValue = maxLength.HasValue
-							                     ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
-							                     : validator.GetString( errorHandler, postBackValue.Value, allowEmpty );
-						if( errorHandler.LastResult != ErrorCondition.NoError ) {
+						var validatedValue = internalValidationMethod( postBackValue.Value, validator );
+						if( validatedValue == null ) {
 							validationErrorNotifier?.Invoke();
 							return;
 						}
 
-						validationMethod( validatedValue, validator );
+						externalValidationMethod( validatedValue, validator );
 					} ) );
 			};
 		}

@@ -20,7 +20,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="maxLength">The maximum number of characters a user can input.</param>
 		public TextControl( string value, bool allowEmpty, Action<string, Validator> validationMethod, TextControlSetup setup = null, int? maxLength = null ) {
 			setup = setup ?? TextControlSetup.Create();
-			( Labeler, PageComponent, Validation ) = setup.LabelerAndComponentAndValidationGetter( value, allowEmpty, maxLength, validationMethod );
+			( Labeler, PageComponent, Validation ) = setup.LabelerAndComponentAndValidationGetter(
+				value,
+				allowEmpty,
+				maxLength,
+				( postBackValue, validator ) => {
+					var errorHandler = new ValidationErrorHandler( "text" );
+					var validatedValue = maxLength.HasValue
+						                     ? validator.GetString( errorHandler, postBackValue, allowEmpty, maxLength.Value )
+						                     : validator.GetString( errorHandler, postBackValue, allowEmpty );
+					return errorHandler.LastResult != ErrorCondition.NoError ? null : validatedValue;
+				},
+				validationMethod );
 		}
 	}
 }
