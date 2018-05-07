@@ -46,26 +46,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				dv =>
 					"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetters(
+			writeFormItemGetter(
 				writer,
 				field,
-				"EwfTextBox",
-				"EmailAddress",
-				"string",
-				"\"\"",
-				new CSharpParameter[ 0 ],
+				"EmailAddressControl",
 				getAllowEmptyParameter( false ).ToCollection(),
-				new[]
-					{
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
-				", readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
-				"validator.GetEmailAddress( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
-				( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) + " )",
-				"" );
+				false,
+				new CSharpParameter( "EmailAddressControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string",
+				Enumerable.Empty<CSharpParameter>(),
+				true,
+				dv =>
+					"{0}.ToEmailAddressControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
 				field,
