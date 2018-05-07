@@ -23,7 +23,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					newPassword = new DataValue<string>();
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(
-							formItems: newPassword.GetPasswordModificationFormItems( firstLabel: "New password", secondLabel: "Re-type new password" ) ) );
+							formItems: newPassword.GetPasswordModificationFormItems(
+								firstLabel: "New password".ToComponents(),
+								secondLabel: "Re-type new password".ToComponents() ) ) );
 					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton() ) );
 				} );
 		}

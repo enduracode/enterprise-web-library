@@ -96,8 +96,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								() => providePasswordSelected.Value,
 								() => {
 									var password = new DataValue<string>();
-									var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout );
-									foreach( var i in password.GetPasswordModificationFormItems( textBoxWidth: Unit.Pixel( 200 ) ) )
+									var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout, classes: "newPassword".ToCollection() );
+									foreach( var i in password.GetPasswordModificationFormItems() )
 										newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
 
 									new EwfValidation(

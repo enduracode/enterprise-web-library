@@ -4,7 +4,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 
@@ -34,25 +33,25 @@ namespace EnterpriseWebLibrary.WebSite {
 						FormItemBlock.CreateFormItemTable(
 							formItems: new[]
 								{
-									FormItem.Create(
-										"System name",
-										new EwfTextBox( "" ),
-										validationGetter: control => new EwfValidation(
-											( pbv, validator ) => {
-												systemName.Value = validator.GetString( new ValidationErrorHandler( "system name" ), control.GetPostBackValue( pbv ), false, 50 );
+									systemName.ToTextControl(
+											false,
+											value: "",
+											maxLength: 50,
+											additionalValidationMethod: validator => {
 												if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
 													validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
 												systemShortName.Value = systemName.Value.EnglishToPascal();
-											} ) ),
-									FormItem.Create(
-										"Base namespace",
-										new EwfTextBox( "" ),
-										validationGetter: control => new EwfValidation(
-											( pbv, validator ) => {
-												baseNamespace.Value = validator.GetString( new ValidationErrorHandler( "base namespace" ), control.GetPostBackValue( pbv ), false, 50 );
+											} )
+										.ToFormItem( label: "System name".ToComponents() ),
+									baseNamespace.ToTextControl(
+											false,
+											value: "",
+											maxLength: 50,
+											additionalValidationMethod: validator => {
 												if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
 													validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
-											} ) )
+											} )
+										.ToFormItem( label: "Base namespace".ToComponents() )
 								} ) );
 				} );
 

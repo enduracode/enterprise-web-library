@@ -33,18 +33,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					emailAddress = new DataValue<string>();
 					FormState.ExecuteWithDataModificationsAndDefaultAction(
 						new[] { logInPb, newPasswordPb },
-						() => registeredTable.AddItem(
-							new EwfTableItem( "Email address", emailAddress.GetEmailAddressFormItem( "", "Please enter a valid email address." ).ToControl() ) ) );
+						() => {
+							var formItem = emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() );
+							registeredTable.AddItem( new EwfTableItem( formItem.Label, formItem.ToControl( omitLabel: true ) ) );
+						} );
 
 					var password = new DataValue<string>();
-					registeredTable.AddItem(
-						new EwfTableItem(
-							"Password",
-							FormItem.Create(
-									"",
-									new EwfTextBox( "", masksCharacters: true ),
-									validationGetter: control => new EwfValidation( ( pbv, v ) => password.Value = control.GetPostBackValue( pbv ) ) )
-								.ToControl() ) );
+					var passwordFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured(), value: "" ).ToFormItem( label: "Password".ToComponents() );
+					registeredTable.AddItem( new EwfTableItem( passwordFormItem.Label, passwordFormItem.ToControl( omitLabel: true ) ) );
 
 					if( FormsAuthStatics.PasswordResetEnabled )
 						registeredTable.AddItem(

@@ -25,16 +25,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var staticTable = FormItemBlock.CreateFormItemTable();
 			staticTable.AddFormItems(
-				FormItem.Create( "Static Field", new EwfTextBox( "Values here will be retained across post-backs" ) ),
-				FormItem.Create( "Static Field", new EwfTextBox( "" ) ),
-				FormItem.Create(
-					"Static Field",
-					new EwfTextBox( "Edit this one to get a validation error" ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => {
-							if( control.ValueChangedOnPostBack( pbv ) )
-								validator.NoteErrorAndAddMessage( "You can't change the value in this box!" );
-						} ) ) );
+				new TextControl( "Values here will be retained across post-backs", true, ( postBackValue, validator ) => {} ).ToFormItem(
+					label: "Static Field".ToComponents() ),
+				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Static Field".ToComponents() ),
+				new TextControl(
+					"Edit this one to get a validation error",
+					true,
+					( postBackValue, validator ) => { validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ); },
+					setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ) ).ToFormItem(
+					label: "Static Field".ToComponents() ) );
 			staticTable.IncludeButtonWithThisText = "Submit";
 			ph.AddControlsReturnThis( staticTable );
 
@@ -65,11 +64,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				() => {
 					if( info.Toggled )
 						regionControls.Add(
-							FormItem.Create(
-									"Dynamic Field",
-									new EwfTextBox( "This was just added!" ),
-									validationGetter: control => new EwfValidation( ( pbv, validator ) => dynamicFieldValue.Value = control.GetPostBackValue( pbv ) ) )
-								.ToControl() );
+							dynamicFieldValue.ToTextControl( true, value: "This was just added!" ).ToFormItem( label: "Dynamic Field".ToComponents() ).ToControl() );
 					else
 						regionControls.Add( new LegacyParagraph( "Nothing here yet." ) );
 				} );
@@ -119,7 +114,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var itemStack = ControlStack.Create( true );
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
-				itemStack.AddControls( new EwfTextBox( "Item {0}".FormatWith( i ) ) );
+				itemStack.AddControls( new TextControl( "Item {0}".FormatWith( i ), true, ( postBackValue, validator ) => {} ).ToFormItem().ToControl() );
 			else
 				itemStack.AddText( "Item {0}".FormatWith( i ) );
 			itemStack.AddControls(
@@ -160,7 +155,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
-			itemStack.AddControls( new EwfTextBox( "ID {0}".FormatWith( id ) ) );
+			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true, ( postBackValue, validator ) => {} ).ToFormItem().ToControl() );
 			itemStack.AddControls(
 				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 

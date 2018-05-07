@@ -1,23 +1,22 @@
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class OmniDemo: EwfPage {
 		protected override void loadData() {
 			var omni = FormItemBlock.CreateFormItemList( numberOfColumns: 7 );
-			var complexLabel = new Panel();
-			complexLabel.AddControlsReturnThis( "Model number".ToComponents().GetControls() );
-			complexLabel.AddControlsReturnThis(
-				new LaunchWindowLink( new ModalWindow( this, new PlaceHolder().AddControlsReturnThis( "More information...".ToComponents().GetControls() ) ) )
-					{
-						ActionControlStyle = new TextActionControlStyle( " (popup)" )
-					} );
+
+			var boxId = new ModalBoxId();
+			new ModalBox( boxId, true, "More information...".ToComponents() ).ToCollection().AddEtherealControls( this );
+
 			omni.AddFormItems(
-				FormItem.Create( complexLabel, new EwfTextBox( "" ), setup: new FormItemSetup( cellSpan: 2 ) ),
+				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem(
+					setup: new FormItemSetup( cellSpan: 2 ),
+					label: "Model number ".ToComponents()
+						.Append( new EwfButton( new StandardButtonStyle( "(popup)", buttonSize: ButtonSize.ShrinkWrap ), behavior: new OpenModalBehavior( boxId ) ) ) ),
 				FormItem.Create( "Normal price", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
-				FormItem.Create( "Actual price", new EwfTextBox( "" ) ),
-				FormItem.Create( "Quantity", new EwfTextBox( "" ) ),
+				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Actual price".ToComponents() ),
+				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Quantity".ToComponents() ),
 				FormItem.Create( "Inventory", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
 				FormItem.Create( "Bill Number", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ) );
 			ph.AddControlsReturnThis( omni );

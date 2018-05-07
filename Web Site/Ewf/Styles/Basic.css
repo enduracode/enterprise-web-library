@@ -321,6 +321,11 @@ ewfModalBoxBackdrop {
 	background-color: hsla( 0, 0%, 0%, .65 );
 }
 
+/* user management */
+ewfTableAllStyles.newPassword ewfSingleLineTextControlAllStates {
+	width: 200px;
+}
+
 /* mail merging */
 ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 	margin-left: 2em;

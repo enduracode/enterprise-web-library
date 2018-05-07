@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// Creates a lookup box.
 		/// </summary>
 		/// <param name="pixelWidth"></param>
-		/// <param name="defaultText">Text displayed when the LookupBox does not have focus.</param>
+		/// <param name="defaultText">Text displayed when the LookupBox does not have focus. Do not pass null.</param>
 		/// <param name="postBackId"></param>
 		/// <param name="handler">Supplies the string entered into the LookupBox from the user. Returns the resource the user will be redirected to.</param>
 		/// <param name="autoCompleteService"></param>
@@ -37,17 +37,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 			var postBack = PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( handler( val.Value ) ) );
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
-				() => {
-					var textBox = FormItem.Create(
-						"",
-						new EwfTextBox( "" ) { Width = new Unit( pixelWidth ) },
-						validationGetter: control => new EwfValidation( ( pbv, validator ) => val.Value = control.GetPostBackValue( pbv ) ) );
-					textBox.Control.SetWatermarkText( defaultText );
-					if( autoCompleteService != null )
-						textBox.Control.SetupAutoComplete( autoCompleteService, AutoCompleteOption.PostBackOnItemSelect );
-
-					return new Block( textBox.ToControl() ) { CssClass = "ewfLookupBox" };
-				} );
+				() => new Block(
+					val.ToTextControl(
+							true,
+							setup: autoCompleteService != null
+								       ? TextControlSetup.CreateAutoComplete( autoCompleteService, placeholder: defaultText, triggersActionWhenItemSelected: true )
+								       : TextControlSetup.Create( placeholder: defaultText ),
+							value: "" )
+						.ToFormItem()
+						.ToControl() ) { CssClass = "ewfLookupBox", Width = Unit.Pixel( pixelWidth ) } );
 		}
 	}
 }

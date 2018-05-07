@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using NodaTime;
@@ -64,33 +61,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// identical, valid passwords.
 		/// </summary>
 		public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
-			this DataValue<string> password, Unit? textBoxWidth = null, FormItemLabel firstLabel = null, FormItemLabel secondLabel = null ) {
+			this DataValue<string> password, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
 			var passwordAgain = new DataValue<string>();
-			var passwordAgainFormItem = FormItem.Create(
-				secondLabel ?? "Password again",
-				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
-				validationGetter: control => new EwfValidation( ( pbv, v ) => passwordAgain.Value = control.GetPostBackValue( pbv ) ) );
-			if( textBoxWidth.HasValue )
-				passwordAgainFormItem.Control.Width = textBoxWidth.Value;
+			var passwordAgainFormItem = passwordAgain.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "off" ), value: "" )
+				.ToFormItem( label: secondLabel ?? "Password again".ToComponents() );
 
-			var passwordFormItem = FormItem.Create(
-				firstLabel ?? "Password",
-				new EwfTextBox( "", masksCharacters: true, disableBrowserAutoComplete: true ),
-				validationGetter: control => new EwfValidation(
-					( pbv, v ) => {
-						password.Value = control.GetPostBackValue( pbv );
+			var passwordFormItem = password.ToTextControl(
+					true,
+					setup: TextControlSetup.CreateObscured( autoFillTokens: "off" ),
+					value: "",
+					additionalValidationMethod: validator => {
 						if( password.Value != passwordAgain.Value )
-							v.NoteErrorAndAddMessage( "Passwords do not match." );
+							validator.NoteErrorAndAddMessage( "Passwords do not match." );
 						else {
-							var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-							if( strictProvider != null )
-								strictProvider.ValidatePassword( v, password.Value );
+							if( SystemProvider is StrictFormsAuthUserManagementProvider strictProvider )
+								strictProvider.ValidatePassword( validator, password.Value );
 							else if( password.Value.Length < 7 )
-								v.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+								validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
 						}
-					} ) );
-			if( textBoxWidth.HasValue )
-				passwordFormItem.Control.Width = textBoxWidth.Value;
+					} )
+				.ToFormItem( label: firstLabel ?? "Password".ToComponents() );
 
 			return new[] { passwordFormItem, passwordAgainFormItem };
 		}
@@ -99,19 +89,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Log-In
 
 		/// <summary>
-		/// Gets an email address form item for use on log-in pages. The validation sets this data value to the post back value of the text box, if valid, or adds
-		/// the specified error message to the form item.
+		/// Gets an email address form item for use on log-in pages.
 		/// </summary>
-		public static FormItem<EwfTextBox> GetEmailAddressFormItem( this DataValue<string> emailAddress, FormItemLabel label, string errorMessage ) {
-			return FormItem.Create(
-				label,
-				new EwfTextBox( "" ),
-				validationGetter: control => new EwfValidation(
-					( pbv, validator ) => emailAddress.Value = validator.GetEmailAddress(
-						                      new ValidationErrorHandler( ( v, ec ) => v.NoteErrorAndAddMessage( errorMessage ) ),
-						                      control.GetPostBackValue( pbv ),
-						                      false ) ) );
-		}
+		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IEnumerable<PhrasingComponent> label ) =>
+			emailAddress.ToEmailAddressControl( false, value: "" ).ToFormItem( label: label );
 
 		/// <summary>
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system

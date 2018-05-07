@@ -297,10 +297,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										isFocused => {
 											if( isFocused )
 												attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
-											return new DisplayableElementFocusDependentData(
-												attributes: attributes,
-												includeIdAttribute: jsInitStatements.Any(),
-												jsInitStatements: jsInitStatements );
+											return new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements );
 										} );
 								},
 								classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
@@ -311,7 +308,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
 							return;
 
-						var validatedValue = internalValidationMethod( postBackValue.Value, validator );
+						string validatedValue;
+						if( inputElementType != "password" )
+							validatedValue = internalValidationMethod( postBackValue.Value, validator );
+						else if( postBackValue.Value.Any() || allowEmpty )
+							validatedValue = postBackValue.Value;
+						else {
+							validatedValue = null;
+							validator.NoteErrorAndAddMessage( "Please enter a value." );
+						}
+
 						if( validatedValue == null ) {
 							validationErrorNotifier?.Invoke();
 							return;

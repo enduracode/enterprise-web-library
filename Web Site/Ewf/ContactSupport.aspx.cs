@@ -4,7 +4,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -35,17 +34,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							"To",
 							new PlaceHolder().AddControlsReturnThis(
 								"{0} ({1} for this system)".FormatWith(
-									StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
-									"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
+										StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
+										"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
 									.ToComponents()
 									.GetControls() ) ),
-						FormItem.Create(
-							"Message",
-							new EwfTextBox( "", rows: 10 ),
-							validationGetter:
-								control =>
-								new EwfValidation(
-									( pbv, validator ) => body.Value = validator.GetString( new ValidationErrorHandler( "message" ), control.GetPostBackValue( pbv ), false ) ) ) );
+						body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) );
 					ph.AddControlsReturnThis( table );
 				} );
 

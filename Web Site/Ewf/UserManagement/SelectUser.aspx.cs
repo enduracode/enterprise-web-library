@@ -3,7 +3,6 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using EnterpriseWebLibrary.InputValidation;
 
 // Parameter: string returnUrl
 
@@ -32,9 +31,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( ConfigurationStatics.IsLiveInstallation )
 				ph.AddControlsReturnThis(
 					new Paragraph(
-						new ImportantContent( "Warning:".ToComponents() ).ToCollection()
-							.Concat( " Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() ) )
-						.ToCollection().GetControls() );
+							new ImportantContent( "Warning:".ToComponents() ).ToCollection()
+								.Concat(
+									" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() ) )
+						.ToCollection()
+						.GetControls() );
 
 			DataValue<User> user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
@@ -44,23 +45,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				pb.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
-						FormItem.Create(
-							"User's email address (leave blank for anonymous)",
-							new EwfTextBox( "" ),
-							validationGetter: control => new EwfValidation(
-								                             ( pbv, validator ) => {
-									                             var errorHandler = new ValidationErrorHandler( "user" );
-									                             var emailAddress = validator.GetEmailAddress( errorHandler, control.GetPostBackValue( pbv ), true );
-									                             if( errorHandler.LastResult != ErrorCondition.NoError )
-										                             return;
-									                             if( !emailAddress.Any() ) {
-										                             user.Value = null;
-										                             return;
-									                             }
-									                             user.Value = UserManagementStatics.GetUser( emailAddress );
-									                             if( user.Value == null )
-										                             validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
-								                             } ) ).ToControl(),
+						new EmailAddressControl(
+								"",
+								true,
+								( postBackValue, validator ) => {
+									if( !postBackValue.Any() ) {
+										user.Value = null;
+										return;
+									}
+									user.Value = UserManagementStatics.GetUser( postBackValue );
+									if( user.Value == null )
+										validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
+								} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )
+							.ToControl(),
 						new LegacyParagraph(
 							new PostBackButton(
 								new ButtonActionControlStyle( AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) ) ) );

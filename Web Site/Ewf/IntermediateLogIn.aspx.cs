@@ -14,8 +14,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					throw new ApplicationException();
 			}
 
-			public override string ResourceName { get { return "Non-Live Installation Log In"; } }
-			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
+			public override string ResourceName => "Non-Live Installation Log In";
+			protected override bool IsIntermediateInstallationPublicResource => true;
 		}
 
 		protected override void loadData() {
@@ -30,18 +30,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(
-							formItems:
-								FormItem.Create(
-									"Enter your password for this non-live installation",
-									new EwfTextBox( "", masksCharacters: true ),
-									validationGetter: control => new EwfValidation(
-										                             ( pbv, validator ) => {
-											                             // NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-											                             var passwordMatch = control.GetPostBackValue( pbv ) ==
-											                                                 ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
-											                             if( !passwordMatch )
-												                             validator.NoteErrorAndAddMessage( "Incorrect password." );
-										                             } ) ).ToCollection() ) );
+							formItems: new TextControl(
+									"",
+									true,
+									( postBackValue, validator ) => {
+										// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+										var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+										if( !passwordMatch )
+											validator.NoteErrorAndAddMessage( "Incorrect password." );
+									},
+									setup: TextControlSetup.CreateObscured() ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
+								.ToCollection() ) );
 				} );
 
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( pb ) ) );
