@@ -39,7 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						} );
 
 					var password = new DataValue<string>();
-					var passwordFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured(), value: "" ).ToFormItem( label: "Password".ToComponents() );
+					var passwordFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "current-password" ), value: "" )
+						.ToFormItem( label: "Password".ToComponents() );
 					registeredTable.AddItem( new EwfTableItem( passwordFormItem.Label, passwordFormItem.ToControl( omitLabel: true ) ) );
 
 					if( FormsAuthStatics.PasswordResetEnabled )

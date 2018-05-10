@@ -63,12 +63,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
 			this DataValue<string> password, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
 			var passwordAgain = new DataValue<string>();
-			var passwordAgainFormItem = passwordAgain.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "off" ), value: "" )
+			var passwordAgainFormItem = passwordAgain.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ), value: "" )
 				.ToFormItem( label: secondLabel ?? "Password again".ToComponents() );
 
 			var passwordFormItem = password.ToTextControl(
 					true,
-					setup: TextControlSetup.CreateObscured( autoFillTokens: "off" ),
+					setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
 					value: "",
 					additionalValidationMethod: validator => {
 						if( password.Value != passwordAgain.Value )
@@ -91,8 +91,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Gets an email address form item for use on log-in pages.
 		/// </summary>
-		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IEnumerable<PhrasingComponent> label ) =>
-			emailAddress.ToEmailAddressControl( false, value: "" ).ToFormItem( label: label );
+		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IEnumerable<PhrasingComponent> label ) => emailAddress
+			.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" )
+			.ToFormItem( label: label );
 
 		/// <summary>
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
