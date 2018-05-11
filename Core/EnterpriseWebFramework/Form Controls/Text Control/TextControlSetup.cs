@@ -303,28 +303,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
 								children: inputElementType.Any() ? null : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 						},
-						formValue: formValue ).ToCollection() ), formValue.CreateValidation(
-					( postBackValue, validator ) => {
-						if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-							return;
+						formValue: formValue ).ToCollection() ), externalValidationMethod == null
+							                                         ? null
+							                                         : formValue.CreateValidation(
+								                                         ( postBackValue, validator ) => {
+									                                         if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+										                                         return;
 
-						string validatedValue;
-						if( inputElementType != "password" )
-							validatedValue = internalValidationMethod( postBackValue.Value, validator );
-						else if( postBackValue.Value.Any() || allowEmpty )
-							validatedValue = postBackValue.Value;
-						else {
-							validatedValue = null;
-							validator.NoteErrorAndAddMessage( "Please enter a value." );
-						}
+									                                         string validatedValue;
+									                                         if( inputElementType != "password" )
+										                                         validatedValue = internalValidationMethod( postBackValue.Value, validator );
+									                                         else if( postBackValue.Value.Any() || allowEmpty )
+										                                         validatedValue = postBackValue.Value;
+									                                         else {
+										                                         validatedValue = null;
+										                                         validator.NoteErrorAndAddMessage( "Please enter a value." );
+									                                         }
 
-						if( validatedValue == null ) {
-							validationErrorNotifier?.Invoke();
-							return;
-						}
+									                                         if( validatedValue == null ) {
+										                                         validationErrorNotifier?.Invoke();
+										                                         return;
+									                                         }
 
-						externalValidationMethod( validatedValue, validator );
-					} ) );
+									                                         externalValidationMethod( validatedValue, validator );
+								                                         } ) );
 			};
 		}
 	}

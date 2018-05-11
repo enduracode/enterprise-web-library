@@ -15,11 +15,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="value">Do not pass null.</param>
 		/// <param name="allowEmpty"></param>
-		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="setup">The setup object for the email-address control.</param>
 		/// <param name="maxLength">The maximum number of characters a user can input.</param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		public EmailAddressControl(
-			string value, bool allowEmpty, Action<string, Validator> validationMethod, EmailAddressControlSetup setup = null, int? maxLength = null ) {
+			string value, bool allowEmpty, EmailAddressControlSetup setup = null, int? maxLength = null, Action<string, Validator> validationMethod = null ) {
 			setup = setup ?? EmailAddressControlSetup.Create();
 			( Labeler, PageComponent, Validation ) = setup.TextControlSetup.LabelerAndComponentAndValidationGetter(
 				value,

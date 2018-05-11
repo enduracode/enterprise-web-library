@@ -25,14 +25,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var staticTable = FormItemBlock.CreateFormItemTable();
 			staticTable.AddFormItems(
-				new TextControl( "Values here will be retained across post-backs", true, ( postBackValue, validator ) => {} ).ToFormItem(
-					label: "Static Field".ToComponents() ),
-				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Static Field".ToComponents() ),
+				new TextControl( "Values here will be retained across post-backs", true ).ToFormItem( label: "Static Field".ToComponents() ),
+				new TextControl( "", true ).ToFormItem( label: "Static Field".ToComponents() ),
 				new TextControl(
 					"Edit this one to get a validation error",
 					true,
-					( postBackValue, validator ) => { validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ); },
-					setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ) ).ToFormItem(
+					setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
+					validationMethod: ( postBackValue, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
 					label: "Static Field".ToComponents() ) );
 			staticTable.IncludeButtonWithThisText = "Submit";
 			ph.AddControlsReturnThis( staticTable );
@@ -114,7 +113,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var itemStack = ControlStack.Create( true );
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
-				itemStack.AddControls( new TextControl( "Item {0}".FormatWith( i ), true, ( postBackValue, validator ) => {} ).ToFormItem().ToControl() );
+				itemStack.AddControls( new TextControl( "Item {0}".FormatWith( i ), true ).ToFormItem().ToControl() );
 			else
 				itemStack.AddText( "Item {0}".FormatWith( i ) );
 			itemStack.AddControls(
@@ -155,7 +154,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
-			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true, ( postBackValue, validator ) => {} ).ToFormItem().ToControl() );
+			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToControl() );
 			itemStack.AddControls(
 				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 

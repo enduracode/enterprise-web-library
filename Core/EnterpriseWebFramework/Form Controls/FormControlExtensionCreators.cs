@@ -10,12 +10,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new TextControl(
 				value ?? dataValue.Value,
 				allowEmpty,
-				( postBackValue, validator ) => {
+				setup: setup,
+				maxLength: maxLength,
+				validationMethod: ( postBackValue, validator ) => {
 					dataValue.Value = postBackValue;
 					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: setup,
-				maxLength: maxLength );
+				} );
 		}
 
 		public static EmailAddressControl ToEmailAddressControl(
@@ -24,12 +24,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new EmailAddressControl(
 				value ?? dataValue.Value,
 				allowEmpty,
-				( postBackValue, validator ) => {
+				setup: setup,
+				maxLength: maxLength,
+				validationMethod: ( postBackValue, validator ) => {
 					dataValue.Value = postBackValue;
 					additionalValidationMethod?.Invoke( validator );
-				},
-				setup: setup,
-				maxLength: maxLength );
+				} );
 		}
 
 		public static WysiwygHtmlEditor ToHtmlEditor(

@@ -10,13 +10,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			new ModalBox( boxId, true, "More information...".ToComponents() ).ToCollection().AddEtherealControls( this );
 
 			omni.AddFormItems(
-				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem(
+				new TextControl( "", true ).ToFormItem(
 					setup: new FormItemSetup( cellSpan: 2 ),
 					label: "Model number ".ToComponents()
 						.Append( new EwfButton( new StandardButtonStyle( "(popup)", buttonSize: ButtonSize.ShrinkWrap ), behavior: new OpenModalBehavior( boxId ) ) ) ),
 				FormItem.Create( "Normal price", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
-				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Actual price".ToComponents() ),
-				new TextControl( "", true, ( postBackValue, validator ) => {} ).ToFormItem( label: "Quantity".ToComponents() ),
+				new TextControl( "", true ).ToFormItem( label: "Actual price".ToComponents() ),
+				new TextControl( "", true ).ToFormItem( label: "Quantity".ToComponents() ),
 				FormItem.Create( "Inventory", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
 				FormItem.Create( "Bill Number", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ) );
 			ph.AddControlsReturnThis( omni );

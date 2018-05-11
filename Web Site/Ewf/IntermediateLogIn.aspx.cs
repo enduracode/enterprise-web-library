@@ -33,13 +33,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							formItems: new TextControl(
 									"",
 									true,
-									( postBackValue, validator ) => {
+									setup: TextControlSetup.CreateObscured(),
+									validationMethod: ( postBackValue, validator ) => {
 										// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
 										var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
 										if( !passwordMatch )
 											validator.NoteErrorAndAddMessage( "Incorrect password." );
-									},
-									setup: TextControlSetup.CreateObscured() ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
+									} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
 								.ToCollection() ) );
 				} );
 

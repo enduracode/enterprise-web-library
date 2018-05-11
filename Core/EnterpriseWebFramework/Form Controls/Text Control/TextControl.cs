@@ -15,10 +15,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="value">Do not pass null.</param>
 		/// <param name="allowEmpty"></param>
-		/// <param name="validationMethod">The validation method. Do not pass null.</param>
 		/// <param name="setup">The setup object for the text control.</param>
 		/// <param name="maxLength">The maximum number of characters a user can input.</param>
-		public TextControl( string value, bool allowEmpty, Action<string, Validator> validationMethod, TextControlSetup setup = null, int? maxLength = null ) {
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
+		public TextControl( string value, bool allowEmpty, TextControlSetup setup = null, int? maxLength = null, Action<string, Validator> validationMethod = null ) {
 			setup = setup ?? TextControlSetup.Create();
 			( Labeler, PageComponent, Validation ) = setup.LabelerAndComponentAndValidationGetter(
 				value,

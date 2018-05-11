@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new TextControl(
 				value,
 				false,
-				( postBackValue, validator ) => {
+				validationMethod: ( postBackValue, validator ) => {
 					emailMessage.Subject = postBackValue;
 					if( Regex.Match( emailMessage.Subject, RegularExpressions.HtmlTag, RegexOptions.IgnoreCase ).Success )
 						validator.NoteErrorAndAddMessage( "HTML is not allowed in the subject field." );

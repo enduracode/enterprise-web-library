@@ -93,8 +93,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			new TextControl(
 				"",
 				true,
-				( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ),
 				setup: setup,
-				maxLength: maxLength ).ToFormItem( label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
+				maxLength: maxLength,
+				validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
+				label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
 	}
 }

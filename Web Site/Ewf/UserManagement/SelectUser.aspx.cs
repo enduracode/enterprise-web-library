@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new EmailAddressControl(
 								"",
 								true,
-								( postBackValue, validator ) => {
+								validationMethod: ( postBackValue, validator ) => {
 									if( !postBackValue.Any() ) {
 										user.Value = null;
 										return;
