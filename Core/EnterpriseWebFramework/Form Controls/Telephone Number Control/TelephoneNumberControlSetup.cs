@@ -2,11 +2,11 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// The configuration for an email-address control.
+	/// The configuration for a telephone-number control.
 	/// </summary>
-	public class EmailAddressControlSetup {
+	public class TelephoneNumberControlSetup {
 		/// <summary>
-		/// Creates a setup object for a standard email-address control.
+		/// Creates a setup object for a standard telephone-number control.
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the control.</param>
@@ -19,14 +19,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="pageModificationValue"></param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static EmailAddressControlSetup Create(
+		public static TelephoneNumberControlSetup Create(
 			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "", FormAction action = null,
 			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) {
-			return new EmailAddressControlSetup(
+			return new TelephoneNumberControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"email",
+					"tel",
 					null,
 					false,
 					classes,
@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a setup object for an email-address control with auto-complete behavior.
+		/// Creates a setup object for a telephone-number control with auto-complete behavior.
 		/// </summary>
 		/// <param name="autoCompleteResource">The resource containing the auto-complete items. Do not pass null.</param>
 		/// <param name="displaySetup"></param>
@@ -58,14 +58,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="pageModificationValue"></param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static EmailAddressControlSetup CreateAutoComplete(
+		public static TelephoneNumberControlSetup CreateAutoComplete(
 			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
 			FormAction action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
-			return new EmailAddressControlSetup(
+			return new TelephoneNumberControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"email",
+					"tel",
 					null,
 					false,
 					classes,
@@ -82,18 +82,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a setup object for a read-only email-address control.
+		/// Creates a setup object for a read-only telephone-number control.
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the control.</param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static EmailAddressControlSetup CreateReadOnly(
+		public static TelephoneNumberControlSetup CreateReadOnly(
 			DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
-			return new EmailAddressControlSetup(
+			return new TelephoneNumberControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"email",
+					"tel",
 					null,
 					true,
 					classes,
@@ -111,7 +111,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal TextControlSetup TextControlSetup { get; }
 
-		private EmailAddressControlSetup( TextControlSetup textControlSetup ) {
+		private TelephoneNumberControlSetup( TextControlSetup textControlSetup ) {
 			TextControlSetup = textControlSetup;
 		}
 	}

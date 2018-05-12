@@ -396,6 +396,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ListItemMatchPageModificationSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Telephone Number Control\TelephoneNumberControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Telephone Number Control\TelephoneNumberControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\FragmentMarker.cs" />

@@ -59,25 +59,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				dv =>
 					"{0}.ToEmailAddressControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetters(
+			writeFormItemGetter(
 				writer,
 				field,
-				"EwfTextBox",
-				"PhoneNumber",
-				"string",
-				"\"\"",
-				new CSharpParameter[ 0 ],
+				"TelephoneNumberControl",
 				getAllowEmptyParameter( false ).ToCollection(),
-				new[]
-					{
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new[] { new CSharpParameter( "bool", "allowExtension", "true" ), new CSharpParameter( "bool", "allowSurroundingGarbage", "false" ) },
-				"new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
-				", readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
-				"validator.GetPhoneNumber( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowExtension, allowEmpty, allowSurroundingGarbage )",
-				"" );
+				false,
+				new CSharpParameter( "TelephoneNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string",
+				Enumerable.Empty<CSharpParameter>(),
+				true,
+				dv =>
+					"{0}.ToTelephoneNumberControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
 				field,
