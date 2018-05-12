@@ -207,7 +207,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => value,
 					() => isReadOnly ? "" : id.Id,
 					v => v,
-					rawValue => rawValue != null ? PostBackValueValidationResult<string>.CreateValid( rawValue ) : PostBackValueValidationResult<string>.CreateInvalid() );
+					rawValue => rawValue == null
+						            ? PostBackValueValidationResult<string>.CreateInvalid()
+						            : maxLength.HasValue && rawValue.Length > maxLength.Value
+							            ? PostBackValueValidationResult<string>.CreateInvalid()
+							            : PostBackValueValidationResult<string>.CreateValid( rawValue ) );
 
 				formValue.AddPageModificationValue( pageModificationValue, v => v );
 
