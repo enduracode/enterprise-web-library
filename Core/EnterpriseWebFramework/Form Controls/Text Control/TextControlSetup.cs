@@ -252,7 +252,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									if( autoFillTokens.Any() )
 										attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
 									if( !isReadOnly )
-										attributes.Add( Tuple.Create( "inputmode", inputElementType == "email" ? "email" : "text" ) );
+										attributes.Add( Tuple.Create( "inputmode", inputElementType == "email" ? "email" : inputElementType == "tel" ? "tel" : "text" ) );
 									if( checksSpellingAndGrammar.HasValue )
 										attributes.Add( Tuple.Create( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
 
