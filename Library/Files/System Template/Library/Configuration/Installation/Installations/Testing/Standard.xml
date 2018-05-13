@@ -14,16 +14,14 @@
 			<EmailFromName>Your Organization</EmailFromName>
 			<EmailFromAddress>contact@example.com</EmailFromAddress>
 			<EmailSendingService xsi:type="SendGrid">
-				<UserName>your-send-grid-user-name</UserName>
-				<Password>your-send-grid-password</Password>
+				<ApiKey>your-send-grid-api-key</ApiKey>
 			</EmailSendingService>
 			<WebApplications>
 				<Application>
-					<Name>Web Site</Name>
-					<DefaultBaseUrl>
-						<Host>intermediate.example.com</Host>
-						<Path>@@SystemShortNameTesting</Path>
-					</DefaultBaseUrl>
+					<Name>Website</Name>
+					<IisApplication xsi:type="VirtualDirectory">
+						<Site>intermediate.example.com</Site>
+					</IisApplication>
 				</Application>
 			</WebApplications>
 		</InstallationTypeConfiguration>

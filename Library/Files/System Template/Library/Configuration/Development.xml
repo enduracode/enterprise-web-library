@@ -4,8 +4,8 @@
 	<LibraryNamespaceAndAssemblyName>@@BaseNamespace.Library</LibraryNamespaceAndAssemblyName>
 	<webProjects>
 		<project>
-			<name>Web Site</name>
-			<NamespaceAndAssemblyName>@@BaseNamespace.WebSite</NamespaceAndAssemblyName>
+			<name>Website</name>
+			<NamespaceAndAssemblyName>@@BaseNamespace.Website</NamespaceAndAssemblyName>
 		</project>
 	</webProjects>
 </systemDevelopmentConfiguration>

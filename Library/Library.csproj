@@ -96,10 +96,10 @@
     <Content Include="Files\System Template\Library\GlobalStatics.cs" />
     <Content Include="Files\System Template\Library\Library.csproj" />
     <Content Include="Files\System Template\Solution.sln" />
-    <Content Include="Files\System Template\Web Site\AppStatics.cs" />
-    <Content Include="Files\System Template\Web Site\Global.asax" />
-    <Content Include="Files\System Template\Web Site\Global.asax.cs" />
-    <Content Include="Files\System Template\Web Site\Web Site.csproj" />
+    <Content Include="Files\System Template\Website\AppStatics.cs" />
+    <Content Include="Files\System Template\Website\Global.asax" />
+    <Content Include="Files\System Template\Website\Global.asax.cs" />
+    <Content Include="Files\System Template\Website\Website.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
@@ -112,7 +112,8 @@
     <None Include="Configuration\Installation\Shared.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Files\System Template\Web Site\Web.config" />
+    <None Include="Files\System Template\Website\packages.config" />
+    <None Include="Files\System Template\Website\Web.config" />
     <None Include="Files\Template.config" />
     <None Include="packages.config" />
   </ItemGroup>
