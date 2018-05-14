@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.Configuration {
 	/// </summary>
 	public class InstallationConfiguration {
 		/// <summary>
-		/// Red Stapler Information System use only.
+		/// Installation Support Utility and private use only.
 		/// </summary>
 		public const string ConfigurationFolderName = "Configuration";
 
@@ -26,12 +26,12 @@ namespace EnterpriseWebLibrary.Configuration {
 		public const string SystemDevelopmentConfigurationFileName = "Development.xml";
 
 		/// <summary>
-		/// Red Stapler Information System use only.
+		/// Installation Support Utility and private use only.
 		/// </summary>
 		public const string InstallationConfigurationFolderName = "Installation";
 
 		/// <summary>
-		/// Red Stapler Information System use only.
+		/// Installation Support Utility and private use only.
 		/// </summary>
 		public const string InstallationsFolderName = "Installations";
 

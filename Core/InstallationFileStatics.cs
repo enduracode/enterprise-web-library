@@ -9,7 +9,7 @@
 		public const string FilesFolderName = "Files";
 
 		/// <summary>
-		/// Internal and Red Stapler Information System use only.
+		/// Installation Support Utility and internal use only.
 		/// </summary>
 		public static string GetGeneralFilesFolderPath( string installationPath, bool isDevelopmentInstallation ) {
 			if( isDevelopmentInstallation )

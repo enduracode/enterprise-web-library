@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {
@@ -20,8 +22,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 							if( args.Length < 2 )
 								throw new UserCorrectableException( "You must specify the installation path as the first argument and the operation name as the second." );
 
-							// Get installation.
+							// If installations folder does not exist, create from template if possible.
 							var installationPath = args[ 0 ];
+							var configurationFolderPath = getInstallationsFolderPath( installationPath, false );
+							if( !Directory.Exists( configurationFolderPath ) ) {
+								var templateFolderPath = getInstallationsFolderPath( installationPath, true );
+								if( Directory.Exists( templateFolderPath ) )
+									IoMethods.CopyFolder( templateFolderPath, configurationFolderPath, false );
+							}
+
+							// Get installation.
 							DevelopmentInstallation installation;
 							try {
 								installation = getInstallation( installationPath );
@@ -53,6 +63,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				GlobalInitializationOps.CleanUpStatics();
 			}
 		}
+
+		private static string getInstallationsFolderPath( string installationPath, bool useTemplate ) => EwlStatics.CombinePaths(
+			InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, true ),
+			InstallationConfiguration.ConfigurationFolderName,
+			InstallationConfiguration.InstallationConfigurationFolderName,
+			useTemplate ? "{0} Template".FormatWith( InstallationConfiguration.InstallationsFolderName ) : InstallationConfiguration.InstallationsFolderName );
 
 		private static DevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );
