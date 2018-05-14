@@ -81,6 +81,10 @@
     <Content Include="Configuration\General.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Configuration\Installation\Installations Template\Development\Standard.xml" />
+    <Content Include="Configuration\Installation\Installations Template\Live\Standard.xml" />
+    <Content Include="Configuration\Installation\Installations Template\Shared.xml" />
+    <Content Include="Configuration\Installation\Installations Template\Testing\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
     <Content Include="Configuration\Installation\Installations\Packaging.xml" />
