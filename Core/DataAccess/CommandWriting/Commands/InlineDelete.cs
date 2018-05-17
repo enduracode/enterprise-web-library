@@ -27,7 +27,9 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this command against the specified database connection and returns the number of rows affected.
 		/// </summary>
-		public int Execute( DBConnection cn ) {
+		/// <param name="cn"></param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
+		public int Execute( DBConnection cn, bool isLongRunning = false ) {
 			if( conditions.Count == 0 )
 				throw new ApplicationException( "Executing an inline delete command with no parameters in the where clause is not allowed." );
 			var command = cn.DatabaseInfo.CreateCommand();
@@ -38,7 +40,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 				command.CommandText += " AND ";
 			}
 			command.CommandText = command.CommandText.Remove( command.CommandText.Length - 5 );
-			return cn.ExecuteNonQueryCommand( command );
+			return cn.ExecuteNonQueryCommand( command, isLongRunning: isLongRunning );
 		}
 	}
 }

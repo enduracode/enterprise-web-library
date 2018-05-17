@@ -67,10 +67,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Write public static methods.
 			writeInsertRowMethod( tableName, revisionHistorySuffix, "", columns.KeyColumns );
 			writeInsertRowMethod( tableName, revisionHistorySuffix, "WithoutAdditionalLogic", columns.KeyColumns );
-			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "" );
-			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic" );
-			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, true );
-			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", false );
+			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "", false );
+			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "", true );
+			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", false );
+			writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", true );
+			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, false, true );
+			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, true, true );
+			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", false, false );
+			writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", true, false );
 			writePrivateDeleteRowsMethod( cn, tableName, isRevisionHistoryClass );
 			writer.WriteLine(
 				"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, ref " +
@@ -136,18 +140,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.Write( returnColumn != null ? returnColumn.DataTypeName : "void" );
 			writer.Write( " InsertRow" + revisionHistorySuffix + additionalLogicSuffix + "( " );
 			writeColumnParameterDeclarations( columns.DataColumns );
-			writer.WriteLine( " ) { " );
+			if( columns.DataColumns.Any() )
+				writer.Write( ", " );
+			writer.WriteLine( "bool isLongRunning = false ) { " );
 
 			// body
 			writer.WriteLine( "var mod = CreateForInsert" + revisionHistorySuffix + "();" );
 			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.Execute" + additionalLogicSuffix + "();" );
+			writer.WriteLine( "mod.Execute{0}( isLongRunning: isLongRunning );".FormatWith( additionalLogicSuffix ) );
 			if( returnColumn != null )
 				writer.WriteLine( "return mod." + returnColumn.Name + ";" );
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeUpdateRowsMethod( DBConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix ) {
+		private static void writeUpdateRowsMethod(
+			DBConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix, bool includeIsLongRunningParameter ) {
 			// header
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
@@ -159,21 +166,33 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writeColumnParameterDeclarations( columns.DataColumns );
 			if( columns.DataColumns.Any() )
 				writer.Write( ", " );
-			writer.WriteLine( "" + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
+			writer.WriteLine(
+				"{0} ) {{".FormatWith(
+					StringTools.ConcatenateWithDelimiter(
+						", ",
+						includeIsLongRunningParameter ? "bool isLongRunning" : "",
+						getConditionParameterDeclarations( cn, tableName ) ) ) );
 
 			// body
 			writer.WriteLine( "var mod = CreateForUpdate" + revisionHistorySuffix + "( requiredCondition, additionalConditions );" );
 			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.Execute" + additionalLogicSuffix + "();" );
+			writer.WriteLine( "mod.Execute{0}( isLongRunning: {1} );".FormatWith( additionalLogicSuffix, includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeDeleteRowsMethod( DBConnection cn, string tableName, string methodNameSuffix, bool executeAdditionalLogic ) {
+		private static void writeDeleteRowsMethod(
+			DBConnection cn, string tableName, string methodNameSuffix, bool includeIsLongRunningParameter, bool executeAdditionalLogic ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para>" +
 				"<para>WARNING: After calling this method, delete referenced rows in other tables that are no longer needed.</para>" );
-			writer.WriteLine( "public static int DeleteRows" + methodNameSuffix + "( " + getConditionParameterDeclarations( cn, tableName ) + " ) {" );
+			writer.WriteLine(
+				"public static int DeleteRows{0}( {1} ) {{".FormatWith(
+					methodNameSuffix,
+					StringTools.ConcatenateWithDelimiter(
+						", ",
+						includeIsLongRunningParameter ? "bool isLongRunning" : "",
+						getConditionParameterDeclarations( cn, tableName ) ) ) );
 			if( executeAdditionalLogic )
 				writer.WriteLine( "return " + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
 
@@ -184,7 +203,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "preDelete( conditions, ref postDeleteCall );" );
 			}
 
-			writer.WriteLine( "var rowsDeleted = deleteRows( conditions );" );
+			writer.WriteLine( "var rowsDeleted = deleteRows( conditions, {0} );".FormatWith( includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 
 			if( executeAdditionalLogic ) {
 				writer.WriteLine( "if( postDeleteCall != null )" );
@@ -202,12 +221,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when doing direct-with-revision-bypass deletions.
 
 			writer.WriteLine(
-				"private static int deleteRows( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions ) {" );
+				"private static int deleteRows( List<{0}> conditions, bool isLongRunning ) {{".FormatWith(
+					DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) ) );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "return " + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
 
 			if( isRevisionHistoryClass )
-				writer.WriteLine( "copyLatestRevisions( conditions );" );
+				writer.WriteLine( "copyLatestRevisions( conditions, isLongRunning );" );
 
 			writer.WriteLine( "var delete = new InlineDelete( \"" + tableName + "\" );" );
 			writer.WriteLine( "conditions.ForEach( condition => delete.AddCondition( condition.CommandCondition ) );" );
@@ -216,7 +236,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer.WriteLine( "delete.AddCondition( getLatestRevisionsCondition() );" );
 
 			writer.WriteLine( "try {" );
-			writer.WriteLine( "return delete.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
+			writer.WriteLine( "return delete.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 			writer.WriteLine( "}" ); // try
 			writer.WriteLine( "catch( System.Exception e ) {" );
 			writer.WriteLine( "rethrowAsDataModificationExceptionIfNecessary( e );" );
@@ -399,7 +419,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer,
 				"Executes this " + tableName +
 				" modification, persisting all changes. Executes any pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
-			writer.WriteLine( "public void Execute() {" );
+			writer.WriteLine( "public void Execute( bool isLongRunning = false ) {" );
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
 
 			// The mod type may change during execute.
@@ -410,7 +430,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "else if( frozenModType == ModificationType.Update )" );
 			writer.WriteLine( "preUpdate();" );
 
-			writer.WriteLine( "executeInsertOrUpdate();" );
+			writer.WriteLine( "executeInsertOrUpdate( isLongRunning );" );
 
 			writer.WriteLine( "if( frozenModType == ModificationType.Insert )" );
 			writer.WriteLine( "postInsert();" );
@@ -429,15 +449,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writer,
 				"Executes this " + tableName +
 				" modification, persisting all changes. Does not execute pre-insert, pre-update, post-insert, or post-update logic that may exist in the class." );
-			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic() {" );
-			writer.WriteLine( "executeInsertOrUpdate();" );
+			writer.WriteLine( "public void ExecuteWithoutAdditionalLogic( bool isLongRunning = false ) {" );
+			writer.WriteLine( "executeInsertOrUpdate( isLongRunning );" );
 			writer.WriteLine( "markColumnValuesUnchanged();" );
 			writer.WriteLine( "}" );
 		}
 
 		private static void writeExecuteInsertOrUpdateMethod(
 			DBConnection cn, string tableName, bool isRevisionHistoryClass, IEnumerable<Column> keyColumns, Column identityColumn ) {
-			writer.WriteLine( "private void executeInsertOrUpdate() {" );
+			writer.WriteLine( "private void executeInsertOrUpdate( bool isLongRunning ) {" );
 			writer.WriteLine( "try {" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
@@ -465,11 +485,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					"{0}.Value = {1};".FormatWith(
 						getColumnFieldName( identityColumn ),
 						identityColumn.GetIncomingValueConversionExpression(
-							"EwlStatics.ChangeType( insert.Execute( {0} ), typeof( {1} ) )".FormatWith(
+							"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning ), typeof( {1} ) )".FormatWith(
 								DataAccessStatics.GetConnectionExpression( database ),
 								identityColumn.UnconvertedDataTypeName ) ) ) );
 			else
-				writer.WriteLine( "insert.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
+				writer.WriteLine( "insert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 
 			// Future calls to Execute should perform updates, not inserts. Use the values of key columns as conditions.
 			writer.WriteLine( "modType = ModificationType.Update;" );
@@ -488,13 +508,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "var modificationValues = getColumnModificationValues();" );
 			writer.WriteLine( "if( modificationValues.Any() ) {" );
 			if( isRevisionHistoryClass )
-				writer.WriteLine( "copyLatestRevisions( conditions );" );
+				writer.WriteLine( "copyLatestRevisions( conditions, isLongRunning );" );
 			writer.WriteLine( "var update = new InlineUpdate( \"" + tableName + "\" );" );
 			writer.WriteLine( "update.AddColumnModifications( modificationValues );" );
 			writer.WriteLine( "conditions.ForEach( condition => update.AddCondition( condition.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "update.AddCondition( getLatestRevisionsCondition() );" );
-			writer.WriteLine( "update.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + " );" );
+			writer.WriteLine( "update.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" ); // else
 
@@ -524,7 +544,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeCopyLatestRevisionsMethod( DBConnection cn, string tableName, IEnumerable<Column> nonIdentityColumns ) {
 			writer.WriteLine(
-				"private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions ) {" );
+				"private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
+				"> conditions, bool isLongRunning ) {" );
 
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 
@@ -534,8 +555,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "command.AddCondition( getLatestRevisionsCondition() );" );
 			writer.WriteLine( "var latestRevisionIds = new List<int>();" );
 			writer.WriteLine(
-				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
-				", r => { while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); } );" );
+				"command.Execute( {0}, r => {{ while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); }}, isLongRunning: isLongRunning );".FormatWith(
+					DataAccessStatics.GetConnectionExpression( database ) ) );
 			writer.WriteLine( "foreach( var latestRevisionId in latestRevisionIds ) {" );
 
 			// Get the latest revision.

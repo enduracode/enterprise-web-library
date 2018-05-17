@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
@@ -36,12 +36,14 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this command using the specified database connection to get a data reader and then executes the specified method with the reader.
 		/// </summary>
-		public void Execute( DBConnection cn, Action<DbDataReader> readerMethod ) {
+		/// <param name="cn"></param>
+		/// <param name="readerMethod"></param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
+		public void Execute( DBConnection cn, Action<DbDataReader> readerMethod, bool isLongRunning = false ) {
 			var command = cn.DatabaseInfo.CreateCommand();
-			command.CommandText =
-				"SELECT{0} {1} ".FormatWith(
-					cacheQueryInDatabase && cn.DatabaseInfo.QueryCacheHint.Any() ? " {0}".FormatWith( cn.DatabaseInfo.QueryCacheHint ) : "",
-					StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.ToArray() ) ) + fromClause;
+			command.CommandText = "SELECT{0} {1} ".FormatWith(
+				                      cacheQueryInDatabase && cn.DatabaseInfo.QueryCacheHint.Any() ? " {0}".FormatWith( cn.DatabaseInfo.QueryCacheHint ) : "",
+				                      StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.ToArray() ) ) + fromClause;
 
 			if( conditions.Any() ) {
 				command.CommandText += " WHERE ";
@@ -56,7 +58,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 			}
 
 			command.CommandText = command.CommandText.ConcatenateWithSpace( orderByClause );
-			cn.ExecuteReaderCommand( command, readerMethod );
+			cn.ExecuteReaderCommand( command, readerMethod, isLongRunning: isLongRunning );
 		}
 	}
 }

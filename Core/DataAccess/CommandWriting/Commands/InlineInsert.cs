@@ -29,7 +29,9 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// Executes this command against the specified database connection and returns the auto-increment value of the inserted row, or null if it is not an
 		/// auto-increment table.
 		/// </summary>
-		public object Execute( DBConnection cn ) {
+		/// <param name="cn"></param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
+		public object Execute( DBConnection cn, bool isLongRunning = false ) {
 			var cmd = cn.DatabaseInfo.CreateCommand();
 			cmd.CommandText = "INSERT INTO " + table;
 			if( columnModifications.Count == 0 )
@@ -48,7 +50,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 				cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 				cmd.CommandText += " )";
 			}
-			cn.ExecuteNonQueryCommand( cmd );
+			cn.ExecuteNonQueryCommand( cmd, isLongRunning: isLongRunning );
 
 			if( !cn.DatabaseInfo.LastAutoIncrementValueExpression.Any() )
 				return null;

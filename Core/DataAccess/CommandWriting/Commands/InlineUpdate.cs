@@ -42,7 +42,9 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this command against the specified database connection and returns the number of rows affected.
 		/// </summary>
-		public int Execute( DBConnection cn ) {
+		/// <param name="cn"></param>
+		/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
+		public int Execute( DBConnection cn, bool isLongRunning = false ) {
 			if( columnModifications.Count == 0 )
 				return 0;
 			if( conditions.Count == 0 )
@@ -63,7 +65,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 				command.CommandText += " AND ";
 			}
 			command.CommandText = command.CommandText.Remove( command.CommandText.Length - 5 );
-			return cn.ExecuteNonQueryCommand( command );
+			return cn.ExecuteNonQueryCommand( command, isLongRunning: isLongRunning );
 		}
 	}
 }
