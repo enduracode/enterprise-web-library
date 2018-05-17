@@ -41,9 +41,12 @@ namespace EnterpriseWebLibrary {
 
 				sw.WriteLine( "Application: {0}".FormatWith( ConfigurationStatics.AppName ) );
 				sw.WriteLine( "Version: {0}".FormatWith( ConfigurationStatics.AppAssembly.GetName().Version ) );
-				sw.WriteLine();
-				sw.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
-				sw.WriteLine( "Machine: {0}".FormatWith( EwlStatics.GetLocalHostName() ) );
+
+				if( !ConfigurationStatics.IsDevelopmentInstallation ) {
+					sw.WriteLine();
+					sw.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
+					sw.WriteLine( "Machine: {0}".FormatWith( EwlStatics.GetLocalHostName() ) );
+				}
 
 				if( NetTools.IsWebApp() )
 					// This check ensures that there is an actual request, which is not the case during application initialization.
