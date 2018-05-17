@@ -7,7 +7,6 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EnterpriseWebLibrary</RootNamespace>
     <AssemblyName>EnterpriseWebLibrary</AssemblyName>
     <SccProjectName>
@@ -793,9 +792,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="WebTestingFramework\Read me.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -9,7 +9,6 @@
     <ProjectGuid>{1FEF500E-B420-42D6-8702-D998CDF65C23}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EnterpriseWebLibrary.WebSite</RootNamespace>
     <AssemblyName>EnterpriseWebLibrary.WebSite</AssemblyName>
     <SccProjectName>
@@ -626,9 +625,6 @@
     <Content Include="Ewf\IntermediateLogIn.aspx" />
     <Content Include="Service\Service.svc" />
     <Content Include="TestPages\GetImage.aspx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

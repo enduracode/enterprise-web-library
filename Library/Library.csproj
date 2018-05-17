@@ -7,7 +7,6 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3398B3A5-8445-410E-A69B-33EE3E914A03}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EnterpriseWebLibrary</RootNamespace>
     <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
     <SccProjectName>
@@ -120,9 +119,6 @@
     <None Include="Files\System Template\Website\Web.config" />
     <None Include="Files\Template.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
