@@ -34,9 +34,9 @@ namespace EnterpriseWebLibrary.Configuration {
 		public static SystemGeneralProvider SystemGeneralProvider { get; private set; }
 
 		internal static string AppName { get; private set; }
-		internal static bool IsClientSideProgram { get; private set; }
+		internal static bool IsClientSideApp { get; private set; }
 
-		internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideProgram, ref string initializationLog ) {
+		internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideApp, ref string initializationLog ) {
 			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
 
 			initializationLog += Environment.NewLine + "About to load machine config";
@@ -95,7 +95,7 @@ namespace EnterpriseWebLibrary.Configuration {
 				throw new ApplicationException( "General provider not found in system" );
 
 			AppName = appName;
-			IsClientSideProgram = isClientSideProgram;
+			IsClientSideApp = isClientSideApp;
 		}
 
 		/// <summary>

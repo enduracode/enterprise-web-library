@@ -39,9 +39,16 @@ namespace EnterpriseWebLibrary {
 					sw.WriteLine();
 				}
 
-				if( NetTools.IsWebApp() ) {
+				sw.WriteLine( "Application: {0}".FormatWith( ConfigurationStatics.AppName ) );
+				sw.WriteLine( "Version: {0}".FormatWith( ConfigurationStatics.AppAssembly.GetName().Version ) );
+				sw.WriteLine();
+				sw.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
+				sw.WriteLine( "Machine: {0}".FormatWith( EwlStatics.GetLocalHostName() ) );
+
+				if( NetTools.IsWebApp() )
 					// This check ensures that there is an actual request, which is not the case during application initialization.
 					if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
+						sw.WriteLine();
 						sw.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
 						sw.WriteLine();
@@ -69,12 +76,6 @@ namespace EnterpriseWebLibrary {
 						if( user != null )
 							sw.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 					}
-				}
-				else {
-					sw.WriteLine( "Program: " + ConfigurationStatics.AppName );
-					sw.WriteLine( "Version: " + ConfigurationStatics.AppAssembly.GetName().Version );
-					sw.WriteLine( "Machine: " + EwlStatics.GetLocalHostName() );
-				}
 
 				EwlStatics.CallEveryMethod(
 					() => {
@@ -165,7 +166,7 @@ namespace EnterpriseWebLibrary {
 			return new EmailMessage
 				{
 					Subject = "Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
-					          ( ConfigurationStatics.IsClientSideProgram ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
+					          ( ConfigurationStatics.IsClientSideApp ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
 					BodyHtml = body.GetTextAsEncodedHtml()
 				};
 		}

@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
 		/// <param name="appName"></param>
-		/// <param name="isClientSideProgram"></param>
+		/// <param name="isClientSideApp"></param>
 		/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
 		/// caution.</param>
 		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary {
 		/// available in the application.</param>
 		/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
 		public static void InitStatics(
-			SystemInitializer globalInitializer, string appName, bool isClientSideProgram, string assemblyFolderPath = "",
+			SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
 			Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
 			var initializationLog = "Starting init";
 			try {
@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary {
 					throw new ApplicationException( "The system must have a global initializer." );
 
 				// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
-				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideProgram, ref initializationLog );
+				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
 				EmailStatics.Init();
 				TelemetryStatics.Init();
 
