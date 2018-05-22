@@ -460,7 +460,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\" + \" Executable\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
 						.FormatWith( service.Name ) );
 				writer.WriteLine( "}" );
 
