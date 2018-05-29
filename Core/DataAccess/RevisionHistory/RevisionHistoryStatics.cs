@@ -17,10 +17,12 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 				                                    group i.Item2 by i.Item1
 				                                    into grouping
 				                                    select Tuple.Create( grouping.Key, grouping.AsEnumerable() );
+				EventIdListAndEventIdSetPairs = Enumerable.Empty<Tuple<IEnumerable<EventId>, IEnumerable<int>>>();
 			}
 
 			public TransactionListEntityData( int entityId, IEnumerable<( IEnumerable<EventId>, int )> eventIdListAndEventIdPairs ) {
 				EntityId = entityId;
+				RevisionIdListAndRevisionSetPairs = Enumerable.Empty<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>>();
 				EventIdListAndEventIdSetPairs = from i in eventIdListAndEventIdPairs
 				                                group i.Item2 by i.Item1
 				                                into grouping
