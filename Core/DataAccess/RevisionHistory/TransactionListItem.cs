@@ -5,25 +5,27 @@ using System.Linq;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 	/// <summary>
-	/// A revision of a conceptual data entity, including its transaction and user.
+	/// A transaction for a conceptual data entity.
 	/// </summary>
-	public class ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> {
+	public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType> {
 		private readonly int conceptualEntityId;
 
 		private readonly Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>
 			revisionDictionariesByEntityType;
 
 		private readonly Lazy<ConceptualEntityStateType> conceptualEntityState;
-		private readonly Lazy<ConceptualEntityDeltaType> conceptualEntityDelta;
+		private readonly Lazy<ConceptualEntityActivityType> conceptualEntityActivity;
 		private readonly UserTransaction transaction;
 		private readonly UserType user;
-		private readonly ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> previous;
+		private readonly TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType> previous;
 
-		internal ConceptualRevision(
+		internal TransactionListItem(
 			int conceptualEntityId, IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>> entityTypeAndRevisionSetPairs,
+			IEnumerable<Tuple<IEnumerable<EventId>, IEnumerable<int>>> eventListTypeAndEventIdSetPairs,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
-			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, ConceptualEntityDeltaType> conceptualEntityDeltaSelector,
-			UserTransaction transaction, UserType user, ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> previous ) {
+			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
+				conceptualEntityActivitySelector, UserTransaction transaction, UserType user,
+			TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType> previous ) {
 			this.conceptualEntityId = conceptualEntityId;
 
 			var cachedEntityTypeAndRevisionSetPairs =
@@ -54,35 +56,36 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 						return previous.revisionDictionariesByEntityType.Value.SetItems( newEntityTypeAndRevisionDictionaryPairs );
 					} );
 
-			conceptualEntityState =
-				new Lazy<ConceptualEntityStateType>(
-					() =>
-					conceptualEntityStateSelector(
-						entityType =>
-						revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty )
-							.Values.Select( i => i.Item1.RevisionId ) ) );
+			conceptualEntityState = new Lazy<ConceptualEntityStateType>(
+				() => conceptualEntityStateSelector(
+					entityType => revisionDictionariesByEntityType.Value
+						.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty )
+						.Values.Select( i => i.Item1.RevisionId ) ) );
 
-			conceptualEntityDelta = new Lazy<ConceptualEntityDeltaType>(
+			conceptualEntityActivity = new Lazy<ConceptualEntityActivityType>(
 				() => {
 					var revisionSetsByEntityType = cachedEntityTypeAndRevisionSetPairs.Value.ToImmutableDictionary( i => i.Item1, i => i.Item2 );
-					return conceptualEntityDeltaSelector(
-						entityType => revisionSetsByEntityType.GetValueOrDefault( entityType, new Revision[ 0 ] ).Select(
-							revision => {
-								Tuple<Revision, UserTransaction, UserType> previousRevisionAndTransactionAndUser = null;
-								if( previous != null ) {
-									var previousRevisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType );
-									if( previousRevisionsByLatestRevisionId != null )
-										previousRevisionAndTransactionAndUser = previousRevisionsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId );
-								}
-								return previousRevisionAndTransactionAndUser == null
-									       ? new RevisionIdDelta<UserType>( revision.RevisionId, null )
-									       : new RevisionIdDelta<UserType>(
-										         revision.RevisionId,
-										         Tuple.Create(
-											         previousRevisionAndTransactionAndUser.Item1.RevisionId,
-											         previousRevisionAndTransactionAndUser.Item2,
-											         previousRevisionAndTransactionAndUser.Item3 ) );
-							} ) );
+					var eventIdSetsByEventListType = eventListTypeAndEventIdSetPairs.ToImmutableDictionary( i => i.Item1, i => i.Item2 );
+					return conceptualEntityActivitySelector(
+						entityType => revisionSetsByEntityType.GetValueOrDefault( entityType, Enumerable.Empty<Revision>() )
+							.Select(
+								revision => {
+									Tuple<Revision, UserTransaction, UserType> previousRevisionAndTransactionAndUser = null;
+									if( previous != null ) {
+										var previousRevisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType );
+										if( previousRevisionsByLatestRevisionId != null )
+											previousRevisionAndTransactionAndUser = previousRevisionsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId );
+									}
+									return previousRevisionAndTransactionAndUser == null
+										       ? new RevisionIdDelta<UserType>( revision.RevisionId, null )
+										       : new RevisionIdDelta<UserType>(
+											       revision.RevisionId,
+											       Tuple.Create(
+												       previousRevisionAndTransactionAndUser.Item1.RevisionId,
+												       previousRevisionAndTransactionAndUser.Item2,
+												       previousRevisionAndTransactionAndUser.Item3 ) );
+								} ),
+						eventListType => eventIdSetsByEventListType.GetValueOrDefault( eventListType, Enumerable.Empty<int>() ) );
 				} );
 
 			this.transaction = transaction;
@@ -91,20 +94,19 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		}
 
 		/// <summary>
-		/// Gets the revision's conceptual-entity ID, i.e. the latest-revision ID of the main entity.
+		/// Gets the conceptual-entity ID, i.e. the latest-revision ID of the main entity.
 		/// </summary>
 		public int ConceptualEntityId => conceptualEntityId;
 
 		/// <summary>
-		/// Gets the conceptual-entity state at this revision. This can be null if you are using that to represent no data at a particular revision.
+		/// Gets the conceptual-entity state. This can be null if you are using that to represent no data at a particular transaction.
 		/// </summary>
 		public ConceptualEntityStateType ConceptualEntityState => conceptualEntityState.Value;
 
 		/// <summary>
-		/// Gets the conceptual-entity-delta object for this revision and the previous revision, if one exists. This can be null if you are using that to represent
-		/// no data for a particular revision.
+		/// Gets the conceptual-entity-activity object. This can be null if you are using that to represent no data in a particular transaction.
 		/// </summary>
-		public ConceptualEntityDeltaType ConceptualEntityDelta => conceptualEntityDelta.Value;
+		public ConceptualEntityActivityType ConceptualEntityActivity => conceptualEntityActivity.Value;
 
 		/// <summary>
 		/// Gets the transaction.
@@ -117,13 +119,13 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		public UserType User => user;
 
 		/// <summary>
-		/// Gets whether there is a previous revision.
+		/// Gets whether there is a previous transaction for the same conceptual entity.
 		/// </summary>
 		public bool HasPrevious => previous != null;
 
 		/// <summary>
-		/// Gets the previous revision, or null if this is the first revision.
+		/// Gets the previous transaction for the same conceptual entity, or null if this is the first.
 		/// </summary>
-		public ConceptualRevision<ConceptualEntityStateType, ConceptualEntityDeltaType, UserType> Previous => previous;
+		public TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType> Previous => previous;
 	}
 }

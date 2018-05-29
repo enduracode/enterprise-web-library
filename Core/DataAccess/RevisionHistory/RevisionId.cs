@@ -17,7 +17,7 @@
 			this.conceptualEntityId = conceptualEntityId;
 		}
 
-		internal int Id { get { return id; } }
-		internal int? ConceptualEntityId { get { return conceptualEntityId; } }
+		internal int Id => id;
+		internal int? ConceptualEntityId => conceptualEntityId;
 	}
 }
