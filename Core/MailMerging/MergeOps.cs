@@ -90,11 +90,12 @@ namespace EnterpriseWebLibrary.MailMerging {
 			return new MergeFieldNameTree( getFieldsInTemplateString( template ) );
 		}
 
-		private static IEnumerable<string> getFieldsInTemplateString( string template ) =>
-			from Match match in Regex.Matches( template, @"@@(\w+)", RegexOptions.Multiline )
-			let field = match.Groups[ 1 ].Value
-			where field != ApplicationRelativeNonSecureUrlPrefix && field != ApplicationRelativeSecureUrlPrefix
-			select field;
+		private static IEnumerable<string> getFieldsInTemplateString( string template ) => from Match match in Regex.Matches(
+			                                                                                   template.Replace( ApplicationRelativeNonSecureUrlPrefix, "" )
+				                                                                                   .Replace( ApplicationRelativeSecureUrlPrefix, "" ),
+			                                                                                   @"@@(\w+)",
+			                                                                                   RegexOptions.Multiline )
+		                                                                                   select match.Groups[ 1 ].Value;
 
 		/// <summary>
 		/// Returns the specified template string with the merge fields converted to Silverpop personalized tags.
