@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.MailMerging;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -9,8 +10,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public static class HtmlBlockStatics {
 		private const string providerName = "HtmlBlockEditing";
-		private const string applicationRelativeNonSecureUrlPrefix = "@@nonSecure~";
-		private const string applicationRelativeSecureUrlPrefix = "@@secure~";
 
 		private static SystemHtmlBlockEditingProvider provider;
 
@@ -56,9 +55,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			SystemProvider.UpdateHtml( htmlBlockId, encodeIntraSiteUris( html ) );
 		}
 
-		// Do this after all validation so that validation doesn't get confused by our app-relative URL prefix "merge fields". We have seen a system run into
-		// problems while doing additional validation to verify that all words preceded by @@ were valid system-specific merge fields; it was mistakenly picking up
-		// our app-relative prefixes, thinking that they were merge fields, and complaining that they were not valid.
 		private static string encodeIntraSiteUris( string html ) {
 			// It's safe to assume that in HTML, <> are used for elements most of the time.
 			// The rest of the time, this pattern may match Javascript. However, Javascript will fail
@@ -96,10 +92,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Convert absolute URLs to connection-security-specific application relative URLs
 			foreach( var secure in new[] { true, false } ) {
 				// Later, we may handle URLs for all web applications in the system rather than just the current one. See the comments in decodeIntraSiteUris.
-				var baseUrl =
-					ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => i.Name == ConfigurationStatics.AppName ).DefaultBaseUrl.GetUrlString( secure );
+				var baseUrl = ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => i.Name == ConfigurationStatics.AppName )
+					.DefaultBaseUrl.GetUrlString( secure );
 
-				html = html.Replace( baseUrl, secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix );
+				html = html.Replace( baseUrl, secure ? MergeOps.ApplicationRelativeSecureUrlPrefix : MergeOps.ApplicationRelativeNonSecureUrlPrefix );
 			}
 
 			return html;
@@ -113,7 +109,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// the web app name or something in the prefix.
 				html = Regex.Replace(
 					html,
-					secure ? applicationRelativeSecureUrlPrefix : applicationRelativeNonSecureUrlPrefix,
+					secure ? MergeOps.ApplicationRelativeSecureUrlPrefix : MergeOps.ApplicationRelativeNonSecureUrlPrefix,
 					ConfigurationStatics.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.GetUrlString( secure ) );
 			}
 			return html;

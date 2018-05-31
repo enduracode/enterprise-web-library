@@ -13,6 +13,16 @@ namespace EnterpriseWebLibrary.MailMerging {
 	/// Contains methods that perform mail merging operations.
 	/// </summary>
 	public static class MergeOps {
+		/// <summary>
+		/// HtmlBlockStatics and private use only.
+		/// </summary>
+		internal const string ApplicationRelativeNonSecureUrlPrefix = "@@nonSecure~";
+
+		/// <summary>
+		/// HtmlBlockStatics and private use only.
+		/// </summary>
+		internal const string ApplicationRelativeSecureUrlPrefix = "@@secure~";
+
 		private class ImageFieldMergingCallBack: IFieldMergingCallback {
 			void IFieldMergingCallback.FieldMerging( FieldMergingArgs args ) {}
 
@@ -80,19 +90,11 @@ namespace EnterpriseWebLibrary.MailMerging {
 			return new MergeFieldNameTree( getFieldsInTemplateString( template ) );
 		}
 
-		private static IEnumerable<string> getFieldsInTemplateString( string template ) {
-			var fields = new List<string>();
-			foreach( Match match in Regex.Matches( template, @"@@(\w+)", RegexOptions.Multiline ) ) {
-				foreach( Group group in match.Groups ) {
-					foreach( Capture capture in group.Captures ) {
-						// This makes sure it's not an empty capture and it's not the capture that contains the at signs.
-						if( capture.Value != "" && capture.Value.IndexOf( "@@" ) == -1 )
-							fields.Add( capture.Value );
-					}
-				}
-			}
-			return fields;
-		}
+		private static IEnumerable<string> getFieldsInTemplateString( string template ) =>
+			from Match match in Regex.Matches( template, @"@@(\w+)", RegexOptions.Multiline )
+			let field = match.Groups[ 1 ].Value
+			where field != ApplicationRelativeNonSecureUrlPrefix && field != ApplicationRelativeSecureUrlPrefix
+			select field;
 
 		/// <summary>
 		/// Returns the specified template string with the merge fields converted to Silverpop personalized tags.
