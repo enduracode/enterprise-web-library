@@ -101,7 +101,7 @@ ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading
 
 /* tables */
 ewfThAndTd {
-	overflow: hidden;
+	overflow: hidden visible;
 	text-overflow: ellipsis;
 }
 @media print {
@@ -174,11 +174,29 @@ p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtm
 }
 
 /* corner rounding */
-ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfActionControlLargeButtonStyleAllStates {
+ewfActionControlLargeButtonStyleAllStates {
 	border-radius: .5em;
 }
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfTableStandardAndStandardExceptLayoutStyles {
+	border-top-left-radius: .5em;
+	border-top-right-radius: .5em;
+}
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfTableStandardAndStandardExceptLayoutStyles,
+ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:first-child {
+	border-bottom-left-radius: .5em;
+}
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfTableStandardAndStandardExceptLayoutStyles,
+ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child {
+	border-bottom-right-radius: .5em;
+}
 @media print {
-	ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
+	ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+	ewfTableStandardAndStandardExceptLayoutStyles,
+	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:first-child,
+	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child {
 		border-radius: 0;
 	}
 }
@@ -187,9 +205,6 @@ ewfActionControlShrinkWrapButtonStyleAllStates {
 }
 ewfActionControlNormalButtonStyleAllStates {
 	border-radius: .4em;
-}
-ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles {
-	overflow: hidden;
 }
 
 /* modal boxes */
