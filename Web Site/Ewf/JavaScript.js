@@ -214,26 +214,3 @@ function toggleCheckBoxes( checklistClientId, setChecked ) {
 	};
 	jQuery.each( fieldSelection, function( i ) { jQuery.fn[i] = this; } );
 } )();
-
-// This function is called when the items in the SelectList are displayed, even when results are not being filtered.
-
-function select2ResultSort( results, container, query ) {
-	// If there's no search term, don't modify order.
-	if( query.term ) {
-		// The goal here is to bring items that begin with the query to the top. Items that simply contain the query
-		// should be listed after. Another goal is to maintain the order of the list, which is the order in which the 
-		// list is provided to this method.
-		var termLower = query.term.toLowerCase();
-		var startWithTerm = new Array();
-		var doesNotStartWithTerm = new Array();
-
-		results.forEach( function( e ) {
-			if( e.text.toLowerCase().indexOf( termLower ) == 0 )
-				startWithTerm.push( e );
-			else
-				doesNotStartWithTerm.push( e );
-		} );
-		return startWithTerm.concat( doesNotStartWithTerm );
-	}
-	return results;
-}

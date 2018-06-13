@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			internal const string DropDownCssClass = "ewfDropDown";
 
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .select2-container" ) };
+				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .chosen-container" ) };
 			}
 		}
 
@@ -242,7 +242,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
 				Controls.Add(
-					useHorizontalRadioLayout.Value ? new ControlLine( radioButtonsAsControls ) as Control : ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
+					useHorizontalRadioLayout.Value
+						? new ControlLine( radioButtonsAsControls ) as Control
+						: ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
 			}
 			else {
 				formValue = new FormValue<ItemIdType>(
@@ -255,7 +257,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				action.AddToPageIfNecessary();
 
 				PreRender += delegate {
-					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, true, legacy: true );
+					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false, legacy: true );
 					if( implicitSubmissionStatements.Any() )
 						this.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
 				};
@@ -278,11 +280,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( changeHandler.Any() )
 						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
 				};
-
-				var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-				if( placeholderItem != null )
-					// Don't let the attribute value be the empty string since this seems to confuse Select2.
-					selectControl.Attributes.Add( "data-placeholder", placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " );
 
 				PreRender += delegate {
 					foreach( var i in items )
@@ -333,16 +330,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return "";
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			var select2Statement = "$( '#" + selectControl.ClientID + "' ).select2( { width: 'copy', " +
-			                       ( placeholderItem != null && placeholderItem.IsValid ? "allowClear: true, " : "" ) +
-			                       "openOnEnter: false, sortResults: select2ResultSort } );";
+			var chosenStatement = "$( '#" + selectControl.ClientID + "' ).chosen( { " + StringTools.ConcatenateWithDelimiter(
+				                      ", ",
+				                      placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
+				                      placeholderItem != null
+					                      // Don't let the placeholder value be the empty string since this seems to confuse Chosen.
+					                      ? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
+					                      : "" ) + " } );";
 			var touchStatement = placeholderItem != null
-				                     ? "$( '#" + selectControl.ClientID + "' ).children().first().text( $( '#" + selectControl.ClientID +
-				                       "' ).attr( 'data-placeholder' ) );"
+				                     ? "$( '#{0}' ).children().first().text( '{1}' );".FormatWith( selectControl.ClientID, placeholderItem.Item.Label )
 				                     : "";
 
 			// We previously used "!Modernizr.touch" as the condition. One reason this didn't work: Windows 8 always identifies as "touch" even if it's desktop.
-			return "if( true ) " + select2Statement + touchStatement.PrependDelimiter( " else " );
+			return "if( true ) " + chosenStatement + touchStatement.PrependDelimiter( " else " );
 		}
 
 		FormValue FormValueControl.FormValue { get { return formValue; } }
@@ -354,11 +354,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator ) {
 			// Both radioList and formValue will be null if this SelectList is never added to the page.
-			var selectedItemIdInPostBack = radioList != null
-				                               ? radioList.GetSelectedItemIdInPostBack( postBackValues )
-				                               : formValue != null
-					                               ? formValue.GetValue( postBackValues )
-					                               : selectedItemId;
+			var selectedItemIdInPostBack = radioList != null ? radioList.GetSelectedItemIdInPostBack( postBackValues ) :
+			                               formValue != null ? formValue.GetValue( postBackValues ) : selectedItemId;
 
 			if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
 				validator.NoteErrorAndAddMessage( "Please make a selection." );
@@ -370,7 +367,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			// Both radioList and formValue will be null if this SelectList is never added to the page.
-			return radioList != null ? radioList.SelectionChangedOnPostBack( postBackValues ) : formValue != null && formValue.ValueChangedOnPostBack( postBackValues );
+			return radioList != null
+				       ? radioList.SelectionChangedOnPostBack( postBackValues )
+				       : formValue != null && formValue.ValueChangedOnPostBack( postBackValues );
 		}
 
 		/// <summary>
@@ -378,7 +377,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected override HtmlTextWriterTag TagKey {
 			get {
-				// Drop-down lists need a wrapping div to allow Select2 to be shown and hidden with display linking and to make the enter key submit the form.
+				// Drop-down lists need a wrapping div to allow Chosen to be shown and hidden with display linking and to make the enter key submit the form.
 				return HtmlTextWriterTag.Div;
 			}
 		}

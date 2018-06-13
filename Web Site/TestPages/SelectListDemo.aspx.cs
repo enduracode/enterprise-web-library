@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
 						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
-						getSelect2UpgradeTestingInfo(),
+						getChosenUpgradeTestingInfo(),
 						FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
 				} );
 			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Submit", new PostBackButton( pb ) ) );
@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		private Control getSelect2UpgradeTestingInfo() {
+		private Control getChosenUpgradeTestingInfo() {
 			var bullets = new List<string>();
 			bullets.Add(
 				"Focus a control above the first dropdown and tab to focus the dropdown. Press a letter on the keyboard. The dropdown should expand, and that letter should be in the search area. " +
@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			bullets.Add( "When a dropdown is focused with the options collapsed, press enter. This should submit the page." );
 
 			return new LegacySection(
-				"What to look for after updating Select2",
+				"What to look for after updating Chosen",
 				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToCollection(),
 				style: SectionStyle.Box );
 		}
