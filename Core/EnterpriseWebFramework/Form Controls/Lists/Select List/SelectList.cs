@@ -149,7 +149,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly bool? useHorizontalRadioLayout;
 		private readonly System.Web.UI.WebControls.Unit? width;
-		private readonly IEnumerable<ListItem> items;
+		private readonly ImmutableArray<ListItem> items;
 		private readonly Dictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
 		private readonly bool? disableSingleRadioButtonDetection;
 		private readonly ItemIdType selectedItemId;
@@ -175,9 +175,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
 
-			items = listItems.Select( i => new ListItem( i, true, false ) ).ToArray();
+			items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
 			this.selectedItemId = selectedItemId;
-			items = getInitialItems( unlistedSelectedItemLabelGetter, defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToArray();
+			items = getInitialItems( unlistedSelectedItemLabelGetter, defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToImmutableArray();
 			if( items.All( i => !i.IsValid ) )
 				throw new ApplicationException( "There must be at least one valid selection in the list." );
 
@@ -330,19 +330,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return "";
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			var chosenStatement = "$( '#" + selectControl.ClientID + "' ).chosen( { " + StringTools.ConcatenateWithDelimiter(
-				                      ", ",
-				                      placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
-				                      placeholderItem != null
-					                      // Don't let the placeholder value be the empty string since this seems to confuse Chosen.
-					                      ? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
-					                      : "" ) + " } );";
-			var touchStatement = placeholderItem != null
-				                     ? "$( '#{0}' ).children().first().text( '{1}' );".FormatWith( selectControl.ClientID, placeholderItem.Item.Label )
-				                     : "";
-
-			// We previously used "!Modernizr.touch" as the condition. One reason this didn't work: Windows 8 always identifies as "touch" even if it's desktop.
-			return "if( true ) " + chosenStatement + touchStatement.PrependDelimiter( " else " );
+			return "$( '#{0}' ).chosen( {{ {1} }} ){2};".FormatWith(
+				selectControl.ClientID,
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
+					placeholderItem != null
+						// Don't let the placeholder value be the empty string since this seems to confuse Chosen.
+						? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
+						: "" ),
+				// Do this after .chosen since we only want it to affect the native select.
+				placeholderItem != null ? ".children().eq( {0} ).text( '{1}' )".FormatWith( items.IndexOf( placeholderItem ), placeholderItem.Item.Label ) : "" );
 		}
 
 		FormValue FormValueControl.FormValue { get { return formValue; } }
