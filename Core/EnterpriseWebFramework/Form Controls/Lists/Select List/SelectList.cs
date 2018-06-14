@@ -340,7 +340,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
 						: "",
 					"search_contains: true",
-					"width: ''" ),
+					"width: '{0}'".FormatWith( width.HasValue ? width.Value.ToString() : "" ) ),
 				// Do this after .chosen since we only want it to affect the native select.
 				placeholderItem != null ? ".children().eq( {0} ).text( '{1}' )".FormatWith( items.IndexOf( placeholderItem ), placeholderItem.Item.Label ) : "" );
 		}
