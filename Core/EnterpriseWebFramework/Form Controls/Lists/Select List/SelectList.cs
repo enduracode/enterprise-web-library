@@ -339,7 +339,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						// Don't let the placeholder value be the empty string since this seems to confuse Chosen.
 						? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
 						: "",
-					"search_contains: true" ),
+					"search_contains: true",
+					"width: ''" ),
 				// Do this after .chosen since we only want it to affect the native select.
 				placeholderItem != null ? ".children().eq( {0} ).text( '{1}' )".FormatWith( items.IndexOf( placeholderItem ), placeholderItem.Item.Label ) : "" );
 		}
