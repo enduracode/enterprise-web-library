@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ServiceProcess;
 using System.Threading;
-using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.Email;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.WindowsServiceFramework {
@@ -73,9 +71,6 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 						var currentInstant = SystemClock.Instance.GetCurrentInstant();
 						var interval = new TickInterval( new Interval( lastTickInstant, currentInstant ) );
 						lastTickInstant = currentInstant;
-
-						if( ConfigurationStatics.IsLiveInstallation && interval.FitsPattern( OperationRecurrencePattern.CreateDaily( 0, 0 ) ) )
-							EmailStatics.SendHealthCheckEmail( WindowsServiceMethods.GetServiceInstalledName( service ) );
 
 						service.Tick( interval );
 					}
