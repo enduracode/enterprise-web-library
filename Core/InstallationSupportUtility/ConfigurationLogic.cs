@@ -56,9 +56,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			return factory;
 		}
 
-		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method ) {
+		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method, bool useLongTimeouts = false ) {
 			using( var client = new HttpClient() ) {
-				client.Timeout = new TimeSpan( 0, 0, 10 );
+				client.Timeout = useLongTimeouts ? new TimeSpan( 0, 2, 0 ) : new TimeSpan( 0, 0, 10 );
 				client.BaseAddress = new Uri( SystemManager.HttpBaseUrl + "/" );
 				client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", SystemManager.AccessToken );
 
@@ -168,8 +168,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			}
 		}
 
-		public static string RevisionControlFolderPath => ConfigurationStatics.MachineConfiguration?.Development?.RevisionControlFolderPath ??
-		                                                  EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
+		public static string RevisionControlFolderPath =>
+			ConfigurationStatics.MachineConfiguration?.Development?.RevisionControlFolderPath ??
+			EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
 
 		public static string OracleSysPassword {
 			get {
