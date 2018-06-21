@@ -9,4 +9,4 @@ New-Item packages\EWL\packages.config -Force -ItemType file -Value "<?xml versio
 & "Solution Files\nuget" restore packages\EWL\packages.config -PackagesDirectory packages\EWL -NonInteractive
 
 cd "packages\EWL\Ewl*\Development Utility"
-& .\EnterpriseWebLibrary.DevelopmentUtility ..\..\..\.. UpdateAllDependentLogic
+& .\EnterpriseWebLibrary.DevelopmentUtility ..\..\..\.. UpdateDependentLogic

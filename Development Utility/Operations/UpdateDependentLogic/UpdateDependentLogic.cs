@@ -22,13 +22,10 @@ using EnterpriseWebLibrary.IO;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
-	// NOTE: Rename this, and the containing folder, to UpdateDependentLogic. Also rename the batch file in Solution Files and the batch file in each person's EWL
-	// Configuration repository. Remember to fix the CruiseControl.NET config generator and the place in ExportLogic where we reference the batch file name when
-	// packaging general files.
-	internal class UpdateAllDependentLogic: Operation {
-		private static readonly Operation instance = new UpdateAllDependentLogic();
+	internal class UpdateDependentLogic: Operation {
+		private static readonly Operation instance = new UpdateDependentLogic();
 		public static Operation Instance => instance;
-		private UpdateAllDependentLogic() {}
+		private UpdateDependentLogic() {}
 
 		bool Operation.IsValid( Installation installation ) {
 			return installation is DevelopmentInstallation;
@@ -294,7 +291,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						baseNamespace,
 						database.SecondaryDatabaseName.Length == 0
 							? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
-							: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ) );
+							: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single(
+								sd => sd.name == database.SecondaryDatabaseName ) );
 				}
 				catch( Exception e ) {
 					throw UserCorrectableException.CreateSecondaryException(
@@ -307,7 +305,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
 				writer.WriteLine( "public class SecondaryDatabaseNames {" );
-				foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
+				foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 )
+				)
 					writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
@@ -324,7 +323,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
 			ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
-			tableNames = tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+			tableNames = tableNames
+				.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
 				.ToImmutableArray();
 
 			database.ExecuteDbMethod(
@@ -525,7 +525,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name + "\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name +
+					"\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
 
@@ -600,8 +601,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				try {
 					EwlStatics.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
-						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" + codeFileName +
-						"\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
+						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
+						codeFileName + "\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
 						"",
 						true );
 				}
@@ -613,7 +614,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				try {
 					EwlStatics.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
-						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath + "\"",
+						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath +
+						"\"",
 						"",
 						true );
 				}

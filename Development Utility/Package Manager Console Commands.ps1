@@ -7,7 +7,7 @@ function Update-DependentLogic {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateAllDependentLogic
+		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateDependentLogic
 	}
 }
 
