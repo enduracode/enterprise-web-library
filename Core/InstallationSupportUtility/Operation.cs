@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
@@ -7,6 +8,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// Never call this method directly.
 		/// </summary>
-		void Execute( Installation installation, OperationResult operationResult );
+		void Execute( Installation installation, IEnumerable<string> args, OperationResult operationResult );
 	}
 }

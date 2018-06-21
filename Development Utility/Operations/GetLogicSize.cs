@@ -54,7 +54,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					select EwlStatics.CombinePaths( installation.GeneralLogic.Path, i.name, "bin", i.NamespaceAndAssemblyName + ".dll" ) )
 				.Concat(
 					from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
-					select EwlStatics.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ), i.NamespaceAndAssemblyName + ".exe" ) )
+					select EwlStatics.CombinePaths(
+						installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ),
+						i.NamespaceAndAssemblyName + ".exe" ) )
 				.Concat(
 					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable
 					select EwlStatics.CombinePaths(
@@ -81,7 +83,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation != null && !installation.DevelopmentInstallationLogic.SystemIsEwl;
 		}
 
-		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
 			if( !AppStatics.NDependIsPresent )
 				throw new UserCorrectableException( "NDepend is not present." );
 			var installation = genericInstallation as DevelopmentInstallation;

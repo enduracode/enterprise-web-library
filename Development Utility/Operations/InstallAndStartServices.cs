@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.InstallationSupportUtility;
+﻿using System.Collections.Generic;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
@@ -11,7 +12,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation is RecognizedDevelopmentInstallation;
 		}
 
-		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
 			var installation = genericInstallation as RecognizedDevelopmentInstallation;
 			installation.ExistingInstallationLogic.InstallServices();
 			installation.ExistingInstallationLogic.Start();

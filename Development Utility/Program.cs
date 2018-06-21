@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 							if( !operation.IsValid( installation ) )
 								throw new UserCorrectableException( "The " + operation.GetType().Name + " operation cannot be performed on this installation." );
-							operation.Execute( installation, new OperationResult() );
+							operation.Execute( installation, args.Skip( 2 ), new OperationResult() );
 						}
 						catch( Exception e ) {
 							Output.WriteTimeStampedError( e.ToString() );
@@ -64,11 +64,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 			}
 		}
 
-		private static string getInstallationsFolderPath( string installationPath, bool useTemplate ) => EwlStatics.CombinePaths(
-			InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, true ),
-			InstallationConfiguration.ConfigurationFolderName,
-			InstallationConfiguration.InstallationConfigurationFolderName,
-			useTemplate ? "{0} Template".FormatWith( InstallationConfiguration.InstallationsFolderName ) : InstallationConfiguration.InstallationsFolderName );
+		private static string getInstallationsFolderPath( string installationPath, bool useTemplate ) =>
+			EwlStatics.CombinePaths(
+				InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, true ),
+				InstallationConfiguration.ConfigurationFolderName,
+				InstallationConfiguration.InstallationConfigurationFolderName,
+				useTemplate ? "{0} Template".FormatWith( InstallationConfiguration.InstallationsFolderName ) : InstallationConfiguration.InstallationsFolderName );
 
 		private static DevelopmentInstallation getInstallation( string path ) {
 			var generalInstallationLogic = new GeneralInstallationLogic( path );

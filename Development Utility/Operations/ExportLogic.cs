@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -72,7 +73,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							InstallationConfiguration.InstallationConfigurationFolderName,
 							InstallationConfiguration.InstallationsFolderName,
 							!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
-						EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName, InstallationConfiguration.InstallationConfigurationFolderName ),
+						EwlStatics.CombinePaths(
+							folderPath,
+							InstallationConfiguration.ConfigurationFolderName,
+							InstallationConfiguration.InstallationConfigurationFolderName ),
 						false );
 					if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
 						IoMethods.CopyFile(
@@ -167,7 +171,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation is DevelopmentInstallation;
 		}
 
-		void Operation.Execute( Installation genericInstallation, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
 			var packagingConfiguration = GetPackagingConfiguration( installation );
 
@@ -236,7 +240,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					buildMessageInstallation.IsLiveInstallation =
 						installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
 
-					var packageFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, $"{installationConfigurationFile.installedInstallation.name} Configuration" );
+					var packageFolderPath = EwlStatics.CombinePaths(
+						logicPackagesFolderPath,
+						$"{installationConfigurationFile.installedInstallation.name} Configuration" );
 					IoMethods.CopyFolder( installationConfigurationFolderPath, packageFolderPath, false );
 					if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
 						IoMethods.CopyFile(
