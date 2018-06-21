@@ -5,9 +5,13 @@ $installPath = $args[0]
 
 function Update-Data {
 	[CmdletBinding()]
-	Param( $Source )
+	Param(
+		[ValidateLength(1,100)]
+		$Source = 'Default',
+		[Switch]$ForceNewPackageDownload
+	)
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateData $Source
+		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateData $Source $ForceNewPackageDownload
 	}
 }
 
