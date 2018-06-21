@@ -57,6 +57,7 @@
     <Compile Include="Operations\GetLogicSize.cs" />
     <Compile Include="Operations\InstallAndStartServices.cs" />
     <Compile Include="Operations\StopAndUninstallServices.cs" />
+    <Compile Include="Operations\UpdateData.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\CodeGenerationStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\CSharpParameter.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\DataAccess\Column.cs" />

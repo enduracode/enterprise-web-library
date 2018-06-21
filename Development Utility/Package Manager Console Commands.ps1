@@ -1,7 +1,15 @@
 ﻿param( $installPath, $toolsPath, $package )
 
-New-Module -ScriptBlock {
+New-Module -Name 'EWL Development Utility' -ScriptBlock {
 $installPath = $args[0]
+
+function Update-Data {
+	[CmdletBinding()]
+	Param( $Source )
+	Process {
+		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. UpdateData $Source
+	}
+}
 
 function Update-DependentLogic {
 	[CmdletBinding()]
