@@ -13,7 +13,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
-			var installation = genericInstallation as DevelopmentInstallation;
+			var installation = (DevelopmentInstallation)genericInstallation;
+
+			var source = arguments[ 0 ];
+			if( source == "Default" )
+				source = "";
+			var forceNewPackageDownload = bool.Parse( arguments[ 1 ] );
 		}
 	}
 }
