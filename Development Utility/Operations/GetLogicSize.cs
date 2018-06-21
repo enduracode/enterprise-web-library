@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation != null && !installation.DevelopmentInstallationLogic.SystemIsEwl;
 		}
 
-		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> arguments, OperationResult operationResult ) {
 			if( !AppStatics.NDependIsPresent )
 				throw new UserCorrectableException( "NDepend is not present." );
 			var installation = genericInstallation as DevelopmentInstallation;

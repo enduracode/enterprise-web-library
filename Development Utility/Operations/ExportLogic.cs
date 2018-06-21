@@ -171,7 +171,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation is DevelopmentInstallation;
 		}
 
-		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> arguments, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
 			var packagingConfiguration = GetPackagingConfiguration( installation );
 

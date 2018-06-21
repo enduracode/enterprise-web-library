@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		bool Operation.IsValid( Installation genericInstallation ) =>
 			genericInstallation is RecognizedDevelopmentInstallation installation && installation.DevelopmentInstallationLogic.SystemIsEwl;
 
-		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> arguments, OperationResult operationResult ) {
 			var installation = genericInstallation as RecognizedDevelopmentInstallation;
 			var localNuGetFeedFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Local NuGet Feed" );
 

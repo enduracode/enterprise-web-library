@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation is DevelopmentInstallation;
 		}
 
-		void Operation.Execute( Installation genericInstallation, IEnumerable<string> args, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IEnumerable<string> arguments, OperationResult operationResult ) {
 			IsuStatics.ConfigureIis( true, false );
 			Console.WriteLine( "Configured IIS Express." );
 
