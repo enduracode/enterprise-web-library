@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return installation is DevelopmentInstallation;
 		}
 
-		void Operation.Execute( Installation genericInstallation, IEnumerable<string> arguments, OperationResult operationResult ) {
+		void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 			var installation = genericInstallation as DevelopmentInstallation;
 		}
 	}

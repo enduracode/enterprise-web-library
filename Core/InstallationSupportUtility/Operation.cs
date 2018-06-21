@@ -8,6 +8,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// Never call this method directly.
 		/// </summary>
-		void Execute( Installation installation, IEnumerable<string> arguments, OperationResult operationResult );
+		void Execute( Installation installation, IReadOnlyList<string> arguments, OperationResult operationResult );
 	}
 }
