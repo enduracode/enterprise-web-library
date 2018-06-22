@@ -210,10 +210,17 @@ namespace EnterpriseWebLibrary.Configuration {
 		public List<NameAndEmailAddress> Developers { get { return new List<NameAndEmailAddress>( systemGeneralConfiguration.developers ); } }
 
 		/// <summary>
-		/// Gets a list of SQL commands to be run against the database after an UpdateData operation on a non-live installation.
+		/// Installation Support Utility use only.
 		/// </summary>
-		public IReadOnlyCollection<string> PrimaryDatabaseLiveToIntermediateConversionCommands =>
-			systemGeneralConfiguration.Database?.LiveToIntermediateConversionCommands.ToImmutableArray() ?? ImmutableArray<string>.Empty;
+		public SystemGeneral.Database PrimaryDatabaseSystemConfiguration => systemGeneralConfiguration.Database;
+
+		/// <summary>
+		/// Installation Support Utility use only.
+		/// </summary>
+		public SystemGeneral.Database GetSecondaryDatabaseSystemConfiguration( string name ) {
+			var secondaryDatabase = systemGeneralConfiguration.SecondaryDatabases.FirstOrDefault( i => i.Name == name );
+			return secondaryDatabase != null ? secondaryDatabase.Database : throw new ApplicationException( "No secondary database exists with the specified name." );
+		}
 
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
@@ -254,11 +261,10 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
 		/// </summary>
 		public DatabaseInfo GetSecondaryDatabaseInfo( string name ) {
-			foreach( var secondaryDatabase in installationStandardConfiguration.SecondaryDatabases ) {
-				if( secondaryDatabase.Name == name )
-					return getDatabaseInfo( secondaryDatabase.Name, secondaryDatabase.Database );
-			}
-			throw new ApplicationException( "No secondary database exists with the specified name." );
+			var secondaryDatabase = installationStandardConfiguration.SecondaryDatabases.FirstOrDefault( i => i.Name == name );
+			return secondaryDatabase != null
+				       ? getDatabaseInfo( secondaryDatabase.Name, secondaryDatabase.Database )
+				       : throw new ApplicationException( "No secondary database exists with the specified name." );
 		}
 
 		private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, InstallationStandard.Database database ) {

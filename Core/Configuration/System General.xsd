@@ -71,6 +71,7 @@
 					</sequence>
 				</complexType>
 			</element>
+			<element name="MinimumDataRevision" type="unsignedShort" minOccurs="0" />
 		</sequence>
 	</complexType>
 </schema>
