@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +50,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 							if( !operation.IsValid( installation ) )
 								throw new UserCorrectableException( "The " + operation.GetType().Name + " operation cannot be performed on this installation." );
-							operation.Execute( installation, args.Skip( 2 ), new OperationResult() );
+							operation.Execute( installation, args.Skip( 2 ).ToImmutableArray(), new OperationResult() );
 						}
 						catch( Exception e ) {
 							Output.WriteTimeStampedError( e.ToString() );
