@@ -133,7 +133,8 @@ namespace EnterpriseWebLibrary.Configuration {
 			                    let name = systemElement.Name
 			                    let supportsSecureConnections = systemElement.SupportsSecureConnections
 			                    select isDevelopmentInstallation
-				                           ? new WebApplication(
+				                           ?
+				                           new WebApplication(
 					                           name,
 					                           installationPath,
 					                           supportsSecureConnections,
@@ -211,9 +212,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Gets a list of SQL commands to be run against the database after an UpdateData operation on a non-live installation.
 		/// </summary>
-		public string[] PrimaryDatabaseLiveToIntermediateConversionCommands {
-			get { return systemGeneralConfiguration.PrimaryDatabaseLiveToIntermediateConversionCommands ?? new string[ 0 ]; }
-		}
+		public IReadOnlyCollection<string> PrimaryDatabaseLiveToIntermediateConversionCommands =>
+			systemGeneralConfiguration.Database?.LiveToIntermediateConversionCommands.ToImmutableArray() ?? ImmutableArray<string>.Empty;
 
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
@@ -230,7 +230,9 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Gets the short name of the installation.
 		/// </summary>
-		public string InstallationShortName { get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; } }
+		public string InstallationShortName {
+			get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; }
+		}
 
 		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
 
@@ -259,7 +261,7 @@ namespace EnterpriseWebLibrary.Configuration {
 			throw new ApplicationException( "No secondary database exists with the specified name." );
 		}
 
-		private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, Database database ) {
+		private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, InstallationStandard.Database database ) {
 			if( database is SqlServerDatabase ) {
 				var sqlServerDatabase = database as SqlServerDatabase;
 				return new SqlServerInfo(
@@ -293,11 +295,9 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// </summary>
 		public InstallationType InstallationType {
 			get {
-				return isDevelopmentInstallation
-					       ? InstallationType.Development
-					       : installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
-						       ? InstallationType.Live
-						       : InstallationType.Intermediate;
+				return isDevelopmentInstallation ? InstallationType.Development :
+				       installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live :
+				       InstallationType.Intermediate;
 			}
 		}
 

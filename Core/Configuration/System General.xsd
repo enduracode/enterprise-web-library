@@ -40,10 +40,11 @@
 					</sequence>
 				</complexType>
 			</element>
-			<element name="PrimaryDatabaseLiveToIntermediateConversionCommands" minOccurs="0">
+			<element name="Database" type="rs:Database" minOccurs="0" />
+			<element name="SecondaryDatabases" minOccurs="0">
 				<complexType>
 					<sequence>
-						<element name="Command" type="string" maxOccurs="unbounded" />
+						<element name="database" type="rs:SecondaryDatabase" maxOccurs="unbounded" />
 					</sequence>
 				</complexType>
 			</element>
@@ -53,6 +54,23 @@
 		<sequence>
 			<element name="Name" type="string" />
 			<element name="EmailAddress" type="string" />
+		</sequence>
+	</complexType>
+	<complexType name="SecondaryDatabase">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="Database" type="rs:Database" />
+		</sequence>
+	</complexType>
+	<complexType name="Database">
+		<sequence>
+			<element name="LiveToIntermediateConversionCommands" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Command" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 		</sequence>
 	</complexType>
 </schema>
