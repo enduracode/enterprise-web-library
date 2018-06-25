@@ -217,10 +217,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Installation Support Utility use only.
 		/// </summary>
-		public SystemGeneral.Database GetSecondaryDatabaseSystemConfiguration( string name ) {
-			var secondaryDatabase = systemGeneralConfiguration.SecondaryDatabases.FirstOrDefault( i => i.Name == name );
-			return secondaryDatabase != null ? secondaryDatabase.Database : throw new ApplicationException( "No secondary database exists with the specified name." );
-		}
+		public SystemGeneral.Database GetSecondaryDatabaseSystemConfiguration( string name ) =>
+			systemGeneralConfiguration.SecondaryDatabases.SingleOrDefault( i => i.Name == name )?.Database;
 
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
@@ -261,7 +259,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
 		/// </summary>
 		public DatabaseInfo GetSecondaryDatabaseInfo( string name ) {
-			var secondaryDatabase = installationStandardConfiguration.SecondaryDatabases.FirstOrDefault( i => i.Name == name );
+			var secondaryDatabase = installationStandardConfiguration.SecondaryDatabases.SingleOrDefault( i => i.Name == name );
 			return secondaryDatabase != null
 				       ? getDatabaseInfo( secondaryDatabase.Name, secondaryDatabase.Database )
 				       : throw new ApplicationException( "No secondary database exists with the specified name." );
