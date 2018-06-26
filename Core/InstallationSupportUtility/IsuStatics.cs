@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Humanizer;
 
@@ -176,7 +177,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 						foreach( var i in bindings ) {
 							if( i.Item1 )
-								site.Bindings.Add( "*:{0}:{1}".FormatWith( i.Item2, i.Item3 ), (byte[])null, (string)null, enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) );
+								site.Bindings.Add(
+									"*:{0}:{1}".FormatWith( i.Item2, i.Item3 ),
+									(byte[])null,
+									(string)null,
+									enumGetter( "Microsoft.Web.Administration.SslFlags", "3" ) );
 							else
 								site.Bindings.Add( "*:{0}:{1}".FormatWith( i.Item2, i.Item3 ), "http" );
 						}
@@ -250,6 +255,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 						throw new ApplicationException( message, e );
 					}
 				} );
+		}
+
+		/// <summary>
+		/// Installation Support Utility use only.
+		/// </summary>
+		public static string GetDataPackageZipFilePath( string installationFullName ) {
+			return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Local Data Packages", installationFullName + ".zip" );
 		}
 	}
 }
