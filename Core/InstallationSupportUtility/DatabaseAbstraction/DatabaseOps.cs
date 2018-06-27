@@ -5,6 +5,7 @@ using System.Linq;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	public static class DatabaseOps {
@@ -19,6 +20,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 				return new Oracle( databaseInfo as OracleInfo, oracleTableSpaces );
 			throw new ApplicationException( "Invalid database information object type." );
 		}
+
+		/// <summary>
+		/// Installation Support Utility use only.
+		/// </summary>
+		public static string GetDatabaseNounPhrase( Database database ) =>
+			"{0} database".FormatWith( database.SecondaryDatabaseName.Any() ? "{0} secondary".FormatWith( database.SecondaryDatabaseName ) : "primary" );
 
 		public static void UpdateDatabaseLogicIfUpdateFileExists( Database database, string databaseUpdateFilePath, bool allFailuresUserCorrectable ) {
 			var linesInScriptOnHd = GetNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
@@ -72,13 +79,27 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 				database.ExportToFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
 		}
 
-		public static void DeleteAndReCreateDatabaseFromFile( Database database, string dataPackageFolderPath ) {
-			if( !( database is NoDatabase ) )
-				database.DeleteAndReCreateFromFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
+		public static void DeleteAndReCreateDatabaseFromFile( Database database, bool databaseHasMinimumDataRevision, string dataPackageFolderPath ) {
+			if( database is NoDatabase )
+				return;
+
+			var filePath = getDatabaseFilePath( dataPackageFolderPath, database );
+			if( !File.Exists( filePath ) )
+				filePath = "";
+
+			if( databaseHasMinimumDataRevision && !filePath.Any() ) {
+				StatusStatics.SetStatus( "Failed to re-create the {0} because the package did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
+				return;
+			}
+			database.DeleteAndReCreateFromFile( filePath );
+			if( !filePath.Any() )
+				StatusStatics.SetStatus( "Created a new {0} because the package did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
 		}
 
 		private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {
-			return EwlStatics.CombinePaths( dataPackageFolderPath, ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
+			return EwlStatics.CombinePaths(
+				dataPackageFolderPath,
+				( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
 		}
 
 		/// <summary>

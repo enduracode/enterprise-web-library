@@ -116,55 +116,76 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					deleteAndReCreateUser( cn );
 				} );
 
-			try {
-				IoMethods.ExecuteWithTempFolder(
-					tempFolderPath => {
-						var folderPath = EwlStatics.CombinePaths( tempFolderPath, "Database File" );
-						ZipOps.UnZipFileAsFolder( filePath, folderPath );
-						try {
-							IoMethods.CopyFile( EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
+			if( filePath.Any() )
+				try {
+					IoMethods.ExecuteWithTempFolder(
+						tempFolderPath => {
+							var folderPath = EwlStatics.CombinePaths( tempFolderPath, "Database File" );
+							ZipOps.UnZipFileAsFolder( filePath, folderPath );
+							try {
+								IoMethods.CopyFile( EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
 
-							executeMethodWithDbExceptionHandling(
-								delegate {
-									try {
-										EwlStatics.RunProgram(
-											"impdp",
-											getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y REMAP_SCHEMA=" +
-											File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" + info.UserAndSchema,
-											"",
-											true );
-									}
-									catch( Exception e ) {
-										throwUserCorrectableExceptionIfNecessary( e );
-										if( e is FileNotFoundException )
-											throw new UserCorrectableException( "The schema name file was not found, probably because of a corrupt database file in the data package.", e );
+								executeMethodWithDbExceptionHandling(
+									delegate {
+										try {
+											EwlStatics.RunProgram(
+												"impdp",
+												getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() +
+												"\"\"\" NOLOGFILE=y REMAP_SCHEMA=" + File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" +
+												info.UserAndSchema,
+												"",
+												true );
+										}
+										catch( Exception e ) {
+											throwUserCorrectableExceptionIfNecessary( e );
+											if( e is FileNotFoundException )
+												throw new UserCorrectableException(
+													"The schema name file was not found, probably because of a corrupt database file in the data package.",
+													e );
 
-										// Secondary databases such as RLE cause procedure compilation errors when imported, and since we have no way of
-										// distinguishing these from legitimate import problems, we have no choice but to ignore all exceptions.
-										if( ( info as DatabaseInfo ).SecondaryDatabaseName.Length == 0 )
-											throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
-									}
-								} );
-						}
-						finally {
-							IoMethods.DeleteFile( getDumpFilePath() );
-						}
+											// Secondary databases such as RLE cause procedure compilation errors when imported, and since we have no way of
+											// distinguishing these from legitimate import problems, we have no choice but to ignore all exceptions.
+											if( ( info as DatabaseInfo ).SecondaryDatabaseName.Length == 0 )
+												throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
+										}
+									} );
+							}
+							finally {
+								IoMethods.DeleteFile( getDumpFilePath() );
+							}
+						} );
+				}
+				catch {
+					// We don't want to leave a partial user/schema on the machine since it may confuse future ISU operations.
+					executeDbMethodWithSpecifiedDatabaseInfo(
+						new OracleInfo(
+							( info as DatabaseInfo ).SecondaryDatabaseName,
+							info.DataSource,
+							"sys",
+							ConfigurationLogic.OracleSysPassword,
+							info.SupportsConnectionPooling,
+							info.SupportsLinguisticIndexes ),
+						deleteUser );
+
+					throw;
+				}
+			else
+				ExecuteDbMethod(
+					cn => {
+						executeLongRunningCommand(
+							cn,
+							@"CREATE TABLE global_numbers (
+	k VARCHAR2( 100 )
+		CONSTRAINT global_numbers_pk PRIMARY KEY,
+	v NUMBER
+)" );
+						var lineMarkerInsert = new InlineInsert( "global_numbers" );
+						lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+						lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( 0 ) ).ToCollection() );
+						lineMarkerInsert.Execute( cn );
+
+						executeLongRunningCommand( cn, "CREATE SEQUENCE main_sequence" );
 					} );
-			}
-			catch {
-				// We don't want to leave a partial user/schema on the machine since it may confuse future ISU operations.
-				executeDbMethodWithSpecifiedDatabaseInfo(
-					new OracleInfo(
-						( info as DatabaseInfo ).SecondaryDatabaseName,
-						info.DataSource,
-						"sys",
-						ConfigurationLogic.OracleSysPassword,
-						info.SupportsConnectionPooling,
-						info.SupportsLinguisticIndexes ),
-					deleteUser );
-
-				throw;
-			}
 		}
 
 		private void deleteAndReCreateUser( DBConnection cn ) {
@@ -321,8 +342,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
 			var command = cn.DatabaseInfo.CreateCommand();
 			command.CommandText = commandText;
-
-			// NOTE: Not sure if this is the right execute method to use.
 			cn.ExecuteNonQueryCommand( command, isLongRunning: true );
 		}
 

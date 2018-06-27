@@ -296,8 +296,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 				catch( Exception e ) {
 					throw UserCorrectableException.CreateSecondaryException(
-						"An exception occurred while generating data access logic for the " +
-						( database.SecondaryDatabaseName.Length == 0 ? "primary" : database.SecondaryDatabaseName + " secondary" ) + " database.",
+						"An exception occurred while generating data access logic for the {0}.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ),
 						e );
 				}
 			}

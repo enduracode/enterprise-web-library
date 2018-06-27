@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -14,8 +15,6 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
-		private static readonly string sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "SQL Server Databases" );
-
 		private readonly SqlServerInfo info;
 		private readonly string dataLogicalFileName;
 		private readonly string logLogicalFileName;
@@ -35,8 +34,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 						EwlStatics.RunProgram(
 							"sqlcmd",
 							( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
-							"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine + "EXIT" +
-							Environment.NewLine,
+							"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine +
+							"EXIT" + Environment.NewLine,
 							true );
 					}
 					catch( Exception e ) {
@@ -78,6 +77,37 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 
 		void Database.DeleteAndReCreateFromFile( string filePath ) {
 			executeDbMethodAgainstMaster( cn => deleteAndReCreateFromFile( cn, filePath ) );
+			if( !filePath.Any() )
+				ExecuteDbMethod(
+					cn => {
+						executeLongRunningCommand( cn, "ALTER DATABASE {0} SET PAGE_VERIFY CHECKSUM".FormatWith( info.Database ) );
+						executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
+						executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( info.Database ) );
+						executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+
+						executeLongRunningCommand(
+							cn,
+							@"CREATE TABLE GlobalInts(
+	ParameterName varchar( 50 )
+		NOT NULL
+		CONSTRAINT GlobalIntsPk PRIMARY KEY,
+	ParameterValue int
+		NOT NULL
+)" );
+						var lineMarkerInsert = new InlineInsert( "GlobalInts" );
+						lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+						lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
+						lineMarkerInsert.Execute( cn );
+
+						executeLongRunningCommand(
+							cn,
+							@"CREATE TABLE MainSequence(
+	MainSequenceId int
+		NOT NULL
+		IDENTITY
+		CONSTRAINT MainSequencePk PRIMARY KEY
+)" );
+					} );
 		}
 
 		private void deleteAndReCreateFromFile( DBConnection cn, string filePath ) {
@@ -94,26 +124,46 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				// The database did not exist. That's fine.
 			}
 
+			var sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "SQL Server Databases" );
 			Directory.CreateDirectory( sqlServerFilesFolderPath );
 
-			try {
-				IoMethods.CopyFile( filePath, backupFilePath );
+			var dataFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" );
+			var logFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" );
+			if( filePath.Any() )
 				try {
-					// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
-					// without their physical files colliding.
-					executeLongRunningCommand(
-						cn,
-						"RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" +
-						EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" ) + "', MOVE '" + logLogicalFileName + "' TO '" +
-						EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" ) + "'" );
+					IoMethods.CopyFile( filePath, backupFilePath );
+					try {
+						// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
+						// without their physical files colliding.
+						executeLongRunningCommand(
+							cn,
+							"RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" + dataFilePath +
+							"', MOVE '" + logLogicalFileName + "' TO '" + logFilePath + "'" );
+					}
+					catch( Exception e ) {
+						throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+					}
 				}
-				catch( Exception e ) {
-					throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+				finally {
+					IoMethods.DeleteFile( backupFilePath );
 				}
-			}
-			finally {
-				IoMethods.DeleteFile( backupFilePath );
-			}
+			else
+				executeLongRunningCommand(
+					cn,
+					@"CREATE DATABASE DatabaseName
+ON (
+	NAME = {0},
+	FILENAME = '{1}',
+	SIZE = 100MB,
+	FILEGROWTH = 15%
+)
+LOG ON (
+	NAME = {2},
+	FILENAME = '{3}',
+	SIZE = 10MB,
+	MAXSIZE = 1000MB,
+	FILEGROWTH = 100MB
+)".FormatWith( dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
 		}
 
 		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
@@ -180,8 +230,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private void executeLongRunningCommand( DBConnection cn, string commandText ) {
 			var command = cn.DatabaseInfo.CreateCommand();
 			command.CommandText = commandText;
-
-			// NOTE: Not sure if this is the right execute method to use. NOTE: I think at this point we have to assume we are right to use this method.
 			cn.ExecuteNonQueryCommand( command, isLongRunning: true );
 		}
 

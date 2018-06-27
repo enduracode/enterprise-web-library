@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
@@ -85,8 +86,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "DROP DATABASE IF EXISTS {0};".FormatWith( info.Database ) );
 				sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
-				sw.WriteLine( "use {0}".FormatWith( info.Database ) );
-				sw.Write( File.ReadAllText( filePath ) );
+				if( filePath.Any() ) {
+					sw.WriteLine( "use {0}".FormatWith( info.Database ) );
+					sw.Write( File.ReadAllText( filePath ) );
+				}
 				sw.WriteLine( "quit" );
 
 				executeMethodWithDbExceptionHandling(
@@ -99,17 +102,43 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 								true );
 						}
 						catch( Exception e ) {
-							if( e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
-								throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
+							if( filePath.Any() && e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
+								throw new UserCorrectableException(
+									"Failed to create database from file. Please try the operation again after obtaining a new database file.",
+									e );
 							throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
 						}
 					} );
 			}
+
+			ExecuteDbMethod(
+				cn => {
+					var globalIntsCreate = cn.DatabaseInfo.CreateCommand();
+					globalIntsCreate.CommandText = @"CREATE TABLE global_ints(
+	ParameterName VARCHAR( 50 )
+		PRIMARY KEY,
+	ParameterValue INT
+		NOT NULL
+)";
+					cn.ExecuteNonQueryCommand( globalIntsCreate );
+
+					var lineMarkerInsert = new InlineInsert( "global_ints" );
+					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
+					lineMarkerInsert.Execute( cn );
+
+					var mainSequenceCreate = cn.DatabaseInfo.CreateCommand();
+					mainSequenceCreate.CommandText = @"CREATE TABLE main_sequence(
+	MainSequenceId INT
+		AUTO_INCREMENT
+		PRIMARY KEY
+)";
+					cn.ExecuteNonQueryCommand( mainSequenceCreate );
+				} );
 		}
 
-		private string binFolderPath => IoMethods.GetFirstExistingFolderPath(
-			new[] { @"C:\Program Files\MySQL\MySQL Server 5.7\bin", @"C:\Program Files\MySQL\MySQL Server 5.5\bin" },
-			"MySQL" );
+		private string binFolderPath =>
+			IoMethods.GetFirstExistingFolderPath( new[] { @"C:\Program Files\MySQL\MySQL Server 5.7\bin", @"C:\Program Files\MySQL\MySQL Server 5.5\bin" }, "MySQL" );
 
 		private string getHostAndAuthenticationArguments() {
 			return "--host=localhost --user=root --password=password";
