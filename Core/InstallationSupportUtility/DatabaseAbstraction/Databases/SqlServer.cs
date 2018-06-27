@@ -150,20 +150,20 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			else
 				executeLongRunningCommand(
 					cn,
-					@"CREATE DATABASE DatabaseName
+					@"CREATE DATABASE {0}
 ON (
-	NAME = {0},
-	FILENAME = '{1}',
+	NAME = {1},
+	FILENAME = '{2}',
 	SIZE = 100MB,
 	FILEGROWTH = 15%
 )
 LOG ON (
-	NAME = {2},
-	FILENAME = '{3}',
+	NAME = {3},
+	FILENAME = '{4}',
 	SIZE = 10MB,
 	MAXSIZE = 1000MB,
 	FILEGROWTH = 100MB
-)".FormatWith( dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
+)".FormatWith( info.Database, dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
 		}
 
 		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.

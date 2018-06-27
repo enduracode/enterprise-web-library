@@ -87,10 +87,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			if( !File.Exists( filePath ) )
 				filePath = "";
 
-			if( databaseHasMinimumDataRevision && !filePath.Any() ) {
-				StatusStatics.SetStatus( "Failed to re-create the {0} because the package did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
-				return;
-			}
+			if( databaseHasMinimumDataRevision && !filePath.Any() )
+				throw new UserCorrectableException(
+					"Failed to re-create the {0} because the package did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
 			database.DeleteAndReCreateFromFile( filePath );
 			if( !filePath.Any() )
 				StatusStatics.SetStatus( "Created a new {0} because the package did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
