@@ -6,7 +6,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class DevelopmentInstallationLogic {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
-		private readonly DatabaseAbstraction.Database database;
 		private readonly List<DatabaseAbstraction.Database> databasesForCodeGeneration;
 
 		public DevelopmentInstallationLogic(
@@ -15,14 +14,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.existingInstallationLogic = existingInstallationLogic;
 
-			database = recognizedInstallationLogic != null
-				           ? recognizedInstallationLogic.Database
-				           : DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo );
-
 			var developmentConfiguration = existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration;
 			databasesForCodeGeneration = new List<DatabaseAbstraction.Database>();
 			if( developmentConfiguration.database != null )
-				DatabasesForCodeGeneration.Add( database );
+				DatabasesForCodeGeneration.Add( existingInstallationLogic.Database );
 			if( developmentConfiguration.secondaryDatabases != null )
 				foreach( var secondaryDatabaseInDevelopmentConfiguration in developmentConfiguration.secondaryDatabases ) {
 					DatabasesForCodeGeneration.Add(
@@ -39,8 +34,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		}
 
 		public string LibraryPath { get { return EwlStatics.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
-
-		public DatabaseAbstraction.Database Database { get { return database; } }
 
 		public List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
 

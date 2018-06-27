@@ -15,13 +15,18 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly InstallationConfiguration runtimeConfiguration;
+		private readonly DatabaseAbstraction.Database database;
 
 		public ExistingInstallationLogic( GeneralInstallationLogic generalInstallationLogic, InstallationConfiguration runtimeConfiguration ) {
 			this.generalInstallationLogic = generalInstallationLogic;
 			this.runtimeConfiguration = runtimeConfiguration;
+
+			database = DatabaseAbstraction.DatabaseOps.CreateDatabase( runtimeConfiguration.PrimaryDatabaseInfo );
 		}
 
 		public InstallationConfiguration RuntimeConfiguration => runtimeConfiguration;
+
+		public DatabaseAbstraction.Database Database => database;
 
 		public string DatabaseUpdateFilePath => EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName );
 
@@ -112,8 +117,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			try {
 				EwlStatics.RunProgram(
 					EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
-					( uninstall ? "/u " : "" ) + "\"" +
-					EwlStatics.CombinePaths( GetWindowsServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe" /* file extension is required */ ) + "\"",
+					( uninstall ? "/u " : "" ) + "\"" + EwlStatics.CombinePaths(
+						GetWindowsServiceFolderPath( service, true ),
+						service.NamespaceAndAssemblyName + ".exe" /* file extension is required */ ) + "\"",
 					"",
 					true );
 			}

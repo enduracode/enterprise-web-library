@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var installation = genericInstallation as DevelopmentInstallation;
 
 			DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists(
-				installation.DevelopmentInstallationLogic.Database,
+				installation.ExistingInstallationLogic.Database,
 				installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
 				true );
 
