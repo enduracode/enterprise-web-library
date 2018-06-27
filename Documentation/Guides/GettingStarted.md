@@ -22,7 +22,7 @@ For servers, the only requirement is Windows Server 2016 with IIS enabled.
 
 	*	Apply some IIS Express configuration
 
-	*	Copy some files into the `Web Site` project, and update the project file to reference them
+	*	Copy some files into the `Website` project, and update the project file to reference them
 
 	*	Generate a few pieces of code in both projects, and update the Web.config file
 
@@ -30,11 +30,11 @@ For servers, the only requirement is Windows Server 2016 with IIS enabled.
 
 	*	The `Library` project, which contains configuration files, provider classes (which allow parts of EWL's behavior to be customized), and a `GlobalInitializer` class (which gives you a place to initialize static fields when your system starts up). `Library` should also be the home of most of your "business logic" and anything else that you would reuse across multiple applications in your system. Right now your system only contains a single web app, but as it grows, you may need another web app or a different type of application, e.g. a Windows service.
 
-	*	The `Web Site` project, which references `Library` and will contain your pages and other resources.
+	*	The `Website` project, which references `Library` and will contain your pages and other resources.
 
 	More information on this is available from our developers; please [ask for help in the forum](https://community.enterpriseweblibrary.org/).
 
-5.	Run the `Web Site` project. If you see a page that says "The page you requested is no longer available", everything is working and you can begin building your system.
+5.	Run the `Website` project. If you see a page that says "The page you requested is no longer available", everything is working and you can begin building your system.
 
 
 ## Adding a database
@@ -94,6 +94,6 @@ This section is more theoretical than practical since it's generally not a good 
 
 3.	Create and initialize a database using the appropriate steps above. The database name should be slightly different; replace `Dev` or `_dev` with the short name of your installation from the configuration file. Also, for SQL Server, grant the `NETWORK SERVICE` account reader/writer access to the database.
 
-4.	Set up an IIS web site or virtual directory that points at the appropriate folder in the logic that you copied to the server in step 2. Run the application pool as `NETWORK SERVICE`.
+4.	Set up an IIS website or virtual directory that points at the appropriate folder in the logic that you copied to the server in step 2. Run the application pool as `NETWORK SERVICE`.
 
 Some of the EWL developers use an internal product called the EWL System Manager, which builds, tests, and deploys EWL systems automatically. It's like an ultra-opinionated version of Heroku or AppHarbor. It can be run in the cloud or on-premises. [Let us know in the forum](https://community.enterpriseweblibrary.org/) if you are interested in using this.
