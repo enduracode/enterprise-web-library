@@ -15,9 +15,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		public static Action DownloadDataPackageAndGetDataUpdateMethod(
 			ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation source, bool forceNewPackageDownload,
 			OperationResult operationResult ) {
-			var packageZipFilePath = source.GetDataPackage( forceNewPackageDownload, operationResult );
+			var recognizedInstallation = installation as RecognizedInstallation;
+			var packageZipFilePath = recognizedInstallation != null ? source.GetDataPackage( forceNewPackageDownload, operationResult ) : "";
 			return () => {
-				var recognizedInstallation = installation as RecognizedInstallation;
 				IoMethods.ExecuteWithTempFolder(
 					tempFolderPath => {
 						var packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
@@ -53,10 +53,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 						installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Development );
 				}
 
-				// If we are getting data from a live installation, we're not a dev installation (which shouldn't happen anyway, but...), and we're
-				// an intermediate installation, sanitize the data and do other conversion commands.
-				if( source.InstallationTypeElements is LiveInstallationElements && installation is RecognizedInstalledInstallation recognizedInstalledInstallation &&
-				    recognizedInstalledInstallation.KnownInstallationLogic.RsisInstallation.InstallationTypeElements is IntermediateInstallationElements ) {
+				// If we're an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
+				if( installation is RecognizedInstalledInstallation recognizedInstalledInstallation &&
+				    recognizedInstalledInstallation.KnownInstallationLogic.RsisInstallation.InstallationTypeElements is IntermediateInstallationElements &&
+				    source.InstallationTypeElements is LiveInstallationElements ) {
 					StatusStatics.SetStatus( "Executing live -> intermediate conversion commands..." );
 					doDatabaseLiveToIntermediateConversionIfCommandsExist(
 						installation.ExistingInstallationLogic.Database,
