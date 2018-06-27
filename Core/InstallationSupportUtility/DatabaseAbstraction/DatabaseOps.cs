@@ -9,7 +9,7 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	public static class DatabaseOps {
-		internal static Database CreateDatabase( DatabaseInfo databaseInfo, List<string> oracleTableSpaces ) {
+		internal static Database CreateDatabase( DatabaseInfo databaseInfo ) {
 			if( databaseInfo == null )
 				return new NoDatabase();
 			if( databaseInfo is SqlServerInfo )
@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			if( databaseInfo is MySqlInfo )
 				return new MySql( databaseInfo as MySqlInfo );
 			if( databaseInfo is OracleInfo )
-				return new Oracle( databaseInfo as OracleInfo, oracleTableSpaces );
+				return new Oracle( databaseInfo as OracleInfo );
 			throw new ApplicationException( "Invalid database information object type." );
 		}
 

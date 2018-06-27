@@ -21,11 +21,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Data Pump" );
 
 		private readonly OracleInfo info;
-		private readonly List<string> latestTableSpaces;
 
-		internal Oracle( OracleInfo info, List<string> latestTableSpaces ) {
+		internal Oracle( OracleInfo info ) {
 			this.info = info;
-			this.latestTableSpaces = latestTableSpaces;
 		}
 
 		string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
@@ -206,26 +204,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			executeLongRunningCommand( cn, "GRANT CREATE TABLE TO " + info.UserAndSchema );
 			executeLongRunningCommand( cn, "GRANT CREATE TRIGGER TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
 			executeLongRunningCommand( cn, "GRANT READ, WRITE ON DIRECTORY " + dataPumpOracleDirectoryName + " TO " + info.UserAndSchema );
-
-			// Get all tablespaces currently in the database.
-			var command = cn.DatabaseInfo.CreateCommand();
-			command.CommandText = "SELECT tablespace_name FROM dba_tablespaces";
-			var currentTableSpaces = new List<string>();
-			cn.ExecuteReaderCommand(
-				command,
-				reader => {
-					while( reader.Read() )
-						currentTableSpaces.Add( reader.GetString( 0 ).ToLower() );
-				} );
-
-			// Create necessary tablespaces that don't already exist.
-			foreach( var nonExistentTs in latestTableSpaces.Select( s => s.ToLower() ).Except( currentTableSpaces ) ) {
-				var tableSpaceFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Tablespaces" );
-				Directory.CreateDirectory( tableSpaceFolderPath );
-				executeLongRunningCommand(
-					cn,
-					"CREATE TABLESPACE " + nonExistentTs + " DATAFILE '" + EwlStatics.CombinePaths( tableSpaceFolderPath, nonExistentTs + ".dbf" ) + "' SIZE 100M" );
-			}
 		}
 
 		private string getLogonString() {

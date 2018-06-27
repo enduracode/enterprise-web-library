@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 			database = recognizedInstallationLogic != null
 				           ? recognizedInstallationLogic.Database
-				           : DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo, new List<string>() );
+				           : DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo );
 
 			var developmentConfiguration = existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration;
 			databasesForCodeGeneration = new List<DatabaseAbstraction.Database>();
@@ -30,8 +30,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 							  ? recognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
 								  sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name )
 							  : null ) ?? DatabaseAbstraction.DatabaseOps.CreateDatabase(
-							this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseInDevelopmentConfiguration.name ),
-							new List<string>() ) );
+							this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseInDevelopmentConfiguration.name ) ) );
 				}
 		}
 

@@ -13,14 +13,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			this.knownSystemLogic = knownSystemLogic;
 
 			var rsisSystem = this.knownSystemLogic.RsisSystem;
-			database = DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo,
-			                                                           rsisSystem.PrimaryDatabaseOracleTableSpaces );
+			database = DatabaseAbstraction.DatabaseOps.CreateDatabase( existingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseInfo );
 
 			var rsisSecondaryDatabases = rsisSystem.SecondaryDatabases.Where( sd => sd.DataPackageRank.HasValue ).OrderBy( sd => sd.DataPackageRank.Value );
 			secondaryDatabasesIncludedInDataPackages = new List<DatabaseAbstraction.Database>();
 			foreach( var rsisSecondaryDatabase in rsisSecondaryDatabases ) {
 				var secondaryDatabaseInfo = this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( rsisSecondaryDatabase.Name );
-				secondaryDatabasesIncludedInDataPackages.Add( DatabaseAbstraction.DatabaseOps.CreateDatabase( secondaryDatabaseInfo, rsisSecondaryDatabase.OracleTableSpaces ) );
+				secondaryDatabasesIncludedInDataPackages.Add( DatabaseAbstraction.DatabaseOps.CreateDatabase( secondaryDatabaseInfo ) );
 			}
 		}
 
