@@ -39,47 +39,17 @@ For servers, the only requirement is Windows Server 2016 with IIS enabled.
 
 ## Adding a database
 
-1.	Create a SQL Server, MySQL, or Oracle database using your preferred tool. We recommend the following naming conventions:
+1.	Add the `<database>` element to the installation configuration files (i.e. the `Standard.xml` files in `Library/Configuration/Installation/Installations`) after the `<administrators>` element:
 
-	*	For SQL Server, name your database `SystemShortNameDev`, replacing `SystemShortName` with the value from your `General.xml` configuration file.
+	* For SQL Server, use `<database xsi:type="SqlServerDatabase" />`. The database name will be `SystemShortNameDev`, `SystemShortName` being replaced with the value from your `General.xml` configuration file. Use the `<database>` child element to override this naming convention.
 
-	*	For MySQL, name your schema `system_short_name_dev`, replacing `system_short_name` with a lowercased, underscore-separated version of the value from your `General.xml` configuration file.
+	* For MySQL, use `<database xsi:type="MySqlDatabase" />`. The schema name will be `system_short_name_dev`, `system_short_name` being replaced with a lowercased, underscore-separated version of the value from your `General.xml` configuration file. Use the `<database>` child element to override this naming convention.
 
-	*	For Oracle, name your schema whatever you like. We have no convention. The MySQL convention may work.
+	* For Oracle, use `<database xsi:type="OracleDatabase">` with the `<tnsName>`, `<userAndSchema>`, and `<password>` child elements. Name your schema whatever you like. We have no convention. The MySQL convention may work.
 
-	Additionally, for SQL Server, we suggest using this script to create the database (after replacing `DatabaseName` and `Path`):
+2.	In the Package Manager Console, run `Update-Data`. This will create (or re-create) the database.
 
-	```SQL
-	USE Master
-
-	CREATE DATABASE DatabaseName
-	ON (
-		NAME = Data,
-		FILENAME = 'Path\DatabaseNameData.mdf',
-		SIZE = 100MB,
-		FILEGROWTH = 15%
-	)
-	LOG ON (
-		NAME = Log,
-		FILENAME = 'Path\DatabaseNameLog.ldf',
-		SIZE = 10MB,
-		MAXSIZE = 1000MB,
-		FILEGROWTH = 100MB
-	);
-	GO
-	```
-
-2.	Run one of the following scripts to initialize your database for EWL usage: [SQL Server](GettingStartedSupplements/DatabaseInitScripts.md#sql-server), [MySQL](GettingStartedSupplements/DatabaseInitScripts.md#mysql), [Oracle](GettingStartedSupplements/DatabaseInitScripts.md#oracle).
-
-3.	Add the `<database>` element to the installation configuration files (i.e. the `Standard.xml` files in `Library/Configuration/Installation/Installations`) after the `<administrators>` element:
-
-	* For SQL Server, use `<database xsi:type="SqlServerDatabase" />`. Use the `<database>` child element if you did not follow the naming convention above.
-
-	* For MySQL, use `<database xsi:type="MySqlDatabase" />`. Use the `<database>` child element if you did not follow the naming convention above.
-
-	* For Oracle, use `<database xsi:type="OracleDatabase">` with the `<tnsName>`, `<userAndSchema>`, and `<password>` child elements.
-
-4.	Add the `<database>` element to the development configuration file (i.e. `Library/Configuration/Development.xml`) after the `<webProjects>` element.
+3.	Add the `<database>` element to the development configuration file (i.e. `Library/Configuration/Development.xml`) after the `<webProjects>` element.
 
 Now, when you run `Update-DependentLogic`, data-access code will be generated for your database.
 
