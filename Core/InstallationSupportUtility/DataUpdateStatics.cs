@@ -13,10 +13,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	/// </summary>
 	public class DataUpdateStatics {
 		public static Action DownloadDataPackageAndGetDataUpdateMethod(
-			RecognizedInstallation installation, bool installationIsStandbyDb, RsisInstallation source, bool forceNewPackageDownload,
+			ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation source, bool forceNewPackageDownload,
 			OperationResult operationResult ) {
 			var packageZipFilePath = source.GetDataPackage( forceNewPackageDownload, operationResult );
 			return () => {
+				var recognizedInstallation = installation as RecognizedInstallation;
 				IoMethods.ExecuteWithTempFolder(
 					tempFolderPath => {
 						var packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
@@ -28,18 +29,20 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 							installation.ExistingInstallationLogic.Database,
 							databaseHasMinimumDataRevision( installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration ),
 							packageFolderPath );
-						foreach( var secondaryDatabase in installation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ) {
-							DatabaseOps.DeleteAndReCreateDatabaseFromFile(
-								secondaryDatabase,
-								databaseHasMinimumDataRevision(
-									installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
-										secondaryDatabase.SecondaryDatabaseName ) ),
-								packageFolderPath );
-						}
+						if( recognizedInstallation != null )
+							foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ) {
+								DatabaseOps.DeleteAndReCreateDatabaseFromFile(
+									secondaryDatabase,
+									databaseHasMinimumDataRevision(
+										installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
+											secondaryDatabase.SecondaryDatabaseName ) ),
+									packageFolderPath );
+							}
 					} );
 
 				DatabaseOps.WaitForDatabaseRecovery( installation.ExistingInstallationLogic.Database );
-				recompileProceduresInSecondaryOracleDatabases( installation );
+				if( recognizedInstallation != null )
+					recompileProceduresInSecondaryOracleDatabases( recognizedInstallation );
 
 				if( !installationIsStandbyDb ) {
 					// Bring database logic up to date with the rest of the logic in this installation. In other words, reapply changes lost when we deleted the database.
@@ -58,7 +61,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 					doDatabaseLiveToIntermediateConversionIfCommandsExist(
 						installation.ExistingInstallationLogic.Database,
 						installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration );
-					foreach( var secondaryDatabase in installation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ) {
+					foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ) {
 						doDatabaseLiveToIntermediateConversionIfCommandsExist(
 							secondaryDatabase,
 							installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration( secondaryDatabase.SecondaryDatabaseName ) );
