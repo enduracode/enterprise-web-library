@@ -12,10 +12,6 @@
 									<element name="Id" type="int" />
 									<element name="Name" type="string" />
 									<element name="ShortName" type="string" />
-									<element name="HgRepositoryUrl" type="string" />
-									<element name="KilnAccessToken" type="string" />
-									<element name="WorkingFolderPath" type="string" />
-									<element name="EwlSystemId" type="int" nillable="true" />
 									<element name="CurrentMajorVersion" type="int" />
 									<element name="NextBuildNumber" type="int" />
 									<element name="ClientSideApp" minOccurs="0">
@@ -23,13 +19,6 @@
 											<sequence>
 												<element name="Name" type="string" />
 												<element name="AssemblyName" type="string" />
-											</sequence>
-										</complexType>
-									</element>
-									<element name="PrimaryDatabaseOracleTableSpaces">
-										<complexType>
-											<sequence>
-												<element name="TableSpace" type="string" minOccurs="0" maxOccurs="unbounded" />
 											</sequence>
 										</complexType>
 									</element>
@@ -60,13 +49,6 @@
 		<sequence>
 			<element name="Name" type="string" />
 			<element name="DataPackageRank" type="int" nillable="true" />
-			<element name="OracleTableSpaces">
-				<complexType>
-					<sequence>
-						<element name="TableSpace" type="string" minOccurs="0" maxOccurs="unbounded" />
-					</sequence>
-				</complexType>
-			</element>
 		</sequence>
 	</complexType>
 	<complexType name="RsisInstallation">

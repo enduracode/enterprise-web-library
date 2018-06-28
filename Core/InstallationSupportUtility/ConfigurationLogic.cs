@@ -168,10 +168,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			}
 		}
 
-		public static string RevisionControlFolderPath =>
-			ConfigurationStatics.MachineConfiguration?.Development?.RevisionControlFolderPath ??
-			EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Revision Control" );
-
 		public static string OracleSysPassword {
 			get {
 				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.OracleSysPassword == null )
