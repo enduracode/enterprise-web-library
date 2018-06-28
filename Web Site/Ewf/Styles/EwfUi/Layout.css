@@ -101,9 +101,7 @@ ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading
 
 /* tables */
 ewfThAndTd {
-	overflow-x: hidden;
-	overflow-y: visible;
-	text-overflow: ellipsis;
+	overflow-wrap: break-word;
 }
 @media print {
 	ewfTableStandardAndStandardExceptLayoutStyles {
