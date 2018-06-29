@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						throw new UserCorrectableException( "The specified source does not exist." );
 				}
 				else {
-					sourceInstallation = sources.FirstOrDefault();
+					sourceInstallation = sources.FirstOrDefault( i => i.DataPackageSize.HasValue ) ?? sources.FirstOrDefault();
 					if( sourceInstallation == null )
 						throw new UserCorrectableException( "No sources exist." );
 				}
