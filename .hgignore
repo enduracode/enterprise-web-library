@@ -1,5 +1,6 @@
 syntax: glob
 
+.vs/Enterprise Web Library/DesignTimeBuild/
 .vs/Enterprise Web Library/v15/.suo
 .vs/Enterprise Web Library/v15/sqlite3/
 .vs/Enterprise Web Library/v15/Server/sqlite3/
