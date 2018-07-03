@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var installation = genericInstallation as RecognizedDevelopmentInstallation;
 			var localNuGetFeedFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Local NuGet Feed" );
 
-			// NuGet.exe has problems if the folder doesn't exist.
+			// nuget.exe has problems if the folder doesn't exist.
 			Directory.CreateDirectory( localNuGetFeedFolderPath );
 
 			ExportLogic.CreateEwlNuGetPackage( installation, ExportLogic.GetPackagingConfiguration( installation ), true, localNuGetFeedFolderPath, null );
