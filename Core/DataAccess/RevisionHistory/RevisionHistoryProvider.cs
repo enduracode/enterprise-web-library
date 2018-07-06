@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory {
 		/// <summary>
 		/// Inserts a new user transaction and returns the ID.
 		/// </summary>
-		void InsertUserTransaction( int userTransactionId, DateTime transactionDateTime, int? userId );
+		void InsertUserTransaction( int userTransactionId, DateTime transactionDateAndTime, int? userId );
 
 		/// <summary>
 		/// Retrieves all revisions.
