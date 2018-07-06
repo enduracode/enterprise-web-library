@@ -556,11 +556,10 @@ namespace EnterpriseWebLibrary {
 					}
 
 					// Check if the current code is the same as the previous code.
-					if( currCode != prevCode ) {
+					if( currCode != prevCode )
 						// Check to see if the current code is 0 (a vowel); do not process vowels.
 						if( currCode != 0 )
 							buffer.Append( currCode );
-					}
 					// Set the previous character code.
 					prevCode = currCode;
 
@@ -602,5 +601,32 @@ namespace EnterpriseWebLibrary {
 		public static T FromJson<T>( this string json ) {
 			return new JavaScriptSerializer().Deserialize<T>( json );
 		}
+
+		/// <summary>
+		/// Returns a slug for this string, which will contain only lowercase alphanumeric characters and hyphens.
+		/// </summary>
+		// From https://stackoverflow.com/a/2921135/35349.
+		public static string ToUrlSlug( this string s ) {
+			var str = s.removeDiacritics().ToLower();
+
+			// invalid chars
+			str = Regex.Replace( str, @"[^a-z0-9\s-]", "" );
+
+			// convert multiple spaces into one space
+			str = Regex.Replace( str, @"\s+", " " ).Trim();
+
+			// cut and trim
+			str = str.Substring( 0, str.Length <= 45 ? str.Length : 45 ).Trim();
+
+			// hyphens
+			str = Regex.Replace( str, @"\s", "-" );
+
+			return str;
+		}
+
+		// From https://stackoverflow.com/a/249126/35349.
+		private static string removeDiacritics( this string s ) =>
+			new string( s.Normalize( NormalizationForm.FormD ).Where( c => CharUnicodeInfo.GetUnicodeCategory( c ) != UnicodeCategory.NonSpacingMark ).ToArray() )
+				.Normalize( NormalizationForm.FormC );
 	}
 }
