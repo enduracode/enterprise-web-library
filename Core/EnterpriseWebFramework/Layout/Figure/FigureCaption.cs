@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="components"></param>
 		/// <param name="figureIsTextual">Pass true to place the caption above the content.</param>
-		public FigureCaption( IEnumerable<FlowComponent> components, bool figureIsTextual = false ) {
+		public FigureCaption( IReadOnlyCollection<FlowComponent> components, bool figureIsTextual = false ) {
 			FigureIsTextual = figureIsTextual;
 			Components = new DisplayableElement(
 				context => new DisplayableElementData(

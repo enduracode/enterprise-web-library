@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Humanizer;
 using MoreLinq;
 
@@ -16,18 +15,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="id"></param>
 		/// <param name="content"></param>
 		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
-		public ConfirmationDialog( ConfirmationDialogId id, IEnumerable<FlowComponent> content, PostBack postBack = null ) {
+		public ConfirmationDialog( ConfirmationDialogId id, IReadOnlyCollection<FlowComponent> content, PostBack postBack = null ) {
 			children = new ModalBox(
-					id.ModalBoxId,
-					false,
-					content.Concat(
+				id.ModalBoxId,
+				false,
+				content.Append(
 						new Paragraph(
 							new EwfButton(
 									new StandardButtonStyle( "Cancel" ),
 									behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) )
 								.Concat( " ".ToComponents() )
-								.Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ) ) ).ToCollection() ) )
-				.ToCollection();
+								.Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ) )
+								.Materialize() ) )
+					.Materialize() ).ToCollection();
 		}
 
 		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {

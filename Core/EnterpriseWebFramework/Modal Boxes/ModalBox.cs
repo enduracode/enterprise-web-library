@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -21,13 +22,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "ModalBoxCloseButtonContainer", "div.{0}".FormatWith( closeButtonContainerClass.ClassName ) ),
 						new CssElement( "ModalBoxContentContainer", "div.{0}".FormatWith( contentContainerClass.ClassName ) ),
 						new CssElement( "ModalBoxContainer", "dialog.{0}".FormatWith( boxClass.ClassName ) ),
-						new CssElement( "ModalBoxBackdrop", "dialog.{0}::backdrop".FormatWith( boxClass.ClassName ), "dialog.{0} + .backdrop".FormatWith( boxClass.ClassName ) )
+						new CssElement(
+							"ModalBoxBackdrop",
+							"dialog.{0}::backdrop".FormatWith( boxClass.ClassName ),
+							"dialog.{0} + .backdrop".FormatWith( boxClass.ClassName ) )
 					};
 			}
 		}
 
 		internal static IEnumerable<EtherealComponent> CreateBrowsingModalBox() {
-			return new ModalBox( EwfPage.Instance.BrowsingModalBoxId, true, Enumerable.Empty<FlowComponent>() ).ToCollection();
+			return new ModalBox( EwfPage.Instance.BrowsingModalBoxId, true, ImmutableArray<FlowComponent>.Empty ).ToCollection();
 		}
 
 		internal static string GetBrowsingModalBoxOpenStatements( BrowsingContextSetup browsingContextSetup, string url ) {
@@ -59,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="includeCloseButton"></param>
 		/// <param name="content"></param>
 		/// <param name="open"></param>
-		public ModalBox( ModalBoxId id, bool includeCloseButton, IEnumerable<FlowComponent> content, bool open = false ) {
+		public ModalBox( ModalBoxId id, bool includeCloseButton, IReadOnlyCollection<FlowComponent> content, bool open = false ) {
 			children = new ElementComponent(
 				context => {
 					id.ElementId.AddId( context.Id );
@@ -80,7 +84,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										  behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( context.Id ) ) ).ToCollection(),
 									  classes: closeButtonContainerClass ).ToCollection<FlowComponent>()
 								  : Enumerable.Empty<FlowComponent>() ).Concat(
-								id == EwfPage.Instance.BrowsingModalBoxId ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() ),
+								id == EwfPage.Instance.BrowsingModalBoxId ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() )
+							.Materialize(),
 							classes: boxClass ).ToCollection() );
 				} ).ToCollection();
 		}

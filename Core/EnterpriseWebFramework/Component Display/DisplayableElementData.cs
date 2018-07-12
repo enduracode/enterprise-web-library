@@ -14,12 +14,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public DisplayableElementData(
 			DisplaySetup displaySetup, Func<DisplayableElementLocalData> localDataGetter, ElementClassSet classes = null,
-			IEnumerable<FlowComponentOrNode> children = null, IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			IReadOnlyCollection<FlowComponentOrNode> children = null, IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
 			displaySetup = displaySetup ?? new DisplaySetup( true );
 			BaseDataGetter = context => {
 				displaySetup.AddJsShowStatements( "$( '#{0}' ).show( 200 );".FormatWith( context.Id ) );
 				displaySetup.AddJsHideStatements( "$( '#{0}' ).hide( 200 );".FormatWith( context.Id ) );
-				return new ElementData( () => localDataGetter().BaseDataGetter( displaySetup ), classes: classes, children: children, etherealChildren: etherealChildren );
+				return new ElementData(
+					() => localDataGetter().BaseDataGetter( displaySetup ),
+					classes: classes,
+					children: children,
+					etherealChildren: etherealChildren );
 			};
 		}
 	}

@@ -33,8 +33,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new Paragraph(
 							new ImportantContent( "Warning:".ToComponents() ).ToCollection()
 								.Concat(
-									" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() ) )
-						.ToCollection()
+									" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you."
+										.ToComponents() )
+								.Materialize() ).ToCollection()
 						.GetControls() );
 
 			DataValue<User> user = new DataValue<User>();
@@ -60,7 +61,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							.ToControl(),
 						new LegacyParagraph(
 							new PostBackButton(
-								new ButtonActionControlStyle( AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) ) ) );
+								new ButtonActionControlStyle(
+									AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
+									buttonSize: ButtonSize.Large ) ) ) );
 				} );
 		}
 	}

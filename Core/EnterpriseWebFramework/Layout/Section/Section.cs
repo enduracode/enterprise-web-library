@@ -38,11 +38,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "SectionAllStylesClosedState", normalClosedSelector, boxClosedSelector ),
 						new CssElement( "SectionAllStylesExpandedState", normalExpandedSelector, boxExpandedSelector ),
 						new CssElement( "SectionNormalStyleBothStates", normalClosedSelector, normalExpandedSelector ),
-						new CssElement( "SectionNormalStyleClosedState", normalClosedSelector ), new CssElement( "SectionNormalStyleExpandedState", normalExpandedSelector ),
-						new CssElement( "SectionBoxStyleBothStates", boxClosedSelector, boxExpandedSelector ), new CssElement( "SectionBoxStyleClosedState", boxClosedSelector ),
-						new CssElement( "SectionBoxStyleExpandedState", boxExpandedSelector ), new CssElement( "SectionHeadingContainer", "* > div." + headingClass.ClassName ),
-						new CssElement( "SectionHeading", "h1." + headingClass.ClassName ), new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ),
-						new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ), new CssElement( "SectionContentContainer", "div." + contentClass.ClassName )
+						new CssElement( "SectionNormalStyleClosedState", normalClosedSelector ),
+						new CssElement( "SectionNormalStyleExpandedState", normalExpandedSelector ),
+						new CssElement( "SectionBoxStyleBothStates", boxClosedSelector, boxExpandedSelector ),
+						new CssElement( "SectionBoxStyleClosedState", boxClosedSelector ), new CssElement( "SectionBoxStyleExpandedState", boxExpandedSelector ),
+						new CssElement( "SectionHeadingContainer", "* > div." + headingClass.ClassName ),
+						new CssElement( "SectionHeading", "h1." + headingClass.ClassName ),
+						new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ), new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ),
+						new CssElement( "SectionContentContainer", "div." + contentClass.ClassName )
 					};
 			}
 		}
@@ -58,8 +61,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the section.</param>
 		/// <param name="etherealChildren"></param>
 		public Section(
-			IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal, ElementClassSet classes = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ): this(
+			IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal, ElementClassSet classes = null,
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ): this(
 			"",
 			content,
 			displaySetup: displaySetup,
@@ -79,9 +82,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="expanded">Set to true or false if you want users to be able to expand or close the section by clicking on the heading.</param>
 		/// <param name="etherealChildren"></param>
 		public Section(
-			string heading, IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal,
-			ElementClassSet classes = null, IEnumerable<FlowComponent> postHeadingComponents = null, bool? expanded = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ): this(
+			string heading, IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal,
+			ElementClassSet classes = null, IReadOnlyCollection<FlowComponent> postHeadingComponents = null, bool? expanded = null,
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ): this(
 			displaySetup,
 			style,
 			classes,
@@ -96,8 +99,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// BasicPage.master use only.
 		/// </summary>
 		public Section(
-			DisplaySetup displaySetup, SectionStyle style, ElementClassSet classes, string heading, IEnumerable<FlowComponent> postHeadingComponents,
-			IEnumerable<FlowComponent> content, bool? expanded, bool disableStatePersistence, IEnumerable<EtherealComponent> etherealChildren ) {
+			DisplaySetup displaySetup, SectionStyle style, ElementClassSet classes, string heading, IReadOnlyCollection<FlowComponent> postHeadingComponents,
+			IReadOnlyCollection<FlowComponent> content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent> etherealChildren ) {
 			children = new DisplayableElement(
 				context => {
 					var hiddenFieldId = new HiddenFieldId();
@@ -141,21 +144,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															       "document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
 																       hiddenFieldId.ElementId.Id,
 																       bool.FalseString,
-																       bool.TrueString ) ) ) + ( isFocused ? " document.getElementById( '{0}' ).focus();".FormatWith( buttonContext.Id ) : "" ) ) ),
+																       bool.TrueString ) ) ) +
+											       ( isFocused ? " document.getElementById( '{0}' ).focus();".FormatWith( buttonContext.Id ) : "" ) ) ),
 									       children: new GenericFlowContainer(
 										       new GenericPhrasingContainer( "Click to Expand".ToComponents(), classes: closeClass ).ToCollection()
 											       .Append( new GenericPhrasingContainer( "Click to Close".ToComponents(), classes: expandClass ) )
-											       .Concat( headingComponents ),
+											       .Concat( headingComponents )
+											       .Materialize(),
 										       classes: headingClass ).ToCollection() ) )
-							       : new GenericFlowContainer( new GenericFlowContainer( headingComponents, classes: headingClass ).ToCollection() );
+							       : new GenericFlowContainer( new GenericFlowContainer( headingComponents.Materialize(), classes: headingClass ).ToCollection() );
 					}
 
-					content = content?.ToImmutableArray() ?? Enumerable.Empty<FlowComponent>();
+					content = content ?? ImmutableArray<FlowComponent>.Empty;
 					return new DisplayableElementData(
 						displaySetup,
 						() => new DisplayableElementLocalData(
 							"section",
-							focusDependentData: new DisplayableElementFocusDependentData( includeIdAttribute: heading.Any() && expanded.HasValue && disableStatePersistence ) ),
+							focusDependentData:
+							new DisplayableElementFocusDependentData( includeIdAttribute: heading.Any() && expanded.HasValue && disableStatePersistence ) ),
 						classes: allStylesBothStatesClass
 							.Add(
 								style == SectionStyle.Normal
@@ -163,23 +169,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									: getSectionClasses( expanded, expandedPmv, boxClosedClass, boxExpandedClass ) )
 							.Add( classes ?? ElementClassSet.Empty ),
 						children: ( heading.Any() ? getHeadingButton().ToCollection() : Enumerable.Empty<FlowComponent>() ).Concat(
-							content.Any() ? new GenericFlowContainer( content, classes: contentClass ).ToCollection() : Enumerable.Empty<FlowComponent>() ),
+							content.Any() ? new GenericFlowContainer( content, classes: contentClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
+						.Materialize(),
 						etherealChildren: ( expandedPmv != null
-							                    ? new EwfHiddenField( expanded.Value.ToString(), id: hiddenFieldId, pageModificationValue: expandedPmv ).PageComponent.ToCollection()
-							                    : Enumerable.Empty<EtherealComponent>() ).Concat( etherealChildren ?? Enumerable.Empty<EtherealComponent>() ) );
+							                    ? new EwfHiddenField( expanded.Value.ToString(), id: hiddenFieldId, pageModificationValue: expandedPmv ).PageComponent
+								                    .ToCollection()
+							                    : Enumerable.Empty<EtherealComponent>() ).Concat( etherealChildren ?? Enumerable.Empty<EtherealComponent>() )
+						.Materialize() );
 				} ).ToCollection();
 		}
 
-		private ElementClassSet getSectionClasses( bool? expanded, PageModificationValue<string> expandedPmv, ElementClass closedClass, ElementClass expandedClass ) {
-			return !expanded.HasValue
-				       ? expandedClass
-				       : expandedPmv == null
-					       ? expanded.Value
-						         ? expandedClass
-						         : closedClass
-					       : expandedPmv.ToCondition( bool.FalseString.ToCollection() )
-						       .ToElementClassSet( closedClass )
-						       .Add( expandedPmv.ToCondition( bool.TrueString.ToCollection() ).ToElementClassSet( expandedClass ) );
+		private ElementClassSet getSectionClasses(
+			bool? expanded, PageModificationValue<string> expandedPmv, ElementClass closedClass, ElementClass expandedClass ) {
+			return !expanded.HasValue ? expandedClass :
+			       expandedPmv == null ? expanded.Value ? expandedClass : closedClass :
+			       expandedPmv.ToCondition( bool.FalseString.ToCollection() )
+				       .ToElementClassSet( closedClass )
+				       .Add( expandedPmv.ToCondition( bool.TrueString.ToCollection() ).ToElementClassSet( expandedClass ) );
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
@@ -256,7 +262,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									ActionControlStyle = actionControlStyle
 								}
-							: new ToggleButton( this.ToCollection(), actionControlStyle, false, ( postBackValue, validator ) => {}, toggleClasses: toggleClasses ) as Control );
+							: new ToggleButton(
+								  this.ToCollection(),
+								  actionControlStyle,
+								  false,
+								  ( postBackValue, validator ) => {},
+								  toggleClasses: toggleClasses ) as Control );
 				}
 				else {
 					var headingContainer = new Block( headingControls.ToArray() ) { CssClass = headingClass };

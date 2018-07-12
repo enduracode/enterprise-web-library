@@ -8,7 +8,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The general configuration for a component list.
 	/// </summary>
 	public class ComponentListSetup {
-		private readonly Func<ElementClassSet, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>>, IReadOnlyCollection<FlowComponentOrNode>> componentGetter;
+		private readonly Func<ElementClassSet, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>>, IReadOnlyCollection<FlowComponentOrNode>>
+			componentGetter;
 
 		/// <summary>
 		/// Creates a component-list setup object.
@@ -23,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public ComponentListSetup(
 			bool hideIfEmpty = false, DisplaySetup displaySetup = null, bool isOrdered = false, ElementClassSet classes = null,
 			IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ) {
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
@@ -73,7 +74,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			};
 		}
 
-		internal IReadOnlyCollection<FlowComponentOrNode> GetComponents( ElementClassSet classes, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>> items ) {
+		internal IReadOnlyCollection<FlowComponentOrNode> GetComponents(
+			ElementClassSet classes, IEnumerable<Tuple<ComponentListItem, FlowComponentOrNode>> items ) {
 			return componentGetter( classes, items );
 		}
 	}

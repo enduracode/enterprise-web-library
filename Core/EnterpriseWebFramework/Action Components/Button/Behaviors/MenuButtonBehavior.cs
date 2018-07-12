@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="menuContent"></param>
 		/// <param name="menuTitle">A title to be displayed in the the menu.</param>
-		public MenuButtonBehavior( IEnumerable<FlowComponent> menuContent, string menuTitle = "" ) {
+		public MenuButtonBehavior( IReadOnlyCollection<FlowComponent> menuContent, string menuTitle = "" ) {
 			toolTip = new ToolTip( menuContent, out toolTipInitStatementGetter, title: menuTitle );
 		}
 
@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return true;
 		}
 
-		IEnumerable<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
+		IReadOnlyCollection<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
 			return toolTip.ToCollection();
 		}
 

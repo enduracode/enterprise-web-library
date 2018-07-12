@@ -6,14 +6,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class CustomHyperlinkStyle: HyperlinkStyle {
 		private readonly ElementClassSet classes;
-		private readonly IEnumerable<FlowComponent> children;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a custom style object.
 		/// </summary>
 		/// <param name="classes">The classes on the hyperlink.</param>
 		/// <param name="children"></param>
-		public CustomHyperlinkStyle( ElementClassSet classes = null, IEnumerable<FlowComponent> children = null ) {
+		public CustomHyperlinkStyle( ElementClassSet classes = null, IReadOnlyCollection<FlowComponent> children = null ) {
 			this.classes = classes;
 			this.children = children;
 		}
@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ActionComponentCssElementCreator.AllStylesClass.Add( classes ?? ElementClassSet.Empty );
 		}
 
-		IEnumerable<FlowComponent> HyperlinkStyle.GetChildren( string destinationUrl ) {
+		IReadOnlyCollection<FlowComponent> HyperlinkStyle.GetChildren( string destinationUrl ) {
 			return children;
 		}
 

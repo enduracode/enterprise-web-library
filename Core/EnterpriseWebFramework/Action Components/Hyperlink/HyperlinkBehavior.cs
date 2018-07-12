@@ -18,7 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static FormAction GetHyperlinkPostBackAction( ResourceInfo destination ) {
 			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
-			return new PostBackFormAction( EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) ) );
+			return new PostBackFormAction(
+				EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) ) );
 		}
 
 		private readonly ResourceInfo destination;
@@ -59,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			else {
 				IncludeIdAttribute = destination != null && actionStatementGetter != null;
-				EtherealChildren = ImmutableArray<EtherealComponent>.Empty;
+				EtherealChildren = null;
 				JsInitStatementGetter = id => destination != null && actionStatementGetter != null ? getActionInitStatements( id, actionStatementGetter( Url ) ) : "";
 			}
 
@@ -78,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = ElementClassSet.Empty;
 			Url = "mailto:{0}".FormatWith( mailtoUri );
 			AttributeGetter = () => Tuple.Create( "href", Url ).ToCollection();
-			EtherealChildren = ImmutableArray<EtherealComponent>.Empty;
+			EtherealChildren = null;
 			JsInitStatementGetter = id => "";
 			IsFocusable = true;
 			PostBackAdder = () => {};

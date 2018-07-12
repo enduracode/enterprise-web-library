@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface ButtonBehavior {
 		IEnumerable<Tuple<string, string>> GetAttributes();
 		bool IncludesIdAttribute();
-		IEnumerable<EtherealComponent> GetEtherealChildren();
+		IReadOnlyCollection<EtherealComponent> GetEtherealChildren();
 		string GetJsInitStatements( string id );
 		void AddPostBack();
 	}

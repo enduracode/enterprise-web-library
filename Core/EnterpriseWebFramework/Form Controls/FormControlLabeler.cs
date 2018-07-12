@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the element.</param>
 		public IReadOnlyCollection<PhrasingComponent> CreateLabel(
-			IEnumerable<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+			IReadOnlyCollection<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
 			return new CustomPhrasingComponent(
 				new DisplayableElement(
 					context => new DisplayableElementData(

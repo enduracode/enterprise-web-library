@@ -15,8 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an element-node-data object.
 		/// </summary>
 		public ElementNodeData(
-			Func<ElementNodeLocalData> localDataGetter, IEnumerable<FlowComponentOrNode> children = null,
-			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			Func<ElementNodeLocalData> localDataGetter, IReadOnlyCollection<FlowComponentOrNode> children = null,
+			IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
 			Children = children ?? Enumerable.Empty<FlowComponentOrNode>();
 			EtherealChildren = etherealChildren ?? Enumerable.Empty<EtherealComponentOrElement>();
 			LocalDataGetter = localDataGetter;

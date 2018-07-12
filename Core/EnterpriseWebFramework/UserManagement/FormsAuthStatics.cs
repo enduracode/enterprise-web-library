@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			this DataValue<string> password, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
 			var passwordAgain = new DataValue<string>();
 			var passwordAgainFormItem = passwordAgain.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ), value: "" )
-				.ToFormItem( label: secondLabel ?? "Password again".ToComponents() );
+				.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
 
 			var passwordFormItem = password.ToTextControl(
 					true,
@@ -80,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 								validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
 						}
 					} )
-				.ToFormItem( label: firstLabel ?? "Password".ToComponents() );
+				.ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
 
 			return new[] { passwordFormItem, passwordAgainFormItem };
 		}
@@ -91,9 +91,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Gets an email address form item for use on log-in pages.
 		/// </summary>
-		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IEnumerable<PhrasingComponent> label ) => emailAddress
-			.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" )
-			.ToFormItem( label: label );
+		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label ) =>
+			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" ).ToFormItem( label: label );
 
 		/// <summary>
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
@@ -202,7 +201,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
 				var authenticationDuration = ( strictProvider?.AuthenticationTimeoutInMinutes ).HasValue
-					                             ? TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
+					                             ?
+					                             TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
 					                             : user.Role.RequiresEnhancedSecurity
 						                             ? TimeSpan.FromMinutes( 12 )
 						                             : SessionDuration;

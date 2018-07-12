@@ -13,7 +13,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new TextControl( "", true ).ToFormItem(
 					setup: new FormItemSetup( cellSpan: 2 ),
 					label: "Model number ".ToComponents()
-						.Append( new EwfButton( new StandardButtonStyle( "(popup)", buttonSize: ButtonSize.ShrinkWrap ), behavior: new OpenModalBehavior( boxId ) ) ) ),
+						.Append( new EwfButton( new StandardButtonStyle( "(popup)", buttonSize: ButtonSize.ShrinkWrap ), behavior: new OpenModalBehavior( boxId ) ) )
+						.Materialize() ),
 				FormItem.Create( "Normal price", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ) ),
 				new TextControl( "", true ).ToFormItem( label: "Actual price".ToComponents() ),
 				new TextControl( "", true ).ToFormItem( label: "Quantity".ToComponents() ),

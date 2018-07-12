@@ -56,8 +56,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				elements.AddRange(
 					new[]
 						{
-							new CssElement( "ProcessingDialogBlockAllStates", allBlockSelectors ), new CssElement( "ProcessingDialogBlockInactiveState", blockInactiveSelector ),
-							new CssElement( "ProcessingDialogBlockActiveState", blockActiveSelector ), new CssElement( "ProcessingDialogBlockTimeOutState", blockTimeOutSelector )
+							new CssElement( "ProcessingDialogBlockAllStates", allBlockSelectors ),
+							new CssElement( "ProcessingDialogBlockInactiveState", blockInactiveSelector ),
+							new CssElement( "ProcessingDialogBlockActiveState", blockActiveSelector ),
+							new CssElement( "ProcessingDialogBlockTimeOutState", blockTimeOutSelector )
 						} );
 
 				elements.Add(
@@ -182,7 +184,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new PlaceHolder().AddControlsReturnThis(
 						"User impersonation is in effect. ".ToComponents()
 							.GetControls()
-							.Concat( EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ) )
+							.Concat(
+								EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ) )
 							.Concat( " ".ToComponents().GetControls() )
 							.Concat(
 								new PostBackButton(
@@ -217,14 +220,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							.Concat( Translation.Processing.ToComponents() )
 							.Concat( getProcessingDialogEllipsisDot( 1 ) )
 							.Concat( getProcessingDialogEllipsisDot( 2 ) )
-							.Concat( getProcessingDialogEllipsisDot( 3 ) ),
+							.Concat( getProcessingDialogEllipsisDot( 3 ) )
+							.Materialize(),
 						classes: processingDialogProcessingParagraphClass ).ToCollection()
 					.Concat(
 						new Paragraph(
 							new EwfButton(
 								new StandardButtonStyle( Translation.ThisSeemsToBeTakingAWhile, buttonSize: ButtonSize.ShrinkWrap ),
 								behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
-							classes: processingDialogTimeOutParagraphClass ) ),
+							classes: processingDialogTimeOutParagraphClass ) )
+					.Materialize(),
 				classes: dialogClass.Add( processingDialogBlockInactiveClass ) ).ToCollection();
 		}
 

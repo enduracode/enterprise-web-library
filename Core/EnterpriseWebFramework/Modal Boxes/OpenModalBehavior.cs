@@ -26,8 +26,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return true;
 		}
 
-		IEnumerable<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
-			return Enumerable.Empty<EtherealComponent>();
+		IReadOnlyCollection<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
+			return null;
 		}
 
 		string ButtonBehavior.GetJsInitStatements( string id ) {

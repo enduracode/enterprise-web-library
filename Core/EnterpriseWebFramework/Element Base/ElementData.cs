@@ -12,8 +12,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an element-data object.
 		/// </summary>
 		public ElementData(
-			Func<ElementLocalData> localDataGetter, ElementClassSet classes = null, IEnumerable<FlowComponentOrNode> children = null,
-			IEnumerable<EtherealComponentOrElement> etherealChildren = null ) {
+			Func<ElementLocalData> localDataGetter, ElementClassSet classes = null, IReadOnlyCollection<FlowComponentOrNode> children = null,
+			IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
 			classes = classes ?? ElementClassSet.Empty;
 			NodeDataGetter = context => {
 				classes.AddElementId( context.Id );

@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
@@ -102,7 +103,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
 						new CssElement(
 							"UiEntityNavAndActionBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass ).ToArray() ),
+							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockCssClass )
+								.ToArray() ),
 						new CssElement(
 							"UiEntityNavControlList",
 							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass ).ToArray() ),
@@ -119,7 +121,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					{
 						new CssElement(
 							"UiSideTabAndContentBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass ).ToArray() ),
+							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
+								.ToArray() ),
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
 						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadClass.ClassName ),
@@ -133,7 +136,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockCssClass ).ToArray() ),
 						new CssElement(
 							"UiContentFootActionControlList",
-							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass ).ToArray() )
+							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootActionListCssClass )
+								.ToArray() )
 					};
 			}
 
@@ -196,7 +200,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							" ",
 							"We've detected that you are not using the latest version of your browser.",
 							"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet." ) +
-						"<br/>" + NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalResourceInfo( "http://www.getfirefox.com" ).GetUrl(), true ) +
+						"<br/>" +
+						NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalResourceInfo( "http://www.getfirefox.com" ).GetUrl(), true ) +
 						"<br />" +
 						NetTools.BuildBasicLink(
 							"Click here to get Chrome (it's free)",
@@ -380,11 +385,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						resource.ResourceName,
 						icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ) );
 
-				tab.CssClass = resource.IsIdenticalToCurrent()
-					               ? CssElementCreator.CurrentTabCssClass
-					               : resource.AlternativeMode is DisabledResourceMode
-						               ? CssElementCreator.DisabledTabCssClass
-						               : "";
+				tab.CssClass = resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabCssClass :
+				               resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabCssClass : "";
 				tabs.Add( tab );
 			}
 			return tabs;
@@ -449,7 +451,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					new Paragraph(
 							"Powered by the ".ToComponents()
 								.Concat( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
-								.Concat( ( " (" + TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() + " version)" ).ToComponents() ),
+								.Concat(
+									" ({0} version)".FormatWith( TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() )
+										.ToComponents() )
+								.Materialize(),
 							classes: CssElementCreator.PoweredByEwlFooterClass ).ToCollection()
 						.GetControls() );
 

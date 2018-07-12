@@ -24,14 +24,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the figure.</param>
 		/// <param name="caption">The caption.</param>
-		public EwfFigure( IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, FigureCaption caption = null ) {
+		public EwfFigure(
+			IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, FigureCaption caption = null ) {
 			children = new DisplayableElement(
-					context => new DisplayableElementData(
-						displaySetup,
-						() => new DisplayableElementLocalData( "figure" ),
-						classes: CssElementCreator.Class.Add( classes ?? ElementClassSet.Empty ),
-						children: caption != null ? caption.FigureIsTextual ? caption.Components.Concat( content ) : content.Concat( caption.Components ) : content ) )
-				.ToCollection();
+				context => new DisplayableElementData(
+					displaySetup,
+					() => new DisplayableElementLocalData( "figure" ),
+					classes: CssElementCreator.Class.Add( classes ?? ElementClassSet.Empty ),
+					children: caption != null
+						          ? caption.FigureIsTextual ? caption.Components.Concat( content ).Materialize() : content.Concat( caption.Components ).Materialize()
+						          : content ) ).ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

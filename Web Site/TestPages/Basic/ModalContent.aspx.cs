@@ -21,8 +21,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
 								}.Select( i => new Paragraph( i.ToComponents() ) )
 							.Concat(
 								new Paragraph(
-									new EwfHyperlink( ActionControls.GetInfo().ToHyperlinkParentContextBehavior(), new StandardHyperlinkStyle( "Navigate" ) ).ToCollection() ) ) )
-					.ToCollection()
+									new EwfHyperlink( ActionControls.GetInfo().ToHyperlinkParentContextBehavior(), new StandardHyperlinkStyle( "Navigate" ) ).ToCollection() ) )
+							.Materialize() ).ToCollection()
 					.GetControls() );
 		}
 	}

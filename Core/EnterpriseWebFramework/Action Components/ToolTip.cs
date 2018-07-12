@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class ToolTip: EtherealComponent {
 		private readonly IReadOnlyCollection<EtherealComponent> children;
 
-		internal ToolTip( IEnumerable<FlowComponent> content, out Func<string, string> jsInitStatementGetter, string title = "" ) {
+		internal ToolTip( IReadOnlyCollection<FlowComponent> content, out Func<string, string> jsInitStatementGetter, string title = "" ) {
 			var id = new ElementId();
 			children = new DisplayableElement(
 				context => {

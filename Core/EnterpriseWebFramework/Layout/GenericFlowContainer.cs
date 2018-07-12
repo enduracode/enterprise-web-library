@@ -15,8 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the element.</param>
 		/// <param name="etherealChildren"></param>
 		public GenericFlowContainer(
-			IEnumerable<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ) {
+			IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null,
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
 			children = new DisplayableElement(
 				context => new DisplayableElementData(
 					displaySetup,

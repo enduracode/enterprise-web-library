@@ -54,6 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
 								.Concat( " ".ToComponents() )
 								.Append( i.ToComponent() )
+								.Materialize()
 								.ToComponentListItem() ).ToCollection() ) ).ToCollection();
 			};
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -16,7 +17,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// By taking a FormItemLabel instead of a Control for label, we retain the ability to implement additional behavior for string labels, such as automatically
 		// making them bold.
 		public static FormItem<ControlType> Create<ControlType>(
-			FormItemLabel label, ControlType control, FormItemSetup setup = null, Func<ControlType, EwfValidation> validationGetter = null ) where ControlType: Control {
+			FormItemLabel label, ControlType control, FormItemSetup setup = null, Func<ControlType, EwfValidation> validationGetter = null )
+			where ControlType: Control {
 			return new FormItem<ControlType>( setup, label, control, validationGetter?.Invoke( control ) );
 		}
 
@@ -38,11 +40,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual Control Label => label.Text != null
-			                                ? label.Text.Any()
-				                                  ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() )
-				                                  : null
-			                                : label.Control;
+		public virtual Control Label =>
+			label.Text != null ? label.Text.Any() ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() ) : null : label.Control;
 
 		/// <summary>
 		/// Gets the control.
@@ -81,8 +80,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="formControl"></param>
 		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
-		public static FormItem ToFormItem( this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IEnumerable<PhrasingComponent> label = null ) {
-			label = label ?? Enumerable.Empty<PhrasingComponent>();
+		public static FormItem ToFormItem(
+			this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null ) {
+			label = label ?? ImmutableArray<PhrasingComponent>.Empty;
 
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			if( formControl is WebControl webControl )

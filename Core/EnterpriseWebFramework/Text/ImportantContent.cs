@@ -13,11 +13,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="content"></param>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the element.</param>
-		public ImportantContent( IEnumerable<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
-			children =
-				new DisplayableElement(
+		public ImportantContent( IReadOnlyCollection<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+			children = new DisplayableElement(
 					context => new DisplayableElementData( displaySetup, () => new DisplayableElementLocalData( "strong" ), classes: classes, children: content ) )
-					.ToCollection();
+				.ToCollection();
 		}
 
 		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {

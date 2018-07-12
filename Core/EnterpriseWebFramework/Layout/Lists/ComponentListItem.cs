@@ -18,7 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			RemovalUpdateRegionSets = removalUpdateRegionSets;
 		}
 
-		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent( ElementClassSet classes, CssLength width, bool includeContentContainer = false ) {
+		internal Tuple<ComponentListItem, FlowComponentOrNode> GetItemAndComponent(
+			ElementClassSet classes, CssLength width, bool includeContentContainer = false ) {
 			return Tuple.Create( this, componentGetter( includeContentContainer, classes, width ) );
 		}
 	}
@@ -34,8 +35,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IEnumerable<FlowComponent> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<EtherealComponent> etherealChildren = null ) {
+			this IReadOnlyCollection<FlowComponent> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
 			return children.ToComponentListItem(
 				"",
 				displaySetup: displaySetup,
@@ -58,9 +59,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IEnumerable<FlowComponent> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-			IEnumerable<EtherealComponent> etherealChildren = null ) {
+			this IReadOnlyCollection<FlowComponent> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null,
+			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
 			return new ComponentListItem(
 				( includeContentContainer, itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
