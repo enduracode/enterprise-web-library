@@ -209,7 +209,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					writer,
 					field,
 					"short?",
-					new[] { getAllowEmptyParameter( true ), new CSharpParameter( "short", "min", "short.MinValue" ), new CSharpParameter( "short", "max", "short.MaxValue" ) },
+					new[]
+						{
+							getAllowEmptyParameter( true ), new CSharpParameter( "short", "min", "short.MinValue" ), new CSharpParameter( "short", "max", "short.MaxValue" )
+						},
 					"validator.GetNullableShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 			}
@@ -240,7 +243,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"decimal?",
 					new[]
 						{
-							new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ), new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
+							new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
+							new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
 						},
 					"validator.GetDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
@@ -557,7 +561,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			IEnumerable<CSharpParameter> preValueOptionalParams, string valueParamTypeName, IEnumerable<CSharpParameter> postValueOptionalParams,
 			bool includeAdditionalValidationMethodParam, Func<string, string> formItemExpressionGetter, string preFormItemStatements = "",
 			string postFormItemStatements = "", IEnumerable<string> additionalSummarySentences = null ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ?? new string[ 0 ] ) );
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ?? new string[ 0 ] ) );
 			if( includeAdditionalValidationMethodParam )
 				CodeGenerationStatics.AddParamDocComment(
 					writer,
@@ -567,9 +573,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			var parameters = new List<CSharpParameter>();
 			parameters.AddRange( requiredParams );
 			parameters.Add( new CSharpParameter( "FormItemSetup", "formItemSetup", "null" ) );
-			parameters.Add( new CSharpParameter( "IEnumerable<PhrasingComponent>", "label", "null" ) );
+			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "label", "null" ) );
 			if( controlIsLabeled )
-				parameters.Add( new CSharpParameter( "IEnumerable<PhrasingComponent>", "formItemLabel", "null" ) );
+				parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "formItemLabel", "null" ) );
 			parameters.AddRange( preValueOptionalParams );
 			parameters.Add( new CSharpParameter( valueParamTypeName, "value", "null" ) );
 			parameters.AddRange( postValueOptionalParams );
@@ -629,7 +635,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		private static void writeFormItemGetterWithoutValueParams(
 			TextWriter writer, string controlType, ModificationField field, string controlTypeForName, bool includeValidationParams,
 			IEnumerable<CSharpParameter> requiredControlParams, IEnumerable<CSharpParameter> requiredValidationParams,
-			IEnumerable<CSharpParameter> optionalControlParams, IEnumerable<CSharpParameter> optionalValidationParams, IEnumerable<string> additionalSummarySentences ) {
+			IEnumerable<CSharpParameter> optionalControlParams, IEnumerable<CSharpParameter> optionalValidationParams,
+			IEnumerable<string> additionalSummarySentences ) {
 			// NOTE: The "out" parameter logic is a hack. We need to improve CSharpParameter.
 			var body = "return " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( false, " +
 			           requiredControlParams.Concat( requiredValidationParams )
@@ -639,8 +646,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			           optionalControlParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
 			           ( includeValidationParams ? ", validationPredicate: validationPredicate" : "" ) +
 			           optionalValidationParams.Select( i => i.Name + ": " + i.Name ).GetCommaDelimitedStringFromCollection().PrependDelimiter( ", " ) +
-			           ( includeValidationParams ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod" : "" ) +
-			           " );";
+			           ( includeValidationParams
+				             ? ", validationErrorNotifier: validationErrorNotifier, additionalValidationMethod: additionalValidationMethod"
+				             : "" ) + " );";
 
 			writeFormItemGetter(
 				writer,
@@ -772,7 +780,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			var parameters = new List<CSharpParameter>();
 			parameters.Add( new CSharpParameter( "System.Func<{0},IEnumerable<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
 			parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
-			parameters.Add( new CSharpParameter( "IEnumerable<PhrasingComponent>", "label", "null" ) );
+			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "label", "null" ) );
 			parameters.Add(
 				new CSharpParameter(
 					field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
