@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Humanizer;
 
@@ -82,6 +83,13 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static HashSet<T> ToHashSet<T>( this IEnumerable<T> items ) {
 			return new HashSet<T>( items );
+		}
+
+		/// <summary>
+		/// Creates a collection from this sequence.
+		/// </summary>
+		public static IReadOnlyCollection<T> Materialize<T>( this IEnumerable<T> items ) {
+			return items.ToImmutableArray();
 		}
 	}
 }
