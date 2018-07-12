@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -33,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public ListErrorDisplayStyle( ElementClassSet classes = null ) {
 			componentGetter = ( errorSources, errors, componentsFocusableOnError ) => {
 				if( !errors.Any() )
-					return ImmutableArray<FlowComponent>.Empty;
+					return Enumerable.Empty<FlowComponent>().Materialize();
 
 				return new DisplayableElement(
 					context => new DisplayableElementData(

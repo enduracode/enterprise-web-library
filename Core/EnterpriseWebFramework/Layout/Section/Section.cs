@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -155,7 +154,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							       : new GenericFlowContainer( new GenericFlowContainer( headingComponents.Materialize(), classes: headingClass ).ToCollection() );
 					}
 
-					content = content ?? ImmutableArray<FlowComponent>.Empty;
+					content = content ?? Enumerable.Empty<FlowComponent>().Materialize();
 					return new DisplayableElementData(
 						displaySetup,
 						() => new DisplayableElementLocalData(

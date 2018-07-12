@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -18,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public SectionErrorDisplayStyle( string heading, SectionStyle style = SectionStyle.Normal ) {
 			componentGetter = ( errorSources, errors, componentsFocusableOnError ) => {
 				if( !errors.Any() )
-					return ImmutableArray<FlowComponent>.Empty;
+					return Enumerable.Empty<FlowComponent>().Materialize();
 
 				return new Section(
 					heading,

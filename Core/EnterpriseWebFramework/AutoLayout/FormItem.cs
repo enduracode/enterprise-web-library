@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -82,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup"></param>
 		public static FormItem ToFormItem(
 			this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null ) {
-			label = label ?? ImmutableArray<PhrasingComponent>.Empty;
+			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
 
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			if( formControl is WebControl webControl )

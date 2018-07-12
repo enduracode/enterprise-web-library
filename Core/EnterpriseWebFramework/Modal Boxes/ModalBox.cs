@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -31,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static IEnumerable<EtherealComponent> CreateBrowsingModalBox() {
-			return new ModalBox( EwfPage.Instance.BrowsingModalBoxId, true, ImmutableArray<FlowComponent>.Empty ).ToCollection();
+			return new ModalBox( EwfPage.Instance.BrowsingModalBoxId, true, Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection();
 		}
 
 		internal static string GetBrowsingModalBoxOpenStatements( BrowsingContextSetup browsingContextSetup, string url ) {
