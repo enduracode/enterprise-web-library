@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                                    : "";
 		}
 
-		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
 			return children;
 		}
 	}

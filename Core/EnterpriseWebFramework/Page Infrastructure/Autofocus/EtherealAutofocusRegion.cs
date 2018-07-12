@@ -6,19 +6,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class EtherealAutofocusRegion: EtherealComponent {
 		internal readonly AutofocusCondition Condition;
-		private readonly IEnumerable<EtherealComponentOrElement> children;
+		private readonly IReadOnlyCollection<EtherealComponentOrElement> children;
 
 		/// <summary>
 		/// Creates an autofocus region.
 		/// </summary>
 		/// <param name="condition">Do not pass null.</param>
 		/// <param name="children"></param>
-		public EtherealAutofocusRegion( AutofocusCondition condition, IEnumerable<EtherealComponent> children ) {
+		public EtherealAutofocusRegion( AutofocusCondition condition, IReadOnlyCollection<EtherealComponent> children ) {
 			Condition = condition;
 			this.children = children;
 		}
 
-		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
 			return children;
 		}
 	}

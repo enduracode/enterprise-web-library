@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.Materialize() ).ToCollection();
 		}
 
-		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
 			return children;
 		}
 	}

@@ -90,7 +90,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} ).ToCollection();
 		}
 
-		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
 			return children;
 		}
 	}

@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return children;
 		}
 
-		IEnumerable<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
 			return children;
 		}
 	}

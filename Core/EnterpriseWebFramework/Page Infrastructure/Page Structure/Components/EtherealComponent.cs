@@ -2,6 +2,6 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface EtherealComponent: EtherealComponentOrElement {
-		IEnumerable<EtherealComponentOrElement> GetChildren();
+		IReadOnlyCollection<EtherealComponentOrElement> GetChildren();
 	}
 }
