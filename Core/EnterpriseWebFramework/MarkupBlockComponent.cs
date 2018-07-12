@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = new MarkupBlockNode( () => markup ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

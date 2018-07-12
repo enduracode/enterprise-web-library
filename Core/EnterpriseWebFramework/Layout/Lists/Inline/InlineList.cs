@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				from i in items select i.GetItemAndComponent( ElementClassSet.Empty, null, includeContentContainer: true ) );
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

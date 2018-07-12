@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					etherealChildren: etherealChildren ) ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

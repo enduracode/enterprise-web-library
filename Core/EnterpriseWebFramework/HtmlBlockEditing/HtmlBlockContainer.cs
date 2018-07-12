@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool HasHtml => html.Any();
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

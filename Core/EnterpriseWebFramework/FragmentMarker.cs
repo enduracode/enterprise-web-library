@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => new ElementNodeLocalData( "span", new ElementNodeFocusDependentData( Enumerable.Empty<Tuple<string, string>>(), id, "" ) ) ) ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

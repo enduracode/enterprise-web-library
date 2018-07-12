@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

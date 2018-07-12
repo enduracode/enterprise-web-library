@@ -188,7 +188,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				       .Add( expandedPmv.ToCondition( bool.TrueString.ToCollection() ).ToElementClassSet( expandedClass ) );
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

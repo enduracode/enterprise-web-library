@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = new TextNode( () => text ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					from i in items select i.ItemAndComponentGetter() );
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

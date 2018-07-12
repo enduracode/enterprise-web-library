@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					errorsBySource => children ) ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = new ElementNode( context => elementDataGetter( context ).NodeDataGetter( context ), formValue: formValue ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 

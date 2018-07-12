@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 } ).spin( document.getElementById( """ + context.Id + "\" ) );" ) ) ) ).ToCollection();
 			}
 
-			IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+			IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 				return children;
 			}
 		}

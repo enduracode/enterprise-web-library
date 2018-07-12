@@ -2,6 +2,6 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface FlowComponent: FlowComponentOrNode {
-		IEnumerable<FlowComponentOrNode> GetChildren();
+		IReadOnlyCollection<FlowComponentOrNode> GetChildren();
 	}
 }

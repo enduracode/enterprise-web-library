@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							( set, additionalClass ) => set.Add( new ElementClass( additionalClass ) ) ) ).ToCollection();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

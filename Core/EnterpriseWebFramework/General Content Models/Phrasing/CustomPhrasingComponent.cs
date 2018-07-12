@@ -15,6 +15,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.children = children.ToImmutableArray();
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() => children;
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }

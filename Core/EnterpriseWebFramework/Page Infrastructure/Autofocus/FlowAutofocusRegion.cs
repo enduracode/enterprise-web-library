@@ -6,19 +6,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class FlowAutofocusRegion: FlowComponent {
 		internal readonly AutofocusCondition Condition;
-		private readonly IEnumerable<FlowComponentOrNode> children;
+		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
 
 		/// <summary>
 		/// Creates an autofocus region.
 		/// </summary>
 		/// <param name="condition">Do not pass null.</param>
 		/// <param name="children"></param>
-		public FlowAutofocusRegion( AutofocusCondition condition, IEnumerable<FlowComponent> children ) {
+		public FlowAutofocusRegion( AutofocusCondition condition, IReadOnlyCollection<FlowComponent> children ) {
 			Condition = condition;
 			this.children = children;
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}

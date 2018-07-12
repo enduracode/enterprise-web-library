@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = generalSetup.ComponentGetter( () => imageResource.GetUrl(), () => "" );
 		}
 
-		IEnumerable<FlowComponentOrNode> FlowComponent.GetChildren() {
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
 		}
 	}
