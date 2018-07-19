@@ -131,8 +131,8 @@ namespace EnterpriseWebLibrary.IO {
 		public static IEnumerable<string> GetFilePathsInFolder(
 			string folderPath, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly ) {
 			if( !Directory.Exists( folderPath ) )
-				return new List<string>();
-			return new DirectoryInfo( folderPath ).GetFiles( searchPattern, searchOption ).OrderByDescending( f => f.LastWriteTime ).Select( f => f.FullName );
+				return Enumerable.Empty<string>();
+			return new DirectoryInfo( folderPath ).EnumerateFiles( searchPattern, searchOption ).OrderByDescending( f => f.LastWriteTime ).Select( f => f.FullName );
 		}
 
 		/// <summary>

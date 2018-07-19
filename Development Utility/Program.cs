@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 							// If installations folder does not exist, create from template if possible.
 							var installationPath = args[ 0 ];
 							var configurationFolderPath = getInstallationsFolderPath( installationPath, false );
-							if( !Directory.Exists( configurationFolderPath ) ) {
+							if( !IoMethods.GetFilePathsInFolder( configurationFolderPath, searchOption: SearchOption.AllDirectories ).Any() ) {
 								var templateFolderPath = getInstallationsFolderPath( installationPath, true );
 								if( Directory.Exists( templateFolderPath ) )
 									IoMethods.CopyFolder( templateFolderPath, configurationFolderPath, false );
