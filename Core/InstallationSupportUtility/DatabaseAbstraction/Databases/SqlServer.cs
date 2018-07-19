@@ -107,6 +107,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		IDENTITY
 		CONSTRAINT MainSequencePk PRIMARY KEY
 )" );
+
+						const string userName = @"NT AUTHORITY\NETWORK SERVICE";
+						executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
+						executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
+						executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
 					} );
 		}
 
