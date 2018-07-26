@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// SubmitButton and private use only.
+		/// SubmitButton, UiButtonSetup, and private use only.
 		/// </summary>
 		internal readonly PostBack PostBack;
 

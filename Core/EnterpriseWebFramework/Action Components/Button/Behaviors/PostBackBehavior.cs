@@ -8,14 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A behavior that causes a post-back.
 	/// </summary>
 	public class PostBackBehavior: ButtonBehavior {
-		private readonly PostBackFormAction postBackAction;
+		/// <summary>
+		/// UiButtonSetup and private use only.
+		/// </summary>
+		internal readonly PostBackFormAction PostBackAction;
 
 		/// <summary>
 		/// Creates a post-back behavior.
 		/// </summary>
 		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
 		public PostBackBehavior( PostBack postBack = null ) {
-			postBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
+			PostBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 		}
 
 		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() {
@@ -31,12 +34,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		string ButtonBehavior.GetJsInitStatements( string id ) {
-			FormAction action = postBackAction;
+			FormAction action = PostBackAction;
 			return "$( '#{0}' ).click( function() {{ {1} }} );".FormatWith( id, action.GetJsStatements() );
 		}
 
 		void ButtonBehavior.AddPostBack() {
-			FormAction action = postBackAction;
+			FormAction action = PostBackAction;
 			action.AddToPageIfNecessary();
 		}
 	}

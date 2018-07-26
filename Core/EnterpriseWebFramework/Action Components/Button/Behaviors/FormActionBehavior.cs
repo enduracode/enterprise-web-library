@@ -8,14 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A behavior that performs a form action.
 	/// </summary>
 	public class FormActionBehavior: ButtonBehavior {
-		private readonly FormAction action;
+		/// <summary>
+		/// UiButtonSetup and private use only.
+		/// </summary>
+		internal readonly FormAction Action;
 
 		/// <summary>
 		/// Creates a form-action behavior.
 		/// </summary>
 		/// <param name="action">Do not pass null.</param>
 		public FormActionBehavior( FormAction action ) {
-			this.action = action;
+			Action = action;
 		}
 
 		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() {
@@ -31,11 +34,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		string ButtonBehavior.GetJsInitStatements( string id ) {
-			return "$( '#{0}' ).click( function() {{ {1} }} );".FormatWith( id, action.GetJsStatements() );
+			return "$( '#{0}' ).click( function() {{ {1} }} );".FormatWith( id, Action.GetJsStatements() );
 		}
 
 		void ButtonBehavior.AddPostBack() {
-			action.AddToPageIfNecessary();
+			Action.AddToPageIfNecessary();
 		}
 	}
 }

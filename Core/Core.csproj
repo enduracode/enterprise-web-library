@@ -594,6 +594,9 @@
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\UiActionSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\UiButtonSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\UiHyperlinkSetup.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
