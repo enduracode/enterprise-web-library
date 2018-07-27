@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A class that provides an EWF master page with the information it needs to display entity navigation buttons, action buttons, tabs, etc.
 	/// </summary>
-	public interface EntityDisplaySetup: EntitySetupBase {
+	public interface UiEntitySetupBase: EntitySetupBase {
 		/// <summary>
 		/// Creates and returns navigation button setup information.
 		/// </summary>
-		List<ActionButtonSetup> CreateNavButtonSetups();
+		IReadOnlyCollection<UiActionSetup> GetNavActions();
 
 		/// <summary>
 		/// Creates and returns lookup box setup information.
@@ -19,6 +19,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity {
 		/// <summary>
 		/// Creates and returns action button setup information.
 		/// </summary>
-		List<ActionButtonSetup> CreateActionButtonSetups();
+		IReadOnlyCollection<UiActionSetup> GetActions();
 	}
 }

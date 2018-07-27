@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
@@ -24,11 +25,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// </summary>
 		public static AppEwfUiProvider AppProvider {
 			get {
-				if( provider == null ) {
+				if( provider == null )
 					throw new ApplicationException(
 						providerName + " provider not found in application. To implement, create a class named " + providerName +
 						@"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
-				}
 				return provider;
 			}
 		}
@@ -59,15 +59,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// Sets the page actions. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
-		public static void SetPageActions( params ActionButtonSetup[] actions ) {
+		/// <param name="actions">Do not pass null.</param>
+		public static void SetPageActions( IReadOnlyCollection<UiActionSetup> actions ) {
 			AppMasterPage.SetPageActions( actions );
 		}
 
 		/// <summary>
 		/// Clears the content foot and adds the specified actions. This must be called before EwfPage.LoadData finishes executing. The first action, if it is a
-		/// post back button, will use submit behavior.
+		/// post-back, will produce a submit button.
 		/// </summary>
-		public static void SetContentFootActions( params ActionButtonSetup[] actions ) {
+		/// <param name="actions">Do not pass null.</param>
+		public static void SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions ) {
 			AppMasterPage.SetContentFootActions( actions );
 		}
 

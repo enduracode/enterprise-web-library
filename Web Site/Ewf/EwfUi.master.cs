@@ -5,7 +5,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 using EnterpriseWebLibrary.WebSessionState;
@@ -159,15 +158,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		private ActionButtonSetup[] pageActions = new ActionButtonSetup[ 0 ];
-		private ActionButtonSetup[] contentFootActions = new ActionButtonSetup[ 0 ];
+		private IReadOnlyCollection<UiActionSetup> pageActions = Enumerable.Empty<UiActionSetup>().Materialize();
+		private IReadOnlyCollection<UiButtonSetup> contentFootActions = Enumerable.Empty<UiButtonSetup>().Materialize();
 		private Control[] contentFootControls;
 
-		void AppEwfUiMasterPage.SetPageActions( params ActionButtonSetup[] actions ) {
+		void AppEwfUiMasterPage.SetPageActions( IReadOnlyCollection<UiActionSetup> actions ) {
 			pageActions = actions;
 		}
 
-		void AppEwfUiMasterPage.SetContentFootActions( params ActionButtonSetup[] actions ) {
+		void AppEwfUiMasterPage.SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions ) {
 			contentFootActions = actions;
 			contentFootControls = null;
 		}
@@ -263,7 +262,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
 				return null;
 
-			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActionControls() )
+			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActions() )
 				.Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups() select i.BuildLookupBoxPanel() )
 				.ToArray();
 			if( !controls.Any() )
@@ -311,10 +310,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private EwfTableCell getEntityNavCell() {
-			if( entityDisplaySetup == null )
+			if( uiEntitySetup == null )
 				return null;
-			var controls = getActionControls( entityDisplaySetup.CreateNavButtonSetups() )
-				.Concat( ( from i in entityDisplaySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() ) )
+			var controls = getActionControls( uiEntitySetup.GetNavActions() )
+				.Concat( from i in uiEntitySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() )
 				.ToArray();
 			if( !controls.Any() )
 				return null;
@@ -326,9 +325,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private EwfTableCell getEntityActionCell() {
-			if( entityDisplaySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
+			if( uiEntitySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
-			var actionControls = getActionControls( entityDisplaySetup.CreateActionButtonSetups() ).ToArray();
+			var actionControls = getActionControls( uiEntitySetup.GetActions() ).ToArray();
 			if( !actionControls.Any() )
 				return null;
 			return new ControlLine( actionControls )
@@ -399,24 +398,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
 		}
 
-		private IEnumerable<Control> getActionControls( IEnumerable<ActionButtonSetup> actionButtonSetups ) {
-			return from actionButtonSetup in actionButtonSetups
-			       let actionControl = actionButtonSetup.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false )
-			       let asEwfLink = actionControl as EwfLink
-			       where asEwfLink == null || asEwfLink.UserCanNavigateToDestination()
-			       select actionControl;
-		}
+		private IEnumerable<Control> getActionControls( IReadOnlyCollection<UiActionSetup> actions ) =>
+			from action in actions
+			let actionComponent =
+				action.GetActionComponent(
+					( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+					( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
+			where actionComponent != null
+			select new PlaceHolder().AddControlsReturnThis( actionComponent.ToCollection().GetControls() );
 
 		private Control getContentFootBlock() {
 			var controls = new List<Control>();
 			if( contentFootActions != null ) {
-				if( contentFootActions.Any() ) {
-					var first = from i in contentFootActions.Take( 1 )
-					            select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonSize.Large, icon: icon ), true );
-					var remaining = from i in contentFootActions.Skip( 1 )
-					                select i.BuildButton( ( text, icon ) => new ButtonActionControlStyle( text, ButtonSize.Large, icon: icon ), false );
-					controls.Add( new ControlLine( first.Concat( remaining ).ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
-				}
+				if( contentFootActions.Any() )
+					controls.Add(
+						new ControlLine(
+							contentFootActions.Select(
+									( action, index ) => (Control)new PlaceHolder().AddControlsReturnThis(
+										action.GetActionComponent(
+												null,
+												( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.Large, icon: icon ),
+												enableSubmitButton: index == 0 )
+											.ToCollection()
+											.GetControls() ) )
+								.ToArray() ) { CssClass = CssElementCreator.ContentFootActionListCssClass } );
 				else if( EwfPage.Instance.IsAutoDataUpdater )
 					controls.Add( new PostBackButton( new ButtonActionControlStyle( "Update Now" ), postBack: EwfPage.Instance.DataUpdatePostBack ) );
 			}
@@ -461,6 +466,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
 		}
 
-		private EntityDisplaySetup entityDisplaySetup => EwfPage.Instance.EsAsBaseType as EntityDisplaySetup;
+		private UiEntitySetupBase uiEntitySetup => EwfPage.Instance.EsAsBaseType as UiEntitySetupBase;
 	}
 }

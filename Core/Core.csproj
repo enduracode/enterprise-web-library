@@ -588,8 +588,8 @@
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppLogoAndUserInfoControlOverrider.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityDisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />

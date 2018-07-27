@@ -1,4 +1,5 @@
-﻿using System.Web.UI;
+﻿using System.Collections.Generic;
+using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
@@ -9,12 +10,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		void SetPageActions( params ActionButtonSetup[] actions );
+		void SetPageActions( IReadOnlyCollection<UiActionSetup> actions );
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		void SetContentFootActions( params ActionButtonSetup[] actions );
+		void SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions );
 
 		/// <summary>
 		/// EWL use only.

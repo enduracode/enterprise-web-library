@@ -17,7 +17,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="text">Do not pass null. Pass the empty string to use the destination URL.</param>
 		/// <param name="icon">The icon.</param>
 		public UiHyperlinkSetup( HyperlinkBehavior behavior, string text, ActionComponentIcon icon = null ) {
-			hyperlinkGetter = hyperlinkStyleSelector => new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ) );
+			hyperlinkGetter = hyperlinkStyleSelector =>
+				behavior.UserCanNavigateToDestination() ? new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ) ) : null;
 		}
 
 		/// <inheritdoc/>

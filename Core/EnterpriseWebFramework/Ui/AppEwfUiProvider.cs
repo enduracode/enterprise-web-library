@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
@@ -24,9 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the global nav action controls.
 		/// </summary>
-		public virtual List<ActionButtonSetup> GetGlobalNavActionControls() {
-			return new List<ActionButtonSetup>();
-		}
+		public virtual IReadOnlyCollection<UiActionSetup> GetGlobalNavActions() => Enumerable.Empty<UiActionSetup>().Materialize();
 
 		/// <summary>
 		/// Gets the global nav lookup box setups.
