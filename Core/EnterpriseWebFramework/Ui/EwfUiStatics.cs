@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// Sets the page actions. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
 		/// <param name="actions">Do not pass null.</param>
-		public static void SetPageActions( IReadOnlyCollection<UiActionSetup> actions ) {
+		public static void SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions ) {
 			AppMasterPage.SetPageActions( actions );
 		}
 
@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// post-back, will produce a submit button.
 		/// </summary>
 		/// <param name="actions">Do not pass null.</param>
-		public static void SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions ) {
+		public static void SetContentFootActions( IReadOnlyCollection<ButtonSetup> actions ) {
 			AppMasterPage.SetContentFootActions( actions );
 		}
 

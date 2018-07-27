@@ -273,12 +273,14 @@
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentIconPlacement.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ActionComponentSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\ChangeValueBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\CustomButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\FormActionBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\MenuButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\PostBackBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonBehavior.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\EwfButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\CustomButtonStyle.cs" />
@@ -287,6 +289,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\BrowsingContextSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\EwfHyperlink.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\CustomHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\ImageHyperlinkStyle.cs" />
@@ -594,9 +597,6 @@
     <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\UiActionSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\UiButtonSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\UiHyperlinkSetup.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />

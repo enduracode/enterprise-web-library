@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the global nav action controls.
 		/// </summary>
-		public virtual IReadOnlyCollection<UiActionSetup> GetGlobalNavActions() => Enumerable.Empty<UiActionSetup>().Materialize();
+		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 		/// <summary>
 		/// Gets the global nav lookup box setups.

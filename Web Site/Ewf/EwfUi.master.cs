@@ -158,15 +158,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		private IReadOnlyCollection<UiActionSetup> pageActions = Enumerable.Empty<UiActionSetup>().Materialize();
-		private IReadOnlyCollection<UiButtonSetup> contentFootActions = Enumerable.Empty<UiButtonSetup>().Materialize();
+		private IReadOnlyCollection<ActionComponentSetup> pageActions = Enumerable.Empty<ActionComponentSetup>().Materialize();
+		private IReadOnlyCollection<ButtonSetup> contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 		private Control[] contentFootControls;
 
-		void AppEwfUiMasterPage.SetPageActions( IReadOnlyCollection<UiActionSetup> actions ) {
+		void AppEwfUiMasterPage.SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions ) {
 			pageActions = actions;
 		}
 
-		void AppEwfUiMasterPage.SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions ) {
+		void AppEwfUiMasterPage.SetContentFootActions( IReadOnlyCollection<ButtonSetup> actions ) {
 			contentFootActions = actions;
 			contentFootControls = null;
 		}
@@ -398,7 +398,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
 		}
 
-		private IEnumerable<Control> getActionControls( IReadOnlyCollection<UiActionSetup> actions ) =>
+		private IEnumerable<Control> getActionControls( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
 			let actionComponent =
 				action.GetActionComponent(

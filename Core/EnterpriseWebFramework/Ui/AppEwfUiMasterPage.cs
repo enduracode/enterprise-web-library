@@ -10,12 +10,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		void SetPageActions( IReadOnlyCollection<UiActionSetup> actions );
+		void SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions );
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		void SetContentFootActions( IReadOnlyCollection<UiButtonSetup> actions );
+		void SetContentFootActions( IReadOnlyCollection<ButtonSetup> actions );
 
 		/// <summary>
 		/// EWL use only.

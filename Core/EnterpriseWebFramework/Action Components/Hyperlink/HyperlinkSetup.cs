@@ -2,9 +2,9 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// The configuration for a hyperlink in the UI.
+	/// The configuration for a hyperlink.
 	/// </summary>
-	public class UiHyperlinkSetup: UiActionSetup {
+	public class HyperlinkSetup: ActionComponentSetup {
 		private readonly Func<Func<string, ActionComponentIcon, HyperlinkStyle>, PhrasingComponent> hyperlinkGetter;
 
 		/// <summary>
@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkBehavior(Email.EmailAddress, string, string, string, string)"/>.</param>
 		/// <param name="text">Do not pass null. Pass the empty string to use the destination URL.</param>
 		/// <param name="icon">The icon.</param>
-		public UiHyperlinkSetup( HyperlinkBehavior behavior, string text, ActionComponentIcon icon = null ) {
+		public HyperlinkSetup( HyperlinkBehavior behavior, string text, ActionComponentIcon icon = null ) {
 			hyperlinkGetter = hyperlinkStyleSelector =>
 				behavior.UserCanNavigateToDestination() ? new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ) ) : null;
 		}

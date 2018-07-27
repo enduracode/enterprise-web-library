@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates and returns navigation button setup information.
 		/// </summary>
-		IReadOnlyCollection<UiActionSetup> GetNavActions();
+		IReadOnlyCollection<ActionComponentSetup> GetNavActions();
 
 		/// <summary>
 		/// Creates and returns lookup box setup information.
@@ -19,6 +19,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates and returns action button setup information.
 		/// </summary>
-		IReadOnlyCollection<UiActionSetup> GetActions();
+		IReadOnlyCollection<ActionComponentSetup> GetActions();
 	}
 }
