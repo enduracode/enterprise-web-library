@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly ResourceInfo destination;
 		internal readonly ElementClassSet Classes;
 		internal readonly Func<IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
-		internal readonly string Url;
+		internal readonly Lazy<string> Url;
 		internal readonly bool IncludeIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
 		internal readonly Func<string, string> JsInitStatementGetter;
@@ -36,11 +36,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.destination = destination;
 			Classes = destination?.AlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
-			Url = destination != null ? destination.GetUrl( true, false, true ) : "";
+			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
 			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
 			                          EwfPage.Instance.IsAutoDataUpdater;
 			FormAction postBackAction = null;
-			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 				.Concat( destination != null && target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 				.Concat(
 					isPostBackHyperlink
@@ -61,7 +61,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			else {
 				IncludeIdAttribute = destination != null && actionStatementGetter != null;
 				EtherealChildren = null;
-				JsInitStatementGetter = id => destination != null && actionStatementGetter != null ? getActionInitStatements( id, actionStatementGetter( Url ) ) : "";
+				JsInitStatementGetter = id =>
+					destination != null && actionStatementGetter != null ? getActionInitStatements( id, actionStatementGetter( Url.Value ) ) : "";
 			}
 
 			IsFocusable = destination != null;
@@ -77,8 +78,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal HyperlinkBehavior( string mailtoUri ) {
 			Classes = ElementClassSet.Empty;
-			Url = "mailto:{0}".FormatWith( mailtoUri );
-			AttributeGetter = () => Tuple.Create( "href", Url ).ToCollection();
+			Url = new Lazy<string>( () => "mailto:{0}".FormatWith( mailtoUri ) );
+			AttributeGetter = () => Tuple.Create( "href", Url.Value ).ToCollection();
 			EtherealChildren = null;
 			JsInitStatementGetter = id => "";
 			IsFocusable = true;

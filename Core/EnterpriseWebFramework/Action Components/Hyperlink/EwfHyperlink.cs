@@ -25,21 +25,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return new DisplayableElementData(
 						displaySetup,
 						() => {
-							DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) => new DisplayableElementFocusDependentData(
-								attributes: behavior.AttributeGetter(),
-								includeIdAttribute: behavior.IncludeIdAttribute || isFocused,
-								jsInitStatements: StringTools.ConcatenateWithDelimiter(
-									" ",
-									behavior.JsInitStatementGetter( context.Id ),
-									style.GetJsInitStatements( context.Id ),
-									isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
+							DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) =>
+								new DisplayableElementFocusDependentData(
+									attributes: behavior.AttributeGetter(),
+									includeIdAttribute: behavior.IncludeIdAttribute || isFocused,
+									jsInitStatements: StringTools.ConcatenateWithDelimiter(
+										" ",
+										behavior.JsInitStatementGetter( context.Id ),
+										style.GetJsInitStatements( context.Id ),
+										isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
 
 							return behavior.IsFocusable
 								       ? new DisplayableElementLocalData( "a", new FocusabilityCondition( true ), getFocusDependentData )
 								       : new DisplayableElementLocalData( "a", focusDependentData: getFocusDependentData( false ) );
 						},
 						classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
-						children: style.GetChildren( behavior.Url ),
+						children: style.GetChildren( behavior.Url.Value ),
 						etherealChildren: behavior.EtherealChildren );
 				} ).ToCollection();
 		}
