@@ -17,7 +17,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			behavior = behavior ?? new FormActionBehavior( FormState.Current.DefaultAction );
 
 			buttonGetter = ( enableSubmitButton, buttonStyleSelector ) => {
-				var postBack = behavior is FormActionBehavior formActionBehavior ? ( formActionBehavior.Action as PostBackFormAction )?.PostBack :
+				var postBack = !enableSubmitButton ? null :
+				               behavior is FormActionBehavior formActionBehavior ? ( formActionBehavior.Action as PostBackFormAction )?.PostBack :
 				               behavior is PostBackBehavior postBackBehavior ? postBackBehavior.PostBackAction.PostBack : null;
 				return postBack != null
 					       ? (PhrasingComponent)new SubmitButton( buttonStyleSelector( text, icon ), postBack: postBack )
