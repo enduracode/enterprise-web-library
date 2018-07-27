@@ -97,7 +97,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						postBack: PostBack.CreateFull(
 							id: "delegate",
 							firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ).ToCollection<ActionComponentSetup>()
-				.Append( new HyperlinkSetup( new ExternalResourceInfo( "http://www.google.com" ), "Go to Google" ) )
+				.Append( new HyperlinkSetup( new ExternalResourceInfo( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
 				.Append(
 					new ButtonSetup(
 						"Generate error",
