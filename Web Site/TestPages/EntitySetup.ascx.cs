@@ -50,14 +50,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new LegacyParagraph(
 					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
 
-			new ModalBox( one, true, new Paragraph( "Test!".ToComponents() ).ToCollection() ).ToCollection().AddEtherealControls( this );
+			new ModalBox( one, true, new Paragraph( "This is a modal box!".ToComponents() ).ToCollection() ).ToCollection().AddEtherealControls( this );
 			new ModalBox(
 					two,
 					true,
 					new EwfImage(
-						new ImageSetup( null ),
-						new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection() )
-				.ToCollection()
+						new ImageSetup( "Houses in the mountains" ),
+						new ExternalResourceInfo( "http://r0k.us/graphics/kodak/kodak/kodim08.png" ) ).ToCollection() ).ToCollection()
 				.AddEtherealControls( this );
 		}
 
