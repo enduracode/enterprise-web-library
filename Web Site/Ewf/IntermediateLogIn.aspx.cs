@@ -1,6 +1,5 @@
 using System;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string returnUrl
@@ -19,14 +18,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull(
-				firstModificationMethod: () => {
-					IntermediateAuthenticationMethods.SetCookie();
-					AppRequestState.Instance.IntermediateUserExists = true;
-				},
-				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull(
+						firstModificationMethod: () => {
+							IntermediateAuthenticationMethods.SetCookie();
+							AppRequestState.Instance.IntermediateUserExists = true;
+						},
+						actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
+					.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(
@@ -41,9 +40,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											validator.NoteErrorAndAddMessage( "Incorrect password." );
 									} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
 								.ToCollection() ) );
-				} );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton( pb ) ) );
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Log In" ).ToCollection() );
+				} );
 		}
 	}
 }

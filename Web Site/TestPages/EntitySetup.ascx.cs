@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 
 // OptionalParameter: string someText
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	partial class EntitySetup: UserControl, EntityDisplaySetup {
+	partial class EntitySetup: UserControl, UiEntitySetupBase {
 		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {
 				return null;
@@ -31,78 +30,80 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
 							new DateAndTimePickers.Info( this ) ),
-						new ResourceGroup( "Other", new IntermediatePostBacks.Info( this ), new ModalBoxes.Info( this ), new MailMerging.Info( this ), new Charts.Info( this ) )
+						new ResourceGroup(
+							"Other",
+							new IntermediatePostBacks.Info( this ),
+							new ModalBoxes.Info( this ),
+							new MailMerging.Info( this ),
+							new Charts.Info( this ) )
 					};
 			}
 
 			public override string EntitySetupName => "Customer #1";
 		}
 
-		private ModalWindow one;
-		private ModalWindow two;
+		private readonly ModalBoxId one = new ModalBoxId();
+		private readonly ModalBoxId two = new ModalBoxId();
 
 		void EntitySetupBase.LoadData() {
 			ph.AddControlsReturnThis(
 				new LegacyParagraph(
 					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
 
-			one = new ModalWindow( this, new LegacyParagraph( "Test!" ) );
-			two = new ModalWindow(
-				this,
-				new PlaceHolder().AddControlsReturnThis(
+			new ModalBox( one, true, new Paragraph( "Test!".ToComponents() ).ToCollection() ).ToCollection().AddEtherealControls( this );
+			new ModalBox(
+					two,
+					true,
 					new EwfImage(
-							new ImageSetup( null ),
-							new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection()
-						.GetControls() ) );
+						new ImageSetup( null ),
+						new ExternalResourceInfo( "http://i3.microsoft.com/en/shared/templates/components/cspMscomHeader/m_head_blend.png" ) ).ToCollection() )
+				.ToCollection()
+				.AddEtherealControls( this );
 		}
 
-		public List<ActionButtonSetup> CreateNavButtonSetups() {
-			var navButtonSetups = new List<ActionButtonSetup>();
-			navButtonSetups.Add( new ActionButtonSetup( "Go to Microsoft", new EwfLink( new ExternalResourceInfo( "http://www.microsoft.com" ) ) ) );
-			navButtonSetups.Add( new ActionButtonSetup( "Custom script", new CustomButton( () => "alert('test')" ) ) );
-			navButtonSetups.Add(
-				new ActionButtonSetup(
-					"Menu",
-					new ToolTipButton(
-						EwfTable.CreateWithItems(
-							items: new Func<EwfTableItem>[]
-								{
-									() => new EwfTableItem(
-										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.apple.com" ) ) ),
-										"Apple" ),
-									() => new EwfTableItem(
-										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.microsoft.com" ) ) ),
-										"Microsoft" ),
-									() => new EwfTableItem(
-										new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://www.google.com" ) ) ),
-										"Google" ),
-									() => new EwfTableItem( new EwfTableItemSetup( clickScript: ClickScript.CreateCustomScript( "alert('test!')" ) ), "Custom script" ),
-									() => new EwfTableItem( new LaunchWindowLink( one ) { ActionControlStyle = new TextActionControlStyle( "Modal" ) } )
-								} ) ) ) );
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetNavActions() =>
+			new HyperlinkSetup( new ExternalResourceInfo( "http://www.microsoft.com" ), "Go to Microsoft" ).ToCollection<ActionComponentSetup>()
+				.Append( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
+				.Append(
+					new ButtonSetup(
+						"Menu",
+						behavior: new MenuButtonBehavior(
+							new StackList(
+									new EwfHyperlink( new ExternalResourceInfo( "http://www.apple.com" ), new StandardHyperlinkStyle( "Apple" ) ).ToCollection()
+										.ToComponentListItem()
+										.ToCollection()
+										.Append(
+											new EwfHyperlink( new ExternalResourceInfo( "http://www.microsoft.com" ), new StandardHyperlinkStyle( "Microsoft" ) ).ToCollection()
+												.ToComponentListItem() )
+										.Append(
+											new EwfHyperlink( new ExternalResourceInfo( "http://www.google.com" ), new StandardHyperlinkStyle( "Google" ) ).ToCollection()
+												.ToComponentListItem() )
+										.Append(
+											new EwfButton( new StandardButtonStyle( "Custom script" ), behavior: new CustomButtonBehavior( () => "alert('test!');" ) ).ToCollection()
+												.ToComponentListItem() )
+										.Append(
+											new EwfButton( new StandardButtonStyle( "Modal" ), behavior: new OpenModalBehavior( one ) ).ToCollection().ToComponentListItem() ) )
+								.ToCollection() ) ) )
+				.Append( new ButtonSetup( "Modal Window", behavior: new OpenModalBehavior( two ) ) )
+				.Materialize();
 
-			navButtonSetups.Add( new ActionButtonSetup( "Modal Window", new LaunchWindowLink( two ) ) );
-			return navButtonSetups;
-		}
+		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() =>
+			new LookupBoxSetup( 100, "Lookup!", "lookup", text => { throw new DataModificationException( "Lookup '" + text + "' failed." ); } ).ToCollection()
+				.ToList();
 
-		public List<LookupBoxSetup> CreateLookupBoxSetups() {
-			var lookupBoxSetups = new List<LookupBoxSetup>();
-			lookupBoxSetups.Add( new LookupBoxSetup( 100, "Lookup!", "lookup", text => { throw new DataModificationException( "Lookup '" + text + "' failed." ); } ) );
-			return lookupBoxSetups;
-		}
-
-		public List<ActionButtonSetup> CreateActionButtonSetups() {
-			var actionButtonSetups = new List<ActionButtonSetup>();
-			actionButtonSetups.Add(
-				new ActionButtonSetup(
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() =>
+			new ButtonSetup(
 					"Delegate action",
-					new PostBackButton(
-						PostBack.CreateFull( id: "delegate", firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ) );
-			actionButtonSetups.Add( new ActionButtonSetup( "Go to Google", new EwfLink( new ExternalResourceInfo( "http://www.google.com" ) ) ) );
-			actionButtonSetups.Add(
-				new ActionButtonSetup(
-					"Generate error",
-					new PostBackButton( PostBack.CreateFull( id: "error", firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) );
-			return actionButtonSetups;
-		}
+					behavior: new PostBackBehavior(
+						postBack: PostBack.CreateFull(
+							id: "delegate",
+							firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) ).ToCollection<ActionComponentSetup>()
+				.Append( new HyperlinkSetup( new ExternalResourceInfo( "http://www.google.com" ), "Go to Google" ) )
+				.Append(
+					new ButtonSetup(
+						"Generate error",
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull( id: "error", firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) )
+				.Materialize();
 	}
 }

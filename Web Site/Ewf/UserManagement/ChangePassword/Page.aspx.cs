@@ -1,5 +1,4 @@
 using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -14,11 +13,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull(
-				firstModificationMethod: modifyData,
-				actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull(
+						firstModificationMethod: modifyData,
+						actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) )
+					.ToCollection(),
 				() => {
 					newPassword = new DataValue<string>();
 					ph.AddControlsReturnThis(
@@ -26,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							formItems: newPassword.GetPasswordModificationFormItems(
 								firstLabel: "New password".ToComponents(),
 								secondLabel: "Re-type new password".ToComponents() ) ) );
-					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Change Password", new PostBackButton() ) );
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Change Password" ).ToCollection() );
 				} );
 		}
 

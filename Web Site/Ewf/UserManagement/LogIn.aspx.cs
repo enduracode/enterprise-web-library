@@ -27,8 +27,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					var registeredTable = EwfTable.Create( caption: "Registered users" );
 					registeredTable.AddItem(
 						new EwfTableItem(
-							( "You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName ).ToCell(
-								new TableCellSetup( fieldSpan: 2 ) ) ) );
+							( "You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName )
+							.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 
 					emailAddress = new DataValue<string>();
 					FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -63,7 +63,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						ph.AddControlsReturnThis( specialInstructions );
 					else {
 						var unregisteredTable = EwfTable.Create( caption: "Unregistered users" );
-						unregisteredTable.AddItem( new EwfTableItem( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ) );
+						unregisteredTable.AddItem(
+							new EwfTableItem( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ) );
 						ph.AddControlsReturnThis( unregisteredTable );
 					}
 
@@ -74,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
 					logInHiddenFieldsAndMethod.Item1.AddEtherealControls( this );
 
-					EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Log In", new PostBackButton() ) );
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Log In" ).ToCollection() );
 				} );
 		}
 

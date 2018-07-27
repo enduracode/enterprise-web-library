@@ -33,15 +33,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." ) ) );
 
 			EwfUiStatics.SetContentFootActions(
-				new ActionButtonSetup(
+				new ButtonSetup(
 					"Reset Password",
-					new PostBackButton(
-						PostBack.CreateFull(
+					behavior: new PostBackBehavior(
+						postBack: PostBack.CreateFull(
 							firstModificationMethod: () => {
 								FormsAuthStatics.ResetAndSendPassword( info.User.UserId );
 								AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 							},
-							actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) ) ) ) );
+							actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) ) ) ).ToCollection() );
 		}
 	}
 }

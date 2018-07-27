@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	partial class EntitySetup: UserControl, EntityDisplaySetup {
+	partial class EntitySetup: UserControl, UiEntitySetupBase {
 		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {
 				return null;
@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return new List<ResourceGroup> { new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ) };
 			}
 
-			public override string EntitySetupName { get { return "EWF Admin"; } }
+			public override string EntitySetupName => "EWF Admin";
 
 			protected override bool UserCanAccessEntitySetup {
 				get {
@@ -28,16 +28,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		void EntitySetupBase.LoadData() {}
 
-		List<ActionButtonSetup> EntityDisplaySetup.CreateNavButtonSetups() {
-			return new List<ActionButtonSetup>();
-		}
-
-		List<LookupBoxSetup> EntityDisplaySetup.CreateLookupBoxSetups() {
-			return new List<LookupBoxSetup>();
-		}
-
-		List<ActionButtonSetup> EntityDisplaySetup.CreateActionButtonSetups() {
-			return new List<ActionButtonSetup>();
-		}
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetNavActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
+		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() => new List<LookupBoxSetup>();
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 	}
 }

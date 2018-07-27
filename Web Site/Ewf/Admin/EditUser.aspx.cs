@@ -26,23 +26,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override void loadData() {
 			if( info.UserId.HasValue )
 				EwfUiStatics.SetPageActions(
-					new ActionButtonSetup(
+					new ButtonSetup(
 						"Delete User",
-						new PostBackButton(
-							PostBack.CreateFull(
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
 								id: "delete",
 								firstModificationMethod: deleteUser,
-								actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ) );
+								actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ).ToCollection() );
 
-			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( info.ParentResource ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
 				() => {
 					userFieldTable = new UserFieldTable();
 					userFieldTable.LoadData( info.UserId );
 					ph.AddControlsReturnThis( userFieldTable );
+
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "OK" ).ToCollection() );
 				} );
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "OK", new PostBackButton( pb ) ) );
 		}
 
 		private void deleteUser() {

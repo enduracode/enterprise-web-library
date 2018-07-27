@@ -25,17 +25,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var updateRegionSet = new UpdateRegionSet();
 			EwfUiStatics.SetPageActions(
-				new ActionButtonSetup(
+				new ButtonSetup(
 					"Remove Last Group",
-					new PostBackButton(
-						PostBack.CreateIntermediate(
+					behavior: new PostBackBehavior(
+						postBack: PostBack.CreateIntermediate(
 							updateRegionSet.ToCollection(),
 							id: "removeLastGroup",
 							firstModificationMethod: () => {
 								if( info.GroupCount <= 0 )
 									throw new DataModificationException( "No groups to remove." );
 								parametersModification.GroupCount -= 1;
-							} ) ) ) );
+							} ) ) ).ToCollection() );
 
 			place.Controls.Add(
 				EwfTable.CreateWithItemGroups(
@@ -43,50 +43,46 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					defaultItemLimit: DataRowLimit.Fifty,
 					caption: "Caption",
 					subCaption: "Sub caption",
-					fields:
-						new[]
-							{ new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ), new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" ) },
+					fields: new[]
+						{
+							new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ),
+							new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" )
+						},
 					headItems: new EwfTableItem( "First Column", "Second Column" ).ToCollection(),
 					tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() ) );
 		}
 
 		private EwfTableItemGroup getItemGroup( int groupNumber ) {
 			var updateRegionSet = new UpdateRegionSet();
-			return
-				new EwfTableItemGroup(
-					() =>
-					new EwfTableItemGroupRemainingData(
-						new PlaceHolder().AddControlsReturnThis( "Group {0}".FormatWith( groupNumber ).ToComponents().GetControls() ),
-						groupHeadClickScript:
-						ClickScript.CreatePostBackScript(
-							PostBack.CreateIntermediate(
-								null,
-								id: "group{0}".FormatWith( groupNumber ),
-								firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
-						tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
-					groupNumber == 1
-						? getItems( info.FirstGroupItemCount )
-							  .Concat(
-								  new Func<EwfTableItem>(
-							  () =>
-							  new EwfTableItem(
-								  new PostBackButton(
-								  new ButtonActionControlStyle( "Add Row" ),
-								  usesSubmitBehavior: false,
-								  postBack:
-								  PostBack.CreateIntermediate(
-									  updateRegionSet.ToCollection(),
-									  id: "addRow",
-									  firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) ).ToCollection() )
-						: getItems( 250 ) );
+			return new EwfTableItemGroup(
+				() => new EwfTableItemGroupRemainingData(
+					new PlaceHolder().AddControlsReturnThis( "Group {0}".FormatWith( groupNumber ).ToComponents().GetControls() ),
+					groupHeadClickScript: ClickScript.CreatePostBackScript(
+						PostBack.CreateIntermediate(
+							null,
+							id: "group{0}".FormatWith( groupNumber ),
+							firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
+					tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
+				groupNumber == 1
+					? getItems( info.FirstGroupItemCount )
+						.Concat(
+							new Func<EwfTableItem>(
+									() => new EwfTableItem(
+										new PostBackButton(
+											new ButtonActionControlStyle( "Add Row" ),
+											usesSubmitBehavior: false,
+											postBack: PostBack.CreateIntermediate(
+												updateRegionSet.ToCollection(),
+												id: "addRow",
+												firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) )
+								.ToCollection() )
+					: getItems( 250 ) );
 		}
 
 		private IEnumerable<Func<EwfTableItem>> getItems( int count ) {
 			return from i in Enumerable.Range( 1, count )
-			       select
-				       new Func<EwfTableItem>(
-				       () =>
-				       new EwfTableItem(
+			       select new Func<EwfTableItem>(
+				       () => new EwfTableItem(
 					       new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( ActionControls.GetInfo() ) ),
 					       i.ToString(),
 					       ( i * 2 ) + Environment.NewLine + "extra stuff" ) );

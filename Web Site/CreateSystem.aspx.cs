@@ -2,7 +2,6 @@ using System.IO;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
@@ -18,16 +17,16 @@ namespace EnterpriseWebLibrary.WebSite {
 		private readonly DataValue<string> baseNamespace = new DataValue<string>();
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull(
-				actionGetter: () => new PostBackAction(
-					new PageReloadBehavior(
-						secondaryResponse: new SecondaryResponse(
-							() => EwfResponse.Create(
-								ContentTypes.ApplicationZip,
-								new EwfResponseBodyCreator( createAndZipSystem ),
-								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull(
+						actionGetter: () => new PostBackAction(
+							new PageReloadBehavior(
+								secondaryResponse: new SecondaryResponse(
+									() => EwfResponse.Create(
+										ContentTypes.ApplicationZip,
+										new EwfResponseBodyCreator( createAndZipSystem ),
+										fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) )
+					.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable(
@@ -53,9 +52,9 @@ namespace EnterpriseWebLibrary.WebSite {
 											} )
 										.ToFormItem( label: "Base namespace".ToComponents() )
 								} ) );
-				} );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Create System", new PostBackButton( pb ) ) );
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Create System" ).ToCollection() );
+				} );
 		}
 
 		private void createAndZipSystem( Stream stream ) {

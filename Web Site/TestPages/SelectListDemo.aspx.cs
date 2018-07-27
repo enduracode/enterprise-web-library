@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
@@ -13,17 +12,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			var pb = PostBack.CreateFull();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull().ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
 						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
 						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
 						getChosenUpgradeTestingInfo(),
 						FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
+
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
 				} );
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Submit", new PostBackButton( pb ) ) );
 		}
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {

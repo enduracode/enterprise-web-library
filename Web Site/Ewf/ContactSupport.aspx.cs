@@ -20,9 +20,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override void loadData() {
 			ph.AddControlsReturnThis( new LegacyParagraph( "You may report any problems, make suggestions, or ask for help here." ) );
 
-			var pb = PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				pb.ToCollection(),
+				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
+					.ToCollection(),
 				() => {
 					var table = FormItemBlock.CreateFormItemTable();
 					table.AddFormItems(
@@ -40,9 +40,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									.GetControls() ) ),
 						body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) );
 					ph.AddControlsReturnThis( table );
-				} );
 
-			EwfUiStatics.SetContentFootActions( new ActionButtonSetup( "Send Message", new PostBackButton( pb ) ) );
+					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Send Message" ).ToCollection() );
+				} );
 		}
 
 		private void modifyData() {

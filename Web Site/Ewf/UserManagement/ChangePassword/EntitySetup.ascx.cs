@@ -1,13 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayElements.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string returnAndDestinationUrl
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
-	partial class EntitySetup: UserControl, EntityDisplaySetup {
+	partial class EntitySetup: UserControl, UiEntitySetupBase {
 		partial class Info {
 			protected override ResourceInfo createParentResourceInfo() {
 				return null;
@@ -17,21 +16,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return new List<ResourceGroup>();
 			}
 
-			public override string EntitySetupName { get { return "Change Password"; } }
+			public override string EntitySetupName => "Change Password";
 		}
 
 		void EntitySetupBase.LoadData() {}
 
-		public List<ActionButtonSetup> CreateNavButtonSetups() {
-			return new List<ActionButtonSetup> { new ActionButtonSetup( "Back", new EwfLink( new ExternalResourceInfo( info.ReturnAndDestinationUrl ) ) ) };
-		}
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetNavActions() =>
+			new HyperlinkSetup( new ExternalResourceInfo( info.ReturnAndDestinationUrl ), "Back" ).ToCollection();
 
-		public List<LookupBoxSetup> CreateLookupBoxSetups() {
-			return new List<LookupBoxSetup>();
-		}
-
-		public List<ActionButtonSetup> CreateActionButtonSetups() {
-			return new List<ActionButtonSetup>();
-		}
+		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() => new List<LookupBoxSetup>();
+		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 	}
 }
