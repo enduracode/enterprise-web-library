@@ -23,13 +23,26 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 							if( args.Length < 2 )
 								throw new UserCorrectableException( "You must specify the installation path as the first argument and the operation name as the second." );
 
-							// If installations folder does not exist, create from template if possible.
+							// Create installations folder from template if necessary.
 							var installationPath = args[ 0 ];
-							var configurationFolderPath = getInstallationsFolderPath( installationPath, false );
-							if( !IoMethods.GetFilePathsInFolder( configurationFolderPath, searchOption: SearchOption.AllDirectories ).Any() ) {
-								var templateFolderPath = getInstallationsFolderPath( installationPath, true );
-								if( Directory.Exists( templateFolderPath ) )
+							var templateFolderPath = getInstallationsFolderPath( installationPath, true );
+							var message = "";
+							if( !Directory.Exists( templateFolderPath ) )
+								message = "No installation-configuration template exists.";
+							else {
+								var configurationFolderPath = getInstallationsFolderPath( installationPath, false );
+								if( IoMethods.GetFilePathsInFolder( configurationFolderPath, searchOption: SearchOption.AllDirectories ).Any() )
+									message = "Installation configuration already exists.";
+								else {
 									IoMethods.CopyFolder( templateFolderPath, configurationFolderPath, false );
+									Console.WriteLine( "Created installation configuration from template." );
+								}
+							}
+
+							if( args[ 1 ] == "CreateInstallationConfiguration" ) {
+								if( message.Any() )
+									throw new UserCorrectableException( message );
+								return;
 							}
 
 							// Get installation.

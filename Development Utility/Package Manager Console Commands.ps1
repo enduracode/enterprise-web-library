@@ -3,6 +3,14 @@
 New-Module -Name 'EWL Development Utility' -ScriptBlock {
 $installPath = $args[0]
 
+function Initialize-InstallationConfiguration {
+	[CmdletBinding()]
+	Param()
+	Process {
+		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installPath\..\.. CreateInstallationConfiguration
+	}
+}
+
 function Update-Data {
 	[CmdletBinding()]
 	Param(
