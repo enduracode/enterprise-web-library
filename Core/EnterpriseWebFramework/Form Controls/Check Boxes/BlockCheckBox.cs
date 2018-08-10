@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( validationMethod != null )
 				validation = checkBoxFormValue.CreateValidation( validationMethod );
 
-			nestedControls = setup.NestedControlListGetter?.Invoke().ToImmutableArray() ?? ImmutableArray<Control>.Empty;
+			nestedControls = this.setup.NestedControlListGetter?.Invoke().ToImmutableArray() ?? ImmutableArray<Control>.Empty;
 		}
 
 		/// <summary>
@@ -67,7 +67,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( validationMethod != null )
 				validation = formValue.CreateValidation(
-					( postBackValue, validator ) => validationMethod( new PostBackValue<bool>( postBackValue.Value == this, postBackValue.ChangedOnPostBack ), validator ) );
+					( postBackValue, validator ) => validationMethod(
+						new PostBackValue<bool>( postBackValue.Value == this, postBackValue.ChangedOnPostBack ),
+						validator ) );
 
 			nestedControls = setup.NestedControlListGetter?.Invoke().ToImmutableArray() ?? ImmutableArray<Control>.Empty;
 		}
