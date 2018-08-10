@@ -46,6 +46,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 		}
 
+		public static UrlControl ToUrlControl(
+			this DataValue<string> dataValue, bool allowEmpty, UrlControlSetup setup = null, string value = null, int? maxLength = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new UrlControl(
+				value ?? dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				maxLength: maxLength,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
 		public static WysiwygHtmlEditor ToHtmlEditor(
 			this DataValue<string> dataValue, bool allowEmpty, WysiwygHtmlEditorSetup setup = null, string value = null, int? maxLength = null,
 			Action<Validator> additionalValidationMethod = null ) {

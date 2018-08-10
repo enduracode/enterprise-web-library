@@ -402,6 +402,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Telephone Number Control\TelephoneNumberControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Control\TextControlSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\URL Control\UrlControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\URL Control\UrlControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\FragmentMarker.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Ethereal\EtherealIdContainer.cs" />
     <Compile Include="EnterpriseWebFramework\General Content Models\Flow\FlowIdContainer.cs" />
