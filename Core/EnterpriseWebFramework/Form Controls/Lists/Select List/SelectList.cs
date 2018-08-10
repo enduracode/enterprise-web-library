@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Web;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
@@ -337,12 +338,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
 					placeholderItem != null
 						// Don't let the placeholder value be the empty string since this seems to confuse Chosen.
-						? "placeholder_text_single: '{0}'".FormatWith( placeholderItem.Item.Label.Any() ? placeholderItem.Item.Label : " " )
+						? "placeholder_text_single: '{0}'".FormatWith(
+							placeholderItem.Item.Label.Any() ? HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) : " " )
 						: "",
 					"search_contains: true",
 					"width: '{0}'".FormatWith( width.HasValue ? width.Value.ToString() : "" ) ),
 				// Do this after .chosen since we only want it to affect the native select.
-				placeholderItem != null ? ".children().eq( {0} ).text( '{1}' )".FormatWith( items.IndexOf( placeholderItem ), placeholderItem.Item.Label ) : "" );
+				placeholderItem != null
+					? ".children().eq( {0} ).text( '{1}' )".FormatWith(
+						items.IndexOf( placeholderItem ),
+						HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) )
+					: "" );
 		}
 
 		FormValue FormValueControl.FormValue { get { return formValue; } }
