@@ -91,26 +91,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				", readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
 				"validator.GetZipCode( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty ).FullZipCode",
 				"" );
-			writeFormItemGetters(
+			writeFormItemGetter(
 				writer,
 				field,
-				"EwfTextBox",
-				"Uri",
-				"string",
-				"\"\"",
-				new CSharpParameter[ 0 ],
+				"UrlControl",
 				getAllowEmptyParameter( false ).ToCollection(),
-				new[]
-					{
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
-				", readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
-				"validator.GetUrl( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty" +
-				( field.Size.HasValue ? ", " + field.Size.Value : "" ) + " )",
-				"" );
+				false,
+				new CSharpParameter( "UrlControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string",
+				Enumerable.Empty<CSharpParameter>(),
+				true,
+				dv =>
+					"{0}.ToUrlControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
 				field,
