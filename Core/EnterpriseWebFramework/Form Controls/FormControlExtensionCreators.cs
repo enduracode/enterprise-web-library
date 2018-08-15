@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.InputValidation;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class FormControlExtensionCreators {
@@ -112,6 +113,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup: setup,
 				additionalValidationMethod: validator => {
 					dataValue.Value = boolValue.Value.BooleanToDecimal();
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DateControl ToDateControl(
+			this DataValue<LocalDate> dataValue, DateControlSetup setup = null, SpecifiedValue<LocalDate?> value = null, LocalDate? minValue = null,
+			LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			return new DateControl(
+				value != null ? value.Value : dataValue.Value,
+				false,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DateControl ToDateControl(
+			this DataValue<LocalDate?> dataValue, DateControlSetup setup = null, SpecifiedValue<LocalDate?> value = null, bool allowEmpty = true,
+			LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			return new DateControl(
+				value != null ? value.Value : dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
 					additionalValidationMethod?.Invoke( validator );
 				} );
 		}

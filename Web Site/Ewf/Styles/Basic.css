@@ -203,14 +203,18 @@ table.ewfBlockCheckBox > tbody > tr > td:first-child input {
 }
 
 /* date pickers, time pickers, and date and time pickers */
+ewfDateControl > ewfSingleLineTextControlAllStates {
+	margin-right: .5em;
+	width: 8em;
+}
+ewfDateControl > ewfActionControlAllStylesAllStates, .datepickerIcon, .timepickerIcon {
+	font-size: 1.4em;
+}
 ewfDatePicker, ewfTimePicker {
 	max-width: 10em;
 }
 ewfDateAndTimePicker {
 	max-width: 15em;
-}
-.datepickerIcon, .timepickerIcon {
-	font-size: 1.4em;
 }
 .datetimepickerIcon {
 	font-size: .8em;
