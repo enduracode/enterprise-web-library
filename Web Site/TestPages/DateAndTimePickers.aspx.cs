@@ -1,4 +1,3 @@
-using System;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
@@ -13,8 +12,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			table.AddFormItems(
 				new DateControl( null, true ).ToFormItem( label: "Date control".ToComponents() ),
 				FormItem.Create( "Time Picker", new TimePicker( null ) ),
-				FormItem.Create( "Date/Time Picker", new DateTimePicker( null ) ),
-				FormItem.Create( "Duration Picker", new DurationPicker( TimeSpan.Zero ) ) );
+				new DateAndTimeControl( null, true ).ToFormItem( label: "Date and time control".ToComponents() ),
+				new DurationControl( null, true ).ToFormItem( label: "Duration control".ToComponents() ) );
 			ph.AddControlsReturnThis( table );
 		}
 
