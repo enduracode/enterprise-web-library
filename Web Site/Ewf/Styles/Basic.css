@@ -213,15 +213,20 @@ ewfDateControl > ewfActionControlAllStylesAllStates, .datepickerIcon, .timepicke
 ewfDatePicker, ewfTimePicker {
 	max-width: 10em;
 }
-ewfDateAndTimePicker {
-	max-width: 15em;
+ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
+	margin-right: .5em;
+	width: 12em;
+	vertical-align: middle;
 }
-.datetimepickerIcon {
+ewfDateAndTimeControl > ewfActionControlAllStylesAllStates, .datetimepickerIcon {
 	font-size: .8em;
 }
-.datetimepickerIcon > .fa-clock-o {
+ewfDateAndTimeControl > ewfActionControlAllStylesAllStates .fa-clock-o, .datetimepickerIcon > .fa-clock-o {
 	position: relative;
 	top: .20em;
+}
+ewfDateAndTimePicker {
+	max-width: 15em;
 }
 
 /* action controls */
