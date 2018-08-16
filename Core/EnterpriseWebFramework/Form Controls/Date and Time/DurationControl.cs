@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
@@ -87,21 +88,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Validation = textControl.Validation;
 		}
 
-		/// <summary>
-		/// Supports ':' being present or not.
-		/// Requires a value. Must be less than maxValueLength.
-		/// May only contain numbers.
-		/// </summary>
 		private bool tooLongOrInvalidCharacters( string value ) {
 			const int maxValueLength = 6; // also defined in JavaScript
-			return ( value.Length > ( value.Contains( ":" ) ? maxValueLength + 1 : maxValueLength ) || value.Length == 0 ) ||
-			       !( value.Equals( Regex.Replace( value, "[^0-9:]", "" ) ) );
+			return value.Length > ( value.Contains( ":" ) ? maxValueLength + 1 : maxValueLength ) || !value.Equals( Regex.Replace( value, "[^0-9:]", "" ) );
 		}
 
 		/// <summary>
 		/// Supports browsers with Javascript disabled.
 		/// </summary>
-		private TimeSpan parseTimeSpan( string value ) {
+		private TimeSpan? parseTimeSpan( string value ) {
+			if( !value.Any() )
+				return null;
+
 			if( value.Contains( ":" ) ) {
 				var splitPartsArray = value.Split( ':' );
 				return new TimeSpan( int.Parse( splitPartsArray[ 0 ] ), int.Parse( splitPartsArray[ 1 ] ), 0 );

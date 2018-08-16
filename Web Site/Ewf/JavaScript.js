@@ -18,6 +18,9 @@ function toggleElementDisplay( id ) {
 var maxValueLength = 6;
 
 function ApplyTimeSpanFormat( field ) {
+	if( field.value === "" )
+		return;
+
 	// Turn the string HHHH:MM into an an array of { H, H, H, H, M, M }
 	var digits = field.value.replace( ":", "" ).split( "" );
 
