@@ -424,5 +424,12 @@ namespace EnterpriseWebLibrary {
 		public static IEnumerable<T> Append<T>( this IEnumerable<T> items, T item ) {
 			return items.Concat( item );
 		}
+
+		/// <summary>
+		/// Transforms the underlying value of this nullable object using the specified selector, if an underlying value exists.
+		/// </summary>
+		public static DestinationType? ToNewUnderlyingValue<SourceType, DestinationType>( this SourceType? value, Func<SourceType, DestinationType> valueSelector )
+			where SourceType: struct where DestinationType: struct =>
+			value.HasValue ? (DestinationType?)valueSelector( value.Value ) : null;
 	}
 }

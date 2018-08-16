@@ -146,5 +146,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					additionalValidationMethod?.Invoke( validator );
 				} );
 		}
+
+		public static DateControl ToDateControl(
+			this DataValue<DateTime> dataValue, DateControlSetup setup = null, SpecifiedValue<DateTime?> value = null, LocalDate? minValue = null,
+			LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<DateTime?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToDateControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DateControl ToDateControl(
+			this DataValue<DateTime?> dataValue, DateControlSetup setup = null, SpecifiedValue<DateTime?> value = null, bool allowEmpty = true,
+			LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			var localDateValue =
+				new DataValue<LocalDate?> { Value = ( value != null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( LocalDate.FromDateTime ) };
+			return localDateValue.ToDateControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue,
+				additionalValidationMethod: validator => {
+					dataValue.Value = localDateValue.Value.ToNewUnderlyingValue( i => i.ToDateTimeUnspecified() );
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
 	}
 }
