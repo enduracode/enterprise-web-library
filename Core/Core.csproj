@@ -384,6 +384,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateAndTimeControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateControlSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DurationControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DurationControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />

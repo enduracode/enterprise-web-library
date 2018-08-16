@@ -173,9 +173,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					new[] { new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
 					"validator.GetInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
+				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
-				writeDurationFormItemGetters( writer, field );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
 				writeNumberAsTextFormItemGetters(
@@ -185,6 +185,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					new[] { getAllowEmptyParameter( true ), new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
 					"validator.GetNullableInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min: min, max: max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
+				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 			}
 
@@ -242,9 +243,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					"validator.GetDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeCheckBoxFormItemGetters( writer, field, "decimal" );
+				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
-				writeDurationFormItemGetters( writer, field );
 			}
 			if( field.TypeIs( typeof( decimal? ) ) ) {
 				writeNumberAsTextFormItemGetters(
@@ -258,6 +259,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						},
 					"validator.GetNullableDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
+				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
 		}
@@ -302,22 +304,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"" );
 		}
 
-		private static void writeDurationFormItemGetters( TextWriter writer, ModificationField field ) {
-			writeFormItemGetters(
+		private static void writeDurationFormItemGetter( TextWriter writer, ModificationField field ) =>
+			writeFormItemGetter(
 				writer,
 				field,
-				"DurationPicker",
-				"Duration",
-				field.TypeName,
-				"0",
-				new CSharpParameter[ 0 ],
-				new CSharpParameter[ 0 ],
-				new CSharpParameter[ 0 ],
-				new CSharpParameter[ 0 ],
-				"new DurationPicker( System.TimeSpan.FromSeconds( (int)v ) )",
-				"(" + field.TypeName + ")control.ValidateAndGetPostBackDuration( postBackValues, validator, new ValidationErrorHandler( subject ) ).TotalSeconds",
-				"" );
-		}
+				"DurationControl",
+				Enumerable.Empty<CSharpParameter>(),
+				false,
+				new CSharpParameter( "DurationControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				field.TypeName == field.NullableTypeName ? getAllowEmptyParameter( true ).ToCollection() : Enumerable.Empty<CSharpParameter>(),
+				true,
+				dv => field.TypeName == field.NullableTypeName
+					      ? "{0}.ToDurationControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						      .FormatWith( dv )
+					      : "{0}.ToDurationControl( setup: controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						      .FormatWith( dv ) );
 
 		private static void writeHtmlAndFileFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
 			writeFormItemGetter(

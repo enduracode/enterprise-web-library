@@ -238,5 +238,86 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					additionalValidationMethod?.Invoke( validator );
 				} );
 		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<TimeSpan> dataValue, DurationControlSetup setup = null, SpecifiedValue<TimeSpan?> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new DurationControl(
+				value != null ? value.Value : dataValue.Value,
+				false,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<TimeSpan?> dataValue, DurationControlSetup setup = null, SpecifiedValue<TimeSpan?> value = null, bool allowEmpty = true,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new DurationControl(
+				value != null ? value.Value : dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<int> dataValue, DurationControlSetup setup = null, SpecifiedValue<int?> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<int?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToDurationControl(
+				setup: setup,
+				allowEmpty: false,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<int?> dataValue, DurationControlSetup setup = null, SpecifiedValue<int?> value = null, bool allowEmpty = true,
+			Action<Validator> additionalValidationMethod = null ) {
+			var timeSpanValue = new DataValue<TimeSpan?>
+				{
+					Value = ( value != null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( v => TimeSpan.FromSeconds( v ) )
+				};
+			return timeSpanValue.ToDurationControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				additionalValidationMethod: validator => {
+					dataValue.Value = timeSpanValue.Value.ToNewUnderlyingValue( i => (int)i.TotalSeconds );
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<decimal> dataValue, DurationControlSetup setup = null, SpecifiedValue<decimal?> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<decimal?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToDurationControl(
+				setup: setup,
+				allowEmpty: false,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static DurationControl ToDurationControl(
+			this DataValue<decimal?> dataValue, DurationControlSetup setup = null, SpecifiedValue<decimal?> value = null, bool allowEmpty = true,
+			Action<Validator> additionalValidationMethod = null ) {
+			var intValue = new DataValue<int?> { Value = (int?)( value != null ? value.Value : dataValue.Value ) };
+			return intValue.ToDurationControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				additionalValidationMethod: validator => {
+					dataValue.Value = intValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
 	}
 }

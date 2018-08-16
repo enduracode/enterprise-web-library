@@ -228,6 +228,9 @@ ewfDateAndTimeControl > ewfActionControlAllStylesAllStates .fa-clock-o, .datetim
 ewfDateAndTimePicker {
 	max-width: 15em;
 }
+ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
+	width: 6em;
+}
 
 /* action controls */
 button {
