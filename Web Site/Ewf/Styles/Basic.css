@@ -207,10 +207,10 @@ ewfDateControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
 	width: 8em;
 }
-ewfDateControl > ewfActionControlAllStylesAllStates, .datepickerIcon, .timepickerIcon {
+ewfDateControl > ewfActionControlAllStylesAllStates, .timepickerIcon {
 	font-size: 1.4em;
 }
-ewfDatePicker, ewfTimePicker {
+ewfTimePicker {
 	max-width: 10em;
 }
 ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
@@ -218,15 +218,12 @@ ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
 	width: 12em;
 	vertical-align: middle;
 }
-ewfDateAndTimeControl > ewfActionControlAllStylesAllStates, .datetimepickerIcon {
+ewfDateAndTimeControl > ewfActionControlAllStylesAllStates {
 	font-size: .8em;
 }
-ewfDateAndTimeControl > ewfActionControlAllStylesAllStates .fa-clock-o, .datetimepickerIcon > .fa-clock-o {
+ewfDateAndTimeControl > ewfActionControlAllStylesAllStates .fa-clock-o {
 	position: relative;
 	top: .20em;
-}
-ewfDateAndTimePicker {
-	max-width: 15em;
 }
 ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
 	width: 6em;

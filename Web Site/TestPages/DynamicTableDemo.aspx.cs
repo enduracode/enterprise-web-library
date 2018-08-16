@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					"One",
 					"Two",
 					"Three with Tip".ToCell( new TableCellSetup( toolTip: "Cell tool tip" ) ),
-					"Four with TipControl".ToCell( new TableCellSetup( toolTipControl: new DatePicker( null ) ) ) );
+					"Four with TipControl" );
 			}
 			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 
@@ -39,9 +39,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript =
-						ClickScript.CreatePostBackScript(
-							PostBack.CreateFull( id: "table3" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
+					clickScript = ClickScript.CreatePostBackScript(
+						PostBack.CreateFull( id: "table3" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -64,9 +63,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript =
-						ClickScript.CreatePostBackScript(
-							PostBack.CreateFull( id: "table4" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
+					clickScript = ClickScript.CreatePostBackScript(
+						PostBack.CreateFull( id: "table4" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -83,9 +81,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						{
 							ClickScript = clickScript,
 							UniqueIdentifier = 3,
-							ToolTipControl =
-								new PlaceHolder().AddControlsReturnThis(
-									new EwfImage( new ImageSetup( null ), new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) ).ToCollection().GetControls() )
+							ToolTipControl = new PlaceHolder().AddControlsReturnThis(
+								new EwfImage( new ImageSetup( null ), new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) ).ToCollection()
+									.GetControls() )
 						},
 					cells[ 0 ],
 					cells[ 1 ],
@@ -105,9 +103,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table6.AddTextRow(
 					new RowSetup
 						{
-							ClickScript =
-								ClickScript.CreatePostBackScript(
-									PostBack.CreateFull( id: "table6" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) ),
+							ClickScript = ClickScript.CreatePostBackScript(
+								PostBack.CreateFull( id: "table6" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) ),
 							UniqueIdentifier = 3
 						},
 					"Post" );
@@ -118,9 +115,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript =
-						ClickScript.CreatePostBackScript(
-							PostBack.CreateFull( id: "table7" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
+					clickScript = ClickScript.CreatePostBackScript(
+						PostBack.CreateFull( id: "table7" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
@@ -140,9 +136,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				ClickScript clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript =
-						ClickScript.CreatePostBackScript(
-							PostBack.CreateFull( id: "table8" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
+					clickScript = ClickScript.CreatePostBackScript(
+						PostBack.CreateFull( id: "table8" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {

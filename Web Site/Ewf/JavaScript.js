@@ -13,7 +13,7 @@ function toggleElementDisplay( id ) {
 	setElementDisplay( id, !$( '#' + id ).is( ":visible" ) );
 }
 
-// Supports DurationPicker
+// Supports DurationControl
 // Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
 var maxValueLength = 6;
 
@@ -174,7 +174,7 @@ function toggleCheckBoxes( checklistClientId, setChecked ) {
 	} );
 }
 
-// Supports DurationPicker.
+// Supports DurationControl.
 /*
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
  * (c) 2006 Alex Brem <alex@0xab.cd> - http://blog.0xab.cd
