@@ -213,6 +213,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
+				writer.WriteLine( "using NodaTime;" );
 
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
@@ -412,6 +413,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
+				writer.WriteLine( "using NodaTime;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();

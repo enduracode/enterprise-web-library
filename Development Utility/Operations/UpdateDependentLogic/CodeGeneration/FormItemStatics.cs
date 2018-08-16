@@ -402,54 +402,37 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeDateFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( field.TypeIs( typeof( DateTime? ) ) )
-				writeFormItemGetters(
-					writer,
-					field,
-					"DatePicker",
-					"Date",
-					"System.DateTime?",
-					"null",
-					new CSharpParameter[ 0 ],
-					new CSharpParameter[ 0 ],
-					new[]
-						{
-							new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
-							new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" ), new CSharpParameter( "FormAction", "action", "null" )
-						},
-					getAllowEmptyParameter( true ).ToCollection(),
-					"{ " + StringTools.ConcatenateWithDelimiter(
-						" ",
-						"var c = new DatePicker( v, action: action ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange };",
-						"if( minDate.HasValue ) c.MinDate = minDate.Value;",
-						"if( maxDate.HasValue ) c.MaxDate = maxDate.Value;",
-						"return c;" ) + " }",
-					"control.ValidateAndGetNullablePostBackDate( postBackValues, validator, new ValidationErrorHandler( subject ), allowEmpty )",
-					"" );
 			if( field.TypeIs( typeof( DateTime ) ) )
-				writeFormItemGetters(
+				writeFormItemGetter(
 					writer,
 					field,
-					"DatePicker",
-					"Date",
-					"System.DateTime?",
-					"null",
-					new CSharpParameter[ 0 ],
-					new CSharpParameter[ 0 ],
-					new[]
-						{
-							new CSharpParameter( "System.DateTime?", "minDate", "null" ), new CSharpParameter( "System.DateTime?", "maxDate", "null" ),
-							new CSharpParameter( "bool", "constrainToSqlSmallDateTimeRange", "true" ), new CSharpParameter( "FormAction", "action", "null" )
-						},
-					new CSharpParameter[ 0 ],
-					"{ " + StringTools.ConcatenateWithDelimiter(
-						" ",
-						"var c = new DatePicker( v, action: action ) { ConstrainToSqlSmallDateTimeRange = constrainToSqlSmallDateTimeRange };",
-						"if( minDate.HasValue ) c.MinDate = minDate.Value;",
-						"if( maxDate.HasValue ) c.MaxDate = maxDate.Value;",
-						"return c;" ) + " }",
-					"control.ValidateAndGetPostBackDate( postBackValues, validator, new ValidationErrorHandler( subject ) )",
-					"" );
+					"DateControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( "DateTime?" ),
+					new CSharpParameter( "LocalDate?", "minValue", "null" ).ToCollection().Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToDateControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+			if( field.TypeIs( typeof( DateTime? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DateControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( "DateTime?" ),
+					getAllowEmptyParameter( true )
+						.ToCollection()
+						.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
+						.Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
 		}
 
 		private static void writeEnumerableFormItemGetters( TextWriter writer, ModificationField field ) {
