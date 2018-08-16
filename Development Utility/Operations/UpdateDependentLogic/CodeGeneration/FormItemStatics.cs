@@ -412,7 +412,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					Enumerable.Empty<CSharpParameter>(),
 					false,
 					new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-					"SpecifiedValue<{0}>".FormatWith( "DateTime?" ),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
 					new CSharpParameter( "LocalDate?", "minValue", "null" ).ToCollection().Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
 					true,
 					dv =>
@@ -426,7 +426,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					Enumerable.Empty<CSharpParameter>(),
 					false,
 					new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-					"SpecifiedValue<{0}>".FormatWith( "DateTime?" ),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
 					getAllowEmptyParameter( true )
 						.ToCollection()
 						.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
