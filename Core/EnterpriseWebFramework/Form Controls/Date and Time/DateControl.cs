@@ -49,28 +49,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						       pageModificationValue: setup.PageModificationValue,
 						       validationPredicate: setup.ValidationPredicate,
 						       validationErrorNotifier: setup.ValidationErrorNotifier ),
-				validationMethod: ( postBackValue, validator ) => {
-					var errorHandler = new ValidationErrorHandler( "date" );
-					var validatedValue = validator.GetNullableDateTime(
-						errorHandler,
-						postBackValue,
-						null,
-						allowEmpty,
-						minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
-						maxValue?.ToDateTimeUnspecified() ?? DateTime.MaxValue );
-					if( errorHandler.LastResult != ErrorCondition.NoError ) {
-						setup.ValidationErrorNotifier?.Invoke();
-						return;
-					}
+				validationMethod: validationMethod == null
+					                  ? (Action<string, Validator>)null
+					                  : ( postBackValue, validator ) => {
+						                  var errorHandler = new ValidationErrorHandler( "date" );
+						                  var validatedValue = validator.GetNullableDateTime(
+							                  errorHandler,
+							                  postBackValue,
+							                  null,
+							                  allowEmpty,
+							                  minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
+							                  maxValue?.ToDateTimeUnspecified() ?? DateTime.MaxValue );
+						                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
+							                  setup.ValidationErrorNotifier?.Invoke();
+							                  return;
+						                  }
 
-					if( validatedValue.HasTime() ) {
-						validator.NoteErrorAndAddMessage( "Time information is not allowed." );
-						setup.ValidationErrorNotifier?.Invoke();
-						return;
-					}
+						                  if( validatedValue.HasTime() ) {
+							                  validator.NoteErrorAndAddMessage( "Time information is not allowed." );
+							                  setup.ValidationErrorNotifier?.Invoke();
+							                  return;
+						                  }
 
-					validationMethod( validatedValue.HasValue ? (LocalDate?)LocalDate.FromDateTime( validatedValue.Value ) : null, validator );
-				} );
+						                  validationMethod( validatedValue.HasValue ? (LocalDate?)LocalDate.FromDateTime( validatedValue.Value ) : null, validator );
+					                  } );
 
 			Labeler = textControl.Labeler;
 
