@@ -203,11 +203,15 @@ table.ewfBlockCheckBox > tbody > tr > td:first-child input {
 }
 
 /* date pickers, time pickers, and date and time pickers */
+ewfDateControl, ewfDateAndTimeControl {
+	display: flex;
+}
 ewfDateControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
-	width: 8em;
+	width: 100%;
+	max-width: 8em;
 }
-ewfDateControl > ewfActionControlAllStylesAllStates, .timepickerIcon {
+ewfDateControl ewfIcon, .timepickerIcon {
 	font-size: 1.4em;
 }
 ewfTimePicker {
@@ -215,18 +219,19 @@ ewfTimePicker {
 }
 ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
-	width: 12em;
-	vertical-align: middle;
+	width: 100%;
+	max-width: 12em;
 }
-ewfDateAndTimeControl > ewfActionControlAllStylesAllStates {
-	font-size: .8em;
+ewfDateAndTimeControl .fa-stack {
+	font-size: .7em;
 }
-ewfDateAndTimeControl > ewfActionControlAllStylesAllStates .fa-clock-o {
+ewfDateAndTimeControl ewfIcon.fa-clock-o {
 	position: relative;
 	top: .20em;
 }
 ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
-	width: 6em;
+	width: 100%;
+	max-width: 6em;
 }
 
 /* action controls */
