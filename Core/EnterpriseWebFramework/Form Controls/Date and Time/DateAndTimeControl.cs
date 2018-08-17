@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                  DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
 							                  allowEmpty,
 							                  minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
-							                  maxValue?.ToDateTimeUnspecified() ?? DateTime.MaxValue );
+							                  maxValue?.PlusDays( 1 ).ToDateTimeUnspecified() ?? DateTime.MaxValue );
 						                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
 							                  setup.ValidationErrorNotifier?.Invoke();
 							                  return;
