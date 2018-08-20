@@ -36,7 +36,16 @@ namespace EnterpriseWebLibrary.Email {
 				var sendGridService = service as Configuration.InstallationStandard.SendGrid;
 				var smtpServerService = service as Configuration.InstallationStandard.SmtpServer;
 				if( sendGridService != null ) {
-					var client = new SendGrid.SendGridClient( new SendGrid.SendGridClientOptions { ApiKey = sendGridService.ApiKey } );
+					var client = new SendGrid.SendGridClient(
+						new SendGrid.SendGridClientOptions
+							{
+								ApiKey = sendGridService.ApiKey,
+								ReliabilitySettings = new SendGrid.Helpers.Reliability.ReliabilitySettings(
+									5,
+									TimeSpan.FromSeconds( .5 ),
+									TimeSpan.FromSeconds( 3 ),
+									TimeSpan.FromSeconds( .5 ) )
+							} );
 					emailSender = message => {
 						var sendGridMessage = getSendGridMessage( message );
 						try {
@@ -63,9 +72,8 @@ namespace EnterpriseWebLibrary.Email {
 		private static SendGrid.Helpers.Mail.SendGridMessage getSendGridMessage( EmailMessage message ) {
 			var m = new SendGrid.Helpers.Mail.SendGridMessage();
 
-			SendGrid.Helpers.Mail.EmailAddress getAddress( EmailAddress address ) => new SendGrid.Helpers.Mail.EmailAddress(
-				address.Address,
-				name: address.DisplayName.Any() ? address.DisplayName : null );
+			SendGrid.Helpers.Mail.EmailAddress getAddress( EmailAddress address ) =>
+				new SendGrid.Helpers.Mail.EmailAddress( address.Address, name: address.DisplayName.Any() ? address.DisplayName : null );
 
 			m.From = getAddress( message.From );
 			// As of 12 September 2017 SendGrid does not support multiple reply-to addresses. See https://github.com/sendgrid/sendgrid-csharp/issues/339.
@@ -210,7 +218,11 @@ namespace EnterpriseWebLibrary.Email {
 			return regexToReplacements.Cast<DictionaryEntry>()
 				.Aggregate(
 					html,
-					( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+					( current, regexToReplacement ) => Regex.Replace(
+						current,
+						(string)regexToReplacement.Key,
+						(string)regexToReplacement.Value,
+						RegexOptions.IgnoreCase ) )
 				.Trim();
 		}
 
@@ -262,7 +274,8 @@ namespace EnterpriseWebLibrary.Email {
 
 			if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
 				m.ToAddresses.Add( new EmailAddress( "system-manager@enterpriseweblibrary.com", "EWL System Manager" ) );
-				m.CustomHeaders.Add( Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
+				m.CustomHeaders.Add(
+					Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
 			}
 			else {
 				m.ToAddresses.AddRange( getDeveloperEmailAddresses() );
