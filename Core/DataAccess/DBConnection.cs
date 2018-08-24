@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Humanizer;
+using NodaTime;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -40,8 +41,12 @@ namespace EnterpriseWebLibrary.DataAccess {
 		internal DBConnection( DatabaseInfo databaseInfo, bool useLongTimeouts = false ) {
 			this.databaseInfo = databaseInfo;
 
+			// Sometimes databases are slow when nightly operations are underway.
+			var time = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay;
+			var isNight = new LocalTime( 22, 0 ) <= time || time < new LocalTime( 6, 0 );
+			var timeout = isNight ? 120 : useLongTimeouts ? 60 : 15;
+
 			// Build the connection string.
-			var timeout = useLongTimeouts ? 60 : 15;
 			string connectionString;
 			if( databaseInfo is SqlServerInfo sqlServerInfo ) {
 				connectionString = "Data Source=" + ( sqlServerInfo.Server ?? "(local)" );
