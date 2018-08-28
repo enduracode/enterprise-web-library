@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -19,17 +20,22 @@ namespace EnterpriseWebLibrary.IO {
 		}
 
 		/// <summary>
-		/// Writes the message prepended by DateTime.Now.
+		/// Writes the message prepended by a timestamp.
 		/// </summary>
 		public static void WriteTimeStampedOutput( string message ) {
-			Console.Out.WriteLine( DateTime.Now + ":  " + message );
+			Console.Out.WriteLine( "{0}  {1}".FormatWith( getTimestamp(), message ) );
 		}
 
 		/// <summary>
-		/// Writes the error message prepended by DateTime.Now.
+		/// Writes the error message prepended by a timestamp.
 		/// </summary>
 		public static void WriteTimeStampedError( string message ) {
-			Console.Error.WriteLine( DateTime.Now + ":  " + message );
+			Console.Error.WriteLine( "{0}  {1}".FormatWith( getTimestamp(), message ) );
+		}
+
+		private static string getTimestamp() {
+			var now = DateTime.Now;
+			return "{0}, {1}".FormatWith( now.ToDayMonthYearString( true ), now.ToString( "HH:mm:ss", Cultures.EnglishUnitedStates ) );
 		}
 	}
 }
