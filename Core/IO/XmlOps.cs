@@ -55,15 +55,14 @@ namespace EnterpriseWebLibrary.IO {
 		/// </summary>
 		public static void SerializeIntoFile<TMainElement>( TMainElement mainElement, string xmlFilePath ) {
 			Directory.CreateDirectory( Path.GetDirectoryName( xmlFilePath ) );
-			File.WriteAllText( xmlFilePath, SerializeIntoString( mainElement ) );
+			using( var stream = File.Create( xmlFilePath ) )
+				SerializeIntoStream( mainElement, stream );
 		}
 
 		/// <summary>
-		/// Deserializes an instance of the specified main element type from an XML string.
+		/// Deserializes an instance of the specified main element type from a stream.
 		/// </summary>
-		public static TMainElement DeserializeFromString<TMainElement>( string xmlString, bool performSchemaValidation ) {
-			// NOTE: Compare this to the XML reading code in Charette Importer
-
+		public static TMainElement DeserializeFromStream<TMainElement>( Stream sourceStream, bool performSchemaValidation ) {
 			// Configure the XML reader.
 			var settings = new XmlReaderSettings();
 			if( performSchemaValidation ) {
@@ -77,14 +76,12 @@ namespace EnterpriseWebLibrary.IO {
 
 			// Deserialize the XML file.
 			TMainElement mainElement;
-			using( var stringReader = new StringReader( xmlString ) ) {
-				using( var reader = XmlReader.Create( stringReader, settings ) ) {
-					// If TMainElement has a DataContract attribute, use the DataContractSerializer. Otherwise use the XmlSerializer.
-					if( isDataContract<TMainElement>() )
-						mainElement = (TMainElement)new DataContractSerializer( typeof( TMainElement ) ).ReadObject( reader );
-					else
-						mainElement = (TMainElement)new XmlSerializer( typeof( TMainElement ) ).Deserialize( reader );
-				}
+			using( var reader = XmlReader.Create( sourceStream, settings ) ) {
+				// If TMainElement has a DataContract attribute, use the DataContractSerializer. Otherwise use the XmlSerializer.
+				if( isDataContract<TMainElement>() )
+					mainElement = (TMainElement)new DataContractSerializer( typeof( TMainElement ) ).ReadObject( reader );
+				else
+					mainElement = (TMainElement)new XmlSerializer( typeof( TMainElement ) ).Deserialize( reader );
 			}
 
 			// If there were any problems with the file, throw an exception.
@@ -104,7 +101,8 @@ namespace EnterpriseWebLibrary.IO {
 		public static TMainElement DeserializeFromFile<TMainElement>( string xmlFilePath, bool performSchemaValidation ) {
 			if( !File.Exists( xmlFilePath ) )
 				throw new FileNotFoundException( "XML file not present at: " + xmlFilePath );
-			return DeserializeFromString<TMainElement>( File.ReadAllText( xmlFilePath ), performSchemaValidation );
+			using( var stream = File.OpenRead( xmlFilePath ) )
+				return DeserializeFromStream<TMainElement>( stream, performSchemaValidation );
 		}
 
 		private static bool isDataContract<TMainElement>() {

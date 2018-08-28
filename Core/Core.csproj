@@ -664,7 +664,6 @@
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\SystemList.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\Isu.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\ProgramRunner.cs" />
-    <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\ProgramRunnerUnstreamed.cs" />
     <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />

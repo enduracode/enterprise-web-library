@@ -1,53 +1,63 @@
 ﻿using System;
 using System.IO;
-using System.ServiceModel;
+using System.Net.Http;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
-	/// <summary>
-	/// RSIS System List logic.
-	/// </summary>
 	public static class SystemListStatics {
 		public static SystemList RsisSystemList { get; private set; }
 
 		/// <summary>
-		/// Gets a new system list from RSIS.
+		/// Gets a new system list.
 		/// </summary>
 		public static void RefreshSystemList() {
-			// When deserializing the system list below, do not perform schema validation since we don't want to be forced into redeploying Program Runner after every
-			// schema change. We also don't have access to the schema on non-development machines.
-			var cachedSystemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "RSIS System List.xml" );
+			// Do not perform schema validation since we don't want to be forced into redeploying Program Runner after every schema change. We also don't have access
+			// to the schema on non-development machines.
+			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "System List.xml" );
+			var cacheUsed = false;
 			try {
-				var serializedSystemList = ConfigurationLogic.ExecuteProgramRunnerUnstreamedServiceMethod(
-					channel => channel.GetSystemList( ConfigurationLogic.SystemManagerAccessToken ),
-					"system list download" );
-				RsisSystemList = XmlOps.DeserializeFromString<SystemList>( serializedSystemList, false );
-
-				// Cache the system list so something is available in the future if the machine is offline.
-				try {
-					XmlOps.SerializeIntoFile( RsisSystemList, cachedSystemListFilePath );
-				}
-				catch( Exception e ) {
-					const string generalMessage = "The RSIS system list cannot be cached on disk.";
-					if( e is UnauthorizedAccessException )
-						throw new UserCorrectableException( generalMessage + " If the program is running as a non built in administrator, you may need to disable UAC.", e );
-
-					// An IOException probably means the file is locked. In this case we want to ignore the problem and move on.
-					if( !( e is IOException ) )
-						throw new UserCorrectableException( generalMessage, e );
-				}
+				ConfigurationLogic.ExecuteWithSystemManagerClient(
+					client => {
+						Task.Run(
+								async () => {
+									using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
+										response.EnsureSuccessStatusCode();
+										using( var stream = await response.Content.ReadAsStreamAsync() )
+											RsisSystemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
+									}
+								} )
+							.Wait();
+					} );
 			}
-			catch( UserCorrectableException e ) {
-				if( e.InnerException == null || !( e.InnerException is EndpointNotFoundException ) )
-					throw;
-
+			catch( Exception e ) {
 				// Use the cached version of the system list if it is available.
-				if( File.Exists( cachedSystemListFilePath ) )
-					RsisSystemList = XmlOps.DeserializeFromFile<SystemList>( cachedSystemListFilePath, false );
+				if( File.Exists( cacheFilePath ) ) {
+					RsisSystemList = XmlOps.DeserializeFromFile<SystemList>( cacheFilePath, false );
+					cacheUsed = true;
+				}
 				else
-					throw new UserCorrectableException( "RSIS cannot be reached to download the system list and a cached version is not available.", e );
+					throw new UserCorrectableException( "Failed to download the system list and a cached version is not available.", e );
+			}
+
+			StatusStatics.SetStatus(
+				cacheUsed ? "Failed to download the system list; loaded a cached version from \"{0}\".".FormatWith( cacheFilePath ) : "Downloaded the system list." );
+
+			// Cache the system list so something is available in the future if the machine is offline.
+			try {
+				XmlOps.SerializeIntoFile( RsisSystemList, cacheFilePath );
+			}
+			catch( Exception e ) {
+				const string generalMessage = "Failed to cache the system list on disk.";
+				if( e is UnauthorizedAccessException )
+					throw new UserCorrectableException( generalMessage + " If the program is running as a non built in administrator, you may need to disable UAC.", e );
+
+				// An IOException probably means the file is locked. In this case we want to ignore the problem and move on.
+				if( !( e is IOException ) )
+					throw new UserCorrectableException( generalMessage, e );
 			}
 		}
 	}

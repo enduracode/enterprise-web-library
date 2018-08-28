@@ -12,13 +12,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
-		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed> programRunnerUnstreamedServiceFactory;
 
 		public static void Init() {
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
-			programRunnerUnstreamedServiceFactory =
-				getHttpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed>( "ProgramRunnerUnstreamed.svc" );
 		}
 
 		private static ChannelFactory<T> getHttpChannelFactory<T>( string serviceFileName ) {
@@ -83,14 +80,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// The action should be a noun, e.g. "logic package download".
 		/// </summary>
-		public static void ExecuteProgramRunnerUnstreamedServiceMethod(
-			Action<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed> method, string action ) {
-			executeWebMethod( method, programRunnerUnstreamedServiceFactory, action );
-		}
-
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
 		public static T ExecuteIsuServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.Isu, T> method, string action ) {
 			return executeWebMethodWithResult( method, isuServiceFactory, action );
 		}
@@ -100,14 +89,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static T ExecuteProgramRunnerServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.ProgramRunner, T> method, string action ) {
 			return executeWebMethodWithResult( method, programRunnerServiceFactory, action );
-		}
-
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
-		public static T ExecuteProgramRunnerUnstreamedServiceMethod<T>(
-			Func<SystemManagerInterface.ServiceContracts.ProgramRunnerUnstreamed, T> method, string action ) {
-			return executeWebMethodWithResult( method, programRunnerUnstreamedServiceFactory, action );
 		}
 
 		private static void executeWebMethod<ContractType>( Action<ContractType> method, ChannelFactory<ContractType> factory, string action ) {
