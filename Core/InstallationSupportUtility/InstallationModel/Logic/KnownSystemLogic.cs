@@ -21,9 +21,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 							async () => {
 								using( var response = await client.GetAsync( "Pages/Public/AsposeLicensePackage.aspx", HttpCompletionOption.ResponseHeadersRead ) ) {
 									response.EnsureSuccessStatusCode();
-									ZipOps.UnZipStreamAsFolder(
-										await response.Content.ReadAsStreamAsync(),
-										EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
+									using( var stream = await response.Content.ReadAsStreamAsync() )
+										ZipOps.UnZipStreamAsFolder( stream, EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
 								}
 							} )
 						.Wait();
