@@ -18,13 +18,7 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 		/// Creates a service installer for the specified service.
 		/// </summary>
 		public static ServiceInstaller CreateServiceInstaller( WindowsServiceBase service ) {
-			return new ServiceInstaller
-				{
-					ServiceName = GetServiceInstalledName( service ),
-					Description = service.Description,
-					StartType = ServiceStartMode.Automatic,
-					DelayedAutoStart = true
-				};
+			return new ServiceInstaller { ServiceName = GetServiceInstalledName( service ), Description = service.Description };
 		}
 
 		internal static string GetServiceInstalledName( WindowsServiceBase service ) {

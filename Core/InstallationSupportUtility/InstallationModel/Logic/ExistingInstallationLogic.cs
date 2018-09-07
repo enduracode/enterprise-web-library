@@ -54,6 +54,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			var allServices = ServiceController.GetServices();
 			var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
 			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) ) ) {
+				EwlStatics.RunProgram( "sc", "config \"{0}\" start= demand".FormatWith( service.ServiceName ), "", true );
+
 				// Clear failure actions.
 				EwlStatics.RunProgram( "sc", "failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ), "", true );
 
@@ -91,6 +93,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 					throw new ApplicationException( message, e );
 				}
 				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
+
+				EwlStatics.RunProgram( "sc", "config \"{0}\" start= delayed-auto".FormatWith( service.ServiceName ), "", true );
 
 				// Set failure actions.
 				const int restartDelay = 60000; // milliseconds
