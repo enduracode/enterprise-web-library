@@ -2,11 +2,11 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// The configuration for a telephone-number control.
+	/// The configuration for a numeric-text control.
 	/// </summary>
-	public class TelephoneNumberControlSetup {
+	public class NumericTextControlSetup {
 		/// <summary>
-		/// Creates a setup object for a standard telephone-number control.
+		/// Creates a setup object for a standard numeric-text control.
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the control.</param>
@@ -17,20 +17,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action.</param>
 		/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 		/// <param name="pageModificationValue"></param>
+		/// <param name="numericPageModificationValue"></param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static TelephoneNumberControlSetup Create(
+		public static NumericTextControlSetup Create(
 			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "", FormAction action = null,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
-			return new TelephoneNumberControlSetup(
+			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			PageModificationValue<long?> numericPageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+			return new NumericTextControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"tel",
+					"text",
 					null,
 					false,
 					classes,
-					false,
+					true,
 					placeholder,
 					autoFillTokens,
 					null,
@@ -39,13 +40,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					null,
 					valueChangedAction,
 					pageModificationValue,
-					null,
+					numericPageModificationValue,
 					validationPredicate,
 					validationErrorNotifier ) );
 		}
 
 		/// <summary>
-		/// Creates a setup object for a telephone-number control with auto-complete behavior.
+		/// Creates a setup object for a numeric-text control with auto-complete behavior.
 		/// </summary>
 		/// <param name="autoCompleteResource">The resource containing the auto-complete items. Do not pass null.</param>
 		/// <param name="displaySetup"></param>
@@ -58,20 +59,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="triggersActionWhenItemSelected">Pass true to also trigger the action when the user selects an auto-complete item.</param>
 		/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 		/// <param name="pageModificationValue"></param>
+		/// <param name="numericPageModificationValue"></param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static TelephoneNumberControlSetup CreateAutoComplete(
+		public static NumericTextControlSetup CreateAutoComplete(
 			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
 			FormAction action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
-			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
-			return new TelephoneNumberControlSetup(
+			PageModificationValue<string> pageModificationValue = null, PageModificationValue<long?> numericPageModificationValue = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+			return new NumericTextControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"tel",
+					"text",
 					null,
 					false,
 					classes,
-					false,
+					true,
 					placeholder,
 					autoFillTokens,
 					autoCompleteResource,
@@ -80,28 +83,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					triggersActionWhenItemSelected,
 					valueChangedAction,
 					pageModificationValue,
-					null,
+					numericPageModificationValue,
 					validationPredicate,
 					validationErrorNotifier ) );
 		}
 
 		/// <summary>
-		/// Creates a setup object for a read-only telephone-number control.
+		/// Creates a setup object for a read-only numeric-text control.
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the control.</param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
-		public static TelephoneNumberControlSetup CreateReadOnly(
+		public static NumericTextControlSetup CreateReadOnly(
 			DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
-			return new TelephoneNumberControlSetup(
+			return new NumericTextControlSetup(
 				new TextControlSetup(
 					displaySetup,
-					"tel",
+					"text",
 					null,
 					true,
 					classes,
-					false,
+					true,
 					"",
 					"",
 					null,
@@ -117,7 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal TextControlSetup TextControlSetup { get; }
 
-		private TelephoneNumberControlSetup( TextControlSetup textControlSetup ) {
+		private NumericTextControlSetup( TextControlSetup textControlSetup ) {
 			TextControlSetup = textControlSetup;
 		}
 	}

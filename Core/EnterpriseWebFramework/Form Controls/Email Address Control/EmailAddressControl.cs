@@ -24,6 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			( Labeler, PageComponent, Validation ) = setup.TextControlSetup.LabelerAndComponentAndValidationGetter(
 				value,
 				allowEmpty,
+				null,
 				maxLength,
 				( postBackValue, validator ) => {
 					var errorHandler = new ValidationErrorHandler( "email address" );

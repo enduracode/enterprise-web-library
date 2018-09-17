@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
@@ -69,6 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				numberOfRows,
 				false,
 				classes,
+				false,
 				placeholder,
 				autoFillTokens,
 				null,
@@ -77,6 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				null,
 				valueChangedAction,
 				pageModificationValue,
+				null,
 				validationPredicate,
 				validationErrorNotifier );
 		}
@@ -111,6 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				numberOfRows,
 				false,
 				classes,
+				false,
 				placeholder,
 				autoFillTokens,
 				autoCompleteResource,
@@ -119,6 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				triggersActionWhenItemSelected,
 				valueChangedAction,
 				pageModificationValue,
+				null,
 				validationPredicate,
 				validationErrorNotifier );
 		}
@@ -140,8 +145,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				numberOfRows,
 				true,
 				classes,
+				false,
 				"",
 				"",
+				null,
 				null,
 				null,
 				null,
@@ -177,6 +184,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				null,
 				false,
 				classes,
+				false,
 				placeholder,
 				autoFillTokens,
 				null,
@@ -185,35 +193,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				null,
 				valueChangedAction,
 				pageModificationValue,
+				null,
 				validationPredicate,
 				validationErrorNotifier );
 		}
 
 		internal readonly
-			Func<string, bool, int?, Func<string, Validator, string>, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+			Func<string, bool, int?, int?, Func<string, Validator, string>, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
 			LabelerAndComponentAndValidationGetter;
 
 		internal TextControlSetup(
-			DisplaySetup displaySetup, string inputElementType, int? numberOfRows, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
-			ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
-			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+			DisplaySetup displaySetup, string inputElementType, int? numberOfRows, bool isReadOnly, ElementClassSet classes, bool requiresNumericValue,
+			string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action,
+			bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValue,
+			PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			var labeler = new FormControlLabeler();
 			action = action ?? FormState.Current.DefaultAction;
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
-			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, maxLength, internalValidationMethod, externalValidationMethod ) => {
+			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minLength, maxLength, internalValidationMethod, externalValidationMethod ) => {
 				var id = new ElementId();
 				var formValue = new FormValue<string>(
 					() => value,
 					() => isReadOnly ? "" : id.Id,
 					v => v,
-					rawValue => rawValue == null
-						            ? PostBackValueValidationResult<string>.CreateInvalid()
-						            : maxLength.HasValue && rawValue.Length > maxLength.Value
-							            ? PostBackValueValidationResult<string>.CreateInvalid()
-							            : PostBackValueValidationResult<string>.CreateValid( rawValue ) );
+					rawValue => rawValue == null ? PostBackValueValidationResult<string>.CreateInvalid() :
+					            maxLength.HasValue && rawValue.Length > maxLength.Value ? PostBackValueValidationResult<string>.CreateInvalid() :
+					            PostBackValueValidationResult<string>.CreateValid( rawValue ) );
 
 				formValue.AddPageModificationValue( pageModificationValue, v => v );
+				if( numericPageModificationValue != null )
+					formValue.AddPageModificationValue(
+						numericPageModificationValue,
+						v => long.TryParse( v, NumberStyles.None, CultureInfo.InvariantCulture, out var result ) ? (long?)result : null );
 
 				return ( labeler, new CustomPhrasingComponent(
 					new DisplayableElement(
@@ -245,8 +257,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										attributes.Add( Tuple.Create( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
 									if( isReadOnly )
 										attributes.Add( Tuple.Create( "disabled", "disabled" ) );
-									if( !isReadOnly && maxLength.HasValue )
-										attributes.Add( Tuple.Create( "maxlength", maxLength.Value.ToString() ) );
+									if( !isReadOnly ) {
+										if( minLength.HasValue )
+											attributes.Add( Tuple.Create( "minlength", minLength.Value.ToString() ) );
+										if( maxLength.HasValue )
+											attributes.Add( Tuple.Create( "maxlength", maxLength.Value.ToString() ) );
+									}
+									if( requiresNumericValue )
+										attributes.Add( Tuple.Create( "pattern", "[0-9]*" ) );
 									if( placeholder.Any() )
 										attributes.Add( Tuple.Create( "placeholder", placeholder ) );
 									if( autoFillTokens.Any() )
@@ -255,7 +273,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										attributes.Add(
 											Tuple.Create(
 												"inputmode",
-												inputElementType == "email" ? "email" : inputElementType == "tel" ? "tel" : inputElementType == "url" ? "url" : "text" ) );
+												inputElementType == "email" ? "email" :
+												inputElementType == "tel" ? "tel" :
+												inputElementType == "url" ? "url" :
+												requiresNumericValue ? "numeric" : "text" ) );
 									if( checksSpellingAndGrammar.HasValue )
 										attributes.Add( Tuple.Create( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
 
@@ -295,6 +316,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												"setTimeout( function() { " + valueChangedAction.GetJsStatements() + " }, 0 );" )
 											: "",
 										pageModificationValue.GetJsModificationStatements( "$( this ).val()" )
+											.ConcatenateWithSpace(
+												numericPageModificationValue?.GetJsModificationStatements( "Number( {0} )".FormatWith( "$( this ).val()" ) ) ?? "" )
 											.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
 										autoCompleteStatements );
 

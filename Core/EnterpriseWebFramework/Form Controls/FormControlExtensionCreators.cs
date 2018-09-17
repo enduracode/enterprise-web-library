@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using EnterpriseWebLibrary.InputValidation;
 using NodaTime;
 
@@ -73,6 +75,97 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				},
 				setup: setup,
 				maxLength: maxLength );
+		}
+
+		public static NumericTextControl ToNumericTextControl(
+			this DataValue<string> dataValue, bool allowEmpty, NumericTextControlSetup setup = null, string value = null, int? minLength = null,
+			int? maxLength = null, Action<Validator> additionalValidationMethod = null ) {
+			return new NumericTextControl(
+				value ?? dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				maxLength: maxLength,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumericTextControl ToTextControl(
+			this DataValue<int> dataValue, NumericTextControlSetup setup = null, SpecifiedValue<int?> value = null, int? minValue = null, int? maxValue = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return longValue.ToTextControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue ?? int.MaxValue,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (int)longValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumericTextControl ToTextControl(
+			this DataValue<int?> dataValue, NumericTextControlSetup setup = null, SpecifiedValue<int?> value = null, bool allowEmpty = true, int? minValue = null,
+			int? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return longValue.ToTextControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue ?? int.MaxValue,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (int?)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumericTextControl ToTextControl(
+			this DataValue<long> dataValue, NumericTextControlSetup setup = null, SpecifiedValue<long?> value = null, long? minValue = null, long? maxValue = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToTextControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumericTextControl ToTextControl(
+			this DataValue<long?> dataValue, NumericTextControlSetup setup = null, SpecifiedValue<long?> value = null, bool allowEmpty = true, long? minValue = null,
+			long? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+			minValue = minValue ?? 1;
+			maxValue = maxValue ?? long.MaxValue;
+			if( minValue.Value < 1 || maxValue.Value < 1 )
+				throw new ApplicationException( "minValue and maxValue must be positive integers." );
+
+			var v = value != null ? value.Value : dataValue.Value;
+			if( v.HasValue && ( v.Value < minValue.Value || v.Value > maxValue.Value ) )
+				throw new ApplicationException( "The value must be between minValue and maxValue." );
+
+			return new NumericTextControl(
+				v?.ToString( "D", CultureInfo.InvariantCulture ) ?? "",
+				allowEmpty,
+				setup: setup,
+				maxLength: maxValue.Value.ToString( "D", CultureInfo.InvariantCulture ).Length,
+				validationMethod: ( postBackValue, validator ) => {
+					if( postBackValue.Any() ) {
+						if( !long.TryParse( postBackValue, NumberStyles.None, CultureInfo.InvariantCulture, out var result ) || result > maxValue.Value )
+							validator.NoteErrorAndAddMessage( "The value is too large." );
+						else if( result < minValue.Value )
+							validator.NoteErrorAndAddMessage( "The value is too small." );
+						else
+							dataValue.Value = result;
+					}
+					else
+						dataValue.Value = null;
+					additionalValidationMethod?.Invoke( validator );
+				} );
 		}
 
 		/// <summary>

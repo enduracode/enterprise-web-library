@@ -403,6 +403,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ListItemMatchPageModificationSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Telephone Number Control\TelephoneNumberControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Telephone Number Control\TelephoneNumberControlSetup.cs" />
