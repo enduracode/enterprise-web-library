@@ -104,6 +104,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				dv =>
 					"{0}.ToUrlControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+			writeFormItemGetter(
+				writer,
+				field,
+				"NumericTextControl",
+				getAllowEmptyParameter( false ).ToCollection(),
+				false,
+				new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string",
+				new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
+				true,
+				dv =>
+					"{0}.ToNumericTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetters(
 				writer,
 				field,
@@ -165,25 +178,46 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeNumericFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( field.TypeIs( typeof( int ) ) ) {
-				writeNumberAsTextFormItemGetters(
+			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) )
+				writeFormItemGetter(
 					writer,
 					field,
-					"int?",
-					new[] { new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
-					"validator.GetInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
+					"TextControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( field.NullableTypeName, "minValue", "null" ).ToCollection()
+						.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToTextControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+			if( field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"TextControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					getAllowEmptyParameter( true )
+						.ToCollection()
+						.Append( new CSharpParameter( field.NullableTypeName, "minValue", "null" ) )
+						.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToTextControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+
+			if( field.TypeIs( typeof( int ) ) ) {
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"int?",
-					new[] { getAllowEmptyParameter( true ), new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
-					"validator.GetNullableInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min: min, max: max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
@@ -745,7 +779,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			var statements = new[]
 				{
 					"if( validationPredicate != null && !validationPredicate() ) return;",
-					( includeValidationMethodReturnValue ? fieldPropertyName + " = " : "" ) + "validationMethod( control, postBackValues, labelAndSubject, validator );",
+					( includeValidationMethodReturnValue ? fieldPropertyName + " = " : "" ) +
+					"validationMethod( control, postBackValues, labelAndSubject, validator );",
 					"if( validator.ErrorsOccurred && validationErrorNotifier != null ) validationErrorNotifier();",
 					"if( !validator.ErrorsOccurred && additionalValidationMethod != null ) additionalValidationMethod( labelAndSubject, validator );"
 				};
