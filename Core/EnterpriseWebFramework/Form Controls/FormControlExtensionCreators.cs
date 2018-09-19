@@ -155,12 +155,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				maxLength: maxValue.Value.ToString( "D", CultureInfo.InvariantCulture ).Length,
 				validationMethod: ( postBackValue, validator ) => {
 					if( postBackValue.Any() ) {
-						if( !long.TryParse( postBackValue, NumberStyles.None, CultureInfo.InvariantCulture, out var result ) || result > maxValue.Value )
+						if( !long.TryParse( postBackValue, NumberStyles.None, CultureInfo.InvariantCulture, out var result ) || result > maxValue.Value ) {
 							validator.NoteErrorAndAddMessage( "The value is too large." );
-						else if( result < minValue.Value )
+							setup.ValidationErrorNotifier?.Invoke();
+							return;
+						}
+						if( result < minValue.Value ) {
 							validator.NoteErrorAndAddMessage( "The value is too small." );
-						else
-							dataValue.Value = result;
+							setup.ValidationErrorNotifier?.Invoke();
+							return;
+						}
+
+						dataValue.Value = result;
 					}
 					else
 						dataValue.Value = null;

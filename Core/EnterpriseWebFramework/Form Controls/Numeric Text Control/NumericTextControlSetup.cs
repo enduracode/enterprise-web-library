@@ -42,7 +42,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					pageModificationValue,
 					numericPageModificationValue,
 					validationPredicate,
-					validationErrorNotifier ) );
+					validationErrorNotifier ),
+				validationErrorNotifier );
 		}
 
 		/// <summary>
@@ -85,7 +86,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					pageModificationValue,
 					numericPageModificationValue,
 					validationPredicate,
-					validationErrorNotifier ) );
+					validationErrorNotifier ),
+				validationErrorNotifier );
 		}
 
 		/// <summary>
@@ -115,13 +117,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					null,
 					null,
 					validationPredicate,
-					validationErrorNotifier ) );
+					validationErrorNotifier ),
+				validationErrorNotifier );
 		}
 
 		internal TextControlSetup TextControlSetup { get; }
+		internal Action ValidationErrorNotifier { get; }
 
-		private NumericTextControlSetup( TextControlSetup textControlSetup ) {
+		private NumericTextControlSetup( TextControlSetup textControlSetup, Action validationErrorNotifier ) {
 			TextControlSetup = textControlSetup;
+			ValidationErrorNotifier = validationErrorNotifier;
 		}
 	}
 }
