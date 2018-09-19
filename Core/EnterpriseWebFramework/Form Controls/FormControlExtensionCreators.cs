@@ -157,12 +157,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( postBackValue.Any() ) {
 						if( !long.TryParse( postBackValue, NumberStyles.None, CultureInfo.InvariantCulture, out var result ) || result > maxValue.Value ) {
 							validator.NoteErrorAndAddMessage( "The value is too large." );
-							setup.ValidationErrorNotifier?.Invoke();
+							setup?.ValidationErrorNotifier?.Invoke();
 							return;
 						}
 						if( result < minValue.Value ) {
 							validator.NoteErrorAndAddMessage( "The value is too small." );
-							setup.ValidationErrorNotifier?.Invoke();
+							setup?.ValidationErrorNotifier?.Invoke();
 							return;
 						}
 
