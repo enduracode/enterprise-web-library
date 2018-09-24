@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
@@ -28,14 +27,20 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 			return navButtonSetups;
 		}
 
-		public override List<LookupBoxSetup> GetGlobalNavLookupBoxSetups() {
-			var lookupBoxSetups = new List<LookupBoxSetup>();
+		public override IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() {
+			var controls = new List<NavFormControl>();
 			if( CreateSystem.GetInfo().IsIdenticalToCurrent() )
-				return lookupBoxSetups;
+				return controls;
 
-			lookupBoxSetups.Add( new LookupBoxSetup( 100, "test", "lookup1", delegate { return null; } ) );
-			lookupBoxSetups.Add( new LookupBoxSetup( 100, "test", "lookup2", delegate { return null; } ) );
-			return lookupBoxSetups;
+			controls.Add(
+				NavFormControl.CreateText(
+					new NavFormControlSetup( 100.ToPixels(), "test" ),
+					v => new NavFormControlValidationResult( "This doesn’t actually work." ) ) );
+			controls.Add(
+				NavFormControl.CreateText(
+					new NavFormControlSetup( 100.ToPixels(), "test" ),
+					v => new NavFormControlValidationResult( "This doesn’t actually work." ) ) );
+			return controls;
 		}
 	}
 }

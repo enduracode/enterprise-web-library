@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
 
 // OptionalParameter: string someText
 
@@ -86,9 +85,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				.Append( new ButtonSetup( "Modal Window", behavior: new OpenModalBehavior( two ) ) )
 				.Materialize();
 
-		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() =>
-			new LookupBoxSetup( 100, "Lookup!", "lookup", text => { throw new DataModificationException( "Lookup '" + text + "' failed." ); } ).ToCollection()
-				.ToList();
+		IReadOnlyCollection<NavFormControl> UiEntitySetupBase.GetNavFormControls() =>
+			NavFormControl.CreateText(
+					new NavFormControlSetup( 100.ToPixels(), "Lookup!" ),
+					v => new NavFormControlValidationResult( "Lookup '{0}' failed.".FormatWith( v ) ) )
+				.ToCollection();
 
 		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() =>
 			new ButtonSetup(

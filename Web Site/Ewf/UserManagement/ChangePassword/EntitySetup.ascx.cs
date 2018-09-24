@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 // Parameter: string returnAndDestinationUrl
 
@@ -24,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetNavActions() =>
 			new HyperlinkSetup( new ExternalResourceInfo( info.ReturnAndDestinationUrl ), "Back" ).ToCollection();
 
-		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() => new List<LookupBoxSetup>();
+		IReadOnlyCollection<NavFormControl> UiEntitySetupBase.GetNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 	}
 }

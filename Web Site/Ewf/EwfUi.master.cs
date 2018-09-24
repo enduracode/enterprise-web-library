@@ -9,7 +9,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
@@ -109,7 +108,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavListCssClass ).ToArray() ),
 						new CssElement(
 							"UiEntityActionControlList",
-							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass ).ToArray() ),
+							ControlLine.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityActionListCssClass )
+								.ToArray() ),
 						new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
 					};
 			}
@@ -262,15 +262,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
 				return null;
 
-			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActions() )
-				.Concat( from i in EwfUiStatics.AppProvider.GetGlobalNavLookupBoxSetups() select i.BuildLookupBoxPanel() )
-				.ToArray();
+			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
+				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "global", "nav", index.ToString() ) ) )
+				.Materialize();
+			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActions() ).Concat( formItems.Select( i => i.Control ) ).ToArray();
 			if( !controls.Any() )
 				return null;
-			return new Block( new ControlLine( controls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe() } )
-				{
-					CssClass = CssElementCreator.GlobalNavBlockCssClass
-				};
+
+			return new Block(
+				new ControlLine( controls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe() }.ToCollection()
+					.Concat(
+						new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ).ToCollection()
+							.GetControls() )
+					.ToArray() ) { CssClass = CssElementCreator.GlobalNavBlockCssClass };
 		}
 
 		private Control getEntityAndTopTabBlock() {
@@ -312,16 +316,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private EwfTableCell getEntityNavCell() {
 			if( uiEntitySetup == null )
 				return null;
-			var controls = getActionControls( uiEntitySetup.GetNavActions() )
-				.Concat( from i in uiEntitySetup.CreateLookupBoxSetups() select i.BuildLookupBoxPanel() )
-				.ToArray();
+
+			var formItems = uiEntitySetup.GetNavFormControls()
+				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
+				.Materialize();
+			var controls = getActionControls( uiEntitySetup.GetNavActions() ).Concat( formItems.Select( i => i.Control ) ).ToArray();
 			if( !controls.Any() )
 				return null;
+
 			return new ControlLine( controls )
-				{
-					CssClass = CssElementCreator.EntityNavListCssClass,
-					ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-				};
+					{
+						CssClass = CssElementCreator.EntityNavListCssClass, ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					}.ToCollection()
+				.Concat(
+					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ).ToCollection()
+						.GetControls() )
+				.ToCell();
 		}
 
 		private EwfTableCell getEntityActionCell() {
@@ -332,8 +342,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return null;
 			return new ControlLine( actionControls )
 				{
-					CssClass = CssElementCreator.EntityActionListCssClass,
-					ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					CssClass = CssElementCreator.EntityActionListCssClass, ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
 				}.ToCell( new TableCellSetup( textAlignment: TextAlignment.Right ) );
 		}
 
@@ -352,8 +361,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return new Block(
 				new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() )
 					{
-						CssClass = CssElementCreator.TopTabCssClass,
-						VerticalAlignment = TableCellVerticalAlignment.Bottom
+						CssClass = CssElementCreator.TopTabCssClass, VerticalAlignment = TableCellVerticalAlignment.Bottom
 					} ) { CssClass = CssElementCreator.TopTabCssClass };
 		}
 
@@ -455,7 +463,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				controls.AddRange(
 					new Paragraph(
 							"Powered by the ".ToComponents()
-								.Concat( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
+								.Append( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
 								.Concat(
 									" ({0} version)".FormatWith( TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() )
 										.ToComponents() )

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -23,16 +22,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the global nav action controls.
+		/// Gets the global navigational action components.
 		/// </summary>
 		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 		/// <summary>
-		/// Gets the global nav lookup box setups.
+		/// Gets the global navigational form controls.
 		/// </summary>
-		public virtual List<LookupBoxSetup> GetGlobalNavLookupBoxSetups() {
-			return new List<LookupBoxSetup>();
-		}
+		public virtual IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 
 		/// <summary>
 		/// Gets whether items in the global nav control list are separated with a pipe character.

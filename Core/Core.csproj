@@ -403,6 +403,9 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ListItemMatchPageModificationSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlValidationResult.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />
@@ -601,7 +604,6 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\LookupBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />

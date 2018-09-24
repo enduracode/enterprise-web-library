@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -7,17 +6,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public interface UiEntitySetupBase: EntitySetupBase {
 		/// <summary>
-		/// Creates and returns navigation button setup information.
+		/// Gets the navigational action components.
 		/// </summary>
 		IReadOnlyCollection<ActionComponentSetup> GetNavActions();
 
 		/// <summary>
-		/// Creates and returns lookup box setup information.
+		/// Gets the navigational form controls.
 		/// </summary>
-		List<LookupBoxSetup> CreateLookupBoxSetups();
+		IReadOnlyCollection<NavFormControl> GetNavFormControls();
 
 		/// <summary>
-		/// Creates and returns action button setup information.
+		/// Gets the action components.
 		/// </summary>
 		IReadOnlyCollection<ActionComponentSetup> GetActions();
 	}

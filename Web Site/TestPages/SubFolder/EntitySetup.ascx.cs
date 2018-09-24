@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
@@ -30,7 +29,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 		}
 
 		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetNavActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
-		List<LookupBoxSetup> UiEntitySetupBase.CreateLookupBoxSetups() => new List<LookupBoxSetup>();
+		IReadOnlyCollection<NavFormControl> UiEntitySetupBase.GetNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 		IReadOnlyCollection<ActionComponentSetup> UiEntitySetupBase.GetActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
 	}
 }
