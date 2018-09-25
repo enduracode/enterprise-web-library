@@ -84,6 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								       placeholder: setup.Placeholder,
 								       triggersActionWhenItemSelected: true )
 							       : NumericTextControlSetup.Create( placeholder: setup.Placeholder ),
+						value: new SpecifiedValue<int?>( null ),
 						additionalValidationMethod: validator => validationResultHandler( validationMethod( val.Value ), validator ) );
 				} );
 
@@ -104,6 +105,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								       placeholder: setup.Placeholder,
 								       triggersActionWhenItemSelected: true )
 							       : NumericTextControlSetup.Create( placeholder: setup.Placeholder ),
+						value: new SpecifiedValue<long?>( null ),
 						additionalValidationMethod: validator => validationResultHandler( validationMethod( val.Value ), validator ) );
 				} );
 
