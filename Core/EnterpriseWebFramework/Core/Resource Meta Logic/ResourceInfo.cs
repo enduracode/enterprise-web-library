@@ -76,7 +76,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the resource info object for the parent resource of this resource. Returns null if there is no parent resource.
 		/// </summary>
-		public ResourceInfo ParentResource { get { return parentResource.Value; } }
+		public ResourceInfo ParentResource => parentResource.Value;
 
 		/// <summary>
 		/// Creates a resource info object for the parent resource of this resource. Returns null if there is no parent resource.
@@ -93,10 +93,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// NOTE: If we used recursion this would be much simpler.
 				var path = new List<ResourceInfo>();
 				var resource = this;
-				do {
+				do
 					path.Add( resource );
-				}
-				while( ( resource = resource.ParentResource ?? ( resource.EsInfoAsBaseType != null ? resource.EsInfoAsBaseType.ParentResource : null ) ) != null );
+				while( ( resource = resource.ParentResource ?? resource.EsInfoAsBaseType?.ParentResource ) != null );
 				path.Reverse();
 				return path;
 			}
@@ -105,19 +104,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the name of the resource.
 		/// </summary>
-		public virtual string ResourceName { get { return GetType().DeclaringType.Name.CamelToEnglish(); } }
+		public virtual string ResourceName => GetType().DeclaringType.Name.CamelToEnglish();
 
 		/// <summary>
 		/// Returns the name of the resource, including the entity setup name if an entity setup exists.
 		/// </summary>
-		public string ResourceFullName {
-			get {
-				return CombineResourcePathStrings(
-					EntityResourceSeparator,
-					EsInfoAsBaseType != null && ParentResource == null ? EsInfoAsBaseType.EntitySetupName : "",
-					ResourceName );
-			}
-		}
+		public string ResourceFullName =>
+			CombineResourcePathStrings(
+				EntityResourceSeparator,
+				EsInfoAsBaseType != null && ParentResource == null ? EsInfoAsBaseType.EntitySetupName : "",
+				ResourceName );
 
 		/// <summary>
 		/// Returns the string representing the parent resource's path within the entity.
@@ -165,12 +161,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets whether the resource is public in intermediate installations.
 		/// </summary>
-		protected internal virtual bool IsIntermediateInstallationPublicResource { get { return false; } }
+		protected internal virtual bool IsIntermediateInstallationPublicResource => false;
 
 		/// <summary>
 		/// Returns true if the authenticated user passes resource-level authorization checks.
 		/// </summary>
-		protected virtual bool userCanAccessResource { get { return true; } }
+		protected virtual bool userCanAccessResource => true;
 
 		/// <summary>
 		/// Gets the log in page to use for this resource if the system supports forms authentication.
@@ -205,7 +201,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// when implementing a parent that should have new content when one or more children have new content. When calling this property take care to meet any
 		/// preconditions that would normally be handled by ancestor logic.
 		/// </summary>
-		public AlternativeResourceMode AlternativeModeDirect { get { return alternativeMode.Value; } }
+		public AlternativeResourceMode AlternativeModeDirect => alternativeMode.Value;
 
 		/// <summary>
 		/// Creates the alternative mode for this resource or returns null if it is in normal mode.
@@ -243,9 +239,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract string buildUrl();
 
-		internal bool ShouldBeSecureGivenCurrentRequest {
-			get { return ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicResource ); }
-		}
+		internal bool ShouldBeSecureGivenCurrentRequest => ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicResource );
 
 		/// <summary>
 		/// Gets the desired security setting for requests to the resource.
@@ -257,6 +251,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( EsInfoAsBaseType != null )
 					return EsInfoAsBaseType.ConnectionSecurity;
 				return ConnectionSecurity.SecureIfPossible;
+			}
+		}
+
+		protected internal virtual bool? AllowsSearchEngineIndexing {
+			get {
+				if( ParentResource != null )
+					return ParentResource.AllowsSearchEngineIndexing;
+				if( EsInfoAsBaseType != null )
+					return EsInfoAsBaseType.AllowsSearchEngineIndexing;
+				return null;
 			}
 		}
 

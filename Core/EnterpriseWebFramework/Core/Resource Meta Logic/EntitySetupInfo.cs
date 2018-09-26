@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the list of resource info objects for the resources that are part of this entity setup.
 		/// </summary>
-		public ReadOnlyCollection<ResourceGroup> Resources { get { return resources ?? ( resources = createResourceInfos().AsReadOnly() ); } }
+		public ReadOnlyCollection<ResourceGroup> Resources => resources ?? ( resources = createResourceInfos().AsReadOnly() );
 
 		/// <summary>
 		/// Returns the name of the entity setup.
@@ -59,12 +59,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if the authenticated user passes entity setup authorization checks.
 		/// </summary>
-		protected internal virtual bool UserCanAccessEntitySetup { get { return true; } }
+		protected internal virtual bool UserCanAccessEntitySetup => true;
 
 		/// <summary>
 		/// Gets the log in page to use for resources that are part of this entity setup if the system supports forms authentication.
 		/// </summary>
-		protected internal virtual PageInfo LogInPage { get { return ParentResource != null ? ParentResource.LogInPage : null; } }
+		protected internal virtual PageInfo LogInPage => ParentResource?.LogInPage;
 
 		/// <summary>
 		/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
@@ -84,7 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// e.g. when implementing a parent that should have new content when one or more children have new content. When calling this property take care to meet
 		/// any preconditions that would normally be handled by ancestor logic.
 		/// </summary>
-		public AlternativeResourceMode AlternativeModeDirect { get { return alternativeMode.Value; } }
+		public AlternativeResourceMode AlternativeModeDirect => alternativeMode.Value;
 
 		/// <summary>
 		/// Creates the alternative mode for this entity setup or returns null if it is in normal mode.
@@ -96,8 +96,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the desired security setting for requests to resources that are part of this entity setup.
 		/// </summary>
-		protected internal virtual ConnectionSecurity ConnectionSecurity {
-			get { return ParentResource != null ? ParentResource.ConnectionSecurity : ConnectionSecurity.SecureIfPossible; }
-		}
+		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
+
+		protected internal virtual bool? AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing;
 	}
 }

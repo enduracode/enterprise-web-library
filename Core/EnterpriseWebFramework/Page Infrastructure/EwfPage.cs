@@ -47,13 +47,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				postBack => {
 					if( Instance.GetPostBack( postBack.Id ) != postBack )
 						throw new ApplicationException( "The post-back must have been added to the page." );
-					if( ( postBack as ActionPostBack )?.ValidationDm is PostBack validationPostBack && Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+					if( ( postBack as ActionPostBack )?.ValidationDm is PostBack validationPostBack &&
+					    Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
 						throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
 				} );
 			FormState.Init(
 				() => Instance.formState,
 				dataModifications => {
-					if( dataModifications.Contains( Instance.dataUpdate ) && dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
+					if( dataModifications.Contains( Instance.dataUpdate ) &&
+					    dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
 						throw new ApplicationException(
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
@@ -90,7 +92,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
-		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent = new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
+
+		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent =
+			new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
+
 		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
@@ -309,8 +314,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) )
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
-							? "Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
-							  " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
+							?
+							"Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
+							" (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
 								? "Form controls outside of update regions may not change on an intermediate post-back."
 								: "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
@@ -463,7 +469,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
+				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors =
+					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 				resetPage();
 			}
 
@@ -482,9 +489,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( postBack == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 					var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
-						                            ? lastPostBackFailingDmId.Any()
-							                              ? GetPostBack( lastPostBackFailingDmId ) as DataModification
-							                              : dataUpdate
+						                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
 						                            : null;
 					if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
@@ -606,7 +611,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
-				throw new ApplicationException( "Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
+				throw new ApplicationException(
+					"Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
 
 			ClientScript.RegisterHiddenField( postBackHiddenFieldName, "" );
 
@@ -627,8 +633,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Header.Controls.Add(
 				new HtmlMeta
 					{
-						Name = "application-name",
-						Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName
+						Name = "application-name", Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName
 					} );
 
 			// Chrome start URL
@@ -853,7 +858,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			var webFormsHiddenFields = new[]
-					{ "__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR" };
+				{
+					"__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR"
+				};
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
@@ -1023,6 +1030,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
 
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+			if( InfoAsBaseType.AllowsSearchEngineIndexing == false )
+				Response.AppendHeader( "X-Robots-Tag", "noindex" );
 
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
 			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
@@ -1099,10 +1108,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
 					" ",
 					"OnDocumentReady();",
-					"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );".FormatWith(
-						SubmitButtonPostBack != null
-							? SubmitButtonPostBack.Id
-							: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
+					"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );"
+						.FormatWith(
+							SubmitButtonPostBack != null
+								? SubmitButtonPostBack.Id
+								: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
 					controlInitStatements,
 					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
