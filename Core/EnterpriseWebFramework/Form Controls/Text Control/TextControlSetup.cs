@@ -49,6 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="numberOfRows">The number of lines in the text control. Must be one or more.</param>
 		/// <param name="classes">The classes on the control.</param>
+		/// <param name="disableTrimming">Pass true to disable white-space trimming.</param>
 		/// <param name="placeholder">The hint word or phrase that will appear when the control has an empty value. Do not pass null.</param>
 		/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
 		/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
@@ -61,8 +62,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static TextControlSetup Create(
-			DisplaySetup displaySetup = null, int numberOfRows = 1, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-			bool? checksSpellingAndGrammar = null, FormAction action = null, FormAction valueChangedAction = null,
+			DisplaySetup displaySetup = null, int numberOfRows = 1, ElementClassSet classes = null, bool disableTrimming = false, string placeholder = "",
+			string autoFillTokens = "", bool? checksSpellingAndGrammar = null, FormAction action = null, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
@@ -70,6 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				numberOfRows,
 				false,
 				classes,
+				disableTrimming,
 				false,
 				placeholder,
 				autoFillTokens,
@@ -91,6 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="numberOfRows">The number of lines in the text control. Must be one or more.</param>
 		/// <param name="classes">The classes on the control.</param>
+		/// <param name="disableTrimming">Pass true to disable white-space trimming.</param>
 		/// <param name="placeholder">The hint word or phrase that will appear when the control has an empty value. Do not pass null.</param>
 		/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
 		/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
@@ -104,16 +107,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static TextControlSetup CreateAutoComplete(
-			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, int numberOfRows = 1, ElementClassSet classes = null, string placeholder = "",
-			string autoFillTokens = "", bool? checksSpellingAndGrammar = null, FormAction action = null, bool triggersActionWhenItemSelected = false,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
+			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, int numberOfRows = 1, ElementClassSet classes = null, bool disableTrimming = false,
+			string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null, FormAction action = null,
+			bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
 				numberOfRows == 1 ? "text" : "",
 				numberOfRows,
 				false,
 				classes,
+				disableTrimming,
 				false,
 				placeholder,
 				autoFillTokens,
@@ -145,6 +149,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				numberOfRows,
 				true,
 				classes,
+				false,
 				false,
 				"",
 				"",
@@ -184,6 +189,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				null,
 				false,
 				classes,
+				true,
 				false,
 				placeholder,
 				autoFillTokens,
@@ -203,9 +209,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			LabelerAndComponentAndValidationGetter;
 
 		internal TextControlSetup(
-			DisplaySetup displaySetup, string inputElementType, int? numberOfRows, bool isReadOnly, ElementClassSet classes, bool requiresNumericValue,
-			string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar, FormAction action,
-			bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValue,
+			DisplaySetup displaySetup, string inputElementType, int? numberOfRows, bool isReadOnly, ElementClassSet classes, bool disableTrimming,
+			bool requiresNumericValue, string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource, bool? checksSpellingAndGrammar,
+			FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValue,
 			PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			var labeler = new FormControlLabeler();
 			action = action ?? FormState.Current.DefaultAction;
@@ -221,7 +227,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					            maxLength.HasValue && rawValue.Length > maxLength.Value ? PostBackValueValidationResult<string>.CreateInvalid() :
 					            PostBackValueValidationResult<string>.CreateValid( rawValue ) );
 
-				formValue.AddPageModificationValue( pageModificationValue, v => v );
+				formValue.AddPageModificationValue( pageModificationValue, v => disableTrimming ? v : v.Trim() );
 				if( numericPageModificationValue != null )
 					formValue.AddPageModificationValue(
 						numericPageModificationValue,
@@ -315,7 +321,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												context.Id,
 												"setTimeout( function() { " + valueChangedAction.GetJsStatements() + " }, 0 );" )
 											: "",
-										pageModificationValue.GetJsModificationStatements( "$( this ).val()" )
+										pageModificationValue.GetJsModificationStatements( "$( this ).val()" + ( disableTrimming ? "" : ".trim()" ) )
 											.ConcatenateWithSpace(
 												numericPageModificationValue?.GetJsModificationStatements( "Number( {0} )".FormatWith( "$( this ).val()" ) ) ?? "" )
 											.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
@@ -341,10 +347,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										                                         return;
 
 									                                         string validatedValue;
-									                                         if( inputElementType != "password" )
-										                                         validatedValue = internalValidationMethod( postBackValue.Value, validator );
-									                                         else if( postBackValue.Value.Any() || allowEmpty )
-										                                         validatedValue = postBackValue.Value;
+									                                         if( inputElementType != "password" ? postBackValue.Value.Trim().Any() : postBackValue.Value.Any() )
+										                                         validatedValue = internalValidationMethod(
+											                                         disableTrimming ? postBackValue.Value : postBackValue.Value.Trim(),
+											                                         validator );
+									                                         else if( allowEmpty )
+										                                         validatedValue = "";
 									                                         else {
 										                                         validatedValue = null;
 										                                         validator.NoteErrorAndAddMessage( "Please enter a value." );

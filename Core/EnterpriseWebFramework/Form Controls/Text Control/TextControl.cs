@@ -26,13 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				allowEmpty,
 				null,
 				maxLength,
-				( postBackValue, validator ) => {
-					var errorHandler = new ValidationErrorHandler( "text" );
-					var validatedValue = maxLength.HasValue
-						                     ? validator.GetString( errorHandler, postBackValue, allowEmpty, maxLength.Value )
-						                     : validator.GetString( errorHandler, postBackValue, allowEmpty );
-					return errorHandler.LastResult != ErrorCondition.NoError ? null : validatedValue;
-				},
+				( postBackValue, validator ) => postBackValue,
 				validationMethod );
 		}
 	}
