@@ -1030,7 +1030,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
 
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
-			if( InfoAsBaseType.AllowsSearchEngineIndexing == false )
+
+			if( !ConfigurationStatics.IsLiveInstallation )
+				Response.AppendHeader( "X-Robots-Tag", "noindex, nofollow" );
+			else if( InfoAsBaseType.AllowsSearchEngineIndexing == false )
 				Response.AppendHeader( "X-Robots-Tag", "noindex" );
 
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
