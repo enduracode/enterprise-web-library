@@ -254,13 +254,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		protected internal virtual bool? AllowsSearchEngineIndexing {
+		protected internal virtual bool AllowsSearchEngineIndexing {
 			get {
 				if( ParentResource != null )
 					return ParentResource.AllowsSearchEngineIndexing;
 				if( EsInfoAsBaseType != null )
 					return EsInfoAsBaseType.AllowsSearchEngineIndexing;
-				return null;
+				return true;
 			}
 		}
 

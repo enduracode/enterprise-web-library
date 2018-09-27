@@ -98,6 +98,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
-		protected internal virtual bool? AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing;
+		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
 	}
 }

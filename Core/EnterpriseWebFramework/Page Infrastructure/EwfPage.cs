@@ -1033,7 +1033,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( !ConfigurationStatics.IsLiveInstallation )
 				Response.AppendHeader( "X-Robots-Tag", "noindex, nofollow" );
-			else if( InfoAsBaseType.AllowsSearchEngineIndexing == false )
+			else if( !InfoAsBaseType.AllowsSearchEngineIndexing )
 				Response.AppendHeader( "X-Robots-Tag", "noindex" );
 
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
