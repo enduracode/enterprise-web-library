@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Humanizer;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	/// <summary>
@@ -35,8 +35,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
 			this.size = size;
 
-			// MySQL LONGTEXT returns zero for size.
-			if( databaseInfo is MySqlInfo && dbTypeString == "Text" && size == 0 )
+			// MySQL LONGTEXT returns -1 for size.
+			if( databaseInfo is MySqlInfo && dbTypeString == "Text" && size == -1 )
 				this.size = int.MaxValue;
 
 			if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && this.size == 1 ) {
