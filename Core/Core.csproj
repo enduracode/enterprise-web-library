@@ -397,6 +397,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\HiddenFieldId.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\HTML Editor\WysiwygHtmlEditor.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\HTML Editor\WysiwygHtmlEditorSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Imprecise Number Control\ImpreciseNumberControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Imprecise Number Control\ImpreciseNumberControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ChangeBasedCheckBoxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />

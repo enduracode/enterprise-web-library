@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				displaySetup,
 				false,
 				false,
-				classes,
+				TextControlSetup.ElementClass.Add( classes ?? ElementClassSet.Empty ),
 				placeholder,
 				autoFillTokens,
 				null,
@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				displaySetup,
 				false,
 				false,
-				classes,
+				TextControlSetup.ElementClass.Add( classes ?? ElementClassSet.Empty ),
 				placeholder,
 				autoFillTokens,
 				autoCompleteResource,
@@ -95,7 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				displaySetup,
 				false,
 				true,
-				classes,
+				TextControlSetup.ElementClass.Add( classes ?? ElementClassSet.Empty ),
 				"",
 				"",
 				null,
@@ -226,7 +226,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											return new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements );
 										} );
 								},
-								classes: TextControlSetup.ElementClass.Add( classes ?? ElementClassSet.Empty ) );
+								classes: classes );
 						},
 						formValue: formValue ).ToCollection() ), validationMethod == null
 							                                         ? null

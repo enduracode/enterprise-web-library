@@ -37,7 +37,16 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							FormState.Current.DataModifications.Append( pb ),
 							() => get( "Separate value-changed action", NumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 					},
-					get( "Read-only", NumberControlSetup.CreateReadOnly() )
+					get( "Read-only", NumberControlSetup.CreateReadOnly() ), getImprecise( "Imprecise", null ),
+					getImprecise( "Imprecise [1,2] with .25 step", null, minValue: 1, maxValue: 2, valueStep: .25m ), id => {
+						var pb = PostBack.CreateIntermediate( null, id: id );
+						return FormState.ExecuteWithDataModificationsAndDefaultAction(
+							FormState.Current.DataModifications.Append( pb ),
+							() => getImprecise(
+								"Imprecise with separate value-changed action",
+								ImpreciseNumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
+					},
+					getImprecise( "Imprecise read-only", ImpreciseNumberControlSetup.CreateReadOnly() )
 				};
 
 		private IReadOnlyCollection<Func<string, FormItem>> getIndependentControls() =>
@@ -76,6 +85,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				setup: setup,
 				minValue: minValue,
 				maxValue: maxValue,
+				valueStep: valueStep,
+				validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
+				label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
+
+		private Func<string, FormItem> getImprecise(
+			string label, ImpreciseNumberControlSetup setup, decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null ) =>
+			id => new ImpreciseNumberControl(
+				.25m,
+				minValue ?? 0,
+				maxValue ?? 1,
+				setup: setup,
 				valueStep: valueStep,
 				validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
 				label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
