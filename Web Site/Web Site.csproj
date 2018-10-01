@@ -320,6 +320,13 @@
     <Compile Include="TestPages\ModalBoxes.aspx.designer.cs">
       <DependentUpon>ModalBoxes.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\NumberControlDemo.aspx.cs">
+      <DependentUpon>NumberControlDemo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\NumberControlDemo.aspx.designer.cs">
+      <DependentUpon>NumberControlDemo.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\OmniDemo.aspx.cs">
       <DependentUpon>OmniDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -533,6 +540,7 @@
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
     <Content Include="TestPages\MailMerging.aspx" />
     <Content Include="TestPages\ModalBoxes.aspx" />
+    <Content Include="TestPages\NumberControlDemo.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />

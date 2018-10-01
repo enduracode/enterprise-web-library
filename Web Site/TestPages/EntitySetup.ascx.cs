@@ -25,6 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new ResourceGroup(
 							"Form Controls",
 							new TextControlDemo.Info( this ),
+							new NumberControlDemo.Info( this ),
 							new CheckBox.Info( this ),
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),

@@ -406,6 +406,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Number Control\NumberControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Number Control\NumberControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Numeric Text Control\NumericTextControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\RadioButtonGroup.cs" />

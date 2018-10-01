@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The configuration for a text control.
 	/// </summary>
 	public class TextControlSetup {
-		private static readonly ElementClass elementClass = new ElementClass( "ewfTextC" );
+		internal static readonly ElementClass ElementClass = new ElementClass( "ewfTextC" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -33,8 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					};
 			}
 
-			private string getSingleLineSelector( string suffix ) => "input.{0}".FormatWith( elementClass.ClassName ) + suffix;
-			private string getMultilineSelector( string suffix ) => "textarea.{0}".FormatWith( elementClass.ClassName ) + suffix;
+			private string getSingleLineSelector( string suffix ) => "input.{0}".FormatWith( ElementClass.ClassName ) + suffix;
+			private string getMultilineSelector( string suffix ) => "textarea.{0}".FormatWith( ElementClass.ClassName ) + suffix;
 		}
 
 		internal static string GetTextareaValue( string value ) {
@@ -336,7 +336,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											return new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements );
 										} );
 								},
-								classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
+								classes: ElementClass.Add( classes ?? ElementClassSet.Empty ),
 								children: inputElementType.Any() ? null : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 						},
 						formValue: formValue ).ToCollection() ), externalValidationMethod == null
