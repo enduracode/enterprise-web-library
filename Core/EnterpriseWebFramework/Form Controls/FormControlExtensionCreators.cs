@@ -174,6 +174,241 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 		}
 
+		public static NumberControl ToNumberControl(
+			this DataValue<int> dataValue, NumberControlSetup setup = null, SpecifiedValue<int?> value = null, int? minValue = null, int? maxValue = null,
+			int? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<int?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<int?> dataValue, NumberControlSetup setup = null, SpecifiedValue<int?> value = null, bool allowEmpty = true, int? minValue = null,
+			int? maxValue = null, int? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return longValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (int?)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<long> dataValue, NumberControlSetup setup = null, SpecifiedValue<long?> value = null, long? minValue = null, long? maxValue = null,
+			long? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<long?> dataValue, NumberControlSetup setup = null, SpecifiedValue<long?> value = null, bool allowEmpty = true, long? minValue = null,
+			long? maxValue = null, long? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var decimalValue = new DataValue<decimal?> { Value = value != null ? value.Value : dataValue.Value };
+			return decimalValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep ?? 1,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (long?)decimalValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<short> dataValue, NumberControlSetup setup = null, SpecifiedValue<short?> value = null, short? minValue = null, short? maxValue = null,
+			short? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<short?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<short?> dataValue, NumberControlSetup setup = null, SpecifiedValue<short?> value = null, bool allowEmpty = true, short? minValue = null,
+			short? maxValue = null, short? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return longValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (short?)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<byte> dataValue, NumberControlSetup setup = null, SpecifiedValue<byte?> value = null, byte? minValue = null, byte? maxValue = null,
+			byte? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var nullableValue = new DataValue<byte?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: false,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = nullableValue.Value.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<byte?> dataValue, NumberControlSetup setup = null, SpecifiedValue<byte?> value = null, bool allowEmpty = true, byte? minValue = null,
+			byte? maxValue = null, byte? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
+			return longValue.ToNumberControl(
+				setup: setup,
+				allowEmpty: allowEmpty,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (byte?)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<decimal> dataValue, NumberControlSetup setup = null, SpecifiedValue<decimal?> value = null, decimal? minValue = null,
+			decimal? maxValue = null, decimal? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			return new NumberControl(
+				value != null ? value.Value : dataValue.Value,
+				false,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static NumberControl ToNumberControl(
+			this DataValue<decimal?> dataValue, NumberControlSetup setup = null, SpecifiedValue<decimal?> value = null, bool allowEmpty = true,
+			decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			return new NumberControl(
+				value != null ? value.Value : dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				valueStep: valueStep,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static ImpreciseNumberControl ToImpreciseNumberControl(
+			this DataValue<int> dataValue, int minValue, int maxValue, ImpreciseNumberControlSetup setup = null, int? value = null, int? valueStep = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long> { Value = value ?? dataValue.Value };
+			return longValue.ToImpreciseNumberControl(
+				minValue,
+				maxValue,
+				setup: setup,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (int)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static ImpreciseNumberControl ToImpreciseNumberControl(
+			this DataValue<long> dataValue, long minValue, long maxValue, ImpreciseNumberControlSetup setup = null, long? value = null, long? valueStep = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var decimalValue = new DataValue<decimal> { Value = value ?? dataValue.Value };
+			return decimalValue.ToImpreciseNumberControl(
+				minValue,
+				maxValue,
+				setup: setup,
+				valueStep: valueStep ?? 1,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (long)decimalValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static ImpreciseNumberControl ToImpreciseNumberControl(
+			this DataValue<short> dataValue, short minValue, short maxValue, ImpreciseNumberControlSetup setup = null, short? value = null, short? valueStep = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long> { Value = value ?? dataValue.Value };
+			return longValue.ToImpreciseNumberControl(
+				minValue,
+				maxValue,
+				setup: setup,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (short)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static ImpreciseNumberControl ToImpreciseNumberControl(
+			this DataValue<byte> dataValue, byte minValue, byte maxValue, ImpreciseNumberControlSetup setup = null, byte? value = null, byte? valueStep = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var longValue = new DataValue<long> { Value = value ?? dataValue.Value };
+			return longValue.ToImpreciseNumberControl(
+				minValue,
+				maxValue,
+				setup: setup,
+				valueStep: valueStep,
+				additionalValidationMethod: validator => {
+					dataValue.Value = (byte)longValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static ImpreciseNumberControl ToImpreciseNumberControl(
+			this DataValue<decimal> dataValue, decimal minValue, decimal maxValue, ImpreciseNumberControlSetup setup = null, decimal? value = null,
+			decimal? valueStep = null, Action<Validator> additionalValidationMethod = null ) {
+			return new ImpreciseNumberControl(
+				value ?? dataValue.Value,
+				minValue,
+				maxValue,
+				setup: setup,
+				valueStep: valueStep,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
 		/// <summary>
 		/// Creates a block checkbox for this data value.
 		/// </summary>
