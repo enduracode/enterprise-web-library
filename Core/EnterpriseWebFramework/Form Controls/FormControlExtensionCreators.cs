@@ -84,6 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				value ?? dataValue.Value,
 				allowEmpty,
 				setup: setup,
+				minLength: minLength,
 				maxLength: maxLength,
 				validationMethod: ( postBackValue, validator ) => {
 					dataValue.Value = postBackValue;
