@@ -72,25 +72,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				dv =>
 					"{0}.ToTelephoneNumberControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetters(
-				writer,
-				field,
-				"EwfTextBox",
-				"ZipCode",
-				"string",
-				"\"\"",
-				new CSharpParameter[ 0 ],
-				getAllowEmptyParameter( false ).ToCollection(),
-				new[]
-					{
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfTextBox( v" + ( field.Size.HasValue ? ", maxLength: " + field.Size.Value : "" ) +
-				", readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
-				"validator.GetZipCode( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty ).FullZipCode",
-				"" );
 			writeFormItemGetter(
 				writer,
 				field,
