@@ -211,82 +211,85 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						"{0}.ToTextControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
 
-			if( field.TypeIs( typeof( int ) ) ) {
-				writeNumberAsTextFormItemGetters(
+			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( short ) ) || field.TypeIs( typeof( byte ) ) ||
+			    field.TypeIs( typeof( decimal ) ) )
+				writeFormItemGetter(
 					writer,
 					field,
-					"int?",
-					new[] { new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
-					"validator.GetInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
+					"NumberControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "NumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( field.NullableTypeName, "minValue", "null" ).ToCollection()
+						.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) )
+						.Append( new CSharpParameter( field.NullableTypeName, "valueStep", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToNumberControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, valueStep: valueStep, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ),
+					preFormItemStatements: getNumberControlValueStepStatements( field ) );
+			if( field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( short? ) ) || field.TypeIs( typeof( byte? ) ) ||
+			    field.TypeIs( typeof( decimal? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"NumberControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "NumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					getAllowEmptyParameter( true )
+						.ToCollection()
+						.Append( new CSharpParameter( field.NullableTypeName, "minValue", "null" ) )
+						.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) )
+						.Append( new CSharpParameter( field.NullableTypeName, "valueStep", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToNumberControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, valueStep: valueStep, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ),
+					preFormItemStatements: getNumberControlValueStepStatements( field ) );
+
+			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( short ) ) || field.TypeIs( typeof( byte ) ) ||
+			    field.TypeIs( typeof( decimal ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"ImpreciseNumberControl",
+					new CSharpParameter( field.TypeName, "minValue" ).ToCollection().Append( new CSharpParameter( field.TypeName, "maxValue" ) ),
+					false,
+					new CSharpParameter( "ImpreciseNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					field.NullableTypeName,
+					new CSharpParameter( field.NullableTypeName, "valueStep", "null" ).ToCollection(),
+					true,
+					dv =>
+						"{0}.ToImpreciseNumberControl( minValue, maxValue, setup: controlSetup, value: value, valueStep: valueStep, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ),
+					preFormItemStatements: getNumberControlValueStepStatements( field ) );
+
+			if( field.TypeIs( typeof( int ) ) ) {
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"int?",
-					new[] { getAllowEmptyParameter( true ), new CSharpParameter( "int", "min", "int.MinValue" ), new CSharpParameter( "int", "max", "int.MaxValue" ) },
-					"validator.GetNullableInt( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min: min, max: max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 			}
 
-			if( field.TypeIs( typeof( short ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"short?",
-					new[] { new CSharpParameter( "short", "min", "short.MinValue" ), new CSharpParameter( "short", "max", "short.MaxValue" ) },
-					"validator.GetShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
+			if( field.TypeIs( typeof( short ) ) )
 				writeNumberAsSelectListFormItemGetters( writer, field );
-			}
-			if( field.TypeIs( typeof( short? ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"short?",
-					new[]
-						{
-							getAllowEmptyParameter( true ), new CSharpParameter( "short", "min", "short.MinValue" ), new CSharpParameter( "short", "max", "short.MaxValue" )
-						},
-					"validator.GetNullableShort( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
+			if( field.TypeIs( typeof( short? ) ) )
 				writeNumberAsSelectListFormItemGetters( writer, field );
-			}
 
-			if( field.TypeIs( typeof( byte ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"byte?",
-					new[] { new CSharpParameter( "byte", "min", "byte.MinValue" ), new CSharpParameter( "byte", "max", "byte.MaxValue" ) },
-					"validator.GetByte( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
+			if( field.TypeIs( typeof( byte ) ) )
 				writeNumberAsSelectListFormItemGetters( writer, field );
-			}
-			if( field.TypeIs( typeof( byte? ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"byte?",
-					getAllowEmptyParameter( true ).ToCollection(),
-					"validator.GetNullableByte( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty )" );
+			if( field.TypeIs( typeof( byte? ) ) )
 				writeNumberAsSelectListFormItemGetters( writer, field );
-			}
 
 			if( field.TypeIs( typeof( decimal ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"decimal?",
-					new[]
-						{
-							new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
-							new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
-						},
-					"validator.GetDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeDurationFormItemGetter( writer, field );
@@ -294,43 +297,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
 			}
 			if( field.TypeIs( typeof( decimal? ) ) ) {
-				writeNumberAsTextFormItemGetters(
-					writer,
-					field,
-					"decimal?",
-					new[]
-						{
-							getAllowEmptyParameter( true ), new CSharpParameter( "decimal", "min", "Validator.SqlDecimalDefaultMin" ),
-							new CSharpParameter( "decimal", "max", "Validator.SqlDecimalDefaultMax" )
-						},
-					"validator.GetNullableDecimal( new ValidationErrorHandler( subject ), control.GetPostBackValue( postBackValues ), allowEmpty, min, max )" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
 		}
 
-		private static void writeNumberAsTextFormItemGetters(
-			TextWriter writer, ModificationField field, string valueParamTypeName, IEnumerable<CSharpParameter> optionalValidationParams,
-			string validationMethodExpressionOrBlock ) {
-			writeFormItemGetters(
-				writer,
-				field,
-				"EwfTextBox",
-				"Text",
-				valueParamTypeName,
-				"null",
-				new CSharpParameter[ 0 ],
-				new CSharpParameter[ 0 ],
-				new[]
-					{
-						new CSharpParameter( "bool", "readOnly", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				optionalValidationParams,
-				"new EwfTextBox( v.ObjectToString( true ), readOnly: readOnly, action: action, autoPostBack: autoPostBack )",
-				validationMethodExpressionOrBlock,
-				"" );
+		private static string getNumberControlValueStepStatements( ModificationField field ) {
+			if( ( !field.TypeIs( typeof( decimal ) ) && !field.TypeIs( typeof( decimal? ) ) ) || !field.NumericScale.HasValue )
+				return "";
+			var minStep = field.NumericScale.Value == 0 ? "1" : ".{0}1m".FormatWith( string.Concat( Enumerable.Repeat( '0', field.NumericScale.Value - 1 ) ) );
+			return StringTools.ConcatenateWithDelimiter(
+				Environment.NewLine,
+				"if( !valueStep.HasValue ) valueStep = {0};".FormatWith( minStep ),
+				"else if( valueStep.Value % {0} != 0 ) throw new System.ApplicationException( \"The specified step is not a multiple of the field’s minimum step.\" );"
+					.FormatWith( minStep ) );
 		}
 
 		private static void writeFileCollectionFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
