@@ -11,11 +11,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		private readonly string nullableTypeName;
 		private readonly string enumerableElementTypeName;
 		private readonly int? size;
+		private readonly short? numericScale;
 		private readonly string privateFieldNameOverride;
 
 		internal ModificationField(
-			string name, string pascalCasedName, string camelCasedName, Type type, string typeName, string nullableTypeName, string enumerableElementTypeName, int? size,
-			string privateFieldNameOverride = "" ) {
+			string name, string pascalCasedName, string camelCasedName, Type type, string typeName, string nullableTypeName, string enumerableElementTypeName,
+			int? size, short? numericScale, string privateFieldNameOverride = "" ) {
 			this.name = name;
 			this.pascalCasedName = pascalCasedName;
 			this.camelCasedName = camelCasedName;
@@ -24,6 +25,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			this.nullableTypeName = nullableTypeName;
 			this.enumerableElementTypeName = enumerableElementTypeName;
 			this.size = size;
+			this.numericScale = numericScale;
 			this.privateFieldNameOverride = privateFieldNameOverride;
 		}
 
@@ -39,6 +41,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		internal string NullableTypeName => nullableTypeName;
 		internal string EnumerableElementTypeName => enumerableElementTypeName;
 		internal int? Size => size;
+		internal short? NumericScale => numericScale;
 
 		internal string PrivateFieldName => privateFieldNameOverride.Any() ? privateFieldNameOverride : camelCasedName;
 	}

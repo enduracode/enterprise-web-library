@@ -21,25 +21,24 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 		private readonly string dbTypeString;
 
 		private readonly int size;
+		private readonly short? numericScale;
 		private readonly bool allowsNull;
 
 		// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
 		private readonly string pascalCasedNameExceptForOracle;
 
-		public ValueContainer( string name, Type dataType, string dbTypeString, int size, bool allowsNull, DatabaseInfo databaseInfo ) {
+		public ValueContainer( string name, Type dataType, string dbTypeString, int size, short? numericScale, bool allowsNull, DatabaseInfo databaseInfo ) {
 			this.name = name;
 			pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : name;
 			pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
-			unconvertedDataType = dataType;
-			this.dbTypeString = dbTypeString;
 			nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
-			this.size = size;
+			unconvertedDataType = dataType;
 
 			// MySQL LONGTEXT returns -1 for size.
 			if( databaseInfo is MySqlInfo && dbTypeString == "Text" && size == -1 )
-				this.size = int.MaxValue;
+				size = int.MaxValue;
 
-			if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && this.size == 1 ) {
+			if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && size == 1 ) {
 				if( unconvertedDataType != typeof( ulong ) )
 					throw new ApplicationException( "The unconverted data type was not ulong." );
 
@@ -55,6 +54,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 				outgoingValueConversionExpressionGetter = valueExpression => valueExpression;
 			}
 
+			this.dbTypeString = dbTypeString;
+			this.size = size;
+			this.numericScale = numericScale;
 			this.allowsNull = allowsNull;
 		}
 
@@ -88,8 +90,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			return incomingValueConverter( value );
 		}
 
-		public int Size { get { return size; } }
-		public bool AllowsNull { get { return allowsNull; } }
+		public int Size => size;
+		public short? NumericScale => numericScale;
+		public bool AllowsNull => allowsNull;
 
 		public string GetParameterValueExpression( string valueExpression ) {
 			var conversionExpression = outgoingValueConversionExpressionGetter( valueExpression );

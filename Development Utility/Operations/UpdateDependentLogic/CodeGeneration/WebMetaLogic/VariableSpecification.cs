@@ -38,7 +38,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				rawTypeNamesToTypes.Add( typeName, type );
 			}
 
-			if( !isSupportedValueType( type ) && !isSupportedNullableType( type, isSupportedValueType ) && type != typeof( string ) && !isSupportedEnumerable( type ) )
+			if( !isSupportedValueType( type ) && !isSupportedNullableType( type, isSupportedValueType ) && type != typeof( string ) &&
+			    !isSupportedEnumerable( type ) )
 				throw new UserCorrectableException( "The type \"" + typeName + "\" is not supported." );
 
 			normalizedTypeName = getNormalizedTypeName( type );
@@ -60,8 +61,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		private static bool isSupportedValueType( Type type ) {
 			return isSupportedIntegralType( type ) || new[]
-					       { typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan ) }.Contains(
-				       type ) || type.IsEnum;
+				{
+					typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan )
+				}.Contains( type ) || type.IsEnum;
 		}
 
 		private static bool isSupportedIntegralType( Type type ) {
@@ -131,7 +133,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( type.IsValueType && Nullable.GetUnderlyingType( type ) == null )
 				nullableTypeName += "?";
 
-			return new ModificationField( PropertyName, PropertyName, name, type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, null );
+			return new ModificationField( PropertyName, PropertyName, name, type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, null, null );
 		}
 	}
 }

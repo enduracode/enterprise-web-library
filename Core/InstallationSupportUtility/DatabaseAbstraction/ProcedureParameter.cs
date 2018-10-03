@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			var dbTypeString = cn.DatabaseInfo.GetDbTypeString( row[ "ProviderDbType" ] );
 			var allowsNull = (bool)row[ "IsNullable" ];
 
-			valueContainer = new ValueContainer( name, dataType, dbTypeString, size, allowsNull, cn.DatabaseInfo );
+			valueContainer = new ValueContainer( name, dataType, dbTypeString, size, null, allowsNull, cn.DatabaseInfo );
 			this.direction = direction;
 		}
 

@@ -44,13 +44,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			if( databaseInfo is MySqlInfo )
 				ordinal -= 1;
 
+			var dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
 			valueContainer = new ValueContainer(
 				(string)schemaTableRow[ "ColumnName" ],
 				(Type)schemaTableRow[ "DataType" ],
-				databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] ),
+				dbTypeString,
 				(int)schemaTableRow[ "ColumnSize" ],
+				databaseInfo is SqlServerInfo && dbTypeString == "Decimal" ? (short)schemaTableRow[ "NumericScale" ] :
+				databaseInfo is MySqlInfo && dbTypeString == "NewDecimal" ? (short)(int)schemaTableRow[ "NumericScale" ] :
+				databaseInfo is OracleInfo && dbTypeString == "Decimal" ? (short)schemaTableRow[ "NumericScale" ] : (short?)null,
 				(bool)schemaTableRow[ "AllowDBNull" ],
 				databaseInfo );
+
 			isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 			             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
 			isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
@@ -103,7 +108,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		internal string GetDataReaderValueExpression( string readerName, int? ordinalOverride = null ) {
-			var getValueExpression = valueContainer.GetIncomingValueConversionExpression( "{0}.GetValue( {1} )".FormatWith( readerName, ordinalOverride ?? ordinal ) );
+			var getValueExpression =
+				valueContainer.GetIncomingValueConversionExpression( "{0}.GetValue( {1} )".FormatWith( readerName, ordinalOverride ?? ordinal ) );
 			return valueContainer.AllowsNull
 				       ? "{0}.IsDBNull( {1} ) ? {2} : {3}".FormatWith(
 					       readerName,
@@ -126,6 +132,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				valueContainer.NullableDataTypeName,
 				"",
 				valueContainer.Size,
+				valueContainer.NumericScale,
 				privateFieldNameOverride: privateFieldName );
 		}
 	}
