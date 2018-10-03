@@ -94,14 +94,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static NumericTextControl ToTextControl(
 			this DataValue<int> dataValue, NumericTextControlSetup setup = null, SpecifiedValue<int?> value = null, int? minValue = null, int? maxValue = null,
 			Action<Validator> additionalValidationMethod = null ) {
-			var longValue = new DataValue<long?> { Value = value != null ? value.Value : dataValue.Value };
-			return longValue.ToTextControl(
+			var nullableValue = new DataValue<int?> { Value = value != null ? value.Value : dataValue.Value };
+			return nullableValue.ToTextControl(
 				setup: setup,
 				allowEmpty: false,
 				minValue: minValue,
-				maxValue: maxValue ?? int.MaxValue,
+				maxValue: maxValue,
 				additionalValidationMethod: validator => {
-					dataValue.Value = (int)longValue.Value.Value;
+					dataValue.Value = nullableValue.Value.Value;
 					additionalValidationMethod?.Invoke( validator );
 				} );
 		}
@@ -197,8 +197,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return longValue.ToNumberControl(
 				setup: setup,
 				allowEmpty: allowEmpty,
-				minValue: minValue,
-				maxValue: maxValue,
+				minValue: minValue ?? int.MinValue,
+				maxValue: maxValue ?? int.MaxValue,
 				valueStep: valueStep,
 				additionalValidationMethod: validator => {
 					dataValue.Value = (int?)longValue.Value;
@@ -229,8 +229,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return decimalValue.ToNumberControl(
 				setup: setup,
 				allowEmpty: allowEmpty,
-				minValue: minValue,
-				maxValue: maxValue,
+				minValue: minValue ?? long.MinValue,
+				maxValue: maxValue ?? long.MaxValue,
 				valueStep: valueStep ?? 1,
 				additionalValidationMethod: validator => {
 					dataValue.Value = (long?)decimalValue.Value;
@@ -261,8 +261,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return longValue.ToNumberControl(
 				setup: setup,
 				allowEmpty: allowEmpty,
-				minValue: minValue,
-				maxValue: maxValue,
+				minValue: minValue ?? short.MinValue,
+				maxValue: maxValue ?? short.MaxValue,
 				valueStep: valueStep,
 				additionalValidationMethod: validator => {
 					dataValue.Value = (short?)longValue.Value;
@@ -293,8 +293,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return longValue.ToNumberControl(
 				setup: setup,
 				allowEmpty: allowEmpty,
-				minValue: minValue,
-				maxValue: maxValue,
+				minValue: minValue ?? byte.MinValue,
+				maxValue: maxValue ?? byte.MaxValue,
 				valueStep: valueStep,
 				additionalValidationMethod: validator => {
 					dataValue.Value = (byte?)longValue.Value;
