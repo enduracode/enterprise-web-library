@@ -11,10 +11,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			// just adding them to the data modification. This allows client code on a page to specify the order of modification methods, which is important because
 			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
 			// page, and the main modification needs to execute between these.
-			writer.WriteLine( "#pragma warning disable CS0618" ); // remove when EwfTextBox is gone
 			writeStringFormItemGetters( writer, field );
 			writeNumericFormItemGetters( writer, field );
-			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfTextBox is gone
 			writeBoolFormItemGetters( writer, field );
 			writeDateFormItemGetters( writer, field );
 			writeEnumerableFormItemGetters( writer, field );
