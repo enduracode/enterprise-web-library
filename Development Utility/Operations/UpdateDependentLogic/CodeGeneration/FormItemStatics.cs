@@ -285,7 +285,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		private static string getNumberControlValueStepStatements( ModificationField field ) {
 			if( ( !field.TypeIs( typeof( decimal ) ) && !field.TypeIs( typeof( decimal? ) ) ) || !field.NumericScale.HasValue )
 				return "";
-			var minStep = field.NumericScale.Value == 0 ? "1" : ".{0}1m".FormatWith( string.Concat( Enumerable.Repeat( '0', field.NumericScale.Value - 1 ) ) );
+			var minStep = field.NumericScale.Value == 0
+				              ? "1"
+				              : ".{0}1m".FormatWith(
+					              string.Concat( Enumerable.Repeat( '0', Math.Min( field.NumericScale.Value, (short)28 /* max scale for decimal */ ) - 1 ) ) );
 			return StringTools.ConcatenateWithDelimiter(
 				Environment.NewLine,
 				"if( !valueStep.HasValue ) valueStep = {0};".FormatWith( minStep ),
