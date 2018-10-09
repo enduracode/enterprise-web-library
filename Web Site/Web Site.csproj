@@ -492,8 +492,6 @@
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
     <Content Include="Ewf\UserManagement\ConfirmPasswordReset.aspx" />
     <Content Include="Ewf\UserManagement\SelectUser.aspx" />
-    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Darker.svg" />
-    <Content Include="Ewf\VersionedStaticFiles\Backgrounds-v2\Lighter.svg" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen-sprite%402x.png" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen-sprite.png" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen.jquery.min.js" />

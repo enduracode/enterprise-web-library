@@ -9,7 +9,7 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
 .checkedChecklistCheckboxDiv {
-	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Darker.svg' );
+	background-image: linear-gradient( rgba( 0, 0, 0, .05 ), rgba( 0, 0, 0, .05 ) );
 }
 
 /* block highlighting */
@@ -78,7 +78,7 @@ ewfUiTopTabBlock ewfActionControlAllStylesStatesWithHover,
 ewfUiTopTabBlock ewfActionControlAllStylesStatesWithFocus,
 ewfUiSideTabBlock ewfActionControlAllStylesStatesWithHover,
 ewfUiSideTabBlock ewfActionControlAllStylesStatesWithFocus {
-	background-image: url( '../../VersionedStaticFiles/Backgrounds-v2/Lighter.svg' );
+	background-image: linear-gradient( rgba( 255, 255, 255, .3 ), rgba( 255, 255, 255, .3 ) );
 }
 
 /* new content */
