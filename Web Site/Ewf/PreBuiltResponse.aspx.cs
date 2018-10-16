@@ -9,11 +9,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					throw new ApplicationException();
 			}
 
-			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.MatchingCurrentRequest; } }
+			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 		}
 
-		protected override EwfSafeResponseWriter responseWriter {
-			get { return new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.Instance.ResponseToSend ) ); }
-		}
+		protected override EwfSafeRequestHandler requestHandler =>
+			new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.Instance.ResponseToSend ) );
 	}
 }

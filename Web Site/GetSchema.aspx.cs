@@ -16,16 +16,13 @@ namespace EnterpriseWebLibrary.WebSite {
 					throw new ApplicationException( "File does not exist." );
 			}
 
-			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.NonSecure; } }
+			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.NonSecure;
 		}
 
-		protected override EwfSafeResponseWriter responseWriter {
-			get {
-				return new EwfSafeResponseWriter(
-					() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
-					EwlStatics.EwlBuildDateTime,
-					() => "getSchema" + info.FileName );
-			}
-		}
+		protected override EwfSafeRequestHandler requestHandler =>
+			new EwfSafeResponseWriter(
+				() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( info.FilePath ) ) ),
+				EwlStatics.EwlBuildDateTime,
+				() => "getSchema" + info.FileName );
 	}
 }

@@ -191,10 +191,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( responseWriter != null ) {
+			if( requestHandler != null ) {
 				Response.ClearHeaders();
 				Response.ClearContent();
-				responseWriter.WriteResponse();
+				requestHandler.WriteResponse();
 
 				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
 				// EWF from Web Forms. This is EnduraCode goal 790.
@@ -208,9 +208,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected abstract void initEntitySetup();
 
 		/// <summary>
-		/// Gets the response writer for this page. NOTE: We should re-implement this such that the classes that override this are plain old HTTP handlers instead of pages.
+		/// Gets the request handler for this page, which will override the page.
 		/// </summary>
-		protected virtual EwfSafeResponseWriter responseWriter { get { return null; } }
+		protected virtual EwfSafeRequestHandler requestHandler => null;
 
 		/// <summary>
 		/// Performs EWF activities in addition to the normal InitComplete activities.

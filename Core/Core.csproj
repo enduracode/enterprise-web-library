@@ -377,7 +377,6 @@
     <Compile Include="EnterpriseWebFramework\Error Display\Styles\ListErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Error Display\Styles\SectionErrorDisplayStyle.cs" />
     <Compile Include="EnterpriseWebFramework\EwfInitializationOps.cs" />
-    <Compile Include="EnterpriseWebFramework\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBoxSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateAndTimeControl.cs" />
@@ -593,8 +592,10 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeResponseWriter.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
