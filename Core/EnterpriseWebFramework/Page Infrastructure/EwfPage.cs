@@ -191,10 +191,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
 
-			if( requestHandler != null ) {
+			var cachedRequestHandler = requestHandler;
+			if( cachedRequestHandler != null ) {
 				Response.ClearHeaders();
 				Response.ClearContent();
-				requestHandler.WriteResponse();
+				cachedRequestHandler.WriteResponse();
 
 				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
 				// EWF from Web Forms. This is EnduraCode goal 790.
