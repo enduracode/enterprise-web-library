@@ -39,7 +39,7 @@ For servers, the only requirement is Windows Server 2016 with IIS enabled.
 
 ## Adding a database
 
-1.	Add the `<database>` element to the installation configuration files (i.e. the `Standard.xml` files in `Library/Configuration/Installation/Installations`) after the closing `</administrators>` tag:
+1.	Add the `<database>` element to the three installation configuration files (i.e. the `Standard.xml` files in `Library/Configuration/Installation/Installations`) after the closing `</administrators>` tag:
 
 	* For SQL Server, use `<database xsi:type="SqlServerDatabase" />`. The database name will be `SystemShortNameDev`, `SystemShortName` being replaced with the value from your `General.xml` configuration file. Use the `<database>` child element to override this naming convention.
 
