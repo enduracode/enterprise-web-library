@@ -6,20 +6,7 @@ using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.JavaScriptWriting;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	/* NOTE: This should be named InlineCheckBox. When we do this, rename CommonCheckBox to EwfCheckBox.
-	 * 
-	 * InlineCheckBox is a check box that can be centered with text-align or used within a paragraph of text. This cannot be done with BlockCheckBox for two reasons:
-	 * 
-	 * 1. BlockCheckBox needs to have 100% width in order for nested controls to work properly in Chrome and Safari. Specifically, a two-row shrink wrap table with wide content
-	 * in the second column of the second row did not work properly in these browsers under certain circumstances (Sam may have details). Inline elements cannot specify width,
-	 * so the BlockCheckBox must be non-inline, and non-inline elements cannot be centered with text-align or used within a paragraph of text.
-	 * 
-	 * 2. We could not find a way to get Chrome and Safari to center a table-based check box control using text-align regardless of what CSS display value we used on the element.
-	 * */
-
-	/// <summary>
-	/// An in-line check box with the label vertically centered on the box.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 28 Feb 2019. Use Checkbox instead." ) ]
 	public class EwfCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl {
 		private static readonly ElementClass elementClass = new ElementClass( "ewfCheckBox" );
 
@@ -38,11 +25,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => isChecked,
 				() => checkBox.IsOnPage() ? checkBox.UniqueID : "",
 				v => v.ToString(),
-				rawValue => rawValue == null
-					            ? PostBackValueValidationResult<bool>.CreateValid( false )
-					            : rawValue == "on"
-						            ? PostBackValueValidationResult<bool>.CreateValid( true )
-						            : PostBackValueValidationResult<bool>.CreateInvalid() );
+				rawValue => rawValue == null ? PostBackValueValidationResult<bool>.CreateValid( false ) :
+				            rawValue == "on" ? PostBackValueValidationResult<bool>.CreateValid( true ) : PostBackValueValidationResult<bool>.CreateInvalid() );
 		}
 
 		internal static void AddCheckBoxAttributes(

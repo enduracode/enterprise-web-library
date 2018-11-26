@@ -379,6 +379,12 @@
     <Compile Include="EnterpriseWebFramework\EwfInitializationOps.cs" />
     <Compile Include="EnterpriseWebFramework\FontAwesomeIcon.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBoxSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\Checkbox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\CheckboxSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\FlowCheckbox.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\FlowCheckboxSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\FlowRadioButtonSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Checkboxes\RadioButtonSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateAndTimeControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateAndTimeControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateControl.cs" />
@@ -399,6 +405,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Imprecise Number Control\ImpreciseNumberControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Imprecise Number Control\ImpreciseNumberControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ChangeBasedCheckBoxList.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioList.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\EwfCheckBoxList.cs" />
@@ -739,7 +747,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\User.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\FreeFormRadioList.cs" />
     <Compile Include="Tools\CollectionTools.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="FormattingMethods.cs" />
