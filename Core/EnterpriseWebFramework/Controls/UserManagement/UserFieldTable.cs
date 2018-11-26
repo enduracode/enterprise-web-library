@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems( Email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
 
 			if( includePasswordControls() ) {
-				var group = new RadioButtonGroup( false );
+				var group = new LegacyRadioButtonGroup( false );
 
 				var keepPassword = FormItem.Create(
 					"",
@@ -123,8 +123,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				FormItem.Create(
 					"Role",
 					SelectList.CreateDropDown( from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ), user?.Role.RoleId ),
-					validationGetter: control =>
-						new EwfValidation( ( pbv, validator ) => RoleId.Value = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ) ) ) );
+					validationGetter: control => new EwfValidation(
+						( pbv, validator ) => RoleId.Value = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ) ) ) );
 
 			Controls.Add( b );
 		}
