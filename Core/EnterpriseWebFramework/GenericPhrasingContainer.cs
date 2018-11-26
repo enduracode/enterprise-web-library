@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -28,6 +30,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
 			return children;
+		}
+	}
+
+	public static class GenericPhrasingContainerExtensionCreators {
+		/// <summary>
+		/// Creates a generic phrasing container (i.e. span element) that depends on this page-modification value.
+		/// </summary>
+		public static IReadOnlyCollection<PhrasingComponent> ToGenericPhrasingContainer<ModificationValueType>(
+			this PageModificationValue<ModificationValueType> pageModificationValue, Func<ModificationValueType, string> textSelector,
+			Func<string, string> jsTextExpressionGetter ) {
+			return new CustomPhrasingComponent(
+				new DisplayableElement(
+					context => {
+						pageModificationValue.AddJsModificationStatement(
+							valueExpression => "$( '#{0}' ).text( {1} );".FormatWith( context.Id, jsTextExpressionGetter( valueExpression ) ) );
+						return new DisplayableElementData(
+							null,
+							() => new DisplayableElementLocalData( "span", focusDependentData: new DisplayableElementFocusDependentData( includeIdAttribute: true ) ),
+							children: new TextNode( () => textSelector( pageModificationValue.Value ) ).ToCollection() );
+					} ).ToCollection() ).ToCollection();
 		}
 	}
 }
