@@ -12,8 +12,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
 			// page, and the main modification needs to execute between these.
 			writeStringFormItemGetters( writer, field );
+			writer.WriteLine( "#pragma warning disable CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeNumericFormItemGetters( writer, field );
 			writeBoolFormItemGetters( writer, field );
+			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeDateFormItemGetters( writer, field );
 			writeEnumerableFormItemGetters( writer, field );
 			writeGuidFormItemGetters( writer, field );
