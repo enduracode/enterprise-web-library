@@ -2,13 +2,13 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
-	partial class CheckBox: EwfPage {
+	partial class Checkboxes: EwfPage {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				ControlStack.CreateWithControls(
 					true,
-					new EwfCheckBox( false, label: "Inline Check Box" ),
-					new BlockCheckBox( false, "Block Check Box".ToComponents() ) ) );
+					new Checkbox( false, label: "Checkbox".ToComponents() ).ToFormItem().ToControl(),
+					new FlowCheckbox( false, "Flow checkbox".ToComponents() ).ToFormItem().ToControl() ) );
 		}
 
 		public override bool IsAutoDataUpdater => true;

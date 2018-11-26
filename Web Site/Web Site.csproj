@@ -236,12 +236,12 @@
     <Compile Include="TestPages\Charts.aspx.designer.cs">
       <DependentUpon>Charts.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\CheckBox.aspx.cs">
-      <DependentUpon>CheckBox.aspx</DependentUpon>
+    <Compile Include="TestPages\Checkboxes.aspx.cs">
+      <DependentUpon>Checkboxes.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="TestPages\CheckBox.aspx.designer.cs">
-      <DependentUpon>CheckBox.aspx</DependentUpon>
+    <Compile Include="TestPages\Checkboxes.aspx.designer.cs">
+      <DependentUpon>Checkboxes.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\CheckBoxList.aspx.cs">
       <DependentUpon>CheckBoxList.aspx</DependentUpon>
@@ -525,7 +525,7 @@
     <Content Include="TestPages\Basic\ModalContent.aspx" />
     <Content Include="TestPages\BoxDemo.aspx" />
     <Content Include="TestPages\Charts.aspx" />
-    <Content Include="TestPages\CheckBox.aspx" />
+    <Content Include="TestPages\Checkboxes.aspx" />
     <Content Include="TestPages\CheckBoxList.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
     <Content Include="TestPages\DateAndTimePickers.aspx" />

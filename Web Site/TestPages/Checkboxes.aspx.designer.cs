@@ -10,7 +10,7 @@
 namespace EnterpriseWebLibrary.WebSite.TestPages {
     
     
-    public partial class CheckBox {
+    public partial class Checkboxes {
         
         /// <summary>
         /// ph control.
