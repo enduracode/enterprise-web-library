@@ -13,40 +13,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static FormValue<ElementId> GetFormValue(
 			bool allowsNoSelection, Func<IEnumerable<ElementId>> buttonIdGetter, Func<IEnumerable<ElementId>> selectedButtonIdGetter,
 			Func<ElementId, string> stringValueSelector, Func<string, IEnumerable<ElementId>> selectedButtonIdInPostBackGetter ) {
-			return new FormValue<ElementId>(
-				() => selectedButtonIdGetter().FirstOrDefault(),
-				() => buttonIdGetter().Select( i => i.Id ).FirstOrDefault( i => i.Any() ) ?? "",
-				stringValueSelector,
-				rawValue => {
-					if( rawValue != null ) {
-						var selectedButtonId = selectedButtonIdInPostBackGetter( rawValue ).SingleOrDefault();
-						return selectedButtonId != null
-							       ? PostBackValueValidationResult<ElementId>.CreateValid( selectedButtonId )
-							       : PostBackValueValidationResult<ElementId>.CreateInvalid();
-					}
-					return allowsNoSelection ? PostBackValueValidationResult<ElementId>.CreateValid( null ) : PostBackValueValidationResult<ElementId>.CreateInvalid();
-				} );
+			FormValue<ElementId> formValue = null;
+			return formValue = new FormValue<ElementId>(
+				       () => selectedButtonIdGetter().FirstOrDefault(),
+				       () => buttonIdGetter().Select( i => i.Id ).FirstOrDefault( i => i.Any() ) ?? "",
+				       stringValueSelector,
+				       rawValue => {
+					       if( rawValue != null ) {
+						       var selectedButtonId = selectedButtonIdInPostBackGetter( rawValue ).SingleOrDefault();
+						       return selectedButtonId != null
+							              ? PostBackValueValidationResult<ElementId>.CreateValid( selectedButtonId )
+							              : PostBackValueValidationResult<ElementId>.CreateInvalid();
+					       }
+
+					       var durableValue = formValue.GetDurableValue();
+					       return durableValue != null && !durableValue.Id.Any() ? PostBackValueValidationResult<ElementId>.CreateValid( durableValue ) :
+					              allowsNoSelection ? PostBackValueValidationResult<ElementId>.CreateValid( null ) :
+					              PostBackValueValidationResult<ElementId>.CreateInvalid();
+				       } );
 		}
 
 		internal static void ValidateControls(
 			bool allowsNoSelection, bool inNoSelectionState, IEnumerable<ElementId> selectedButtonIds, IEnumerable<ElementId> buttonIds,
 			bool disableSingleButtonDetection ) {
-			ElementId selectedButtonId = null;
-			if( !allowsNoSelection || !inNoSelectionState ) {
-				selectedButtonIds = selectedButtonIds.Materialize();
-				if( selectedButtonIds.Count() != 1 )
-					throw new ApplicationException( "If a radio button group is not in the no-selection state, then exactly one radio button must be selected." );
-				selectedButtonId = selectedButtonIds.Single();
-			}
+			if( ( !allowsNoSelection || !inNoSelectionState ) && selectedButtonIds.Count() != 1 )
+				throw new ApplicationException( "If a radio button group is not in the no-selection state, then exactly one radio button must be selected." );
 
-			var buttonsIdsOnPage = buttonIds.Where( i => i.Id.Any() ).Materialize();
-			if( buttonsIdsOnPage.Any() ) {
-				if( selectedButtonId != null && !selectedButtonId.Id.Any() )
-					throw new ApplicationException( "The selected radio button must be on the page." );
-				if( !disableSingleButtonDetection && buttonsIdsOnPage.Count < 2 ) {
-					const string link = "http://developers.whatwg.org/states-of-the-type-attribute.html#radio-button-state-%28type=radio%29";
-					throw new ApplicationException( "A radio button group must contain more than one element; see " + link + "." );
-				}
+			var activeButtonsIds = buttonIds.Where( i => i.Id.Any() ).Materialize();
+			if( activeButtonsIds.Any() && !disableSingleButtonDetection && activeButtonsIds.Count < 2 ) {
+				const string link = "http://developers.whatwg.org/states-of-the-type-attribute.html#radio-button-state-%28type=radio%29";
+				throw new ApplicationException( "A radio button group must contain more than one element; see " + link + "." );
 			}
 		}
 
@@ -105,7 +101,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new Checkbox(
 				formValue,
-				id,
+				setup.IsReadOnly ? new ElementId() : id,
 				setup,
 				label,
 				selectionChangedAction,

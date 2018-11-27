@@ -114,7 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new Checkbox(
 				formValue,
-				id,
+				setup.IsReadOnly ? new ElementId() : id,
 				setup,
 				label,
 				listSetup.SelectionChangedAction,
