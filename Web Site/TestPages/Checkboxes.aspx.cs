@@ -62,7 +62,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						() => {
 							var pmv = new PageModificationValue<bool>();
 							return getRadioGroup( "Radio group with page modification", RadioButtonSetup.Create( pageModificationValue: pmv ), pageModificationValue: pmv );
-						} )()
+						} )(),
+					getRadioGroup( "Radio group with read-only button", RadioButtonSetup.CreateReadOnly() )
 				};
 
 		private Func<string, FormItem> getCheckbox( string label, CheckboxSetup setup, PageModificationValue<bool> pageModificationValue = null ) =>
