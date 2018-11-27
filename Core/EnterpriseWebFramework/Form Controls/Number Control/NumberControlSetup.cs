@@ -211,10 +211,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												context.Id,
 												"setTimeout( function() { " + valueChangedAction.GetJsStatements() + " }, 0 );" )
 											: "",
-										isImprecise
-											? ( (PageModificationValue<decimal>)pageModificationValue ).GetJsModificationStatements( "Number( $( this ).val() )" )
-											: ( (PageModificationValue<decimal?>)pageModificationValue ).GetJsModificationStatements( "Number( $( this ).val() )" )
-											.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
+										( isImprecise
+											  ? ( (PageModificationValue<decimal>)pageModificationValue ).GetJsModificationStatements( "Number( $( this ).val() )" )
+											  : ( (PageModificationValue<decimal?>)pageModificationValue ).GetJsModificationStatements( "Number( $( this ).val() )" ) ).Surround(
+											"$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ),
+											" } );" ),
 										autoCompleteStatements );
 
 									return new DisplayableElementLocalData(
