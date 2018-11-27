@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "FlowCheckboxAllStates", new[] { unhighlightedClass, highlightedClass }.Select( getSelector ).ToArray() ),
 						new CssElement( "FlowCheckboxUnhighlightedState", getSelector( unhighlightedClass ) ),
 						new CssElement( "FlowCheckboxHighlightedState", getSelector( highlightedClass ) ),
-						new CssElement( "FlowCheckboxNestedContentContainer", "div.{0}".FormatWith( nestedContentClass ) )
+						new CssElement( "FlowCheckboxNestedContentContainer", "div.{0}".FormatWith( nestedContentClass.ClassName ) )
 					};
 
 			private string getSelector( ElementClass elementClass ) => "div.{0}".FormatWith( elementClass.ClassName );
