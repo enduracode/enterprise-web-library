@@ -11,12 +11,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class RadioButtonGroup {
 		internal static FormValue<ElementId> GetFormValue(
-			bool allowsNoSelection, Func<IEnumerable<ElementId>> buttonIdGetter, Func<IEnumerable<ElementId>> selectedButtonIdGetter,
-			Func<ElementId, string> stringValueSelector, Func<string, IEnumerable<ElementId>> selectedButtonIdInPostBackGetter ) {
+			Func<IEnumerable<( ElementId id, bool isReadOnly, bool isSelected )>> buttonGetter, Func<ElementId, string> stringValueSelector,
+			Func<string, IEnumerable<ElementId>> selectedButtonIdInPostBackGetter, bool allowsNoSelection ) {
 			FormValue<ElementId> formValue = null;
 			return formValue = new FormValue<ElementId>(
-				       () => selectedButtonIdGetter().FirstOrDefault(),
-				       () => buttonIdGetter().Select( i => i.Id ).FirstOrDefault( i => i.Any() ) ?? "",
+				       () => buttonGetter().Where( i => i.isSelected ).Select( i => i.id ).FirstOrDefault(),
+				       () => buttonGetter().Where( i => i.id.Id.Any() && !i.isReadOnly ).Select( i => i.id ).FirstOrDefault()?.Id ?? "",
 				       stringValueSelector,
 				       rawValue => {
 					       if( rawValue != null ) {
@@ -27,20 +27,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					       }
 
 					       var durableValue = formValue.GetDurableValue();
-					       return durableValue != null && !durableValue.Id.Any() ? PostBackValueValidationResult<ElementId>.CreateValid( durableValue ) :
-					              allowsNoSelection ? PostBackValueValidationResult<ElementId>.CreateValid( null ) :
-					              PostBackValueValidationResult<ElementId>.CreateInvalid();
+					       if( durableValue != null ) {
+						       var button = buttonGetter().Single( i => i.id == durableValue );
+						       if( !button.id.Id.Any() || button.isReadOnly )
+							       return PostBackValueValidationResult<ElementId>.CreateValid( durableValue );
+					       }
+
+					       return allowsNoSelection
+						              ? PostBackValueValidationResult<ElementId>.CreateValid( null )
+						              : PostBackValueValidationResult<ElementId>.CreateInvalid();
 				       } );
 		}
 
 		internal static void ValidateControls(
-			bool allowsNoSelection, bool inNoSelectionState, IEnumerable<ElementId> selectedButtonIds, IEnumerable<ElementId> buttonIds,
+			bool allowsNoSelection, bool inNoSelectionState, IEnumerable<( ElementId id, bool isReadOnly, bool isSelected )> buttons,
 			bool disableSingleButtonDetection ) {
-			if( ( !allowsNoSelection || !inNoSelectionState ) && selectedButtonIds.Count() != 1 )
+			if( ( !allowsNoSelection || !inNoSelectionState ) && buttons.Count( i => i.isSelected ) != 1 )
 				throw new ApplicationException( "If a radio button group is not in the no-selection state, then exactly one radio button must be selected." );
 
-			var activeButtonsIds = buttonIds.Where( i => i.Id.Any() ).Materialize();
-			if( activeButtonsIds.Any() && !disableSingleButtonDetection && activeButtonsIds.Count < 2 ) {
+			var activeButtons = buttons.Where( i => i.id.Id.Any() && !i.isReadOnly ).Materialize();
+			if( activeButtons.Any() && !disableSingleButtonDetection && activeButtons.Count < 2 ) {
 				const string link = "http://developers.whatwg.org/states-of-the-type-attribute.html#radio-button-state-%28type=radio%29";
 				throw new ApplicationException( "A radio button group must contain more than one element; see " + link + "." );
 			}
@@ -48,8 +54,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly FormValue<ElementId> formValue;
 
-		private readonly List<( ElementId id, bool value, PageModificationValue<bool> pmv )> buttonIdAndValueAndPmvTriples =
-			new List<( ElementId id, bool value, PageModificationValue<bool> pmv )>();
+		private readonly List<( ElementId id, bool isReadOnly, bool value, PageModificationValue<bool> pmv )> buttonIdAndIsReadOnlyAndValueAndPmvQuadruples =
+			new List<( ElementId, bool, bool, PageModificationValue<bool> )>();
 
 		private readonly FormAction selectionChangedAction;
 
@@ -63,23 +69,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
 		public RadioButtonGroup( bool allowNoSelection, bool disableSingleButtonDetection = false, FormAction selectionChangedAction = null ) {
 			formValue = GetFormValue(
-				allowNoSelection,
-				() => from i in buttonIdAndValueAndPmvTriples select i.id,
-				() => from i in buttonIdAndValueAndPmvTriples where i.value select i.id,
+				() => from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
 				v => v?.Id ?? "",
-				rawValue => from buttonIdAndValueAndPmv in buttonIdAndValueAndPmvTriples
-				            let id = buttonIdAndValueAndPmv.id
-				            where id.Id.Any() && id.Id == rawValue
-				            select id );
+				rawValue => from quadruple in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples
+				            let id = quadruple.id
+				            where id.Id.Any() && !quadruple.isReadOnly && id.Id == rawValue
+				            select id,
+				allowNoSelection );
 
 			this.selectionChangedAction = selectionChangedAction;
 
 			EwfPage.Instance.AddControlTreeValidation(
 				() => ValidateControls(
 					allowNoSelection,
-					buttonIdAndValueAndPmvTriples.All( i => !i.value ),
-					from i in buttonIdAndValueAndPmvTriples where i.value select i.id,
-					from i in buttonIdAndValueAndPmvTriples select i.id,
+					buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.All( i => !i.value ),
+					from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
 					disableSingleButtonDetection ) );
 		}
 
@@ -97,17 +101,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var id = new ElementId();
 			formValue.AddPageModificationValue( setup.PageModificationValue, v => v == id );
-			buttonIdAndValueAndPmvTriples.Add( ( id, value, setup.PageModificationValue ) );
+			buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.Add( ( id, setup.IsReadOnly, value, setup.PageModificationValue ) );
 
 			return new Checkbox(
 				formValue,
-				setup.IsReadOnly ? new ElementId() : id,
+				id,
 				setup,
 				label,
 				selectionChangedAction,
 				() => StringTools.ConcatenateWithDelimiter(
 					" ",
-					buttonIdAndValueAndPmvTriples.Select( i => i.pmv.GetJsModificationStatements( i.id == id ? "true" : "false" ) ).ToArray() ),
+					buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.Select( i => i.pmv.GetJsModificationStatements( i.id == id ? "true" : "false" ) ).ToArray() ),
 				validationMethod != null
 					? formValue.CreateValidation(
 						( postBackValue, validator ) => validationMethod(

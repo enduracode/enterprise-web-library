@@ -40,8 +40,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly FormValue<ElementId> formValue;
 		private readonly bool? noSelectionIsValid;
 
-		private readonly List<( ItemIdType itemId, ElementId buttonId, PageModificationValue<bool> pmv )> itemIdAndButtonIdAndPmvTriples =
-			new List<( ItemIdType, ElementId, PageModificationValue<bool> )>();
+		private readonly List<( ItemIdType itemId, ElementId buttonId, bool isReadOnly, PageModificationValue<bool> pmv )>
+			itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples = new List<( ItemIdType, ElementId, bool, PageModificationValue<bool> )>();
 
 		private readonly FreeFormRadioListSetup<ItemIdType> listSetup;
 		private readonly EwfValidation validation;
@@ -51,14 +51,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			setup = setup ?? FreeFormRadioListSetup.Create<ItemIdType>();
 
 			formValue = RadioButtonGroup.GetFormValue(
-				noSelectionIsValid.HasValue,
-				() => from i in itemIdAndButtonIdAndPmvTriples select i.buttonId,
-				() => from i in itemIdAndButtonIdAndPmvTriples where EwlStatics.AreEqual( i.itemId, selectedItemId ) select i.buttonId,
-				v => getStringId( v != null ? itemIdAndButtonIdAndPmvTriples.Single( i => i.buttonId == v ).itemId : getNoSelectionItemId() ),
-				rawValue => from itemIdAndButtonIdAndPmv in itemIdAndButtonIdAndPmvTriples
-				            let buttonId = itemIdAndButtonIdAndPmv.buttonId
-				            where buttonId.Id.Any() && getStringId( itemIdAndButtonIdAndPmv.itemId ) == rawValue
-				            select buttonId );
+				() => from i in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples select ( i.buttonId, i.isReadOnly, EwlStatics.AreEqual( i.itemId, selectedItemId ) ),
+				v => getStringId( v != null ? itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Single( i => i.buttonId == v ).itemId : getNoSelectionItemId() ),
+				rawValue => from quadruple in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples
+				            let buttonId = quadruple.buttonId
+				            where buttonId.Id.Any() && !quadruple.isReadOnly && getStringId( quadruple.itemId ) == rawValue
+				            select buttonId,
+				noSelectionIsValid.HasValue );
 
 			this.noSelectionIsValid = noSelectionIsValid;
 			listSetup = setup;
@@ -89,13 +88,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => RadioButtonGroup.ValidateControls(
 					noSelectionIsValid.HasValue,
 					EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
-					from i in itemIdAndButtonIdAndPmvTriples where EwlStatics.AreEqual( i.itemId, selectedItemId ) select i.buttonId,
-					from i in itemIdAndButtonIdAndPmvTriples select i.buttonId,
+					from i in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples select ( i.buttonId, i.isReadOnly, EwlStatics.AreEqual( i.itemId, selectedItemId ) ),
 					setup.DisableSingleButtonDetection ) );
 		}
 
 		private ItemIdType getItemIdFromButtonId( ElementId buttonId ) =>
-			itemIdAndButtonIdAndPmvTriples.Where( i => i.buttonId == buttonId ).Select( i => i.itemId ).FallbackIfEmpty( getNoSelectionItemId() ).Single();
+			itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Where( i => i.buttonId == buttonId )
+				.Select( i => i.itemId )
+				.FallbackIfEmpty( getNoSelectionItemId() )
+				.Single();
 
 		/// <summary>
 		/// Creates a radio button that is part of the list.
@@ -110,11 +111,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var id = new ElementId();
 			formValue.AddPageModificationValue( setup.PageModificationValue, v => v == id );
-			itemIdAndButtonIdAndPmvTriples.Add( ( listItemId, id, setup.PageModificationValue ) );
+			itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Add( ( listItemId, id, setup.IsReadOnly, setup.PageModificationValue ) );
 
 			return new Checkbox(
 				formValue,
-				setup.IsReadOnly ? new ElementId() : id,
+				id,
 				setup,
 				label,
 				listSetup.SelectionChangedAction,
@@ -124,7 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.Concat(
 						listSetup.ItemMatchPageModificationSetups.Select(
 							i => i.PageModificationValue.GetJsModificationStatements( i.ItemIds.Contains( listItemId ) ? "true" : "false" ) ) )
-					.Concat( itemIdAndButtonIdAndPmvTriples.Select( i => i.pmv.GetJsModificationStatements( i.buttonId == id ? "true" : "false" ) ) )
+					.Concat( itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Select( i => i.pmv.GetJsModificationStatements( i.buttonId == id ? "true" : "false" ) ) )
 					.ToArray() ),
 				null,
 				listItemId: getStringId( listItemId ) );
@@ -144,7 +145,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void validateListItem( ItemIdType listItemId ) {
 			if( noSelectionIsValid.HasValue && EwlStatics.AreEqual( listItemId, getNoSelectionItemId() ) )
 				throw new ApplicationException( "You cannot create a radio button with the ID that represents no selection." );
-			if( itemIdAndButtonIdAndPmvTriples.Any( i => getStringId( i.itemId ) == getStringId( listItemId ) ) )
+			if( itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Any( i => getStringId( i.itemId ) == getStringId( listItemId ) ) )
 				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
 		}
 
