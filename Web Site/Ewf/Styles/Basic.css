@@ -180,9 +180,16 @@ ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyl
 	width: 100%;
 }
 
-/* check boxes */
+/* checkboxes */
 ewfInlineCheckBox > ewfInlineCheckBoxBox, ewfInlineCheckBox > ewfInlineCheckBoxLabel {
 	vertical-align: middle;
+}
+ewfFlowCheckboxAllStates > ewfCheckbox {
+	display: block;
+}
+ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
+	margin-top: .5em;
+	margin-left: 2em;
 }
 table.ewfBlockCheckBox {
 	width: 100%;

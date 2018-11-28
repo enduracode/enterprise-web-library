@@ -162,7 +162,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>> displayLinks =
 			new List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>>();
 
-		private FreeFormRadioList<ItemIdType> radioList;
+		private LegacyFreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
 		private FormValue<ItemIdType> formValue;
 		private System.Web.UI.WebControls.WebControl selectControl;
@@ -227,7 +227,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			if( useHorizontalRadioLayout.HasValue ) {
-				radioList = FreeFormRadioList.Create(
+				radioList = LegacyFreeFormRadioList.Create(
 					items.Any( i => !i.IsValid ),
 					selectedItemId,
 					disableSingleButtonDetection: disableSingleRadioButtonDetection.Value,

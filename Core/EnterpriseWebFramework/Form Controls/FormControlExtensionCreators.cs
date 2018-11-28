@@ -411,6 +411,180 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Creates a checkbox for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the checkbox.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static Checkbox ToCheckbox(
+			this DataValue<bool> dataValue, IReadOnlyCollection<PhrasingComponent> label, CheckboxSetup setup = null, bool? value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new Checkbox(
+				value ?? dataValue.Value,
+				label,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a checkbox for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the checkbox.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static Checkbox ToCheckbox(
+			this DataValue<decimal> dataValue, IReadOnlyCollection<PhrasingComponent> label, CheckboxSetup setup = null, decimal? value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
+			return boolValue.ToCheckbox(
+				label,
+				setup: setup,
+				additionalValidationMethod: validator => {
+					dataValue.Value = boolValue.Value.BooleanToDecimal();
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a flow checkbox for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the flow checkbox.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static FlowCheckbox ToFlowCheckbox(
+			this DataValue<bool> dataValue, IReadOnlyCollection<PhrasingComponent> label, FlowCheckboxSetup setup = null, bool? value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new FlowCheckbox(
+				value ?? dataValue.Value,
+				label,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a flow checkbox for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the flow checkbox.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static FlowCheckbox ToFlowCheckbox(
+			this DataValue<decimal> dataValue, IReadOnlyCollection<PhrasingComponent> label, FlowCheckboxSetup setup = null, decimal? value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
+			return boolValue.ToFlowCheckbox(
+				label,
+				setup: setup,
+				additionalValidationMethod: validator => {
+					dataValue.Value = boolValue.Value.BooleanToDecimal();
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a radio button for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="group">The group of which this radio button will be a part. Do not pass null.</param>
+		/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the radio button.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static Checkbox ToRadioButton(
+			this DataValue<bool> dataValue, RadioButtonGroup group, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup setup = null, bool? value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return group.CreateRadioButton(
+				value ?? dataValue.Value,
+				label,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a radio button for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="group">The group of which this radio button will be a part. Do not pass null.</param>
+		/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the radio button.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static Checkbox ToRadioButton(
+			this DataValue<decimal> dataValue, RadioButtonGroup group, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup setup = null,
+			decimal? value = null, Action<Validator> additionalValidationMethod = null ) {
+			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
+			return boolValue.ToRadioButton(
+				group,
+				label,
+				setup: setup,
+				additionalValidationMethod: validator => {
+					dataValue.Value = boolValue.Value.BooleanToDecimal();
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a flow radio button for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="group">The group of which this radio button will be a part. Do not pass null.</param>
+		/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the flow radio button.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static FlowCheckbox ToFlowRadioButton(
+			this DataValue<bool> dataValue, RadioButtonGroup group, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null,
+			bool? value = null, Action<Validator> additionalValidationMethod = null ) {
+			return group.CreateFlowRadioButton(
+				value ?? dataValue.Value,
+				label,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
+		/// Creates a flow radio button for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="group">The group of which this radio button will be a part. Do not pass null.</param>
+		/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
+		/// <param name="setup">The setup object for the flow radio button.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static FlowCheckbox ToFlowRadioButton(
+			this DataValue<decimal> dataValue, RadioButtonGroup group, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null,
+			decimal? value = null, Action<Validator> additionalValidationMethod = null ) {
+			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
+			return boolValue.ToFlowRadioButton(
+				group,
+				label,
+				setup: setup,
+				additionalValidationMethod: validator => {
+					dataValue.Value = boolValue.Value.BooleanToDecimal();
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		/// <summary>
 		/// Creates a block checkbox for this data value.
 		/// </summary>
 		/// <param name="dataValue"></param>

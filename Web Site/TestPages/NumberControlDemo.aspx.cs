@@ -37,6 +37,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							FormState.Current.DataModifications.Append( pb ),
 							() => get( "Separate value-changed action", NumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 					},
+					new Func<Func<string, FormItem>>(
+						() => {
+							var pmv = new PageModificationValue<decimal?>();
+							return get( "Page modification", NumberControlSetup.Create( pageModificationValue: pmv ), pageModificationValue: pmv );
+						} )(),
 					get( "Read-only", NumberControlSetup.CreateReadOnly() ), getImprecise( "Imprecise", null ),
 					getImprecise( "Imprecise [1,2] with .25 step", null, minValue: 1, maxValue: 2, valueStep: .25m ), id => {
 						var pb = PostBack.CreateIntermediate( null, id: id );
@@ -46,6 +51,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								"Imprecise with separate value-changed action",
 								ImpreciseNumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 					},
+					new Func<Func<string, FormItem>>(
+						() => {
+							var pmv = new PageModificationValue<decimal>();
+							return getImprecise(
+								"Imprecise with page modification",
+								ImpreciseNumberControlSetup.Create( pageModificationValue: pmv ),
+								pageModificationValue: pmv );
+						} )(),
 					getImprecise( "Imprecise read-only", ImpreciseNumberControlSetup.CreateReadOnly() )
 				};
 
@@ -78,7 +91,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				};
 
 		private Func<string, FormItem>
-			get( string label, NumberControlSetup setup, decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null ) =>
+			get(
+				string label, NumberControlSetup setup, PageModificationValue<decimal?> pageModificationValue = null, decimal? minValue = null,
+				decimal? maxValue = null, decimal? valueStep = null ) =>
 			id => new NumberControl(
 				null,
 				true,
@@ -87,10 +102,26 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				maxValue: maxValue,
 				valueStep: valueStep,
 				validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
-				label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
+				label: "{0}. {1}".FormatWith( id, label )
+					.ToComponents()
+					.Concat(
+						pageModificationValue != null
+							? new LineBreak().ToCollection<PhrasingComponent>()
+								.Append(
+									new SideComments(
+										"Value: ".ToComponents()
+											.Concat(
+												pageModificationValue.ToGenericPhrasingContainer(
+													v => v?.Normalize().ToString() ?? "",
+													valueExpression => "{0}.toString()".FormatWith( valueExpression ) ) )
+											.Materialize() ) )
+							: Enumerable.Empty<PhrasingComponent>() )
+					.Materialize() );
 
-		private Func<string, FormItem> getImprecise(
-			string label, ImpreciseNumberControlSetup setup, decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null ) =>
+		private Func<string, FormItem>
+			getImprecise(
+				string label, ImpreciseNumberControlSetup setup, PageModificationValue<decimal> pageModificationValue = null, decimal? minValue = null,
+				decimal? maxValue = null, decimal? valueStep = null ) =>
 			id => new ImpreciseNumberControl(
 				.25m,
 				minValue ?? 0,
@@ -98,6 +129,20 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				setup: setup,
 				valueStep: valueStep,
 				validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
-				label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
+				label: "{0}. {1}".FormatWith( id, label )
+					.ToComponents()
+					.Concat(
+						pageModificationValue != null
+							? new LineBreak().ToCollection<PhrasingComponent>()
+								.Append(
+									new SideComments(
+										"Value: ".ToComponents()
+											.Concat(
+												pageModificationValue.ToGenericPhrasingContainer(
+													v => v.Normalize().ToString(),
+													valueExpression => "{0}.toString()".FormatWith( valueExpression ) ) )
+											.Materialize() ) )
+							: Enumerable.Empty<PhrasingComponent>() )
+					.Materialize() );
 	}
 }

@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							"Form Controls",
 							new TextControlDemo.Info( this ),
 							new NumberControlDemo.Info( this ),
-							new CheckBox.Info( this ),
+							new Checkboxes.Info( this ),
 							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
 							new DateAndTimePickers.Info( this ) ),

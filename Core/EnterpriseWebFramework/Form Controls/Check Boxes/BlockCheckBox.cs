@@ -10,9 +10,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	/// <summary>
-	/// A block-level check box with the label vertically centered on the box.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 28 Feb 2019. Use Checkbox instead." ) ]
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "NestedControls" ) ]
 	public class BlockCheckBox: WebControl, CommonCheckBox, ControlTreeDataLoader, FormValueControl, ControlWithJsInitLogic, FormControl<FlowComponent> {
 		private readonly FormValue<bool> checkBoxFormValue;

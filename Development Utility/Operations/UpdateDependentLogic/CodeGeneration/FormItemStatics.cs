@@ -12,8 +12,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
 			// page, and the main modification needs to execute between these.
 			writeStringFormItemGetters( writer, field );
+			writer.WriteLine( "#pragma warning disable CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeNumericFormItemGetters( writer, field );
+			writeCheckboxFormItemGetters( writer, field );
 			writeBoolFormItemGetters( writer, field );
+			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeDateFormItemGetters( writer, field );
 			writeEnumerableFormItemGetters( writer, field );
 			writeGuidFormItemGetters( writer, field );
@@ -270,7 +273,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 			if( field.TypeIs( typeof( decimal ) ) ) {
 				writeNumberAsSelectListFormItemGetters( writer, field );
-				writeCheckBoxFormItemGetters( writer, field, "decimal" );
+				writeLegacyCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
@@ -294,6 +297,67 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"if( !valueStep.HasValue ) valueStep = {0};".FormatWith( minStep ),
 				"else if( valueStep.Value % {0} != 0 ) throw new System.ApplicationException( \"The specified step is not a multiple of the field’s minimum step.\" );"
 					.FormatWith( minStep ) );
+		}
+
+		private static void writeCheckboxFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( !field.TypeIs( typeof( bool ) ) && !field.TypeIs( typeof( decimal ) ) )
+				return;
+
+			// checkboxes
+			writeFormItemGetter(
+				writer,
+				field,
+				"Checkbox",
+				new CSharpParameter[ 0 ],
+				true,
+				new[] { new CSharpParameter( "CheckboxSetup", "checkboxSetup", "null" ) },
+				field.NullableTypeName,
+				new CSharpParameter[ 0 ],
+				true,
+				dv =>
+					"{0}.ToCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( dv ) );
+			writeFormItemGetter(
+				writer,
+				field,
+				"FlowCheckbox",
+				new CSharpParameter[ 0 ],
+				true,
+				new[] { new CSharpParameter( "FlowCheckboxSetup", "checkboxSetup", "null" ) },
+				field.NullableTypeName,
+				new CSharpParameter[ 0 ],
+				true,
+				dv =>
+					"{0}.ToFlowCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( dv ) );
+
+			// radio buttons
+			writeFormItemGetter(
+				writer,
+				field,
+				"RadioButton",
+				new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
+				true,
+				new[] { new CSharpParameter( "RadioButtonSetup", "radioButtonSetup", "null" ) },
+				field.NullableTypeName,
+				new CSharpParameter[ 0 ],
+				true,
+				dv =>
+					"{0}.ToRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( dv ) );
+			writeFormItemGetter(
+				writer,
+				field,
+				"FlowRadioButton",
+				new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
+				true,
+				new[] { new CSharpParameter( "FlowRadioButtonSetup", "radioButtonSetup", "null" ) },
+				field.NullableTypeName,
+				new CSharpParameter[ 0 ],
+				true,
+				dv =>
+					"{0}.ToFlowRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( dv ) );
 		}
 
 		private static void writeFileCollectionFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
@@ -366,37 +430,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 
 		private static void writeBoolFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( field.TypeIs( typeof( bool ) ) ) {
-				writeCheckBoxFormItemGetters( writer, field, "bool" );
+				writeLegacyCheckBoxFormItemGetters( writer, field, "bool" );
 				writeNumberAsSelectListFormItemGetters( writer, field );
 			}
 			if( field.TypeIs( typeof( bool? ) ) )
 				writeNumberAsSelectListFormItemGetters( writer, field );
 		}
 
-		private static void writeCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
-			var fieldIsDecimal = valueParamTypeName == "decimal";
-			var valueParamDefaultValue = fieldIsDecimal ? false.BooleanToDecimal().ToString() : "false";
-			var toBoolSuffix = fieldIsDecimal ? ".DecimalToBoolean()" : "";
-			var fromBoolSuffix = fieldIsDecimal ? ".BooleanToDecimal()" : "";
-
-			writeFormItemGetters(
-				writer,
-				field,
-				"EwfCheckBox",
-				"CheckBox",
-				valueParamTypeName,
-				valueParamDefaultValue,
-				new CSharpParameter[ 0 ],
-				new CSharpParameter[ 0 ],
-				new[]
-					{
-						new CSharpParameter( "bool", "putLabelOnCheckBox", "true" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfCheckBox( v.Value" + toBoolSuffix + ", label: putLabelOnCheckBox ? ls : \"\", action: action ) { AutoPostBack = autoPostBack }",
-				"control.IsCheckedInPostBack( postBackValues )" + fromBoolSuffix,
-				"( putLabelOnCheckBox ? \"\" : (FormItemLabel)null )" );
+		private static void writeLegacyCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
 			writeFormItemGetter(
 				writer,
 				field,
