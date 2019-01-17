@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							return new ElementLocalData(
 								"textarea",
-								new FocusabilityCondition( true ),
+								new FocusabilityCondition( !setup.IsReadOnly ),
 								isFocused => new ElementFocusDependentData(
 									attributes: attributes,
 									includeIdAttribute: true,

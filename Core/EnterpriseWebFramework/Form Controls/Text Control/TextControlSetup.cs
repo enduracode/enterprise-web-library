@@ -329,7 +329,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									return new DisplayableElementLocalData(
 										inputElementType.Any() ? "input" : "textarea",
-										new FocusabilityCondition( true ),
+										new FocusabilityCondition( !isReadOnly ),
 										isFocused => {
 											if( isFocused )
 												attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );

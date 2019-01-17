@@ -220,7 +220,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									return new DisplayableElementLocalData(
 										"input",
-										new FocusabilityCondition( true ),
+										new FocusabilityCondition( !isReadOnly ),
 										isFocused => {
 											if( isFocused )
 												attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
