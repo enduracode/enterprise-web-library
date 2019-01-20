@@ -300,8 +300,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeCheckboxFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( !field.TypeIs( typeof( bool ) ) && !field.TypeIs( typeof( decimal ) ) )
+			if( !field.TypeIs( typeof( bool ) ) && !field.TypeIs( typeof( bool? ) ) && !field.TypeIs( typeof( decimal ) ) && !field.TypeIs( typeof( decimal? ) ) )
 				return;
+
+			var preFormItemStatements = field.TypeName == field.NullableTypeName
+				                            ? "var nonNullableValue = new DataValue<{0}>();".FormatWith( field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool" )
+				                            : "";
+			string getDataValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "nonNullableValue" : dv;
+			string getValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "value ?? {0}.Value.Value".FormatWith( dv ) : "value";
+
+			string getAdditionalValidationMethodExpression( string dv ) =>
+				field.TypeName == field.NullableTypeName
+					? "validator => {{ {0}.Value = nonNullableValue.Value; additionalValidationMethod?.Invoke( validator ); }}".FormatWith( dv )
+					: "additionalValidationMethod";
 
 			// checkboxes
 			writeFormItemGetter(
@@ -315,8 +326,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
-						.FormatWith( dv ) );
+					"{0}.ToCheckbox( label, setup: checkboxSetup, value: {1}, additionalValidationMethod: {2} ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( getDataValueExpression( dv ), getValueExpression( dv ), getAdditionalValidationMethodExpression( dv ) ),
+				preFormItemStatements: preFormItemStatements );
 			writeFormItemGetter(
 				writer,
 				field,
@@ -328,8 +340,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToFlowCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
-						.FormatWith( dv ) );
+					"{0}.ToFlowCheckbox( label, setup: checkboxSetup, value: {1}, additionalValidationMethod: {2} ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( getDataValueExpression( dv ), getValueExpression( dv ), getAdditionalValidationMethodExpression( dv ) ),
+				preFormItemStatements: preFormItemStatements );
 
 			// radio buttons
 			writeFormItemGetter(
@@ -343,8 +356,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
-						.FormatWith( dv ) );
+					"{0}.ToRadioButton( group, label, setup: radioButtonSetup, value: {1}, additionalValidationMethod: {2} ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( getDataValueExpression( dv ), getValueExpression( dv ), getAdditionalValidationMethodExpression( dv ) ),
+				preFormItemStatements: preFormItemStatements );
 			writeFormItemGetter(
 				writer,
 				field,
@@ -356,8 +370,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				true,
 				dv =>
-					"{0}.ToFlowRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
-						.FormatWith( dv ) );
+					"{0}.ToFlowRadioButton( group, label, setup: radioButtonSetup, value: {1}, additionalValidationMethod: {2} ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
+						.FormatWith( getDataValueExpression( dv ), getValueExpression( dv ), getAdditionalValidationMethodExpression( dv ) ),
+				preFormItemStatements: preFormItemStatements );
 		}
 
 		private static void writeFileCollectionFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
