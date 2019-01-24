@@ -20,6 +20,7 @@ ewfUiTopTabBlock ewfUiCurrentTabActionControl,
 ewfUiSideTabBlock ewfUiCurrentTabActionControl {
 	background-color: #81989E;
 	background-image: none;
+	color: white;
 }
 
 /* action controls */
