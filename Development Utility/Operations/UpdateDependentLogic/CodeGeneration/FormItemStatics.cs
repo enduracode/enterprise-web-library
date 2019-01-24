@@ -17,8 +17,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeCheckboxFormItemGetters( writer, field );
 			writeBoolFormItemGetters( writer, field );
 			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
+			writeListFormItemGetters( writer, field );
 			writeDateFormItemGetters( writer, field );
-			writeEnumerableFormItemGetters( writer, field );
 			writeGuidFormItemGetters( writer, field );
 
 			writeGenericGetter( writer, field );
@@ -468,6 +468,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						.FormatWith( dv ) );
 		}
 
+		private static void writeListFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( field.EnumerableElementTypeName.Any() )
+				writeFormItemGetter(
+					writer,
+					field,
+					"CheckboxList",
+					new CSharpParameter( "CheckboxListSetup<{0}>".FormatWith( field.EnumerableElementTypeName ), "checkboxListSetup" ).ToCollection(),
+					false,
+					Enumerable.Empty<CSharpParameter>(),
+					field.TypeName,
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToCheckboxList( checkboxListSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+		}
+
 		private static void writeDateFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( field.TypeIs( typeof( DateTime ) ) )
 				writeFormItemGetter(
@@ -500,30 +517,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					dv =>
 						"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
-		}
-
-		private static void writeEnumerableFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( !field.EnumerableElementTypeName.Any() )
-				return;
-			writeFormItemGetters(
-				writer,
-				field,
-				"EwfCheckBoxList<" + field.EnumerableElementTypeName + ">",
-				"CheckBoxList",
-				field.TypeName,
-				"null",
-				new CSharpParameter( "IEnumerable<SelectListItem<" + field.EnumerableElementTypeName + ">>", "items" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				new[]
-					{
-						new CSharpParameter( "string", "caption", "\"\"" ), new CSharpParameter( "bool", "includeSelectAndDeselectAllButtons", "false" ),
-						new CSharpParameter( "byte", "numberOfColumns", "1" ), new CSharpParameter( "FormAction", "action", "null" )
-					},
-				new CSharpParameter[ 0 ],
-				"new EwfCheckBoxList<" + field.EnumerableElementTypeName + ">( items, v ?? new " + field.EnumerableElementTypeName +
-				"[ 0 ], caption: caption, includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons, numberOfColumns: numberOfColumns, action: action )",
-				"control.GetSelectedItemIdsInPostBack( postBackValues )",
-				"" );
 		}
 
 		private static void writeGuidFormItemGetters( TextWriter writer, ModificationField field ) {
