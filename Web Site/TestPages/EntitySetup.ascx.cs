@@ -27,8 +27,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new TextControlDemo.Info( this ),
 							new NumberControlDemo.Info( this ),
 							new Checkboxes.Info( this ),
-							new CheckBoxList.Info( this ),
 							new SelectListDemo.Info( this ),
+							new CheckboxListDemo.Info( this ),
 							new DateAndTimePickers.Info( this ) ),
 						new ResourceGroup(
 							"Other",

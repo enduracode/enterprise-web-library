@@ -166,14 +166,6 @@ function changeCheckBoxColor( checkBox ) {
 		checkBoxParentDiv.removeClass( selectedCheckBoxClass );
 }
 
-// Toggles the given checklist boxes based on the text of the link clicked
-
-function toggleCheckBoxes( checklistClientId, setChecked ) {
-	$( '#' + checklistClientId ).find( 'input[type=checkbox]' ).prop( 'checked', setChecked ).each( function( i, checkBox ) {
-		changeCheckBoxColor( checkBox );
-	} );
-}
-
 // Supports DurationControl.
 /*
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16

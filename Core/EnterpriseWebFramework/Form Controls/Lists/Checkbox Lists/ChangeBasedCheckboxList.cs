@@ -1,141 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A check box list that is based on changes to the selections rather than the absolute set of selected items.
+	/// A checkbox list that is based on changes to the selections rather than the absolute set of selected items.
 	/// </summary>
-	public static class ChangeBasedCheckBoxList {
+	public static class ChangeBasedCheckboxList {
 		/// <summary>
-		/// Creates a form item with a change based check box list, which is a check box list that is based on changes to the selections rather than the absolute
-		/// set of selected items.
+		/// Creates a change-based checkbox list, which is a checkbox list that is based on changes to the selections rather than the absolute set of selected
+		/// items.
 		/// </summary>
-		/// <typeparam name="ItemIdType"></typeparam>
-		/// <param name="label"></param>
-		/// <param name="items"></param>
-		/// <param name="selectedItemIds"></param>
+		/// <param name="items">The items in the list.</param>
+		/// <param name="selectedItemIds">The selected-item IDs.</param>
 		/// <param name="modificationMethod">A method that executes the change handlers of the items that were selected or deselected on this post back.</param>
-		/// <param name="caption"></param>
+		/// <param name="displaySetup"></param>
 		/// <param name="includeSelectAndDeselectAllButtons"></param>
-		/// <param name="numberOfColumns"></param>
+		/// <param name="minColumnWidth">The minimum width of each column in the list. Pass null to force a single column.</param>
 		/// <param name="uiSelectedItemIds"></param>
-		/// <param name="action"></param>
-		/// <param name="cellSpan"></param>
-		/// <param name="textAlignment"></param>
+		/// <param name="action">The action that will occur when the user hits Enter on any of the checkboxes. Pass null to use the current default action.</param>
+		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
 		/// <param name="validationPredicate"></param>
-		/// <returns></returns>
-		public static FormItem GetFormItem<ItemIdType>(
-			FormItemLabel label, IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
-			string caption = "", bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, IEnumerable<ItemIdType> uiSelectedItemIds = null,
-			FormAction action = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
-			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>(
-				items,
-				selectedItemIds,
-				caption,
-				includeSelectAndDeselectAllButtons,
-				numberOfColumns,
-				uiSelectedItemIds ?? selectedItemIds,
-				action );
-			modificationMethod = checkBoxList.ModifyData;
-			return FormItem.Create(
-				label,
-				checkBoxList,
-				setup: new FormItemSetup( cellSpan: cellSpan, textAlignment: textAlignment ),
-				validationGetter: control => new EwfValidation(
-					( pbv, validator ) => {
-						if( validationPredicate != null && !validationPredicate() )
-							return;
-						control.Validate( pbv );
-					} ) );
-		}
+		/// <param name="validationErrorNotifier"></param>
+		public static CheckboxList<ItemIdType> Create<ItemIdType>(
+			IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
+			DisplaySetup displaySetup = null, bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null,
+			IEnumerable<ItemIdType> uiSelectedItemIds = null, FormAction action = null, FormAction selectionChangedAction = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+			items = items.Materialize();
+			var selectedItemIdSet = selectedItemIds.ToImmutableHashSet();
 
-		/// <summary>
-		/// Creates a form item with a change based check box list, which is a check box list that is based on changes to the selections rather than the absolute
-		/// set of selected items.
-		/// </summary>
-		/// <typeparam name="ItemIdType"></typeparam>
-		/// <param name="label"></param>
-		/// <param name="items"></param>
-		/// <param name="modificationMethod">A method that executes the change handlers of the items that were selected or deselected on this post back.</param>
-		/// <param name="caption"></param>
-		/// <param name="includeSelectAndDeselectAllButtons"></param>
-		/// <param name="numberOfColumns"></param>
-		/// <param name="action"></param>
-		/// <param name="cellSpan"></param>
-		/// <param name="textAlignment"></param>
-		/// <param name="validationPredicate"></param>
-		/// <returns></returns>
-		public static FormItem GetFormItem<ItemIdType>(
-			FormItemLabel label, IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, string caption = "",
-			bool includeSelectAndDeselectAllButtons = false, byte numberOfColumns = 1, FormAction action = null, int? cellSpan = null,
-			TextAlignment textAlignment = TextAlignment.NotSpecified, Func<bool> validationPredicate = null ) {
-			var itemArray = items.ToArray();
-			var selectedItemIds = itemArray.Where( i => i.IsSelected ).Select( i => i.Item.Item.Id );
-			var uiSelectedItemIds = itemArray.Where( i => i.IsSelectedInUi ).Select( i => i.Item.Item.Id );
-			var checkBoxList = new ChangeBasedCheckBoxList<ItemIdType>(
-				itemArray.Select( i => i.Item ),
-				selectedItemIds,
-				caption,
-				includeSelectAndDeselectAllButtons,
-				numberOfColumns,
-				uiSelectedItemIds,
-				action );
-			modificationMethod = checkBoxList.ModifyData;
-			return FormItem.Create(
-				label,
-				checkBoxList,
-				setup: new FormItemSetup( cellSpan: cellSpan, textAlignment: textAlignment ),
-				validationGetter: control => new EwfValidation(
-					( pbv, validator ) => {
-						if( validationPredicate != null && !validationPredicate() )
-							return;
-						control.Validate( pbv );
-					} ) );
-		}
-	}
+			ImmutableHashSet<ItemIdType> selectedItemIdsInPostBack = null;
+			modificationMethod = () => {
+				if( selectedItemIdsInPostBack == null )
+					return;
+				var changedItemIds = selectedItemIdsInPostBack.Except( selectedItemIdSet ).Union( selectedItemIdSet.Except( selectedItemIdsInPostBack ) ).ToArray();
+				foreach( var i in items.Where( i => changedItemIds.Contains( i.Item.Id ) ) )
+					i.ChangeHandler( selectedItemIdsInPostBack.Contains( i.Item.Id ) );
+			};
 
-	internal sealed class ChangeBasedCheckBoxList<ItemIdType>: WebControl {
-		private readonly IEnumerable<ChangeBasedListItem<ItemIdType>> items;
-		private readonly IEnumerable<ItemIdType> selectedItemIds;
-
-		private readonly EwfCheckBoxList<ItemIdType> checkBoxList;
-		private IEnumerable<ItemIdType> selectedItemIdsInPostBack;
-
-		internal ChangeBasedCheckBoxList(
-			IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, string caption, bool includeSelectAndDeselectAllButtons,
-			byte numberOfColumns, IEnumerable<ItemIdType> uiSelectedItemIds, FormAction action ) {
-			this.items = items.ToArray();
-			this.selectedItemIds = selectedItemIds.ToArray();
-
-			Controls.Add(
-				checkBoxList = new EwfCheckBoxList<ItemIdType>(
-					this.items.Select( i => i.Item ),
-					uiSelectedItemIds,
-					caption: caption,
+			return new CheckboxList<ItemIdType>(
+				CheckboxListSetup.Create(
+					from i in items select i.Item,
+					displaySetup: displaySetup,
 					includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,
-					numberOfColumns: numberOfColumns,
-					action: action ) );
-		}
-
-		internal void Validate( PostBackValueDictionary postBackValues ) {
-			selectedItemIdsInPostBack = checkBoxList.GetSelectedItemIdsInPostBack( postBackValues );
-		}
-
-		internal void ModifyData() {
-			if( selectedItemIdsInPostBack == null )
-				return;
-			var changedItemIds = selectedItemIdsInPostBack.Except( selectedItemIds ).Union( selectedItemIds.Except( selectedItemIdsInPostBack ) ).ToArray();
-			foreach( var i in items.Where( i => changedItemIds.Contains( i.Item.Id ) ) )
-				i.ChangeHandler( selectedItemIdsInPostBack.Contains( i.Item.Id ) );
+					minColumnWidth: minColumnWidth,
+					action: action,
+					selectionChangedAction: selectionChangedAction,
+					validationPredicate: validationPredicate,
+					validationErrorNotifier: validationErrorNotifier ),
+				uiSelectedItemIds ?? selectedItemIdSet,
+				validationMethod: ( postBackValue, validator ) => selectedItemIdsInPostBack = postBackValue.ToImmutableHashSet() );
 		}
 
 		/// <summary>
-		/// Returns the tag that represents this control in HTML.
+		/// Creates a change-based checkbox list, which is a checkbox list that is based on changes to the selections rather than the absolute set of selected
+		/// items.
 		/// </summary>
-		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
+		/// <param name="items">The items in the list.</param>
+		/// <param name="modificationMethod">A method that executes the change handlers of the items that were selected or deselected on this post back.</param>
+		/// <param name="displaySetup"></param>
+		/// <param name="includeSelectAndDeselectAllButtons"></param>
+		/// <param name="minColumnWidth">The minimum width of each column in the list. Pass null to force a single column.</param>
+		/// <param name="action">The action that will occur when the user hits Enter on any of the checkboxes. Pass null to use the current default action.</param>
+		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
+		public static CheckboxList<ItemIdType> Create<ItemIdType>(
+			IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, DisplaySetup displaySetup = null,
+			bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null, FormAction action = null,
+			FormAction selectionChangedAction = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+			items = items.Materialize();
+			return Create(
+				from i in items select i.Item,
+				from i in items where i.IsSelected select i.Item.Item.Id,
+				out modificationMethod,
+				displaySetup: displaySetup,
+				includeSelectAndDeselectAllButtons: includeSelectAndDeselectAllButtons,
+				minColumnWidth: minColumnWidth,
+				uiSelectedItemIds: from i in items where i.IsSelectedInUi select i.Item.Item.Id,
+				action: action,
+				selectionChangedAction: selectionChangedAction,
+				validationPredicate: validationPredicate,
+				validationErrorNotifier: validationErrorNotifier );
+		}
 	}
 }

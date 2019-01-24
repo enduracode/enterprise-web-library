@@ -626,6 +626,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 		}
 
+		/// <summary>
+		/// Creates a checkbox list for this data value.
+		/// </summary>
+		/// <param name="dataValue"></param>
+		/// <param name="setup">The setup object for the checkbox list. Do not pass null.</param>
+		/// <param name="value"></param>
+		/// <param name="additionalValidationMethod"></param>
+		public static CheckboxList<ItemIdType> ToCheckboxList<ItemIdType>(
+			this DataValue<IEnumerable<ItemIdType>> dataValue, CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			return new CheckboxList<ItemIdType>(
+				setup,
+				value ?? dataValue.Value,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
 		public static DateControl ToDateControl(
 			this DataValue<LocalDate> dataValue, DateControlSetup setup = null, SpecifiedValue<LocalDate?> value = null, LocalDate? minValue = null,
 			LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {

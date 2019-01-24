@@ -243,12 +243,12 @@
     <Compile Include="TestPages\Checkboxes.aspx.designer.cs">
       <DependentUpon>Checkboxes.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\CheckBoxList.aspx.cs">
-      <DependentUpon>CheckBoxList.aspx</DependentUpon>
+    <Compile Include="TestPages\CheckboxListDemo.aspx.cs">
+      <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="TestPages\CheckBoxList.aspx.designer.cs">
-      <DependentUpon>CheckBoxList.aspx</DependentUpon>
+    <Compile Include="TestPages\CheckboxListDemo.aspx.designer.cs">
+      <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\DateAndTimePickers.aspx.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
@@ -487,6 +487,7 @@
     <Content Include="Ewf\Styles\EwfUi\Colors.css" />
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
+    <Content Include="Ewf\Styles\EwfUi\Transitions.css" />
     <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
@@ -526,7 +527,7 @@
     <Content Include="TestPages\BoxDemo.aspx" />
     <Content Include="TestPages\Charts.aspx" />
     <Content Include="TestPages\Checkboxes.aspx" />
-    <Content Include="TestPages\CheckBoxList.aspx" />
+    <Content Include="TestPages\CheckboxListDemo.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
     <Content Include="TestPages\DateAndTimePickers.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />

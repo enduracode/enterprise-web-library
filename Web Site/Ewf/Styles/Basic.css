@@ -175,11 +175,6 @@ textarea {
 	resize: none;
 }
 
-/* drop-down lists */
-ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
-	width: 100%;
-}
-
 /* checkboxes */
 ewfInlineCheckBox > ewfInlineCheckBoxBox, ewfInlineCheckBox > ewfInlineCheckBoxLabel {
 	vertical-align: middle;
@@ -207,6 +202,16 @@ table.ewfBlockCheckBox > tbody > tr > td:first-child {
 table.ewfBlockCheckBox > tbody > tr > td:first-child input {
 	margin-top: 0;
 	margin-bottom: 0;
+}
+
+/* list controls */
+ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
+	width: 100%;
+}
+ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
 }
 
 /* date pickers, time pickers, and date and time pickers */

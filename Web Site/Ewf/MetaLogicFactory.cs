@@ -53,7 +53,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateEwfUiCssInfos() {
-			return new ResourceInfo[] { new Styles.EwfUi.ColorsCss.Info(), new Styles.EwfUi.FontsCss.Info(), new Styles.EwfUi.LayoutCss.Info() };
+			return new ResourceInfo[]
+				{
+					new Styles.EwfUi.ColorsCss.Info(), new Styles.EwfUi.FontsCss.Info(), new Styles.EwfUi.LayoutCss.Info(), new Styles.EwfUi.TransitionsCss.Info()
+				};
 		}
 
 		ResourceInfo AppMetaLogicFactory.CreateModernizrJavaScriptInfo() {

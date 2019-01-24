@@ -8,13 +8,14 @@ ewfSectionBoxStyleBothStates,
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
-ewfFlowCheckboxHighlightedState > ewfCheckbox,
+ewfCheckboxList,
 .checkedChecklistCheckboxDiv {
 	background-image: linear-gradient( rgba( 0, 0, 0, .05 ), rgba( 0, 0, 0, .05 ) );
 }
 
 /* block highlighting */
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover,
+ewfFlowCheckboxHighlightedState > ewfCheckbox,
 ewfUiTopTabBlock ewfUiCurrentTabActionControl,
 ewfUiSideTabBlock ewfUiCurrentTabActionControl {
 	background-color: #81989E;

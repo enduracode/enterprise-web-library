@@ -82,10 +82,6 @@ ewfUnorderedWrappingList > ewfComponentListItem {
 .ewfControlList tr:first-child td {
 	padding-top: 0;
 }
-ewfCheckBoxList table.ewfBlockCheckBox {
-	padding-top: .25em;
-	padding-bottom: .25em;
-}
 
 /* boxes */
 ewfSectionBoxStyleBothStates {
@@ -164,11 +160,27 @@ ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
 	text-decoration: underline;
 }
 
+/* list controls */
+ewfCheckboxList {
+	padding: .5em;
+}
+ewfCheckboxList > ewfCheckboxListActionContainer {
+	margin-bottom: .5em;
+	text-align: right;
+}
+ewfCheckboxList > ewfCheckboxListContentContainer {
+	margin: -.25em;
+	column-gap: .5em;
+}
+ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList > ewfComponentListItem > ewfFlowCheckboxAllStates > ewfCheckbox {
+	padding: .25em;
+}
+
 /* block element vertical spacing */
-p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckBoxList, div.ewfStandardFileCollectionManager, ewfMergeFieldTreeContainer, ewfMergeRowTreeContainer, ewfMergeRowTreeChildContainer, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock, ewfHtmlBlock {
+p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckboxList, div.ewfStandardFileCollectionManager, ewfMergeFieldTreeContainer, ewfMergeRowTreeContainer, ewfMergeRowTreeChildContainer, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemBlock, ewfLabeledControl, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock, ewfHtmlBlock {
 	margin-top: 1em;
 }
-p:first-child, ewfUnorderedLineList:first-child, ewfUnorderedStackList:first-child, ewfUnorderedWrappingList:first-child, ewfHtmlBlock ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckBoxList:first-child, div.ewfStandardFileCollectionManager:first-child, ewfMergeFieldTreeContainer:first-child, ewfMergeRowTreeContainer:first-child, ewfMergeRowTreeChildContainer:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child, ewfHtmlBlock:first-child {
+p:first-child, ewfUnorderedLineList:first-child, ewfUnorderedStackList:first-child, ewfUnorderedWrappingList:first-child, ewfHtmlBlock ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckboxList:first-child, div.ewfStandardFileCollectionManager:first-child, ewfMergeFieldTreeContainer:first-child, ewfMergeRowTreeContainer:first-child, ewfMergeRowTreeChildContainer:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemBlock:first-child, ewfLabeledControl:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child, ewfHtmlBlock:first-child {
 	margin-top: 0;
 }
 ewfUiPageActionAndContentAndContentFootCell {
@@ -179,7 +191,8 @@ p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtm
 }
 
 /* corner rounding */
-ewfActionControlLargeButtonStyleAllStates {
+ewfActionControlLargeButtonStyleAllStates,
+ewfCheckboxList {
 	border-radius: .5em;
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
@@ -201,7 +214,8 @@ ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWi
 	ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 	ewfTableStandardAndStandardExceptLayoutStyles,
 	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:first-child,
-	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child {
+	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child,
+	ewfCheckboxList {
 		border-radius: 0;
 	}
 }
