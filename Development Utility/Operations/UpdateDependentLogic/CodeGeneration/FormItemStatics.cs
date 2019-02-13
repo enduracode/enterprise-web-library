@@ -436,8 +436,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter[ 0 ],
 				new CSharpParameter[ 0 ],
 				new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection(),
-				"{ var control = new BlobFileManager( (int?)v ); mm = () => " + field.Name + " = control.ModifyData(); return control; }",
-				"control.ValidateFormValues( validator, subject, requireUploadIfNoFile )",
+				"{ var control = new BlobFileManager( (int?)v, requireUploadIfNoFile, ( postBackValue, validator ) => {} ); mm = () => " + field.Name +
+				" = control.ModifyData(); return control; }",
+				"",
 				"",
 				preFormItemGetterStatements: "System.Action mm = null;",
 				postFormItemGetterStatements: "modificationMethod = mm;" );
