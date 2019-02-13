@@ -6,10 +6,7 @@
 		internal static string DownloadExisting { get { return getCorrectTranslation( "Download existing", "Descargar archivo existente" ); } }
 		internal static string NoExistingFile { get { return getCorrectTranslation( "No existing file", "No existe el archivo" ); } }
 
-		/// <summary>
-		/// Intended to be used as PleaseUploadAFile + " 'File name'".
-		/// </summary>
-		internal static string PleaseUploadAFile { get { return getCorrectTranslation( "Please upload a file:", "Por favor, cargue un archivo:" ); } }
+		internal static string PleaseUploadAFile => getCorrectTranslation( "Please upload a file.", "Por favor, cargue un archivo." );
 
 		/// <summary>
 		/// "Unacceptable file extension. Acceptable file extensions are:".

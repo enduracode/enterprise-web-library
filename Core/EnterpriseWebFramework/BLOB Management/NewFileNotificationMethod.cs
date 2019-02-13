@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Method invoked when a new file is uploaded.
 	/// </summary>

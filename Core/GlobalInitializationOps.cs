@@ -4,10 +4,10 @@ using System.IO;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace EnterpriseWebLibrary {
@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary {
 					new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
 
 				AppMemoryCache.Init();
-				BlobFileOps.Init();
+				BlobStorageStatics.Init();
 				DataAccessStatics.Init();
 				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 				EncryptionOps.Init();

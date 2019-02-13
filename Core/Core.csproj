@@ -218,6 +218,9 @@
     <Compile Include="Configuration\WebApplication.cs" />
     <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
+    <Compile Include="DataAccess\BlobStorage\BlobFile.cs" />
+    <Compile Include="DataAccess\BlobStorage\BlobStorageStatics.cs" />
+    <Compile Include="DataAccess\BlobStorage\SystemBlobStorageProvider.cs" />
     <Compile Include="DataAccess\CommandWriting\Commands\InlineSelect.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\InequalityCondition.cs" />
     <Compile Include="DataAccess\CommandWriting\InlineConditionAbstraction\Conditions\LikeCondition.cs" />
@@ -310,6 +313,11 @@
     <Compile Include="EnterpriseWebFramework\Action Controls\ToolTipButton.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemLabel.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\BlobManagementStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\MarkFileAsReadMethod.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\NewFileNotificationMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\Chart.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Charting\ChartType.cs" />
@@ -392,9 +400,9 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DurationControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControlSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\EwfFileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\FileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FormControlExtensionCreators.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FormControlLabeler.cs" />
@@ -479,13 +487,6 @@
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="ContentTypes.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ActionControl.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFile.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFileCollectionManager.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\SystemBlobFileManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFileManager.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\BlobFileOps.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\MarkFileAsReadMethod.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\BlobFileManagers\NewFileNotificationMethod.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\BlockCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\CommonCheckBox.cs" />
@@ -817,6 +818,7 @@
   <ItemGroup>
     <Content Include="WebTestingFramework\Read me.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

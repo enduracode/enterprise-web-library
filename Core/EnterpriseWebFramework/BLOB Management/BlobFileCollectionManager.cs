@@ -5,11 +5,13 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.DataAccess.BlobStorage;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A control for managing a collection of files stored in a database.
 	/// </summary>
@@ -109,7 +111,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 					var table = new DynamicTable( columnSetups.ToArray() ) { Caption = Caption };
 
-					files = BlobFileOps.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
+					files = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 					files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
 
 					var deleteModMethods = new List<Func<bool>>();
@@ -141,7 +143,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
-			var thumbnailControl = BlobFileOps.GetThumbnailControl( file, ThumbnailResourceInfoCreator ).ToImmutableArray();
+			var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, ThumbnailResourceInfoCreator ).ToImmutableArray();
 			if( thumbnailControl.Any() )
 				cells.Add( thumbnailControl.ToCell() );
 
@@ -157,8 +159,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							if( fileIsUnread )
 								markFileAsReadMethod?.Invoke( file.FileId );
 						},
-						actionGetter: () =>
-							new PostBackAction( new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) )
+						actionGetter: () => new PostBackAction(
+							new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) )
 					{
 						ToolTip = file.FileName
 					} );
@@ -177,7 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				() => {
 					if( !delete )
 						return false;
-					BlobFileOps.SystemProvider.DeleteFile( file.FileId );
+					BlobStorageStatics.SystemProvider.DeleteFile( file.FileId );
 					return true;
 				} );
 
@@ -195,11 +197,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
 					int newFileId;
 					if( existingFile != null ) {
-						BlobFileOps.SystemProvider.UpdateFile( existingFile.FileId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+						BlobStorageStatics.SystemProvider.UpdateFile(
+							existingFile.FileId,
+							file.FileName,
+							file.Contents,
+							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
 						newFileId = existingFile.FileId;
 					}
 					else
-						newFileId = BlobFileOps.SystemProvider.InsertFile( fileCollectionId, file.FileName, file.Contents, BlobFileOps.GetContentTypeForPostedFile( file ) );
+						newFileId = BlobStorageStatics.SystemProvider.InsertFile(
+							fileCollectionId,
+							file.FileName,
+							file.Contents,
+							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
 
 					NewFileNotificationMethod?.Invoke( newFileId );
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
@@ -207,14 +217,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dm.ToCollection(),
 				() => {
-					var fi = FormItem.Create(
-						"",
-						new EwfFileUpload(),
-						validationGetter: control => new EwfValidation(
-							( pbv, validator ) => {
-								BlobFileOps.ValidateUploadedFile( validator, control, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
-								file = control.GetPostBackValue( pbv );
-							} ) );
+					var fi = new FileUpload(
+						validationMethod: ( postBackValue, validator ) => {
+							BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
+							file = postBackValue;
+						} ).ToFormItem();
 
 					return ControlList.CreateWithControls(
 						true,

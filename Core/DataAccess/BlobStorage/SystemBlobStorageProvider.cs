@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.DataAccess.BlobStorage {
 	/// <summary>
-	/// Defines how file management operations will be carried out against a database.
+	/// System-specific BLOB-storage logic.
 	/// </summary>
-	public interface SystemBlobFileManagementProvider {
+	public interface SystemBlobStorageProvider {
 		/// <summary>
 		/// Retrieves the file with the specified ID.
 		/// </summary>

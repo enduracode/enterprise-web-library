@@ -1,5 +1,5 @@
 ﻿using System;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -20,31 +20,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="forcedImageWidthGetter">A function that gets the width in pixels to which the specified file should be scaled, while maintaining its aspect
 		/// ratio. The file must be an image. Pass null or return null if the file is not an image or you do not want scaling.</param>
 		public BlobFileResponse( int fileId, Func<bool> processAsAttachmentGetter, Func<int?> forcedImageWidthGetter = null ) {
-			file = BlobFileOps.SystemProvider.GetFile( fileId );
+			file = BlobStorageStatics.SystemProvider.GetFile( fileId );
 			processAsAttachment = new Lazy<bool>( processAsAttachmentGetter ?? ( () => false ) );
 			forcedImageWidth = new Lazy<int?>( forcedImageWidthGetter ?? ( () => null ) );
 		}
 
-		internal DateTime FileLastModificationDateAndTime { get { return file.UploadedDate; } }
+		internal DateTime FileLastModificationDateAndTime => file.UploadedDate;
 
-		internal string ETagBase { get { return identifier; } }
-		internal string MemoryCacheKey { get { return identifier; } }
+		internal string ETagBase => identifier;
+		internal string MemoryCacheKey => identifier;
 
-		private string identifier {
-			get {
-				return "blobFile-{0}-{1}-{2}".FormatWith(
-					file.FileId,
-					processAsAttachment.Value ? "a" : "i",
-					forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" );
-			}
-		}
+		private string identifier =>
+			"blobFile-{0}-{1}-{2}".FormatWith(
+				file.FileId,
+				processAsAttachment.Value ? "a" : "i",
+				forcedImageWidth.Value.HasValue ? forcedImageWidth.Value.Value.ToString() : "nonscaled" );
 
 		internal EwfResponse GetResponse() {
 			return EwfResponse.Create(
 				file.ContentType,
 				new EwfResponseBodyCreator(
 					() => {
-						var contents = BlobFileOps.SystemProvider.GetFileContents( file.FileId );
+						var contents = BlobStorageStatics.SystemProvider.GetFileContents( file.FileId );
 						if( forcedImageWidth.Value.HasValue )
 							contents = EwlStatics.ResizeImage( contents, forcedImageWidth.Value.Value );
 						return contents;

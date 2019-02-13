@@ -1,60 +1,24 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Aspose.Pdf.Facades;
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess.BlobStorage;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// Contains methods for working with BLOB files.
-	/// </summary>
-	public static class BlobFileOps {
-		private const string providerName = "BlobFileManagement";
-		private static SystemBlobFileManagementProvider provider;
-
-		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemBlobFileManagementProvider;
-		}
-
-		internal static SystemBlobFileManagementProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
-
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	public static class BlobManagementStatics {
 		/// <summary>
-		/// Returns the first file in the specified file collection, or null if the collection is empty.
-		/// </summary>
-		public static BlobFile GetFirstFileFromCollection( int fileCollectionId ) {
-			return SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ).FirstOrDefault();
-		}
-
-		/// <summary>
-		/// Copies the specified file collection and returns the ID of the copy.
-		/// </summary>
-		public static int CopyFileCollection( int fileCollectionId ) {
-			var newFileCollectionId = SystemProvider.InsertFileCollection();
-			foreach( var file in SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ) )
-				SystemProvider.InsertFile( newFileCollectionId, file.FileName, SystemProvider.GetFileContents( file.FileId ), file.ContentType );
-			return newFileCollectionId;
-		}
-
-		/// <summary>
-		/// Uploaded file cannot be null. But if uploadedFile.HasFile is false, this will be a no-op.
+		/// If file is null, this will be a no-op.
 		/// Pass null for acceptableFileExtensions if there is no restriction on file extension.
 		/// PerformAdditionalImageValidation cannot be null but may be an empty delegate.
 		/// </summary>
 		public static void ValidateUploadedFile(
-			Validator validator, EwfFileUpload uploadedFile, string[] acceptableFileExtensions, Action<Validator, System.Drawing.Image> performAdditionalImageValidation,
+			Validator validator, RsFile file, string[] acceptableFileExtensions, Action<Validator, System.Drawing.Image> performAdditionalImageValidation,
 			bool mustBeRenderableImage ) {
-			var file = uploadedFile.GetPostBackValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			if( file == null )
 				return;
 
@@ -68,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// Perform image-specific validation if necessary.
 			if( mustBeRenderableImage )
 				// Make sure it is an image according to its content type.
-				if( !ContentTypes.IsImageType( GetContentTypeForPostedFile( file ) ) )
+				if( !ContentTypes.IsImageType( BlobStorageStatics.GetContentTypeForPostedFile( file ) ) )
 					validator.NoteErrorAndAddMessage( "Please upload a valid image file." );
 				else
 					// Make sure it is an image type that we understand. Also perform optional custom validation.
@@ -88,10 +52,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Provides a height/width image validation method without you having to create a custom validation method.
 		/// </summary>
-		public static Action<Validator, System.Drawing.Image> GetWidthAndHeightImageValidationMethod( string subject, int width, int height ) {
+		public static Action<Validator, System.Drawing.Image> GetWidthAndHeightImageValidationMethod( int width, int height ) {
 			return ( validator2, image ) => {
 				if( image.Height != height || image.Width != width )
-					validator2.NoteErrorAndAddMessage( subject + " must be " + width + "x" + height + " pixels." );
+					validator2.NoteErrorAndAddMessage( "Image must be " + width + "x" + height + " pixels." );
 			};
 		}
 
@@ -117,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
 		public static Control GetFileLink( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
-			var file = GetFirstFileFromCollection( fileCollectionId );
+			var file = BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
 				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
 			return new PostBackButton(
@@ -127,7 +91,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 					actionGetter: () => new PostBackAction(
 						new PageReloadBehavior(
-							secondaryResponse: new SecondaryResponse( new BlobFileResponse( GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ), false ) ) ) ) );
+							secondaryResponse: new SecondaryResponse(
+								new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ),
+								false ) ) ) ) );
 		}
 
 		/// <summary>
@@ -137,7 +103,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
 		public static Control GetFileLinkFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
-			var file = SystemProvider.GetFile( fileId );
+			var file = BlobStorageStatics.SystemProvider.GetFile( fileId );
 			if( file == null )
 				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
 			return new PostBackButton(
@@ -147,55 +113,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
 					actionGetter: () =>
 						new PostBackAction( new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) ) );
-		}
-
-		/// <summary>
-		/// SystemBlobFileManagementProvider must be implemented.
-		/// You should check other meta information about the file (such as the extension) before calling this expensive method.
-		/// </summary>
-		public static bool IsValidPdfFile( int fileId ) {
-			var contents = SystemProvider.GetFileContents( fileId );
-			return IsValidPdfFile( contents );
-		}
-
-		/// <summary>
-		/// Returns true if the file is a valid PDF file.
-		/// You should check other meta information about the file (such as the extension) before calling this expensive method.
-		/// </summary>
-		public static bool IsValidPdfFile( byte[] contents ) {
-			using( var memoryStream = new MemoryStream( contents ) )
-				return IsValidPdfFile( memoryStream );
-		}
-
-		/// <summary>
-		/// Returns true if the file is a valid PDF file. Caller is responsible for opening and cleaning up the stream.
-		/// You should check other meta information about the file (such as the extension) before calling this expensive method.
-		/// </summary>
-		public static bool IsValidPdfFile( Stream sourceStream ) {
-			try {
-				return new PdfFileInfo( sourceStream ).IsPdfFile;
-			}
-			catch {
-				// We catch all exceptions here because we don't trust Aspose to consistently throw a particular type of exception when the PDF is invalid.
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Returns the content type of the given HttpPostedFile.
-		/// </summary>
-		// This implementation simply returns the media type provided by the client, which makes it vulnerable to spoofing. The only way around this is to determine
-		// the media type by looking at the contents of the file.
-		internal static string GetContentTypeForPostedFile( RsFile file ) {
-			return file.ContentType;
-		}
-
-		internal static IEnumerable<BlobFile> OrderByName( this IEnumerable<BlobFile> rows ) {
-			return rows.OrderBy( i => i.FileName ).ThenBy( i => i.FileId );
-		}
-
-		internal static IEnumerable<BlobFile> OrderByUploadedDateDescending( this IEnumerable<BlobFile> rows ) {
-			return rows.OrderByDescending( i => i.UploadedDate ).ThenByDescending( i => i.FileId );
 		}
 	}
 }

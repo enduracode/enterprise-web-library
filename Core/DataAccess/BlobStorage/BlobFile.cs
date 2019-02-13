@@ -1,6 +1,6 @@
 using System;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.DataAccess.BlobStorage {
 	/// <summary>
 	/// Contains basic attributes of a file stored in a database, including the ID and the name.
 	/// </summary>
