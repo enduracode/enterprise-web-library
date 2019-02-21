@@ -331,24 +331,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return "";
 
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
-			return "$( '#{0}' ).chosen( {{ {1} }} ){2};".FormatWith(
-				selectControl.ClientID,
-				StringTools.ConcatenateWithDelimiter(
-					", ",
-					placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
-					placeholderItem != null
-						// Don't let the placeholder value be the empty string since this seems to confuse Chosen.
-						? "placeholder_text_single: '{0}'".FormatWith(
-							placeholderItem.Item.Label.Any() ? HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) : " " )
-						: "",
-					"search_contains: true",
-					"width: '{0}'".FormatWith( width.HasValue ? width.Value.ToString() : "" ) ),
-				// Do this after .chosen since we only want it to affect the native select.
-				placeholderItem != null
-					? ".children().eq( {0} ).text( '{1}' )".FormatWith(
-						items.IndexOf( placeholderItem ),
-						HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) )
-					: "" );
+
+			// Chosen’s allow_single_deselect only works if the placeholder is the first item.
+			var chosenLogic = placeholderItem == null || placeholderItem == items.First()
+				                  ? ".chosen( {{ {0} }} )".FormatWith(
+					                  StringTools.ConcatenateWithDelimiter(
+						                  ", ",
+						                  placeholderItem != null && placeholderItem.IsValid ? "allow_single_deselect: true" : "",
+						                  placeholderItem != null
+							                  // Don't let the placeholder value be the empty string since this seems to confuse Chosen.
+							                  ? "placeholder_text_single: '{0}'".FormatWith(
+								                  placeholderItem.Item.Label.Any() ? HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) : " " )
+							                  : "",
+						                  "search_contains: true",
+						                  "width: '{0}'".FormatWith( width.HasValue ? width.Value.ToString() : "" ) ) )
+				                  : "";
+
+			// Do this after .chosen since we only want it to affect the native select.
+			var placeholderTextLogic = placeholderItem != null
+				                           ? ".children().eq( {0} ).text( '{1}' )".FormatWith(
+					                           items.IndexOf( placeholderItem ),
+					                           HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) )
+				                           : "";
+
+			return ( chosenLogic + placeholderTextLogic ).Surround( "$( '#{0}' )".FormatWith( selectControl.ClientID ), ";" );
 		}
 
 		FormValue FormValueControl.FormValue { get { return formValue; } }
