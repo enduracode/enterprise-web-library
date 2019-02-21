@@ -16,9 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Pass null for acceptableFileExtensions if there is no restriction on file extension.
 		/// PerformAdditionalImageValidation cannot be null but may be an empty delegate.
 		/// </summary>
-		public static void ValidateUploadedFile(
-			Validator validator, RsFile file, string[] acceptableFileExtensions, Action<Validator, System.Drawing.Image> performAdditionalImageValidation,
-			bool mustBeRenderableImage ) {
+		public static void ValidateUploadedFile( Validator validator, RsFile file, string[] acceptableFileExtensions, bool mustBeRenderableImage ) {
 			if( file == null )
 				return;
 
@@ -37,26 +35,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				else
 					// Make sure it is an image type that we understand. Also perform optional custom validation.
 					try {
-						using( var stream = new MemoryStream( file.Contents ) ) {
-							var image = System.Drawing.Image.FromStream( stream );
-							performAdditionalImageValidation( validator, image );
-						}
+						using( var stream = new MemoryStream( file.Contents ) )
+							System.Drawing.Image.FromStream( stream );
 					}
 					catch( ArgumentException ) {
 						// If we end up in this catch block, it means that System.Drawing.Image does not understand our image. Since we already know that our content type
 						// is image at this point, this usually means that the file is some sort of unsupported image format, like NEF.
 						validator.NoteErrorAndAddMessage( "The uploaded image file is in an unsupported format." );
 					}
-		}
-
-		/// <summary>
-		/// Provides a height/width image validation method without you having to create a custom validation method.
-		/// </summary>
-		public static Action<Validator, System.Drawing.Image> GetWidthAndHeightImageValidationMethod( int width, int height ) {
-			return ( validator2, image ) => {
-				if( image.Height != height || image.Width != width )
-					validator2.NoteErrorAndAddMessage( "Image must be " + width + "x" + height + " pixels." );
-			};
 		}
 
 		/// <summary>
