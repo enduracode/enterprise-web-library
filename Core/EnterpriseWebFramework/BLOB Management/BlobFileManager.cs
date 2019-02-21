@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
-		public BlobFileManager( int? fileCollectionId, bool requireUploadIfNoFile, Action<RsFile, Validator> validationMethod ) {
+		public BlobFileManager( int? fileCollectionId, bool requireUploadIfNoFile, Action<RsFile, Validator> uploadValidationMethod ) {
 			this.fileCollectionId = fileCollectionId;
 
 			var file = fileCollectionId != null ? BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId.Value ) : null;
@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							}
 
 							uploadedFile = postBackValue;
-							validationMethod( postBackValue, validator );
+							uploadValidationMethod( postBackValue, validator );
 						} ).ToFormItem()
 					.ToControl() );
 			var fileUploadDisplayedHiddenFieldId = new HiddenFieldId();
