@@ -42,11 +42,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool AcceptOnlyImages { get; set; }
 
 		/// <summary>
-		/// Set this if you want to perform custom validation on any (renderable) images added to this manager.
-		/// </summary>
-		public Action<Validator, System.Drawing.Image> ValidateImage { private get { return validateImage; } set { validateImage = value; } }
-
-		/// <summary>
 		/// Set the method to execute when a new file is uploaded.
 		/// </summary>
 		public NewFileNotificationMethod NewFileNotificationMethod { private get; set; }
@@ -219,7 +214,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => {
 					var fi = new FileUpload(
 						validationMethod: ( postBackValue, validator ) => {
-							BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, ValidateImage, AcceptOnlyImages );
+							BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
 							file = postBackValue;
 						} ).ToFormItem();
 
