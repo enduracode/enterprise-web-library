@@ -7,7 +7,7 @@ using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.DataAccess.BlobStorage {
 	public static class BlobStorageStatics {
-		private const string providerName = "BlobFileManagement";
+		private const string providerName = "BlobStorage";
 		private static SystemBlobStorageProvider provider;
 
 		internal static void Init() {
