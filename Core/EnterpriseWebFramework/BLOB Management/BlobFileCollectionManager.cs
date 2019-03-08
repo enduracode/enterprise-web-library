@@ -7,7 +7,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
 
@@ -22,7 +21,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private string[] acceptableFileExtensions;
 		private readonly bool sortByName;
 		private readonly string postBackIdBase;
-		private Action<Validator, System.Drawing.Image> validateImage = delegate {};
+		private readonly NewFileNotificationMethod fileCreatedOrReplacedNotifier;
+		private readonly Action filesDeletedNotifier;
 		private IEnumerable<BlobFile> files;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
@@ -42,11 +42,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool AcceptOnlyImages { get; set; }
 
 		/// <summary>
-		/// Set the method to execute when a new file is uploaded.
-		/// </summary>
-		public NewFileNotificationMethod NewFileNotificationMethod { private get; set; }
-
-		/// <summary>
 		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a resource info object.
 		/// </summary>
 		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
@@ -56,10 +51,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="sortByName"></param>
 		/// <param name="postBackIdBase">Do not pass null.</param>
-		public BlobFileCollectionManager( bool sortByName = false, string postBackIdBase = "" ) {
+		/// <param name="fileCreatedOrReplacedNotifier">A method that executes after a file is created or replaced.</param>
+		/// <param name="filesDeletedNotifier">A method that executes after one or more files are deleted.</param>
+		public BlobFileCollectionManager(
+			bool sortByName = false, string postBackIdBase = "", NewFileNotificationMethod fileCreatedOrReplacedNotifier = null,
+			Action filesDeletedNotifier = null ) {
 			Caption = "";
 			this.sortByName = sortByName;
 			this.postBackIdBase = PostBack.GetCompositeId( "ewfFileCollection", postBackIdBase );
+			this.fileCreatedOrReplacedNotifier = fileCreatedOrReplacedNotifier;
+			this.filesDeletedNotifier = filesDeletedNotifier;
 
 			dataModifications = FormState.Current.DataModifications;
 		}
@@ -113,8 +114,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var deletePb = PostBack.CreateFull(
 						id: PostBack.GetCompositeId( postBackIdBase, "delete" ),
 						firstModificationMethod: () => {
-							if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) )
+							if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) ) {
+								filesDeletedNotifier?.Invoke();
 								EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+							}
 						} );
 					FormState.ExecuteWithDataModificationsAndDefaultAction(
 						deletePb.ToCollection(),
@@ -206,7 +209,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							file.Contents,
 							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
 
-					NewFileNotificationMethod?.Invoke( newFileId );
+					fileCreatedOrReplacedNotifier?.Invoke( newFileId );
 					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} );
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
