@@ -261,7 +261,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// Installation Support Utility use only.
 		/// </summary>
 		public static string GetDataPackageZipFilePath( string installationFullName ) {
-			return EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Local Data Packages", installationFullName + ".zip" );
+			return EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Local Data Packages", installationFullName + ".zip" );
 		}
 	}
 }

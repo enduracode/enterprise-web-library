@@ -126,7 +126,7 @@ namespace EnterpriseWebLibrary.Email {
 				else {
 					smtpClient.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory;
 
-					var pickupFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Outgoing Dev Mail" );
+					var pickupFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Outgoing Dev Mail" );
 					Directory.CreateDirectory( pickupFolderPath );
 					smtpClient.PickupDirectoryLocation = pickupFolderPath;
 				}

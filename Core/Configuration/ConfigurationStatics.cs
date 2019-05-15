@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Web;
 using EnterpriseWebLibrary.Configuration.Machine;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.Configuration {
 	public static class ConfigurationStatics {
@@ -15,9 +16,9 @@ namespace EnterpriseWebLibrary.Configuration {
 		public const string ProvidersFolderAndNamespaceName = "Providers";
 
 		/// <summary>
-		/// Gets the path of the Red Stapler folder on the machine.
+		/// Gets the path of the EWL folder on the machine.
 		/// </summary>
-		public static string RedStaplerFolderPath { get; private set; }
+		public static string EwlFolderPath { get; private set; }
 
 		/// <summary>
 		/// EWL and ISU use only.
@@ -37,12 +38,13 @@ namespace EnterpriseWebLibrary.Configuration {
 		internal static bool IsClientSideApp { get; private set; }
 
 		internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideApp, ref string initializationLog ) {
-			RedStaplerFolderPath = Environment.GetEnvironmentVariable( "RedStaplerFolderPath" ) ?? @"C:\Red Stapler";
+			EwlFolderPath = Environment.GetEnvironmentVariable( "{0}FolderPath".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ) ) ??
+			                @"C:\{0}".FormatWith( EwlStatics.EwlName );
 
 			initializationLog += Environment.NewLine + "About to load machine config";
 
 			// Load machine configuration.
-			var machineConfigFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration.xml" );
+			var machineConfigFilePath = EwlStatics.CombinePaths( EwlFolderPath, "Machine Configuration.xml" );
 			if( File.Exists( machineConfigFilePath ) )
 				// Do not perform schema validation since the schema file won't be available on non-development machines.
 				try {
@@ -50,7 +52,7 @@ namespace EnterpriseWebLibrary.Configuration {
 				}
 				catch {
 					// The alt file allows us to smoothly transition all machines in the case of schema changes that break deserialization.
-					var altFilePath = EwlStatics.CombinePaths( RedStaplerFolderPath, "Machine Configuration Alt.xml" );
+					var altFilePath = EwlStatics.CombinePaths( EwlFolderPath, "Machine Configuration Alt.xml" );
 					if( !File.Exists( altFilePath ) )
 						throw;
 					MachineConfiguration = XmlOps.DeserializeFromFile<MachineConfiguration>( altFilePath, false );

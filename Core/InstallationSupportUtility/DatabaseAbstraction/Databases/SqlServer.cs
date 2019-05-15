@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				// The database did not exist. That's fine.
 			}
 
-			var sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "SQL Server Databases" );
+			var sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "SQL Server Databases" );
 			Directory.CreateDirectory( sqlServerFilesFolderPath );
 
 			var dataFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" );
@@ -171,8 +171,8 @@ LOG ON (
 )".FormatWith( info.Database, dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
 		}
 
-		// Use the Red Stapler folder for all backup/restore operations because the SQL Server account probably already has access to it.
-		private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, info.Database + ".bak" );
+		// Use the EWL folder for all backup/restore operations because the SQL Server account probably already has access to it.
+		private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, info.Database + ".bak" );
 
 		List<string> Database.GetTables() {
 			var tables = new List<string>();

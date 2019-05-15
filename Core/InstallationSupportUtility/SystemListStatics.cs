@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		public static void RefreshSystemList() {
 			// Do not perform schema validation since we don't want to be forced into redeploying Program Runner after every schema change. We also don't have access
 			// to the schema on non-development machines.
-			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "System List.xml" );
+			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List.xml" );
 			var cacheUsed = false;
 			try {
 				ConfigurationLogic.ExecuteWithSystemManagerClient(

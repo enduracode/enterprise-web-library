@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 		/// This is the code to install and start the SeleniumRC service.
 		/// </summary>
 		public static void InstallSeleniumServiceIfNecessary() {
-			var supportFilesDestinationPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Selenium Support" );
+			var supportFilesDestinationPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Selenium Support" );
 			const string serviceName = "SeleniumRC";
 			const string seleniumJarFile = "selenium-server.jar";
 			const string srvany = "srvany.exe";

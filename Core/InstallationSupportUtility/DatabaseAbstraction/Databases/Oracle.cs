@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
 		private const string databaseFileDumpFileName = "Dump File.dmp";
 		private const string databaseFileSchemaNameFileName = "Schema.txt";
-		private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Oracle Data Pump" );
+		private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Oracle Data Pump" );
 
 		private readonly OracleInfo info;
 

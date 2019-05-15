@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 			var installation = genericInstallation as RecognizedDevelopmentInstallation;
-			var localNuGetFeedFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.RedStaplerFolderPath, "Local NuGet Feed" );
+			var localNuGetFeedFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Local NuGet Feed" );
 
 			// nuget.exe has problems if the folder doesn't exist.
 			Directory.CreateDirectory( localNuGetFeedFolderPath );
