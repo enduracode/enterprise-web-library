@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						installation.GeneralLogic.Path,
 						AppStatics.CoreProjectName,
 						EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net462-full" );
+					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net472-full" );
 					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 						IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
@@ -275,8 +275,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							channel => channel.UploadBuild(
 								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
 									{
-										AuthenticationKey = ConfigurationLogic.SystemManagerAccessToken,
-										BuildDocument = memoryStream
+										AuthenticationKey = ConfigurationLogic.SystemManagerAccessToken, BuildDocument = memoryStream
 									} ),
 							"build upload" );
 					}

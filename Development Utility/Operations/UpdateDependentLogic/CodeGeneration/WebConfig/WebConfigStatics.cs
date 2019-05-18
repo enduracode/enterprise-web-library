@@ -39,15 +39,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 
 			if( project.UsesEntityFrameworkSpecified && project.UsesEntityFramework )
 				sections = sections.Replace(
-					"<compilation debug=\"true\" targetFramework=\"4.6.2\" />",
-					"<compilation debug=\"true\" targetFramework=\"4.6.2\"><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
+					"<compilation debug=\"true\" targetFramework=\"4.7.2\" />",
+					"<compilation debug=\"true\" targetFramework=\"4.7.2\"><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = project.useCertificateAuthenticationSpecified && project.useCertificateAuthentication;
 			sections = sections.Replace(
 				"@@CertificateAuthenticationModulePlace",
-				useCertificateAuth ? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>" : "" );
+				useCertificateAuth
+					? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
+					: "" );
 
 			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
 			sections = sections.Replace( "@@CacheTimeout", cacheTimeoutTimeSpan );
