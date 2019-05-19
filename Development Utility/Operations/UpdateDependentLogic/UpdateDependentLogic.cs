@@ -646,10 +646,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( regionBegin );
 				writer.WriteLine( "syntax: glob" );
 				writer.WriteLine();
-				writer.WriteLine( ".vs/{0}/DesignTimeBuild/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( ".vs/{0}/v15/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( ".vs/{0}/v15/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( ".vs/{0}/v15/Server/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v16/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine( ".vs/{0}/v16/Server/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 				writer.WriteLine( "Error Log.txt" );
