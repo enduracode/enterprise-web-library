@@ -9,7 +9,6 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ImageResizer;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary {
 	/// <summary>
@@ -418,11 +417,6 @@ namespace EnterpriseWebLibrary {
 			var chrono = new Chronometer();
 			method();
 			return chrono.Elapsed;
-		}
-
-		// Remove this when we update to .NET 4.7.1.
-		public static IEnumerable<T> Append<T>( this IEnumerable<T> items, T item ) {
-			return items.Concat( item );
 		}
 
 		/// <summary>
