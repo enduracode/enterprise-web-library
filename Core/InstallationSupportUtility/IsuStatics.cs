@@ -24,7 +24,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 							p.StartInfo.FileName = @"C:\Program Files (x86)\IIS Express\iisexpress";
 							p.Start();
 							Thread.Sleep( 2000 );
-							p.CloseMainWindow();
+							if( !p.CloseMainWindow() )
+								// We need this when the process runs non-interactively, such as from a scheduled task on a build server.
+								p.Kill();
 							p.WaitForExit();
 						}
 						configureIis( true, useServerAppPoolSettings );
