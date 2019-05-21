@@ -79,13 +79,6 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
-		/// Convenience method for converting a collection into a HashSet.
-		/// </summary>
-		public static HashSet<T> ToHashSet<T>( this IEnumerable<T> items ) {
-			return new HashSet<T>( items );
-		}
-
-		/// <summary>
 		/// Creates a collection from this sequence.
 		/// </summary>
 		public static IReadOnlyCollection<T> Materialize<T>( this IEnumerable<T> items ) {
