@@ -1,5 +1,5 @@
 ﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
-	public class RecognizedInstalledInstallation: KnownInstalledInstallation, RecognizedInstallation {
+	public class RecognizedInstalledInstallation: ExistingInstalledInstallation, KnownInstalledInstallation, RecognizedInstallation {
 		private readonly GeneralInstallationLogic generalInstallationLogic;
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 		private readonly ExistingInstalledInstallationLogic existingInstalledInstallationLogic;
