@@ -5,6 +5,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -19,8 +20,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		private TimeSpan? value;
+		private readonly TimeSpan? value;
 		private bool autoPostBack;
+		private readonly LocalTime minValue;
+		private readonly LocalTime? maxValue;
 		private readonly int minuteInterval;
 		private readonly FormAction action;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
@@ -33,10 +36,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Be aware that other values can still be sent from the browser via a crafted request.
 		/// </summary>
 		/// <param name="value"></param>
+		/// <param name="minValue">The earliest allowed time.</param>
+		/// <param name="maxValue">The latest allowed time. This can be earlier than <paramref name="minValue"/> to create a range spanning midnight.</param>
 		/// <param name="minuteInterval"></param>
 		/// <param name="action">The post-back that will be performed when the user hits Enter on the time picker.</param>
-		public TimePicker( TimeSpan? value, int minuteInterval = 15, FormAction action = null ) {
+		public TimePicker( TimeSpan? value, LocalTime? minValue = null, LocalTime? maxValue = null, int minuteInterval = 15, FormAction action = null ) {
 			this.value = value;
+			this.minValue = minValue ?? LocalTime.Midnight;
+			this.maxValue = maxValue;
 			this.minuteInterval = minuteInterval;
 			this.action = action;
 
@@ -73,13 +80,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						Controls.Add( new ControlLine( textBox, getIconButton() ) );
 					}
 					else {
-						var minuteValues = new List<int>();
-						for( var i = 0; i < 60; i += minuteInterval )
-							minuteValues.Add( i );
 						selectList = SelectList.CreateDropDown(
-							from hour in Enumerable.Range( 0, 24 )
-							from minute in minuteValues
-							let timeSpan = new TimeSpan( hour, minute, 0 )
+							from time in getTimes()
+							let timeSpan = new TimeSpan( time.TickOfDay )
 							select SelectListItem.Create<TimeSpan?>( timeSpan, timeSpan.ToTimeOfDayHourAndMinuteString() ),
 							value,
 							width: Unit.Percentage( 100 ),
@@ -98,7 +101,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private WebControl getIconButton() {
 			var icon = new FontAwesomeIcon( "fa-clock-o", "timepickerIcon" ).ToCollection().GetControls();
 			var style = new CustomActionControlStyle( control => control.AddControlsReturnThis( icon ) );
-			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) ) { ActionControlStyle = style, CssClass = "icon" };
+			return new CustomButton( () => "$( '#{0}' ).timepicker( 'show' )".FormatWith( textBox.TextBoxClientId ) )
+				{
+					ActionControlStyle = style, CssClass = "icon"
+				};
+		}
+
+		private IReadOnlyCollection<LocalTime> getTimes() {
+			var times = new List<LocalTime>();
+			var time = minValue;
+			var wrapAllowed = maxValue < minValue;
+			while( true ) {
+				times.Add( time );
+				time = time.PlusMinutes( minuteInterval );
+
+				if( time < times.Last() )
+					if( wrapAllowed )
+						wrapAllowed = false;
+					else
+						break;
+
+				if( !wrapAllowed && time > maxValue.Value )
+					break;
+			}
+			return times;
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
@@ -112,24 +138,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public TimeSpan? ValidateAndGetNullableTimeSpan(
 			PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler, bool allowEmpty ) {
-			return textBox != null
-				       ? validator.GetNullableTimeOfDayTimeSpan(
-					       errorHandler,
-					       textBox.GetPostBackValue( postBackValues ).ToUpper(),
-					       DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
-					       allowEmpty )
-				       : selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
+			if( textBox != null ) {
+				var postBackValue = validator.GetNullableTimeOfDayTimeSpan(
+					errorHandler,
+					textBox.GetPostBackValue( postBackValues ).ToUpper(),
+					DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+					allowEmpty );
+				if( postBackValue < new TimeSpan( minValue.TickOfDay ) || postBackValue > maxValue.ToNewUnderlyingValue( v => new TimeSpan( v.TickOfDay ) ) )
+					validator.NoteErrorAndAddMessage( "The time is too early or too late." );
+				return postBackValue;
+			}
+
+			return selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 		}
 
 		/// <summary>
 		/// Validates the time and returns the time. The value is expressed in time since 12AM on an arbitrary day.
 		/// </summary>
 		public TimeSpan ValidateAndGetTimeSpan( PostBackValueDictionary postBackValues, Validator validator, ValidationErrorHandler errorHandler ) {
-			if( textBox != null )
-				return validator.GetTimeOfDayTimeSpan(
+			if( textBox != null ) {
+				var postBackValue = validator.GetTimeOfDayTimeSpan(
 					errorHandler,
 					textBox.GetPostBackValue( postBackValues ).ToUpper(),
 					DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray() );
+				if( postBackValue < new TimeSpan( minValue.TickOfDay ) || postBackValue > maxValue.ToNewUnderlyingValue( v => new TimeSpan( v.TickOfDay ) ) )
+					validator.NoteErrorAndAddMessage( "The time is too early or too late." );
+				return postBackValue;
+			}
 
 			var selectedItemIdInPostBack = selectList.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator );
 			if( selectedItemIdInPostBack.HasValue )
