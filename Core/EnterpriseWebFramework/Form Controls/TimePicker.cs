@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					else
 						break;
 
-				if( !wrapAllowed && time > maxValue.Value )
+				if( !wrapAllowed && time > maxValue )
 					break;
 			}
 			return times;
