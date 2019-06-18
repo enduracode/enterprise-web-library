@@ -551,7 +551,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableOps.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\TabStrip.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\TextAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\TimePicker.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ToolTip.cs" />

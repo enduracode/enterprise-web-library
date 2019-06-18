@@ -5,7 +5,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
@@ -122,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A drop-down list or radio button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl, DisplayLink {
+	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl {
 		private class ListItem {
 			private readonly SelectListItem<ItemIdType> item;
 			private readonly bool isValid;
@@ -158,9 +157,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly bool autoPostBack;
 		private readonly PageModificationValue<ItemIdType> itemIdPageModificationValue;
 		private readonly IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups;
-
-		private readonly List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>> displayLinks =
-			new List<Tuple<IEnumerable<ItemIdType>, bool, IEnumerable<System.Web.UI.WebControls.WebControl>>>();
 
 		private LegacyFreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
@@ -221,10 +217,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				isPlaceholder );
 		}
 
-		public void AddDisplayLink( IEnumerable<ItemIdType> itemIds, bool controlsVisibleOnMatch, IEnumerable<System.Web.UI.WebControls.WebControl> controls ) {
-			displayLinks.Add( Tuple.Create( itemIds, controlsVisibleOnMatch, controls.ToArray() as IEnumerable<System.Web.UI.WebControls.WebControl> ) );
-		}
-
 		void ControlTreeDataLoader.LoadData() {
 			if( useHorizontalRadioLayout.HasValue ) {
 				radioList = LegacyFreeFormRadioList.Create(
@@ -233,8 +225,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					disableSingleButtonDetection: disableSingleRadioButtonDetection.Value,
 					itemIdPageModificationValue: itemIdPageModificationValue,
 					itemMatchPageModificationSetups: itemMatchPageModificationSetups );
-				foreach( var i in displayLinks )
-					radioList.AddDisplayLink( i.Item1, i.Item2, i.Item3 );
 
 				var radioButtons = items.Where( i => i.IsValid )
 					.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: autoPostBack ) )
@@ -293,8 +283,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					formValue.AddPageModificationValue( itemIdPageModificationValue, v => v );
 				foreach( var setup in itemMatchPageModificationSetups )
 					formValue.AddPageModificationValue( setup.PageModificationValue, id => setup.ItemIds.Contains( id ) );
-
-				EwfPage.Instance.AddDisplayLink( this );
 			}
 		}
 
@@ -305,25 +293,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					       ( EwlStatics.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
 					       label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
 				};
-		}
-
-		void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
-			foreach( var displayLink in displayLinks ) {
-				var match = displayLink.Item1.Contains( formValue.GetValue( formControlValues ) );
-				var visible = ( displayLink.Item2 && match ) || ( !displayLink.Item2 && !match );
-				foreach( var control in displayLink.Item3 )
-					DisplayLinkingOps.SetControlDisplay( control, visible );
-			}
-		}
-
-		void DisplayLink.AddJavaScript() {
-			foreach( var displayLink in displayLinks ) {
-				var scripts = from control in displayLink.Item3
-				              select "setElementDisplay( '" + control.ClientID + "', [ " +
-				                     StringTools.ConcatenateWithDelimiter( ", ", displayLink.Item1.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) +
-				                     " ].indexOf( $( '#" + selectControl.ClientID + "' ).val() ) " + ( displayLink.Item2 ? "!" : "=" ) + "= -1 )";
-				selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, StringTools.ConcatenateWithDelimiter( "; ", scripts.ToArray() ) );
-			}
 		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
