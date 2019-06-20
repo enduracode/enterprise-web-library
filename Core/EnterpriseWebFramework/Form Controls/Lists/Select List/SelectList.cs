@@ -11,10 +11,10 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// This control should never support custom-text scenarios. An essential element of SelectList is that each item has both a label and an ID, and custom text
-	// cannot meet this requirement. EwfTextBox would be a more appropriate place to implement custom-text "combo boxes".
+	// cannot meet this requirement. TextControl would be a more appropriate place to implement custom-text "combo boxes".
 
 	/// <summary>
-	/// A drop-down list or radio button list.
+	/// A drop-down or radio-button list.
 	/// </summary>
 	public static class SelectList {
 		internal class CssElementCreator: ControlCssElementCreator {
@@ -42,8 +42,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 		/// selected if the selected item ID has the default value and none of the list items do.</param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
-			RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "" ) =>
+			RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", Action<ItemIdType, Validator> validationMethod = null ) =>
 			new SelectList<ItemIdType>(
 				setup.UseHorizontalLayout,
 				null,
@@ -57,7 +58,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.Action,
 				setup.FreeFormSetup.SelectionChangedAction,
 				setup.FreeFormSetup.ItemIdPageModificationValue,
-				setup.FreeFormSetup.ItemMatchPageModificationSetups );
+				setup.FreeFormSetup.ItemMatchPageModificationSetups,
+				validationMethod );
 
 		/// <summary>
 		/// Creates a drop-down list.
@@ -71,8 +73,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// This will only be included if none of the list items have an ID with the default value and the default-value item label is the empty string. If you pass
 		/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 		/// case the placeholder will not be considered a valid selection.</param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
-			DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false ) =>
+			DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false,
+			Action<ItemIdType, Validator> validationMethod = null ) =>
 			new SelectList<ItemIdType>(
 				null,
 				setup.Width,
@@ -86,11 +90,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.Action,
 				setup.SelectionChangedAction,
 				setup.ItemIdPageModificationValue,
-				setup.ItemMatchPageModificationSetups );
+				setup.ItemMatchPageModificationSetups,
+				validationMethod );
 	}
 
 	/// <summary>
-	/// A drop-down list or radio button list.
+	/// A drop-down or radio-button list.
 	/// </summary>
 	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl {
 		private class ListItem {
@@ -138,7 +143,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool? useHorizontalRadioLayout, ContentBasedLength width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel,
 			bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection,
 			ItemIdType selectedItemId, FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
-			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Action<ItemIdType, Validator> validationMethod ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
 

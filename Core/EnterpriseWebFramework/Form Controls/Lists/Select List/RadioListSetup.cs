@@ -20,11 +20,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
 		/// <param name="itemIdPageModificationValue"></param>
 		/// <param name="itemMatchPageModificationSetups"></param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
 		public static RadioListSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, bool useHorizontalLayout = false, Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null,
 			bool disableSingleButtonDetection = false, FormAction action = null, FormAction selectionChangedAction = null,
 			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) =>
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
+			Action validationErrorNotifier = null ) =>
 			new RadioListSetup<ItemIdType>(
 				useHorizontalLayout,
 				false,
@@ -34,7 +37,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					disableSingleButtonDetection: disableSingleButtonDetection,
 					selectionChangedAction: selectionChangedAction,
 					itemIdPageModificationValue: itemIdPageModificationValue,
-					itemMatchPageModificationSetups: itemMatchPageModificationSetups ),
+					itemMatchPageModificationSetups: itemMatchPageModificationSetups,
+					validationPredicate: validationPredicate,
+					validationErrorNotifier: validationErrorNotifier ),
 				action );
 
 		/// <summary>
@@ -45,9 +50,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="unlistedSelectedItemLabelGetter">A function that will be called if the selected item ID does not match any list item and is not the default
 		/// value of the type. The function takes the selected item ID and returns the label of the unlisted selected item, which will appear before all other
 		/// items in the list. The string " (invalid)" will be appended to the label.</param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
 		public static RadioListSetup<ItemIdType> CreateReadOnly<ItemIdType>(
-			IEnumerable<SelectListItem<ItemIdType>> items, bool useHorizontalLayout = false, Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null ) =>
-			new RadioListSetup<ItemIdType>( useHorizontalLayout, true, unlistedSelectedItemLabelGetter, items, FreeFormRadioListSetup.Create<ItemIdType>(), null );
+			IEnumerable<SelectListItem<ItemIdType>> items, bool useHorizontalLayout = false, Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) =>
+			new RadioListSetup<ItemIdType>(
+				useHorizontalLayout,
+				true,
+				unlistedSelectedItemLabelGetter,
+				items,
+				FreeFormRadioListSetup.Create<ItemIdType>( validationPredicate: validationPredicate, validationErrorNotifier: validationErrorNotifier ),
+				null );
 	}
 
 	/// <summary>

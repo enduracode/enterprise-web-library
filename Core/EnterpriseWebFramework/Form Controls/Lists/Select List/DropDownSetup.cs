@@ -21,11 +21,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
 		/// <param name="itemIdPageModificationValue"></param>
 		/// <param name="itemMatchPageModificationSetups"></param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
 		public static DropDownSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, ContentBasedLength width = null, Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null,
 			string placeholderText = "Please select", FormAction action = null, FormAction selectionChangedAction = null,
 			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) =>
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
+			Action validationErrorNotifier = null ) =>
 			new DropDownSetup<ItemIdType>(
 				width,
 				false,
@@ -35,7 +38,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				action,
 				selectionChangedAction,
 				itemIdPageModificationValue,
-				itemMatchPageModificationSetups );
+				itemMatchPageModificationSetups,
+				validationPredicate,
+				validationErrorNotifier );
 
 		/// <summary>
 		/// Creates a setup object for a read-only drop-down.
@@ -47,10 +52,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// value of the type. The function takes the selected item ID and returns the label of the unlisted selected item, which will appear before all other
 		/// items in the list. The string " (invalid)" will be appended to the label.</param>
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
+		/// <param name="validationPredicate"></param>
+		/// <param name="validationErrorNotifier"></param>
 		public static DropDownSetup<ItemIdType> CreateReadOnly<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, ContentBasedLength width = null, Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null,
-			string placeholderText = "Please select" ) =>
-			new DropDownSetup<ItemIdType>( width, true, unlistedSelectedItemLabelGetter, placeholderText, items, null, null, null, null );
+			string placeholderText = "Please select", Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) =>
+			new DropDownSetup<ItemIdType>(
+				width,
+				true,
+				unlistedSelectedItemLabelGetter,
+				placeholderText,
+				items,
+				null,
+				null,
+				null,
+				null,
+				validationPredicate,
+				validationErrorNotifier );
 	}
 
 	/// <summary>
@@ -66,12 +84,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly FormAction SelectionChangedAction;
 		internal readonly PageModificationValue<ItemIdType> ItemIdPageModificationValue;
 		internal readonly IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> ItemMatchPageModificationSetups;
+		internal readonly Func<bool, bool> ValidationPredicate;
+		internal readonly Action ValidationErrorNotifier;
 
 		internal DropDownSetup(
 			ContentBasedLength width, bool isReadOnly, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string placeholderText,
 			IEnumerable<SelectListItem<ItemIdType>> items, FormAction action, FormAction selectionChangedAction,
 			PageModificationValue<ItemIdType> itemIdPageModificationValue,
-			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
+			Action validationErrorNotifier ) {
 			Width = width;
 			IsReadOnly = isReadOnly;
 			UnlistedSelectedItemLabelGetter = unlistedSelectedItemLabelGetter;
@@ -81,6 +102,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			SelectionChangedAction = selectionChangedAction;
 			ItemIdPageModificationValue = itemIdPageModificationValue;
 			ItemMatchPageModificationSetups = itemMatchPageModificationSetups ?? Enumerable.Empty<ListItemMatchPageModificationSetup<ItemIdType>>().Materialize();
+			ValidationPredicate = validationPredicate;
+			ValidationErrorNotifier = validationErrorNotifier;
 		}
 	}
 }
