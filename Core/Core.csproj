@@ -440,6 +440,9 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItemWithSelectionState.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\SelectListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\ListItemMatchPageModificationSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\DropDownSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\RadioListSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Navigational Form Control\NavFormControlValidationResult.cs" />
@@ -520,7 +523,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Select List\SelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />

@@ -34,88 +34,59 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a radio button list.
+		/// Creates a radio-button list.
 		/// </summary>
-		/// <param name="items">The items in the list. There must be at least one.</param>
+		/// <param name="setup">The setup object for the radio list.</param>
 		/// <param name="selectedItemId">The ID of the selected item. This must either match a list item or be the default value of the type, unless an unlisted
 		/// selected item label getter is passed.</param>
-		/// <param name="useHorizontalLayout">Pass true if you want the radio buttons to be laid out horizontally instead of vertically.</param>
-		/// <param name="unlistedSelectedItemLabelGetter">A function that will be called if the selected item ID does not match any list item and is not the default
-		/// value of the type. The function takes the selected item ID and returns the label of the unlisted selected item, which will appear before all other
-		/// items in the list. The string " (invalid)" will be appended to the label.</param>
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 		/// selected if the selected item ID has the default value and none of the list items do.</param>
-		/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this list. Use with caution, as this
-		/// violates the HTML specification.</param>
-		/// <param name="action">The action that will occur when the user hits Enter on a radio button.</param>
-		/// <param name="autoPostBack">Pass true if you want an action to occur when the selection changes.</param>
-		/// <param name="itemIdPageModificationValue"></param>
-		/// <param name="itemMatchPageModificationSetups"></param>
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
-			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, bool useHorizontalLayout = false,
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string defaultValueItemLabel = "", bool disableSingleButtonDetection = false,
-			FormAction action = null, bool autoPostBack = false, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
-			return new SelectList<ItemIdType>(
-				useHorizontalLayout,
+			RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "" ) =>
+			new SelectList<ItemIdType>(
+				setup.UseHorizontalLayout,
 				null,
-				unlistedSelectedItemLabelGetter,
+				setup.UnlistedSelectedItemLabelGetter,
 				defaultValueItemLabel,
 				null,
 				null,
-				items,
-				disableSingleButtonDetection,
+				setup.Items,
+				setup.FreeFormSetup.DisableSingleButtonDetection,
 				selectedItemId,
-				action,
-				autoPostBack,
-				itemIdPageModificationValue,
-				itemMatchPageModificationSetups );
-		}
+				setup.Action,
+				setup.FreeFormSetup.SelectionChangedAction,
+				setup.FreeFormSetup.ItemIdPageModificationValue,
+				setup.FreeFormSetup.ItemMatchPageModificationSetups );
 
 		/// <summary>
 		/// Creates a drop-down list.
 		/// </summary>
-		/// <param name="items">The items in the list. There must be at least one.</param>
+		/// <param name="setup">The setup object for the drop-down.</param>
 		/// <param name="selectedItemId">The ID of the selected item. This must either match a list item or be the default value of the type, unless an unlisted
 		/// selected item label getter is passed.</param>
-		/// <param name="width">The width of the list. This overrides any value that may be specified via CSS. If no width is specified via CSS and you pass null
-		/// for this parameter, the list will be just wide enough to show the selected item and will resize whenever the selected item is changed.</param>
-		/// <param name="unlistedSelectedItemLabelGetter">A function that will be called if the selected item ID does not match any list item and is not the default
-		/// value of the type. The function takes the selected item ID and returns the label of the unlisted selected item, which will appear before all other
-		/// items in the list. The string " (invalid)" will be appended to the label.</param>
 		/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 		/// default value. Do not pass null. If you pass the empty string, no default-value item will appear.</param>
 		/// <param name="placeholderIsValid">Pass true if you would like the list to include a default-value placeholder that is considered a valid selection.
 		/// This will only be included if none of the list items have an ID with the default value and the default-value item label is the empty string. If you pass
 		/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 		/// case the placeholder will not be considered a valid selection.</param>
-		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
-		/// <param name="action">The action that will occur when the user hits Enter on the drop-down list.</param>
-		/// <param name="autoPostBack">Pass true if you want an action to occur when the selection changes.</param>
-		/// <param name="itemIdPageModificationValue"></param>
-		/// <param name="itemMatchPageModificationSetups"></param>
 		public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
-			IEnumerable<SelectListItem<ItemIdType>> items, ItemIdType selectedItemId, System.Web.UI.WebControls.Unit? width = null,
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string defaultValueItemLabel = "", bool placeholderIsValid = false,
-			string placeholderText = "Please select", FormAction action = null, bool autoPostBack = false,
-			PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null ) {
-			return new SelectList<ItemIdType>(
+			DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false ) =>
+			new SelectList<ItemIdType>(
 				null,
-				width,
-				unlistedSelectedItemLabelGetter,
+				setup.Width,
+				setup.UnlistedSelectedItemLabelGetter,
 				defaultValueItemLabel,
 				placeholderIsValid,
-				placeholderText,
-				items,
+				setup.PlaceholderText,
+				setup.Items,
 				null,
 				selectedItemId,
-				action,
-				autoPostBack,
-				itemIdPageModificationValue,
-				itemMatchPageModificationSetups ?? ImmutableArray<ListItemMatchPageModificationSetup<ItemIdType>>.Empty );
-		}
+				setup.Action,
+				setup.SelectionChangedAction,
+				setup.ItemIdPageModificationValue,
+				setup.ItemMatchPageModificationSetups );
 	}
 
 	/// <summary>
@@ -148,15 +119,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private readonly bool? useHorizontalRadioLayout;
-		private readonly System.Web.UI.WebControls.Unit? width;
+		private readonly ContentBasedLength width;
 		private readonly ImmutableArray<ListItem> items;
 		private readonly Dictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
 		private readonly bool? disableSingleRadioButtonDetection;
 		private readonly ItemIdType selectedItemId;
 		private readonly FormAction action;
-		private readonly bool autoPostBack;
+		private readonly FormAction selectionChangedAction;
 		private readonly PageModificationValue<ItemIdType> itemIdPageModificationValue;
-		private readonly IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups;
+		private readonly IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups;
 
 		private LegacyFreeFormRadioList<ItemIdType> radioList;
 		private EwfCheckBox firstRadioButton;
@@ -164,11 +135,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private System.Web.UI.WebControls.WebControl selectControl;
 
 		internal SelectList(
-			bool? useHorizontalRadioLayout, System.Web.UI.WebControls.Unit? width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
-			string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems,
-			bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, FormAction action, bool autoPostBack,
-			PageModificationValue<ItemIdType> itemIdPageModificationValue,
-			IEnumerable<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
+			bool? useHorizontalRadioLayout, ContentBasedLength width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel,
+			bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection,
+			ItemIdType selectedItemId, FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups ) {
 			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
 			this.width = width;
 
@@ -187,7 +157,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			this.disableSingleRadioButtonDetection = disableSingleRadioButtonDetection;
 			this.action = action ?? FormState.Current.DefaultAction;
-			this.autoPostBack = autoPostBack;
+			this.selectionChangedAction = selectionChangedAction;
 			this.itemIdPageModificationValue = itemIdPageModificationValue;
 			this.itemMatchPageModificationSetups = itemMatchPageModificationSetups;
 		}
@@ -227,7 +197,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					itemMatchPageModificationSetups: itemMatchPageModificationSetups );
 
 				var radioButtons = items.Where( i => i.IsValid )
-					.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: autoPostBack ) )
+					.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: selectionChangedAction != null ) )
 					.ToArray();
 				firstRadioButton = radioButtons.First();
 
@@ -254,7 +224,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				};
 				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
 
-				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select ) { Width = width ?? System.Web.UI.WebControls.Unit.Empty };
+				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select )
+					{
+						Width = width != null ? new System.Web.UI.WebControls.Unit( ( (CssLength)width ).Value ) : System.Web.UI.WebControls.Unit.Empty
+					};
 				selectControl.Attributes.Add( "name", UniqueID );
 				PreRender += delegate {
 					var changeHandler = "";
@@ -266,8 +239,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								StringTools.ConcatenateWithDelimiter( ", ", setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
 								selectControl.ClientID ) );
 					}
-					if( autoPostBack )
-						changeHandler += action.GetJsStatements() + " return false";
+					if( selectionChangedAction != null )
+						changeHandler += selectionChangedAction.GetJsStatements() + " return false";
 					if( changeHandler.Any() )
 						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
 				};
@@ -313,7 +286,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								                  placeholderItem.Item.Label.Any() ? HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) : " " )
 							                  : "",
 						                  "search_contains: true",
-						                  "width: '{0}'".FormatWith( width.HasValue ? width.Value.ToString() : "" ) ) )
+						                  "width: '{0}'".FormatWith( width != null ? ( (CssLength)width ).Value : "" ) ) )
 				                  : "";
 
 			// Do this after .chosen since we only want it to affect the native select.

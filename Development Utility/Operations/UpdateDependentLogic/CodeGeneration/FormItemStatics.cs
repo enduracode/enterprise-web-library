@@ -106,16 +106,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"RadioList",
 				"string",
 				"\"\"",
-				new[] { new CSharpParameter( "IEnumerable<SelectListItem<string>>", "items" ) },
+				new CSharpParameter( "RadioListSetup<string>", "controlSetup" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new[]
-					{
-						new CSharpParameter( "bool", "useHorizontalLayout", "false" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-						new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-						new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
+				new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: defaultValueItemLabel, disableSingleButtonDetection: disableSingleButtonDetection, action: action, autoPostBack: autoPostBack )",
+				"SelectList.CreateRadioList( controlSetup, v, defaultValueItemLabel: defaultValueItemLabel )",
 				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 				"" );
 			writeFormItemGetters(
@@ -125,16 +120,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				"DropDown",
 				"string",
 				"\"\"",
-				new[] { new CSharpParameter( "IEnumerable<SelectListItem<string>>", "items" ) },
+				new CSharpParameter( "DropDownSetup<string>", "controlSetup" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new[]
-					{
-						new CSharpParameter( "Unit?", "width", "null" ), new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ),
-						new CSharpParameter( "bool", "placeholderIsValid", "false" ), new CSharpParameter( "string", "placeholderText", "\"Please select\"" ),
-						new CSharpParameter( "FormAction", "action", "null" ), new CSharpParameter( "bool", "autoPostBack", "false" )
-					},
+				new[] { new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ), new CSharpParameter( "bool", "placeholderIsValid", "false" ) },
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid, placeholderText: placeholderText, action: action, autoPostBack: autoPostBack )",
+				"SelectList.CreateDropDown( controlSetup, v, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid )",
 				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
 				"" );
 			writeFormItemGetter(
@@ -531,29 +521,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeFormItemGetters(
 				writer,
 				field,
-				"SelectList<" + field.NullableTypeName + ">",
+				"SelectList<{0}>".FormatWith( field.NullableTypeName ),
 				"RadioList",
 				field.NullableTypeName,
 				"null",
-				new[] { new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ) },
+				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "bool", "useHorizontalLayout", "false" ).ToCollection()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection() )
-					.Concat(
-						new[]
-							{
-								new CSharpParameter( "bool", "disableSingleButtonDetection", "false" ), new CSharpParameter( "FormAction", "action", "null" ),
-								new CSharpParameter( "bool", "autoPostBack", "false" ),
-								new CSharpParameter( "PageModificationValue<{0}>".FormatWith( field.NullableTypeName ), "itemIdPageModificationValue", "null" ),
-								new CSharpParameter(
-									"IEnumerable<ListItemMatchPageModificationSetup<{0}>>".FormatWith( field.NullableTypeName ),
-									"itemMatchPageModificationSetups",
-									"null" )
-							} ),
+				nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateRadioList( items, v, useHorizontalLayout: useHorizontalLayout, defaultValueItemLabel: " +
-				( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
-				", disableSingleButtonDetection: disableSingleButtonDetection, action: action, autoPostBack: autoPostBack, itemIdPageModificationValue: itemIdPageModificationValue, itemMatchPageModificationSetups: itemMatchPageModificationSetups )",
+				"SelectList.CreateRadioList( controlSetup, v, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) + " )",
 				"{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 				( nonNullableField
 					  ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
@@ -562,30 +538,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeFormItemGetters(
 				writer,
 				field,
-				"SelectList<" + field.NullableTypeName + ">",
+				"SelectList<{0}>".FormatWith( field.NullableTypeName ),
 				"DropDown",
 				field.NullableTypeName,
 				"null",
-				new CSharpParameter( "IEnumerable<SelectListItem<" + field.NullableTypeName + ">>", "items" ).ToCollection()
+				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection()
 					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
 				new CSharpParameter[ 0 ],
-				new CSharpParameter( "Unit?", "width", "null" ).ToCollection()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection() )
-					.Concat(
-						new[]
-							{
-								new CSharpParameter( "string", "placeholderText", "\"Please select\"" ), new CSharpParameter( "FormAction", "action", "null" ),
-								new CSharpParameter( "bool", "autoPostBack", "false" ),
-								new CSharpParameter( "PageModificationValue<{0}>".FormatWith( field.NullableTypeName ), "itemIdPageModificationValue", "null" ),
-								new CSharpParameter(
-									"IEnumerable<ListItemMatchPageModificationSetup<{0}>>".FormatWith( field.NullableTypeName ),
-									"itemMatchPageModificationSetups",
-									"null" )
-							} ),
+				nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection(),
 				new CSharpParameter[ 0 ],
-				"SelectList.CreateDropDown( items, v, width: width, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
-				", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) +
-				", placeholderText: placeholderText, action: action, autoPostBack: autoPostBack, itemIdPageModificationValue: itemIdPageModificationValue, itemMatchPageModificationSetups: itemMatchPageModificationSetups )",
+				"SelectList.CreateDropDown( controlSetup, v, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
+				", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) + " )",
 				"{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
 				( nonNullableField
 					  ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"

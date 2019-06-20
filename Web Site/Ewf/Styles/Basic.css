@@ -229,6 +229,9 @@ ewfDateControl ewfIcon, .timepickerIcon {
 ewfTimePicker {
 	max-width: 10em;
 }
+ewfTimePicker > ewfDropDownList {
+	width: 100%;
+}
 ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
 	width: 100%;

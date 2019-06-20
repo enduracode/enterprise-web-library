@@ -81,15 +81,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					}
 					else {
 						selectList = SelectList.CreateDropDown(
-							from time in getTimes()
-							let timeSpan = new TimeSpan( time.TickOfDay )
-							select SelectListItem.Create<TimeSpan?>( timeSpan, timeSpan.ToTimeOfDayHourAndMinuteString() ),
+							DropDownSetup.Create(
+								from time in getTimes()
+								let timeSpan = new TimeSpan( time.TickOfDay )
+								select SelectListItem.Create<TimeSpan?>( timeSpan, timeSpan.ToTimeOfDayHourAndMinuteString() ),
+								placeholderText: "",
+								action: action,
+								selectionChangedAction: autoPostBack ? action ?? FormState.Current.DefaultAction : null ),
 							value,
-							width: Unit.Percentage( 100 ),
-							placeholderIsValid: true,
-							placeholderText: "",
-							action: action,
-							autoPostBack: autoPostBack );
+							placeholderIsValid: true );
 						Controls.Add( selectList );
 					}
 
