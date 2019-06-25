@@ -19,11 +19,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="validationPredicate"></param>
-		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		/// <param name="validationErrorNotifier"></param>
+		/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 		public FileUpload(
-			DisplaySetup displaySetup = null, Func<bool, bool> validationPredicate = null, Action<RsFile, Validator> validationMethod = null,
-			Action validationErrorNotifier = null ) {
+			DisplaySetup displaySetup = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null,
+			Action<RsFile, Validator> validationMethod = null ) {
 			Labeler = new FormControlLabeler();
 
 			var id = new ElementId();
