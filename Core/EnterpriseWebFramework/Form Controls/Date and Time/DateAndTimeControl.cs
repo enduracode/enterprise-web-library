@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfValidation Validation { get; }
 
 		/// <summary>
-		/// Creates a date control.
+		/// Creates a date-and-time control.
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="allowEmpty"></param>
