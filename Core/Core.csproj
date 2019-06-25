@@ -418,6 +418,8 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DateControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DurationControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\DurationControlSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\TimeControl.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\TimeControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
@@ -434,6 +436,7 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\ChangeBasedCheckboxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\CheckboxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\CheckboxListSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\DependentSelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
@@ -517,7 +520,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListSpacerCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlStack.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\DependentDropDownList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Check Boxes\EwfCheckBox.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
@@ -554,7 +556,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableOps.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\TextAlignment.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\TimePicker.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />

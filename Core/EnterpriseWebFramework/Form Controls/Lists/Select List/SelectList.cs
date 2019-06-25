@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
-using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// This control should never support custom-text scenarios. An essential element of SelectList is that each item has both a label and an ID, and custom text
@@ -17,12 +15,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A drop-down or radio-button list.
 	/// </summary>
 	public static class SelectList {
-		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string DropDownCssClass = "ewfDropDown";
+		internal static readonly ElementClass DropDownClass = new ElementClass( "ewfDropDown" );
 
-			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "DropDownList", "div." + DropDownCssClass + " > select", "div." + DropDownCssClass + " > .chosen-container" ) };
-			}
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
+				new CssElement(
+					"DropDownList",
+					"div." + DropDownClass.ClassName + " > select",
+					"div." + DropDownClass.ClassName + " > .chosen-container" ).ToCollection();
 		}
 
 		public static IEnumerable<SelectListItem<bool?>> GetYesNoItems() {
@@ -46,8 +47,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
 			RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", Action<ItemIdType, Validator> validationMethod = null ) =>
 			new SelectList<ItemIdType>(
+				setup.DisplaySetup,
 				setup.UseHorizontalLayout,
 				null,
+				setup.IsReadOnly,
+				setup.Classes,
 				setup.UnlistedSelectedItemLabelGetter,
 				defaultValueItemLabel,
 				null,
@@ -59,6 +63,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.FreeFormSetup.SelectionChangedAction,
 				setup.FreeFormSetup.ItemIdPageModificationValue,
 				setup.FreeFormSetup.ItemMatchPageModificationSetups,
+				setup.FreeFormSetup.ValidationPredicate,
+				setup.FreeFormSetup.ValidationErrorNotifier,
 				validationMethod );
 
 		/// <summary>
@@ -78,8 +84,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false,
 			Action<ItemIdType, Validator> validationMethod = null ) =>
 			new SelectList<ItemIdType>(
+				setup.DisplaySetup,
 				null,
 				setup.Width,
+				setup.IsReadOnly,
+				setup.Classes,
 				setup.UnlistedSelectedItemLabelGetter,
 				defaultValueItemLabel,
 				placeholderIsValid,
@@ -91,13 +100,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.SelectionChangedAction,
 				setup.ItemIdPageModificationValue,
 				setup.ItemMatchPageModificationSetups,
+				setup.ValidationPredicate,
+				setup.ValidationErrorNotifier,
 				validationMethod );
 	}
 
 	/// <summary>
 	/// A drop-down or radio-button list.
 	/// </summary>
-	public class SelectList<ItemIdType>: System.Web.UI.WebControls.WebControl, ControlTreeDataLoader, ControlWithJsInitLogic, FormValueControl {
+	public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 		private class ListItem {
 			private readonly SelectListItem<ItemIdType> item;
 			private readonly bool isValid;
@@ -123,52 +134,177 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			internal bool IsPlaceholder { get { return isPlaceholder; } }
 		}
 
-		private readonly bool? useHorizontalRadioLayout;
-		private readonly ContentBasedLength width;
-		private readonly ImmutableArray<ListItem> items;
-		private readonly Dictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
-		private readonly bool? disableSingleRadioButtonDetection;
-		private readonly ItemIdType selectedItemId;
-		private readonly FormAction action;
-		private readonly FormAction selectionChangedAction;
-		private readonly PageModificationValue<ItemIdType> itemIdPageModificationValue;
-		private readonly IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups;
-
-		private LegacyFreeFormRadioList<ItemIdType> radioList;
-		private EwfCheckBox firstRadioButton;
-		private FormValue<ItemIdType> formValue;
-		private System.Web.UI.WebControls.WebControl selectControl;
+		public FormControlLabeler Labeler { get; }
+		public FlowComponent PageComponent { get; }
+		public EwfValidation Validation { get; }
 
 		internal SelectList(
-			bool? useHorizontalRadioLayout, ContentBasedLength width, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel,
-			bool? placeholderIsValid, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection,
-			ItemIdType selectedItemId, FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
-			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Action<ItemIdType, Validator> validationMethod ) {
-			this.useHorizontalRadioLayout = useHorizontalRadioLayout;
-			this.width = width;
-
-			items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
-			this.selectedItemId = selectedItemId;
-			items = getInitialItems( unlistedSelectedItemLabelGetter, defaultValueItemLabel, placeholderIsValid, placeholderText ).Concat( items ).ToImmutableArray();
+			DisplaySetup displaySetup, bool? useHorizontalRadioLayout, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
+			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+			IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, FormAction action,
+			FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
+			Action validationErrorNotifier, Action<ItemIdType, Validator> validationMethod ) {
+			var items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
+			items = getInitialItems(
+					!useHorizontalRadioLayout.HasValue,
+					unlistedSelectedItemLabelGetter,
+					defaultValueItemLabel,
+					placeholderIsValid,
+					placeholderText,
+					items,
+					selectedItemId )
+				.Concat( items )
+				.ToImmutableArray();
 			if( items.All( i => !i.IsValid ) )
 				throw new ApplicationException( "There must be at least one valid selection in the list." );
 
+			ImmutableDictionary<string, SelectListItem<ItemIdType>> itemsByStringId;
 			try {
-				itemsByStringId = items.ToDictionary( i => i.StringId, i => i.Item );
+				itemsByStringId = items.ToImmutableDictionary( i => i.StringId, i => i.Item );
 			}
 			catch( ArgumentException ) {
 				throw new ApplicationException( "Item IDs, when converted to strings, must be unique." );
 			}
 
-			this.disableSingleRadioButtonDetection = disableSingleRadioButtonDetection;
-			this.action = action ?? FormState.Current.DefaultAction;
-			this.selectionChangedAction = selectionChangedAction;
-			this.itemIdPageModificationValue = itemIdPageModificationValue;
-			this.itemMatchPageModificationSetups = itemMatchPageModificationSetups;
+			if( useHorizontalRadioLayout.HasValue ) {
+				var freeFormList = FreeFormRadioList.Create(
+					items.All( i => i.IsValid ) ? null : (bool?)false,
+					selectedItemId,
+					setup: FreeFormRadioListSetup.Create(
+						disableSingleButtonDetection: disableSingleRadioButtonDetection.Value,
+						selectionChangedAction: selectionChangedAction,
+						itemIdPageModificationValue: itemIdPageModificationValue,
+						itemMatchPageModificationSetups: itemMatchPageModificationSetups,
+						validationPredicate: validationPredicate,
+						validationErrorNotifier: validationErrorNotifier ),
+					validationMethod: validationMethod );
+
+				var radioButtons = from i in items
+				                   where i.IsValid
+				                   select freeFormList.CreateRadioButton(
+					                   i.Item.Id,
+					                   label: i.Item.Label.ToComponents(),
+					                   setup: isReadOnly ? RadioButtonSetup.CreateReadOnly() : RadioButtonSetup.Create( action: action ) );
+				PageComponent = new GenericFlowContainer(
+					useHorizontalRadioLayout.Value
+						? new LineList( from i in radioButtons select (LineListItem)i.PageComponent.ToCollection().ToComponentListItem() ).ToCollection<FlowComponent>()
+						: new StackList( from i in radioButtons select i.PageComponent.ToCollection().ToComponentListItem() ).ToCollection(),
+					displaySetup: displaySetup,
+					classes: classes );
+
+				Validation = freeFormList.Validation;
+			}
+			else {
+				itemIdPageModificationValue = itemIdPageModificationValue ?? new PageModificationValue<ItemIdType>();
+
+				Labeler = new FormControlLabeler();
+
+				var id = new ElementId();
+				var formValue = new FormValue<ItemIdType>(
+					() => selectedItemId,
+					() => isReadOnly ? "" : id.Id,
+					v => v.ObjectToString( true ),
+					rawValue => rawValue != null && itemsByStringId.ContainsKey( rawValue )
+						            ? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
+						            : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
+
+				// Drop-down lists need a container div to allow Chosen to be shown and hidden and to make the enter key submit the form.
+				PageComponent = new DisplayableElement(
+					containerContext => new DisplayableElementData(
+						displaySetup,
+						() => new DisplayableElementLocalData(
+							"div",
+							focusDependentData: new DisplayableElementFocusDependentData(
+								includeIdAttribute: !isReadOnly,
+								jsInitStatements: !isReadOnly
+									                  ? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+										                  .Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( containerContext.Id ), " } );" )
+									                  : "" ) ),
+						classes: SelectList.DropDownClass.Add( classes ?? ElementClassSet.Empty ),
+						children: new DisplayableElement(
+							context => {
+								id.AddId( containerContext.Id );
+								Labeler.AddControlId( context.Id );
+
+								if( !isReadOnly ) {
+									action.AddToPageIfNecessary();
+									selectionChangedAction?.AddToPageIfNecessary();
+								}
+
+								return new DisplayableElementData(
+									null,
+									() => {
+										var attributes = new List<Tuple<string, string>>();
+										if( isReadOnly )
+											attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+										else
+											attributes.Add( Tuple.Create( "name", containerContext.Id ) );
+										if( width != null )
+											attributes.Add( Tuple.Create( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
+
+										return new DisplayableElementLocalData(
+											"select",
+											new FocusabilityCondition( !isReadOnly ),
+											isFocused => {
+												if( isFocused )
+													attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+												return new DisplayableElementFocusDependentData(
+													attributes: attributes,
+													includeIdAttribute: true,
+													jsInitStatements: StringTools.ConcatenateWithDelimiter(
+														" ",
+														selectionChangedAction != null
+															? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, selectionChangedAction.GetJsStatements() )
+															: "",
+														StringTools.ConcatenateWithDelimiter(
+																" ",
+																( itemIdPageModificationValue?.GetJsModificationStatements( "$( this ).val()" ) ?? "" ).ToCollection()
+																.Concat(
+																	itemMatchPageModificationSetups.Select(
+																		setup => setup.PageModificationValue.GetJsModificationStatements(
+																			"[ {0} ].indexOf( $( this ).val() ) != -1".FormatWith(
+																				StringTools.ConcatenateWithDelimiter(
+																					", ",
+																					setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
+																.ToArray() )
+															.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
+														getChosenStatements( width, isReadOnly, items ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
+											} );
+									},
+									children: items.Select(
+											i => getOption(
+												i.StringId,
+												i.IsPlaceholder ? "" : i.Item.Label,
+												() => EwlStatics.AreEqual( i.Item.Id, itemIdPageModificationValue.Value ) ) )
+										.Materialize() );
+							} ).ToCollection() ),
+					formValue: formValue );
+
+				formValue.AddPageModificationValue( itemIdPageModificationValue, v => v );
+				foreach( var i in itemMatchPageModificationSetups )
+					formValue.AddPageModificationValue( i.PageModificationValue, v => i.ItemIds.Contains( v ) );
+
+				if( validationMethod != null )
+					Validation = formValue.CreateValidation(
+						( postBackValue, validator ) => {
+							if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+								return;
+
+							if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, postBackValue.Value ) ).IsValid ) {
+								validator.NoteErrorAndAddMessage( "Please make a selection." );
+								validationErrorNotifier?.Invoke();
+								return;
+							}
+
+							validationMethod( postBackValue.Value, validator );
+						} );
+			}
 		}
 
 		private IEnumerable<ListItem> getInitialItems(
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText ) {
+			bool isDropDown, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+			IReadOnlyCollection<ListItem> items, ItemIdType selectedItemId ) {
 			var itemIdDefaultValue = EwlStatics.GetDefaultValue<ItemIdType>( true );
 			var selectedItemIdHasDefaultValue = EwlStatics.AreEqual( selectedItemId, itemIdDefaultValue );
 
@@ -181,106 +317,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( items.Any( i => EwlStatics.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
 				yield break;
 
-			var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( !useHorizontalRadioLayout.HasValue && placeholderIsValid.Value );
+			var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( isDropDown && placeholderIsValid.Value );
 			if( !selectedItemIdHasDefaultValue && !includeDefaultValueItemOrValidPlaceholder )
 				yield break;
 
-			var isPlaceholder = !useHorizontalRadioLayout.HasValue && !defaultValueItemLabel.Any();
+			var isPlaceholder = isDropDown && !defaultValueItemLabel.Any();
 			yield return new ListItem(
 				SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
 				includeDefaultValueItemOrValidPlaceholder,
 				isPlaceholder );
 		}
 
-		void ControlTreeDataLoader.LoadData() {
-			if( useHorizontalRadioLayout.HasValue ) {
-				radioList = LegacyFreeFormRadioList.Create(
-					items.Any( i => !i.IsValid ),
-					selectedItemId,
-					disableSingleButtonDetection: disableSingleRadioButtonDetection.Value,
-					itemIdPageModificationValue: itemIdPageModificationValue,
-					itemMatchPageModificationSetups: itemMatchPageModificationSetups );
-
-				var radioButtons = items.Where( i => i.IsValid )
-					.Select( i => radioList.CreateInlineRadioButton( i.Item.Id, label: i.Item.Label, action: action, autoPostBack: selectionChangedAction != null ) )
-					.ToArray();
-				firstRadioButton = radioButtons.First();
-
-				var radioButtonsAsControls = radioButtons.Select( i => i as Control ).ToArray();
-				Controls.Add(
-					useHorizontalRadioLayout.Value
-						? new ControlLine( radioButtonsAsControls ) as Control
-						: ControlStack.CreateWithControls( true, radioButtonsAsControls ) );
-			}
-			else {
-				formValue = new FormValue<ItemIdType>(
-					() => selectedItemId,
-					() => UniqueID,
-					v => v.ObjectToString( true ),
-					rawValue => rawValue != null && itemsByStringId.ContainsKey( rawValue )
-						            ? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
-						            : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
-				action.AddToPageIfNecessary();
-
-				PreRender += delegate {
-					var implicitSubmissionStatements = SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false, legacy: true );
-					if( implicitSubmissionStatements.Any() )
-						this.AddJavaScriptEventScript( JsWritingMethods.onkeypress, implicitSubmissionStatements );
-				};
-				CssClass = CssClass.ConcatenateWithSpace( SelectList.CssElementCreator.DropDownCssClass );
-
-				selectControl = new System.Web.UI.WebControls.WebControl( HtmlTextWriterTag.Select )
-					{
-						Width = width != null ? new System.Web.UI.WebControls.Unit( ( (CssLength)width ).Value ) : System.Web.UI.WebControls.Unit.Empty
-					};
-				selectControl.Attributes.Add( "name", UniqueID );
-				PreRender += delegate {
-					var changeHandler = "";
-					if( itemIdPageModificationValue != null )
-						changeHandler += itemIdPageModificationValue.GetJsModificationStatements( "$( '#{0}' ).val()".FormatWith( selectControl.ClientID ) );
-					foreach( var setup in itemMatchPageModificationSetups ) {
-						changeHandler += setup.PageModificationValue.GetJsModificationStatements(
-							"[ {0} ].indexOf( $( '#{1}' ).val() ) != -1".FormatWith(
-								StringTools.ConcatenateWithDelimiter( ", ", setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ),
-								selectControl.ClientID ) );
-					}
-					if( selectionChangedAction != null )
-						changeHandler += selectionChangedAction.GetJsStatements() + " return false";
-					if( changeHandler.Any() )
-						selectControl.AddJavaScriptEventScript( JavaScriptWriting.JsWritingMethods.onchange, changeHandler );
-				};
-
-				PreRender += delegate {
-					foreach( var i in items )
-						selectControl.Controls.Add( getOption( i.StringId, i.Item.Id, i.IsPlaceholder ? "" : i.Item.Label ) );
-				};
-
-				Controls.Add( selectControl );
-
-				if( itemIdPageModificationValue != null )
-					formValue.AddPageModificationValue( itemIdPageModificationValue, v => v );
-				foreach( var setup in itemMatchPageModificationSetups )
-					formValue.AddPageModificationValue( setup.PageModificationValue, id => setup.ItemIds.Contains( id ) );
-			}
-		}
-
-		private Control getOption( string value, ItemIdType id, string label ) {
-			return new System.Web.UI.WebControls.Literal
-				{
-					Text = "<option value=\"" + value + "\"" +
-					       ( EwlStatics.AreEqual( id, formValue.GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ) ? " selected" : "" ) + ">" +
-					       label.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: false ) + "</option>"
-				};
-		}
-
-		string ControlWithJsInitLogic.GetJsInitStatements() {
-			if( useHorizontalRadioLayout.HasValue )
-				return "";
-
+		private string getChosenStatements( ContentBasedLength width, bool isReadOnly, ImmutableArray<ListItem> items ) {
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 
 			// Chosen’s allow_single_deselect only works if the placeholder is the first item.
-			var chosenLogic = placeholderItem == null || placeholderItem == items.First()
+			var chosenLogic = !isReadOnly && ( placeholderItem == null || placeholderItem == items.First() )
 				                  ? ".chosen( {{ {0} }} )".FormatWith(
 					                  StringTools.ConcatenateWithDelimiter(
 						                  ", ",
@@ -301,44 +353,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					                           HttpUtility.JavaScriptStringEncode( placeholderItem.Item.Label ) )
 				                           : "";
 
-			return ( chosenLogic + placeholderTextLogic ).Surround( "$( '#{0}' )".FormatWith( selectControl.ClientID ), ";" );
+			return chosenLogic + placeholderTextLogic;
 		}
 
-		FormValue FormValueControl.FormValue { get { return formValue; } }
+		private FlowComponent getOption( string value, string label, Func<bool> selectedGetter ) =>
+			new ElementComponent(
+				context => new ElementData(
+					() => {
+						var attributes = new List<Tuple<string, string>>();
+						attributes.Add( Tuple.Create( "value", value ) );
+						if( selectedGetter() )
+							attributes.Add( Tuple.Create( "selected", "selected" ) );
 
-		/// <summary>
-		/// Validates and returns the selected item ID in the post back. The default value of the item ID type will be considered valid only if it matches a
-		/// specified list item or the default-value item label is not the empty string or the default-value placeholder (drop-downs only) was specified to be
-		/// valid.
-		/// </summary>
-		public ItemIdType ValidateAndGetSelectedItemIdInPostBack( PostBackValueDictionary postBackValues, Validator validator ) {
-			// Both radioList and formValue will be null if this SelectList is never added to the page.
-			var selectedItemIdInPostBack = radioList != null ? radioList.GetSelectedItemIdInPostBack( postBackValues ) :
-			                               formValue != null ? formValue.GetValue( postBackValues ) : selectedItemId;
-
-			if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, selectedItemIdInPostBack ) ).IsValid )
-				validator.NoteErrorAndAddMessage( "Please make a selection." );
-			return selectedItemIdInPostBack;
-		}
-
-		/// <summary>
-		/// Returns true if the selection changed on this post back.
-		/// </summary>
-		public bool SelectionChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			// Both radioList and formValue will be null if this SelectList is never added to the page.
-			return radioList != null
-				       ? radioList.SelectionChangedOnPostBack( postBackValues )
-				       : formValue != null && formValue.ValueChangedOnPostBack( postBackValues );
-		}
-
-		/// <summary>
-		/// Returns the tag that represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey {
-			get {
-				// Drop-down lists need a wrapping div to allow Chosen to be shown and hidden with display linking and to make the enter key submit the form.
-				return HtmlTextWriterTag.Div;
-			}
-		}
+						return new ElementLocalData( "option", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+					},
+					children: label.ToComponents( disableNewlineReplacement: true ) ) );
 	}
 }

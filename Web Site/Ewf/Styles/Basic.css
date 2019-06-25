@@ -215,19 +215,21 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
 }
 
 /* date pickers, time pickers, and date and time pickers */
-ewfDateControl, ewfDateAndTimeControl {
+ewfDateControl, ewfTimeControl, ewfDateAndTimeControl {
 	display: flex;
+}
+ewfDateControl ewfIcon, ewfTimeControl ewfIcon {
+	font-size: 1.4em;
 }
 ewfDateControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
 	width: 100%;
 	max-width: 8em;
 }
-ewfDateControl ewfIcon, .timepickerIcon {
-	font-size: 1.4em;
-}
-ewfTimePicker {
-	max-width: 10em;
+ewfTimeControl > ewfSingleLineTextControlAllStates {
+	margin-right: .5em;
+	width: 100%;
+	max-width: 5em;
 }
 ewfTimePicker > ewfDropDownList {
 	width: 100%;

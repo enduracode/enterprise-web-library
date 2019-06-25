@@ -120,13 +120,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			b.AddFormItems(
-				FormItem.Create(
-					"Role",
-					SelectList.CreateDropDown(
+				SelectList.CreateDropDown(
 						DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ) ),
-						user?.Role.RoleId ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => RoleId.Value = control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ?? default( int ) ) ) );
+						user?.Role.RoleId,
+						validationMethod: ( postBackValue, validator ) => RoleId.Value = postBackValue.Value )
+					.ToFormItem( label: "Role".ToComponents() ) );
 
 			Controls.Add( b );
 		}
