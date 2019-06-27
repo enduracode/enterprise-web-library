@@ -266,7 +266,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																					setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
 																.ToArray() )
 															.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
-														getChosenStatements( width, isReadOnly, items ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
+														getChosenLogic( width, isReadOnly, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
 											} );
 									},
 									children: items.Select(
@@ -325,7 +325,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				isPlaceholder );
 		}
 
-		private string getChosenStatements( ContentBasedLength width, bool isReadOnly, ImmutableArray<ListItem> items ) {
+		private string getChosenLogic( ContentBasedLength width, bool isReadOnly, ImmutableArray<ListItem> items, bool isFocused ) {
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 
 			// Chosen’s allow_single_deselect only works if the placeholder is the first item.
@@ -342,6 +342,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                  "search_contains: true",
 						                  "width: '{0}'".FormatWith( width != null ? ( (CssLength)width ).Value : "" ) ) )
 				                  : "";
+			if( isFocused )
+				chosenLogic = chosenLogic.PrependDelimiter( ".on( 'chosen:ready', function() { $( this ).trigger( 'chosen:activate' ) } )" );
 
 			// Do this after .chosen since we only want it to affect the native select.
 			var placeholderTextLogic = placeholderItem != null
