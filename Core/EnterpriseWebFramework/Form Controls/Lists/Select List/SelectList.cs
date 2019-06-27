@@ -120,18 +120,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				this.isPlaceholder = isPlaceholder;
 			}
 
-			internal SelectListItem<ItemIdType> Item { get { return item; } }
+			internal SelectListItem<ItemIdType> Item => item;
 
-			internal string StringId {
-				get {
-					// Represent the default value with the empty string to support drop-down list placeholders. The HTML spec states that the "placeholder label option"
-					// must have a value of the empty string. See https://html.spec.whatwg.org/multipage/forms.html#the-select-element.
-					return EwlStatics.AreEqual( item.Id, EwlStatics.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
-				}
-			}
+			internal string StringId =>
+				// Represent the default value with the empty string to support drop-down list placeholders. The HTML spec states that the "placeholder label option"
+				// must have a value of the empty string. See https://html.spec.whatwg.org/multipage/forms.html#the-select-element.
+				EwlStatics.AreEqual( item.Id, EwlStatics.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
 
-			internal bool IsValid { get { return isValid; } }
-			internal bool IsPlaceholder { get { return isPlaceholder; } }
+			internal bool IsValid => isValid;
+			internal bool IsPlaceholder => isPlaceholder;
 		}
 
 		public FormControlLabeler Labeler { get; }
