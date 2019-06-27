@@ -626,6 +626,320 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 		}
 
+		public static SelectList<bool?> ToRadioList(
+			this DataValue<bool> dataValue, RadioListSetup<bool?> setup, SpecifiedValue<bool?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<bool?> ToRadioList(
+			this DataValue<bool?> dataValue, RadioListSetup<bool?> setup, SpecifiedValue<bool?> value = null, string defaultValueItemLabel = "None",
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<int?> ToRadioList(
+			this DataValue<int> dataValue, RadioListSetup<int?> setup, SpecifiedValue<int?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<int?> ToRadioList(
+			this DataValue<int?> dataValue, RadioListSetup<int?> setup, SpecifiedValue<int?> value = null, string defaultValueItemLabel = "None",
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<long?> ToRadioList(
+			this DataValue<long> dataValue, RadioListSetup<long?> setup, SpecifiedValue<long?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<long?> ToRadioList(
+			this DataValue<long?> dataValue, RadioListSetup<long?> setup, SpecifiedValue<long?> value = null, string defaultValueItemLabel = "None",
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<decimal?> ToRadioList(
+			this DataValue<decimal> dataValue, RadioListSetup<decimal?> setup, SpecifiedValue<decimal?> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<decimal?> ToRadioList(
+			this DataValue<decimal?> dataValue, RadioListSetup<decimal?> setup, SpecifiedValue<decimal?> value = null, string defaultValueItemLabel = "None",
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateRadioList(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<bool?> ToDropDown(
+			this DataValue<bool> dataValue, DropDownSetup<bool?> setup, SpecifiedValue<bool?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				placeholderIsValid: false,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<bool?> ToDropDown(
+			this DataValue<bool?> dataValue, DropDownSetup<bool?> setup, string defaultValueItemLabel, SpecifiedValue<bool?> value = null,
+			bool placeholderIsValid = true, Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				placeholderIsValid: placeholderIsValid,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<int?> ToDropDown(
+			this DataValue<int> dataValue, DropDownSetup<int?> setup, SpecifiedValue<int?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				placeholderIsValid: false,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<int?> ToDropDown(
+			this DataValue<int?> dataValue, DropDownSetup<int?> setup, string defaultValueItemLabel, SpecifiedValue<int?> value = null,
+			bool placeholderIsValid = true, Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				placeholderIsValid: placeholderIsValid,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<long?> ToDropDown(
+			this DataValue<long> dataValue, DropDownSetup<long?> setup, SpecifiedValue<long?> value = null, Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				placeholderIsValid: false,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<long?> ToDropDown(
+			this DataValue<long?> dataValue, DropDownSetup<long?> setup, string defaultValueItemLabel, SpecifiedValue<long?> value = null,
+			bool placeholderIsValid = true, Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				placeholderIsValid: placeholderIsValid,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static SelectList<decimal?> ToDropDown(
+			this DataValue<decimal> dataValue, DropDownSetup<decimal?> setup, SpecifiedValue<decimal?> value = null,
+			Action<Validator> additionalValidationMethod = null ) {
+			if( setup.Items.Any( i => !i.Id.HasValue ) )
+				throw new ApplicationException( "An item with a null ID cannot be a valid selection." );
+			return SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: "",
+				placeholderIsValid: false,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+		}
+
+		public static SelectList<decimal?> ToDropDown(
+			this DataValue<decimal?> dataValue, DropDownSetup<decimal?> setup, string defaultValueItemLabel, SpecifiedValue<decimal?> value = null,
+			bool placeholderIsValid = true, Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateDropDown(
+				setup,
+				value != null ? value.Value : dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				placeholderIsValid: placeholderIsValid,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<bool?> ToFreeFormRadioList(
+			this DataValue<bool> dataValue, FreeFormRadioListSetup<bool?> setup = null, SpecifiedValue<bool?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				value == null || value.Value.HasValue ? (bool?)null : false,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<bool?> ToFreeFormRadioList(
+			this DataValue<bool?> dataValue, bool? noSelectionIsValid, FreeFormRadioListSetup<bool?> setup = null, SpecifiedValue<bool?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				noSelectionIsValid,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<int?> ToFreeFormRadioList(
+			this DataValue<int> dataValue, FreeFormRadioListSetup<int?> setup = null, SpecifiedValue<int?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				value == null || value.Value.HasValue ? (bool?)null : false,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<int?> ToFreeFormRadioList(
+			this DataValue<int?> dataValue, bool? noSelectionIsValid, FreeFormRadioListSetup<int?> setup = null, SpecifiedValue<int?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				noSelectionIsValid,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<long?> ToFreeFormRadioList(
+			this DataValue<long> dataValue, FreeFormRadioListSetup<long?> setup = null, SpecifiedValue<long?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				value == null || value.Value.HasValue ? (bool?)null : false,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<long?> ToFreeFormRadioList(
+			this DataValue<long?> dataValue, bool? noSelectionIsValid, FreeFormRadioListSetup<long?> setup = null, SpecifiedValue<long?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				noSelectionIsValid,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<decimal?> ToFreeFormRadioList(
+			this DataValue<decimal> dataValue, FreeFormRadioListSetup<decimal?> setup = null, SpecifiedValue<decimal?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				value == null || value.Value.HasValue ? (bool?)null : false,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<decimal?> ToFreeFormRadioList(
+			this DataValue<decimal?> dataValue, bool? noSelectionIsValid, FreeFormRadioListSetup<decimal?> setup = null, SpecifiedValue<decimal?> value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				noSelectionIsValid,
+				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
 		/// <summary>
 		/// Creates a checkbox list for this data value.
 		/// </summary>
@@ -705,6 +1019,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					additionalValidationMethod?.Invoke( validator );
 				} );
 		}
+
+		public static TimeControl ToTimeControl(
+			this DataValue<LocalTime> dataValue, TimeControlSetup setup = null, SpecifiedValue<LocalTime?> value = null, LocalTime? minValue = null,
+			LocalTime? maxValue = null, Action<Validator> additionalValidationMethod = null ) =>
+			new TimeControl(
+				value != null ? value.Value : dataValue.Value,
+				false,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue.Value;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static TimeControl ToTimeControl(
+			this DataValue<LocalTime?> dataValue, TimeControlSetup setup = null, SpecifiedValue<LocalTime?> value = null, bool allowEmpty = true,
+			LocalTime? minValue = null, LocalTime? maxValue = null, Action<Validator> additionalValidationMethod = null ) =>
+			new TimeControl(
+				value != null ? value.Value : dataValue.Value,
+				allowEmpty,
+				setup: setup,
+				minValue: minValue,
+				maxValue: maxValue,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
 
 		public static DateAndTimeControl ToDateAndTimeControl(
 			this DataValue<LocalDateTime> dataValue, DateAndTimeControlSetup setup = null, SpecifiedValue<LocalDateTime?> value = null, LocalDate? minValue = null,

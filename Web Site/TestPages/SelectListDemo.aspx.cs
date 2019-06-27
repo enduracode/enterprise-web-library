@@ -37,17 +37,19 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				} ) {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {
 					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
-						yield return FormItem.Create(
-							StringTools.ConcatenateWithDelimiter(
-								", ",
-								items.Length == 4 ? "Default in list" : "Default not in list",
-								selectedItemId.HasValue ? "One selected" : "default selected",
-								defaultValueItemLabel.Any() ? "default label" : "no default label" ),
-							SelectList.CreateRadioList(
+						yield return SelectList
+							.CreateRadioList(
 								RadioListSetup.Create( items, useHorizontalLayout: useHorizontalLayout ),
 								selectedItemId,
-								defaultValueItemLabel: defaultValueItemLabel ),
-							validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
+								defaultValueItemLabel: defaultValueItemLabel,
+								validationMethod: ( postBackValue, validator ) => {} )
+							.ToFormItem(
+								label: StringTools.ConcatenateWithDelimiter(
+										", ",
+										items.Length == 4 ? "Default in list" : "Default not in list",
+										selectedItemId.HasValue ? "One selected" : "default selected",
+										defaultValueItemLabel.Any() ? "default label" : "no default label" )
+									.ToComponents() );
 					}
 				}
 			}
@@ -85,19 +87,21 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				foreach( var selectedItemId in new int?[] { null, 1 } ) {
 					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
 						foreach( var placeholderIsValid in new[] { false, true } ) {
-							yield return FormItem.Create(
-								StringTools.ConcatenateWithDelimiter(
-									", ",
-									items.Length == 4 ? "Default in list" : "Default not in list",
-									selectedItemId.HasValue ? "One selected" : "default selected",
-									defaultValueItemLabel.Any() ? "default label" : "no default label",
-									placeholderIsValid ? "placeholder valid" : "placeholder not valid" ),
-								SelectList.CreateDropDown(
+							yield return SelectList
+								.CreateDropDown(
 									DropDownSetup.Create( items ),
 									selectedItemId,
 									defaultValueItemLabel: defaultValueItemLabel,
-									placeholderIsValid: placeholderIsValid ),
-								validationGetter: control => new EwfValidation( ( pbv, validator ) => control.ValidateAndGetSelectedItemIdInPostBack( pbv, validator ) ) );
+									placeholderIsValid: placeholderIsValid,
+									validationMethod: ( postBackValue, validator ) => {} )
+								.ToFormItem(
+									label: StringTools.ConcatenateWithDelimiter(
+											", ",
+											items.Length == 4 ? "Default in list" : "Default not in list",
+											selectedItemId.HasValue ? "One selected" : "default selected",
+											defaultValueItemLabel.Any() ? "default label" : "no default label",
+											placeholderIsValid ? "placeholder valid" : "placeholder not valid" )
+										.ToComponents() );
 						}
 					}
 				}

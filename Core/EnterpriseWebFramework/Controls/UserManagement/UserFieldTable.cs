@@ -120,10 +120,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 
 			b.AddFormItems(
-				SelectList.CreateDropDown(
+				RoleId.ToDropDown(
 						DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ) ),
-						user?.Role.RoleId,
-						validationMethod: ( postBackValue, validator ) => RoleId.Value = postBackValue.Value )
+						value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
 					.ToFormItem( label: "Role".ToComponents() ) );
 
 			Controls.Add( b );

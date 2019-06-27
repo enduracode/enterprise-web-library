@@ -19,7 +19,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeListFormItemGetters( writer, field );
 			writeDateFormItemGetters( writer, field );
-			writeGuidFormItemGetters( writer, field );
 
 			writeGenericGetter( writer, field );
 			writeGenericGetterWithoutValueParams( writer, field, null );
@@ -99,34 +98,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				dv =>
 					"{0}.ToNumericTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetters(
-				writer,
-				field,
-				"SelectList<string>",
-				"RadioList",
-				"string",
-				"\"\"",
-				new CSharpParameter( "RadioListSetup<string>", "controlSetup" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				"SelectList.CreateRadioList( controlSetup, v, defaultValueItemLabel: defaultValueItemLabel )",
-				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
-				"" );
-			writeFormItemGetters(
-				writer,
-				field,
-				"SelectList<string>",
-				"DropDown",
-				"string",
-				"\"\"",
-				new CSharpParameter( "DropDownSetup<string>", "controlSetup" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				new[] { new CSharpParameter( "string", "defaultValueItemLabel", "\"\"" ), new CSharpParameter( "bool", "placeholderIsValid", "false" ) },
-				new CSharpParameter[ 0 ],
-				"SelectList.CreateDropDown( controlSetup, v, defaultValueItemLabel: defaultValueItemLabel, placeholderIsValid: placeholderIsValid )",
-				"control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator )",
-				"" );
 			writeFormItemGetter(
 				writer,
 				field,
@@ -240,36 +211,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					preFormItemStatements: getNumberControlValueStepStatements( field ) );
 
 			if( field.TypeIs( typeof( int ) ) ) {
-				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 				writeFileCollectionFormItemGetters( writer, field, "int" );
 			}
 			if( field.TypeIs( typeof( int? ) ) ) {
-				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
 			}
 
-			if( field.TypeIs( typeof( short ) ) )
-				writeNumberAsSelectListFormItemGetters( writer, field );
-			if( field.TypeIs( typeof( short? ) ) )
-				writeNumberAsSelectListFormItemGetters( writer, field );
-
-			if( field.TypeIs( typeof( byte ) ) )
-				writeNumberAsSelectListFormItemGetters( writer, field );
-			if( field.TypeIs( typeof( byte? ) ) )
-				writeNumberAsSelectListFormItemGetters( writer, field );
-
 			if( field.TypeIs( typeof( decimal ) ) ) {
-				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeLegacyCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 				writeFileCollectionFormItemGetters( writer, field, "decimal" );
 			}
 			if( field.TypeIs( typeof( decimal? ) ) ) {
-				writeNumberAsSelectListFormItemGetters( writer, field );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
@@ -435,12 +392,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeBoolFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( field.TypeIs( typeof( bool ) ) ) {
+			if( field.TypeIs( typeof( bool ) ) )
 				writeLegacyCheckBoxFormItemGetters( writer, field, "bool" );
-				writeNumberAsSelectListFormItemGetters( writer, field );
-			}
-			if( field.TypeIs( typeof( bool? ) ) )
-				writeNumberAsSelectListFormItemGetters( writer, field );
 		}
 
 		private static void writeLegacyCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
@@ -460,6 +413,65 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		private static void writeListFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( field.TypeIs( typeof( bool ) ) || field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( decimal ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"RadioList",
+					new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
+					false,
+					Enumerable.Empty<CSharpParameter>(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToRadioList( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( decimal? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"RadioList",
+					new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
+					false,
+					Enumerable.Empty<CSharpParameter>(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection(),
+					true,
+					dv =>
+						"{0}.ToRadioList( controlSetup, value: value, defaultValueItemLabel: defaultValueItemLabel, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+
+			if( field.TypeIs( typeof( bool ) ) || field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( decimal ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DropDown",
+					new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
+					false,
+					Enumerable.Empty<CSharpParameter>(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToDropDown( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( decimal? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DropDown",
+					new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection()
+						.Append( new CSharpParameter( "string", "defaultValueItemLabel" ) ),
+					false,
+					Enumerable.Empty<CSharpParameter>(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection(),
+					true,
+					dv =>
+						"{0}.ToDropDown( controlSetup, defaultValueItemLabel, value: value, placeholderIsValid: placeholderIsValid, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+
 			if( field.EnumerableElementTypeName.Any() )
 				writeFormItemGetter(
 					writer,
@@ -508,52 +520,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					dv =>
 						"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
-		}
-
-		private static void writeGuidFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( !field.TypeIs( typeof( Guid ) ) )
-				return;
-			writeNumberAsSelectListFormItemGetters( writer, field );
-		}
-
-		private static void writeNumberAsSelectListFormItemGetters( TextWriter writer, ModificationField field ) {
-			var nonNullableField = field.TypeName != field.NullableTypeName;
-			writeFormItemGetters(
-				writer,
-				field,
-				"SelectList<{0}>".FormatWith( field.NullableTypeName ),
-				"RadioList",
-				field.NullableTypeName,
-				"null",
-				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				"SelectList.CreateRadioList( controlSetup, v, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) + " )",
-				"{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
-				( nonNullableField
-					  ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
-					  : "selectedItemIdInPostBack" ) + "; }",
-				"" );
-			writeFormItemGetters(
-				writer,
-				field,
-				"SelectList<{0}>".FormatWith( field.NullableTypeName ),
-				"DropDown",
-				field.NullableTypeName,
-				"null",
-				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection()
-					.Concat( nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
-				new CSharpParameter[ 0 ],
-				nonNullableField ? new CSharpParameter[ 0 ] : new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection(),
-				new CSharpParameter[ 0 ],
-				"SelectList.CreateDropDown( controlSetup, v, defaultValueItemLabel: " + ( nonNullableField ? "\"\"" : "defaultValueItemLabel" ) +
-				", placeholderIsValid: " + ( nonNullableField ? "false" : "placeholderIsValid" ) + " )",
-				"{ var selectedItemIdInPostBack = control.ValidateAndGetSelectedItemIdInPostBack( postBackValues, validator ); return " +
-				( nonNullableField
-					  ? "selectedItemIdInPostBack.HasValue ? selectedItemIdInPostBack.Value : default( " + field.TypeName + " )"
-					  : "selectedItemIdInPostBack" ) + "; }",
-				"" );
 		}
 
 		private static void writeFormItemGetter(

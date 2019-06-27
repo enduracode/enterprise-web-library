@@ -1,5 +1,4 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class DateAndTimePickers: EwfPage {
@@ -11,7 +10,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var table = FormItemBlock.CreateFormItemTable();
 			table.AddFormItems(
 				new DateControl( null, true ).ToFormItem( label: "Date control".ToComponents() ),
-				FormItem.Create( "Time Picker", new TimePicker( null ) ),
+				new TimeControl( null, true ).ToFormItem( label: "Time control".ToComponents() ),
 				new DateAndTimeControl( null, true ).ToFormItem( label: "Date and time control".ToComponents() ),
 				new DurationControl( null, true ).ToFormItem( label: "Duration control".ToComponents() ) );
 			ph.AddControlsReturnThis( table );
