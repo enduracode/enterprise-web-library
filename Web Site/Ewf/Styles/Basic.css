@@ -231,7 +231,7 @@ ewfTimeControl > ewfSingleLineTextControlAllStates {
 	width: 100%;
 	max-width: 5em;
 }
-ewfTimePicker > ewfDropDownList {
+ewfTimeControl > ewfDropDownList {
 	width: 100%;
 }
 ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
