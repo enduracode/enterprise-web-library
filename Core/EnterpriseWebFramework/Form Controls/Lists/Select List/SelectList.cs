@@ -20,10 +20,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-				new CssElement(
-					"DropDownList",
-					"div." + DropDownClass.ClassName + " > select",
-					"div." + DropDownClass.ClassName + " > .chosen-container" ).ToCollection();
+				new[]
+					{
+						new CssElement( "DropDownList", "select", ".chosen-container" ),
+						new CssElement( "DropDownListContainer", "div.{0}".FormatWith( DropDownClass.ClassName ) )
+					};
 		}
 
 		public static IEnumerable<SelectListItem<bool?>> GetYesNoItems() {
@@ -206,7 +207,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						            ? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
 						            : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
 
-				// Drop-down lists need a container div to allow Chosen to be shown and hidden and to make the enter key submit the form.
+				// Drop-down lists need a container to allow Chosen to be easily shown and hidden.
 				PageComponent = new DisplayableElement(
 					containerContext => new DisplayableElementData(
 						displaySetup,

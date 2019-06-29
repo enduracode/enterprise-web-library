@@ -205,7 +205,7 @@ table.ewfBlockCheckBox > tbody > tr > td:first-child input {
 }
 
 /* list controls */
-ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownList {
+ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
 ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
@@ -231,7 +231,11 @@ ewfTimeControl > ewfSingleLineTextControlAllStates {
 	width: 100%;
 	max-width: 5em;
 }
-ewfTimeControl > ewfDropDownList {
+ewfTimeControl > ewfDropDownListContainer {
+	width: 100%;
+	max-width: 6em;
+}
+ewfTimeControl > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
 ewfDateAndTimeControl > ewfSingleLineTextControlAllStates {
