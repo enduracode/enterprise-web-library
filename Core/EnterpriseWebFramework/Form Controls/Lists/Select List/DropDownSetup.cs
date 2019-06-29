@@ -18,6 +18,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// value of the type. The function takes the selected item ID and returns the label of the unlisted selected item, which will appear before all other
 		/// items in the list. The string " (invalid)" will be appended to the label.</param>
 		/// <param name="placeholderText">The default-value placeholder's text. Do not pass null.</param>
+		/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
+		/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
+		/// (see https://stackoverflow.com/a/23234498/35349 for an explanation of why this could be ignored). Do not pass null.</param>
 		/// <param name="action">The action that will occur when the user hits Enter on the drop-down list. Pass null to use the current default action.</param>
 		/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
 		/// <param name="itemIdPageModificationValue"></param>
@@ -26,8 +29,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static DropDownSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, ContentBasedLength width = null,
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", FormAction action = null,
-			FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
+			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", string autoFillTokens = "",
+			FormAction action = null, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) =>
 			new DropDownSetup<ItemIdType>(
@@ -38,6 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				unlistedSelectedItemLabelGetter,
 				placeholderText,
 				items,
+				autoFillTokens,
 				action,
 				selectionChangedAction,
 				itemIdPageModificationValue,
@@ -70,6 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				unlistedSelectedItemLabelGetter,
 				placeholderText,
 				items,
+				"",
 				null,
 				null,
 				null,
@@ -89,6 +94,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Func<ItemIdType, string> UnlistedSelectedItemLabelGetter;
 		internal readonly string PlaceholderText;
 		internal readonly IEnumerable<SelectListItem<ItemIdType>> Items;
+		internal readonly string AutoFillTokens;
 		internal readonly FormAction Action;
 		internal readonly FormAction SelectionChangedAction;
 		internal readonly PageModificationValue<ItemIdType> ItemIdPageModificationValue;
@@ -98,7 +104,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal DropDownSetup(
 			DisplaySetup displaySetup, ContentBasedLength width, bool isReadOnly, ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
-			string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, FormAction action, FormAction selectionChangedAction,
+			string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens, FormAction action, FormAction selectionChangedAction,
 			PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier ) {
@@ -109,6 +115,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			UnlistedSelectedItemLabelGetter = unlistedSelectedItemLabelGetter;
 			PlaceholderText = placeholderText;
 			Items = items;
+			AutoFillTokens = autoFillTokens;
 			Action = action ?? FormState.Current.DefaultAction;
 			SelectionChangedAction = selectionChangedAction;
 			ItemIdPageModificationValue = itemIdPageModificationValue;

@@ -120,6 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						: DropDownSetup.Create(
 							items,
 							placeholderText: "",
+							autoFillTokens: setup.AutoFillTokens,
 							action: setup.Action,
 							selectionChangedAction: setup.ValueChangedAction,
 							validationPredicate: setup.ValidationPredicate,

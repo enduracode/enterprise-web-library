@@ -60,6 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.Items,
 				setup.FreeFormSetup.DisableSingleButtonDetection,
 				selectedItemId,
+				"",
 				setup.Action,
 				setup.FreeFormSetup.SelectionChangedAction,
 				setup.FreeFormSetup.ItemIdPageModificationValue,
@@ -97,6 +98,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.Items,
 				null,
 				selectedItemId,
+				setup.AutoFillTokens,
 				setup.Action,
 				setup.SelectionChangedAction,
 				setup.ItemIdPageModificationValue,
@@ -139,8 +141,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal SelectList(
 			DisplaySetup displaySetup, bool? useHorizontalRadioLayout, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
-			IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, FormAction action,
-			FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, string autoFillTokens,
+			FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier, Action<ItemIdType, Validator> validationMethod ) {
 			var items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
@@ -238,6 +240,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											attributes.Add( Tuple.Create( "disabled", "disabled" ) );
 										else
 											attributes.Add( Tuple.Create( "name", containerContext.Id ) );
+										if( autoFillTokens.Any() )
+											attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
 										if( width != null )
 											attributes.Add( Tuple.Create( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
 
