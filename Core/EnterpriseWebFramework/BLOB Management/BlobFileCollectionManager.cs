@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
@@ -44,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Sets the method used to get thumbnail URLs for files with the image content type. The method takes a file ID and returns a resource info object.
 		/// </summary>
-		public Func<decimal, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
+		public Func<int, ResourceInfo> ThumbnailResourceInfoCreator { private get; set; }
 
 		/// <summary>
 		/// Creates a file collection manager.
@@ -141,7 +140,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {
 			var cells = new List<EwfTableCell>();
 
-			var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, ThumbnailResourceInfoCreator ).ToImmutableArray();
+			var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
 			if( thumbnailControl.Any() )
 				cells.Add( thumbnailControl.ToCell() );
 
@@ -166,16 +165,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
-			var delete = false;
-			var deleteCheckBox = FormItem.Create(
-					"",
-					new EwfCheckBox( false ),
-					validationGetter: control => new EwfValidation( ( pbv, v ) => { delete = control.IsCheckedInPostBack( pbv ); } ) )
-				.ToControl();
+			var delete = new DataValue<bool>();
+			var deleteCheckBox = delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToControl();
 			cells.Add( ReadOnly ? null : deleteCheckBox );
 			deleteModMethods.Add(
 				() => {
-					if( !delete )
+					if( !delete.Value )
 						return false;
 					BlobStorageStatics.SystemProvider.DeleteFile( file.FileId );
 					return true;

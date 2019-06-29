@@ -335,6 +335,7 @@
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
+    <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManagerSetup.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobManagementStatics.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\MarkFileAsReadMethod.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\NewFileNotificationMethod.cs" />
