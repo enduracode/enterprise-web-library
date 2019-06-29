@@ -542,7 +542,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTable.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableColumn.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\EwfTextBox.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableField.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableFieldOrItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableItem.cs" />

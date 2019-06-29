@@ -70,28 +70,8 @@ function NumericalOnly( evt, field ) {
 
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
-	SetupTextBoxFocus();
 	RemoveClickScriptBinding();
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
-}
-
-//Finds all EwfTextBoxes and appends onfocus and onblur events to apply focus CSS styles to their parent.
-
-function SetupTextBoxFocus() {
-	var textBoxWrapperFocused = "textBoxWrapperFocused";
-	var textBoxWrapperInput = ".textBoxWrapper > input";
-
-	var setFocusedClass = function() {
-		$( this.parentNode ).addClass( textBoxWrapperFocused );
-	};
-
-	$( textBoxWrapperInput ).focus( setFocusedClass ).blur(
-		function() {
-			$( this.parentNode ).removeClass( textBoxWrapperFocused );
-		}
-	);
-	// Textboxes with focus on load
-	$( textBoxWrapperInput + ":focus" ).each( setFocusedClass );
 }
 
 //Used for dynamic tables
