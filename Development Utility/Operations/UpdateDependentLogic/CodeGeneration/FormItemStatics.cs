@@ -358,7 +358,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection(),
 				false,
 				dv =>
-					"new BlobFileManager( (int?)( value != null ? value.Value : {0}.Value ), requireUploadIfNoFile, id => {0}.Value = id, out modificationMethod, setup: managerSetup ).ToFormItem( setup: formItemSetup, label: label )"
+					"new BlobFileManager( (int?)( value != null ? value.Value : {0}.Value ), requireUploadIfNoFile, id => {0}.Value = id, out modificationMethod, setup: managerSetup ).ToCollection().ToFormItem( setup: formItemSetup, label: label )"
 						.FormatWith( dv ) );
 		}
 
