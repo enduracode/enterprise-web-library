@@ -104,10 +104,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							numberOfPlaceholdersRequired.Times( () => formItems.Add( getPlaceholderFormItem() ) );
 						}
 						formItems.Add(
-							FormItem.Create(
-								"",
-								new PostBackButton( new ButtonActionControlStyle( IncludeButtonWithThisText ) ) { Width = Unit.Percentage( 50 ) },
-								setup: new FormItemSetup( cellSpan: defaultFormItemCellSpan, textAlignment: TextAlignment.Right ) ) );
+							new SubmitButton( new StandardButtonStyle( IncludeButtonWithThisText ) ).ToCollection()
+								.ToFormItem( setup: new FormItemSetup( cellSpan: defaultFormItemCellSpan, textAlignment: TextAlignment.Right ) ) );
 					}
 					Controls.Add( useFormItemListMode ? getTableForFormItemList() : getTableForFormItemTable() );
 				} );
@@ -130,7 +128,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				table.AddItem(
 					new EwfTableItem(
 						new EwfTableItemSetup( verticalAlignment: verticalAlignment ),
-						items.Select( i => i.ToControl().ToCell( new TableCellSetup( fieldSpan: getCellSpan( i ), textAlignment: i.Setup.TextAlignment ) ) ).ToArray() ) );
+						items.Select(
+								i => i.ToComponent().ToCollection().ToCell( new TableCellSetup( fieldSpan: getCellSpan( i ), textAlignment: i.Setup.TextAlignment ) ) )
+							.ToArray() ) );
 			}
 			return table;
 		}
@@ -155,9 +155,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return results;
 		}
 
-		private FormItem getPlaceholderFormItem() {
-			return FormItem.Create( "", new PlaceHolder().AddControlsReturnThis( "".ToComponents().GetControls() ), setup: new FormItemSetup( cellSpan: 1 ) );
-		}
+		private FormItem getPlaceholderFormItem() => Enumerable.Empty<FlowComponent>().Materialize().ToFormItem( setup: new FormItemSetup( cellSpan: 1 ) );
 
 		private int getCellSpan( FormItem formItem ) {
 			return formItem.Setup.CellSpan ?? defaultFormItemCellSpan;
@@ -174,13 +172,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} );
 			table.AddData(
 				formItems,
-				i => {
-					var stack = ControlStack.Create( true );
-					if( i.Validation != null )
-						stack.AddModificationErrorItem( i.Validation, new ListErrorDisplayStyle() );
-					stack.AddControls( i.Control );
-					return new EwfTableItem( i.Label, stack.ToCell( new TableCellSetup( textAlignment: i.Setup.TextAlignment ) ) );
-				} );
+				i => new EwfTableItem(
+					i.Label.ToCell(),
+					i.ToComponent( omitLabel: true ).ToCollection().ToCell( new TableCellSetup( textAlignment: i.Setup.TextAlignment ) ) ) );
 			return table;
 		}
 

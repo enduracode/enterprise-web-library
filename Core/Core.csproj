@@ -331,7 +331,6 @@
     <Compile Include="EnterpriseWebFramework\Action Controls\Styles\TextActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ToggleButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ToolTipButton.cs" />
-    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemLabel.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
@@ -526,7 +525,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\Controls\LabeledControl.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />

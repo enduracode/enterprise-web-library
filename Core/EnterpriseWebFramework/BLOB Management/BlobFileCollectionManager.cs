@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								addFileRow( table, file, deleteModMethods );
 							if( !ReadOnly )
 								table.AddRow(
-									getUploadControlList().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
+									getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
 									( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
 										new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToCollection() ) ) );
 						} );
@@ -166,8 +166,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
 			var delete = new DataValue<bool>();
-			var deleteCheckBox = delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToControl();
-			cells.Add( ReadOnly ? null : deleteCheckBox );
+			cells.Add(
+				( ReadOnly
+					  ? Enumerable.Empty<FlowComponent>()
+					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponent().ToCollection() ).ToCell() );
 			deleteModMethods.Add(
 				() => {
 					if( !delete.Value )
@@ -179,7 +181,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			table.AddRow( cells.ToArray() );
 		}
 
-		private ControlList getUploadControlList() {
+		private IReadOnlyCollection<FlowComponent> getUploadComponents() {
 			RsFile file = null;
 			var dm = PostBack.CreateFull(
 				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
@@ -209,19 +211,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dm.ToCollection(),
-				() => {
-					var fi = new FileUpload(
-						validationMethod: ( postBackValue, validator ) => {
-							BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
-							file = postBackValue;
-						} ).ToFormItem();
-
-					return ControlList.CreateWithControls(
-						true,
-						"Select and upload a new file:",
-						fi.ToControl(),
-						new PostBackButton( new ButtonActionControlStyle( "Upload new file" ), usesSubmitBehavior: false ) );
-				} );
+				() => new StackList(
+					"Select and upload a new file:".ToComponents()
+						.ToComponentListItem()
+						.ToCollection()
+						.Append(
+							new FileUpload(
+									validationMethod: ( postBackValue, validator ) => {
+										BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
+										file = postBackValue;
+									} ).ToFormItem()
+								.ToComponent()
+								.ToCollection()
+								.ToComponentListItem() )
+						.Append( new EwfButton( new StandardButtonStyle( "Upload new file" ) ).ToCollection().ToComponentListItem() ) ).ToCollection() );
 		}
 
 		/// <summary>

@@ -541,7 +541,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
 
 			var parameters = new List<CSharpParameter>();
-			parameters.Add( new CSharpParameter( "System.Func<{0},IEnumerable<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
+			parameters.Add( new CSharpParameter( "System.Func<{0},IReadOnlyCollection<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
 			parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
 			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "label", "null" ) );
 			parameters.Add(

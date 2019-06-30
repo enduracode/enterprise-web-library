@@ -1,75 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using Humanizer;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Contains metadata about a control, such as what it is called, ways in which it can be displayed, how it should be validated, etc.
 	/// </summary>
-	public abstract class FormItem {
-		/// <summary>
-		/// Creates a form item with the given label and control.
-		/// </summary>
-		// By taking a FormItemLabel instead of a Control for label, we retain the ability to implement additional behavior for string labels, such as automatically
-		// making them bold.
-		public static FormItem<ControlType> Create<ControlType>(
-			FormItemLabel label, ControlType control, FormItemSetup setup = null, Func<ControlType, EwfValidation> validationGetter = null )
-			where ControlType: Control {
-			return new FormItem<ControlType>( setup, label, control, validationGetter?.Invoke( control ) );
+	public class FormItem {
+		private static readonly ElementClass elementClass = new ElementClass( "ewfFi" );
+
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
+				new CssElement( "FormItem", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 		}
 
 		internal readonly FormItemSetup Setup;
-		private readonly FormItemLabel label;
-		private readonly Control control;
+		private readonly IReadOnlyCollection<PhrasingComponent> label;
+		private readonly IReadOnlyCollection<FlowComponent> content;
 		public readonly EwfValidation Validation;
 
-		/// <summary>
-		/// Creates a form item.
-		/// </summary>
-		protected FormItem( FormItemSetup setup, FormItemLabel label, Control control, EwfValidation validation ) {
+		internal FormItem(
+			FormItemSetup setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content, EwfValidation validation ) {
 			Setup = setup ?? new FormItemSetup();
-			this.label = label ?? throw new ApplicationException( "The label cannot be a null FormItemLabel reference." );
-			this.control = control;
+			this.label = label;
+			this.content = content;
 			Validation = validation;
 		}
 
 		/// <summary>
 		/// Gets the label.
 		/// </summary>
-		public virtual Control Label =>
-			label.Text != null ? label.Text.Any() ? new PlaceHolder().AddControlsReturnThis( label.Text.ToComponents().GetControls() ) : null : label.Control;
+		public IReadOnlyCollection<PhrasingComponent> Label => label;
 
 		/// <summary>
-		/// Gets the control.
+		/// Gets the content.
 		/// </summary>
-		public virtual Control Control => control;
+		public IReadOnlyCollection<FlowComponent> Content => content;
 
 		/// <summary>
-		/// Creates a labeled control for this form item.
-		/// This can be used to insert controls to a page without a <see cref="FormItemBlock"/> and display inline error messages.
+		/// Creates a component representing this form item.
+		/// This can be used to display a form item without a <see cref="FormItemBlock"/>.
 		/// </summary>
-		public LabeledControl ToControl( bool omitLabel = false ) {
-			return new LabeledControl( omitLabel ? null : Label, control, Validation );
-		}
-	}
-
-	/// <summary>
-	/// Contains metadata about a control, such as what it is called, ways in which it can be displayed, how it should be validated, etc.
-	/// </summary>
-	public class FormItem<ControlType>: FormItem where ControlType: Control {
-		private readonly ControlType control;
-
-		internal FormItem( FormItemSetup setup, FormItemLabel label, ControlType control, EwfValidation validation ): base( setup, label, control, validation ) {
-			this.control = control;
-		}
-
-		/// <summary>
-		/// Gets the control.
-		/// </summary>
-		public new ControlType Control => control;
+		public FlowComponent ToComponent( bool omitLabel = false ) =>
+			new GenericFlowContainer(
+				( !label.Any() || omitLabel ? Enumerable.Empty<FlowComponent>() : label ).Append( new LineBreak() )
+				.Concat( content )
+				.Concat(
+					Validation == null
+						? Enumerable.Empty<FlowComponent>()
+						: new FlowErrorContainer( new ErrorSourceSet( validations: Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection() )
+				.Materialize(),
+				displaySetup: Setup.DisplaySetup,
+				classes: elementClass );
 	}
 
 	public static class FormItemExtensionCreators {
@@ -82,18 +66,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static FormItem ToFormItem(
 			this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null ) {
 			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
-
-			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-			if( formControl is WebControl webControl )
-				return new FormItem<Control>(
-					setup,
-					label.Any()
-						? (FormItemLabel)new PlaceHolder().AddControlsReturnThis(
-							( formControl.Labeler != null ? formControl.Labeler.CreateLabel( label ) : label ).GetControls() )
-						: "",
-					webControl,
-					formControl.Validation );
-
 			return formControl.PageComponent.ToCollection()
 				.ToFormItem(
 					setup: setup,
@@ -109,13 +81,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup"></param>
 		/// <param name="validation"></param>
 		public static FormItem ToFormItem(
-			this IEnumerable<FlowComponent> content, FormItemSetup setup = null, IEnumerable<PhrasingComponent> label = null, EwfValidation validation = null ) {
-			label = label ?? Enumerable.Empty<PhrasingComponent>();
-			return new FormItem<Control>(
-				setup,
-				label.Any() ? (FormItemLabel)new PlaceHolder().AddControlsReturnThis( label.GetControls() ) : "",
-				new PlaceHolder().AddControlsReturnThis( content.GetControls() ),
-				validation );
+			this IReadOnlyCollection<FlowComponent> content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null,
+			EwfValidation validation = null ) {
+			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
+			return new FormItem( setup, label, content, validation );
 		}
 	}
 }

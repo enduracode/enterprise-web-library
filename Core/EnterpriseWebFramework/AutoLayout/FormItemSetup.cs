@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item setup object.
 		/// </summary>
-		/// <param name="displaySetup">Not yet implemented. Will implement when EnduraCode goal 790 is complete (i.e. when Web Forms dependency is gone).</param>
+		/// <param name="displaySetup"></param>
 		/// <param name="cellSpan">Only applies to adjacent layouts.</param>
 		/// <param name="textAlignment"></param>
 		public FormItemSetup( DisplaySetup displaySetup = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {

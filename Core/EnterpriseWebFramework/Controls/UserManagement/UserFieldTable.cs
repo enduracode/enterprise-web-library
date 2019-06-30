@@ -57,14 +57,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			b.AddFormItems( Email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
 
 			if( includePasswordControls() ) {
-				var group = new LegacyRadioButtonGroup( false );
+				var group = new RadioButtonGroup( false );
 
-				var keepPassword = FormItem.Create(
-					"",
-					group.CreateInlineRadioButton( true, label: userId.HasValue ? "Keep the current password" : "Do not create a password" ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => {
-							if( !control.IsCheckedInPostBack( pbv ) )
+				var keepPassword = group.CreateRadioButton(
+						true,
+						label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents(),
+						validationMethod: ( postBackValue, validator ) => {
+							if( !postBackValue.Value )
 								return;
 							if( user != null ) {
 								Salt.Value = facUser.Salt;
@@ -73,50 +72,55 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							}
 							else
 								genPassword( false );
-						} ) );
+						} )
+					.ToFormItem();
 
-				var generatePassword = FormItem.Create(
-					"",
-					group.CreateInlineRadioButton( false, label: "Generate a " + ( userId.HasValue ? "new, " : "" ) + "random password and email it to the user" ),
-					validationGetter: control => new EwfValidation(
-						( pbv, validator ) => {
-							if( control.IsCheckedInPostBack( pbv ) )
+				var generatePassword = group.CreateRadioButton(
+						false,
+						label: "Generate a {0} password and email it to the user".FormatWith( userId.HasValue ? "new, random" : "random" ).ToComponents(),
+						validationMethod: ( postBackValue, validator ) => {
+							if( postBackValue.Value )
 								genPassword( true );
-						} ) );
+						} )
+					.ToFormItem();
 
 				var providePasswordSelected = new DataValue<bool>();
-				var providePassword = FormItem.Create(
-					"",
-					group.CreateBlockRadioButton(
+				var providePassword = group.CreateFlowRadioButton(
 						false,
-						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ),
-						validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value,
-						nestedControlListGetter: () => {
-							return FormState.ExecuteWithValidationPredicate(
-								() => providePasswordSelected.Value,
-								() => {
-									var password = new DataValue<string>();
-									var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout, classes: "newPassword".ToCollection() );
-									foreach( var i in password.GetPasswordModificationFormItems() )
-										newPasswordTable.AddItem( new EwfTableItem( i.Label, i.ToControl( omitLabel: true ) ) );
+						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ).ToComponents(),
+						setup: FlowRadioButtonSetup.Create(
+							nestedContentGetter: () => {
+								return FormState.ExecuteWithValidationPredicate(
+									() => providePasswordSelected.Value,
+									() => {
+										var password = new DataValue<string>();
+										var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout, classes: "newPassword".ToCollection() );
+										foreach( var i in password.GetPasswordModificationFormItems() )
+											newPasswordTable.AddItem( new EwfTableItem( i.Label.ToCell(), i.ToComponent( omitLabel: true ).ToCollection().ToCell() ) );
 
-									new EwfValidation(
-										validator => {
-											var p = new Password( password.Value );
-											Salt.Value = p.Salt;
-											SaltedPassword.Value = p.ComputeSaltedHash();
-											MustChangePassword.Value = false;
-										} );
+										new EwfValidation(
+											validator => {
+												var p = new Password( password.Value );
+												Salt.Value = p.Salt;
+												SaltedPassword.Value = p.ComputeSaltedHash();
+												MustChangePassword.Value = false;
+											} );
 
-									return newPasswordTable.ToCollection();
-								} );
-						} ),
-					validationGetter: control => control.Validation );
+										return newPasswordTable.ToCollection();
+									} );
+							} ),
+						validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value )
+					.ToFormItem();
 
 				b.AddFormItems(
-					FormItem.Create(
-						"Password",
-						ControlStack.CreateWithControls( true, keepPassword.ToControl(), generatePassword.ToControl(), providePassword.ToControl() ) ) );
+					new StackList(
+							keepPassword.ToComponent()
+								.ToCollection()
+								.ToComponentListItem()
+								.ToCollection()
+								.Append( generatePassword.ToComponent().ToCollection().ToComponentListItem() )
+								.Append( providePassword.ToComponent().ToCollection().ToComponentListItem() ) ).ToCollection()
+						.ToFormItem( label: "Password".ToComponents() ) );
 			}
 
 			b.AddFormItems(

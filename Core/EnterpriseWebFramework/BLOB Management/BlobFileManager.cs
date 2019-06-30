@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							uploadedFile = postBackValue;
 							setup.UploadValidationMethod?.Invoke( postBackValue, validator );
 						} ).ToFormItem()
-					.ToControl() );
+					.ToComponent() );
 			var fileUploadDisplayedHiddenFieldId = new HiddenFieldId();
 			if( file != null )
 				components.Add(

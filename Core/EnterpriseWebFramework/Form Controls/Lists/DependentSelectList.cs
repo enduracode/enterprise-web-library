@@ -1,5 +1,5 @@
 using System;
-using System.Web.UI;
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -15,9 +15,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A select list whose visible options depend upon the selected value in another select list.
 	/// </summary>
-	public class DependentSelectList<ItemIdType, ParentItemIdType>: Control, INamingContainer {
+	public class DependentSelectList<ItemIdType, ParentItemIdType>: FlowComponent {
 		private readonly Func<ParentItemIdType> parentItemIdGetter;
 		private readonly PageModificationValue<ParentItemIdType> parentItemIdPmv;
+		private readonly List<FlowComponent> children = new List<FlowComponent>();
 
 		internal DependentSelectList( Func<ParentItemIdType> parentItemIdGetter, PageModificationValue<ParentItemIdType> parentItemIdPmv ) {
 			this.parentItemIdGetter = parentItemIdGetter;
@@ -30,11 +31,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public void AddSelectList( ParentItemIdType parentItemId, Func<SelectList<ItemIdType>> selectListGetter ) {
 			var selectList = FormState.ExecuteWithValidationPredicate(
 				() => EwlStatics.AreEqual( parentItemId, parentItemIdGetter() ),
-				() => selectListGetter().ToFormItem().ToControl() );
-
-			Controls.Add( selectList );
-
-			parentItemIdPmv.ToCondition( parentItemId.ToCollection() ).AddDisplayLink( selectList.ToCollection() );
+				() => selectListGetter()
+					.ToFormItem( setup: new FormItemSetup( displaySetup: parentItemIdPmv.ToCondition( parentItemId.ToCollection() ).ToDisplaySetup() ) )
+					.ToComponent() );
+			children.Add( selectList );
 		}
+
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }
