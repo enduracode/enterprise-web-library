@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 			var facUser = includePasswordControls() && user != null ? FormsAuthStatics.GetUser( user.UserId, true ) : null;
 
-			var b = FormItemBlock.CreateFormItemTable( heading: "Security Information" );
+			var b = FormItemList.CreateStack();
 
 			b.AddFormItems( Email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
 
@@ -94,9 +94,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 									() => providePasswordSelected.Value,
 									() => {
 										var password = new DataValue<string>();
-										var newPasswordTable = EwfTable.Create( style: EwfTableStyle.StandardExceptLayout, classes: "newPassword".ToCollection() );
-										foreach( var i in password.GetPasswordModificationFormItems() )
-											newPasswordTable.AddItem( new EwfTableItem( i.Label.ToCell(), i.ToComponent( omitLabel: true ).ToCollection().ToCell() ) );
+										var list = FormItemList.CreateStack(
+											generalSetup: new FormItemListSetup( classes: new ElementClass( "newPassword" ) ),
+											items: password.GetPasswordModificationFormItems() );
 
 										new EwfValidation(
 											validator => {
@@ -106,7 +106,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 												MustChangePassword.Value = false;
 											} );
 
-										return newPasswordTable.ToCollection();
+										return list.ToCollection();
 									} );
 							} ),
 						validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value )
@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
 					.ToFormItem( label: "Role".ToComponents() ) );
 
-			Controls.Add( b );
+			this.AddControlsReturnThis( new Section( "Security Information", b.ToCollection() ).ToCollection().GetControls() );
 		}
 
 		private bool includePasswordControls() {

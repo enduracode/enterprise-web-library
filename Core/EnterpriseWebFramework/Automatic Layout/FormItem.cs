@@ -41,12 +41,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Creates a component representing this form item.
-		/// This can be used to display a form item without a <see cref="FormItemBlock"/>.
+		/// This can be used to display a form item without a <see cref="FormItemList"/>.
 		/// </summary>
 		public FlowComponent ToComponent( bool omitLabel = false ) =>
 			new GenericFlowContainer(
-				( !label.Any() || omitLabel ? Enumerable.Empty<FlowComponent>() : label ).Append( new LineBreak() )
-				.Concat( content )
+				( !label.Any() || omitLabel ? Enumerable.Empty<FlowComponent>() : label.Append( new LineBreak() ) ).Concat( content )
 				.Concat(
 					Validation == null
 						? Enumerable.Empty<FlowComponent>()

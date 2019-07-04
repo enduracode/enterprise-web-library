@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
@@ -74,23 +73,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="omitListIfSingleRow">Pass true to omit the root ordered-list component if the tree has exactly one row.</param>
 		/// <param name="useSubtractiveMode">Pass true if you want the field-name tree to represent excluded fields, rather than included fields.</param>
 		public static Control ToRowTreeDisplay(
-			this MergeRowTree rowTree, MergeFieldNameTree fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) {
-			return new Block(
+			this MergeRowTree rowTree, MergeFieldNameTree fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) =>
+			new Block(
 				omitListIfSingleRow && rowTree.Rows.Count() == 1
-					? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode )
-					: ControlStack.CreateWithControls( true, rowTree.Rows.Select( i => getRow( i, fieldNameTree, useSubtractiveMode ) ).ToArray() ) )
-				{
-					CssClass = rowTreeClass.ClassName
-				};
-		}
+					? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode ).GetControls().ToArray()
+					: ControlStack.CreateWithControls(
+							true,
+							rowTree.Rows.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( getRow( i, fieldNameTree, useSubtractiveMode ).GetControls() ) )
+								.ToArray() )
+						.ToCollection<Control>()
+						.ToArray() ) { CssClass = rowTreeClass.ClassName };
 
-		private static Control getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
-			var values = FormItemBlock.CreateFormItemList(
-				hideIfEmpty: true,
-				numberOfColumns: 2,
-				formItems: ( useSubtractiveMode
-					             ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
-					             : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
+		private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
+			var values = FormItemList.CreateGrid(
+				2,
+				generalSetup: new FormItemListSetup( hideIfEmpty: true ),
+				items: ( useSubtractiveMode
+					         ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
+					         : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
 					mergeValue => {
 						IReadOnlyCollection<PhrasingComponent> value = null;
 						if( mergeValue is MergeValue<string> stringValue )
@@ -100,7 +100,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return value == null
 							       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
 							       : value.ToFormItem( label: mergeValue.Name.ToComponents() );
-					} ) );
+					} )
+				.Materialize() );
 
 			var children = ( useSubtractiveMode
 				                 ? row.Children.Select(
@@ -123,15 +124,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
 				.Where( child => child.rowTree.Rows.Any() )
 				.Select(
-					child => new LegacySection(
+					child => new Section(
 						child.rowTree.NodeName,
-						ControlStack.CreateWithControls( true, child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ) ).ToArray() )
-							.ToCollection() ) )
-				.ToImmutableArray<Control>();
+						new StackList( child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ).ToComponentListItem() ) ).ToCollection() ) )
+				.Materialize();
 
 			return children.Any()
-				       ? (Control)new PlaceHolder().AddControlsReturnThis( values, new Block( children.ToArray() ) { CssClass = rowTreeChildClass.ClassName } )
-				       : values;
+				       ? values.ToCollection<FlowComponent>().Append( new GenericFlowContainer( children, classes: rowTreeChildClass ) ).Materialize()
+				       : values.ToCollection();
 		}
 	}
 }

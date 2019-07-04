@@ -8,7 +8,9 @@ ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfUnorde
 	padding: 0;
 	list-style-type: none;
 }
-ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
+ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
+ewfWrappingFormItemList {
 	display: flex;
 }
 ewfUnorderedLineList {
@@ -17,14 +19,26 @@ ewfUnorderedLineList {
 ewfUnorderedStackList {
 	flex-flow: column nowrap;
 }
-ewfUnorderedWrappingList {
+ewfUnorderedWrappingList,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
+ewfWrappingFormItemList {
 	flex-flow: row wrap;
+}
+ewfGridFormItemList {
+	display: grid;
 }
 ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInlineListItemContentContainer {
 	display: inline;
 }
 ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 	content: " | ";
+}
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	flex-grow: 1;
+}
+ewfGridFormItemList > ewfFormItemListButtonItem {
+	grid-column-end: -1;
 }
 .ewfFaL {
 	justify-content: flex-start;
@@ -53,6 +67,38 @@ ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 .ewfFvaBl {
 	align-items: baseline;
 	align-self: baseline;
+}
+.ewfGaL {
+	justify-items: start;
+	justify-self: start;
+}
+.ewfGaR {
+	justify-items: end;
+	justify-self: end;
+}
+.ewfGaC {
+	justify-items: center;
+	justify-self: center;
+}
+.ewfGaS {
+	justify-items: stretch;
+	justify-self: stretch;
+}
+.ewfGvaT {
+	align-items: start;
+	align-self: start;
+}
+.ewfGvaB {
+	align-items: end;
+	align-self: end;
+}
+.ewfGvaC {
+	align-items: center;
+	align-self: center;
+}
+.ewfGvaS {
+	align-items: stretch;
+	align-self: stretch;
 }
 ewfStandardControlStack > ewfControlStackItem {
 	margin-top: 4px;
@@ -331,7 +377,7 @@ ewfModalBoxBackdrop {
 }
 
 /* user management */
-ewfTableAllStyles.newPassword ewfSingleLineTextControlAllStates {
+ewfFormItemList.newPassword ewfSingleLineTextControlAllStates {
 	width: 200px;
 }
 

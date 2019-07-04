@@ -331,7 +331,10 @@
     <Compile Include="EnterpriseWebFramework\Action Controls\Styles\TextActionControlStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ToggleButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Controls\ToolTipButton.cs" />
-    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItem.cs" />
+    <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
+    <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManagerSetup.cs" />
@@ -487,6 +490,8 @@
     <Compile Include="EnterpriseWebFramework\Layout\Lists\CssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\FlexboxAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\FlexboxVerticalAlignment.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\GridAlignment.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Lists\GridVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Inline\InlineList.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\ItemInsertionUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Lists\Line\LineList.cs" />
@@ -525,8 +530,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItem.cs" />
-    <Compile Include="EnterpriseWebFramework\AutoLayout\FormItemBlock.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\PageName.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\PagePath.cs" />
