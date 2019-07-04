@@ -116,15 +116,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					     : ElementClassSet.Empty,
 				i => {
 					var span = defaultColumnSpan;
-					if( i.Setup.CellSpan.HasValue ) {
-						if( i.Setup.CellSpan.Value > numberOfColumns )
+					if( i.Setup.ColumnSpan.HasValue ) {
+						if( i.Setup.ColumnSpan.Value > numberOfColumns )
 							throw new ApplicationException(
-								"An item has a column span of {0}, but the number of columns is {1}.".FormatWith( i.Setup.CellSpan.Value, numberOfColumns ) );
-						span = i.Setup.CellSpan.Value;
+								"An item has a column span of {0}, but the number of columns is {1}.".FormatWith( i.Setup.ColumnSpan.Value, numberOfColumns ) );
+						span = i.Setup.ColumnSpan.Value;
 					}
 					return span == 1 ? "" : "grid-column-end: span {0}".FormatWith( span );
 				},
-				new FormItemSetup( cellSpan: defaultColumnSpan ),
+				new FormItemSetup( columnSpan: defaultColumnSpan ),
 				getItemComponents,
 				items );
 		}

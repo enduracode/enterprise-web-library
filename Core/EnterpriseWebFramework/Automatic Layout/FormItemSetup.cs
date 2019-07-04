@@ -6,18 +6,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class FormItemSetup {
 		internal readonly DisplaySetup DisplaySetup;
-		internal readonly int? CellSpan;
+		internal readonly int? ColumnSpan;
 		internal readonly TextAlignment TextAlignment;
 
 		/// <summary>
 		/// Creates a form item setup object.
 		/// </summary>
 		/// <param name="displaySetup"></param>
-		/// <param name="cellSpan">Only applies to adjacent layouts.</param>
+		/// <param name="columnSpan">Only applies to <see cref="FormItemList.CreateGrid"/>.</param>
 		/// <param name="textAlignment"></param>
-		public FormItemSetup( DisplaySetup displaySetup = null, int? cellSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+		public FormItemSetup( DisplaySetup displaySetup = null, int? columnSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
 			DisplaySetup = displaySetup;
-			CellSpan = cellSpan;
+			ColumnSpan = columnSpan;
 			TextAlignment = textAlignment;
 		}
 	}
