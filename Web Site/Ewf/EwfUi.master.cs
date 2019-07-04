@@ -265,7 +265,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "global", "nav", index.ToString() ) ) )
 				.Materialize();
-			var controls = getActionControls( EwfUiStatics.AppProvider.GetGlobalNavActions() ).Concat( formItems.Select( i => i.Control ) ).ToArray();
+			var controls = getActionComponents( EwfUiStatics.AppProvider.GetGlobalNavActions() )
+				.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) )
+				.Concat( formItems.Select( i => new PlaceHolder().AddControlsReturnThis( i.Content.GetControls() ) ) )
+				.ToArray();
 			if( !controls.Any() )
 				return null;
 
@@ -320,7 +323,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = uiEntitySetup.GetNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
 				.Materialize();
-			var controls = getActionControls( uiEntitySetup.GetNavActions() ).Concat( formItems.Select( i => i.Control ) ).ToArray();
+			var controls = getActionComponents( uiEntitySetup.GetNavActions() )
+				.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) )
+				.Concat( formItems.Select( i => new PlaceHolder().AddControlsReturnThis( i.Content.GetControls() ) ) )
+				.ToArray();
 			if( !controls.Any() )
 				return null;
 
@@ -337,10 +343,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private EwfTableCell getEntityActionCell() {
 			if( uiEntitySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
-			var actionControls = getActionControls( uiEntitySetup.GetActions() ).ToArray();
-			if( !actionControls.Any() )
+			var actionComponents = getActionComponents( uiEntitySetup.GetActions() ).Materialize();
+			if( !actionComponents.Any() )
 				return null;
-			return new ControlLine( actionControls )
+			return new ControlLine( actionComponents.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) ).ToArray() )
 				{
 					CssClass = CssElementCreator.EntityActionListCssClass, ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
 				}.ToCell( new TableCellSetup( textAlignment: TextAlignment.Right ) );
@@ -400,20 +406,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private IEnumerable<Control> getPageActionList() {
-			var actionControls = getActionControls( pageActions ).ToArray();
+			var actionControls = getActionComponents( pageActions )
+				.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) )
+				.ToArray();
 			if( !actionControls.Any() )
 				yield break;
 			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
 		}
 
-		private IEnumerable<Control> getActionControls( IReadOnlyCollection<ActionComponentSetup> actions ) =>
+		private IEnumerable<PhrasingComponent> getActionComponents( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
-			let actionComponent =
-				action.GetActionComponent(
-					( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
-					( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
+			let actionComponent = action.GetActionComponent(
+				( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+				( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
 			where actionComponent != null
-			select new PlaceHolder().AddControlsReturnThis( actionComponent.ToCollection().GetControls() );
+			select actionComponent;
 
 		private Control getContentFootBlock() {
 			var controls = new List<Control>();

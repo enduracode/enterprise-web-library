@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using MoreLinq;
+using Humanizer;
 
 // Parameter: string returnUrl
 
@@ -24,48 +23,48 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				logInPb.ToCollection(),
 				() => {
-					var registeredTable = EwfTable.Create( caption: "Registered users" );
-					registeredTable.AddItem(
-						new EwfTableItem(
-							( "You may log in to this system if you have registered your email address with " + FormsAuthStatics.SystemProvider.AdministratingCompanyName )
-							.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+					var registeredComponents = new List<FlowComponent>();
+					registeredComponents.Add(
+						new Paragraph(
+							"You may log in to this system if you have registered your email address with {0}"
+								.FormatWith( FormsAuthStatics.SystemProvider.AdministratingCompanyName )
+								.ToComponents() ) );
 
 					emailAddress = new DataValue<string>();
-					FormState.ExecuteWithDataModificationsAndDefaultAction(
-						new[] { logInPb, newPasswordPb },
-						() => {
-							var formItem = emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() );
-							registeredTable.AddItem( new EwfTableItem( formItem.Label, formItem.ToControl( omitLabel: true ) ) );
-						} );
-
 					var password = new DataValue<string>();
-					var passwordFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "current-password" ), value: "" )
-						.ToFormItem( label: "Password".ToComponents() );
-					registeredTable.AddItem( new EwfTableItem( passwordFormItem.Label, passwordFormItem.ToControl( omitLabel: true ) ) );
+					registeredComponents.Add(
+						FormItemList.CreateStack(
+							items: FormState
+								.ExecuteWithDataModificationsAndDefaultAction(
+									new[] { logInPb, newPasswordPb },
+									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
+								.ToCollection()
+								.Append(
+									password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "current-password" ), value: "" )
+										.ToFormItem( label: "Password".ToComponents() ) )
+								.Materialize() ) );
 
 					if( FormsAuthStatics.PasswordResetEnabled )
-						registeredTable.AddItem(
-							new EwfTableItem(
-								new PlaceHolder().AddControlsReturnThis(
-										"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
-											.GetControls()
-											.Concat(
-												new PostBackButton(
-													new TextActionControlStyle( "click here to immediately send yourself a new password." ),
-													usesSubmitBehavior: false,
-													postBack: newPasswordPb ) ) )
-									.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+						registeredComponents.Add(
+							new Paragraph(
+								"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
+									.Append(
+										new EwfButton(
+											new StandardButtonStyle( "click here to immediately send yourself a new password.", buttonSize: ButtonSize.ShrinkWrap ),
+											behavior: new PostBackBehavior( postBack: newPasswordPb ) ) )
+									.Materialize() ) );
 
-					ph.AddControlsReturnThis( registeredTable );
+					ph.AddControlsReturnThis( new Section( "Registered users", registeredComponents ).ToCollection().GetControls() );
 
 					var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
 					if( specialInstructions != null )
 						ph.AddControlsReturnThis( specialInstructions );
 					else {
-						var unregisteredTable = EwfTable.Create( caption: "Unregistered users" );
-						unregisteredTable.AddItem(
-							new EwfTableItem( "If you have difficulty logging in, please " + FormsAuthStatics.SystemProvider.LogInHelpInstructions ) );
-						ph.AddControlsReturnThis( unregisteredTable );
+						var unregisteredComponents = new List<FlowComponent>();
+						unregisteredComponents.Add(
+							new Paragraph(
+								"If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
+						ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents ).ToCollection().GetControls() );
 					}
 
 					logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(

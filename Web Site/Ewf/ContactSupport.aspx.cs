@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -24,22 +23,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
 					.ToCollection(),
 				() => {
-					var table = FormItemBlock.CreateFormItemTable();
-					table.AddFormItems(
-						FormItem.Create(
-							"From",
-							new PlaceHolder().AddControlsReturnThis(
-								new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress().ToString().ToComponents().GetControls() ) ),
-						FormItem.Create(
-							"To",
-							new PlaceHolder().AddControlsReturnThis(
-								"{0} ({1} for this system)".FormatWith(
-										StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
-										"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
-									.ToComponents()
-									.GetControls() ) ),
+					var list = FormItemList.CreateStack();
+					list.AddFormItems(
+						new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress()
+							.ToString()
+							.ToComponents()
+							.ToFormItem( label: "From".ToComponents() ),
+						"{0} ({1} for this system)".FormatWith(
+								StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
+								"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
+							.ToComponents()
+							.ToFormItem( label: "To".ToComponents() ),
 						body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) );
-					ph.AddControlsReturnThis( table );
+					ph.AddControlsReturnThis( list.ToCollection().GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Send Message" ).ToCollection() );
 				} );

@@ -28,18 +28,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
-						FormItemBlock.CreateFormItemTable(
-							formItems: new TextControl(
-									"",
-									true,
-									setup: TextControlSetup.CreateObscured(),
-									validationMethod: ( postBackValue, validator ) => {
-										// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-										var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
-										if( !passwordMatch )
-											validator.NoteErrorAndAddMessage( "Incorrect password." );
-									} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
-								.ToCollection() ) );
+						FormItemList.CreateStack(
+								items: new TextControl(
+										"",
+										true,
+										setup: TextControlSetup.CreateObscured(),
+										validationMethod: ( postBackValue, validator ) => {
+											// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+											var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+											if( !passwordMatch )
+												validator.NoteErrorAndAddMessage( "Incorrect password." );
+										} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
+									.ToCollection() )
+							.ToCollection()
+							.GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Log In" ).ToCollection() );
 				} );

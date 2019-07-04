@@ -29,29 +29,31 @@ namespace EnterpriseWebLibrary.WebSite {
 					.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
-						FormItemBlock.CreateFormItemTable(
-							formItems: new[]
-								{
-									systemName.ToTextControl(
-											false,
-											value: "",
-											maxLength: 50,
-											additionalValidationMethod: validator => {
-												if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
-													validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
-												systemShortName.Value = systemName.Value.EnglishToPascal();
-											} )
-										.ToFormItem( label: "System name".ToComponents() ),
-									baseNamespace.ToTextControl(
-											false,
-											value: "",
-											maxLength: 50,
-											additionalValidationMethod: validator => {
-												if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
-													validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
-											} )
-										.ToFormItem( label: "Base namespace".ToComponents() )
-								} ) );
+						FormItemList.CreateStack(
+								items: new[]
+									{
+										systemName.ToTextControl(
+												false,
+												value: "",
+												maxLength: 50,
+												additionalValidationMethod: validator => {
+													if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
+														validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
+													systemShortName.Value = systemName.Value.EnglishToPascal();
+												} )
+											.ToFormItem( label: "System name".ToComponents() ),
+										baseNamespace.ToTextControl(
+												false,
+												value: "",
+												maxLength: 50,
+												additionalValidationMethod: validator => {
+													if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
+														validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
+												} )
+											.ToFormItem( label: "Base namespace".ToComponents() )
+									} )
+							.ToCollection()
+							.GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Create System" ).ToCollection() );
 				} );

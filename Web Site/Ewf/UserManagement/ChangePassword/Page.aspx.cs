@@ -21,10 +21,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				() => {
 					newPassword = new DataValue<string>();
 					ph.AddControlsReturnThis(
-						FormItemBlock.CreateFormItemTable(
-							formItems: newPassword.GetPasswordModificationFormItems(
-								firstLabel: "New password".ToComponents(),
-								secondLabel: "Re-type new password".ToComponents() ) ) );
+						FormItemList.CreateStack(
+								items: newPassword.GetPasswordModificationFormItems(
+									firstLabel: "New password".ToComponents(),
+									secondLabel: "Re-type new password".ToComponents() ) )
+							.ToCollection()
+							.GetControls() );
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Change Password" ).ToCollection() );
 				} );
 		}

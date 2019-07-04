@@ -58,12 +58,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									if( user.Value == null )
 										validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 								} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )
-							.ToControl(),
-						new LegacyParagraph(
-							new PostBackButton(
-								new ButtonActionControlStyle(
-									AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
-									buttonSize: ButtonSize.Large ) ) ) );
+							.ToComponent()
+							.ToCollection()
+							.GetControls()
+							.Append(
+								new LegacyParagraph(
+									new PostBackButton(
+										new ButtonActionControlStyle(
+											AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
+											buttonSize: ButtonSize.Large ) ) ) ) );
 				} );
 		}
 	}
