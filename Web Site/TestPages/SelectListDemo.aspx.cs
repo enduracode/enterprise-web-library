@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
@@ -16,10 +14,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				PostBack.CreateFull().ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
-						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Vertical", formItems: getRadioItems( false ) ),
-						FormItemBlock.CreateFormItemTable( heading: "Radio Button List, Horizontal", formItems: getRadioItems( true ) ),
-						getChosenUpgradeTestingInfo(),
-						FormItemBlock.CreateFormItemTable( heading: "Drop-Down List", formItems: getDropDownItems() ) );
+						new Section( "Radio Button List, Vertical", FormItemList.CreateStack( items: getRadioItems( false ).Materialize() ).ToCollection() )
+							.ToCollection<FlowComponent>()
+							.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack( items: getRadioItems( true ).Materialize() ).ToCollection() ) )
+							.Append( getChosenUpgradeTestingInfo() )
+							.Append( new Section( "Drop-Down List", FormItemList.CreateStack( items: getDropDownItems().Materialize() ).ToCollection() ) )
+							.GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
 				} );
@@ -55,7 +55,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		private Control getChosenUpgradeTestingInfo() {
+		private FlowComponent getChosenUpgradeTestingInfo() {
 			var bullets = new List<string>();
 			bullets.Add(
 				"Focus a control above the first dropdown and tab to focus the dropdown. Press a letter on the keyboard. The dropdown should expand, and that letter should be in the search area. " +
@@ -63,9 +63,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			bullets.Add( "When a dropdown is focused with the options expanded, press enter. This should select the option and not submit the page." );
 			bullets.Add( "When a dropdown is focused with the options collapsed, press enter. This should submit the page." );
 
-			return new LegacySection(
+			return new Section(
 				"What to look for after updating Chosen",
-				new HtmlGenericControl( "ul" ).AddControlsReturnThis( bullets.Select( b => new HtmlGenericControl( "li" ) { InnerText = b } ) ).ToCollection(),
+				new RawList( bullets.Select( i => i.ToComponents().ToComponentListItem() ) ).ToCollection(),
 				style: SectionStyle.Box );
 		}
 

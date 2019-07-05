@@ -10,7 +10,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				PostBack.CreateFull().ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
-						new HtmlBlockEditor( null, id => {}, out mod ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() ).ToControl() );
+						new HtmlBlockEditor( null, id => {}, out mod ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() )
+							.ToComponent()
+							.ToCollection()
+							.GetControls() );
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Post Back" ).ToCollection() );
 				} );
 		}

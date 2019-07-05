@@ -23,8 +23,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			var staticTable = FormItemBlock.CreateFormItemTable();
-			staticTable.AddFormItems(
+			var staticFil = FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) );
+			staticFil.AddFormItems(
 				new TextControl( "Values here will be retained across post-backs", true ).ToFormItem( label: "Static Field".ToComponents() ),
 				new TextControl( "", true ).ToFormItem( label: "Static Field".ToComponents() ),
 				new TextControl(
@@ -33,10 +33,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
 					validationMethod: ( postBackValue, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
 					label: "Static Field".ToComponents() ) );
-			staticTable.IncludeButtonWithThisText = "Submit";
-			ph.AddControlsReturnThis( staticTable );
+			ph.AddControlsReturnThis( staticFil.ToCollection().GetControls() );
 
-			ph.AddControlsReturnThis( getBasicRegionBlocks() );
+			ph.AddControlsReturnThis( getBasicRegionComponents().GetControls() );
 
 			var listTable = EwfTable.Create(
 				style: EwfTableStyle.StandardLayoutOnly,
@@ -50,25 +49,25 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis( listTable );
 		}
 
-		private IEnumerable<Control> getBasicRegionBlocks() {
+		private IEnumerable<FlowComponent> getBasicRegionComponents() {
 			var rs = new UpdateRegionSet();
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: "basic" );
-			yield return new LegacyParagraph(
-				new PostBackButton( new ButtonActionControlStyle( "Toggle Basic Region Below" ), usesSubmitBehavior: false, postBack: pb ) );
+			yield return new Paragraph(
+				new EwfButton( new StandardButtonStyle( "Toggle Basic Region Below" ), behavior: new PostBackBehavior( postBack: pb ) ).ToCollection() );
 
-			var regionControls = new List<Control>();
+			var regionComponents = new List<FlowComponent>();
 			var dynamicFieldValue = new DataValue<string>();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
 					if( info.Toggled )
-						regionControls.Add(
-							dynamicFieldValue.ToTextControl( true, value: "This was just added!" ).ToFormItem( label: "Dynamic Field".ToComponents() ).ToControl() );
+						regionComponents.Add(
+							dynamicFieldValue.ToTextControl( true, value: "This was just added!" ).ToFormItem( label: "Dynamic Field".ToComponents() ).ToComponent() );
 					else
-						regionControls.Add( new LegacyParagraph( "Nothing here yet." ) );
+						regionComponents.Add( new Paragraph( "Nothing here yet.".ToComponents() ) );
 				} );
-			yield return new NamingPlaceholder(
-				new LegacySection( "Basic Update Region", regionControls, style: SectionStyle.Box ).ToCollection(),
+			yield return new FlowIdContainer(
+				new Section( "Basic Update Region", regionComponents, style: SectionStyle.Box ).ToCollection(),
 				updateRegionSets: rs.ToCollection() );
 
 			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
@@ -113,7 +112,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var itemStack = ControlStack.Create( true );
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
-				itemStack.AddControls( new TextControl( "Item {0}".FormatWith( i ), true ).ToFormItem().ToControl() );
+				itemStack.AddControls( new TextControl( "Item {0}".FormatWith( i ), true ).ToFormItem().ToComponent().ToCollection().GetControls().ToArray() );
 			else
 				itemStack.AddText( "Item {0}".FormatWith( i ) );
 			itemStack.AddControls(
@@ -135,9 +134,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					postBack: PostBack.CreateIntermediate(
 						rs.ToCollection(),
 						id: "idAdd",
-						firstModificationMethod: () => parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 )
-							                               .ToCollection()
-							                               .Concat( parametersModification.ItemIds ) ) ) );
+						firstModificationMethod: () =>
+							parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection()
+								.Concat( parametersModification.ItemIds ) ) ) );
 
 			var stack = ControlStack.Create(
 				true,
@@ -154,7 +153,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
-			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToControl() );
+			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToComponent().ToCollection().GetControls().ToArray() );
 			itemStack.AddControls(
 				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 

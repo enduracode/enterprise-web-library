@@ -15,7 +15,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							includeSelectAndDeselectAllButtons: true,
 							minColumnWidth: 20.ToEm() ),
 						new[] { 3, 9, 19 } ).ToFormItem()
-					.ToControl() );
+					.ToComponent()
+					.ToCollection()
+					.GetControls() );
 		}
 
 		public override bool IsAutoDataUpdater => true;

@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -14,11 +11,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				FormState.ExecuteWithDataModificationsAndDefaultAction(
 					PostBack.CreateFull().ToCollection(),
-					() => {
-						var table = FormItemBlock.CreateFormItemTable( formItems: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ) );
-						table.IncludeButtonWithThisText = "Submit";
-						return table;
-					} ) );
+					() => FormItemList.CreateStack(
+							generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
+							items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() )
+						.ToCollection()
+						.GetControls() ) );
 		}
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() =>
@@ -104,9 +101,45 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			PageModificationValue<bool> pageModificationValue = null ) =>
 			id => {
 				var group = new RadioButtonGroup( noSelection, disableSingleButtonDetection: singleButton, selectionChangedAction: selectionChangedAction );
-				return FormItem.Create(
-					new PlaceHolder().AddControlsReturnThis(
-						"{0}. {1}".FormatWith( id, label )
+				return new StackList(
+						group
+							.CreateRadioButton(
+								!noSelection,
+								"First".ToComponents(),
+								setup: setup,
+								validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+									StatusMessageType.Info,
+									"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+							.ToFormItem()
+							.ToComponent()
+							.ToCollection()
+							.Concat(
+								singleButton
+									? Enumerable.Empty<FlowComponent>()
+									: group.CreateFlowRadioButton(
+											false,
+											"Second".ToComponents(),
+											setup: FlowRadioButtonSetup.Create(
+												nestedContentGetter: () => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit.".ToComponents() ),
+											validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+												StatusMessageType.Info,
+												"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+										.ToFormItem()
+										.ToComponent()
+										.ToCollection()
+										.Append(
+											group.CreateRadioButton(
+													false,
+													"Third".ToComponents(),
+													setup: RadioButtonSetup.Create(),
+													validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+														StatusMessageType.Info,
+														"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+												.ToFormItem()
+												.ToComponent() ) )
+							.Select( i => i.ToCollection().ToComponentListItem() ) ).ToCollection()
+					.ToFormItem(
+						label: "{0}. {1}".FormatWith( id, label )
 							.ToComponents()
 							.Concat(
 								pageModificationValue != null
@@ -120,45 +153,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 															valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
 													.Materialize() ) )
 									: Enumerable.Empty<PhrasingComponent>() )
-							.GetControls() ),
-					ControlStack.CreateWithControls(
-						true,
-						group
-							.CreateRadioButton(
-								!noSelection,
-								"First".ToComponents(),
-								setup: setup,
-								validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-									StatusMessageType.Info,
-									"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-							.ToFormItem()
-							.ToControl()
-							.ToCollection()
-							.Concat(
-								singleButton
-									? Enumerable.Empty<Control>()
-									: group.CreateFlowRadioButton(
-											false,
-											"Second".ToComponents(),
-											setup: FlowRadioButtonSetup.Create(
-												nestedContentGetter: () => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit.".ToComponents() ),
-											validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-												StatusMessageType.Info,
-												"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-										.ToFormItem()
-										.ToControl()
-										.ToCollection()
-										.Append(
-											group.CreateRadioButton(
-													false,
-													"Third".ToComponents(),
-													setup: RadioButtonSetup.Create(),
-													validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-														StatusMessageType.Info,
-														"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-												.ToFormItem()
-												.ToControl() ) )
-							.ToArray() ) );
+							.Materialize() );
 			};
 	}
 }

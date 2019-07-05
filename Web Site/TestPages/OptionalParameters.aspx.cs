@@ -15,9 +15,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			var fib = FormItemBlock.CreateFormItemTable();
-			fib.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
-			ph.AddControlsReturnThis( fib );
+			var fil = FormItemList.CreateStack();
+			fil.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
+			ph.AddControlsReturnThis( fil.ToCollection().GetControls() );
 
 			ph.AddControlsReturnThis(
 				new PostBackButton(

@@ -7,14 +7,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override void loadData() {
-			var table = FormItemBlock.CreateFormItemTable();
-			table.AddFormItems(
+			var list = FormItemList.CreateStack();
+			list.AddFormItems(
 				new DateControl( null, true ).ToFormItem( label: "Date control".ToComponents() ),
 				new TimeControl( null, true ).ToFormItem( label: "Time control".ToComponents() ),
 				new TimeControl( null, true, minuteInterval: 30 ).ToFormItem( label: "Drop-down time control".ToComponents() ),
 				new DateAndTimeControl( null, true ).ToFormItem( label: "Date and time control".ToComponents() ),
 				new DurationControl( null, true ).ToFormItem( label: "Duration control".ToComponents() ) );
-			ph.AddControlsReturnThis( table );
+			ph.AddControlsReturnThis( list.ToCollection().GetControls() );
 		}
 
 		public override bool IsAutoDataUpdater => true;

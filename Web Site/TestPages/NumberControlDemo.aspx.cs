@@ -14,15 +14,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				FormState.ExecuteWithDataModificationsAndDefaultAction(
-					PostBack.CreateFull().ToCollection(),
-					() => {
-						var table = FormItemBlock.CreateFormItemTable( formItems: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ) );
-						table.IncludeButtonWithThisText = "Submit";
-						return table;
-					} ),
-				FormItemBlock.CreateFormItemTable(
-					heading: "Independent Controls",
-					formItems: getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ).ToString() ) ) ) );
+						PostBack.CreateFull().ToCollection(),
+						() => FormItemList.CreateStack(
+							generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
+							items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) )
+					.ToCollection<FlowComponent>()
+					.Append(
+						new Section(
+							"Independent Controls",
+							FormItemList.CreateStack( items: getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ).ToString() ) ).Materialize() )
+								.ToCollection() ) )
+					.GetControls() );
 		}
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() =>
