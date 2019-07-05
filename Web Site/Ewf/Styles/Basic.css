@@ -35,7 +35,11 @@ ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 }
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	min-width: 0;
 	flex-grow: 1;
+}
+ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
+	min-width: 0;
 }
 ewfGridFormItemList > ewfFormItemListButtonItem {
 	grid-column-end: -1;

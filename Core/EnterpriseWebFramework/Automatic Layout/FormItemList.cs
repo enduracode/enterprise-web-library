@@ -152,22 +152,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<FormItem> items;
 
 		private FormItemList(
-			FormItemListSetup generalSetup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
+			FormItemListSetup setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
 			Func<FormItem, string> itemStyleAttributeGetter, FormItemSetup buttonItemSetup, Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter,
 			IReadOnlyCollection<FormItem> items ) {
-			var buttonItem = generalSetup.Button.Any()
-				                 ? generalSetup.Button.ToFormItem( setup: buttonItemSetup ).ToCollection()
-				                 : Enumerable.Empty<FormItem>().Materialize();
-			childGetter = () => generalSetup.HideIfEmpty && !this.items.Any()
+			setup = setup ?? new FormItemListSetup();
+
+			var buttonItem = setup.Button.Any() ? setup.Button.ToFormItem( setup: buttonItemSetup ).ToCollection() : Enumerable.Empty<FormItem>().Materialize();
+			childGetter = () => setup.HideIfEmpty && !this.items.Any()
 				                    ? Enumerable.Empty<DisplayableElement>().Materialize()
 				                    : new DisplayableElement(
 					                    listContext => new DisplayableElementData(
-						                    generalSetup.DisplaySetup,
+						                    setup.DisplaySetup,
 						                    () => new DisplayableElementLocalData(
 							                    "div",
 							                    focusDependentData: new DisplayableElementFocusDependentData(
 								                    attributes: listStyleAttribute.Any() ? Tuple.Create( "style", listStyleAttribute ).ToCollection() : null ) ),
-						                    classes: allListsClass.Add( classes ).Add( generalSetup.Classes ?? ElementClassSet.Empty ),
+						                    classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
 						                    children: this.items.Select(
 								                    i => new DisplayableElement(
 									                    itemContext => new DisplayableElementData(
