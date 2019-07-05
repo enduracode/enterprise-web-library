@@ -12,11 +12,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
 			// page, and the main modification needs to execute between these.
 			writeStringFormItemGetters( writer, field );
-			writer.WriteLine( "#pragma warning disable CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeNumericFormItemGetters( writer, field );
 			writeCheckboxFormItemGetters( writer, field );
-			writeBoolFormItemGetters( writer, field );
-			writer.WriteLine( "#pragma warning restore CS0618" ); // remove when EwfCheckBox and BlockCheckBox are gone
 			writeListFormItemGetters( writer, field );
 			writeDateFormItemGetters( writer, field );
 
@@ -214,7 +211,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			}
 
 			if( field.TypeIs( typeof( decimal ) ) ) {
-				writeLegacyCheckBoxFormItemGetters( writer, field, "decimal" );
 				writeDurationFormItemGetter( writer, field );
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
 			}
@@ -359,27 +355,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 				false,
 				dv =>
 					"new BlobFileManager( (int?)( value != null ? value.Value : {0}.Value ), requireUploadIfNoFile, id => {0}.Value = id, out modificationMethod, setup: managerSetup ).ToCollection().ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv ) );
-		}
-
-		private static void writeBoolFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( field.TypeIs( typeof( bool ) ) )
-				writeLegacyCheckBoxFormItemGetters( writer, field, "bool" );
-		}
-
-		private static void writeLegacyCheckBoxFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
-			writeFormItemGetter(
-				writer,
-				field,
-				"BlockCheckbox",
-				new CSharpParameter[ 0 ],
-				true,
-				new[] { new CSharpParameter( "BlockCheckBoxSetup", "checkboxSetup", "null" ) },
-				valueParamTypeName + "?",
-				new CSharpParameter[ 0 ],
-				true,
-				dv =>
-					"{0}.ToBlockCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: formItemLabel )"
 						.FormatWith( dv ) );
 		}
 

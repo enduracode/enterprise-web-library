@@ -584,48 +584,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 		}
 
-		/// <summary>
-		/// Creates a block checkbox for this data value.
-		/// </summary>
-		/// <param name="dataValue"></param>
-		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
-		/// <param name="setup">The setup object for the checkbox.</param>
-		/// <param name="value"></param>
-		/// <param name="additionalValidationMethod"></param>
-		public static BlockCheckBox ToBlockCheckbox(
-			this DataValue<bool> dataValue, IEnumerable<PhrasingComponent> label, BlockCheckBoxSetup setup = null, bool? value = null,
-			Action<Validator> additionalValidationMethod = null ) {
-			return new BlockCheckBox(
-				value ?? dataValue.Value,
-				label,
-				setup: setup,
-				validationMethod: ( postBackValue, validator ) => {
-					dataValue.Value = postBackValue.Value;
-					additionalValidationMethod?.Invoke( validator );
-				} );
-		}
-
-		/// <summary>
-		/// Creates a block checkbox for this data value.
-		/// </summary>
-		/// <param name="dataValue"></param>
-		/// <param name="label">The checkbox label. Do not pass null. Pass an empty collection for no label.</param>
-		/// <param name="setup">The setup object for the checkbox.</param>
-		/// <param name="value"></param>
-		/// <param name="additionalValidationMethod"></param>
-		public static BlockCheckBox ToBlockCheckbox(
-			this DataValue<decimal> dataValue, IEnumerable<PhrasingComponent> label, BlockCheckBoxSetup setup = null, decimal? value = null,
-			Action<Validator> additionalValidationMethod = null ) {
-			var boolValue = new DataValue<bool> { Value = ( value ?? dataValue.Value ).DecimalToBoolean() };
-			return boolValue.ToBlockCheckbox(
-				label,
-				setup: setup,
-				additionalValidationMethod: validator => {
-					dataValue.Value = boolValue.Value.BooleanToDecimal();
-					additionalValidationMethod?.Invoke( validator );
-				} );
-		}
-
 		public static SelectList<bool?> ToRadioList(
 			this DataValue<bool> dataValue, RadioListSetup<bool?> setup, SpecifiedValue<bool?> value = null, Action<Validator> additionalValidationMethod = null ) {
 			if( setup.Items.Any( i => !i.Id.HasValue ) )
