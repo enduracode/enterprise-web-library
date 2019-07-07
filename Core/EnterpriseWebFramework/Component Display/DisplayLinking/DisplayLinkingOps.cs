@@ -10,12 +10,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking {
 			else
 				c.Style.Add( HtmlTextWriterStyle.Display, "none" );
 		}
-
-		internal static void AddDisplayJavaScriptToCheckBox( CommonCheckBox checkBox, bool controlsVisibleWhenBoxChecked, params WebControl[] controls ) {
-			var s = "";
-			foreach( var c in controls )
-				s += "setElementDisplay( '" + c.ClientID + "', " + ( controlsVisibleWhenBoxChecked ? "" : "!" ) + "checked );";
-			checkBox.AddOnClickJsMethod( s );
-		}
 	}
 }

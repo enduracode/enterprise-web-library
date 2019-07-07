@@ -366,15 +366,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						actionLinkStack.AddControls( button );
 					}
 
+					var checkedRowSetups = new HashSet<RowSetup>();
 					foreach( var buttonToMethod in selectedRowDataModificationsToMethods ) {
 						var dataModification = buttonToMethod.Key;
 						var method = buttonToMethod.Value;
 						dataModification.AddModificationMethod(
 							() => {
 								foreach( var rowSetup in rowSetups ) {
-									if( rowSetup.UniqueIdentifier != null &&
-									    ( (EwfCheckBox)rowSetup.UnderlyingTableRow.Cells[ 0 ].Controls[ 0 ] ).IsCheckedInPostBack(
-										    AppRequestState.Instance.EwfPageRequestState.PostBackValues ) )
+									if( checkedRowSetups.Contains( rowSetup ) )
 										method( rowSetup.UniqueIdentifier );
 								}
 							} );
@@ -384,13 +383,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						foreach( var rowSetup in rowSetups ) {
 							var cell = new TableCell
 								{
-									Width = Unit.Percentage( 5 ),
-									CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+									Width = Unit.Percentage( 5 ), CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
 								};
 							if( rowSetup.UniqueIdentifier != null ) {
 								var firstDm = selectedRowDataModificationsToMethods.First().Key;
 								var pb = firstDm as PostBack;
-								cell.Controls.Add( new EwfCheckBox( false, action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ) );
+								cell.Controls.Add(
+									new PlaceHolder().AddControlsReturnThis(
+										new Checkbox(
+												false,
+												Enumerable.Empty<PhrasingComponent>().Materialize(),
+												setup: CheckboxSetup.Create( action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ),
+												validationMethod: ( postBackValue, validator ) => {
+													if( postBackValue.Value )
+														checkedRowSetups.Add( rowSetup );
+												} ).PageComponent.ToCollection()
+											.GetControls() ) );
 							}
 							rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
 						}

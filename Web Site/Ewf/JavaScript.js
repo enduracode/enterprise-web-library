@@ -134,18 +134,6 @@ function dockNotificationSection() {
 	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
 }
 
-
-/* These methods support the Checklist Control */
-
-function changeCheckBoxColor( checkBox ) {
-	var checkBoxParentDiv = $( checkBox ).parents( '.ewfBlockCheckBox' ).first().parent();
-	var selectedCheckBoxClass = 'checkedChecklistCheckboxDiv';
-	if( $( checkBox ).prop( 'checked' ) )
-		checkBoxParentDiv.addClass( selectedCheckBoxClass );
-	else
-		checkBoxParentDiv.removeClass( selectedCheckBoxClass );
-}
-
 // Supports DurationControl.
 /*
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16

@@ -8,8 +8,7 @@ ewfSectionBoxStyleBothStates,
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
-ewfCheckboxList,
-.checkedChecklistCheckboxDiv {
+ewfCheckboxList {
 	background-image: linear-gradient( rgba( 0, 0, 0, .05 ), rgba( 0, 0, 0, .05 ) );
 }
 
