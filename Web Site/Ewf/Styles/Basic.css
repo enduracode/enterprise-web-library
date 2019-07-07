@@ -3,6 +3,17 @@ html {
 	overflow-y: scroll;
 }
 
+/* spacing */
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
+	margin-top: 1em;
+}
+ewfStackFormItemList > ewfFormItemListItem:first-child, ewfStackFormItemList > ewfFormItemListButtonItem:first-child {
+	margin-top: 0;
+}
+ewfGridFormItemList {
+	grid-gap: 1em;
+}
+
 /* lists */
 ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfUnorderedInlineList {
 	padding: 0;
@@ -229,7 +240,9 @@ table.ewfBlockCheckBox > tbody > tr > td:first-child input {
 }
 
 /* list controls */
-ewfControlStackItem > ewfDropDownList, ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownListContainer > ewfDropDownList {
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
+ewfControlStackItem > ewfDropDownListContainer > ewfDropDownList,
+ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
 ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
