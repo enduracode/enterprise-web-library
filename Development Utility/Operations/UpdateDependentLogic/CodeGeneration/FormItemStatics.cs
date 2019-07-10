@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			// just adding them to the data modification. This allows client code on a page to specify the order of modification methods, which is important because
 			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
 			// page, and the main modification needs to execute between these.
-			writeStringFormItemGetters( writer, field );
+			writeTextFormItemGetters( writer, field );
 			writeNumericFormItemGetters( writer, field );
 			writeCheckboxFormItemGetters( writer, field );
 			writeListFormItemGetters( writer, field );
@@ -20,98 +20,76 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeGenericGetter( writer, field );
 		}
 
-		private static void writeStringFormItemGetters( TextWriter writer, ModificationField field ) {
-			if( !field.TypeIs( typeof( string ) ) )
-				return;
+		private static void writeTextFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( field.TypeIs( typeof( string ) ) ) {
+				writeFormItemGetter(
+					writer,
+					field,
+					"TextControl",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "TextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"string",
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+				writeFormItemGetter(
+					writer,
+					field,
+					"EmailAddressControl",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "EmailAddressControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"string",
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToEmailAddressControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+				writeFormItemGetter(
+					writer,
+					field,
+					"TelephoneNumberControl",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "TelephoneNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"string",
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToTelephoneNumberControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+				writeFormItemGetter(
+					writer,
+					field,
+					"UrlControl",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "UrlControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"string",
+					Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv =>
+						"{0}.ToUrlControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+			}
 
-			writeFormItemGetter(
-				writer,
-				field,
-				"TextControl",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "TextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
-				Enumerable.Empty<CSharpParameter>(),
-				true,
-				dv =>
-					"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetter(
-				writer,
-				field,
-				"EmailAddressControl",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "EmailAddressControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
-				Enumerable.Empty<CSharpParameter>(),
-				true,
-				dv =>
-					"{0}.ToEmailAddressControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetter(
-				writer,
-				field,
-				"TelephoneNumberControl",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "TelephoneNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
-				Enumerable.Empty<CSharpParameter>(),
-				true,
-				dv =>
-					"{0}.ToTelephoneNumberControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetter(
-				writer,
-				field,
-				"UrlControl",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "UrlControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
-				Enumerable.Empty<CSharpParameter>(),
-				true,
-				dv =>
-					"{0}.ToUrlControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetter(
-				writer,
-				field,
-				"NumericTextControl",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
-				new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
-				true,
-				dv =>
-					"{0}.ToNumericTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeFormItemGetter(
-				writer,
-				field,
-				"Html",
-				getAllowEmptyParameter( false ).ToCollection(),
-				false,
-				new CSharpParameter( "WysiwygHtmlEditorSetup", "editorSetup", "null" ).ToCollection(),
-				"string",
-				new CSharpParameter[ 0 ],
-				true,
-				dv =>
-					"{0}.ToHtmlEditor( allowEmpty, setup: editorSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						.FormatWith( dv, field.Size?.ToString() ?? "null" ),
-				additionalSummarySentences: new[]
-					{
-						"WARNING: Do not use this form-item getter unless you know exactly what you're doing.",
-						"If you want to store HTML, it is almost always better to use an HTML block instead of just a string field.",
-						"HTML blocks have special handling for intra-site URIs and may include additional features in the future.",
-						"They also cause all of your HTML to be stored in one place, which is usually a good practice."
-					} );
-		}
-
-		private static void writeNumericFormItemGetters( TextWriter writer, ModificationField field ) {
+			if( field.TypeIs( typeof( string ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"NumericTextControl",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"string",
+					new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
+					true,
+					dv =>
+						"{0}.ToNumericTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) )
 				writeFormItemGetter(
 					writer,
@@ -145,6 +123,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						"{0}.ToTextControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
 
+			if( field.TypeIs( typeof( string ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"Html",
+					getAllowEmptyParameter( false ).ToCollection(),
+					false,
+					new CSharpParameter( "WysiwygHtmlEditorSetup", "editorSetup", "null" ).ToCollection(),
+					"string",
+					new CSharpParameter[ 0 ],
+					true,
+					dv =>
+						"{0}.ToHtmlEditor( allowEmpty, setup: editorSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.Size?.ToString() ?? "null" ),
+					additionalSummarySentences: new[]
+						{
+							"WARNING: Do not use this form-item getter unless you know exactly what you're doing.",
+							"If you want to store HTML, it is almost always better to use an HTML block instead of just a string field.",
+							"HTML blocks have special handling for intra-site URIs and may include additional features in the future.",
+							"They also cause all of your HTML to be stored in one place, which is usually a good practice."
+						} );
+		}
+
+		private static void writeNumericFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( short ) ) || field.TypeIs( typeof( byte ) ) ||
 			    field.TypeIs( typeof( decimal ) ) )
 				writeFormItemGetter(
