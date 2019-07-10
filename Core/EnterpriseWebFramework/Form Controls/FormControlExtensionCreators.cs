@@ -662,6 +662,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					additionalValidationMethod?.Invoke( validator );
 				} );
 
+		public static SelectList<string> ToRadioList(
+			this DataValue<string> dataValue, RadioListSetup<string> setup, string defaultValueItemLabel = "", string value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateRadioList(
+				setup,
+				value ?? dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
 		public static SelectList<decimal?> ToRadioList(
 			this DataValue<decimal> dataValue, RadioListSetup<decimal?> setup, SpecifiedValue<decimal?> value = null,
 			Action<Validator> additionalValidationMethod = null ) {
@@ -773,6 +785,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					additionalValidationMethod?.Invoke( validator );
 				} );
 
+		public static SelectList<string> ToDropDown(
+			this DataValue<string> dataValue, DropDownSetup<string> setup, string defaultValueItemLabel = "", bool placeholderIsValid = false, string value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			SelectList.CreateDropDown(
+				setup,
+				value ?? dataValue.Value,
+				defaultValueItemLabel: defaultValueItemLabel,
+				placeholderIsValid: placeholderIsValid,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
 		public static SelectList<decimal?> ToDropDown(
 			this DataValue<decimal> dataValue, DropDownSetup<decimal?> setup, SpecifiedValue<decimal?> value = null,
 			Action<Validator> additionalValidationMethod = null ) {
@@ -868,6 +893,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FreeFormRadioList.Create(
 				noSelectionIsValid,
 				value != null ? value.Value : dataValue.Value,
+				setup: setup,
+				validationMethod: ( postBackValue, validator ) => {
+					dataValue.Value = postBackValue;
+					additionalValidationMethod?.Invoke( validator );
+				} );
+
+		public static FreeFormRadioList<string> ToFreeFormRadioList(
+			this DataValue<string> dataValue, bool? noSelectionIsValid, FreeFormRadioListSetup<string> setup = null, string value = null,
+			Action<Validator> additionalValidationMethod = null ) =>
+			FreeFormRadioList.Create(
+				noSelectionIsValid,
+				value ?? dataValue.Value,
 				setup: setup,
 				validationMethod: ( postBackValue, validator ) => {
 					dataValue.Value = postBackValue;

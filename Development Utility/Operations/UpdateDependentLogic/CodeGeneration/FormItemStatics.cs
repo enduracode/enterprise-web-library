@@ -373,15 +373,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					dv =>
 						"{0}.ToRadioList( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
-			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( decimal? ) ) )
+			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( string ) ) ||
+			    field.TypeIs( typeof( decimal? ) ) )
 				writeFormItemGetter(
 					writer,
 					field,
 					"RadioList",
 					new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 					false,
-					new CSharpParameter( "string", "defaultValueItemLabel", "\"None\"" ).ToCollection(),
-					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: field.TypeIs( typeof( string ) ) ? "\"\"" : "\"None\"" ).ToCollection(),
+					field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
 					Enumerable.Empty<CSharpParameter>(),
 					true,
 					dv =>
@@ -402,21 +403,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					dv =>
 						"{0}.ToDropDown( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
-			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( decimal? ) ) )
+			if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( string ) ) ||
+			    field.TypeIs( typeof( decimal? ) ) )
 				writeFormItemGetter(
 					writer,
 					field,
 					"DropDown",
 					new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection()
-						.Append( new CSharpParameter( "string", "defaultValueItemLabel" ) ),
+						.Concat(
+							field.TypeIs( typeof( string ) )
+								? Enumerable.Empty<CSharpParameter>()
+								: new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
 					false,
-					new CSharpParameter( "bool", "placeholderIsValid", "true" ).ToCollection(),
-					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					( field.TypeIs( typeof( string ) )
+						  ? new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: "\"\"" ).ToCollection()
+						  : Enumerable.Empty<CSharpParameter>() ).Append(
+						new CSharpParameter( "bool", "placeholderIsValid", field.TypeIs( typeof( string ) ) ? "false" : "true" ) ),
+					field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
 					Enumerable.Empty<CSharpParameter>(),
 					true,
 					dv =>
-						"{0}.ToDropDown( controlSetup, defaultValueItemLabel, placeholderIsValid: placeholderIsValid, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-							.FormatWith( dv ) );
+						"{0}.ToDropDown( controlSetup, {1}defaultValueItemLabel, placeholderIsValid: placeholderIsValid, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv, field.TypeIs( typeof( string ) ) ? "defaultValueItemLabel: " : "" ) );
 
 			if( field.EnumerableElementTypeName.Any() )
 				writeFormItemGetter(
