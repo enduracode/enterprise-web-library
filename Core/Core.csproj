@@ -437,7 +437,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\ChangeBasedCheckboxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\CheckboxList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Checkbox Lists\CheckboxListSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Lists\DependentSelectList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioList.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\Free-Form Radio List\FreeFormRadioListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Lists\List Items\ChangeBasedListItem.cs" />
