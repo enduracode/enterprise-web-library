@@ -4,11 +4,23 @@ html {
 }
 
 /* spacing */
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
+	border-color: rgba( 0, 0, 0, 0.1 );
+}
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
-	margin-top: 1em;
+	border-top-width: 1px;
+	border-top-style: solid;
+	padding-top: .75em;
+	padding-bottom: .75em;
 }
 ewfStackFormItemList > ewfFormItemListItem:first-child, ewfStackFormItemList > ewfFormItemListButtonItem:first-child {
-	margin-top: 0;
+	border-top: 0;
+	padding-top: 0;
+}
+ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ewfFormItemListButtonItem:last-child {
+	padding-bottom: 0;
 }
 ewfGridFormItemList {
 	grid-gap: 1em;
@@ -43,6 +55,9 @@ ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInline
 }
 ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 	content: " | ";
+}
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
+	align-items: center;
 }
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
@@ -199,7 +214,17 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	font-family: inherit;
 	box-sizing: border-box;
 	max-width: 100%;
-	padding: .2em;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: .4em;
+	background-color: hsla( 216, 33%, 97%, 1 );
+	padding: .5em .75em;
+	color: hsla( 215, 11%, 22%, 1 );
+}
+ewfSingleLineTextControlFocusState, ewfMultilineTextControlFocusState {
+	box-shadow: 0 0 8px rgba( 11, 125, 229, 0.3 );
+	border-color: hsla( 209, 91%, 47%, 1 );
+	outline: none;
 }
 ewfMultilineTextControlAllStates {
 	width: 35em;

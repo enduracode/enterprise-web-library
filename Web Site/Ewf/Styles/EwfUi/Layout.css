@@ -92,6 +92,8 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-top: -.5em;
 	margin-right: -.5em;
 	margin-left: -.5em;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
 	padding: .5em;
 }
 ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {

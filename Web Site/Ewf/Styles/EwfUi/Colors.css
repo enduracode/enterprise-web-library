@@ -1,11 +1,15 @@
 ﻿body {
+	background-color: hsla( 215, 33%, 93%, 1 );
+	color: hsla( 215, 11%, 22%, 1 );
+}
+
+/* boxes */
+ewfSectionBoxStyleBothStates {
+	box-shadow: 0 4px 6px rgba( 51, 56, 63, 0.12 );
 	background-color: white;
-	color: black;
 }
 
 /* contrast */
-ewfSectionBoxStyleBothStates,
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
 ewfCheckboxList {
