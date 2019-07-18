@@ -54,7 +54,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											behavior: new PostBackBehavior( postBack: newPasswordPb ) ) )
 									.Materialize() ) );
 
-					ph.AddControlsReturnThis( new Section( "Registered users", registeredComponents ).ToCollection().GetControls() );
+					ph.AddControlsReturnThis(
+						new FlowAutofocusRegion(
+								AutofocusCondition.InitialRequest(),
+								new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ).ToCollection()
+							.GetControls() );
 
 					var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
 					if( specialInstructions != null )
@@ -64,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						unregisteredComponents.Add(
 							new Paragraph(
 								"If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
-						ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents ).ToCollection().GetControls() );
+						ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ).ToCollection().GetControls() );
 					}
 
 					logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(
