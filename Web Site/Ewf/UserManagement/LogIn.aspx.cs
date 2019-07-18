@@ -34,6 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					var password = new DataValue<string>();
 					registeredComponents.Add(
 						FormItemList.CreateStack(
+							generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Log In" ), enableSubmitButton: true ),
 							items: FormState
 								.ExecuteWithDataModificationsAndDefaultAction(
 									new[] { logInPb, newPasswordPb },
@@ -47,10 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					if( FormsAuthStatics.PasswordResetEnabled )
 						registeredComponents.Add(
 							new Paragraph(
-								"If you are a first-time user and do not know your password, or if you have forgotten your password, ".ToComponents()
+								new ImportantContent( "Forgot password?".ToComponents() ).ToCollection()
+									.Concat( " ".ToComponents() )
 									.Append(
 										new EwfButton(
-											new StandardButtonStyle( "click here to immediately send yourself a new password.", buttonSize: ButtonSize.ShrinkWrap ),
+											new StandardButtonStyle( "Send me a new password", buttonSize: ButtonSize.ShrinkWrap ),
 											behavior: new PostBackBehavior( postBack: newPasswordPb ) ) )
 									.Materialize() ) );
 
@@ -60,26 +62,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ).ToCollection()
 							.GetControls() );
 
-					var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
-					if( specialInstructions != null )
-						ph.AddControlsReturnThis( specialInstructions );
-					else {
-						var unregisteredComponents = new List<FlowComponent>();
-						unregisteredComponents.Add(
-							new Paragraph(
-								"If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
-						ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ).ToCollection().GetControls() );
-					}
-
 					logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(
 						emailAddress,
 						password,
 						getUnregisteredEmailMessage(),
 						"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
 					logInHiddenFieldsAndMethod.Item1.AddEtherealControls( this );
-
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Log In" ).ToCollection() );
 				} );
+
+			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
+			if( specialInstructions != null )
+				ph.AddControlsReturnThis( specialInstructions );
+			else {
+				var unregisteredComponents = new List<FlowComponent>();
+				unregisteredComponents.Add(
+					new Paragraph( "If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
+				ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ).ToCollection().GetControls() );
+			}
 		}
 
 		private PostBackAction getSendNewPasswordAction() {
