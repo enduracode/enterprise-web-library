@@ -58,23 +58,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                  : ( postBackValue, validator ) => {
 							                  var errorHandler = new ValidationErrorHandler( "time" );
 							                  var validatedValue = validator.GetNullableTimeOfDayTimeSpan(
-								                  errorHandler,
-								                  postBackValue.ToUpper(),
-								                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
-								                  allowEmpty );
+									                  errorHandler,
+									                  postBackValue.ToUpper(),
+									                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+									                  allowEmpty )
+								                  .ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) );
 							                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
 								                  setup.ValidationErrorNotifier?.Invoke();
 								                  return;
 							                  }
 
-							                  if( validatedValue < new TimeSpan( minValue.Value.TickOfDay ) ||
-							                      validatedValue > maxValue.ToNewUnderlyingValue( v => new TimeSpan( v.TickOfDay ) ) ) {
+							                  var wrap = maxValue < minValue.Value;
+							                  if( !wrap
+								                      ? validatedValue < minValue.Value || validatedValue > maxValue
+								                      : validatedValue < minValue.Value && validatedValue > maxValue ) {
 								                  validator.NoteErrorAndAddMessage( "The time is too early or too late." );
 								                  setup.ValidationErrorNotifier?.Invoke();
 								                  return;
 							                  }
 
-							                  validationMethod( validatedValue.ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) ), validator );
+							                  validationMethod( validatedValue, validator );
 						                  } );
 
 				Labeler = textControl.Labeler;
