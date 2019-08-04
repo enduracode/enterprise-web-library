@@ -4,8 +4,8 @@ html {
 }
 
 /* spacing */
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	border-color: rgba( 0, 0, 0, 0.1 );
 }
@@ -24,6 +24,20 @@ ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ew
 }
 ewfGridFormItemList {
 	grid-gap: 1em;
+}
+
+/* sections */
+ewfSectionAllStylesBothStates {
+	clear: both;
+}
+ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
+	float: right;
+}
+ewfSectionAllStylesClosedState > ewfSectionHeadingContainer > ewfSectionCloseLabel, ewfSectionAllStylesExpandedState > ewfSectionHeadingContainer > ewfSectionExpandLabel {
+	display: none;
+}
+ewfSectionAllStylesClosedState > ewfSectionContentContainer {
+	display: none;
 }
 
 /* lists */
@@ -151,18 +165,13 @@ div.ewfControlList > div > table {
 	table-layout: fixed;
 }
 
-/* sections */
-ewfSectionAllStylesBothStates {
-	clear: both;
+/* images */
+img {
+	border-width: 0; /* Remove default borders around images when they are inside anchor tags. */
 }
-ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel, ewfSectionAllStylesBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
-	float: right;
-}
-ewfSectionAllStylesClosedState > ewfSectionHeadingContainer > ewfSectionCloseLabel, ewfSectionAllStylesExpandedState > ewfSectionHeadingContainer > ewfSectionExpandLabel {
-	display: none;
-}
-ewfSectionAllStylesClosedState > ewfSectionContentContainer {
-	display: none;
+img.ewfAutoSizer {
+	display: block;
+	width: 100%;
 }
 
 /* tables */
@@ -197,15 +206,6 @@ th.ewfTcBaseLine, td.ewfTcBaseLine {
 }
 .ewfOverflowedCell {
 	overflow: hidden;
-}
-
-/* images */
-img {
-	border-width: 0; /* Remove default borders around images when they are inside anchor tags. */
-}
-img.ewfAutoSizer {
-	display: block;
-	width: 100%;
 }
 
 /* text control */
