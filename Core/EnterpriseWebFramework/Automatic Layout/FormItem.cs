@@ -8,12 +8,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Contains metadata about a control, such as what it is called, ways in which it can be displayed, how it should be validated, etc.
 	/// </summary>
 	public class FormItem {
-		private static readonly ElementClass elementClass = new ElementClass( "ewfFi" );
+		private static readonly ElementClass itemClass = new ElementClass( "ewfFi" );
+		private static readonly ElementClass labelClass = new ElementClass( "ewfFiL" );
+		private static readonly ElementClass contentClass = new ElementClass( "ewfFiC" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-				new CssElement( "FormItem", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
+				new CssElement( "FormItem", "div.{0}".FormatWith( itemClass.ClassName ) ).ToCollection()
+					.Append( new CssElement( "FormItemLabel", "span.{0}".FormatWith( labelClass.ClassName ) ) )
+					.Append( new CssElement( "FormItemContent", "div.{0}".FormatWith( contentClass.ClassName ) ) )
+					.Materialize();
 		}
 
 		internal readonly FormItemSetup Setup;
@@ -45,14 +50,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public FlowComponent ToComponent( bool omitLabel = false ) =>
 			new GenericFlowContainer(
-				( !label.Any() || omitLabel ? Enumerable.Empty<FlowComponent>() : label.Append( new LineBreak() ) ).Concat( content )
+				( !label.Any() || omitLabel
+					  ? Enumerable.Empty<FlowComponent>()
+					  : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
+				.Append( new GenericFlowContainer( content, classes: contentClass ) )
 				.Concat(
 					Validation == null
 						? Enumerable.Empty<FlowComponent>()
 						: new FlowErrorContainer( new ErrorSourceSet( validations: Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection() )
 				.Materialize(),
 				displaySetup: Setup.DisplaySetup,
-				classes: elementClass );
+				classes: itemClass );
 	}
 
 	public static class FormItemExtensionCreators {
