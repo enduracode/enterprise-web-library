@@ -53,8 +53,20 @@ ewfWrappingFormItemList {
 ewfUnorderedLineList {
 	flex-flow: row nowrap;
 }
+ewfUnorderedLineList > ewfComponentListItem {
+	margin-left: .5em;
+}
+ewfUnorderedLineList > ewfComponentListItem:first-child {
+	margin-left: 0;
+}
 ewfUnorderedStackList {
 	flex-flow: column nowrap;
+}
+ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
+	margin-top: .5em;
+}
+ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
+	margin-top: 0;
 }
 ewfUnorderedWrappingList,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,

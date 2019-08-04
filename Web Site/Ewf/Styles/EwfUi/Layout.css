@@ -58,18 +58,6 @@ ewfHtmlBlock ul {
 	padding: 0;
 	list-style-type: circle;
 }
-ewfUnorderedLineList > ewfComponentListItem {
-	margin-left: .5em;
-}
-ewfUnorderedLineList > ewfComponentListItem:first-child {
-	margin-left: 0;
-}
-ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
-	margin-top: .5em;
-}
-ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
-	margin-top: 0;
-}
 ewfUnorderedWrappingList {
 	margin: -.25em;
 }
