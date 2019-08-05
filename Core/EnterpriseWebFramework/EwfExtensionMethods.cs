@@ -7,6 +7,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -129,10 +130,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.GetControls();
 					if( componentData.Id == null )
 						return children;
-					var np = new NamingPlaceholder( children );
-					if( componentData.Id.Any() )
-						np.ID = componentData.Id + "np";
-					return np.ToCollection();
+					return new NamingPlaceholder( children ) { ID = "{0}np".FormatWith( ph.UniqueID.Separate( "$", false ).Last() ) }.ToCollection();
 				} );
 			if( !string.IsNullOrEmpty( componentData.Id ) )
 				ph.ID = componentData.Id;
