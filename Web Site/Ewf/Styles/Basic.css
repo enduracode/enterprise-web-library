@@ -6,20 +6,26 @@ html {
 /* spacing */
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
-ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
+ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
+ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
 	border-color: rgba( 0, 0, 0, 0.1 );
 }
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
+ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
+	margin-top: 0;
+	margin-bottom: 0;
 	border-top-width: 1px;
 	border-top-style: solid;
 	padding-top: .75em;
 	padding-bottom: .75em;
 }
-ewfStackFormItemList > ewfFormItemListItem:first-child, ewfStackFormItemList > ewfFormItemListButtonItem:first-child {
+ewfStackFormItemList > ewfFormItemListItem:first-child, ewfStackFormItemList > ewfFormItemListButtonItem:first-child,
+ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:first-child {
 	border-top: 0;
 	padding-top: 0;
 }
-ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ewfFormItemListButtonItem:last-child {
+ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ewfFormItemListButtonItem:last-child,
+ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:last-child {
 	padding-bottom: 0;
 }
 ewfGridFormItemList {
@@ -72,6 +78,9 @@ ewfUnorderedWrappingList,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfWrappingFormItemList {
 	flex-flow: row wrap;
+}
+ewfStackFormItemList, ewfGridFormItemList {
+	clear: both;
 }
 ewfGridFormItemList {
 	display: grid;
