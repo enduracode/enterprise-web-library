@@ -58,12 +58,6 @@ ewfHtmlBlock ul {
 	padding: 0;
 	list-style-type: circle;
 }
-ewfUnorderedWrappingList {
-	margin: -.25em;
-}
-ewfUnorderedWrappingList > ewfComponentListItem {
-	margin: .25em;
-}
 .ewfControlList tr td {
 	padding-top: .25em;
 }

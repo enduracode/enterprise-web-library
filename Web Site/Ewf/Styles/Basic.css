@@ -10,6 +10,24 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
 	border-color: rgba( 0, 0, 0, 0.1 );
 }
+ewfUnorderedLineList > ewfComponentListItem {
+	margin-left: .5em;
+}
+ewfUnorderedLineList > ewfComponentListItem:first-child {
+	margin-left: 0;
+}
+ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
+	margin-top: .5em;
+}
+ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
+	margin-top: 0;
+}
+ewfUnorderedWrappingList {
+	margin: -.25em;
+}
+ewfUnorderedWrappingList > ewfComponentListItem {
+	margin: .25em;
+}
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
 	margin-top: 0;
@@ -27,6 +45,12 @@ ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:first-chil
 ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ewfFormItemListButtonItem:last-child,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:last-child {
 	padding-bottom: 0;
+}
+ewfWrappingFormItemList {
+	margin: -.5em;
+}
+ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem {
+	margin: .5em;
 }
 ewfGridFormItemList {
 	grid-gap: 1em;
@@ -56,23 +80,15 @@ ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemLi
 ewfWrappingFormItemList {
 	display: flex;
 }
+ewfUnorderedLineList, ewfUnorderedWrappingList,
+ewfWrappingFormItemList {
+	align-items: center;
+}
 ewfUnorderedLineList {
 	flex-flow: row nowrap;
 }
-ewfUnorderedLineList > ewfComponentListItem {
-	margin-left: .5em;
-}
-ewfUnorderedLineList > ewfComponentListItem:first-child {
-	margin-left: 0;
-}
 ewfUnorderedStackList {
 	flex-flow: column nowrap;
-}
-ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
-	margin-top: .5em;
-}
-ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
-	margin-top: 0;
 }
 ewfUnorderedWrappingList,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
