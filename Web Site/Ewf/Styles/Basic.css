@@ -271,6 +271,9 @@ ewfMultilineTextControlAllStates {
 textarea {
 	resize: none;
 }
+ewfSingleLineTextControlAllStates[type="email"] {
+	width: 20em;
+}
 
 /* checkboxes */
 ewfFlowCheckboxAllStates > ewfCheckbox {
