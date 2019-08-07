@@ -28,6 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					displaySetup,
 					"url",
 					null,
+					null,
 					false,
 					classes,
 					false,
@@ -70,6 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					displaySetup,
 					"url",
 					null,
+					null,
 					false,
 					classes,
 					false,
@@ -100,6 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new TextControlSetup(
 					displaySetup,
 					"url",
+					null,
 					null,
 					true,
 					classes,
