@@ -390,14 +390,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								var pb = firstDm as PostBack;
 								cell.Controls.Add(
 									new PlaceHolder().AddControlsReturnThis(
-										new Checkbox(
-												false,
-												Enumerable.Empty<PhrasingComponent>().Materialize(),
-												setup: CheckboxSetup.Create( action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ),
-												validationMethod: ( postBackValue, validator ) => {
-													if( postBackValue.Value )
-														checkedRowSetups.Add( rowSetup );
-												} ).PageComponent.ToCollection()
+										FormState.ExecuteWithDataModificationsAndDefaultAction(
+												selectedRowDataModificationsToMethods.Keys,
+												() => new Checkbox(
+													false,
+													Enumerable.Empty<PhrasingComponent>().Materialize(),
+													setup: CheckboxSetup.Create( action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ),
+													validationMethod: ( postBackValue, validator ) => {
+														if( postBackValue.Value )
+															checkedRowSetups.Add( rowSetup );
+													} ) )
+											.PageComponent.ToCollection()
 											.GetControls() ) );
 							}
 							rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
