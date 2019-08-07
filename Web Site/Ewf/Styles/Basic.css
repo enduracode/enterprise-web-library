@@ -283,6 +283,7 @@ ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 
 /* list controls */
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
+ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
 ewfControlStackItem > ewfDropDownListContainer > ewfDropDownList,
 ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
