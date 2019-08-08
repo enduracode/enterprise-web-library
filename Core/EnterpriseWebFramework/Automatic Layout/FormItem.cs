@@ -45,29 +45,69 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public IReadOnlyCollection<FlowComponent> Content => content;
 
 		/// <summary>
-		/// Creates a component representing this form item.
+		/// Creates a collection of components representing this form item.
 		/// This can be used to display a form item without a <see cref="FormItemList"/>.
 		/// </summary>
-		public FlowComponent ToComponent( bool omitLabel = false ) =>
+		public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false ) =>
 			new GenericFlowContainer(
 				( !label.Any() || omitLabel
 					  ? Enumerable.Empty<FlowComponent>()
 					  : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
 				.Append( new GenericFlowContainer( content, classes: contentClass ) )
-				.Concat(
-					Validation == null
-						? Enumerable.Empty<FlowComponent>()
-						: new FlowErrorContainer( new ErrorSourceSet( validations: Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection() )
+				.Concat( getErrorContainer() )
 				.Materialize(),
 				displaySetup: Setup.DisplaySetup,
-				classes: itemClass );
+				classes: itemClass ).ToCollection();
+
+		/// <summary>
+		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
+		/// </summary>
+		/// <param name="visualOrderRank"></param>
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		/// <param name="etherealChildren"></param>
+		public ComponentListItem ToListItem(
+			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			content.Concat( getErrorContainer() )
+				.Materialize()
+				.ToComponentListItem(
+					displaySetup: Setup.DisplaySetup,
+					visualOrderRank: visualOrderRank,
+					updateRegionSets: updateRegionSets,
+					etherealChildren: etherealChildren );
+
+		/// <summary>
+		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
+		/// </summary>
+		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
+		/// intermediate post-back. Do not pass null or the empty string.</param>
+		/// <param name="visualOrderRank"></param>
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
+		/// <param name="etherealChildren"></param>
+		public ComponentListItem ToListItem(
+			string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			content.Concat( getErrorContainer() )
+				.Materialize()
+				.ToComponentListItem(
+					id,
+					displaySetup: Setup.DisplaySetup,
+					visualOrderRank: visualOrderRank,
+					updateRegionSets: updateRegionSets,
+					removalUpdateRegionSets: removalUpdateRegionSets,
+					etherealChildren: etherealChildren );
+
+		private IEnumerable<FlowComponent> getErrorContainer() =>
+			Validation == null
+				? Enumerable.Empty<FlowComponent>()
+				: new FlowErrorContainer( new ErrorSourceSet( validations: Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection();
 	}
 
 	public static class FormItemExtensionCreators {
 		/// <summary>
 		/// Creates a form item with this form control.
 		/// </summary>
-		/// <param name="formControl"></param>
+		/// <param name="formControl">Do not pass null.</param>
 		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
 		public static FormItem ToFormItem(
@@ -83,7 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a form item with these components.
 		/// </summary>
-		/// <param name="content"></param>
+		/// <param name="content">Do not pass null.</param>
 		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
 		/// <param name="validation"></param>
