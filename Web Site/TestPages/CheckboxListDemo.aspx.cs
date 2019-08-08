@@ -15,8 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							includeSelectAndDeselectAllButtons: true,
 							minColumnWidth: 20.ToEm() ),
 						new[] { 3, 9, 19 } ).ToFormItem()
-					.ToComponent()
-					.ToCollection()
+					.ToComponentCollection()
 					.GetControls() );
 		}
 

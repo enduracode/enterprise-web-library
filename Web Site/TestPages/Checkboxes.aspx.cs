@@ -111,11 +111,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									StatusMessageType.Info,
 									"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 							.ToFormItem()
-							.ToComponent()
+							.ToListItem()
 							.ToCollection()
 							.Concat(
 								singleButton
-									? Enumerable.Empty<FlowComponent>()
+									? Enumerable.Empty<ComponentListItem>()
 									: group.CreateFlowRadioButton(
 											false,
 											"Second".ToComponents(),
@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 												StatusMessageType.Info,
 												"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 										.ToFormItem()
-										.ToComponent()
+										.ToListItem()
 										.ToCollection()
 										.Append(
 											group.CreateRadioButton(
@@ -136,8 +136,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 														StatusMessageType.Info,
 														"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 												.ToFormItem()
-												.ToComponent() ) )
-							.Select( i => i.ToCollection().ToComponentListItem() ) ).ToCollection()
+												.ToListItem() ) ) ).ToCollection()
 					.ToFormItem(
 						label: "{0}. {1}".FormatWith( id, label )
 							.ToComponents()

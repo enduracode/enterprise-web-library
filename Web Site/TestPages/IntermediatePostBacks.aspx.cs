@@ -61,8 +61,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				pb.ToCollection(),
 				() => {
 					if( info.Toggled )
-						regionComponents.Add(
-							dynamicFieldValue.ToTextControl( true, value: "This was just added!" ).ToFormItem( label: "Dynamic Field".ToComponents() ).ToComponent() );
+						regionComponents.AddRange(
+							dynamicFieldValue.ToTextControl( true, value: "This was just added!" )
+								.ToFormItem( label: "Dynamic Field".ToComponents() )
+								.ToComponentCollection() );
 					else
 						regionComponents.Add( new Paragraph( "Nothing here yet.".ToComponents() ) );
 				} );
@@ -114,7 +116,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var items = new List<ComponentListItem>();
 			if( info.NonIdItemStates.ElementAt( i ) == 1 )
-				items.Add( new TextControl( "Item {0}".FormatWith( i ), true ).ToFormItem().ToComponent().ToCollection().ToComponentListItem() );
+				items.Add( new TextControl( "Item {0}".FormatWith( i ), true ).ToFormItem().ToListItem() );
 			else
 				items.Add( "Item {0}".FormatWith( i ).ToComponents().ToComponentListItem() );
 			items.Add(
@@ -161,7 +163,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
 			var itemStack = ControlStack.Create( true );
-			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToComponent().ToCollection().GetControls().ToArray() );
+			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToComponentCollection().GetControls().ToArray() );
 			itemStack.AddControls(
 				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
 

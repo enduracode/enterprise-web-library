@@ -58,8 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									if( user.Value == null )
 										validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 								} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )
-							.ToComponent()
-							.ToCollection()
+							.ToComponentCollection()
 							.GetControls()
 							.Append(
 								new LegacyParagraph(

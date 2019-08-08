@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			RsFile uploadedFile = null;
 			var fileUploadDisplayedPmv = new PageModificationValue<string>();
-			components.Add(
+			components.AddRange(
 				new FileUpload(
 						displaySetup: fileUploadDisplayedPmv.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup(),
 						validationPredicate: setup.UploadValidationPredicate,
@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							uploadedFile = postBackValue;
 							setup.UploadValidationMethod?.Invoke( postBackValue, validator );
 						} ).ToFormItem()
-					.ToComponent() );
+					.ToComponentCollection() );
 			var fileUploadDisplayedHiddenFieldId = new HiddenFieldId();
 			if( file != null )
 				components.Add(

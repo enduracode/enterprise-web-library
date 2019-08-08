@@ -169,7 +169,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cells.Add(
 				( ReadOnly
 					  ? Enumerable.Empty<FlowComponent>()
-					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponent().ToCollection() ).ToCell() );
+					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponentCollection() ).ToCell() );
 			deleteModMethods.Add(
 				() => {
 					if( !delete.Value )
@@ -221,9 +221,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
 										file = postBackValue;
 									} ).ToFormItem()
-								.ToComponent()
-								.ToCollection()
-								.ToComponentListItem() )
+								.ToListItem() )
 						.Append( new EwfButton( new StandardButtonStyle( "Upload new file" ) ).ToCollection().ToComponentListItem() ) ).ToCollection() );
 		}
 
