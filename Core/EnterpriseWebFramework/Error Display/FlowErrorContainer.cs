@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a modification-error container with the specified sources.
 		/// </summary>
-		public FlowErrorContainer( ErrorSourceSet errorSources, ErrorDisplayStyle<FlowComponent> displayStyle ) {
+		public FlowErrorContainer( ErrorSourceSet errorSources, ErrorDisplayStyle<FlowComponent> displayStyle, bool disableFocusabilityOnError = false ) {
 			children = new IdentifiedFlowComponent(
 				() => new IdentifiedComponentData<FlowComponentOrNode>(
 					"",
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						errorSources.Validations.SelectMany( errorsBySource.GetValidationErrors )
 							.Select( i => new TrustedHtmlString( HttpUtility.HtmlEncode( i ) ) )
 							.Concat( errorsBySource.GetGeneralErrors() ),
-						true ) ) ).ToCollection();
+						!disableFocusabilityOnError ) ) ).ToCollection();
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {

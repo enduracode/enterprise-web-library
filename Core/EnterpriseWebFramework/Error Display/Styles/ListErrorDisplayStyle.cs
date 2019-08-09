@@ -23,6 +23,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		internal static DisplayableElementLocalData GetErrorFocusableElementLocalData(
+			ElementContext context, string elementName, ErrorSourceSet errorSources, IReadOnlyCollection<Tuple<string, string>> attributes ) =>
+			new DisplayableElementLocalData(
+				elementName,
+				new FocusabilityCondition( false, errorFocusabilitySources: errorSources ),
+				isFocused => {
+					if( isFocused )
+						attributes = ( attributes ?? Enumerable.Empty<Tuple<string, string>>() ).Append( Tuple.Create( "tabindex", "-1" ) ).Materialize();
+					return new DisplayableElementFocusDependentData(
+						attributes: attributes,
+						includeIdAttribute: isFocused,
+						jsInitStatements: isFocused
+							                  ? "document.getElementById( '{0}' ).focus(); document.getElementById( '{0}' ).scrollIntoView( {{ behavior: 'smooth', block: 'start' }} );"
+								                  .FormatWith( context.Id )
+							                  : "" );
+				} );
+
 		private readonly Func<ErrorSourceSet, IEnumerable<TrustedHtmlString>, bool, IReadOnlyCollection<FlowComponent>> componentGetter;
 
 		/// <summary>
@@ -37,16 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return new DisplayableElement(
 					context => new DisplayableElementData(
 						null,
-						() => new DisplayableElementLocalData(
-							"div",
-							new FocusabilityCondition( false, errorFocusabilitySources: componentsFocusableOnError ? errorSources : null ),
-							isFocused => new DisplayableElementFocusDependentData(
-								attributes: isFocused ? Tuple.Create( "tabindex", "-1" ).ToCollection() : null,
-								includeIdAttribute: isFocused,
-								jsInitStatements: isFocused
-									                  ? "document.getElementById( '{0}' ).focus(); document.getElementById( '{0}' ).scrollIntoView( {{ behavior: 'smooth', block: 'start' }} );"
-										                  .FormatWith( context.Id )
-									                  : "" ) ),
+						() => GetErrorFocusableElementLocalData( context, "div", componentsFocusableOnError ? errorSources : null, null ),
 						classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
 						children: new StackList(
 							from i in errors

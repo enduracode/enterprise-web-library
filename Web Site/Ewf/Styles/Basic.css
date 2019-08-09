@@ -450,7 +450,7 @@ ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 }
 
 /* error messages */
-ewfErrorMessageListContainer:focus {
+*[tabindex="-1"]:focus {
 	outline: none;
 }
 

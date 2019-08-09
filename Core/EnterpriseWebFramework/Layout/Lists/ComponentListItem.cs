@@ -36,15 +36,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="etherealChildren"></param>
 		public static ComponentListItem ToComponentListItem(
 			this IReadOnlyCollection<FlowComponent> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
-			return children.ToComponentListItem(
-				"",
-				displaySetup: displaySetup,
-				classes: classes,
-				visualOrderRank: visualOrderRank,
-				updateRegionSets: updateRegionSets,
-				etherealChildren: etherealChildren );
-		}
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			children.ToComponentListItem( displaySetup, classes, visualOrderRank, updateRegionSets, etherealChildren, null );
+
+		internal static ComponentListItem ToComponentListItem(
+			this IReadOnlyCollection<FlowComponent> children, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
+			IEnumerable<UpdateRegionSet> updateRegionSets, IReadOnlyCollection<EtherealComponent> etherealChildren,
+			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) =>
+			children.ToComponentListItem( "", displaySetup, classes, visualOrderRank, updateRegionSets, null, etherealChildren, localDataGetter );
 
 		/// <summary>
 		/// Creates a list item containing these components.
@@ -61,7 +60,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ComponentListItem ToComponentListItem(
 			this IReadOnlyCollection<FlowComponent> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null,
 			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
+			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			children.ToComponentListItem( id, displaySetup, classes, visualOrderRank, updateRegionSets, removalUpdateRegionSets, etherealChildren, null );
+
+		internal static ComponentListItem ToComponentListItem(
+			this IReadOnlyCollection<FlowComponent> children, string id, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
+			IEnumerable<UpdateRegionSet> updateRegionSets, IEnumerable<UpdateRegionSet> removalUpdateRegionSets,
+			IReadOnlyCollection<EtherealComponent> etherealChildren,
+			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) {
 			return new ComponentListItem(
 				( includeContentContainer, itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
@@ -87,13 +93,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 									return new DisplayableElementData(
 										displaySetup,
-										() => new DisplayableElementLocalData( "li", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) ),
+										() => !includeContentContainer && localDataGetter != null
+											      ? localDataGetter( context, "li", attributes )
+											      : new DisplayableElementLocalData( "li", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) ),
 										classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
 										children: includeContentContainer
 											          ? new DisplayableElement(
 												          innerContext => new DisplayableElementData(
 													          null,
-													          () => new DisplayableElementLocalData( "div" ),
+													          () => localDataGetter != null ? localDataGetter( innerContext, "div", null ) : new DisplayableElementLocalData( "div" ),
 													          classes: CssElementCreator.ItemClass,
 													          children: children,
 													          etherealChildren: etherealChildren ) ).ToCollection()

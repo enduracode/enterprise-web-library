@@ -74,9 +74,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										? new ElementClass( TextAlignmentStatics.Class( i.Setup.TextAlignment ) )
 										: ElementClassSet.Empty ),
 								children: i.Content.Concat(
-										i.Validation == null
+										i.ErrorSourceSet == null
 											? Enumerable.Empty<FlowComponent>()
-											: new FlowErrorContainer( new ErrorSourceSet( validations: i.Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection() )
+											: new FlowErrorContainer( i.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
 									.Materialize() ) ) )
 					.Materialize(),
 				items );
@@ -141,9 +141,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			( item.Label.Any() ? new GenericFlowContainer( item.Label, classes: labelClass ).ToCollection() : Enumerable.Empty<FlowComponent>() ).Append(
 				new GenericFlowContainer(
 					item.Content.Concat(
-							item.Validation == null
+							item.ErrorSourceSet == null
 								? Enumerable.Empty<FlowComponent>()
-								: new FlowErrorContainer( new ErrorSourceSet( validations: item.Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection() )
+								: new FlowErrorContainer( item.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
 						.Materialize(),
 					classes: contentClass ) )
 			.Materialize();
@@ -176,10 +176,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										                    i.item.Setup.DisplaySetup,
 										                    () => {
 											                    var styleAttribute = itemStyleAttributeGetter( i.item );
-											                    return new DisplayableElementLocalData(
+											                    return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+												                    itemContext,
 												                    "div",
-												                    focusDependentData: new DisplayableElementFocusDependentData(
-													                    attributes: styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null ) );
+												                    i.item.ErrorSourceSet,
+												                    styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
 										                    },
 										                    classes: i.elementClass.Add( itemClassGetter( i.item ) ),
 										                    children: itemComponentGetter( i.item ) ) ) )

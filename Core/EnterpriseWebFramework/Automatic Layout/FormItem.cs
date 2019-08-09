@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -25,6 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly IReadOnlyCollection<PhrasingComponent> label;
 		private readonly IReadOnlyCollection<FlowComponent> content;
 		public readonly EwfValidation Validation;
+		internal readonly ErrorSourceSet ErrorSourceSet;
 
 		internal FormItem(
 			FormItemSetup setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content, EwfValidation validation ) {
@@ -32,6 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.label = label;
 			this.content = content;
 			Validation = validation;
+			ErrorSourceSet = validation != null ? new ErrorSourceSet( validations: validation.ToCollection() ) : null;
 		}
 
 		/// <summary>
@@ -49,15 +52,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// This can be used to display a form item without a <see cref="FormItemList"/>.
 		/// </summary>
 		public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false ) =>
-			new GenericFlowContainer(
-				( !label.Any() || omitLabel
-					  ? Enumerable.Empty<FlowComponent>()
-					  : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
-				.Append( new GenericFlowContainer( content, classes: contentClass ) )
-				.Concat( getErrorContainer() )
-				.Materialize(),
-				displaySetup: Setup.DisplaySetup,
-				classes: itemClass ).ToCollection();
+			new DisplayableElement(
+				context => new DisplayableElementData(
+					Setup.DisplaySetup,
+					() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
+					classes: itemClass,
+					children: ( !label.Any() || omitLabel
+						            ? Enumerable.Empty<FlowComponent>()
+						            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
+					.Append( new GenericFlowContainer( content, classes: contentClass ) )
+					.Concat( getErrorContainer() )
+					.Materialize() ) ).ToCollection();
 
 		/// <summary>
 		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
@@ -69,11 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
 			content.Concat( getErrorContainer() )
 				.Materialize()
-				.ToComponentListItem(
-					displaySetup: Setup.DisplaySetup,
-					visualOrderRank: visualOrderRank,
-					updateRegionSets: updateRegionSets,
-					etherealChildren: etherealChildren );
+				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, updateRegionSets, etherealChildren, getErrorFocusableElementLocalData );
 
 		/// <summary>
 		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
@@ -91,16 +92,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.Materialize()
 				.ToComponentListItem(
 					id,
-					displaySetup: Setup.DisplaySetup,
-					visualOrderRank: visualOrderRank,
-					updateRegionSets: updateRegionSets,
-					removalUpdateRegionSets: removalUpdateRegionSets,
-					etherealChildren: etherealChildren );
+					Setup.DisplaySetup,
+					null,
+					visualOrderRank,
+					updateRegionSets,
+					removalUpdateRegionSets,
+					etherealChildren,
+					getErrorFocusableElementLocalData );
 
 		private IEnumerable<FlowComponent> getErrorContainer() =>
-			Validation == null
-				? Enumerable.Empty<FlowComponent>()
-				: new FlowErrorContainer( new ErrorSourceSet( validations: Validation.ToCollection() ), new ListErrorDisplayStyle() ).ToCollection();
+			ErrorSourceSet != null
+				? new FlowErrorContainer( ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection()
+				: Enumerable.Empty<FlowComponent>();
+
+		private DisplayableElementLocalData getErrorFocusableElementLocalData(
+			ElementContext context, string elementName, IReadOnlyCollection<Tuple<string, string>> attributes ) =>
+			ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, elementName, ErrorSourceSet, attributes );
 	}
 
 	public static class FormItemExtensionCreators {
