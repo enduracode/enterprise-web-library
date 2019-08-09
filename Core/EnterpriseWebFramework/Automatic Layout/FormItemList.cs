@@ -168,33 +168,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                    focusDependentData: new DisplayableElementFocusDependentData(
 								                    attributes: listStyleAttribute.Any() ? Tuple.Create( "style", listStyleAttribute ).ToCollection() : null ) ),
 						                    classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
-						                    children: this.items.Select(
+						                    children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
+							                    .Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
+							                    .Select(
 								                    i => new DisplayableElement(
 									                    itemContext => new DisplayableElementData(
-										                    i.Setup.DisplaySetup,
+										                    i.item.Setup.DisplaySetup,
 										                    () => {
-											                    var styleAttribute = itemStyleAttributeGetter( i );
+											                    var styleAttribute = itemStyleAttributeGetter( i.item );
 											                    return new DisplayableElementLocalData(
 												                    "div",
 												                    focusDependentData: new DisplayableElementFocusDependentData(
 													                    attributes: styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null ) );
 										                    },
-										                    classes: itemClass.Add( itemClassGetter( i ) ),
-										                    children: itemComponentGetter( i ) ) ) )
-							                    .Concat(
-								                    buttonItem.Select(
-									                    i => new DisplayableElement(
-										                    itemContext => new DisplayableElementData(
-											                    i.Setup.DisplaySetup,
-											                    () => {
-												                    var styleAttribute = itemStyleAttributeGetter( i );
-												                    return new DisplayableElementLocalData(
-													                    "div",
-													                    focusDependentData: new DisplayableElementFocusDependentData(
-														                    attributes: styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null ) );
-											                    },
-											                    classes: buttonItemClass.Add( itemClassGetter( i ) ),
-											                    children: itemComponentGetter( i ) ) ) ) )
+										                    classes: i.elementClass.Add( itemClassGetter( i.item ) ),
+										                    children: itemComponentGetter( i.item ) ) ) )
 							                    .Materialize() ) ).ToCollection();
 
 			this.items = ( items ?? Enumerable.Empty<FormItem>() ).ToList();
