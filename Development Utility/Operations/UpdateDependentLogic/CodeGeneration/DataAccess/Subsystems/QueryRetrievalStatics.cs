@@ -13,7 +13,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static DatabaseInfo info;
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			if( configuration.queries == null )
 				return;
 
@@ -57,7 +58,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 					r => {} );
 			}
 
-			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
+			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false, false );
 		}
 
 		private static void writeCacheClass( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
@@ -72,7 +73,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "private Cache() {}" );
 			foreach( var i in query.postSelectFromClauses ) {
 				var type = getQueryCacheType( query, i );
-				writer.WriteLine( "internal " + type + " " + getQueryCacheName( query, i, false ) + " { get { return " + getQueryCacheName( query, i, true ) + "; } }" );
+				writer.WriteLine(
+					"internal " + type + " " + getQueryCacheName( query, i, false ) + " { get { return " + getQueryCacheName( query, i, true ) + "; } }" );
 			}
 			writer.WriteLine( "}" );
 		}
@@ -99,7 +101,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			var namedParamList = DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value );
 			var getResultSetFirstArg = namedParamList.Any() ? "new[] { " + StringTools.ConcatenateWithDelimiter( ", ", namedParamList.ToArray() ) + " }, " : "";
-			writer.WriteLine( "return Cache.Current." + getQueryCacheName( query, postSelectFromClause, false ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
+			writer.WriteLine(
+				"return Cache.Current." + getQueryCacheName( query, postSelectFromClause, false ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );

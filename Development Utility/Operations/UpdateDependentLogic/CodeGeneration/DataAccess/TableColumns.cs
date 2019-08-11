@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
@@ -35,16 +34,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		internal TableColumns( DBConnection cn, string table, bool forRevisionHistoryLogic ) {
 			try {
+				// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
+				var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
+
 				// NOTE: Cache this result.
-				AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true );
-
-				foreach( var col in AllColumns ) {
-					// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
-					var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
-
-					if( !( cn.DatabaseInfo is OracleInfo ) && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull && !isAspNetApplicationServicesTable )
-						throw new UserCorrectableException( "String column " + col.Name + " allows null, which is not allowed." );
-				}
+				AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true, !isAspNetApplicationServicesTable );
 
 				// Identify key, identity, and non identity columns.
 				var nonIdentityColumns = new List<Column>();
@@ -73,10 +67,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				AllNonIdentityColumnsExceptRowVersion = nonIdentityColumns.Where( i => !i.IsRowVersion ).ToArray();
 
 				if( forRevisionHistoryLogic ) {
-					if( keyColumns.Count != 1 ) {
+					if( keyColumns.Count != 1 )
 						throw new UserCorrectableException(
 							"A revision history modification class can only be created for tables with exactly one primary key column, which is assumed to also be a foreign key to the revisions table." );
-					}
 					primaryKeyAndRevisionIdColumn = keyColumns.Single();
 					if( primaryKeyAndRevisionIdColumn.IsIdentity )
 						throw new UserCorrectableException( "The revision ID column of a revision history table must not be an identity." );

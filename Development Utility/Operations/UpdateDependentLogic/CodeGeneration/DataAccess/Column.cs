@@ -6,6 +6,7 @@ using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Humanizer;
 
@@ -14,14 +15,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		/// <summary>
 		/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 		/// </summary>
-		internal static List<Column> GetColumnsInQueryResults( DBConnection cn, string commandText, bool includeKeyInfo ) {
+		internal static List<Column> GetColumnsInQueryResults( DBConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
 			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 			var columns = new List<Column>();
 
 			var readerMethod = new Action<DbDataReader>(
 				r => {
-					foreach( DataRow row in r.GetSchemaTable().Rows )
-						columns.Add( new Column( row, includeKeyInfo, cn.DatabaseInfo ) );
+					foreach( DataRow row in r.GetSchemaTable().Rows ) {
+						var col = new Column( row, includeKeyInfo, cn.DatabaseInfo );
+						if( validateStringColumns && !( cn.DatabaseInfo is OracleInfo ) && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull )
+							throw new UserCorrectableException( "String column " + col.Name + " allows null, which is not allowed." );
+						columns.Add( col );
+					}
 				} );
 			if( includeKeyInfo )
 				cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
