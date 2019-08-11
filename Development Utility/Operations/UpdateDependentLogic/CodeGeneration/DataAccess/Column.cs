@@ -16,22 +16,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 		/// </summary>
 		internal static List<Column> GetColumnsInQueryResults( DBConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
-			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 			var columns = new List<Column>();
 
+			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
+			var validationMethods = new List<Action>();
 			var readerMethod = new Action<DbDataReader>(
 				r => {
-					foreach( DataRow row in r.GetSchemaTable().Rows ) {
-						var col = new Column( row, includeKeyInfo, cn.DatabaseInfo );
-						if( validateStringColumns && !( cn.DatabaseInfo is OracleInfo ) && col.DataTypeName == typeof( string ).ToString() && col.AllowsNull )
-							throw new UserCorrectableException( "String column " + col.Name + " allows null, which is not allowed." );
-						columns.Add( col );
-					}
+					foreach( DataRow row in r.GetSchemaTable().Rows )
+						columns.Add( new Column( row, includeKeyInfo, validateStringColumns, validationMethods, cn.DatabaseInfo ) );
 				} );
 			if( includeKeyInfo )
 				cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 			else
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, readerMethod );
+
+			foreach( var i in validationMethods )
+				i();
 
 			return columns;
 		}
@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private readonly bool isRowVersion;
 		private readonly bool? isKey;
 
-		private Column( DataRow schemaTableRow, bool includeKeyInfo, DatabaseInfo databaseInfo ) {
+		private Column( DataRow schemaTableRow, bool includeKeyInfo, bool validateIfString, List<Action> validationMethods, DatabaseInfo databaseInfo ) {
 			ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
 
 			// MySQL incorrectly uses one-based ordinals; see http://bugs.mysql.com/bug.php?id=61477.
@@ -66,6 +66,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
 			if( includeKeyInfo )
 				isKey = (bool)schemaTableRow[ "IsKey" ];
+
+			validationMethods.Add(
+				() => {
+					if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
+					    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
+						throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
+				} );
 		}
 
 		internal string Name { get { return valueContainer.Name; } }
