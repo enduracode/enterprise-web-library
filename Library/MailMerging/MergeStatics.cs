@@ -51,7 +51,10 @@ namespace EnterpriseWebLibrary.MailMerging {
 				new PseudoTableRow[] { null },
 				children: new List<MergeDataTreeChild<PseudoTableRow>>
 					{
-						new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>( "Things", childFields.AsReadOnly(), pseudoTableRow => ( (PseudoChildRow)null ).ToCollection() )
+						new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
+							"Things",
+							childFields.AsReadOnly(),
+							pseudoTableRow => ( (PseudoChildRow)null ).ToCollection() )
 					}.AsReadOnly() );
 		}
 
@@ -65,8 +68,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 						new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
 							"Things",
 							childFields.AsReadOnly(),
-							pseudoTableRow =>
-								Randomness.FlipCoin() ? new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } : Enumerable.Empty<PseudoChildRow>() )
+							pseudoTableRow => new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } )
 					}.AsReadOnly() );
 		}
 	}
