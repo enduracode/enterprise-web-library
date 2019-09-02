@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
@@ -72,17 +71,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="fieldNameTree">The fields that you want to include in the display. Pass null for all.</param>
 		/// <param name="omitListIfSingleRow">Pass true to omit the root ordered-list component if the tree has exactly one row.</param>
 		/// <param name="useSubtractiveMode">Pass true if you want the field-name tree to represent excluded fields, rather than included fields.</param>
-		public static Control ToRowTreeDisplay(
+		public static FlowComponent ToRowTreeDisplay(
 			this MergeRowTree rowTree, MergeFieldNameTree fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) =>
-			new Block(
+			new GenericFlowContainer(
 				omitListIfSingleRow && rowTree.Rows.Count() == 1
-					? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode ).GetControls().ToArray()
-					: ControlStack.CreateWithControls(
-							true,
-							rowTree.Rows.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( getRow( i, fieldNameTree, useSubtractiveMode ).GetControls() ) )
-								.ToArray() )
-						.ToCollection<Control>()
-						.ToArray() ) { CssClass = rowTreeClass.ClassName };
+					? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode )
+					: new StackList( from i in rowTree.Rows select getRow( i, fieldNameTree, useSubtractiveMode ).ToComponentListItem() ).ToCollection(),
+				classes: rowTreeClass );
 
 		private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
 			var values = FormItemList.CreateGrid(

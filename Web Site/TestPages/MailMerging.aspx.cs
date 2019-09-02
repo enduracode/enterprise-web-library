@@ -15,7 +15,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								new[] { "Test", "FullName" },
 								childNamesAndChildren: Tuple.Create( "Things", new MergeFieldNameTree( "Another".ToCollection() ) ).ToCollection() ),
 							omitListIfSingleRow: true )
-						.ToCollection() ) );
+						.ToCollection()
+						.GetControls() ) );
 		}
 	}
 }
