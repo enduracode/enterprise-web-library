@@ -164,7 +164,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void handleAuthenticateRequest( object sender, EventArgs e ) {
-			RequestState.IntermediateUserExists = IntermediateAuthenticationMethods.CookieExists();
+			RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
 		}
 
 		private void handlePostAuthenticateRequest( object sender, EventArgs e ) {
@@ -389,8 +389,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
 					// wrapped with another exception.
 					if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
-					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler || errorIsWcf404 ||
-					    errorIsBogusPathException ) {
+					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler ||
+					    errorIsWcf404 || errorIsBogusPathException ) {
 						setStatusCode( 404 );
 						return;
 					}
@@ -462,18 +462,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private bool handleErrorIfOnHandledErrorPage( string errorEvent, Exception exception ) {
-			var handledErrorPages =
-				new[]
-					{
-						MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ), MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
-						MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
-					}.Select( getErrorPage );
+			var handledErrorPages = new[]
+				{
+					MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ), MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
+					MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
+				}.Select( getErrorPage );
 			var requestParameters = new HashSet<string>( getQueryParameters( RequestState.Url ) );
-			if(
-				handledErrorPages.All(
-					page =>
-					page.GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ||
-					getQueryParameters( page.GetUrl() ).Any( i => !requestParameters.Contains( i ) ) ) )
+			if( handledErrorPages.All(
+				page => page.GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ||
+				        getQueryParameters( page.GetUrl() ).Any( i => !requestParameters.Contains( i ) ) ) )
 				return false;
 			RequestState.SetError( errorEvent + " during a request for a handled error page" + ( exception != null ? ":" : "." ), exception );
 			transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );

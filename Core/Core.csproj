@@ -364,7 +364,7 @@
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfResponseBodyCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\FullResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\ResponseMemoryCachingSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\IntermediateAuthenticationMethods.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\NonLiveInstallationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Core\PageDisabledException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />

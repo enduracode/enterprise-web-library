@@ -455,7 +455,7 @@ ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 }
 
 /* EwfPage and master page */
-ewfTopWarningBlock {
+ewfTopWarningContainer {
 	z-index: 9998;
 }
 ewfNotificationSectionContainerBothStates {
@@ -467,7 +467,7 @@ ewfClickBlockerBothStates {
 ewfProcessingDialogBlockAllStates {
 	z-index: 10001;
 }
-ewfTopWarningBlock {
+ewfTopWarningContainer {
 	position: relative;
 	font-size: 1rem;
 	margin-bottom: .5em;
@@ -480,24 +480,24 @@ ewfTopWarningBlock {
 	color: black;
 }
 @media print {
-	ewfTopWarningBlock {
+	ewfTopWarningContainer {
 		display: none;
 	}
 }
-ewfTopWarningBlock ewfActionControlAllButtonStylesAllStates {
+ewfTopWarningContainer ewfActionControlAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none;
 	color: white;
 }
-ewfTopWarningBlock ewfActionControlAllButtonStylesAllNormalStates,
-ewfTopWarningBlock ewfActionControlAllButtonStylesAllVisitedStates {
+ewfTopWarningContainer ewfActionControlAllButtonStylesAllNormalStates,
+ewfTopWarningContainer ewfActionControlAllButtonStylesAllVisitedStates {
 	background-color: hsla( 4, 100%, 32%, 1 );
 }
-ewfTopWarningBlock ewfActionControlAllButtonStylesStatesWithHover,
-ewfTopWarningBlock ewfActionControlAllButtonStylesStatesWithFocus {
+ewfTopWarningContainer ewfActionControlAllButtonStylesStatesWithHover,
+ewfTopWarningContainer ewfActionControlAllButtonStylesStatesWithFocus {
 	background-color: hsla( 4, 100%, 45%, 1 );
 }
-ewfTopWarningBlock ewfActionControlShrinkWrapButtonStyleAllStates {
+ewfTopWarningContainer ewfActionControlShrinkWrapButtonStyleAllStates {
 	padding: .1em .2em;
 	border-radius: .5em;
 }
@@ -844,7 +844,7 @@ ewfErrorPageBody ewfActionControlLargeButtonStyleAllStates {
 }
 
 /* fonts */
-ewfTopWarningBlock, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
+ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
 	font-family: 'Open Sans', sans-serif;
 }
 ewfSelectUserPageBody h1, ewfErrorPageBody h1 {

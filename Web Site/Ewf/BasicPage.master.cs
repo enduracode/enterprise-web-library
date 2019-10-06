@@ -15,7 +15,7 @@ using MoreLinq;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
 		// Some of these are used by the EWF JavaScript file.
-		private const string topWarningBlockCssClass = "ewfTopWarning";
+		private static readonly ElementClass topWarningContainerClass = new ElementClass( "ewfTopWarning" );
 		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
 		private const string clickBlockerActiveClass = "ewfClickBlockerA";
 		private static readonly ElementClass processingDialogBlockInactiveClass = new ElementClass( "ewfProcessingDialogI" );
@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		internal class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var elements = new List<CssElement>();
-				elements.Add( new CssElement( "TopWarningBlock", "div.{0}".FormatWith( topWarningBlockCssClass ) ) );
+				elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
 
 				const string clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass;
 				const string clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass;
@@ -161,45 +161,46 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						? new Block { CssClass = notificationSpacerClass }.ToCollection()
 						: Enumerable.Empty<Control>() ) );
 
-			var warningControls = new List<Control>();
+			var warningLines = new List<IReadOnlyCollection<PhrasingComponent>>();
 			if( !ConfigurationStatics.IsLiveInstallation ) {
-				var children = new List<Control>();
-				children.AddRange( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ).ToCollection().GetControls() );
-				children.AddRange( " This is not the live system. Changes made here will be lost and are not recoverable. ".ToComponents().GetControls() );
+				var components = new List<PhrasingComponent>();
+				components.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
+				components.AddRange( " This is not the live system. Changes made here will be lost and are not recoverable. ".ToComponents() );
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
-					children.Add(
-						new PostBackButton(
-							new ButtonActionControlStyle( "Log Out", ButtonSize.ShrinkWrap ),
-							usesSubmitBehavior: false,
-							postBack: PostBack.CreateFull(
-								id: "ewfIntermediateLogOut",
-								firstModificationMethod: IntermediateAuthenticationMethods.ClearCookie,
-								actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) );
-				warningControls.Add( new PlaceHolder().AddControlsReturnThis( children.ToArray() ) );
+					components.Add(
+						new EwfButton(
+							new StandardButtonStyle( "Log Out", buttonSize: ButtonSize.ShrinkWrap ),
+							behavior: new PostBackBehavior(
+								postBack: PostBack.CreateFull(
+									id: "ewfIntermediateLogOut",
+									firstModificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
+									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) );
+				warningLines.Add( components );
 			}
 
 			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
 			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )
-				warningControls.Add(
-					new PlaceHolder().AddControlsReturnThis(
-						"User impersonation is in effect. ".ToComponents()
-							.GetControls()
-							.Concat(
-								EwfLink.Create( SelectUser.GetInfo( AppRequestState.Instance.Url ), new ButtonActionControlStyle( "Change User", ButtonSize.ShrinkWrap ) ) )
-							.Concat( " ".ToComponents().GetControls() )
-							.Concat(
-								new PostBackButton(
-									new ButtonActionControlStyle( "End Impersonation", ButtonSize.ShrinkWrap ),
-									usesSubmitBehavior: false,
+				warningLines.Add(
+					"User impersonation is in effect. ".ToComponents()
+						.Append( new EwfHyperlink( SelectUser.GetInfo( AppRequestState.Instance.Url ), new StandardHyperlinkStyle( "Change User" ) ) )
+						.Concat( " ".ToComponents() )
+						.Append(
+							new EwfButton(
+								new StandardButtonStyle( "End Impersonation", buttonSize: ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: "ewfEndImpersonation",
 										firstModificationMethod: UserImpersonationStatics.EndImpersonation,
-										actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) ) );
+										actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) )
+						.Materialize() );
 
-			if( warningControls.Any() ) {
-				var warningControl = warningControls.Count > 1 ? ControlStack.CreateWithControls( true, warningControls.ToArray() ) : warningControls.Single();
-				ph.AddControlsReturnThis( new Block( warningControl ) { CssClass = topWarningBlockCssClass } );
-			}
+			if( warningLines.Any() )
+				ph.AddControlsReturnThis(
+					new GenericFlowContainer(
+							warningLines.Aggregate( ( components, line ) => components.Append( new LineBreak() ).Concat( line ).Materialize() ),
+							displaySetup: new DisplaySetup( ConfigurationStatics.IsLiveInstallation || !NonLiveInstallationStatics.WarningsHiddenCookieExists() ),
+							classes: topWarningContainerClass ).ToCollection()
+						.GetControls() );
 
 			// This is used by the EWF JavaScript file.
 			const string clickBlockerId = "ewfClickBlocker";
@@ -255,9 +256,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return messagesExist && statusMessagesDisplayAsNotification()
 				       ? new Block( new LegacySection( SectionStyle.Box, "Messages", null, getStatusMessageControlList(), false, true ) )
 					       {
-						       ClientIDMode = ClientIDMode.Static,
-						       ID = notificationSectionContainerId,
-						       CssClass = notificationSectionContainerNotificationClass
+						       ClientIDMode = ClientIDMode.Static, ID = notificationSectionContainerId, CssClass = notificationSectionContainerNotificationClass
 					       }.ToCollection()
 				       : Enumerable.Empty<Control>();
 		}
