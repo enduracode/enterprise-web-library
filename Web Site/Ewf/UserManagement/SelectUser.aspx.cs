@@ -3,16 +3,23 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.WebSessionState;
 
 // Parameter: string returnUrl
+// OptionalParameter: string user
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class SelectUser: EwfPage {
 		partial class Info {
+			internal User UserObject { get; private set; }
+
 			protected override void init() {
 				if( !UserManagementStatics.UserManagementEnabled )
 					throw new ApplicationException( "User management not enabled" );
+
+				if( User.Any() && User != "anonymous" && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
+					throw new ApplicationException( "user" );
 			}
 
 			protected override bool userCanAccessResource {
@@ -23,7 +30,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
+		private bool pageViewDataModificationsExecuted;
+
+		protected override Action getPageViewDataModificationMethod() {
+			pageViewDataModificationsExecuted = true;
+
+			if( !info.User.Any() )
+				return null;
+			return () => UserImpersonationStatics.BeginImpersonation( info.UserObject );
+		}
+
 		protected override void loadData() {
+			if( info.User.Any() ) {
+				if( !pageViewDataModificationsExecuted )
+					throw new ApplicationException( "Page-view data modifications did not execute." );
+
+				ph.AddControlsReturnThis( new Paragraph( "Please wait.".ToComponents() ).ToCollection().GetControls() );
+				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResourceInfo( info.ReturnUrl ).GetUrl() );
+				return;
+			}
+
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.SelectUserPageBodyCssClass;
 
 			ph.AddControlsReturnThis( new PageName() );
@@ -38,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								.Materialize() ).ToCollection()
 						.GetControls() );
 
-			DataValue<User> user = new DataValue<User>();
+			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
 				firstModificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
 				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
