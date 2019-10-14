@@ -72,16 +72,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		/// </summary>
 		public void Start() {
 			var allServices = ServiceController.GetServices();
-			foreach( var service in RuntimeConfiguration.WindowsServices.Select(
-				s => {
-					var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == s.InstalledName );
-					if( serviceController == null )
-						throw new UserCorrectableException(
-							"The \"" + s.InstalledName + "\" service could not be found. Re-install the services for the installation to correct this error." );
-					return serviceController;
-				} ) ) {
+			foreach( var service in RuntimeConfiguration.WindowsServices ) {
+				var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == service.InstalledName );
+				if( serviceController == null ) {
+					TelemetryStatics.ReportFault(
+						"Failed to start the \"{0}\" service because it is missing. Re-install the services for the installation to correct this error.".FormatWith(
+							service.InstalledName ) );
+					continue;
+				}
+
 				try {
-					service.Start();
+					serviceController.Start();
 				}
 				catch( InvalidOperationException e ) {
 					const string message = "Failed to start service.";
@@ -93,18 +94,18 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 					throw new ApplicationException( message, e );
 				}
-				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
+				serviceController.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
 
-				EwlStatics.RunProgram( "sc", "config \"{0}\" start= delayed-auto".FormatWith( service.ServiceName ), "", true );
+				EwlStatics.RunProgram( "sc", "config \"{0}\" start= delayed-auto".FormatWith( serviceController.ServiceName ), "", true );
 
 				// Set failure actions.
 				const int restartDelay = 60000; // milliseconds
 				EwlStatics.RunProgram(
 					"sc",
-					"failure \"{0}\" reset= {1} actions= restart/{2}".FormatWith( service.ServiceName, serviceFailureResetPeriod, restartDelay ),
+					"failure \"{0}\" reset= {1} actions= restart/{2}".FormatWith( serviceController.ServiceName, serviceFailureResetPeriod, restartDelay ),
 					"",
 					true );
-				EwlStatics.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( service.ServiceName ), "", true );
+				EwlStatics.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( serviceController.ServiceName ), "", true );
 			}
 			if( runtimeConfiguration.WebApplications.Any( i => i.IisApplication != null ) && runtimeConfiguration.InstallationType != InstallationType.Development )
 				IsuStatics.StartIisAppPool( IisAppPoolName );
