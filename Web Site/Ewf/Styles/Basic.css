@@ -271,7 +271,7 @@ ewfMultilineTextControlAllStates {
 textarea {
 	resize: none;
 }
-ewfSingleLineTextControlAllStates[type="email"] {
+ewfSingleLineTextControlAllStates[type="password"], ewfSingleLineTextControlAllStates[type="email"] {
 	width: 20em;
 }
 
