@@ -133,7 +133,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="listItemId"></param>
 		/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
 		/// <param name="setup">The setup object for the flow radio button.</param>
-		public FlowCheckbox CreateBlockRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null ) {
+		public FlowCheckbox CreateFlowRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null ) {
 			setup = setup ?? FlowRadioButtonSetup.Create();
 			return new FlowCheckbox( setup, CreateRadioButton( listItemId, label, setup: setup.RadioButtonSetup ) );
 		}
