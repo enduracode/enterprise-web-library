@@ -80,12 +80,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: rowTreeClass );
 
 		private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
-			var values = FormItemList.CreateGrid(
-				2,
-				generalSetup: new FormItemListSetup( hideIfEmpty: true ),
-				items: ( useSubtractiveMode
-					         ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
-					         : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
+			var valueFormItems = ( useSubtractiveMode
+				                       ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
+				                       : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
 					mergeValue => {
 						IReadOnlyCollection<PhrasingComponent> value = null;
 						if( mergeValue is MergeValue<string> stringValue )
@@ -96,7 +93,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
 							       : value.ToFormItem( label: mergeValue.Name.ToComponents() );
 					} )
-				.Materialize() );
+				.Materialize();
+			var valueList = valueFormItems.Any()
+				                ? FormItemList.CreateGrid( 2, items: valueFormItems ).ToCollection()
+				                : Enumerable.Empty<FlowComponent>().Materialize();
 
 			var children = ( useSubtractiveMode
 				                 ? row.Children.Select(
@@ -124,9 +124,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new StackList( child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ).ToComponentListItem() ) ).ToCollection() ) )
 				.Materialize();
 
-			return children.Any()
-				       ? values.ToCollection<FlowComponent>().Append( new GenericFlowContainer( children, classes: rowTreeChildClass ) ).Materialize()
-				       : values.ToCollection();
+			return children.Any() ? valueList.Append( new GenericFlowContainer( children, classes: rowTreeChildClass ) ).Materialize() : valueList;
 		}
 	}
 }

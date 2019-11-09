@@ -11,7 +11,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// A column primary table. Do not use this control in markup.
 	/// </summary>
 	public class ColumnPrimaryTable: WebControl, ControlTreeDataLoader {
-		private readonly bool hideIfEmpty;
 		private readonly EwfTableStyle style;
 		private readonly ReadOnlyCollection<string> classes;
 		private readonly string caption;
@@ -26,7 +25,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a table with one item group.
 		/// </summary>
-		/// <param name="hideIfEmpty">Set to true if you want this table to hide itself if it has no content rows.</param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
@@ -41,26 +39,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="items">The items.</param>
 		public ColumnPrimaryTable(
-			bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
+			EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
 			bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-			IEnumerable<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IEnumerable<EwfTableItem> items = null )
-			: this(
-				hideIfEmpty,
-				style,
-				classes,
-				caption,
-				subCaption,
-				allowExportToExcel,
-				tableActions,
-				fields,
-				headItems,
-				firstDataFieldIndex,
-				items != null ? new List<ColumnPrimaryItemGroup> { new ColumnPrimaryItemGroup( null, items: items ) } : null ) {}
+			IEnumerable<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IEnumerable<EwfTableItem> items = null ): this(
+			style,
+			classes,
+			caption,
+			subCaption,
+			allowExportToExcel,
+			tableActions,
+			fields,
+			headItems,
+			firstDataFieldIndex,
+			items != null ? new List<ColumnPrimaryItemGroup> { new ColumnPrimaryItemGroup( null, items: items ) } : null ) {}
 
 		/// <summary>
 		/// Creates a table with multiple item groups.
 		/// </summary>
-		/// <param name="hideIfEmpty">Set to true if you want this table to hide itself if it has no content rows.</param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
@@ -76,10 +71,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="itemGroups">The item groups.</param>
 		// NOTE: Change the Tuple for tableActions to a named type.
 		public ColumnPrimaryTable(
-			bool hideIfEmpty = false, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
+			EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
 			bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
 			IEnumerable<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IEnumerable<ColumnPrimaryItemGroup> itemGroups = null ) {
-			this.hideIfEmpty = hideIfEmpty;
 			this.style = style;
 			this.classes = ( classes ?? new string[ 0 ] ).ToList().AsReadOnly();
 			this.caption = caption;
@@ -99,11 +93,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			if( hideIfEmpty && itemGroups.All( itemGroup => !itemGroup.Items.Any() ) ) {
-				Visible = false;
-				return;
-			}
-
 			EwfTable.SetUpTableAndCaption( this, style, classes, caption, subCaption );
 
 			var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) ).Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) );
@@ -120,10 +109,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				fields.Count );
 
 			// Pivot the cell placeholders from column primary into row primary format.
-			var cellPlaceholderListsForRows =
-				Enumerable.Range( 0, fields.Count )
-					.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
-					.ToList();
+			var cellPlaceholderListsForRows = Enumerable.Range( 0, fields.Count )
+				.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
+				.ToList();
 
 			var headRows = TableOps.BuildRows(
 				cellPlaceholderListsForRows.Take( firstDataFieldIndex ).ToList(),

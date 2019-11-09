@@ -158,33 +158,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			setup = setup ?? new FormItemListSetup();
 
 			var buttonItem = setup.Button.Any() ? setup.Button.ToFormItem( setup: buttonItemSetup ).ToCollection() : Enumerable.Empty<FormItem>().Materialize();
-			childGetter = () => setup.HideIfEmpty && !this.items.Any()
-				                    ? Enumerable.Empty<DisplayableElement>().Materialize()
-				                    : new DisplayableElement(
-					                    listContext => new DisplayableElementData(
-						                    setup.DisplaySetup,
-						                    () => new DisplayableElementLocalData(
-							                    "div",
-							                    focusDependentData: new DisplayableElementFocusDependentData(
-								                    attributes: listStyleAttribute.Any() ? Tuple.Create( "style", listStyleAttribute ).ToCollection() : null ) ),
-						                    classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
-						                    children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
-							                    .Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
-							                    .Select(
-								                    i => new DisplayableElement(
-									                    itemContext => new DisplayableElementData(
-										                    i.item.Setup.DisplaySetup,
-										                    () => {
-											                    var styleAttribute = itemStyleAttributeGetter( i.item );
-											                    return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
-												                    itemContext,
-												                    "div",
-												                    i.item.ErrorSourceSet,
-												                    styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
-										                    },
-										                    classes: i.elementClass.Add( itemClassGetter( i.item ) ),
-										                    children: itemComponentGetter( i.item ) ) ) )
-							                    .Materialize() ) ).ToCollection();
+			childGetter = () => new DisplayableElement(
+				listContext => new DisplayableElementData(
+					setup.DisplaySetup,
+					() => new DisplayableElementLocalData(
+						"div",
+						focusDependentData: new DisplayableElementFocusDependentData(
+							attributes: listStyleAttribute.Any() ? Tuple.Create( "style", listStyleAttribute ).ToCollection() : null ) ),
+					classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
+					children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
+						.Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
+						.Select(
+							i => new DisplayableElement(
+								itemContext => new DisplayableElementData(
+									i.item.Setup.DisplaySetup,
+									() => {
+										var styleAttribute = itemStyleAttributeGetter( i.item );
+										return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+											itemContext,
+											"div",
+											i.item.ErrorSourceSet,
+											styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
+									},
+									classes: i.elementClass.Add( itemClassGetter( i.item ) ),
+									children: itemComponentGetter( i.item ) ) ) )
+						.Materialize() ) ).ToCollection();
 
 			this.items = ( items ?? Enumerable.Empty<FormItem>() ).ToList();
 		}
