@@ -85,8 +85,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new EwfValidation(
 				validator => validationMethod(
 					new PostBackValue<T>(
-						GetValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
-						ValueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
+						getValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
+						valueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
 					validator ) );
 		}
 
@@ -107,15 +107,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 		}
 
-		[ Obsolete( "Guaranteed through 31 October 2016. Use CreateValidation or a PageModificationValue instead." ) ]
-		internal T GetValue( PostBackValueDictionary postBackValues ) {
-			var key = postBackValueKeyGetter();
-			if( !key.Any() || postBackValues == null || postBackValues.KeyRemoved( key ) )
-				return durableValueGetter();
-			var result = validatePostBackValue( postBackValues.GetValue( key ) );
-			return result.IsValid ? result.Value : durableValueGetter();
-		}
-
 		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
 			if( filePostBackValueValidator != null ) {
 				var fileValue = value as HttpPostedFile;
@@ -126,18 +117,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
 		}
 
-		[ Obsolete( "Guaranteed through 31 October 2016. Use CreateValidation instead." ) ]
-		internal bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return !EwlStatics.AreEqual( GetValue( postBackValues ), durableValueGetter() );
+		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
+			return valueChangedOnPostBack( postBackValues );
 		}
 
-		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return ValueChangedOnPostBack( postBackValues );
-		}
+		private bool valueChangedOnPostBack( PostBackValueDictionary postBackValues ) => !EwlStatics.AreEqual( getValue( postBackValues ), durableValueGetter() );
 
 		void FormValue.SetPageModificationValues( PostBackValueDictionary postBackValues ) {
 			foreach( var i in pageModificationValueAdders )
-				i( GetValue( postBackValues ) );
+				i( getValue( postBackValues ) );
+		}
+
+		private T getValue( PostBackValueDictionary postBackValues ) {
+			var key = postBackValueKeyGetter();
+			if( !key.Any() || postBackValues == null || postBackValues.KeyRemoved( key ) )
+				return durableValueGetter();
+			var result = validatePostBackValue( postBackValues.GetValue( key ) );
+			return result.IsValid ? result.Value : durableValueGetter();
 		}
 	}
 }
