@@ -107,16 +107,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 		}
 
-		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
-			if( filePostBackValueValidator != null ) {
-				var fileValue = value as HttpPostedFile;
-				return value == null || fileValue != null ? filePostBackValueValidator( fileValue ) : PostBackValueValidationResult<T>.CreateInvalid();
-			}
-
-			var stringValue = value as string;
-			return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
-		}
-
 		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return valueChangedOnPostBack( postBackValues );
 		}
@@ -134,6 +124,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return durableValueGetter();
 			var result = validatePostBackValue( postBackValues.GetValue( key ) );
 			return result.IsValid ? result.Value : durableValueGetter();
+		}
+
+		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
+			if( filePostBackValueValidator != null ) {
+				var fileValue = value as HttpPostedFile;
+				return value == null || fileValue != null ? filePostBackValueValidator( fileValue ) : PostBackValueValidationResult<T>.CreateInvalid();
+			}
+
+			var stringValue = value as string;
+			return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
 		}
 	}
 }
