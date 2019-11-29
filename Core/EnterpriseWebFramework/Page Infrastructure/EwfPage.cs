@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,6 +15,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using Newtonsoft.Json;
 using NodaTime;
 using StackExchange.Profiling;
 
@@ -23,12 +25,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class EwfPage: Page {
 		// This string is duplicated in the JavaScript file.
-		private const string postBackHiddenFieldName = "ewfPostBack";
+		private const string hiddenFieldName = "ewfData";
 
 		internal const string ButtonElementName = "ewfButton";
 
 		private static Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator;
 		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
+
+		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
+		private class HiddenFieldData {
+			[ JsonProperty( PropertyName = "componentState" ) ]
+			public readonly ImmutableDictionary<string, object> ComponentStateValuesById;
+
+			[ JsonProperty( PropertyName = "formValueHash" ) ]
+			public readonly string FormValueHash;
+
+			[ JsonProperty( PropertyName = "failingDm", Required = Required.AllowNull ) ]
+			public readonly string LastPostBackFailingDmId;
+
+			// This property name is duplicated in the JavaScript file.
+			[ JsonProperty( PropertyName = "postBack" ) ]
+			public readonly string PostBackId;
+
+			public HiddenFieldData(
+				ImmutableDictionary<string, object> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId ) {
+				ComponentStateValuesById = componentStateValuesById;
+				FormValueHash = formValueHash;
+				LastPostBackFailingDmId = lastPostBackFailingDmId;
+				PostBackId = postBackId;
+			}
+		}
 
 		internal new static void Init( Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator, Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
 			EwfValidation.Init(
@@ -36,6 +62,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => Instance.formState.DataModifications,
 				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
 				() => Instance.formState.ReportValidationCreated() );
+			ComponentStateItem.Init(
+				AssertPageTreeNotBuilt,
+				() => Instance.elementOrIdentifiedComponentIdGetter(),
+				id => {
+					var valuesById = AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById;
+					return valuesById != null && valuesById.TryGetValue( id, out var value ) ? new SpecifiedValue<object>( value ) : null;
+				},
+				( id, item ) => Instance.componentStateItemsById.Add( id, item ) );
 			PostBack.Init( () => Instance.formState.DataModifications );
 			PostBackFormAction.Init(
 				postBack => {
@@ -89,6 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private Control contentContainer;
 		private Control etherealPlace;
 		private FormState formState;
+		private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
 		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
@@ -99,6 +134,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
+		private readonly Dictionary<string, ComponentStateItem> componentStateItemsById = new Dictionary<string, ComponentStateItem>();
 		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
@@ -311,7 +347,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
-				if( staticRegionContents.Item1 != requestState.StaticRegionContents ||
+				if( staticRegionContents.Item1 != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) )
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
@@ -444,24 +480,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Loads hidden field state. We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure
-		/// changes.
+		/// We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure changes.
 		/// </summary>
 		protected sealed override object LoadPageStateFromPersistenceMedium() {
-			string formValueHash = null;
-			string lastPostBackFailingDmId = null;
+			HiddenFieldData hiddenFieldData = null;
 			try {
+				// throws exception if field missing, because Request.Form returns null
+				hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
+					Request.Form[ hiddenFieldName ],
+					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
+
 				// Based on our implementation of SavePageStateToPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
 				// with no First object.
 				var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
 
-				var savedState = PageState.CreateFromViewState( (object[])pair.Second );
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
-					savedState.Item1,
+					PageState.CreateFromViewState( (object[])pair.Second ),
 					Request.Form[ "__SCROLLPOSITIONX" ],
 					Request.Form[ "__SCROLLPOSITIONY" ] );
-				formValueHash = (string)savedState.Item2[ 0 ];
-				lastPostBackFailingDmId = (string)savedState.Item2[ 1 ];
+				AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
@@ -482,17 +519,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
-					validateFormSubmission( formValueHash );
+					validateFormSubmission( hiddenFieldData.FormValueHash );
 
 					// Get the post-back object and, if necessary, the last post-back's failing data modification.
-					var postBackId = Request.Form[ postBackHiddenFieldName ]; // returns null if field missing
-					var postBack = postBackId != null ? GetPostBack( postBackId ) : null;
+					var postBack = GetPostBack( hiddenFieldData.PostBackId );
 					if( postBack == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-					var lastPostBackFailingDm = postBack.IsIntermediate && lastPostBackFailingDmId != null
-						                            ? lastPostBackFailingDmId.Any() ? GetPostBack( lastPostBackFailingDmId ) as DataModification : dataUpdate
+					var lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
+						                            ? hiddenFieldData.LastPostBackFailingDmId.Any()
+							                              ?
+							                              GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
+							                              : dataUpdate
 						                            : null;
-					if( postBack.IsIntermediate && lastPostBackFailingDmId != null && lastPostBackFailingDm == null )
+					if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null && lastPostBackFailingDm == null )
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
 					// Execute the page's data update.
@@ -551,6 +590,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							.ToArray();
 						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
+						requestState.ComponentStateValuesById = null;
 						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
 						requestState.DmIdAndSecondaryOp = Tuple.Create(
 							actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
@@ -559,8 +599,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							staticRegionContents.Item1,
 							preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 					}
-					else
+					else {
+						requestState.ComponentStateValuesById = null;
 						requestState.PostBackValues = null;
+					}
 				} );
 
 			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
@@ -603,6 +645,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
 						loadData();
 				} );
+			Form.AddControlsReturnThis(
+				new ElementNode(
+						context => new ElementNodeData(
+							() => {
+								var attributes = new List<Tuple<string, string>>();
+								attributes.Add( Tuple.Create( "type", "hidden" ) );
+								attributes.Add( Tuple.Create( "name", hiddenFieldName ) );
+
+								var rs = AppRequestState.Instance.EwfPageRequestState;
+								var failingDmId =
+									rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
+										? rs.DmIdAndSecondaryOp.Item1
+										: null;
+
+								attributes.Add(
+									Tuple.Create(
+										"value",
+										JsonConvert.SerializeObject(
+											new HiddenFieldData(
+												componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsObject ),
+												generateFormValueHash(),
+												failingDmId,
+												"" ),
+											Formatting.None ) ) );
+
+								return new ElementNodeLocalData( "input", new ElementNodeFocusDependentData( attributes, hiddenFieldName, "" ) );
+							} ) ).ToCollection()
+					.GetControls() );
 			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
 				loadDataForControlAndChildren( this );
 			formState = null;
@@ -614,8 +684,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( duplicatePostBackValueKeys.Any() )
 				throw new ApplicationException(
 					"Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
-
-			ClientScript.RegisterHiddenField( postBackHiddenFieldName, "" );
 
 			foreach( var i in formValues )
 				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
@@ -724,6 +792,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual void loadData() {}
 
 		private void loadDataForControlAndChildren( Control control ) {
+			elementOrIdentifiedComponentIdGetter = () => control.ClientID;
+
 			var controlTreeDataLoader = control as ControlTreeDataLoader;
 			if( controlTreeDataLoader != null ) {
 				FormState.Current.SetForNextElement();
@@ -865,25 +935,47 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
-			var extraPostBackValuesExist =
-				requestState.PostBackValues.AddFromRequest(
-					Request.Form.Cast<string>().Except( new[] { postBackHiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
-					postBackValueKeys.Contains,
-					key => Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
-					Request.Files.Cast<string>(),
-					postBackValueKeys.Contains,
-					key => Request.Files[ key ] );
+			var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
+			                               requestState.PostBackValues.AddFromRequest(
+				                               Request.Form.Cast<string>().Except( new[] { hiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
+				                               postBackValueKeys.Contains,
+				                               key => Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
+				                               Request.Files.Cast<string>(),
+				                               postBackValueKeys.Contains,
+				                               key => Request.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
-			var invalidPostBackValuesExist = activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
+			var invalidPostBackValuesExist =
+				componentStateItemsById.Any( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() ) ||
+				activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
 			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
 			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree ) {
 				// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
+				requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
+					from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
 				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid( requestState.PostBackValues ) select i.GetPostBackValueKey();
 				requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 
 				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
 			}
+		}
+
+		private string generateFormValueHash() {
+			var formValueString = new StringBuilder();
+			foreach( var pair in componentStateItemsById ) {
+				formValueString.Append( pair.Key );
+				formValueString.Append( pair.Value.DurableValue );
+			}
+			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
+				formValueString.Append( formValue.GetPostBackValueKey() );
+				formValueString.Append( formValue.GetDurableValueAsString() );
+			}
+
+			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+			var hashString = "";
+			foreach( var b in hash )
+				hashString += b.ToString( "x2" );
+			return hashString;
 		}
 
 		private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
@@ -1172,30 +1264,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return base.SaveViewState();
 		}
 
-		/// <summary>
-		/// Saves hidden field state.
-		/// </summary>
 		protected sealed override void SavePageStateToPersistenceMedium( object state ) {
-			var rs = AppRequestState.Instance.EwfPageRequestState;
-			var failingDmId =
-				rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
-					? rs.DmIdAndSecondaryOp.Item1
-					: null;
-			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray( new object[] { generateFormValueHash(), failingDmId } ) );
-		}
-
-		private string generateFormValueHash() {
-			var formValueString = new StringBuilder();
-			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
-				formValueString.Append( formValue.GetPostBackValueKey() );
-				formValueString.Append( formValue.GetDurableValueAsString() );
-			}
-
-			var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
-			var hashString = "";
-			foreach( var b in hash )
-				hashString += b.ToString( "x2" );
-			return hashString;
+			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray() );
 		}
 	}
 }

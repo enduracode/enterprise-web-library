@@ -585,6 +585,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ModalBoxId.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Modification\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Modification\PageModificationValueCondition.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ComponentStateItem.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\EtherealComponentOrElement.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />

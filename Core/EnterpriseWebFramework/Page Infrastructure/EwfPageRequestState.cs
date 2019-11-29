@@ -9,7 +9,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string scrollPositionX;
 		private readonly string scrollPositionY;
 
-		// set after onLoadData
+		internal ImmutableDictionary<string, object> ComponentStateValuesById { get; set; }
+
+		// form data
 		internal PostBackValueDictionary PostBackValues { get; set; }
 
 		// set during modifications

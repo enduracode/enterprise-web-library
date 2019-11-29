@@ -105,7 +105,9 @@ function postBackRequestStarting( e, postBackId ) {
 		return;
 	}
 
-	$( "#ewfPostBack" ).val( postBackId );
+	var ewfData = JSON.parse( $( "#ewfData" ).val() );
+	ewfData.postBack = postBackId;
+	$( "#ewfData" ).val( JSON.stringify( ewfData ) );
 
 	// see http://stackoverflow.com/a/9924844/35349
 	for( var i in CKEDITOR.instances )

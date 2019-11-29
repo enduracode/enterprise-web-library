@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -27,12 +25,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// view state serialization
 
-		internal static Tuple<PageState, object[]> CreateFromViewState( object[] viewStateArray ) {
-			return Tuple.Create( new PageState( (Hashtable)viewStateArray[ 0 ] ), viewStateArray.Skip( 1 ).ToArray() );
+		internal static PageState CreateFromViewState( object[] viewStateArray ) {
+			return new PageState( (Hashtable)viewStateArray[ 0 ] );
 		}
 
-		internal object[] GetViewStateArray( object[] additionalElements ) {
-			return new object[] { customState }.Concat( additionalElements ).ToArray();
+		internal object[] GetViewStateArray() {
+			return new object[] { customState };
 		}
 
 
