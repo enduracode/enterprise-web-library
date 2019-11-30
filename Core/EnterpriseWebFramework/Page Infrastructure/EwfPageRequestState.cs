@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class EwfPageRequestState {
@@ -9,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string scrollPositionX;
 		private readonly string scrollPositionY;
 
-		internal ImmutableDictionary<string, object> ComponentStateValuesById { get; set; }
+		internal ImmutableDictionary<string, JToken> ComponentStateValuesById { get; set; }
 
 		// form data
 		internal PostBackValueDictionary PostBackValues { get; set; }

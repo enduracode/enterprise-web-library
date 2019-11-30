@@ -1,15 +1,16 @@
 ﻿using System;
 using EnterpriseWebLibrary.InputValidation;
+using Newtonsoft.Json.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class ComponentStateItem {
 		private static Action creationTimeAsserter;
 		private static Func<string> elementOrIdentifiedComponentIdGetter;
-		private static Func<string, SpecifiedValue<object>> valueGetter;
+		private static Func<string, JToken> valueGetter;
 		private static Action<string, ComponentStateItem> itemAdder;
 
 		internal static void Init(
-			Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, SpecifiedValue<object>> valueGetter,
+			Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, JToken> valueGetter,
 			Action<string, ComponentStateItem> itemAdder ) {
 			ComponentStateItem.creationTimeAsserter = creationTimeAsserter;
 			ComponentStateItem.elementOrIdentifiedComponentIdGetter = elementOrIdentifiedComponentIdGetter;
@@ -39,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal abstract object DurableValue { get; }
 		internal abstract bool ValueIsInvalid();
-		internal abstract object ValueAsObject { get; }
+		internal abstract JToken ValueAsJson { get; }
 	}
 
 	public sealed class ComponentStateItem<T>: ComponentStateItem {
@@ -48,13 +49,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly bool valueIsInvalid;
 		private readonly EwfValidation durableValueUpdateValidation;
 
-		internal ComponentStateItem(
-			T durableValue, SpecifiedValue<object> value, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod ) {
+		internal ComponentStateItem( T durableValue, JToken value, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod ) {
 			if( !valueValidator( durableValue ) )
 				throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
 			this.durableValue = durableValue;
 
-			if( value != null && tryConvertValue( value.Value, out var convertedValue ) && valueValidator( convertedValue ) )
+			if( value != null && tryConvertValue( value, out var convertedValue ) && valueValidator( convertedValue ) )
 				this.value = new DataValue<T> { Value = convertedValue };
 			else {
 				this.value = new DataValue<T> { Value = durableValue };
@@ -65,9 +65,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				durableValueUpdateValidation = new EwfValidation( validator => durableValueUpdateValidationMethod( this.value.Value, validator ) );
 		}
 
-		private bool tryConvertValue( object valueAsObject, out T convertedValue ) {
+		private bool tryConvertValue( JToken valueAsJson, out T convertedValue ) {
 			try {
-				convertedValue = (T)valueAsObject;
+				convertedValue = valueAsJson.ToObject<T>();
 			}
 			catch {
 				convertedValue = default;
@@ -88,6 +88,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal override object DurableValue => durableValue;
 		internal override bool ValueIsInvalid() => valueIsInvalid;
-		internal override object ValueAsObject => value.Value;
+		internal override JToken ValueAsJson => JToken.FromObject( value.Value );
 	}
 }

@@ -16,6 +16,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NodaTime;
 using StackExchange.Profiling;
 
@@ -35,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
 			[ JsonProperty( PropertyName = "componentState" ) ]
-			public readonly ImmutableDictionary<string, object> ComponentStateValuesById;
+			public readonly ImmutableDictionary<string, JToken> ComponentStateValuesById;
 
 			[ JsonProperty( PropertyName = "formValueHash" ) ]
 			public readonly string FormValueHash;
@@ -48,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			public readonly string PostBackId;
 
 			public HiddenFieldData(
-				ImmutableDictionary<string, object> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId ) {
+				ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId ) {
 				ComponentStateValuesById = componentStateValuesById;
 				FormValueHash = formValueHash;
 				LastPostBackFailingDmId = lastPostBackFailingDmId;
@@ -67,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => Instance.elementOrIdentifiedComponentIdGetter(),
 				id => {
 					var valuesById = AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById;
-					return valuesById != null && valuesById.TryGetValue( id, out var value ) ? new SpecifiedValue<object>( value ) : null;
+					return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 				},
 				( id, item ) => Instance.componentStateItemsById.Add( id, item ) );
 			PostBack.Init( () => Instance.formState.DataModifications );
@@ -664,7 +665,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										"value",
 										JsonConvert.SerializeObject(
 											new HiddenFieldData(
-												componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsObject ),
+												componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 												generateFormValueHash(),
 												failingDmId,
 												"" ),
