@@ -4,8 +4,8 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal sealed class ElementNode: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, FormValueControl,
-		ControlWithJsInitLogic, EtherealControl {
+	internal sealed class ElementNode: WebControl, FlowComponentOrNode, EtherealComponentOrElement, ControlTreeDataLoader, ControlWithJsInitLogic,
+		EtherealControl {
 		internal readonly Func<ElementContext, ElementNodeData> ElementDataGetter;
 		internal readonly FormValue FormValue;
 
@@ -64,8 +64,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			webFormsFocusDependentData = webFormsLocalData.FocusDependentDataGetter( isFocused );
 			return webFormsFocusDependentData.JsInitStatements;
 		}
-
-		FormValue FormValueControl.FormValue => FormValue;
 
 		protected override void Render( HtmlTextWriter writer ) {
 			if( webFormsLocalData == null )

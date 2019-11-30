@@ -376,7 +376,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								performValidationOnly: true );
 						else {
 							var formValuesChanged = GetDescendants( contentContainer )
-								.OfType<FormValueControl>()
+								.OfType<ElementNode>()
 								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
 						}
@@ -553,7 +553,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var actionPostBack = postBack as ActionPostBack;
 					if( actionPostBack != null ) {
 						var formValuesChanged = GetDescendants( contentContainer )
-							.OfType<FormValueControl>()
+							.OfType<ElementNode>()
 							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						requestState.FocusKey = "";
 						try {
@@ -995,7 +995,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
 			var staticFormValues = GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
-				.OfType<FormValueControl>()
+				.OfType<ElementNode>()
 				.Select( i => i.FormValue )
 				.Where( i => i != null )
 				.Distinct()
