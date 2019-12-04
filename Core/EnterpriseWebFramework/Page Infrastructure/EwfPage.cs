@@ -348,16 +348,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
-				if( staticRegionContents.Item1 != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
+				if( staticRegionContents.contents != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) )
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
 							?
-							"Form controls, modification-error-display keys, and post-back IDs may not change if modification errors exist." +
+							"Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
 							" (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
 							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
-								? "Form controls outside of update regions may not change on an intermediate post-back."
-								: "Form controls and post-back IDs may not change during the validation stage of an intermediate post-back." );
+								? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
+								: "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." );
 			}
 
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
@@ -383,7 +383,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						if( navigationNeeded ) {
 							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).Item1, new Tuple<string, string>[ 0 ] );
+							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).contents, new Tuple<string, string>[ 0 ] );
 						}
 					} );
 				if( navigationNeeded )
@@ -591,13 +591,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							.ToArray();
 						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
 
-						requestState.ComponentStateValuesById = null;
-						requestState.PostBackValues.RemoveExcept( staticRegionContents.Item2.Select( i => i.GetPostBackValueKey() ) );
+						requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
+							.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
+						requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
 						requestState.DmIdAndSecondaryOp = Tuple.Create(
 							actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
 							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
 						requestState.SetStaticAndUpdateRegionState(
-							staticRegionContents.Item1,
+							staticRegionContents.contents,
 							preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 					}
 					else {
@@ -678,13 +679,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				loadDataForControlAndChildren( this );
 			formState = null;
 
-			foreach( var i in controlTreeValidations )
-				i();
+			var activeStateItems = GetDescendants( this ).OfType<ElementNode>().SelectMany( i => i.StateItems ).ToImmutableHashSet();
+			foreach( var i in componentStateItemsById.Where( i => !activeStateItems.Contains( i.Value ) ).Select( i => i.Key ).Materialize() )
+				componentStateItemsById.Remove( i );
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
 				throw new ApplicationException(
 					"Duplicate post-back-value keys exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicatePostBackValueKeys ) + "." );
+
+			foreach( var i in controlTreeValidations )
+				i();
 
 			foreach( var i in formValues )
 				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
@@ -921,7 +926,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.HtmlMessages;
 				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
-					getStaticRegionContents( new Control[ 0 ] ).Item1,
+					getStaticRegionContents( new Control[ 0 ] ).contents,
 					new Tuple<string, string>[ 0 ] );
 			}
 		}
@@ -963,7 +968,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private string generateFormValueHash() {
 			var formValueString = new StringBuilder();
-			foreach( var pair in componentStateItemsById ) {
+			foreach( var pair in componentStateItemsById.OrderBy( i => i.Key ) ) {
 				formValueString.Append( pair.Key );
 				formValueString.Append( pair.Value.DurableValue );
 			}
@@ -990,17 +995,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private Tuple<string, IEnumerable<FormValue>> getStaticRegionContents( IEnumerable<Control> updateRegionControls ) {
+		private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
+			IEnumerable<Control> updateRegionControls ) {
 			var contents = new StringBuilder();
 
 			updateRegionControls = new HashSet<Control>( updateRegionControls );
-			var staticFormValues = GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) )
-				.OfType<ElementNode>()
-				.Select( i => i.FormValue )
+			var staticDescendants = GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) ).OfType<ElementNode>().Materialize();
+			var staticStateItems = staticDescendants.SelectMany( i => i.StateItems ).ToImmutableHashSet();
+			var staticFormValues = staticDescendants.Select( i => i.FormValue )
 				.Where( i => i != null )
 				.Distinct()
 				.OrderBy( i => i.GetPostBackValueKey() )
-				.ToArray();
+				.Materialize();
+
+			foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
+				contents.Append( pair.Key );
+				contents.Append( pair.Value.DurableValue );
+			}
 			foreach( var formValue in staticFormValues ) {
 				contents.Append( formValue.GetPostBackValueKey() );
 				contents.Append( formValue.GetDurableValueAsString() );
@@ -1020,7 +1031,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
 					contents.Append( postBack.Id );
 
-			return Tuple.Create<string, IEnumerable<FormValue>>( contents.ToString(), staticFormValues );
+			return ( contents.ToString(), staticStateItems, staticFormValues );
 		}
 
 		private void navigate( ResourceInfo destination, FullResponse secondaryResponse ) {

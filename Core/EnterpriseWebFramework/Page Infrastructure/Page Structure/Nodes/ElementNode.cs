@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -10,6 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly FormValue FormValue;
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		internal IReadOnlyCollection<ComponentStateItem> StateItems;
 		private Func<ElementNodeLocalData> webFormsLocalDataGetter;
 		private ElementNodeLocalData webFormsLocalData;
 		private bool isFocused;
@@ -27,6 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var elementData = ElementDataGetter( new ElementContext( ClientID ) );
 			this.AddControlsReturnThis( elementData.Children.GetControls() );
 			elementData.EtherealChildren.AddEtherealControls( this );
+			StateItems = elementData.EtherealChildren.OfType<ComponentStateItem>().Materialize();
 			webFormsLocalDataGetter = elementData.LocalDataGetter;
 		}
 

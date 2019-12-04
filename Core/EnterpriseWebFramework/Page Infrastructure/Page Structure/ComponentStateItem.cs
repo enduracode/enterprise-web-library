@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using EnterpriseWebLibrary.InputValidation;
 using Newtonsoft.Json.Linq;
 
@@ -43,7 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal abstract JToken ValueAsJson { get; }
 	}
 
-	public sealed class ComponentStateItem<T>: ComponentStateItem {
+	public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent {
 		private readonly T durableValue;
 		private readonly DataValue<T> value;
 		private readonly bool valueIsInvalid;
@@ -89,5 +91,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal override object DurableValue => durableValue;
 		internal override bool ValueIsInvalid() => valueIsInvalid;
 		internal override JToken ValueAsJson => JToken.FromObject( value.Value );
+
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 	}
 }
