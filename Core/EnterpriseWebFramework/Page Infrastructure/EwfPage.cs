@@ -63,6 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => Instance.formState.DataModifications,
 				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
 				() => Instance.formState.ReportValidationCreated() );
+			FormValueStatics.Init( formValue => Instance.formValues.Add( formValue ) );
 			ComponentStateItem.Init(
 				AssertPageTreeNotBuilt,
 				() => Instance.elementOrIdentifiedComponentIdGetter(),
@@ -862,10 +863,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal PostBack GetPostBack( string id ) {
 			PostBack value;
 			return postBacksById.TryGetValue( id, out value ) ? value : null;
-		}
-
-		internal void AddFormValue( FormValue formValue ) {
-			formValues.Add( formValue );
 		}
 
 		/// <summary>

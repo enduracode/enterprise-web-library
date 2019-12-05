@@ -45,8 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.stringValueSelector = stringValueSelector;
 			this.stringPostBackValueValidator = stringPostBackValueValidator;
 
-			// This dependency on EwfPage should not exist.
-			EwfPage.Instance.AddFormValue( this );
+			FormValueStatics.FormValueAdder( this );
 		}
 
 		/// <summary>
@@ -65,8 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.stringValueSelector = stringValueSelector;
 			this.filePostBackValueValidator = filePostBackValueValidator;
 
-			// This dependency on EwfPage should not exist.
-			EwfPage.Instance.AddFormValue( this );
+			FormValueStatics.FormValueAdder( this );
 		}
 
 		/// <summary>
@@ -134,6 +132,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var stringValue = value as string;
 			return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
+		}
+	}
+
+	internal static class FormValueStatics {
+		internal static Action<FormValue> FormValueAdder;
+
+		internal static void Init( Action<FormValue> formValueAdder ) {
+			FormValueAdder = formValueAdder;
 		}
 	}
 }
