@@ -88,10 +88,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfValidation DurableValueUpdateValidation => durableValueUpdateValidation;
 
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 		internal override object DurableValue => durableValue;
 		internal override bool ValueIsInvalid() => valueIsInvalid;
 		internal override JToken ValueAsJson => JToken.FromObject( value.Value );
-
-		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 	}
 }
