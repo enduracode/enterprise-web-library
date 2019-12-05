@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.Materialize(),
 				displaySetup: setup.DisplaySetup,
 				classes: setup.Classes,
-				etherealChildren: new EwfHiddenField( ( file == null ).ToString(), id: fileUploadDisplayedHiddenFieldId, pageModificationValue: fileUploadDisplayedPmv )
+				etherealContent: new EwfHiddenField( ( file == null ).ToString(), id: fileUploadDisplayedHiddenFieldId, pageModificationValue: fileUploadDisplayedPmv )
 					.PageComponent.ToCollection() ).ToCollection();
 
 			modificationMethod = () => {

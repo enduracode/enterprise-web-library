@@ -42,8 +42,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "SectionBoxStyleBothStates", boxClosedSelector, boxExpandedSelector ),
 						new CssElement( "SectionBoxStyleClosedState", boxClosedSelector ), new CssElement( "SectionBoxStyleExpandedState", boxExpandedSelector ),
 						new CssElement( "SectionHeadingContainer", "* > div." + headingClass.ClassName ),
-						new CssElement( "SectionHeading", "h1." + headingClass.ClassName ),
-						new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ), new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ),
+						new CssElement( "SectionHeading", "h1." + headingClass.ClassName ), new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ),
+						new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ),
 						new CssElement( "SectionContentContainer", "div." + contentClass.ClassName )
 					};
 			}
@@ -58,16 +58,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="style">The section's style.</param>
 		/// <param name="classes">The classes on the section.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public Section(
 			IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal, ElementClassSet classes = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ): this(
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
 			"",
 			content,
 			displaySetup: displaySetup,
 			style: style,
 			classes: classes,
-			etherealChildren: etherealChildren ) {}
+			etherealContent: etherealContent ) {}
 
 		/// <summary>
 		/// Creates a section.
@@ -79,11 +79,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the section.</param>
 		/// <param name="postHeadingComponents">Components that follow the heading but are still part of the heading container.</param>
 		/// <param name="expanded">Set to true or false if you want users to be able to expand or close the section by clicking on the heading.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public Section(
 			string heading, IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal,
 			ElementClassSet classes = null, IReadOnlyCollection<FlowComponent> postHeadingComponents = null, bool? expanded = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ): this(
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
 			displaySetup,
 			style,
 			classes,
@@ -92,14 +92,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			content,
 			expanded,
 			false,
-			etherealChildren ) {}
+			etherealContent ) {}
 
 		/// <summary>
 		/// BasicPage.master use only.
 		/// </summary>
 		public Section(
 			DisplaySetup displaySetup, SectionStyle style, ElementClassSet classes, string heading, IReadOnlyCollection<FlowComponent> postHeadingComponents,
-			IReadOnlyCollection<FlowComponent> content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent> etherealChildren ) {
+			IReadOnlyCollection<FlowComponent> content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			children = new DisplayableElement(
 				context => {
 					var hiddenFieldId = new HiddenFieldId();
@@ -173,7 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						etherealChildren: ( expandedPmv != null
 							                    ? new EwfHiddenField( expanded.Value.ToString(), id: hiddenFieldId, pageModificationValue: expandedPmv ).PageComponent
 								                    .ToCollection()
-							                    : Enumerable.Empty<EtherealComponent>() ).Concat( etherealChildren ?? Enumerable.Empty<EtherealComponent>() )
+							                    : Enumerable.Empty<EtherealComponent>() ).Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
 						.Materialize() );
 				} ).ToCollection();
 		}

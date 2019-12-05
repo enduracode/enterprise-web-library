@@ -28,27 +28,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a list item containing these components.
 		/// </summary>
-		/// <param name="children"></param>
+		/// <param name="content"></param>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the item.</param>
 		/// <param name="visualOrderRank"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IReadOnlyCollection<FlowComponent> children, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
-			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
-			children.ToComponentListItem( displaySetup, classes, visualOrderRank, updateRegionSets, etherealChildren, null );
+			this IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			content.ToComponentListItem( displaySetup, classes, visualOrderRank, updateRegionSets, etherealContent, null );
 
 		internal static ComponentListItem ToComponentListItem(
-			this IReadOnlyCollection<FlowComponent> children, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
-			IEnumerable<UpdateRegionSet> updateRegionSets, IReadOnlyCollection<EtherealComponent> etherealChildren,
+			this IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
+			IEnumerable<UpdateRegionSet> updateRegionSets, IReadOnlyCollection<EtherealComponent> etherealContent,
 			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) =>
-			children.ToComponentListItem( "", displaySetup, classes, visualOrderRank, updateRegionSets, null, etherealChildren, localDataGetter );
+			content.ToComponentListItem( "", displaySetup, classes, visualOrderRank, updateRegionSets, null, etherealContent, localDataGetter );
 
 		/// <summary>
 		/// Creates a list item containing these components.
 		/// </summary>
-		/// <param name="children"></param>
+		/// <param name="content"></param>
 		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
 		/// intermediate post-back. Do not pass null or the empty string.</param>
 		/// <param name="displaySetup"></param>
@@ -56,17 +56,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="visualOrderRank"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public static ComponentListItem ToComponentListItem(
-			this IReadOnlyCollection<FlowComponent> children, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null,
-			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
-			children.ToComponentListItem( id, displaySetup, classes, visualOrderRank, updateRegionSets, removalUpdateRegionSets, etherealChildren, null );
+			this IReadOnlyCollection<FlowComponent> content, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			content.ToComponentListItem( id, displaySetup, classes, visualOrderRank, updateRegionSets, removalUpdateRegionSets, etherealContent, null );
 
 		internal static ComponentListItem ToComponentListItem(
-			this IReadOnlyCollection<FlowComponent> children, string id, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
+			this IReadOnlyCollection<FlowComponent> content, string id, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
 			IEnumerable<UpdateRegionSet> updateRegionSets, IEnumerable<UpdateRegionSet> removalUpdateRegionSets,
-			IReadOnlyCollection<EtherealComponent> etherealChildren,
+			IReadOnlyCollection<EtherealComponent> etherealContent,
 			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) {
 			return new ComponentListItem(
 				( includeContentContainer, itemTypeClasses, width ) => {
@@ -103,10 +103,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													          null,
 													          () => localDataGetter != null ? localDataGetter( innerContext, "div", null ) : new DisplayableElementLocalData( "div" ),
 													          classes: CssElementCreator.ItemClass,
-													          children: children,
-													          etherealChildren: etherealChildren ) ).ToCollection()
-											          : children,
-										etherealChildren: includeContentContainer ? null : etherealChildren );
+													          children: content,
+													          etherealChildren: etherealContent ) ).ToCollection()
+											          : content,
+										etherealChildren: includeContentContainer ? null : etherealContent );
 								} ).ToCollection() ) );
 					return component;
 				},

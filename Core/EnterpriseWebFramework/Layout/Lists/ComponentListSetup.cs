@@ -19,10 +19,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the list.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		/// <param name="itemInsertionUpdateRegions"></param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public ComponentListSetup(
 			DisplaySetup displaySetup = null, bool isOrdered = false, ElementClassSet classes = null, IEnumerable<TailUpdateRegion> tailUpdateRegions = null,
-			IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
+			IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			componentGetter = ( listTypeClasses, items ) => {
 				items = items.ToImmutableArray();
 
@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									() => new DisplayableElementLocalData( isOrdered ? "ol" : "ul" ),
 									classes: CssElementCreator.AllListsClass.Add( listTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
 									children: itemComponents,
-									etherealChildren: etherealChildren );
+									etherealChildren: etherealContent );
 							} ).ToCollection() ) ).ToCollection();
 			};
 		}

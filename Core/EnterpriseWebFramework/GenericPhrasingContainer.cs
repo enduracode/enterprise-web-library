@@ -15,17 +15,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="content"></param>
 		/// <param name="displaySetup"></param>
 		/// <param name="classes">The classes on the element.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public GenericPhrasingContainer(
 			IReadOnlyCollection<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) {
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			children = new DisplayableElement(
 				context => new DisplayableElementData(
 					displaySetup,
 					() => new DisplayableElementLocalData( "span" ),
 					classes: classes,
 					children: content,
-					etherealChildren: etherealChildren ) ).ToCollection();
+					etherealChildren: etherealContent ) ).ToCollection();
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {

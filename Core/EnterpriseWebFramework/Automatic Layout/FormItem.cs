@@ -69,12 +69,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="visualOrderRank"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public ComponentListItem ToListItem(
-			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			content.Concat( getErrorContainer() )
 				.Materialize()
-				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, updateRegionSets, etherealChildren, getErrorFocusableElementLocalData );
+				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, updateRegionSets, etherealContent, getErrorFocusableElementLocalData );
 
 		/// <summary>
 		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
@@ -84,10 +84,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="visualOrderRank"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
-		/// <param name="etherealChildren"></param>
+		/// <param name="etherealContent"></param>
 		public ComponentListItem ToListItem(
 			string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-			IReadOnlyCollection<EtherealComponent> etherealChildren = null ) =>
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			content.Concat( getErrorContainer() )
 				.Materialize()
 				.ToComponentListItem(
@@ -97,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					visualOrderRank,
 					updateRegionSets,
 					removalUpdateRegionSets,
-					etherealChildren,
+					etherealContent,
 					getErrorFocusableElementLocalData );
 
 		private IEnumerable<FlowComponent> getErrorContainer() =>
