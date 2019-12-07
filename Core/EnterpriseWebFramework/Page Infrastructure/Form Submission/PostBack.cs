@@ -19,8 +19,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
 		/// <param name="forcePageDataUpdate">Pass true to force the page's data update to execute even if no form values changed.</param>
-		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
-		/// are included in this post-back.</param>
+		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form or component-state values changed, or if
+		/// no form controls or component-state items are included in this post-back.</param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="actionGetter">A method that returns the action EWF will perform if there were no modification errors.</param>
 		public static ActionPostBack CreateFull(
@@ -41,8 +41,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// automatically fall back to a full-page post-back if the page has changed in any way since it was last sent. This parameter currently has no effect since
 		/// async post-backs are not yet implemented; see RSIS goal 478.</param>
 		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
-		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form values changed, or if no form controls
-		/// are included in this post-back.</param>
+		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form or component-state values changed, or if
+		/// no form controls or component-state items are included in this post-back.</param>
 		/// <param name="firstModificationMethod"></param>
 		/// <param name="reloadBehaviorGetter">A method that returns the reload behavior, if there were no modification errors. If you do pass a method, the page
 		/// will block interaction even for async post-backs. This prevents an abrupt focus change for the user when the page reloads.</param>
@@ -93,7 +93,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal ActionPostBack(
 			bool forceFullPagePostBack, IEnumerable<UpdateRegionSet> updateRegions, string id, bool? forcePageDataUpdate, bool skipModificationIfNoChanges,
-			Action firstModificationMethod, Func<PostBackAction> actionGetter, DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
+			Action firstModificationMethod, Func<PostBackAction> actionGetter, DataModification validationDm ):
+			base( forceFullPagePostBack, id, forcePageDataUpdate ) {
 			this.updateRegions = updateRegions ?? new UpdateRegionSet[ 0 ];
 			this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
@@ -125,11 +126,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			dataModification.AddModificationMethods( modificationMethods );
 		}
 
-		internal bool Execute( bool formValuesChanged, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
+		internal bool Execute( bool changesExist, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
 			PostBackAction action = null;
 			return dataModification.Execute(
 				skipModificationIfNoChanges,
-				formValuesChanged,
+				changesExist,
 				validationErrorHandler,
 				performValidationOnly: actionSetter == null,
 				actionMethodAndPostModificationMethod: actionGetter != null

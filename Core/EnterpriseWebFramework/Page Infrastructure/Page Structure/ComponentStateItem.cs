@@ -9,14 +9,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Action creationTimeAsserter;
 		private static Func<string> elementOrIdentifiedComponentIdGetter;
 		private static Func<string, JToken> valueGetter;
+		private static Func<IReadOnlyCollection<DataModification>> dataModificationGetter;
 		private static Action<string, ComponentStateItem> itemAdder;
 
 		internal static void Init(
 			Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, JToken> valueGetter,
-			Action<string, ComponentStateItem> itemAdder ) {
+			Func<IReadOnlyCollection<DataModification>> dataModificationGetter, Action<string, ComponentStateItem> itemAdder ) {
 			ComponentStateItem.creationTimeAsserter = creationTimeAsserter;
 			ComponentStateItem.elementOrIdentifiedComponentIdGetter = elementOrIdentifiedComponentIdGetter;
 			ComponentStateItem.valueGetter = valueGetter;
+			ComponentStateItem.dataModificationGetter = dataModificationGetter;
 			ComponentStateItem.itemAdder = itemAdder;
 		}
 
@@ -35,13 +37,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			creationTimeAsserter();
 
 			id = elementOrIdentifiedComponentIdGetter().AppendDelimiter( "_" ) + id;
-			var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, durableValueUpdateValidationMethod );
+			var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, durableValueUpdateValidationMethod, dataModificationGetter() );
 			itemAdder( id, item );
 			return item;
 		}
 
 		internal abstract object DurableValue { get; }
 		internal abstract bool ValueIsInvalid();
+		internal abstract IReadOnlyCollection<DataModification> DataModifications { get; }
+		internal abstract bool ValueChanged();
 		internal abstract JToken ValueAsJson { get; }
 	}
 
@@ -50,8 +54,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly DataValue<T> value;
 		private readonly bool valueIsInvalid;
 		private readonly EwfValidation durableValueUpdateValidation;
+		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
-		internal ComponentStateItem( T durableValue, JToken value, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod ) {
+		internal ComponentStateItem(
+			T durableValue, JToken value, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod,
+			IReadOnlyCollection<DataModification> dataModifications ) {
 			if( !valueValidator( durableValue ) )
 				throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
 			this.durableValue = durableValue;
@@ -63,8 +70,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				valueIsInvalid = value != null;
 			}
 
-			if( durableValueUpdateValidationMethod != null )
+			if( durableValueUpdateValidationMethod != null ) {
 				durableValueUpdateValidation = new EwfValidation( validator => durableValueUpdateValidationMethod( this.value.Value, validator ) );
+				this.dataModifications = dataModifications;
+			}
+			else
+				this.dataModifications = Enumerable.Empty<DataModification>().Materialize();
 		}
 
 		private bool tryConvertValue( JToken valueAsJson, out T convertedValue ) {
@@ -91,6 +102,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 		internal override object DurableValue => durableValue;
 		internal override bool ValueIsInvalid() => valueIsInvalid;
+		internal override IReadOnlyCollection<DataModification> DataModifications => dataModifications;
+		internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue );
 		internal override JToken ValueAsJson => JToken.FromObject( value.Value );
 	}
 }

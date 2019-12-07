@@ -13,6 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		string GetDurableValueAsString();
 		bool PostBackValueIsInvalid( PostBackValueDictionary postBackValues );
+		IReadOnlyCollection<DataModification> DataModifications { get; }
 		bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues );
 		void SetPageModificationValues( PostBackValueDictionary postBackValues );
 	}
@@ -20,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class FormValue<T>: FormValue {
 		private readonly Func<T> durableValueGetter;
 
-		// This should not be called until after control tree validation, to enable scenarios such as RadioButtonGroup using its first on-page button's UniqueID as
+		// This should not be called until after the page tree has been built, to enable scenarios such as RadioButtonGroup using its first on-page button's ID as
 		// the key.
 		private readonly Func<string> postBackValueKeyGetter;
 
@@ -28,6 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator;
 		private readonly Func<HttpPostedFile, PostBackValueValidationResult<T>> filePostBackValueValidator;
 		private readonly List<Action<T>> pageModificationValueAdders = new List<Action<T>>();
+		private readonly HashSet<DataModification> dataModifications = new HashSet<DataModification>();
 
 		/// <summary>
 		/// Creates a form value.
@@ -80,6 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="validationMethod">The method that will be called by the data modification(s) to which this validation is added.</param>
 		public EwfValidation CreateValidation( Action<PostBackValue<T>, Validator> validationMethod ) {
+			dataModifications.UnionWith( FormValueStatics.DataModificationGetter() );
 			return new EwfValidation(
 				validator => validationMethod(
 					new PostBackValue<T>(
@@ -104,6 +107,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var key = postBackValueKeyGetter();
 			return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 		}
+
+		IReadOnlyCollection<DataModification> FormValue.DataModifications => dataModifications;
 
 		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
 			return valueChangedOnPostBack( postBackValues );
@@ -137,9 +142,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 	internal static class FormValueStatics {
 		internal static Action<FormValue> FormValueAdder;
+		internal static Func<IReadOnlyCollection<DataModification>> DataModificationGetter;
 
-		internal static void Init( Action<FormValue> formValueAdder ) {
+		internal static void Init( Action<FormValue> formValueAdder, Func<IReadOnlyCollection<DataModification>> dataModificationGetter ) {
 			FormValueAdder = formValueAdder;
+			DataModificationGetter = dataModificationGetter;
 		}
 	}
 }

@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => Instance.formState.DataModifications,
 				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
 				() => Instance.formState.ReportValidationCreated() );
-			FormValueStatics.Init( formValue => Instance.formValues.Add( formValue ) );
+			FormValueStatics.Init( formValue => Instance.formValues.Add( formValue ), () => Instance.formState.DataModifications );
 			ComponentStateItem.Init(
 				AssertPageTreeNotBuilt,
 				() => Instance.elementOrIdentifiedComponentIdGetter(),
@@ -71,6 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var valuesById = AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById;
 					return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 				},
+				() => Instance.formState.DataModifications,
 				( id, item ) => Instance.componentStateItemsById.Add( id, item ) );
 			PostBack.Init( () => Instance.formState.DataModifications );
 			PostBackFormAction.Init(
@@ -122,7 +123,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
-		private Control contentContainer;
 		private Control etherealPlace;
 		private FormState formState;
 		private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
@@ -170,9 +170,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a new page. Do not call this yourself.
 		/// </summary>
 		protected EwfPage() {
-			// Use the entire page as the default content container.
-			contentContainer = this;
-
 			// We suspect that this disables browser detection for the entire request, not just the page.
 			ClientTarget = "uplevel";
 		}
@@ -369,18 +366,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var navigationNeeded = true;
 				executeWithDataModificationExceptionHandling(
 					() => {
+						var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
+							                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						if( secondaryDm == dataUpdate )
-							navigationNeeded = dataUpdate.Execute(
-								true,
-								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-								handleValidationErrors,
-								performValidationOnly: true );
-						else {
-							var formValuesChanged = GetDescendants( contentContainer )
-								.OfType<ElementNode>()
-								.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
-							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( formValuesChanged, handleValidationErrors, null );
-						}
+							navigationNeeded = dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true );
+						else
+							navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
 
 						if( navigationNeeded ) {
 							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
@@ -537,13 +528,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
 					// Execute the page's data update.
+					bool changesExist( DataModification dataModification ) =>
+						componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
+							i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack( requestState.PostBackValues ) );
 					var dmExecuted = false;
 					if( !postBack.IsIntermediate )
 						try {
-							dmExecuted |= dataUpdate.Execute(
-								!postBack.ForcePageDataUpdate,
-								formValues.Any( i => i.ValueChangedOnPostBack( requestState.PostBackValues ) ),
-								handleValidationErrors );
+							dmExecuted |= dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ), handleValidationErrors );
 						}
 						catch {
 							requestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
@@ -553,13 +544,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// Execute the post-back.
 					var actionPostBack = postBack as ActionPostBack;
 					if( actionPostBack != null ) {
-						var formValuesChanged = GetDescendants( contentContainer )
-							.OfType<ElementNode>()
-							.Any( i => i.FormValue != null && i.FormValue.ValueChangedOnPostBack( requestState.PostBackValues ) );
 						requestState.FocusKey = "";
 						try {
 							dmExecuted |= actionPostBack.Execute(
-								formValuesChanged,
+								changesExist( actionPostBack ),
 								handleValidationErrors,
 								postBackAction => {
 									redirectInfo = postBackAction?.Resource;
@@ -898,13 +886,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal void AddControlTreeValidation( Action validation ) {
 			controlTreeValidations.Add( validation );
-		}
-
-		/// <summary>
-		/// Notifies this page that only the form controls within the specified control should be checked for modifications and used to set default focus.
-		/// </summary>
-		public void SetContentContainer( Control control ) {
-			contentContainer = control;
 		}
 
 		/// <summary>

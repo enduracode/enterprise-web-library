@@ -22,9 +22,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal bool Execute(
-			bool skipIfNoChanges, bool formValuesChanged, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
+			bool skipIfNoChanges, bool changesExist, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
 			Tuple<Action, Action> actionMethodAndPostModificationMethod = null ) {
-			var validationNeeded = validations.Any() && ( !skipIfNoChanges || formValuesChanged );
+			var validationNeeded = validations.Any() && ( !skipIfNoChanges || changesExist );
 			if( validationNeeded ) {
 				var errorsOccurred = false;
 				foreach( var validation in validations ) {
@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new DataModificationException();
 			}
 
-			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !formValuesChanged );
+			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !changesExist );
 			if( performValidationOnly || ( skipModification && actionMethodAndPostModificationMethod == null ) )
 				return validationNeeded;
 
