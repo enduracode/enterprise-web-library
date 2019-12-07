@@ -177,8 +177,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			EwfPage.Instance.SetContentContainer( contentPlace );
-
 			globalPlace.AddControlsReturnThis( getGlobalBlock() );
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
