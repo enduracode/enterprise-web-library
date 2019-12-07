@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A dictionary of form control values from a post back.
 	/// </summary>
-	public class PostBackValueDictionary {
+	internal class PostBackValueDictionary {
 		private readonly Dictionary<string, object> dictionary = new Dictionary<string, object>();
 		private HashSet<string> nonRemovedKeys;
 

@@ -12,10 +12,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		string GetPostBackValueKey();
 
 		string GetDurableValueAsString();
-		bool PostBackValueIsInvalid( PostBackValueDictionary postBackValues );
+		bool PostBackValueIsInvalid();
 		IReadOnlyCollection<DataModification> DataModifications { get; }
-		bool ValueChangedOnPostBack( PostBackValueDictionary postBackValues );
-		void SetPageModificationValues( PostBackValueDictionary postBackValues );
+		bool ValueChangedOnPostBack();
+		void SetPageModificationValues();
 	}
 
 	internal class FormValue<T>: FormValue {
@@ -83,12 +83,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationMethod">The method that will be called by the data modification(s) to which this validation is added.</param>
 		public EwfValidation CreateValidation( Action<PostBackValue<T>, Validator> validationMethod ) {
 			dataModifications.UnionWith( FormValueStatics.DataModificationGetter() );
-			return new EwfValidation(
-				validator => validationMethod(
-					new PostBackValue<T>(
-						getValue( AppRequestState.Instance.EwfPageRequestState.PostBackValues ),
-						valueChangedOnPostBack( AppRequestState.Instance.EwfPageRequestState.PostBackValues ) ),
-					validator ) );
+			return new EwfValidation( validator => validationMethod( new PostBackValue<T>( getValue(), valueChangedOnPostBack() ), validator ) );
 		}
 
 		public T GetDurableValue() {
@@ -103,25 +98,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return stringValueSelector( durableValueGetter() );
 		}
 
-		bool FormValue.PostBackValueIsInvalid( PostBackValueDictionary postBackValues ) {
+		bool FormValue.PostBackValueIsInvalid() {
+			var postBackValues = FormValueStatics.PostBackValueDictionaryGetter();
 			var key = postBackValueKeyGetter();
 			return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 		}
 
 		IReadOnlyCollection<DataModification> FormValue.DataModifications => dataModifications;
 
-		bool FormValue.ValueChangedOnPostBack( PostBackValueDictionary postBackValues ) {
-			return valueChangedOnPostBack( postBackValues );
+		bool FormValue.ValueChangedOnPostBack() {
+			return valueChangedOnPostBack();
 		}
 
-		private bool valueChangedOnPostBack( PostBackValueDictionary postBackValues ) => !EwlStatics.AreEqual( getValue( postBackValues ), durableValueGetter() );
+		private bool valueChangedOnPostBack() => !EwlStatics.AreEqual( getValue(), durableValueGetter() );
 
-		void FormValue.SetPageModificationValues( PostBackValueDictionary postBackValues ) {
+		void FormValue.SetPageModificationValues() {
 			foreach( var i in pageModificationValueAdders )
-				i( getValue( postBackValues ) );
+				i( getValue() );
 		}
 
-		private T getValue( PostBackValueDictionary postBackValues ) {
+		private T getValue() {
+			var postBackValues = FormValueStatics.PostBackValueDictionaryGetter();
 			var key = postBackValueKeyGetter();
 			if( !key.Any() || postBackValues == null || postBackValues.KeyRemoved( key ) )
 				return durableValueGetter();
@@ -143,10 +140,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class FormValueStatics {
 		internal static Action<FormValue> FormValueAdder;
 		internal static Func<IReadOnlyCollection<DataModification>> DataModificationGetter;
+		internal static Func<PostBackValueDictionary> PostBackValueDictionaryGetter;
 
-		internal static void Init( Action<FormValue> formValueAdder, Func<IReadOnlyCollection<DataModification>> dataModificationGetter ) {
+		internal static void Init(
+			Action<FormValue> formValueAdder, Func<IReadOnlyCollection<DataModification>> dataModificationGetter,
+			Func<PostBackValueDictionary> postBackValueDictionaryGetter ) {
 			FormValueAdder = formValueAdder;
 			DataModificationGetter = dataModificationGetter;
+			PostBackValueDictionaryGetter = postBackValueDictionaryGetter;
 		}
 	}
 }

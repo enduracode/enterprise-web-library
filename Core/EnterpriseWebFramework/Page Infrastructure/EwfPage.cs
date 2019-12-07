@@ -63,7 +63,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => Instance.formState.DataModifications,
 				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
 				() => Instance.formState.ReportValidationCreated() );
-			FormValueStatics.Init( formValue => Instance.formValues.Add( formValue ), () => Instance.formState.DataModifications );
+			FormValueStatics.Init(
+				formValue => Instance.formValues.Add( formValue ),
+				() => Instance.formState.DataModifications,
+				() => AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			ComponentStateItem.Init(
 				AssertPageTreeNotBuilt,
 				() => Instance.elementOrIdentifiedComponentIdGetter(),
@@ -347,7 +350,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var staticRegionContents = getStaticRegionContents( updateRegionControls );
 				if( staticRegionContents.contents != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
-				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid( requestState.PostBackValues ) ) )
+				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ) )
 					throw getPossibleDeveloperMistakeException(
 						requestState.ModificationErrorsExist
 							?
@@ -367,7 +370,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				executeWithDataModificationExceptionHandling(
 					() => {
 						var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
-							                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
 						if( secondaryDm == dataUpdate )
 							navigationNeeded = dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true );
 						else
@@ -530,7 +533,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// Execute the page's data update.
 					bool changesExist( DataModification dataModification ) =>
 						componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
-							i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack( requestState.PostBackValues ) );
+							i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
 					var dmExecuted = false;
 					if( !postBack.IsIntermediate )
 						try {
@@ -681,7 +684,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				i();
 
 			foreach( var i in formValues )
-				i.SetPageModificationValues( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+				i.SetPageModificationValues();
 
 			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			foreach( var displayLink in displayLinks )
@@ -931,13 +934,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist =
 				componentStateItemsById.Any( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() ) ||
-				activeFormValues.Any( i => i.PostBackValueIsInvalid( requestState.PostBackValues ) );
+				activeFormValues.Any( i => i.PostBackValueIsInvalid() );
 			var formValueHashesDisagree = generateFormValueHash() != formValueHash;
 			if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree ) {
 				// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
 				requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
 					from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
-				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid( requestState.PostBackValues ) select i.GetPostBackValueKey();
+				var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
 				requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 
 				throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
