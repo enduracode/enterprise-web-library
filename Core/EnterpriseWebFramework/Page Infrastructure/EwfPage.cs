@@ -342,8 +342,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
 				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
 					keyAndArg => {
-						LegacyUpdateRegionLinker linker;
-						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out linker ) )
+						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out var linker ) )
 							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
 						return linker.PostModificationRegionGetter( keyAndArg.Item2 );
 					} );
@@ -403,14 +402,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// another transaction has modified its value during this transaction.
 			var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
 				() => {
-					Func<User> userGetter = () => UserManagementStatics.GetUser( user.UserId, false );
-					return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( userGetter ) : userGetter();
+					User getUser() => UserManagementStatics.GetUser( user.UserId, false );
+					return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( getUser ) : getUser();
 				} );
 			if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
 				return null;
 
 			return () => {
-				Action userUpdater = () => {
+				void updateUser() {
 					if( FormsAuthStatics.FormsAuthEnabled ) {
 						var formsAuthCapableUser = (FormsAuthCapableUser)user;
 						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
@@ -428,12 +427,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							user.Email,
 							user.Role.RoleId,
 							AppRequestState.RequestTime );
-				};
+				}
 				if( ConfigurationStatics.DatabaseExists )
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
 						() => {
 							try {
-								userUpdater();
+								updateUser();
 							}
 							catch( DbConcurrencyException ) {
 								// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
@@ -443,7 +442,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							}
 						} );
 				else
-					userUpdater();
+					updateUser();
 			};
 		}
 
@@ -792,8 +791,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void loadDataForControlAndChildren( Control control ) {
 			elementOrIdentifiedComponentIdGetter = () => control.ClientID;
 
-			var controlTreeDataLoader = control as ControlTreeDataLoader;
-			if( controlTreeDataLoader != null ) {
+			if( control is ControlTreeDataLoader controlTreeDataLoader ) {
 				FormState.Current.SetForNextElement();
 
 				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
@@ -851,10 +849,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			etherealControls.Add( etherealControl );
 		}
 
-		internal PostBack GetPostBack( string id ) {
-			PostBack value;
-			return postBacksById.TryGetValue( id, out value ) ? value : null;
-		}
+		internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
 
 		/// <summary>
 		/// Adds a display mapping to this page.
@@ -883,8 +878,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			//
 			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
 			// each when debugging.
-			IEnumerable<string> value;
-			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out value ) ? value : new string[ 0 ];
+			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out var value ) ? value : new string[ 0 ];
 		}
 
 		internal void AddControlTreeValidation( Action validation ) {
@@ -1173,13 +1167,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			string clientSideNavigationUrl;
-			bool clientSideNavigationInNewWindow;
-			int? clientSideNavigationDelay;
 			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
-				out clientSideNavigationUrl,
-				out clientSideNavigationInNewWindow,
-				out clientSideNavigationDelay );
+				out var clientSideNavigationUrl,
+				out var clientSideNavigationInNewWindow,
+				out var clientSideNavigationDelay );
 			var clientSideNavigationStatements = "";
 			if( clientSideNavigationUrl.Any() ) {
 				var url = this.GetClientUrl( clientSideNavigationUrl );
