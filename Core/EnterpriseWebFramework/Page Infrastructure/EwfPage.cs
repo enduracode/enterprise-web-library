@@ -949,11 +949,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private string generateFormValueHash() {
 			var formValueString = new StringBuilder();
-			foreach( var pair in componentStateItemsById.OrderBy( i => i.Key ) ) {
+			foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) ) {
 				formValueString.Append( pair.Key );
 				formValueString.Append( pair.Value.DurableValue );
 			}
-			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() ) ) {
+			foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) ) {
 				formValueString.Append( formValue.GetPostBackValueKey() );
 				formValueString.Append( formValue.GetDurableValueAsString() );
 			}
