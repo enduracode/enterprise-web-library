@@ -148,7 +148,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					classes: contentClass ) )
 			.Materialize();
 
-		private readonly Func<IReadOnlyCollection<DisplayableElement>> childGetter;
+		private readonly IReadOnlyCollection<DisplayableElement> children;
 		private readonly List<FormItem> items;
 
 		private FormItemList(
@@ -158,7 +158,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			setup = setup ?? new FormItemListSetup();
 
 			var buttonItem = setup.Button.Any() ? setup.Button.ToFormItem( setup: buttonItemSetup ).ToCollection() : Enumerable.Empty<FormItem>().Materialize();
-			childGetter = () => new DisplayableElement(
+			children = new DisplayableElement(
 				listContext => new DisplayableElementData(
 					setup.DisplaySetup,
 					() => new DisplayableElementLocalData(
@@ -204,6 +204,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.items.AddRange( items );
 		}
 
-		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => childGetter();
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }
