@@ -13,7 +13,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a custom behavior.
 		/// </summary>
-		/// <param name="actionStatementGetter">Do not pass or return null.</param>
+		/// <param name="actionStatementGetter">A function that gets the JavaScript action statements. The statements can use the variable “e” to access the Event
+		/// object. Do not pass or return null.</param>
 		public CustomButtonBehavior( Func<string> actionStatementGetter ) {
 			this.actionStatementGetter = actionStatementGetter;
 		}
@@ -31,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		string ButtonBehavior.GetJsInitStatements( string id ) {
-			return "$( '#{0}' ).click( function() {{ {1} }} );".FormatWith( id, actionStatementGetter() );
+			return "$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith( id, actionStatementGetter() );
 		}
 
 		void ButtonBehavior.AddPostBack() {}
