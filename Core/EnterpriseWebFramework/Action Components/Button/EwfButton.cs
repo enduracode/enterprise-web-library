@@ -13,7 +13,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="style">The style.</param>
 		/// <param name="displaySetup"></param>
-		/// <param name="behavior">The behavior. Pass null to use the form default action.</param>
+		/// <param name="behavior">The behavior. Pass null to use the form default action. If you need to add additional JavaScript action statements to any
+		/// behavior besides <see cref="CustomButtonBehavior"/>, we recommend using the jQuery document ready event to add an additional click handler to the
+		/// appropriate button element(s), which you can select using a class if there is no simpler way.</param>
 		/// <param name="classes">The classes on the button.</param>
 		public EwfButton( ButtonStyle style, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ElementClassSet classes = null ) {
 			behavior = behavior ?? new FormActionBehavior( FormState.Current.DefaultAction );
