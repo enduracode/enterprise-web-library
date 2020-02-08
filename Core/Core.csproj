@@ -309,6 +309,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\CustomButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\ImageButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\StandardButtonStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\ElementActivationBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\BrowsingContextSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\EwfHyperlink.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
@@ -529,7 +530,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\PagePath.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\CellPlaceholder.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\ClickScript.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryItemGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryTable.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnSetup.cs" />

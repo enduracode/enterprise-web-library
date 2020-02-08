@@ -29,10 +29,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// NOTE: The item-count display should be wrapped in a NamingPlaceholder that is part of all tail update regions for this group.
 			if( RemainingData.Value.GroupName == null )
 				return ImmutableArray<EwfTableItem>.Empty;
-			return
-				new EwfTableItem(
-					new EwfTableItemSetup( clickScript: RemainingData.Value.GroupHeadClickScript ),
-					RemainingData.Value.GroupName.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+			return new EwfTableItem(
+				new EwfTableItemSetup( activationBehavior: RemainingData.Value.GroupHeadActivationBehavior ),
+				RemainingData.Value.GroupName.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
 		private IReadOnlyCollection<EwfTableItem> getItemActionsItem( int fieldCount ) {

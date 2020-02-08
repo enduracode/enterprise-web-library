@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// scaling will not happen if there are any columns without a specified width.</param>
 		/// <param name="textAlignment">The text alignment of the cells in this item.</param>
 		/// <param name="verticalAlignment">The vertical alignment of the cells in this item.</param>
-		/// <param name="clickScript">The click script.</param>
+		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="toolTip">The tool tip to display. Setting ToolTipControl will ignore this property. Do not pass null.</param>
 		/// <param name="toolTipControl">The control to display inside the tool tip. This will ignore the ToolTip property.</param>
 		/// <param name="tableLevelItemActions">The list of table level item actions. Each item must have either a null list or a list with the same actions in the
@@ -36,11 +36,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// column on the right of the table containing controls to move each item up or down the list. This consumes a small amount of table width.
 		/// </param>
 		// NOTE: Change the Tuples to named types here.
-		public EwfTableItemSetup( IEnumerable<string> classes = null, Unit? size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-		                          TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ClickScript clickScript = null,
-		                          string toolTip = "", Control toolTipControl = null, IEnumerable<Tuple<string, Action>> tableLevelItemActions = null,
-		                          IEnumerable<Tuple<string, Action>> groupLevelItemActions = null, int? rankId = null ) {
-			FieldOrItemSetup = new EwfTableFieldOrItemSetup( classes, size, textAlignment, verticalAlignment, clickScript, toolTip, toolTipControl );
+		public EwfTableItemSetup(
+			IEnumerable<string> classes = null, Unit? size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+			TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ElementActivationBehavior activationBehavior = null,
+			string toolTip = "", Control toolTipControl = null, IEnumerable<Tuple<string, Action>> tableLevelItemActions = null,
+			IEnumerable<Tuple<string, Action>> groupLevelItemActions = null, int? rankId = null ) {
+			FieldOrItemSetup = new EwfTableFieldOrItemSetup( classes, size, textAlignment, verticalAlignment, activationBehavior, toolTip, toolTipControl );
 
 			if( tableLevelItemActions != null ) {
 				var tableLevelItemActionList = tableLevelItemActions.ToList();

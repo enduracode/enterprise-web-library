@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	public class ColumnPrimaryItemGroup {
 		internal readonly Control GroupName;
 		internal readonly ReadOnlyCollection<Tuple<string, Action>> GroupActions;
-		internal readonly ClickScript GroupHeadClickScript;
+		internal readonly ElementActivationBehavior GroupHeadActivationBehavior;
 		internal readonly ReadOnlyCollection<EwfTableItem> Items;
 
 		/// <summary>
@@ -19,14 +19,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		/// <param name="groupName">A control that contains the name of the group and any other information you want in the group head</param>
 		/// <param name="groupActions">Group action buttons</param>
-		/// <param name="groupHeadClickScript">The click script for the group head</param>
+		/// <param name="groupHeadActivationBehavior">The activation behavior for the group head</param>
 		/// <param name="items">The items</param>
-		public ColumnPrimaryItemGroup( Control groupName, IEnumerable<Tuple<string, Action>> groupActions = null, ClickScript groupHeadClickScript = null,
-		                               IEnumerable<EwfTableItem> items = null ) {
+		public ColumnPrimaryItemGroup(
+			Control groupName, IEnumerable<Tuple<string, Action>> groupActions = null, ElementActivationBehavior groupHeadActivationBehavior = null,
+			IEnumerable<EwfTableItem> items = null ) {
 			GroupName = groupName;
-			GroupActions = ( groupActions ?? new Tuple<string, Action>[0] ).ToList().AsReadOnly();
-			GroupHeadClickScript = groupHeadClickScript;
-			Items = ( items ?? new EwfTableItem[0] ).ToList().AsReadOnly();
+			GroupActions = ( groupActions ?? new Tuple<string, Action>[ 0 ] ).ToList().AsReadOnly();
+			GroupHeadActivationBehavior = groupHeadActivationBehavior;
+			Items = ( items ?? new EwfTableItem[ 0 ] ).ToList().AsReadOnly();
 		}
 	}
 }

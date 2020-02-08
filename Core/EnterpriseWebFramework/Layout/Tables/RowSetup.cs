@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// </summary>
 	public class RowSetup {
 		private string cssClass = "";
-		
+
 		/// <summary>
 		/// Set when table row is drawn.
 		/// </summary>
@@ -27,9 +27,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public string CssClass { get { return cssClass; } set { cssClass = value ?? ""; } }
 
 		/// <summary>
-		/// Gets or sets the click script for the row.
+		/// Gets or sets the activation behavior for the row.
 		/// </summary>
-		public ClickScript ClickScript { get; set; }
+		public ElementActivationBehavior ActivationBehavior { get; set; }
 
 		/// <summary>
 		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
