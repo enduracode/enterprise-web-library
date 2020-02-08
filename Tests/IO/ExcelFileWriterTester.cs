@@ -18,8 +18,9 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		public void InitializeFixture() {
 			// Make sure all the tests run have the same prefix
 			timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
-			outputFolderPath =
-				Directory.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) ).FullName;
+			outputFolderPath = Directory
+				.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) )
+				.FullName;
 		}
 
 		[ Test ]
@@ -331,7 +332,8 @@ namespace EnterpriseWebLibrary.Tests.IO {
 
 					var oneToTen = Enumerable.Range( 1, 10 ).ToArray();
 					writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
-					writer.DefaultWorksheet.AddRowToWorksheet( oneToTen.Select( i => "The row above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
+					writer.DefaultWorksheet.AddRowToWorksheet(
+						oneToTen.Select( i => "The row above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
 					writer.DefaultWorksheet.AddRowToWorksheet(
 						oneToTen.Select( i => "The row 2 lines above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
 
@@ -364,7 +366,19 @@ namespace EnterpriseWebLibrary.Tests.IO {
 		public void RealWorldDataTableTest() {
 			// This is what a dynamic table would output, a list of rowsetups.
 			var rowSetups = new List<RowSetup>();
-			rowSetups.Add( new RowSetup { IsHeader = true, CsvLine = new List<string> { "Name", "Company", "Location", "Url", "Phone" } } );
+			rowSetups.Add(
+				new RowSetup
+					{
+						IsHeader = true,
+						CsvLine = new List<string>
+							{
+								"Name",
+								"Company",
+								"Location",
+								"Url",
+								"Phone"
+							}
+					} );
 
 			var names = new[] { "Sofeee", "Cathie", "Ann", "Jan", "Patty", "Cora" };
 			var surNames = new[] { "Norjaim", "Carbelt", "Wilson", "Middleberger", "Hewlett", "Taylor", "Danzen" };
@@ -384,7 +398,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 									"http://www.google.com/search?q=" + i,
 									i.ToString( "D3" ) + "-867-5309"
 								},
-							ClickScript = ClickScript.CreateRedirectScript( new ExternalResourceInfo( "http://google.com" ) ),
+							ActivationBehavior = ElementActivationBehavior.CreateRedirectScript( new ExternalResourceInfo( "http://google.com" ) ),
 							CssClass = "gibberish_string_for_testing",
 							IsHeader = false,
 							RankId = i,

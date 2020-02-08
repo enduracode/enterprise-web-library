@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			return new EwfTableItemGroup(
 				() => new EwfTableItemGroupRemainingData(
 					new PlaceHolder().AddControlsReturnThis( "Group {0}".FormatWith( groupNumber ).ToComponents().GetControls() ),
-					groupHeadClickScript: ClickScript.CreatePostBackScript(
+					groupHeadActivationBehavior: ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateIntermediate(
 							null,
 							id: "group{0}".FormatWith( groupNumber ),
@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			return from i in Enumerable.Range( 1, count )
 			       select new Func<EwfTableItem>(
 				       () => new EwfTableItem(
-					       new EwfTableItemSetup( clickScript: ClickScript.CreateRedirectScript( ActionControls.GetInfo() ) ),
+					       new EwfTableItemSetup( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
 					       i.ToString(),
 					       ( i * 2 ) + Environment.NewLine + "extra stuff" ) );
 		}

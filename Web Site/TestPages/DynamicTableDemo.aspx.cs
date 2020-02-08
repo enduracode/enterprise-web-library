@@ -36,22 +36,26 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			//Clickable Rows
 			for( var i = 0; i < 7; i++ ) {
-				ClickScript clickScript;
+				ElementActivationBehavior clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript(
+					clickScript = ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateFull( id: "table3" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
+					clickScript = ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
-					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
+					clickScript = ElementActivationBehavior.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table3.AddTextRow( new RowSetup { ClickScript = clickScript, UniqueIdentifier = 3, ToolTip = "Row Tool Tip" }, cells[ 0 ], cells[ 1 ], cells[ 2 ] );
+				table3.AddTextRow(
+					new RowSetup { ActivationBehavior = clickScript, UniqueIdentifier = 3, ToolTip = "Row Tool Tip" },
+					cells[ 0 ],
+					cells[ 1 ],
+					cells[ 2 ] );
 			}
 
 			//Mixed
@@ -60,26 +64,26 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table4.AddTextRow( new RowSetup { UniqueIdentifier = 2 }, i.ToString(), ( i + 1 ).ToString(), ( +2 ).ToString() );
 
 			for( var i = 0; i < 4; i++ ) {
-				ClickScript clickScript;
+				ElementActivationBehavior clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript(
+					clickScript = ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateFull( id: "table4" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
+					clickScript = ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
-					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
+					clickScript = ElementActivationBehavior.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
 
 				table4.AddTextRow(
 					new RowSetup
 						{
-							ClickScript = clickScript,
+							ActivationBehavior = clickScript,
 							UniqueIdentifier = 3,
 							ToolTipControl = new PlaceHolder().AddControlsReturnThis(
 								new EwfImage( new ImageSetup( null ), new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) ).ToCollection()
@@ -103,7 +107,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				table6.AddTextRow(
 					new RowSetup
 						{
-							ClickScript = ClickScript.CreatePostBackScript(
+							ActivationBehavior = ElementActivationBehavior.CreatePostBackScript(
 								PostBack.CreateFull( id: "table6" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) ),
 							UniqueIdentifier = 3
 						},
@@ -112,43 +116,43 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			//Recorderable, Clickable
 			for( var i = 0; i < 7; i++ ) {
-				ClickScript clickScript;
+				ElementActivationBehavior clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript(
+					clickScript = ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateFull( id: "table7" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
+					clickScript = ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
-					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
+					clickScript = ElementActivationBehavior.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table7.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ClickScript = clickScript }, cells );
+				table7.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ActivationBehavior = clickScript }, cells );
 			}
 
 			//Recorderable, Clickable, Selectable
 			table8.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 			for( var i = 0; i < 7; i++ ) {
-				ClickScript clickScript;
+				ElementActivationBehavior clickScript;
 				string[] cells;
 				if( i % 3 == 0 ) {
-					clickScript = ClickScript.CreatePostBackScript(
+					clickScript = ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateFull( id: "table8" + i, firstModificationMethod: () => AddStatusMessage( StatusMessageType.Warning, "Postback!" ) ) );
 					cells = new[] { "Post", "Back", "Row" };
 				}
 				else if( i % 2 == 0 ) {
-					clickScript = ClickScript.CreateRedirectScript( ActionControls.GetInfo() );
+					clickScript = ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() );
 					cells = new[] { "Re", "-Direct", "Script" };
 				}
 				else {
-					clickScript = ClickScript.CreateCustomScript( "alert('custom script')" );
+					clickScript = ElementActivationBehavior.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table8.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ClickScript = clickScript }, cells );
+				table8.AddTextRow( new RowSetup { UniqueIdentifier = i, RankId = i, ActivationBehavior = clickScript }, cells );
 			}
 
 			// Rowspan test
