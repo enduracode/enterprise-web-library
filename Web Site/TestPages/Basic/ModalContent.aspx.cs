@@ -1,6 +1,5 @@
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
 	partial class ModalContent: EwfPage {
@@ -19,7 +18,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
 									"Fusce ornare ornare massa ut ullamcorper. Nunc commodo malesuada ante sed vulputate. Nam nec nulla sem. Quisque et cursus diam. Nullam vitae leo sed felis interdum pellentesque quis vel nisl. Sed cursus, tellus et ultrices pellentesque, lorem sem accumsan magna, eget imperdiet quam diam at sem. Ut diam ipsum, tristique non mauris et, aliquet accumsan justo. Pellentesque viverra tortor non eros consectetur pulvinar.",
 									"Praesent suscipit nulla vitae fermentum elementum. Cras eu vehicula lectus, a luctus neque. In euismod congue sollicitudin. Ut fringilla massa ac orci blandit egestas. Aenean hendrerit ac leo ac interdum. Cras urna elit, rhoncus sit amet convallis sed, vulputate sed nisl. Nunc rutrum nunc quis dolor cursus pharetra. Mauris enim turpis, porttitor in mauris eu, consequat suscipit dolor. Donec tincidunt nisi et justo maximus, porttitor posuere odio placerat. Ut tempor justo eget lacus auctor, ut pharetra velit ullamcorper."
 								}.Select( i => new Paragraph( i.ToComponents() ) )
-							.Concat(
+							.Append(
 								new Paragraph(
 									new EwfHyperlink( ActionControls.GetInfo().ToHyperlinkParentContextBehavior(), new StandardHyperlinkStyle( "Navigate" ) ).ToCollection() ) )
 							.Materialize() ).ToCollection()

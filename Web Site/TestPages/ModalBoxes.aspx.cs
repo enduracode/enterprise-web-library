@@ -1,7 +1,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSessionState;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ModalBoxes: EwfPage {
@@ -27,8 +26,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				new WrappingList(
 						new EwfButton( new StandardButtonStyle( "Open standard" ), behavior: new OpenModalBehavior( modalBoxId ) ).ToCollection<FlowComponent>()
-							.Concat( new EwfHyperlink( Basic.ModalContent.GetInfo().ToHyperlinkModalBoxBehavior(), new StandardHyperlinkStyle( "Open browsing" ) ) )
-							.Concat(
+							.Append( new EwfHyperlink( Basic.ModalContent.GetInfo().ToHyperlinkModalBoxBehavior(), new StandardHyperlinkStyle( "Open browsing" ) ) )
+							.Append(
 								new EwfButton(
 									new StandardButtonStyle( "Perform action with confirmation" ),
 									behavior: new ConfirmationButtonBehavior(

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class RevisionDisplayStatics {
@@ -79,7 +78,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			                select isNewRevision
 				                       ? new ImportantContent( $"{entityName.CapitalizeString()} added:".ToComponents() ).ToCollection<PhrasingComponent>()
 					                       .Concat( " ".ToComponents() )
-					                       .Concat( new ImportantContent( valueComponentCollectionsByRevision[ revision ] ) )
+					                       .Append( new ImportantContent( valueComponentCollectionsByRevision[ revision ] ) )
 					                       .Materialize()
 					                       .ToComponentListItem()
 				                       : $"{entityName.CapitalizeString()} removed:".ToComponents()
@@ -124,7 +123,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                       .Concat( ":".ToComponents() )
 							                       .Materialize() ).ToCollection<PhrasingComponent>()
 					                       .Concat( " ".ToComponents() )
-					                       .Concat( new ImportantContent( componentCollectionPair.newValueComponents ) )
+					                       .Append( new ImportantContent( componentCollectionPair.newValueComponents ) )
 					                       .Concat( " (from ".ToComponents() )
 					                       .Concat( componentCollectionPair.oldValueComponents )
 					                       .Concat( ")".ToComponents() )
@@ -137,7 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								                       .Concat( " added:".ToComponents() )
 								                       .Materialize() ).ToCollection<PhrasingComponent>()
 						                       .Concat( " ".ToComponents() )
-						                       .Concat( new ImportantContent( componentCollectionPair.newValueComponents ) )
+						                       .Append( new ImportantContent( componentCollectionPair.newValueComponents ) )
 						                       .Materialize()
 						                       .ToComponentListItem()
 					                       : $"{entityName.CapitalizeString()} ".ToComponents()

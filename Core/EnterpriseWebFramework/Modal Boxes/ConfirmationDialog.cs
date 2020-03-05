@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -25,8 +24,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							new EwfButton(
 									new StandardButtonStyle( "Cancel" ),
 									behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( id.ModalBoxId.ElementId.Id ) ) )
+								.ToCollection()
 								.Concat( " ".ToComponents() )
-								.Concat( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ) )
+								.Append( new EwfButton( new StandardButtonStyle( "Continue" ), behavior: new PostBackBehavior( postBack: postBack ) ) )
 								.Materialize() ) )
 					.Materialize() ).ToCollection();
 		}

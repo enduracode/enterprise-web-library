@@ -6,7 +6,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Humanizer;
-using MoreLinq;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -547,11 +546,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								.Concat( tailUpdateRegions )
 								.SelectMany( i => i.Sets ) ).ToCollection()
 						.ToComponentListItem() ).ToCollection()
-				.Concat( "".ToComponents().ToComponentListItem() )
-				.Concat( "Show:".ToComponents().ToComponentListItem() )
-				.Concat( getItemLimitButtonItem( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
-				.Concat( getItemLimitButtonItem( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
-				.Concat( getItemLimitButtonItem( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
+				.Append( "".ToComponents().ToComponentListItem() )
+				.Append( "Show:".ToComponents().ToComponentListItem() )
+				.Append( getItemLimitButtonItem( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
+				.Append( getItemLimitButtonItem( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
+				.Append( getItemLimitButtonItem( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
 			return new EwfTableItem( list.ToCollection().GetControls().ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 

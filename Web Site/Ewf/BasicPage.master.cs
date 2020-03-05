@@ -10,7 +10,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.U
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
-using MoreLinq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
@@ -224,7 +223,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							.Concat( getProcessingDialogEllipsisDot( 3 ) )
 							.Materialize(),
 						classes: processingDialogProcessingParagraphClass ).ToCollection()
-					.Concat(
+					.Append(
 						new Paragraph(
 							new EwfButton(
 								new StandardButtonStyle( Translation.ThisSeemsToBeTakingAWhile, buttonSize: ButtonSize.ShrinkWrap ),
@@ -268,7 +267,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							i => new Block(
 								     new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
 									     .ToCollection<PhrasingComponent>()
-									     .Concat( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
+									     .Append( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
 									     .GetControls()
 									     .ToArray() ) { CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass } as Control )
 						.ToArray() )
