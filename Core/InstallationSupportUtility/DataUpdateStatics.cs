@@ -2,7 +2,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using EnterpriseWebLibrary.IO;
@@ -79,7 +78,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		private static void recompileProceduresInSecondaryOracleDatabases( RecognizedInstallation installation ) {
 			foreach( var secondaryDatabase in installation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ) {
-				if( secondaryDatabase is Oracle )
+				if( secondaryDatabase is DatabaseAbstraction.Databases.Oracle )
 					secondaryDatabase.ExecuteDbMethod(
 						cn => {
 							foreach( var procedure in secondaryDatabase.GetProcedures() ) {

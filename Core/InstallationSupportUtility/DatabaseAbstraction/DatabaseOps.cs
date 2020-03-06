@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			if( databaseInfo is MySqlInfo )
 				return new MySql( databaseInfo as MySqlInfo );
 			if( databaseInfo is OracleInfo )
-				return new Oracle( databaseInfo as OracleInfo );
+				return new Databases.Oracle( databaseInfo as OracleInfo );
 			throw new ApplicationException( "Invalid database information object type." );
 		}
 

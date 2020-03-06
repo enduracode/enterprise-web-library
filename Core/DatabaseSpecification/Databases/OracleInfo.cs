@@ -1,5 +1,5 @@
-using System;
 using System.Data.Common;
+using Oracle.ManagedDataAccess.Client;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -8,9 +8,6 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 	/// Contains information about an Oracle database.
 	/// </summary>
 	public class OracleInfo: DatabaseInfo {
-		private static DbProviderFactory factoryField;
-		private static DbProviderFactory factory => factoryField ?? ( factoryField = DbProviderFactories.GetFactory( "Oracle.DataAccess.Client" ) );
-
 		private readonly string secondaryDatabaseName;
 		private readonly string dataSource;
 		private readonly string userAndSchema;
@@ -66,39 +63,34 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 		public bool SupportsLinguisticIndexes => supportsLinguisticIndexes;
 
 		DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
-			var connection = factory.CreateConnection();
-			connection.ConnectionString = connectionString;
-			return connection;
+			return new OracleConnection( connectionString );
 		}
 
 		DbCommand DatabaseInfo.CreateCommand() {
-			var c = factory.CreateCommand();
+			var c = new OracleCommand();
 
 			// This property would be important if we screwed up the order of parameter adding later on.
-			var bindByNameProperty = c.GetType().GetProperty( "BindByName" );
-			bindByNameProperty.SetValue( c, true );
+			c.BindByName = true;
 
 			// Tell the data reader to retrieve LOB data along with the rest of the row rather than making a separate request when GetValue is called.
 			// Unfortunately, as of 17 July 2014 there is an Oracle bug that prevents us from setting the property to -1. See
 			// http://stackoverflow.com/q/9006773/35349, https://community.oracle.com/thread/3548124, and Oracle bugs 14279177 and 17869834.
-			var initialLobFetchSizeProperty = c.GetType().GetProperty( "InitialLOBFetchSize" );
-			//initialLobFetchSizeProperty.SetValue( c, -1 );
-			initialLobFetchSizeProperty.SetValue( c, 1024 );
+			//c.InitialLOBFetchSize = -1;
+			c.InitialLOBFetchSize = 1024;
 
 			return new ProfiledDbCommand( c, null, MiniProfiler.Current );
 		}
 
 		DbParameter DatabaseInfo.CreateParameter() {
-			return factory.CreateParameter();
+			return new OracleParameter();
 		}
 
 		string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
-			return Enum.GetName( factory.GetType().Assembly.GetType( "Oracle.DataAccess.Client.OracleDbType" ), databaseSpecificType );
+			return ( (OracleDbType)databaseSpecificType ).ToString();
 		}
 
 		void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
-			var oracleDbTypeProperty = parameter.GetType().GetProperty( "OracleDbType" );
-			oracleDbTypeProperty.SetValue( parameter, Enum.Parse( factory.GetType().Assembly.GetType( "Oracle.DataAccess.Client.OracleDbType" ), dbTypeString ), null );
+			( (OracleParameter)parameter ).OracleDbType = dbTypeString.ToEnum<OracleDbType>();
 		}
 	}
 }
