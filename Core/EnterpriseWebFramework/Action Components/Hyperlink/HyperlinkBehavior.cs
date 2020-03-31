@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Email;
-using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -37,20 +35,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = destination?.AlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
 			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
+			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() ).Concat(
+					destination != null && target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+				.Materialize();
+
 			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
 			                          EwfPage.Instance.IsAutoDataUpdater;
 			FormAction postBackAction = null;
-			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
-				.Concat( destination != null && target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
-				.Concat(
-					isPostBackHyperlink
-						? Tuple.Create( JsWritingMethods.onclick, postBackAction.GetJsStatements() + " return false" ).ToCollection()
-						: Enumerable.Empty<Tuple<string, string>>() )
-				.ToImmutableArray();
-
 			string getActionInitStatements( string id, string actionStatements ) =>
 				"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith( id, "e.preventDefault();".ConcatenateWithSpace( actionStatements ) );
-
 			if( destination?.AlternativeMode is DisabledResourceMode disabledResourceMode ) {
 				IncludeIdAttribute = true;
 				EtherealChildren = new ToolTip(
@@ -59,10 +52,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				JsInitStatementGetter = id => getActionInitStatements( id, "" ) + " " + toolTipInitStatementGetter( id );
 			}
 			else {
-				IncludeIdAttribute = destination != null && actionStatementGetter != null;
+				IncludeIdAttribute = isPostBackHyperlink || ( destination != null && actionStatementGetter != null );
 				EtherealChildren = null;
-				JsInitStatementGetter = id =>
-					destination != null && actionStatementGetter != null ? getActionInitStatements( id, actionStatementGetter( Url.Value ) ) : "";
+				JsInitStatementGetter = id => {
+					var actionStatements = ( isPostBackHyperlink ? postBackAction.GetJsStatements() : "" ).ConcatenateWithSpace(
+						destination != null && actionStatementGetter != null ? actionStatementGetter( Url.Value ) : "" );
+					return actionStatements.Any() ? getActionInitStatements( id, actionStatements ) : "";
+				};
 			}
 
 			IsFocusable = destination != null;
