@@ -62,16 +62,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
 
 			var cells = from i in ItemsSeparatedWithPipe ? separateControls( items ) : items
-			            select
-				            new TableCell
-					            {
-						            CssClass =
-							            StringTools.ConcatenateWithDelimiter(
-								            " ",
-								            EwfTable.CssElementCreator.AllCellAlignmentsClass,
-								            TableCellVerticalAlignmentOps.Class( VerticalAlignment ),
-								            CssElementCreator.ItemCssClass )
-					            }.AddControlsReturnThis( i );
+			            select new TableCell
+				            {
+					            CssClass = StringTools.ConcatenateWithDelimiter(
+						            " ",
+						            EwfTable.AllCellAlignmentsClass.ClassName,
+						            tableCellVerticalAlignmentClass( VerticalAlignment ),
+						            CssElementCreator.ItemCssClass )
+				            }.AddControlsReturnThis( i );
 			row.Cells.AddRange( cells.ToArray() );
 		}
 
@@ -86,6 +84,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 			interleavedList.Add( controls.Last() );
 			return interleavedList;
+		}
+
+		private string tableCellVerticalAlignmentClass( TableCellVerticalAlignment verticalAlignment ) {
+			switch( verticalAlignment ) {
+				case TableCellVerticalAlignment.Top:
+					return "ewfTcTop";
+				case TableCellVerticalAlignment.Middle:
+					return "ewfTcMiddle";
+				case TableCellVerticalAlignment.Bottom:
+					return "ewfTcBottom";
+				case TableCellVerticalAlignment.BaseLine:
+					return "ewfTcBaseLine";
+				default:
+					return "";
+			}
 		}
 
 		/// <summary>

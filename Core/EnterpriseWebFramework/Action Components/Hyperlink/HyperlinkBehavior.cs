@@ -22,11 +22,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly ResourceInfo destination;
 		internal readonly ElementClassSet Classes;
-		internal readonly Func<IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
+		internal readonly Func<bool, IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
 		internal readonly Lazy<string> Url;
-		internal readonly bool IncludeIdAttribute;
+		internal readonly Func<bool, bool> IncludesIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
-		internal readonly Func<string, string> JsInitStatementGetter;
+		internal readonly Func<string, bool, string> JsInitStatementGetter;
 		internal readonly bool IsFocusable;
 		internal readonly Action PostBackAdder;
 
@@ -35,29 +35,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = destination?.AlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
 			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
-			AttributeGetter = () => ( destination != null ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() ).Concat(
-					destination != null && target.Any() ? Tuple.Create( "target", target ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+			AttributeGetter = forNonHyperlinkElement =>
+				( destination != null && !forNonHyperlinkElement ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+				.Concat(
+					destination != null && target.Any() && !forNonHyperlinkElement
+						? Tuple.Create( "target", target ).ToCollection()
+						: Enumerable.Empty<Tuple<string, string>>() )
 				.Materialize();
 
 			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
 			                          EwfPage.Instance.IsAutoDataUpdater;
 			FormAction postBackAction = null;
-			string getActionInitStatements( string id, string actionStatements ) =>
-				"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith( id, "e.preventDefault();".ConcatenateWithSpace( actionStatements ) );
+			string getActionInitStatements( string id, bool omitPreventDefaultStatement, string actionStatements ) =>
+				"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith(
+					id,
+					( omitPreventDefaultStatement ? "" : "e.preventDefault();" ).ConcatenateWithSpace( actionStatements ) );
 			if( destination?.AlternativeMode is DisabledResourceMode disabledResourceMode ) {
-				IncludeIdAttribute = true;
+				IncludesIdAttribute = forNonHyperlinkElement => true;
 				EtherealChildren = new ToolTip(
 					( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponents(),
 					out var toolTipInitStatementGetter ).ToCollection();
-				JsInitStatementGetter = id => getActionInitStatements( id, "" ) + " " + toolTipInitStatementGetter( id );
+				JsInitStatementGetter = ( id, forNonHyperlinkElement ) =>
+					( forNonHyperlinkElement ? "" : getActionInitStatements( id, false, "" ) + " " ) + toolTipInitStatementGetter( id );
 			}
 			else {
-				IncludeIdAttribute = isPostBackHyperlink || ( destination != null && actionStatementGetter != null );
+				IncludesIdAttribute = forNonHyperlinkElement =>
+					isPostBackHyperlink || ( destination != null && ( actionStatementGetter != null || forNonHyperlinkElement ) );
 				EtherealChildren = null;
-				JsInitStatementGetter = id => {
-					var actionStatements = ( isPostBackHyperlink ? postBackAction.GetJsStatements() : "" ).ConcatenateWithSpace(
-						destination != null && actionStatementGetter != null ? actionStatementGetter( Url.Value ) : "" );
-					return actionStatements.Any() ? getActionInitStatements( id, actionStatements ) : "";
+				JsInitStatementGetter = ( id, forNonHyperlinkElement ) => {
+					var actionStatements = isPostBackHyperlink ? postBackAction.GetJsStatements() :
+					                       destination != null && actionStatementGetter != null ? actionStatementGetter( Url.Value ) :
+					                       destination != null && forNonHyperlinkElement ? !target.Any()
+						                                                                       ? "window.location.href = '{0}';".FormatWith( Url.Value )
+						                                                                       :
+						                                                                       target == "_parent"
+							                                                                       ?
+							                                                                       "window.parent.location.href = '{0}';".FormatWith( Url.Value )
+							                                                                       : "window.open( '{0}', '{1}' );".FormatWith( Url.Value, target ) : "";
+					return actionStatements.Any() ? getActionInitStatements( id, forNonHyperlinkElement, actionStatements ) : "";
 				};
 			}
 
@@ -75,16 +90,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal HyperlinkBehavior( string mailtoUri ) {
 			Classes = ElementClassSet.Empty;
 			Url = new Lazy<string>( () => "mailto:{0}".FormatWith( mailtoUri ) );
-			AttributeGetter = () => Tuple.Create( "href", Url.Value ).ToCollection();
+			AttributeGetter = forNonHyperlinkElement =>
+				forNonHyperlinkElement ? Enumerable.Empty<Tuple<string, string>>().Materialize() : Tuple.Create( "href", Url.Value ).ToCollection();
+			IncludesIdAttribute = forNonHyperlinkElement => forNonHyperlinkElement;
 			EtherealChildren = null;
-			JsInitStatementGetter = id => "";
+			JsInitStatementGetter = ( id, forNonHyperlinkElement ) => forNonHyperlinkElement ? "window.location.href = '{0}';".FormatWith( Url.Value ) : "";
 			IsFocusable = true;
 			PostBackAdder = () => {};
 		}
 
-		public bool UserCanNavigateToDestination() {
-			return destination == null || destination.UserCanAccessResource;
-		}
+		internal bool HasDestination() => destination != null;
+		public bool UserCanNavigateToDestination() => destination == null || destination.UserCanAccessResource;
 	}
 
 	public static class HyperlinkBehaviorExtensionCreators {

@@ -29,11 +29,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() => {
 							DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) =>
 								new DisplayableElementFocusDependentData(
-									attributes: behavior.AttributeGetter(),
-									includeIdAttribute: behavior.IncludeIdAttribute || isFocused,
+									attributes: behavior.AttributeGetter( false ),
+									includeIdAttribute: behavior.IncludesIdAttribute( false ) || isFocused,
 									jsInitStatements: StringTools.ConcatenateWithDelimiter(
 										" ",
-										behavior.JsInitStatementGetter( context.Id ),
+										behavior.JsInitStatementGetter( context.Id, false ),
 										style.GetJsInitStatements( context.Id ),
 										isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
 

@@ -1,73 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using Humanizer;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// A table. Do not use this control in markup.
+	/// A table.
 	/// </summary>
-	public class EwfTable: WebControl, ControlTreeDataLoader {
-		private const string itemLimitPageStateKey = "itemLimit";
+	public sealed class EwfTable: FlowComponent {
+		private static readonly ElementClass standardLayoutOnlyStyleClass = new ElementClass( "ewfStandardLayoutOnly" );
+		private static readonly ElementClass standardExceptLayoutStyleClass = new ElementClass( "ewfTblSel" );
+		private static readonly ElementClass standardStyleClass = new ElementClass( "ewfStandard" );
+
+		// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
+		internal static readonly ElementClass AllCellAlignmentsClass = new ElementClass( "ewfTc" );
+
+		internal static readonly ElementClass ContrastClass = new ElementClass( "ewfContrast" );
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
 		public class CssElementCreator: ControlCssElementCreator {
-			internal const string StandardLayoutOnlyStyleClass = "ewfStandardLayoutOnly";
-			internal const string StandardExceptLayoutStyleClass = "ewfTblSel";
-			internal const string StandardStyleClass = "ewfStandard";
-
-			// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
-			internal const string AllCellAlignmentsClass = "ewfTc";
-
-			// NOTE: Rename ewfClickable to ewfAction and try to restrict its use to table rows since action controls have CSS elements that we can use for styling.
-			private const string actionClass = "ewfClickable"; // NOTE: Where will this be used besides here?
-
-			internal const string ContrastClass = "ewfContrast";
-
 			/// <summary>
 			/// EWL use only.
 			/// </summary>
 			public static readonly string[] Selectors =
 				{
-					"table", "table." + StandardLayoutOnlyStyleClass, "table." + StandardExceptLayoutStyleClass, "table." + StandardStyleClass
+					"table", "table." + standardLayoutOnlyStyleClass.ClassName, "table." + standardExceptLayoutStyleClass.ClassName,
+					"table." + standardStyleClass.ClassName
 				};
 
-			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass ).ToArray();
+			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass.ClassName ).ToArray();
 
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var elements = new[]
 					{
 						new CssElement( "TableAllStyles", Selectors ),
-						new CssElement( "TableStandardAndStandardLayoutOnlyStyles", "table." + StandardStyleClass, "table." + StandardLayoutOnlyStyleClass ),
-						new CssElement( "TableStandardAndStandardExceptLayoutStyles", "table." + StandardStyleClass, "table." + StandardExceptLayoutStyleClass ),
-						new CssElement( "TableStandardStyle", "table." + StandardStyleClass ), new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ),
-						new CssElement( "ThAndTd", CellSelectors ), new CssElement( "Th", "th." + AllCellAlignmentsClass ),
-						new CssElement( "Td", "td." + AllCellAlignmentsClass )
+						new CssElement(
+							"TableStandardAndStandardLayoutOnlyStyles",
+							"table." + standardStyleClass.ClassName,
+							"table." + standardLayoutOnlyStyleClass.ClassName ),
+						new CssElement(
+							"TableStandardAndStandardExceptLayoutStyles",
+							"table." + standardStyleClass.ClassName,
+							"table." + standardExceptLayoutStyleClass.ClassName ),
+						new CssElement( "TableStandardStyle", "table." + standardStyleClass.ClassName ),
+						new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ), new CssElement( "ThAndTd", CellSelectors ),
+						new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName )
 					}.ToList();
 
 
 				// Add row elements.
 
 				const string tr = "tr";
-				const string noActionSelector = ":not(." + actionClass + ")";
-				const string actionSelector = "." + actionClass;
+				var noActionSelector = ":not(." + ElementActivationBehavior.ActivatableClass.ClassName + ")";
+				var actionSelector = "." + ElementActivationBehavior.ActivatableClass.ClassName;
 				const string noHoverSelector = ":not(:hover)";
 				const string hoverSelector = ":hover";
-				const string contrastSelector = "." + ContrastClass;
+				var contrastSelector = "." + ContrastClass.ClassName;
 
-				const string trNoAction = tr + noActionSelector;
-				const string trNoActionContrast = tr + noActionSelector + contrastSelector;
-				const string trActionNoHover = tr + actionSelector + noHoverSelector;
-				const string trActionNoHoverContrast = tr + actionSelector + noHoverSelector + contrastSelector;
-				const string trActionHover = tr + actionSelector + hoverSelector;
-				const string trActionHoverContrast = tr + actionSelector + hoverSelector + contrastSelector;
+				var trNoAction = tr + noActionSelector;
+				var trNoActionContrast = tr + noActionSelector + contrastSelector;
+				var trActionNoHover = tr + actionSelector + noHoverSelector;
+				var trActionNoHoverContrast = tr + actionSelector + noHoverSelector + contrastSelector;
+				var trActionHover = tr + actionSelector + hoverSelector;
+				var trActionHoverContrast = tr + actionSelector + hoverSelector + contrastSelector;
 
 				// all rows
 				elements.Add(
@@ -97,60 +96,71 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		internal static void SetUpTableAndCaption( WebControl table, EwfTableStyle style, ReadOnlyCollection<string> classes, string caption, string subCaption ) {
-			table.CssClass = StringTools.ConcatenateWithDelimiter( " ", new[] { getTableStyleClass( style ) }.Concat( classes ).ToArray() );
-			addCaptionIfNecessary( table, caption, subCaption );
-		}
+		internal static ElementClassSet GetClasses( EwfTableStyle style, ElementClassSet classes ) => getTableStyleClass( style ).Add( classes );
 
-		private static string getTableStyleClass( EwfTableStyle style ) {
+		private static ElementClassSet getTableStyleClass( EwfTableStyle style ) {
 			switch( style ) {
 				case EwfTableStyle.StandardLayoutOnly:
-					return CssElementCreator.StandardLayoutOnlyStyleClass;
+					return standardLayoutOnlyStyleClass;
 				case EwfTableStyle.StandardExceptLayout:
-					return CssElementCreator.StandardExceptLayoutStyleClass;
+					return standardExceptLayoutStyleClass;
 				case EwfTableStyle.Standard:
-					return CssElementCreator.StandardStyleClass;
+					return standardStyleClass;
 				default:
-					return "";
+					return ElementClassSet.Empty;
 			}
 		}
 
-		private static void addCaptionIfNecessary( WebControl table, string caption, string subCaption ) {
+		internal static IReadOnlyCollection<FlowComponent> GetCaption( string caption, string subCaption ) {
 			if( caption.Length == 0 )
-				return;
+				return Enumerable.Empty<FlowComponent>().Materialize();
 			var subCaptionComponents = new List<PhrasingComponent>();
 			if( subCaption.Length > 0 )
 				subCaptionComponents.AddRange( new LineBreak().ToCollection().Concat( subCaption.ToComponents() ) );
-			table.Controls.Add(
-				new WebControl( HtmlTextWriterTag.Caption ).AddControlsReturnThis( caption.ToComponents().Concat( subCaptionComponents ).GetControls() ) );
+			return new DisplayableElement(
+				context => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData( "caption" ),
+					children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
 		}
 
 		internal static IReadOnlyCollection<EwfTableField> GetFields(
-			EwfTableField[] fields, ReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
 			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
 			if( firstSpecifiedItem == null )
-				return new EwfTableField[ 0 ];
+				return Enumerable.Empty<EwfTableField>().Materialize();
 
 			if( fields != null )
 				return fields;
 
 			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
 			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.Setup.FieldSpan );
-			return Enumerable.Repeat( new EwfTableField(), fieldCount ).ToArray();
+			return Enumerable.Repeat( new EwfTableField(), fieldCount ).Materialize();
 		}
 
-		internal static double GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
-			if( fieldOrItemSetups.Any( f => f.Size.IsEmpty ) )
+		internal static decimal GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
+			if( fieldOrItemSetups.Any( f => f.Size == null ) )
 				return 1;
-			return 100 / fieldOrItemSetups.Where( f => f.Size.Type == UnitType.Percentage ).Sum( f => f.Size.Value );
+			return 100 / fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size.Value.EndsWith( "%" ) )
+				       .Sum( f => decimal.Parse( f.Size.Value.Remove( f.Size.Value.Length - 1 ) ) );
 		}
 
-		internal static WebControl GetColControl( EwfTableFieldOrItemSetup fieldOrItemSetup, double columnWidthFactor ) {
+		internal static FlowComponent GetColElement( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
 			var width = fieldOrItemSetup.Size;
-			return new WebControl( HtmlTextWriterTag.Col )
-				{
-					Width = !width.IsEmpty && width.Type == UnitType.Percentage ? Unit.Percentage( width.Value * columnWidthFactor ) : width
-				};
+			return new ElementComponent(
+				context => new ElementData(
+					() => new ElementLocalData(
+						"col",
+						focusDependentData: new ElementFocusDependentData(
+							attributes: width != null
+								            ? Tuple.Create(
+										            "style",
+										            "width: {0}".FormatWith(
+											            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
+												              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
+												              : width ).Value ) )
+									            .ToCollection()
+								            : null ) ) ) );
 		}
 
 		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
@@ -178,7 +188,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
 		/// text (no controls).</param>
 		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty array.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
@@ -186,10 +196,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		public static EwfTable Create(
-			EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "", string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-			IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IEnumerable<TailUpdateRegion> tailUpdateRegions = null ) {
+			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "", string caption = "", string subCaption = "",
+			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
 			return new EwfTable(
 				style,
 				classes,
@@ -202,9 +212,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				headItems,
 				defaultItemLimit,
 				disableEmptyFieldDetection,
-				new EwfTableItemGroup(
-					() => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ),
-					ImmutableArray<Func<EwfTableItem>>.Empty ).ToCollection(),
+				ImmutableArray.Create(
+					new EwfTableItemGroup(
+						() => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ),
+						Enumerable.Empty<Func<EwfTableItem>>() ) ),
 				null );
 		}
 
@@ -222,7 +233,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
 		/// text (no controls).</param>
 		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty array.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
@@ -230,10 +241,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		public static EwfTable CreateWithItems(
-			IEnumerable<Func<EwfTableItem>> items, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null,
-			IEnumerable<EwfTableField> fields = null, IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
-			bool disableEmptyFieldDetection = false, IEnumerable<TailUpdateRegion> tailUpdateRegions = null ) {
+			IEnumerable<Func<EwfTableItem>> items, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
+			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
 			return new EwfTable(
 				style,
 				classes,
@@ -246,7 +258,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				headItems,
 				defaultItemLimit,
 				disableEmptyFieldDetection,
-				new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ).ToCollection(),
+				ImmutableArray.Create( new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ) ),
 				null );
 		}
 
@@ -264,7 +276,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
 		/// text (no controls).</param>
 		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty array.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
@@ -272,10 +284,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions for the table. These operate on the item-group level, not the item level.</param>
 		public static EwfTable CreateWithItemGroups(
-			IEnumerable<EwfTableItemGroup> itemGroups, EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null,
-			IEnumerable<EwfTableField> fields = null, IEnumerable<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited,
-			bool disableEmptyFieldDetection = false, IEnumerable<TailUpdateRegion> tailUpdateRegions = null ) {
+			IEnumerable<EwfTableItemGroup> itemGroups, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
+			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
 			return new EwfTable(
 				style,
 				classes,
@@ -288,59 +301,221 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				headItems,
 				defaultItemLimit,
 				disableEmptyFieldDetection,
-				itemGroups,
+				itemGroups.ToImmutableArray(),
 				tailUpdateRegions );
 		}
 
-		private readonly EwfTableStyle style;
-		private readonly ReadOnlyCollection<string> classes;
-		private readonly string postBackIdBase;
-		private readonly string caption;
-		private readonly string subCaption;
-		private readonly bool allowExportToExcel;
-		private readonly ReadOnlyCollection<Tuple<string, Action>> tableActions;
-		private readonly EwfTableField[] specifiedFields;
-		private readonly List<EwfTableItem> headItems;
-		private readonly DataRowLimit defaultItemLimit;
-		private readonly bool disableEmptyFieldDetection;
+		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
-		private readonly IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
-		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
 		private EwfTable(
-			EwfTableStyle style, IEnumerable<string> classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-			IEnumerable<Tuple<string, Action>> tableActions, IEnumerable<EwfTableField> fields, IEnumerable<EwfTableItem> headItems, DataRowLimit defaultItemLimit,
-			bool disableEmptyFieldDetection, IEnumerable<EwfTableItemGroup> itemGroups, IEnumerable<TailUpdateRegion> tailUpdateRegions ) {
-			this.style = style;
-			this.classes = ( classes ?? new string[ 0 ] ).ToList().AsReadOnly();
-			this.postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
-			this.caption = caption;
-			this.subCaption = subCaption;
-			this.allowExportToExcel = allowExportToExcel;
-			this.tableActions = ( tableActions ?? new Tuple<string, Action>[ 0 ] ).ToList().AsReadOnly();
+			EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
+			IReadOnlyCollection<Tuple<string, Action>> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields, IReadOnlyCollection<EwfTableItem> headItems,
+			DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IReadOnlyList<EwfTableItemGroup> itemGroups,
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
+			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
+			tableActions = tableActions ?? Enumerable.Empty<Tuple<string, Action>>().Materialize();
 
-			if( fields != null ) {
-				if( !fields.Any() )
-					throw new ApplicationException( "If fields are specified, there must be at least one of them." );
-				specifiedFields = fields.ToArray();
-			}
+			if( specifiedFields != null && !specifiedFields.Any() )
+				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-			this.headItems = ( headItems ?? new EwfTableItem[ 0 ] ).ToList();
-			this.defaultItemLimit = defaultItemLimit;
-			this.disableEmptyFieldDetection = disableEmptyFieldDetection;
-			this.itemGroups = itemGroups.ToImmutableArray();
-			this.tailUpdateRegions = tailUpdateRegions?.ToImmutableArray() ?? ImmutableArray<TailUpdateRegion>.Empty;
+			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
+			tailUpdateRegions = tailUpdateRegions ?? Enumerable.Empty<TailUpdateRegion>().Materialize();
 
-			// When we migrate EwfTable to the new component model, consider having ElementComponent (or ElementNode) store the current DMs and execute the
-			// elementDataGetter with them. This would save developers from having to manually do this when creating intermediate post-backs for click scripts.
-			dataModifications = FormState.Current.DataModifications;
+			var dataModifications = FormState.Current.DataModifications;
+			outerChildren = new DisplayableElement(
+				tableContext => {
+					var children = new List<FlowComponentOrNode>();
+					using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
+						FormState.ExecuteWithDataModificationsAndDefaultAction(
+							dataModifications,
+							() => {
+								children.AddRange( GetCaption( caption, subCaption ) );
+
+								// the maximum number of items that will be shown in this table
+								var itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ) );
+
+								var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
+								foreach( var itemGroup in itemGroups ) {
+									var visibleItems = itemGroup.Items.Take( itemLimit.Value.Value - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
+									visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.Materialize() ) );
+									if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == itemLimit.Value.Value )
+										break;
+								}
+
+								var fields = GetFields( specifiedFields, headItems, visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
+								if( !fields.Any() )
+									fields = new EwfTableField().ToCollection();
+
+								children.AddRange( getColumnSpecifications( fields ) );
+
+								var allVisibleItems = new List<EwfTableItem>();
+
+								var itemLimitingUpdateRegionSet = new UpdateRegionSet();
+								var headRows = buildRows(
+										getItemLimitingAndGeneralActionsItem(
+												postBackIdBase,
+												fields.Count,
+												defaultItemLimit,
+												itemLimit.Value,
+												itemLimitingUpdateRegionSet,
+												tailUpdateRegions )
+											.Concat( getItemActionsItem( fields.Count ) )
+											.Materialize(),
+										Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+										null,
+										false,
+										null,
+										null,
+										allVisibleItems )
+									.Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) )
+									.Materialize();
+								if( headRows.Any() )
+									children.Add( new ElementComponent( context => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
+
+								var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
+								var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
+								for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
+									var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
+									var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
+									var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).Materialize();
+									var cachedVisibleGroupIndex = visibleGroupIndex;
+									FlowComponent rowGroup = new ElementComponent(
+										context => new ElementData(
+											() => new ElementLocalData( "tbody" ),
+											children: buildRows(
+													groupAndItems.Item1.GetHeadItems( fields.Count ),
+													Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
+													null,
+													true,
+													null,
+													null,
+													allVisibleItems )
+												.Append<FlowComponentOrNode>(
+													new IdentifiedFlowComponent(
+														() => new IdentifiedComponentData<FlowComponentOrNode>(
+															"",
+															new UpdateRegionLinker(
+																"tail",
+																from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+																let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+																select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+																arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
+															new ErrorSourceSet(),
+															errorsBySource => groupBodyRows ) ) )
+												.Materialize() ) );
+									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
+
+									// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
+									if( defaultItemLimit != DataRowLimit.Unlimited )
+										updateRegionSetListsAndStaticRowGroupCounts.Add(
+											Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
+												groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).Materialize(),
+												visibleGroupIndex + 1 ) );
+								}
+								var linkers = new List<UpdateRegionLinker>();
+								children.Add(
+									new IdentifiedFlowComponent(
+										() => new IdentifiedComponentData<FlowComponentOrNode>(
+											"",
+											linkers,
+											new ErrorSourceSet(),
+											errorsBySource => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
+
+								if( defaultItemLimit != DataRowLimit.Unlimited ) {
+									var oldItemLimit = itemLimit.Value.Value;
+									var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value.Value ) );
+
+									var itemLimitingTailUpdateRegionComponentGetter = new Func<int, IEnumerable<FlowComponent>>(
+										staticItemCount => {
+											var rowCount = 0;
+											for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
+												var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
+												rowCount += rows.Count;
+												if( rowCount < staticItemCount )
+													continue;
+												return rows.Skip( rows.Count - ( rowCount - staticItemCount ) )
+													.Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
+											}
+											return Enumerable.Empty<FlowComponent>();
+										} );
+
+									linkers.Add(
+										new UpdateRegionLinker(
+											"itemLimitingTail",
+											new PreModificationUpdateRegion(
+												itemLimitingUpdateRegionSet.ToCollection(),
+												() => itemLimitingTailUpdateRegionComponentGetter( lowerItemLimit.Value ),
+												() => lowerItemLimit.Value.ToString() ).ToCollection(),
+											arg => itemLimitingTailUpdateRegionComponentGetter( int.Parse( arg ) ) ) );
+								}
+
+								linkers.Add(
+									new UpdateRegionLinker(
+										"tail",
+										from region in tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
+											.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+										select new PreModificationUpdateRegion(
+											region.sets,
+											() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
+											region.staticRowGroupCount.ToString ),
+										arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
+
+								var itemCount = itemGroups.Sum( i => i.Items.Count );
+								var itemLimitingRowGroup = new List<FlowComponent>();
+								if( itemLimit.Value.Value < itemCount ) {
+									var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value.Value );
+									var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value.Value;
+									var button = new EwfButton(
+										new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+										behavior: new PostBackBehavior(
+											postBack: PostBack.CreateIntermediate(
+												itemLimitingUpdateRegionSet.ToCollection(),
+												id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+												firstModificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
+									var item = new EwfTableItem( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
+									var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
+									itemLimitingRowGroup.Add(
+										new ElementComponent(
+											context => new ElementData(
+												() => new ElementLocalData( "tbody" ),
+												children: buildRows(
+														item.ToCollection().ToList(),
+														Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
+														useContrast,
+														false,
+														null,
+														null,
+														allVisibleItems )
+													.Materialize() ) ) );
+								}
+								children.Add(
+									new FlowIdContainer(
+										itemLimitingRowGroup,
+										updateRegionSets: itemLimitingUpdateRegionSet.ToCollection()
+											.Concat(
+												itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
+													.Materialize()
+													.Concat( tailUpdateRegions )
+													.SelectMany( i => i.Sets ) ) ) );
+
+								// Assert that every visible item in the table has the same number of cells and store a data structure for below.
+								var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
+
+								if( !disableEmptyFieldDetection )
+									AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+							} );
+					}
+					return new DisplayableElementData(
+						null,
+						() => new DisplayableElementLocalData( "table" ),
+						classes: GetClasses( style, classes ?? ElementClassSet.Empty ),
+						children: children );
+				} ).ToCollection();
+
+			this.itemGroups = itemGroups;
 		}
-
-		/// <summary>
-		/// Gets the maximum number of items that will be shown in this table.
-		/// </summary>
-		public int CurrentItemLimit => EwfPage.Instance.PageState.GetValue( this, itemLimitPageStateKey, (int)defaultItemLimit );
 
 		/// <summary>
 		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If
@@ -367,196 +542,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			itemGroups.Single().Items.Add( item );
 		}
 
-		void ControlTreeDataLoader.LoadData() {
-			using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
-				FormState.ExecuteWithDataModificationsAndDefaultAction(
-					dataModifications,
-					() => {
-						SetUpTableAndCaption( this, style, classes, caption, subCaption );
-
-						var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
-						foreach( var itemGroup in itemGroups ) {
-							var visibleItems = itemGroup.Items.Take( CurrentItemLimit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
-							visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.ToImmutableArray() ) );
-							if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == CurrentItemLimit )
-								break;
-						}
-
-						var fields = GetFields( specifiedFields, headItems.AsReadOnly(), visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
-						if( !fields.Any() )
-							fields = new EwfTableField().ToCollection();
-
-						addColumnSpecifications( fields );
-
-						var allVisibleItems = new List<EwfTableItem>();
-
-						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
-						var headRows = buildRows(
-								getItemLimitingAndGeneralActionsItem( fields.Count, itemLimitingUpdateRegionSet ).Concat( getItemActionsItem( fields.Count ) ).ToList(),
-								Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
-								null,
-								false,
-								null,
-								null,
-								allVisibleItems )
-							.Concat( buildRows( headItems, fields, null, true, null, null, allVisibleItems ) )
-							.ToArray();
-						if( headRows.Any() )
-							Controls.Add( new WebControl( HtmlTextWriterTag.Thead ).AddControlsReturnThis( headRows ) );
-
-						var bodyRowGroupsAndRows = new List<Tuple<WebControl, ImmutableArray<Control>>>();
-						var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
-						for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
-							var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
-							var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
-							var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).ToImmutableArray();
-							var rowGroup = new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-								buildRows(
-										groupAndItems.Item1.GetHeadItems( fields.Count ),
-										Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
-										null,
-										true,
-										null,
-										null,
-										allVisibleItems )
-									.Concat( new NamingPlaceholder( groupBodyRows ).ToCollection() ) );
-							bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
-
-							var cachedVisibleGroupIndex = visibleGroupIndex;
-							EwfPage.Instance.AddUpdateRegionLinker(
-								new LegacyUpdateRegionLinker(
-									rowGroup,
-									"tail",
-									from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-									let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-									select new LegacyPreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
-									arg => groupBodyRows.Skip( int.Parse( arg ) ) ) );
-
-							// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
-							if( defaultItemLimit != DataRowLimit.Unlimited )
-								updateRegionSetListsAndStaticRowGroupCounts.Add(
-									Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
-										groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).ToImmutableArray(),
-										visibleGroupIndex + 1 ) );
-						}
-						Controls.Add( new NamingPlaceholder( bodyRowGroupsAndRows.Select( i => i.Item1 ) ) );
-
-						if( defaultItemLimit != DataRowLimit.Unlimited ) {
-							var oldItemLimit = CurrentItemLimit;
-							var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, CurrentItemLimit ) );
-
-							var itemLimitingTailUpdateRegionControlGetter = new Func<int, IEnumerable<Control>>(
-								staticItemCount => {
-									var rowCount = 0;
-									for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
-										var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
-										rowCount += rows.Length;
-										if( rowCount < staticItemCount )
-											continue;
-										return rows.Skip( rows.Length - ( rowCount - staticItemCount ) )
-											.Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
-									}
-									return ImmutableArray<Control>.Empty;
-								} );
-
-							EwfPage.Instance.AddUpdateRegionLinker(
-								new LegacyUpdateRegionLinker(
-									this,
-									"itemLimitingTail",
-									new LegacyPreModificationUpdateRegion(
-										itemLimitingUpdateRegionSet.ToCollection(),
-										() => itemLimitingTailUpdateRegionControlGetter( lowerItemLimit.Value ),
-										() => lowerItemLimit.Value.ToString() ).ToCollection(),
-									arg => itemLimitingTailUpdateRegionControlGetter( int.Parse( arg ) ) ) );
-						}
-
-						EwfPage.Instance.AddUpdateRegionLinker(
-							new LegacyUpdateRegionLinker(
-								this,
-								"tail",
-								from region in tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
-									.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
-								select new LegacyPreModificationUpdateRegion(
-									region.sets,
-									() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
-									region.staticRowGroupCount.ToString ),
-								arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
-
-						var itemCount = itemGroups.Sum( i => i.Items.Count );
-						var itemLimitingRowGroup = new List<Control>();
-						if( CurrentItemLimit < itemCount ) {
-							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)CurrentItemLimit );
-							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - CurrentItemLimit;
-							var button = new PostBackButton(
-								new TextActionControlStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-								usesSubmitBehavior: false,
-								postBack: PostBack.CreateIntermediate(
-									itemLimitingUpdateRegionSet.ToCollection(),
-									id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-									firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)nextLimit ) ) );
-							var item = new EwfTableItem( button.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
-							var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
-							itemLimitingRowGroup.Add(
-								new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis(
-									buildRows(
-										item.ToCollection().ToList(),
-										Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
-										useContrast,
-										false,
-										null,
-										null,
-										allVisibleItems ) ) );
-						}
-						Controls.Add(
-							new NamingPlaceholder(
-								itemLimitingRowGroup,
-								updateRegionSets: itemLimitingUpdateRegionSet.ToCollection()
-									.Concat(
-										itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-											.ToImmutableArray()
-											.Concat( tailUpdateRegions )
-											.SelectMany( i => i.Sets ) ) ) );
-
-						// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-						var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
-
-						if( !disableEmptyFieldDetection )
-							AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
-					} );
-			}
-		}
-
-		private void addColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
+		private IReadOnlyCollection<FlowComponent> getColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
 			var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
 			var factor = GetColumnWidthFactor( fieldOrItemSetups );
-			this.AddControlsReturnThis( fieldOrItemSetups.Select( f => GetColControl( f, factor ) ) );
+			return fieldOrItemSetups.Select( f => GetColElement( f, factor ) ).Materialize();
 		}
 
 		// NOTE: This row also needs to include general actions, on the right. Don't forget about Export to Excel.
-		private IReadOnlyCollection<EwfTableItem> getItemLimitingAndGeneralActionsItem( int fieldCount, UpdateRegionSet itemLimitingUpdateRegionSet ) {
+		private IReadOnlyCollection<EwfTableItem> getItemLimitingAndGeneralActionsItem(
+			string postBackIdBase, int fieldCount, DataRowLimit defaultItemLimit, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
 			if( defaultItemLimit == DataRowLimit.Unlimited )
-				return new EwfTableItem[ 0 ];
+				return Enumerable.Empty<EwfTableItem>().Materialize();
 
 			var itemCount = itemGroups.Sum( i => i.Items.Count );
 			var list = new LineList(
 				( (LineListItem)new PhrasingIdContainer(
 							"Item".ToQuantity( itemCount ).ToComponents(),
 							updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-								.ToImmutableArray()
+								.Materialize()
 								.Concat( tailUpdateRegions )
 								.SelectMany( i => i.Sets ) ).ToCollection()
 						.ToComponentListItem() ).ToCollection()
 				.Append( "".ToComponents().ToComponentListItem() )
 				.Append( "Show:".ToComponents().ToComponentListItem() )
-				.Append( getItemLimitButtonItem( DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
-				.Append( getItemLimitButtonItem( DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
-				.Append( getItemLimitButtonItem( DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
-			return new EwfTableItem( list.ToCollection().GetControls().ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
+				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
+				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
+			return new EwfTableItem( list.ToCollection().ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
-		private ComponentListItem getItemLimitButtonItem( DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
+		private ComponentListItem getItemLimitButtonItem(
+			string postBackIdBase, DataValue<int> currentItemLimit, DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
-			if( itemLimit == (DataRowLimit)CurrentItemLimit )
+			if( itemLimit == (DataRowLimit)currentItemLimit.Value )
 				return text.ToComponents().ToComponentListItem();
 			return new EwfButton(
 					new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
@@ -564,7 +583,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						postBack: PostBack.CreateIntermediate(
 							updateRegionSet.ToCollection(),
 							id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-							firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, itemLimitPageStateKey, (int)itemLimit ) ) ) ).ToCollection()
+							firstModificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToCollection()
 				.ToComponentListItem();
 		}
 
@@ -576,7 +595,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return new EwfTableItem[ 0 ];
 		}
 
-		private IEnumerable<Control> buildRows(
+		private IEnumerable<FlowComponent> buildRows(
 			IReadOnlyCollection<EwfTableItem> items, IReadOnlyCollection<EwfTableField> fields, bool? useContrastForFirstRow, bool useHeadCells,
 			Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter, List<EwfTableItem> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
@@ -595,9 +614,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			return rows;
 		}
 
-		/// <summary>
-		/// Returns the table element, which represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Table;
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
 	}
 }

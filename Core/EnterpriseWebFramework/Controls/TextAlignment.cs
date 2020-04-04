@@ -31,12 +31,12 @@
 
 	internal static class TextAlignmentStatics {
 		// These are used by EWF CSS files for alignment rules.
-		private const string leftCssClass = "ewfTaL";
-		private const string rightCssClass = "ewfTaR";
-		private const string centerCssClass = "ewfTaC";
-		private const string justifyCssClass = "ewfTaJ";
+		private static readonly ElementClass leftCssClass = new ElementClass( "ewfTaL" );
+		private static readonly ElementClass rightCssClass = new ElementClass( "ewfTaR" );
+		private static readonly ElementClass centerCssClass = new ElementClass( "ewfTaC" );
+		private static readonly ElementClass justifyCssClass = new ElementClass( "ewfTaJ" );
 
-		internal static string Class( TextAlignment textAlignment ) {
+		internal static ElementClassSet Class( TextAlignment textAlignment ) {
 			switch( textAlignment ) {
 				case TextAlignment.Left:
 					return leftCssClass;
@@ -47,7 +47,7 @@
 				case TextAlignment.Justify:
 					return justifyCssClass;
 				default:
-					return "";
+					return ElementClassSet.Empty;
 			}
 		}
 	}

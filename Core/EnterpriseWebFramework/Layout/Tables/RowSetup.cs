@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
@@ -30,16 +29,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Gets or sets the activation behavior for the row.
 		/// </summary>
 		public ElementActivationBehavior ActivationBehavior { get; set; }
-
-		/// <summary>
-		/// EWF ToolTip to display on this control. Setting ToolTipControl will ignore this property.
-		/// </summary>
-		public string ToolTip { get; set; }
-
-		/// <summary>
-		/// Control to display inside the tool tip. Do not pass null. This will ignore the ToolTip property.
-		/// </summary>
-		public Control ToolTipControl { get; set; }
 
 		// NOTE: This would probably work better as a call back, since it will always be a waste of time to build the string list when drawing the table.
 		/// <summary>

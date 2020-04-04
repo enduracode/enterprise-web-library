@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -12,8 +11,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly IEnumerable<string> Classes;
 		internal readonly TextAlignment TextAlignment;
 		internal readonly ElementActivationBehavior ActivationBehavior;
-		internal readonly string ToolTip;
-		internal readonly Control ToolTipControl;
 
 		/// <summary>
 		/// Creates a cell setup object.
@@ -27,18 +24,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The CSS class(es).</param>
 		/// <param name="textAlignment">The text alignment of the cell.</param>
 		/// <param name="activationBehavior">The activation behavior.</param>
-		/// <param name="toolTip">The tool tip to display. Setting ToolTipControl will ignore this property. Do not pass null.</param>
-		/// <param name="toolTipControl">The control to display inside the tool tip. This will ignore the ToolTip property.</param>
 		public TableCellSetup(
 			int fieldSpan = 1, int itemSpan = 1, IEnumerable<string> classes = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-			ElementActivationBehavior activationBehavior = null, string toolTip = "", Control toolTipControl = null ) {
+			ElementActivationBehavior activationBehavior = null ) {
 			FieldSpan = fieldSpan;
 			ItemSpan = itemSpan;
 			Classes = classes ?? new string[ 0 ];
 			TextAlignment = textAlignment;
 			ActivationBehavior = activationBehavior;
-			ToolTip = toolTip;
-			ToolTipControl = toolTipControl;
 		}
 	}
 }

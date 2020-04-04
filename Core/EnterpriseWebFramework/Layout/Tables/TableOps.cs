@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
 using System.Web.UI.WebControls;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	internal static class TableOps {
@@ -20,12 +20,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				if( rowPlaceholder[ i ] is EwfTableCell )
 					row.Cells.Add( buildCell( rowPlaceholder[ i ] as EwfTableCell, rowSetup, columnSetups[ i ], tableIsColumnPrimary ) );
 			}
-
-			if( ( !rowSetup.ToolTip.IsNullOrWhiteSpace() || rowSetup.ToolTipControl != null ) && row.Cells.Count > 0 )
-				// NOTE: This comment is no longer accurate.
-				// It is very important that we add the tool tip to the cell so that the tool tip is hidden if the row is hidden.
-				// We cannot add the tool tip to the row because rows can't have children of that type.
-				new ToolTip( rowSetup.ToolTipControl ?? ToolTip.GetToolTipTextControl( rowSetup.ToolTip ), row );
 		}
 
 		private static TableCell buildCell( EwfTableCell ewfCell, RowSetup rowSetup, ColumnSetup columnSetup, bool tableIsColumnPrimary ) {
@@ -33,24 +27,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			var rowSpan = tableIsColumnPrimary ? ewfCell.Setup.FieldSpan : ewfCell.Setup.ItemSpan;
 
 			var underlyingCell = ( rowSetup.IsHeader || columnSetup.IsHeader ) ? new TableHeaderCell() : new TableCell();
-			underlyingCell.AddControlsReturnThis( ewfCell.Controls );
+			underlyingCell.AddControlsReturnThis( ewfCell.Content.GetControls() );
 			if( colSpan == 1 )
 				underlyingCell.Width = columnSetup.Width;
 			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter(
 				" ",
-				EwfTable.CssElementCreator.AllCellAlignmentsClass,
+				EwfTable.AllCellAlignmentsClass.ClassName,
 				columnSetup.CssClassOnAllCells,
 				StringTools.ConcatenateWithDelimiter( " ", ewfCell.Setup.Classes.ToArray() ) );
 			if( ewfCell.Setup.ActivationBehavior != null )
 				ewfCell.Setup.ActivationBehavior.SetUpClickableControl( underlyingCell );
-
-			if( !ewfCell.Setup.ToolTip.IsNullOrWhiteSpace() || ewfCell.Setup.ToolTipControl != null || !columnSetup.ToolTipOnCells.IsNullOrWhiteSpace() ) {
-				var toolTipControl = ewfCell.Setup.ToolTipControl ??
-				                     ToolTip.GetToolTipTextControl( !ewfCell.Setup.ToolTip.IsNullOrWhiteSpace() ? ewfCell.Setup.ToolTip : columnSetup.ToolTipOnCells );
-				// NOTE: This comment is no longer accurate.
-				// It is very important that we add the tool tip to the cell so that the tool tip is hidden if the row/cell is hidden.
-				new ToolTip( toolTipControl, underlyingCell );
-			}
 
 			if( colSpan != 1 )
 				underlyingCell.ColumnSpan = colSpan;
@@ -134,77 +120,104 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			cellPlaceholderListsForItems.Add( list );
 		}
 
-		internal static IEnumerable<Control> BuildRows(
+		internal static IEnumerable<FlowComponent> BuildRows(
 			List<List<CellPlaceholder>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
 			IReadOnlyList<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
 			return cellPlaceholderListsForRows.Select(
 				( row, rowIndex ) => {
-					var rowControl = new WebControl( HtmlTextWriterTag.Tr );
-					rowSetups[ rowIndex ].ActivationBehavior?.SetUpClickableControl( rowControl );
-					rowControl.Height = rowSetups[ rowIndex ].Size;
-					rowControl.CssClass = rowControl.CssClass.ConcatenateWithSpace(
-						useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value ) ? EwfTable.CssElementCreator.ContrastClass : "" );
-					rowControl.CssClass =
-						rowControl.CssClass.ConcatenateWithSpace( StringTools.ConcatenateWithDelimiter( " ", rowSetups[ rowIndex ].Classes.ToArray() ) );
-					return new NamingPlaceholder(
-						rowControl.AddControlsReturnThis(
-								row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
-									.Where( cellAndIndex => cellAndIndex.Cell != null )
-									.Select(
-										cellAndIndex => {
-											var cellControl = new WebControl( cellAndIndex.ColumnIndex < firstDataColumnIndex ? HtmlTextWriterTag.Th : HtmlTextWriterTag.Td );
+					var rowSetup = rowSetups[ rowIndex ];
+					var rowActivationBehavior = rowSetup.ActivationBehavior;
+					return new FlowIdContainer(
+						new ElementComponent(
+							rowContext => {
+								rowActivationBehavior?.PostBackAdder();
+								return new ElementData(
+									() => {
+										var attributes = new List<Tuple<string, string>>();
+										if( rowActivationBehavior != null )
+											attributes.AddRange( rowActivationBehavior.AttributeGetter() );
+										if( rowSetup.Size != null )
+											attributes.Add( Tuple.Create( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ) );
+										if( rowActivationBehavior?.IsFocusable == true )
+											attributes.AddRange( new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) } );
+										return new ElementLocalData(
+											"tr",
+											new FocusabilityCondition( rowActivationBehavior?.IsFocusable == true ),
+											isFocused => new ElementFocusDependentData(
+												attributes: attributes,
+												includeIdAttribute: rowActivationBehavior?.IncludeIdAttribute == true || isFocused,
+												jsInitStatements: ( rowActivationBehavior != null ? rowActivationBehavior.JsInitStatementGetter( rowContext.Id ) : "" )
+												.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( rowContext.Id ) : "" ) ) );
+									},
+									classes: ( rowActivationBehavior != null ? rowActivationBehavior.Classes : ElementClassSet.Empty )
+									.Add(
+										useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
+											? EwfTable.ContrastClass
+											: ElementClassSet.Empty )
+									.Add( rowSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+									children: row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
+										.Where( cellAndIndex => cellAndIndex.Cell != null )
+										.Select(
+											cellAndIndex => {
+												var columnSetup = columns[ cellAndIndex.ColumnIndex ];
+												var cellSetup = cellAndIndex.Cell.Setup;
+												var cellActivationBehavior = cellSetup.ActivationBehavior ??
+												                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
+												return new ElementComponent(
+													cellContext => {
+														cellActivationBehavior?.PostBackAdder();
+														return new ElementData(
+															() => {
+																var attributes = new List<Tuple<string, string>>();
 
-											var rowSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.FieldSpan : cellAndIndex.Cell.Setup.ItemSpan;
-											if( rowSpan != 1 )
-												cellControl.Attributes.Add( "rowspan", rowSpan.ToString() );
+																var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
+																if( rowSpan != 1 )
+																	attributes.Add( Tuple.Create( "rowspan", rowSpan.ToString() ) );
 
-											var colSpan = tableIsColumnPrimary ? cellAndIndex.Cell.Setup.ItemSpan : cellAndIndex.Cell.Setup.FieldSpan;
-											if( colSpan != 1 )
-												cellControl.Attributes.Add( "colspan", colSpan.ToString() );
+																var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
+																if( colSpan != 1 )
+																	attributes.Add( Tuple.Create( "colspan", colSpan.ToString() ) );
 
-											var rowSetup = rowSetups[ rowIndex ];
-											var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-											( cellAndIndex.Cell.Setup.ActivationBehavior ??
-											  ( tableIsColumnPrimary || rowSetup.ActivationBehavior == null ? columnSetup.ActivationBehavior : null ) )?.SetUpClickableControl(
-												cellControl );
-
-											var columnClassString = StringTools.ConcatenateWithDelimiter( " ", columnSetup.Classes.ToArray() );
-											var cellClassString = StringTools.ConcatenateWithDelimiter( " ", cellAndIndex.Cell.Setup.Classes.ToArray() );
-											cellControl.CssClass = StringTools.ConcatenateWithDelimiter(
-												" ",
-												cellControl.CssClass,
-												EwfTable.CssElementCreator.AllCellAlignmentsClass,
-												textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ),
-												verticalAlignmentClass( rowSetup, columnSetup ),
-												columnClassString,
-												cellClassString );
-
-											if( ( rowSetup.ToolTipControl != null || rowSetup.ToolTip.Length > 0 ) && cellAndIndex.ColumnIndex == 0 )
-												new ToolTip( rowSetup.ToolTipControl ?? ToolTip.GetToolTipTextControl( rowSetup.ToolTip ), rowControl );
-											if( columnSetup.ToolTipControl != null )
-												throw new ApplicationException(
-													"A column cannot have a tool tip control because there is no way to clone this control to put it on every cell." );
-											if( columnSetup.ToolTip.Length > 0 )
-												new ToolTip( ToolTip.GetToolTipTextControl( columnSetup.ToolTip ), cellControl );
-											if( cellAndIndex.Cell.Setup.ToolTipControl != null || cellAndIndex.Cell.Setup.ToolTip.Length > 0 )
-												new ToolTip( cellAndIndex.Cell.Setup.ToolTipControl ?? ToolTip.GetToolTipTextControl( cellAndIndex.Cell.Setup.ToolTip ), cellControl );
-
-											return cellControl.AddControlsReturnThis( cellAndIndex.Cell.Controls ) as Control;
-										} ) )
-							.ToCollection() );
+																if( cellActivationBehavior != null )
+																	attributes.AddRange( cellActivationBehavior.AttributeGetter() );
+																if( cellActivationBehavior?.IsFocusable == true )
+																	attributes.AddRange( new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) } );
+																return new ElementLocalData(
+																	cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
+																	new FocusabilityCondition( cellActivationBehavior?.IsFocusable == true ),
+																	isFocused => new ElementFocusDependentData(
+																		attributes: attributes,
+																		includeIdAttribute: cellActivationBehavior?.IncludeIdAttribute == true || isFocused,
+																		jsInitStatements: ( cellActivationBehavior != null ? cellActivationBehavior.JsInitStatementGetter( cellContext.Id ) : "" )
+																		.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( cellContext.Id ) : "" ) ) );
+															},
+															classes: ( cellActivationBehavior != null ? cellActivationBehavior.Classes : ElementClassSet.Empty )
+															.Add( EwfTable.AllCellAlignmentsClass )
+															.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+															.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
+															.Add( columnSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) )
+															.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+															children: cellAndIndex.Cell.Content,
+															etherealChildren: cellActivationBehavior?.EtherealChildren );
+													} );
+											} )
+										.Materialize(),
+									etherealChildren: rowActivationBehavior?.EtherealChildren );
+							} ).ToCollection() );
 				} );
 		}
 
-		private static string textAlignmentClass( EwfTableCell cell, EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {
+		private static ElementClassSet textAlignmentClass( EwfTableCell cell, EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {
 			// NOTE: Think about whether the row or the column should win if nothing is specified on the cell.
-			var alignments = new[] { cell.Setup.TextAlignment, row.TextAlignment, column.TextAlignment };
-			return ( from i in alignments select TextAlignmentStatics.Class( i ) ).FirstOrDefault( i => i.Length > 0 ) ?? "";
+			var alignments = new TextAlignment?[] { cell.Setup.TextAlignment, row.TextAlignment, column.TextAlignment };
+			return TextAlignmentStatics.Class( alignments.FirstOrDefault( i => i != TextAlignment.NotSpecified ) ?? TextAlignment.NotSpecified );
 		}
 
-		private static string verticalAlignmentClass( EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {
+		private static ElementClassSet verticalAlignmentClass( EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {
 			// NOTE: Think about whether the row or the column should win.
-			var alignments = new[] { row.VerticalAlignment, column.VerticalAlignment };
-			return ( from i in alignments select TableCellVerticalAlignmentOps.Class( i ) ).FirstOrDefault( i => i.Length > 0 ) ?? "";
+			var alignments = new TableCellVerticalAlignment?[] { row.VerticalAlignment, column.VerticalAlignment };
+			return TableCellVerticalAlignmentOps.Class(
+				alignments.FirstOrDefault( i => i != TableCellVerticalAlignment.NotSpecified ) ?? TableCellVerticalAlignment.NotSpecified );
 		}
 	}
 }

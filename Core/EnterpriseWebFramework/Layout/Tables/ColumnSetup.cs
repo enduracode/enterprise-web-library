@@ -21,18 +21,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public string CssClassOnAllCells { get; set; }
 
 		/// <summary>
-		/// Gets or sets the tool tip on cells in this column.
-		/// </summary>
-		public string ToolTipOnCells { get; set; }
-
-		/// <summary>
 		/// Creates a column setup object. Options specified on individual cells take precedence over equivalent options specified here.
 		/// </summary>
 		public ColumnSetup() {
 			IsHeader = false;
 			Width = Unit.Empty;
 			CssClassOnAllCells = "";
-			ToolTipOnCells = "";
 		}
 	}
 }

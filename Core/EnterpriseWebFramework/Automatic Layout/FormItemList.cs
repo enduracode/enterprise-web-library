@@ -69,10 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									"div",
 									focusDependentData: new DisplayableElementFocusDependentData(
 										attributes: Tuple.Create( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.content ).Value ) ).ToCollection() ) ),
-								classes: contentClass.Add(
-									TextAlignmentStatics.Class( i.Setup.TextAlignment ).Any()
-										? new ElementClass( TextAlignmentStatics.Class( i.Setup.TextAlignment ) )
-										: ElementClassSet.Empty ),
+								classes: contentClass.Add( TextAlignmentStatics.Class( i.Setup.TextAlignment ) ),
 								children: i.Content.Concat(
 										i.ErrorSourceSet == null
 											? Enumerable.Empty<FlowComponent>()
@@ -111,9 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				gridClass.Add( GridVerticalAlignmentStatics.Class( verticalAlignment ) ),
 				( minWidth != null ? "min-width: {0}; ".FormatWith( ( (CssLength)minWidth ).Value ) : "" ) +
 				"grid-template-columns: repeat( {0}, 1fr )".FormatWith( numberOfColumns ),
-				i => TextAlignmentStatics.Class( i.Setup.TextAlignment ).Any()
-					     ? new ElementClass( TextAlignmentStatics.Class( i.Setup.TextAlignment ) )
-					     : ElementClassSet.Empty,
+				i => TextAlignmentStatics.Class( i.Setup.TextAlignment ),
 				i => {
 					var span = defaultColumnSpan;
 					if( i.Setup.ColumnSpan.HasValue ) {
