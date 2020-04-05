@@ -1,26 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
-	/// A column primary table. Do not use this control in markup.
+	/// A column-primary table.
 	/// </summary>
-	public class ColumnPrimaryTable: WebControl, ControlTreeDataLoader {
-		private readonly EwfTableStyle style;
-		private readonly ReadOnlyCollection<string> classes;
-		private readonly string caption;
-		private readonly string subCaption;
-		private readonly bool allowExportToExcel;
-		private readonly ReadOnlyCollection<Tuple<string, Action>> tableActions;
-		private readonly EwfTableField[] specifiedFields;
-		private readonly ReadOnlyCollection<EwfTableItem> headItems;
-		private readonly int firstDataFieldIndex;
-		private readonly List<ColumnPrimaryItemGroup> itemGroups;
+	public sealed class ColumnPrimaryTable: FlowComponent {
+		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 
 		/// <summary>
 		/// Creates a table with one item group.
@@ -34,14 +22,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
 		/// text (no controls).</param>
 		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty array.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="items">The items.</param>
 		public ColumnPrimaryTable(
-			EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-			IEnumerable<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IEnumerable<EwfTableItem> items = null ): this(
+			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
+			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EwfTableItem> items = null ): this(
 			style,
 			classes,
 			caption,
@@ -51,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			fields,
 			headItems,
 			firstDataFieldIndex,
-			items != null ? new List<ColumnPrimaryItemGroup> { new ColumnPrimaryItemGroup( null, items: items ) } : null ) {}
+			items != null ? new ColumnPrimaryItemGroup( null, items: items ).ToCollection() : null ) {}
 
 		/// <summary>
 		/// Creates a table with multiple item groups.
@@ -65,78 +53,81 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
 		/// text (no controls).</param>
 		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty array.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="itemGroups">The item groups.</param>
 		// NOTE: Change the Tuple for tableActions to a named type.
 		public ColumnPrimaryTable(
-			EwfTableStyle style = EwfTableStyle.Standard, IEnumerable<string> classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IEnumerable<Tuple<string, Action>> tableActions = null, IEnumerable<EwfTableField> fields = null,
-			IEnumerable<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IEnumerable<ColumnPrimaryItemGroup> itemGroups = null ) {
-			this.style = style;
-			this.classes = ( classes ?? new string[ 0 ] ).ToList().AsReadOnly();
-			this.caption = caption;
-			this.subCaption = subCaption;
-			this.allowExportToExcel = allowExportToExcel;
-			this.tableActions = ( tableActions ?? new Tuple<string, Action>[ 0 ] ).ToList().AsReadOnly();
+			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
+			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null ) {
+			tableActions = tableActions ?? Enumerable.Empty<Tuple<string, Action>>().Materialize();
 
-			if( fields != null ) {
-				if( !fields.Any() )
-					throw new ApplicationException( "If fields are specified, there must be at least one of them." );
-				specifiedFields = fields.ToArray();
-			}
+			if( fields != null && !fields.Any() )
+				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-			this.headItems = ( headItems ?? new EwfTableItem[ 0 ] ).ToList().AsReadOnly();
-			this.firstDataFieldIndex = firstDataFieldIndex;
-			this.itemGroups = ( itemGroups ?? new ColumnPrimaryItemGroup[ 0 ] ).ToList();
+			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
+			itemGroups = itemGroups ?? Enumerable.Empty<ColumnPrimaryItemGroup>().Materialize();
+
+			outerChildren = new DisplayableElement(
+				tableContext => {
+					var children = new List<FlowComponentOrNode>();
+
+					children.AddRange( EwfTable.GetCaption( caption, subCaption ) );
+
+					var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) )
+						.Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) )
+						.Materialize();
+					var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
+					var columnWidthFactor = EwfTable.GetColumnWidthFactor( allItemSetups );
+					foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
+						children.Add(
+							new ElementComponent(
+								context => new ElementData(
+									() => new ElementLocalData( "colgroup" ),
+									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
+					}
+
+					fields = EwfTable.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );
+					var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems(
+						headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
+						fields.Count );
+
+					// Pivot the cell placeholders from column primary into row primary format.
+					var cellPlaceholderListsForRows = Enumerable.Range( 0, fields.Count )
+						.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
+						.ToList();
+
+					var headRows = TableOps.BuildRows(
+						cellPlaceholderListsForRows.Take( firstDataFieldIndex ).ToList(),
+						fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
+						null,
+						allItemSetups,
+						allItemSetups.Length,
+						true );
+					var bodyRows = TableOps.BuildRows(
+						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
+						fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
+						false,
+						allItemSetups,
+						headItems.Count,
+						true );
+
+					// We can't easily put the head fields in thead because we don't have a way of verifying that cells don't cross between head and data fields.
+					children.Add(
+						new ElementComponent( context => new ElementData( () => new ElementLocalData( "tbody" ), children: headRows.Concat( bodyRows ).Materialize() ) ) );
+
+					EwfTable.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+
+					return new DisplayableElementData(
+						null,
+						() => new DisplayableElementLocalData( "table" ),
+						classes: EwfTable.GetClasses( style, classes ?? ElementClassSet.Empty ),
+						children: children );
+				} ).ToCollection();
 		}
 
-		void ControlTreeDataLoader.LoadData() {
-			EwfTable.SetUpTableAndCaption( this, style, classes, caption, subCaption );
-
-			var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) ).Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) );
-			var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
-			var columnWidthFactor = EwfTable.GetColumnWidthFactor( allItemSetups );
-			foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
-				Controls.Add(
-					new WebControl( HtmlTextWriterTag.Colgroup ).AddControlsReturnThis( itemSetups.Select( i => EwfTable.GetColControl( i, columnWidthFactor ) ) ) );
-			}
-
-			var fields = EwfTable.GetFields( specifiedFields, headItems, itemGroups.SelectMany( i => i.Items ) );
-			var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems(
-				headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
-				fields.Count );
-
-			// Pivot the cell placeholders from column primary into row primary format.
-			var cellPlaceholderListsForRows = Enumerable.Range( 0, fields.Count )
-				.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
-				.ToList();
-
-			var headRows = TableOps.BuildRows(
-				cellPlaceholderListsForRows.Take( firstDataFieldIndex ).ToList(),
-				fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
-				null,
-				allItemSetups,
-				allItemSetups.Length,
-				true );
-			var bodyRows = TableOps.BuildRows(
-				cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
-				fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
-				false,
-				allItemSetups,
-				headItems.Count,
-				true );
-
-			// We can't easily put the head fields in thead because we don't have a way of verifying that cells don't cross between head and data fields.
-			Controls.Add( new WebControl( HtmlTextWriterTag.Tbody ).AddControlsReturnThis( headRows.Concat( bodyRows ) ) );
-
-			EwfTable.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
-		}
-
-		/// <summary>
-		/// Returns the table element, which represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Table;
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
 	}
 }
