@@ -227,13 +227,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		/// <summary>
-		/// Adds a row of controls to this table.
-		/// </summary>
-		public void AddRow( params Control[] controls ) {
-			AddRow( new RowSetup(), controls );
-		}
-
-		/// <summary>
 		/// Adds a row to this table.
 		/// </summary>
 		public void AddRow( params EwfTableCell[] cells ) {
@@ -245,13 +238,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public void AddTextRow( RowSetup rowSetup, params string[] cellText ) {
 			AddRow( rowSetup, cellText.Select( ct => (EwfTableCell)ct ).ToArray() );
-		}
-
-		/// <summary>
-		/// Adds a row of controls to this table.
-		/// </summary>
-		public void AddRow( RowSetup rowSetup, params Control[] controls ) {
-			AddRow( rowSetup, controls.Select( c => (EwfTableCell)c ).ToArray() );
 		}
 
 		/// <summary>
@@ -297,8 +283,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 							                         .Select(
 								                         rowSpanCell => new RowColumnSpanPair
 									                         {
-										                         RowSpan = rowSpanCell.Setup.ItemSpan - 1,
-										                         ColumnSpan = rowSpanCell.Setup.FieldSpan
+										                         RowSpan = rowSpanCell.Setup.ItemSpan - 1, ColumnSpan = rowSpanCell.Setup.FieldSpan
 									                         } ) ) ).ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
@@ -383,7 +368,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						foreach( var rowSetup in rowSetups ) {
 							var cell = new TableCell
 								{
-									Width = Unit.Percentage( 5 ), CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+									Width = Unit.Percentage( 5 ), CssClass = EwfTable.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfNotClickable" )
 								};
 							if( rowSetup.UniqueIdentifier != null ) {
 								var firstDm = selectedRowDataModificationsToMethods.First().Key;
@@ -436,8 +421,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
 						var cell = new TableCell
 							{
-								Width = Unit.Percentage( 10 ),
-								CssClass = EwfTable.CssElementCreator.AllCellAlignmentsClass.ConcatenateWithSpace( "ewfNotClickable" )
+								Width = Unit.Percentage( 10 ), CssClass = EwfTable.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfNotClickable" )
 							};
 						cell.Controls.Add( controlLine );
 						rowSetup.UnderlyingTableRow.Cells.Add( cell );
