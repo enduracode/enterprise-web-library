@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Web.UI;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
@@ -20,6 +19,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		void SetContentFootControls( params Control[] controls );
+		void SetContentFootComponents( IReadOnlyCollection<FlowComponent> components );
 	}
 }

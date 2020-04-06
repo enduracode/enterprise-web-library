@@ -12,12 +12,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
 				EwfTable.CreateWithItems(
-					items: getStatusTests()
-						.Select(
-							tests => new EwfTableItem(
-								tests.Item1,
-								new PostBackButton( new ButtonActionControlStyle( "Test" ), usesSubmitBehavior: false, postBack: tests.Item2 ) ) )
-						.ToFunctions() ) );
+						items: getStatusTests()
+							.Select(
+								tests => new EwfTableItem(
+									tests.Item1,
+									new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCollection().ToCell() ) )
+							.ToFunctions() )
+					.ToCollection()
+					.GetControls() );
 		}
 
 		private IEnumerable<Tuple<string, ActionPostBack>> getStatusTests() {
@@ -27,7 +29,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			yield return Tuple.Create(
 				"One warning message",
-				PostBack.CreateFull( id: "oneWarning", firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, "This is the warning message" ); } ) );
+				PostBack.CreateFull(
+					id: "oneWarning",
+					firstModificationMethod: () => { AddStatusMessage( StatusMessageType.Warning, "This is the warning message" ); } ) );
 
 			yield return Tuple.Create(
 				"Modification error message",

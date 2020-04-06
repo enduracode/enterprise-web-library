@@ -1,13 +1,12 @@
 using System;
 using System.Linq;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ColumnPrimaryTableDemo: EwfPage {
 		partial class Info {
-			public override string ResourceName { get { return "Column Primary"; } }
+			public override string ResourceName => "Column Primary";
 		}
 
 		protected override void loadData() {
@@ -19,16 +18,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						( i * 2 ) + Environment.NewLine + "extra stuff" ) )
 				.ToList();
 
-			place.Controls.Add(
+			place.AddControlsReturnThis(
 				new ColumnPrimaryTable(
-					caption: "My table",
-					subCaption: "A new table implementation",
-					fields: new[]
-						{
-							new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ),
-							new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" )
-						},
-					items: items ) );
+						caption: "My table",
+						subCaption: "A new table implementation",
+						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
+						items: items ).ToCollection()
+					.GetControls() );
 		}
 	}
 }

@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
@@ -39,14 +37,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			var listTable = EwfTable.Create(
 				style: EwfTableStyle.StandardLayoutOnly,
-				fields: from i in new[] { 10, 1, 10 } select new EwfTableField( size: Unit.Percentage( i ) ) );
+				fields: new[] { 10, 1, 10 }.Select( i => new EwfTableField( size: i.ToPercentage() ) ).Materialize() );
 			listTable.AddItem(
 				new EwfTableItem(
 					new EwfTableItemSetup( verticalAlignment: TableCellVerticalAlignment.Top ),
 					getNonIdListRegionComponents().ToCell(),
 					"",
-					getIdListRegionBlocks().ToCell() ) );
-			ph.AddControlsReturnThis( listTable );
+					getIdListRegionComponents().ToCell() ) );
+			ph.AddControlsReturnThis( listTable.ToCollection().GetControls() );
 		}
 
 		private IEnumerable<FlowComponent> getBasicRegionComponents() {
@@ -79,36 +77,40 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					info.Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." ) );
 		}
 
-		private IEnumerable<FlowComponent> getNonIdListRegionComponents() {
+		private IReadOnlyCollection<FlowComponent> getNonIdListRegionComponents() {
+			var components = new List<FlowComponent>();
+
 			var addRs = new UpdateRegionSet();
 			var removeRs = new UpdateRegionSet();
-			yield return new LineList(
-				new EwfButton(
-						new StandardButtonStyle( "Add Two Items" ),
-						behavior: new PostBackBehavior(
-							postBack: PostBack.CreateIntermediate(
-								addRs.ToCollection(),
-								id: "nonIdAdd",
-								firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
-					.ToCollection()
-					.Append(
-						new EwfButton(
-							new StandardButtonStyle( "Remove Two Items" ),
+			components.Add(
+				new LineList(
+					new EwfButton(
+							new StandardButtonStyle( "Add Two Items" ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateIntermediate(
-									removeRs.ToCollection(),
-									id: "nonIdRemove",
-									firstModificationMethod: () =>
-										parametersModification.NonIdItemStates =
-											parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) ) )
-					.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) );
+									addRs.ToCollection(),
+									id: "nonIdAdd",
+									firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
+						.ToCollection()
+						.Append(
+							new EwfButton(
+								new StandardButtonStyle( "Remove Two Items" ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateIntermediate(
+										removeRs.ToCollection(),
+										id: "nonIdRemove",
+										firstModificationMethod: () =>
+											parametersModification.NonIdItemStates =
+												parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) ) )
+						.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) );
 
 			var stack = new StackList(
 				Enumerable.Range( 0, info.NonIdItemStates.Count() ).Select( getNonIdItem ),
 				setup: new ComponentListSetup(
 					tailUpdateRegions: new[] { new TailUpdateRegion( addRs.ToCollection(), 0 ), new TailUpdateRegion( removeRs.ToCollection(), 2 ) } ) );
 
-			yield return new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box );
+			components.Add( new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
+			return components;
 		}
 
 		private ComponentListItem getNonIdItem( int i ) {
@@ -135,41 +137,51 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			return new StackList( items ).ToCollection().ToComponentListItem( updateRegionSets: rs.ToCollection() );
 		}
 
-		private IEnumerable<Control> getIdListRegionBlocks() {
+		private IReadOnlyCollection<FlowComponent> getIdListRegionComponents() {
+			var components = new List<FlowComponent>();
+
 			var rs = new UpdateRegionSet();
-			yield return new ControlLine(
-				new PostBackButton(
-					new ButtonActionControlStyle( "Add Item" ),
-					usesSubmitBehavior: false,
-					postBack: PostBack.CreateIntermediate(
-						rs.ToCollection(),
-						id: "idAdd",
-						firstModificationMethod: () =>
-							parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection()
-								.Concat( parametersModification.ItemIds ) ) ) );
+			components.Add(
+				new LineList(
+					new EwfButton(
+							new StandardButtonStyle( "Add Item" ),
+							behavior: new PostBackBehavior(
+								postBack: PostBack.CreateIntermediate(
+									rs.ToCollection(),
+									id: "idAdd",
+									firstModificationMethod: () =>
+										parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection()
+											.Concat( parametersModification.ItemIds ) ) ) ).ToCollection()
+						.ToComponentListItem()
+						.ToLineListItemCollection() ) );
 
-			var stack = ControlStack.Create(
-				true,
-				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
-					.ToCollection() );
-			foreach( var i in info.ItemIds )
-				stack.AddItem( getIdItem( i ) );
+			var stack = new StackList(
+				info.ItemIds.Select( getIdItem ),
+				setup: new ComponentListSetup(
+					itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
+						.ToCollection() ) );
 
-			yield return new LegacySection( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box );
+			components.Add( new Section( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
+			return components;
 		}
 
-		private ControlListItem getIdItem( int id ) {
+		private ComponentListItem getIdItem( int id ) {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: PostBack.GetCompositeId( "id", id.ToString() ) );
 
-			var itemStack = ControlStack.Create( true );
-			itemStack.AddControls( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToComponentCollection().GetControls().ToArray() );
-			itemStack.AddControls(
-				new PostBackButton( new ButtonActionControlStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ), usesSubmitBehavior: false, postBack: pb ) );
+			var items = new List<ComponentListItem>();
+			items.Add( new TextControl( "ID {0}".FormatWith( id ), true ).ToFormItem().ToListItem() );
+			items.Add(
+				new EwfButton(
+						new StandardButtonStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateIntermediate(
+								rs.ToCollection(),
+								id: PostBack.GetCompositeId( "id", id.ToString() ),
+								firstModificationMethod: () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() ) ) )
+					.ToCollection()
+					.ToComponentListItem() );
 
-			pb.AddModificationMethod( () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() );
-
-			return new ControlListItem( itemStack.ToCollection(), id.ToString(), removalUpdateRegionSets: rs.ToCollection() );
+			return new StackList( items ).ToCollection().ToComponentListItem( id.ToString(), removalUpdateRegionSets: rs.ToCollection() );
 		}
 	}
 }

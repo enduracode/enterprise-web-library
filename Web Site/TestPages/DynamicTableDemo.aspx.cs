@@ -1,4 +1,3 @@
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
@@ -22,15 +21,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			//Selected Rows Action
 			table2.SetUpColumns( new EwfTableColumn( "1" ), new EwfTableColumn( "2" ), new EwfTableColumn( "3" ), new EwfTableColumn( "4" ) );
-			table2.AddTextRow( new RowSetup { ToolTip = "Row tool tip", UniqueIdentifier = 1 }, "One", "Two", "Three", "Four" );
+			table2.AddTextRow( new RowSetup { UniqueIdentifier = 1 }, "One", "Two", "Three", "Four" );
 			table2.AllowExportToExcel = true;
 			for( var i = 0; i < 20; i += 3 ) {
-				table2.AddRow(
-					new RowSetup { UniqueIdentifier = 2 },
-					"One",
-					"Two",
-					"Three with Tip".ToCell( new TableCellSetup( toolTip: "Cell tool tip" ) ),
-					"Four with TipControl" );
+				table2.AddRow( new RowSetup { UniqueIdentifier = 2 }, "One", "Two", "Three with Tip", "Four with TipControl" );
 			}
 			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 
@@ -51,11 +45,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					clickScript = ElementActivationBehavior.CreateCustomScript( "alert('custom script')" );
 					cells = new[] { "Custom", "alert", "Script" };
 				}
-				table3.AddTextRow(
-					new RowSetup { ActivationBehavior = clickScript, UniqueIdentifier = 3, ToolTip = "Row Tool Tip" },
-					cells[ 0 ],
-					cells[ 1 ],
-					cells[ 2 ] );
+				table3.AddTextRow( new RowSetup { ActivationBehavior = clickScript, UniqueIdentifier = 3 }, cells[ 0 ], cells[ 1 ], cells[ 2 ] );
 			}
 
 			//Mixed
@@ -80,18 +70,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					cells = new[] { "Custom", "alert", "Script" };
 				}
 
-				table4.AddTextRow(
-					new RowSetup
-						{
-							ActivationBehavior = clickScript,
-							UniqueIdentifier = 3,
-							ToolTipControl = new PlaceHolder().AddControlsReturnThis(
-								new EwfImage( new ImageSetup( null ), new ExternalResourceInfo( "http://redstapler.biz/images/logo_blkgradient.png" ) ).ToCollection()
-									.GetControls() )
-						},
-					cells[ 0 ],
-					cells[ 1 ],
-					cells[ 2 ] );
+				table4.AddTextRow( new RowSetup { ActivationBehavior = clickScript, UniqueIdentifier = 3 }, cells[ 0 ], cells[ 1 ], cells[ 2 ] );
 			}
 
 			//Reorderable

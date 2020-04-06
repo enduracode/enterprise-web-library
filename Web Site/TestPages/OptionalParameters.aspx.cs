@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) );
 
 			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url", "Valid?" ) } );
-			ph.AddControlsReturnThis( table );
+			ph.AddControlsReturnThis( table.ToCollection().GetControls() );
 
 			foreach( var scheme in new[] { "http://", "ftp://", "file://" } ) {
 				foreach( var userinfo in new[] { "", "user:pass@" } ) {

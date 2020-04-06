@@ -402,7 +402,6 @@ namespace EnterpriseWebLibrary.Tests.IO {
 							CssClass = "gibberish_string_for_testing",
 							IsHeader = false,
 							RankId = i,
-							ToolTip = "This is row " + i,
 							UniqueIdentifier = "row" + i
 						} );
 			}

@@ -74,10 +74,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
-		/// Clears the content foot and adds the specified controls. This must be called before EwfPage.LoadData finishes executing.
+		/// Clears the content foot and adds the specified components. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
-		public static void SetContentFootControls( params Control[] controls ) {
-			AppMasterPage.SetContentFootControls( controls );
+		public static void SetContentFootComponents( IReadOnlyCollection<FlowComponent> components ) {
+			AppMasterPage.SetContentFootComponents( components );
 		}
 	}
 }

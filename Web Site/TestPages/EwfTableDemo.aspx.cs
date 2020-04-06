@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
@@ -37,26 +36,24 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								parametersModification.GroupCount -= 1;
 							} ) ) ).ToCollection() );
 
-			place.Controls.Add(
+			place.AddControlsReturnThis(
 				EwfTable.CreateWithItemGroups(
-					Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ),
-					defaultItemLimit: DataRowLimit.Fifty,
-					caption: "Caption",
-					subCaption: "Sub caption",
-					fields: new[]
-						{
-							new EwfTableField( size: Unit.Percentage( 1 ), toolTip: "First column!" ),
-							new EwfTableField( size: Unit.Percentage( 2 ), toolTip: "Second column!" )
-						},
-					headItems: new EwfTableItem( "First Column", "Second Column" ).ToCollection(),
-					tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() ) );
+						Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ),
+						defaultItemLimit: DataRowLimit.Fifty,
+						caption: "Caption",
+						subCaption: "Sub caption",
+						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
+						headItems: new EwfTableItem( "First Column", "Second Column" ).ToCollection(),
+						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
+					.ToCollection()
+					.GetControls() );
 		}
 
 		private EwfTableItemGroup getItemGroup( int groupNumber ) {
 			var updateRegionSet = new UpdateRegionSet();
 			return new EwfTableItemGroup(
 				() => new EwfTableItemGroupRemainingData(
-					new PlaceHolder().AddControlsReturnThis( "Group {0}".FormatWith( groupNumber ).ToComponents().GetControls() ),
+					"Group {0}".FormatWith( groupNumber ).ToComponents(),
 					groupHeadActivationBehavior: ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateIntermediate(
 							null,
@@ -67,15 +64,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					? getItems( info.FirstGroupItemCount )
 						.Concat(
 							new Func<EwfTableItem>(
-									() => new EwfTableItem(
-										new PostBackButton(
-											new ButtonActionControlStyle( "Add Row" ),
-											usesSubmitBehavior: false,
-											postBack: PostBack.CreateIntermediate(
-												updateRegionSet.ToCollection(),
-												id: "addRow",
-												firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ).ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) )
-								.ToCollection() )
+								() => new EwfTableItem(
+									new EwfButton(
+											new StandardButtonStyle( "Add Row" ),
+											behavior: new PostBackBehavior(
+												postBack: PostBack.CreateIntermediate(
+													updateRegionSet.ToCollection(),
+													id: "addRow",
+													firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
+										.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) ).ToCollection() )
 					: getItems( 250 ) );
 		}
 
