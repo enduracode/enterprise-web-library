@@ -126,8 +126,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( !ReadOnly )
 								table.AddRow(
 									getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-									( files.Any() ? new PostBackButton( new ButtonActionControlStyle( "Delete Selected Files" ), usesSubmitBehavior: false ) : null ).ToCell(
-										new TableCellSetup( fieldSpan: 2, classes: "ewfRightAlignCell".ToCollection() ) ) );
+									( files.Any() ? new EwfButton( new StandardButtonStyle( "Delete Selected Files" ) ).ToCollection() : null ).ToCell(
+										new TableCellSetup( fieldSpan: 2, textAlignment: TextAlignment.Right ) ) );
 						} );
 
 					Controls.Add( table );
@@ -147,20 +147,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var fileIsUnread = fileIdsMarkedAsRead != null && !fileIdsMarkedAsRead.Contains( file.FileId );
 
 			cells.Add(
-				new PostBackButton(
-					new TextActionControlStyle( file.FileName ),
-					usesSubmitBehavior: false,
-					postBack: PostBack.CreateFull(
-						id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
-						firstModificationMethod: () => {
-							if( fileIsUnread )
-								markFileAsReadMethod?.Invoke( file.FileId );
-						},
-						actionGetter: () => new PostBackAction(
-							new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) )
-					{
-						ToolTip = file.FileName
-					} );
+				new EwfButton(
+						new StandardButtonStyle( file.FileName ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
+								firstModificationMethod: () => {
+									if( fileIsUnread )
+										markFileAsReadMethod?.Invoke( file.FileId );
+								},
+								actionGetter: () => new PostBackAction(
+									new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) ) )
+					.ToCollection()
+					.ToCell() );
 
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
@@ -169,7 +168,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cells.Add(
 				( ReadOnly
 					  ? Enumerable.Empty<FlowComponent>()
-					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponentCollection() ).ToCell() );
+					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponentCollection() ).Materialize()
+				.ToCell() );
 			deleteModMethods.Add(
 				() => {
 					if( !delete.Value )

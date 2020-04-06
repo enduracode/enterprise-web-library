@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
@@ -18,15 +17,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
-			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new[]
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
+				new[]
 					{
 						new CssElement( "MergeFieldTreeContainer", "div.{0}".FormatWith( fieldTreeClass.ClassName ) ),
 						new CssElement( "MergeFieldTreeChildContainer", "div.{0}".FormatWith( fieldTreeChildClass.ClassName ) ),
 						new CssElement( "MergeRowTreeContainer", "div.{0}".FormatWith( rowTreeClass.ClassName ) ),
 						new CssElement( "MergeRowTreeChildContainer", "div.{0}".FormatWith( rowTreeChildClass.ClassName ) )
 					};
-			}
 		}
 
 		/// <summary>
@@ -34,11 +32,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="emptyRowTree">The empty merge row tree.</param>
 		/// <param name="name">The plural name of the data type at the top level in the row tree, e.g. Clients.</param>
-		public static Control ToFieldTreeDisplay( this MergeRowTree emptyRowTree, string name ) {
-			return new Block( getFieldTree( name, emptyRowTree.Rows ) ) { CssClass = fieldTreeClass.ClassName };
-		}
+		public static IReadOnlyCollection<FlowComponent> ToFieldTreeDisplay( this MergeRowTree emptyRowTree, string name ) =>
+			new GenericFlowContainer( getFieldTree( name, emptyRowTree.Rows ), classes: fieldTreeClass ).ToCollection();
 
-		private static Control getFieldTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
+		private static IReadOnlyCollection<FlowComponent> getFieldTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
 			var singleRow = emptyRowTree.Single();
 
 			var table = EwfTable.Create( caption: name, headItems: new EwfTableItem( "Field name", "Description" ).ToCollection() );
@@ -46,8 +43,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			table.AddData(
 				singleRow.Children,
 				i => new EwfTableItem(
-					new Block( getFieldTree( i.NodeName, i.Rows ) ) { CssClass = fieldTreeChildClass.ClassName }.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
-			return table;
+					new GenericFlowContainer( getFieldTree( i.NodeName, i.Rows ), classes: fieldTreeChildClass ).ToCollection()
+						.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
+			return table.ToCollection();
 		}
 
 		private static string getFieldNameCellText( MergeValue field ) {

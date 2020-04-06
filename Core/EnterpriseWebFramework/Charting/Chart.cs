@@ -210,8 +210,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select (EwfTableCell)i ).ToCollection()
 					.Concat(
 						from series in seriesCollection
-						select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) ) );
-			Controls.Add( table );
+						select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) )
+					.Materialize() );
+			this.AddControlsReturnThis( table.ToCollection().GetControls() );
 
 			jsInitStatementGetter = () => {
 				using( var writer = new StringWriter() ) {
