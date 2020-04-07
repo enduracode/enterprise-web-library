@@ -14,6 +14,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfAc" );
 
 		/// <summary>
+		/// Creates hyperlink behavior.
+		/// </summary>
+		/// <param name="hyperlinkBehavior">The behavior. Pass a <see cref="ResourceInfo"/> to navigate to the resource in the default way, or call
+		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkNewTabBehavior(ResourceInfo)"/> or
+		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkModalBoxBehavior(ResourceInfo, BrowsingContextSetup)"/>. For a mailto link, call
+		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkBehavior(Email.EmailAddress, string, string, string, string)"/>.</param>
+		public static ElementActivationBehavior CreateHyperlink( HyperlinkBehavior hyperlinkBehavior ) => new ElementActivationBehavior( hyperlinkBehavior );
+
+		/// <summary>
+		/// Creates button behavior.
+		/// </summary>
+		/// <param name="buttonBehavior">The behavior. Pass null to use the form default action.</param>
+		public static ElementActivationBehavior CreateButton( ButtonBehavior buttonBehavior = null ) =>
+			new ElementActivationBehavior( buttonBehavior ?? new FormActionBehavior( FormState.Current.DefaultAction ) );
+
+		/// <summary>
 		/// Creates a script that redirects to the specified resource. Passing null for resourceInfo will result in no script being added.
 		/// </summary>
 		public static ElementActivationBehavior CreateRedirectScript( ResourceInfo resource ) {
@@ -48,6 +64,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private FormAction action;
 		private readonly string script;
 
+		private ElementActivationBehavior( HyperlinkBehavior hyperlinkBehavior ) {
+			Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
+			AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
+			IncludeIdAttribute = hyperlinkBehavior.IncludesIdAttribute( true );
+			EtherealChildren = hyperlinkBehavior.EtherealChildren;
+			JsInitStatementGetter = id => hyperlinkBehavior.JsInitStatementGetter( id, true );
+			IsFocusable = hyperlinkBehavior.IsFocusable;
+			PostBackAdder = hyperlinkBehavior.PostBackAdder;
+		}
+
+		private ElementActivationBehavior( ButtonBehavior buttonBehavior ) {
+			Classes = ActivatableClass;
+			AttributeGetter = () => buttonBehavior.GetAttributes().Materialize();
+			IncludeIdAttribute = buttonBehavior.IncludesIdAttribute();
+			EtherealChildren = buttonBehavior.GetEtherealChildren();
+			JsInitStatementGetter = buttonBehavior.GetJsInitStatements;
+			IsFocusable = true;
+			PostBackAdder = buttonBehavior.AddPostBack;
+		}
+
+		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 		private ElementActivationBehavior( ResourceInfo resource = null, FormAction action = null, string script = "" ) {
 			if( action == null && !script.Any() ) {
 				HyperlinkBehavior hyperlinkBehavior = resource;
@@ -72,7 +109,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				PostBackAdder = buttonBehavior.AddPostBack;
 			}
 
-			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
 			this.resource = resource;
 			this.action = action;
 			this.script = script;
