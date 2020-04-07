@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		void ControlTreeDataLoader.LoadData() {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 			ActionControlStyle.SetUpControl( this, "" );
 
 			if( ToolTip != null || ToolTipControl != null )

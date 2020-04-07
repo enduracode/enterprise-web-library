@@ -74,7 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						HttpUtility.UrlEncode( Subject ).PrependDelimiter( "subject=" ),
 						HttpUtility.UrlEncode( Body ).PrependDelimiter( "body=" ) ) ) );
 
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 			ActionControlStyle.SetUpControl( this, "" );
 
 			if( ToolTip != null || ToolTipControl != null )

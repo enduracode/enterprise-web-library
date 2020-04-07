@@ -70,7 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( TagKey == HtmlTextWriterTag.Button )
 				PostBackButton.AddButtonAttributes( this );
 			this.AddJavaScriptEventScript( JsWritingMethods.onclick, handlerName + "()" );
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 			textControl = ActionControlStyle.SetUpControl( this, "" );
 		}
 

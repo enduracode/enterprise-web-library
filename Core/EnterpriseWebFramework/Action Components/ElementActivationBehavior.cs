@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class ElementActivationBehavior {
 		// This class name is used by EWF CSS and JavaScript files.
-		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfClickable" );
+		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfAc" );
 
 		/// <summary>
 		/// Creates a script that redirects to the specified resource. Passing null for resourceInfo will result in no script being added.

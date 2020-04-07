@@ -80,7 +80,7 @@ function OnDocumentReady() {
 
 function RemoveClickScriptBinding() {
 	//Clickable Rows
-	$( "tr.ewfClickable" ).each(
+	$( "tr.ewfAc" ).each(
 		function() {
 			//If this row doesn't contain notClickables, don't bother it
 			if( $( this ).children( ".ewfNotClickable" ).length == 0 )

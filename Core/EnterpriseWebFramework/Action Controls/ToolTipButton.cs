@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			// control CSS elements. This hack would not be necessary if Telerik used the onclick attribute to open the tool tip.
 			this.AddJavaScriptEventScript( JsWritingMethods.onclick, "" );
 
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 			ActionControlStyle.SetUpControl( this, "" );
 
 			new ToolTip( toolTipControl, this, title: ToolTipTitle ?? "", sticky: true );

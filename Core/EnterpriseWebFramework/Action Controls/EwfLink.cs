@@ -129,7 +129,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				this.AddJavaScriptEventScript( JsWritingMethods.onclick, openingWindowNavigationScript + "window.close(); return false" );
 			}
 
-			CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+			CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 			if( destinationResourceInfo?.AlternativeMode is NewContentResourceMode )
 				CssClass = CssClass.ConcatenateWithSpace( ActionComponentCssElementCreator.NewContentClass.ClassName );
 			ActionControlStyle.SetUpControl( this, url );

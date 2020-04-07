@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					else if( !usesSubmitBehavior )
 						PreRender += delegate { this.AddJavaScriptEventScript( JsWritingMethods.onclick, action.GetJsStatements() + " return false" ); };
 
-					CssClass = CssClass.ConcatenateWithSpace( "ewfClickable" );
+					CssClass = CssClass.ConcatenateWithSpace( ElementActivationBehavior.ActivatableClass.ClassName );
 					ActionControlStyle.SetUpControl( this, "" );
 				} );
 		}
