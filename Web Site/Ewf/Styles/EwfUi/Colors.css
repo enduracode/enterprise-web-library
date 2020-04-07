@@ -89,7 +89,7 @@ ewfUiSideTabBlock ewfActionControlAllStylesStatesWithFocus {
 
 /* new content */
 ewfUiGlobalNavBlock ewfActionControlAllStylesAllNewContentActionStates,
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNewContentActionStates,
+ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNewContentActionStates,
 ewfUiTopTabBlock ewfActionControlAllStylesAllNewContentActionStates,
 ewfUiSideTabBlock ewfActionControlAllStylesAllNewContentActionStates {
 	font-weight: bold;

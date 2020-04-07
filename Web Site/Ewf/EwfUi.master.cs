@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string EntityAndTopTabBlockCssClass = "ewfUiEntityAndTopTabs";
 
 			internal const string EntityBlockCssClass = "ewfUiEntity";
-			internal static readonly ElementClass EntityNavAndActionBlockClass = new ElementClass( "ewfUiEntityNavAndActions" );
+			internal static readonly ElementClass EntityNavAndActionContainerClass = new ElementClass( "ewfUiEntityNavAndActions" );
 			internal static readonly ElementClass EntityNavListContainerClass = new ElementClass( "ewfUiEntityNav" );
 			internal static readonly ElementClass EntityActionListContainerClass = new ElementClass( "ewfUiEntityActions" );
 			internal const string EntitySummaryBlockCssClass = "ewfUiEntitySummary";
@@ -99,9 +99,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					{
 						new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
 						new CssElement(
-							"UiEntityNavAndActionBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + EntityNavAndActionBlockClass.ClassName )
-								.ToArray() ),
+							"UiEntityNavAndActionContainer",
+							entityAndTabAndContentBlockSelector + " " + "div." + EntityNavAndActionContainerClass.ClassName ),
 						new CssElement( "UiEntityNavListContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntityNavListContainerClass.ClassName ),
 						new CssElement( "UiEntityActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntityActionListContainerClass.ClassName ),
 						new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
@@ -308,7 +307,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private Control getEntityBlock() {
-			return new Block( getPagePath().Concat( getEntityNavAndActionBlock().GetControls() ).Concat( getEntitySummaryBlock() ).ToArray() )
+			return new Block( getPagePath().Concat( getEntityNavAndActionContainer().GetControls() ).Concat( getEntitySummaryBlock() ).ToArray() )
 				{
 					CssClass = CssElementCreator.EntityBlockCssClass
 				};
@@ -323,16 +322,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return pagePath.IsEmpty ? Enumerable.Empty<Control>().Materialize() : pagePath.ToCollection();
 		}
 
-		private IReadOnlyCollection<FlowComponent> getEntityNavAndActionBlock() {
-			var cells = new[] { getEntityNavCell(), getEntityActionCell() }.Where( i => i != null );
-			if( !cells.Any() )
-				return Enumerable.Empty<FlowComponent>().Materialize();
-			var table = EwfTable.Create( style: EwfTableStyle.Raw, classes: CssElementCreator.EntityNavAndActionBlockClass );
-			table.AddItem( new EwfTableItem( cells ) );
-			return table.ToCollection();
+		private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer() {
+			var items = new[] { getEntityNavListContainer(), getEntityActionListContainer() }.Where( i => i != null ).Materialize();
+			return items.Any()
+				       ? new GenericFlowContainer( items, classes: CssElementCreator.EntityNavAndActionContainerClass ).ToCollection()
+				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
-		private EwfTableCell getEntityNavCell() {
+		private FlowComponent getEntityNavListContainer() {
 			if( uiEntitySetup == null )
 				return null;
 
@@ -347,28 +344,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return null;
 
 			return new GenericFlowContainer(
-					( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-						  ? (FlowComponent)new InlineList( listItems )
-						  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection(),
-					classes: CssElementCreator.EntityNavListContainerClass ).ToCollection()
+				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					  ? (FlowComponent)new InlineList( listItems )
+					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection()
 				.Append<FlowComponent>(
 					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
-				.Materialize()
-				.ToCell();
+				.Materialize(),
+				classes: CssElementCreator.EntityNavListContainerClass );
 		}
 
-		private EwfTableCell getEntityActionCell() {
+		private FlowComponent getEntityActionListContainer() {
 			if( uiEntitySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
 			var actionComponents = getActionComponents( uiEntitySetup.GetActions() ).Materialize();
 			if( !actionComponents.Any() )
 				return null;
 			return new GenericFlowContainer(
-					( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-						  ? (FlowComponent)new InlineList( actionComponents.Select( i => i.ToCollection().ToComponentListItem() ) )
-						  : new LineList( actionComponents.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) ).ToCollection(),
-					classes: CssElementCreator.EntityActionListContainerClass ).ToCollection()
-				.ToCell( new TableCellSetup( textAlignment: TextAlignment.Right ) );
+				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
+					  ? (FlowComponent)new InlineList( actionComponents.Select( i => i.ToCollection().ToComponentListItem() ) )
+					  : new LineList( actionComponents.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) ).ToCollection(),
+				classes: CssElementCreator.EntityActionListContainerClass );
 		}
 
 		private IReadOnlyCollection<Control> getEntitySummaryBlock() {
@@ -472,7 +467,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			table.AddItem(
 				new EwfTableItem(
 					components.ToCell(
-						new TableCellSetup( textAlignment: contentFootActions != null && contentFootActions.Any() ? TextAlignment.Right : TextAlignment.Center ) ) ) );
+						new TableCellSetup(
+							textAlignment: contentFootActions == null || !contentFootActions.Any() ? TextAlignment.Center : TextAlignment.NotSpecified ) ) ) );
 			return table.ToCollection();
 		}
 

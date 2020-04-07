@@ -230,8 +230,11 @@ ewfErrorMessageListContainer {
 ewfUiAppLogoAndUserInfoBlock {
 	margin-bottom: .5rem;
 }
-ewfUiUserInfoControlList > ewfControlStackItem {
+ewfUiUserInfoContainer {
 	text-align: right;
+}
+ewfUiUserInfoContainer > ewfUnorderedInlineList {
+	margin-left: .5em;
 }
 ewfUiGlobalNavBlock,
 ewfUiTopErrorMessageListContainer,
@@ -253,9 +256,9 @@ ewfUiSideTabBlock {
 ewfUiGlobalNavBlock ewfActionControlAllStylesActionlessState,
 ewfUiGlobalNavBlock ewfActionControlAllStylesAllNormalStates,
 ewfUiGlobalNavBlock ewfActionControlAllStylesAllVisitedStates,
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesActionlessState,
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllNormalStates,
-ewfUiEntityNavAndActionBlock ewfActionControlAllStylesAllVisitedStates {
+ewfUiEntityNavAndActionContainer ewfActionControlAllStylesActionlessState,
+ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNormalStates,
+ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllVisitedStates {
 	text-decoration: none;
 }
 ewfUiTopErrorMessageListContainer {
@@ -271,12 +274,11 @@ ewfUiTopErrorMessageListContainer {
 ewfUiEntityBlock ewfPagePath {
 	margin: 0;
 }
-ewfUiEntityNavAndActionBlock {
+ewfUiEntityNavAndActionContainer {
+	display: flex;
 	margin-top: .5rem;
-	width: 100%;
-}
-ewfUiEntityActionControlList {
-	display: inline-block;
+	justify-content: space-between;
+	align-items: center;
 }
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	display: block;
@@ -317,22 +319,18 @@ ewfUiPageActionControlList {
 	margin-bottom: 1em;
 	margin-left: 1em;
 }
-ewfUiContentFootActionControlList {
-	line-height: 0;
-}
-ewfUiContentFootActionControlList > table {
-	display: inline-block;
-	line-height: normal;
+ewfUiContentFootActionListContainer > ewfUnorderedLineList {
+	justify-content: flex-end;
 }
 ewfUiPoweredByEwlFooterBlock {
 	font-size: .9em;
 	text-align: center;
 }
 @media print {
-	ewfUiUserInfoControlList,
+	ewfUiUserInfoContainer,
 	ewfUiGlobalNavBlock,
 	ewfUiTopErrorMessageListContainer,
-	ewfUiEntityNavAndActionBlock,
+	ewfUiEntityNavAndActionContainer,
 	ewfUiSideTabBlockCell,
 	ewfUiContentFootBlock {
 		display: none;
