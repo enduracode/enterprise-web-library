@@ -1,5 +1,5 @@
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class SpaceForMultiColOrRowCell: CellPlaceholder {
-		string CellPlaceholder.SimpleText { get { return ""; } }
+		string CellPlaceholder.SimpleText => "";
 	}
 }

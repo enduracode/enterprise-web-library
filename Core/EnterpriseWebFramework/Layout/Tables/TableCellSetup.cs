@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

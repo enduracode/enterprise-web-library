@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A limit on the number of data rows displayed in a dynamic table.
 	/// </summary>

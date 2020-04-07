@@ -5,7 +5,7 @@ using System.Linq;
 using Humanizer;
 using StackExchange.Profiling;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A table.
 	/// </summary>

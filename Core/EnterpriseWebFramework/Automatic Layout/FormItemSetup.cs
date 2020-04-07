@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a form item.
 	/// </summary>

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	///  A field in a table. Options specified on individual cells take precedence over equivalent options specified here.
 	/// </summary>

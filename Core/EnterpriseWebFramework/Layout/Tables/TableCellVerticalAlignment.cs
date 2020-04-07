@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A vertical alignment for a table cell.
 	/// </summary>

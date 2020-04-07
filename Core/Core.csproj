@@ -517,6 +517,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\TextAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\MailMergingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\MarkupBlockComponent.cs" />
     <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
@@ -564,7 +565,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableOps.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\TextAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />

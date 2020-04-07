@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A text alignment for a block.
 	/// </summary>
