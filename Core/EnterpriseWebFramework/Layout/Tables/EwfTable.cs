@@ -381,30 +381,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
 									var groupBodyRows = buildRows( groupAndItems.Item2, fields, useContrastForFirstRow, false, null, null, allVisibleItems ).Materialize();
 									var cachedVisibleGroupIndex = visibleGroupIndex;
-									FlowComponent rowGroup = new ElementComponent(
-										context => new ElementData(
-											() => new ElementLocalData( "tbody" ),
-											children: buildRows(
-													groupAndItems.Item1.GetHeadItems( fields.Count ),
-													Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
-													null,
-													true,
-													null,
-													null,
-													allVisibleItems )
-												.Append<FlowComponentOrNode>(
-													new IdentifiedFlowComponent(
-														() => new IdentifiedComponentData<FlowComponentOrNode>(
-															"",
-															new UpdateRegionLinker(
-																"tail",
-																from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-																let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-																select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
-																arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
-															new ErrorSourceSet(),
-															errorsBySource => groupBodyRows ) ) )
-												.Materialize() ) );
+									FlowComponent rowGroup = new FlowIdContainer(
+										new ElementComponent(
+											context => new ElementData(
+												() => new ElementLocalData( "tbody" ),
+												children: buildRows(
+														groupAndItems.Item1.GetHeadItems( fields.Count ),
+														Enumerable.Repeat( new EwfTableField(), fields.Count ).ToArray(),
+														null,
+														true,
+														null,
+														null,
+														allVisibleItems )
+													.Append<FlowComponentOrNode>(
+														new IdentifiedFlowComponent(
+															() => new IdentifiedComponentData<FlowComponentOrNode>(
+																"",
+																new UpdateRegionLinker(
+																	"tail",
+																	from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+																	let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+																	select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+																	arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
+																new ErrorSourceSet(),
+																errorsBySource => groupBodyRows ) ) )
+													.Materialize() ) ).ToCollection() );
 									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 
 									// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
