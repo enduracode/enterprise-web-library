@@ -327,6 +327,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			outerChildren = new DisplayableElement(
 				tableContext => {
 					var children = new List<FlowComponentOrNode>();
+					ComponentStateItem<int> itemLimit = null;
 					using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
 						FormState.ExecuteWithDataModificationsAndDefaultAction(
 							dataModifications,
@@ -334,7 +335,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								children.AddRange( GetCaption( caption, subCaption ) );
 
 								// the maximum number of items that will be shown in this table
-								var itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ) );
+								itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ) );
 
 								var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
 								foreach( var itemGroup in itemGroups ) {
@@ -512,7 +513,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						null,
 						() => new DisplayableElementLocalData( "table" ),
 						classes: GetClasses( style, classes ?? ElementClassSet.Empty ),
-						children: children );
+						children: children,
+						etherealChildren: defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : null );
 				} ).ToCollection();
 
 			this.itemGroups = itemGroups;
