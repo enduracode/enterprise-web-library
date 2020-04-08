@@ -411,7 +411,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
 									if( defaultItemLimit != DataRowLimit.Unlimited )
 										updateRegionSetListsAndStaticRowGroupCounts.Add(
-											Tuple.Create<IReadOnlyCollection<UpdateRegionSet>, int>(
+											Tuple.Create(
 												groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).Materialize(),
 												visibleGroupIndex + 1 ) );
 								}
