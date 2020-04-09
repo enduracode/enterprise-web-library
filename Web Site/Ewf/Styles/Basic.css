@@ -395,7 +395,7 @@ ewfActionControlLargeButtonStyleAllStates {
 ewfActionControlAllStylesAllActionStates, .ewfAc {
 	cursor: pointer;
 }
-ewfActionControlAllStylesActionlessState, .ewfNotClickable {
+ewfActionControlAllStylesActionlessState, .ewfAec {
 	cursor: default;
 }
 

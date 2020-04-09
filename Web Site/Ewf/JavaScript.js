@@ -70,27 +70,15 @@ function NumericalOnly( evt, field ) {
 
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
-	RemoveClickScriptBinding();
+	stopActivatableTableRowNestedClickEvents();
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 }
 
-//Used for dynamic tables
-//Finds ewfClickable rows that are also selectable, altering the JavaScript
-//to allow them to be clickable without firing when selected.
-
-function RemoveClickScriptBinding() {
-	//Clickable Rows
+function stopActivatableTableRowNestedClickEvents() {
 	$( "tr.ewfAc" ).each(
 		function() {
-			//If this row doesn't contain notClickables, don't bother it
-			if( $( this ).children( ".ewfNotClickable" ).length == 0 )
-				return;
-			//Grab the clickscript we want to apply
-			var clickScript = new Function( $( this ).attr( "onclick" ) );
-			//Unbind it from the row
-			$( this ).removeAttr( "onclick" );
-			//For each td
-			$( this ).children( ":not( .ewfNotClickable )" ).click( clickScript );
+			// Stop propagation of click events on cells that have activation behavior or contain activatable elements.
+			$( this ).children( ".ewfAc" ).add( $( this ).children( ".ewfAec" ) ).click( function( e ) { e.stopPropagation(); } );
 		}
 	);
 }

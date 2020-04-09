@@ -7,6 +7,9 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class TableOps {
+		// This class name is used by EWF CSS and JavaScript files.
+		private static readonly ElementClass activatableElementContainerClass = new ElementClass( "ewfAec" );
+
 		internal static void DrawRow(
 			Table table, RowSetup rowSetup, List<CellPlaceholder> rowPlaceholder, List<ColumnSetup> columnSetups, bool tableIsColumnPrimary ) {
 			var row = new TableRow();
@@ -193,6 +196,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																		.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( cellContext.Id ) : "" ) ) );
 															},
 															classes: ( cellActivationBehavior != null ? cellActivationBehavior.Classes : ElementClassSet.Empty )
+															.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
 															.Add( EwfTable.AllCellAlignmentsClass )
 															.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
 															.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
