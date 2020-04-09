@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfAc" );
 
 		/// <summary>
-		/// Creates hyperlink behavior.
+		/// Creates hyperlink behavior. EnduraCode goal 2450 will add a JavaScript predicate parameter to this method.
 		/// </summary>
 		/// <param name="hyperlinkBehavior">The behavior. Pass a <see cref="ResourceInfo"/> to navigate to the resource in the default way, or call
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkNewTabBehavior(ResourceInfo)"/> or
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ElementActivationBehavior CreateHyperlink( HyperlinkBehavior hyperlinkBehavior ) => new ElementActivationBehavior( hyperlinkBehavior );
 
 		/// <summary>
-		/// Creates button behavior.
+		/// Creates button behavior. EnduraCode goal 2450 will add a JavaScript predicate parameter to this method.
 		/// </summary>
 		/// <param name="buttonBehavior">The behavior. Pass null to use the form default action.</param>
 		public static ElementActivationBehavior CreateButton( ButtonBehavior buttonBehavior = null ) =>
