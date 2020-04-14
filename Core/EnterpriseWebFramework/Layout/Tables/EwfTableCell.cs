@@ -43,8 +43,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfTableCell ToCell( this FlowComponent content, TableCellSetup setup = null ) => content.ToCollection().ToCell( setup: setup );
 
 		/// <summary>
-		/// Creates a table cell representing this string. If you don’t need to pass a setup object, don’t use this method; strings are implicitly converted to
-		/// table cells.
+		/// Creates a table cell containing components that represent this string. If you don’t need to pass a setup object, don’t use this method; strings are
+		/// implicitly converted to table cells.
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="setup"></param>

@@ -59,6 +59,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					updateRegionSets: updateRegionSets,
 					etherealContent: etherealContent );
 
+		/// <summary>
+		/// Creates a list item containing components that represent this string. The string must not be null.
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="displaySetup"></param>
+		/// <param name="classes">The classes on the item.</param>
+		/// <param name="visualOrderRank"></param>
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		/// <param name="etherealContent"></param>
+		public static ComponentListItem ToComponentListItem(
+			this string text, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			text.ToComponents()
+				.ToComponentListItem(
+					displaySetup: displaySetup,
+					classes: classes,
+					visualOrderRank: visualOrderRank,
+					updateRegionSets: updateRegionSets,
+					etherealContent: etherealContent );
+
 		internal static ComponentListItem ToComponentListItem(
 			this IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
 			IEnumerable<UpdateRegionSet> updateRegionSets, IReadOnlyCollection<EtherealComponent> etherealContent,
@@ -100,6 +120,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			content.ToCollection()
+				.ToComponentListItem(
+					id: id,
+					displaySetup: displaySetup,
+					classes: classes,
+					visualOrderRank: visualOrderRank,
+					updateRegionSets: updateRegionSets,
+					removalUpdateRegionSets: removalUpdateRegionSets,
+					etherealContent: etherealContent );
+
+		/// <summary>
+		/// Creates a list item containing components that represent this string. The string must not be null.
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
+		/// intermediate post-back. Do not pass null or the empty string.</param>
+		/// <param name="displaySetup"></param>
+		/// <param name="classes">The classes on the item.</param>
+		/// <param name="visualOrderRank"></param>
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
+		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
+		/// <param name="etherealContent"></param>
+		public static ComponentListItem ToComponentListItem(
+			this string text, string id, DisplaySetup displaySetup = null, ElementClassSet classes = null, int? visualOrderRank = null,
+			IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			text.ToComponents()
 				.ToComponentListItem(
 					id: id,
 					displaySetup: displaySetup,
