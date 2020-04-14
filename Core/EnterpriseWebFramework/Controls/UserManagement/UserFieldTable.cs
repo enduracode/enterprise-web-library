@@ -113,9 +113,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					.ToFormItem();
 
 				b.AddFormItems(
-					new StackList( keepPassword.ToListItem().ToCollection().Append( generatePassword.ToListItem() ).Append( providePassword.ToListItem() ) )
-						.ToCollection()
-						.ToFormItem( label: "Password".ToComponents() ) );
+					new StackList( keepPassword.ToListItem().ToCollection().Append( generatePassword.ToListItem() ).Append( providePassword.ToListItem() ) ).ToFormItem(
+						label: "Password".ToComponents() ) );
 			}
 
 			b.AddFormItems(

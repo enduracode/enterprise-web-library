@@ -140,5 +140,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
 			return new FormItem( setup, label, content, validation );
 		}
+
+		/// <summary>
+		/// Creates a form item with this component.
+		/// </summary>
+		/// <param name="content">Do not pass null.</param>
+		/// <param name="label">The form-item label.</param>
+		/// <param name="setup"></param>
+		/// <param name="validation"></param>
+		public static FormItem ToFormItem(
+			this FlowComponent content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null, EwfValidation validation = null ) =>
+			content.ToCollection().ToFormItem( setup: setup, label: label, validation: validation );
 	}
 }

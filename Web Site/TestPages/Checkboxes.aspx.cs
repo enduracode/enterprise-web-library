@@ -102,57 +102,56 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			id => {
 				var group = new RadioButtonGroup( noSelection, disableSingleButtonDetection: singleButton, selectionChangedAction: selectionChangedAction );
 				return new StackList(
-						group
-							.CreateRadioButton(
-								!noSelection,
-								"First".ToComponents(),
-								setup: setup,
-								validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-									StatusMessageType.Info,
-									"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-							.ToFormItem()
-							.ToListItem()
-							.ToCollection()
-							.Concat(
-								singleButton
-									? Enumerable.Empty<ComponentListItem>()
-									: group.CreateFlowRadioButton(
-											false,
-											"Second".ToComponents(),
-											setup: FlowRadioButtonSetup.Create(
-												nestedContentGetter: () => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit.".ToComponents() ),
-											validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-												StatusMessageType.Info,
-												"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-										.ToFormItem()
-										.ToListItem()
-										.ToCollection()
-										.Append(
-											group.CreateRadioButton(
-													false,
-													"Third".ToComponents(),
-													setup: RadioButtonSetup.Create(),
-													validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-														StatusMessageType.Info,
-														"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
-												.ToFormItem()
-												.ToListItem() ) ) ).ToCollection()
-					.ToFormItem(
-						label: "{0}. {1}".FormatWith( id, label )
-							.ToComponents()
-							.Concat(
-								pageModificationValue != null
-									? new LineBreak().ToCollection<PhrasingComponent>()
-										.Append(
-											new SideComments(
-												"First button value: ".ToComponents()
-													.Concat(
-														pageModificationValue.ToGenericPhrasingContainer(
-															v => v.ToString(),
-															valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
-													.Materialize() ) )
-									: Enumerable.Empty<PhrasingComponent>() )
-							.Materialize() );
+					group
+						.CreateRadioButton(
+							!noSelection,
+							"First".ToComponents(),
+							setup: setup,
+							validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+								StatusMessageType.Info,
+								"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+						.ToFormItem()
+						.ToListItem()
+						.ToCollection()
+						.Concat(
+							singleButton
+								? Enumerable.Empty<ComponentListItem>()
+								: group.CreateFlowRadioButton(
+										false,
+										"Second".ToComponents(),
+										setup: FlowRadioButtonSetup.Create(
+											nestedContentGetter: () => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit.".ToComponents() ),
+										validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+											StatusMessageType.Info,
+											"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+									.ToFormItem()
+									.ToListItem()
+									.ToCollection()
+									.Append(
+										group.CreateRadioButton(
+												false,
+												"Third".ToComponents(),
+												setup: RadioButtonSetup.Create(),
+												validationMethod: ( postBackValue, validator ) => AddStatusMessage(
+													StatusMessageType.Info,
+													"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+											.ToFormItem()
+											.ToListItem() ) ) ).ToFormItem(
+					label: "{0}. {1}".FormatWith( id, label )
+						.ToComponents()
+						.Concat(
+							pageModificationValue != null
+								? new LineBreak().ToCollection<PhrasingComponent>()
+									.Append(
+										new SideComments(
+											"First button value: ".ToComponents()
+												.Concat(
+													pageModificationValue.ToGenericPhrasingContainer(
+														v => v.ToString(),
+														valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
+												.Materialize() ) )
+								: Enumerable.Empty<PhrasingComponent>() )
+						.Materialize() );
 			};
 	}
 }
