@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					usesSubmitBehavior: false,
 					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) );
 
-			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url", "Valid?" ) } );
+			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url".ToCell(), "Valid?".ToCell() ) } );
 			ph.AddControlsReturnThis( table.ToCollection().GetControls() );
 
 			foreach( var scheme in new[] { "http://", "ftp://", "file://" } ) {
@@ -62,7 +62,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			validator.GetUrl( new ValidationErrorHandler( "" ), url, false );
 			table.AddItem(
 				new EwfTableItem(
-					url,
+					url.ToCell(),
 					( !validator.ErrorsOccurred ).ToYesOrEmpty()
 					.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );
 		}

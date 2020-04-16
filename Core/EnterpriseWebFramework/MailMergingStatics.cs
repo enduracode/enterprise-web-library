@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Humanizer;
@@ -38,8 +37,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static IReadOnlyCollection<FlowComponent> getFieldTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
 			var singleRow = emptyRowTree.Single();
 
-			var table = EwfTable.Create( caption: name, headItems: new EwfTableItem( "Field name", "Description" ).ToCollection() );
-			table.AddData( singleRow.Values, i => new EwfTableItem( getFieldNameCellText( i ), i.GetDescription() ) );
+			var table = EwfTable.Create( caption: name, headItems: new EwfTableItem( "Field name".ToCell(), "Description".ToCell() ).ToCollection() );
+			table.AddData( singleRow.Values, i => new EwfTableItem( getFieldNameCellText( i ).ToCell(), i.GetDescription().ToCell() ) );
 			table.AddData(
 				singleRow.Children,
 				i => new EwfTableItem(

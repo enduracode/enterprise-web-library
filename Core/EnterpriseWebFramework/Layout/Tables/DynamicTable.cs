@@ -237,7 +237,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Adds a text-only row to this table.
 		/// </summary>
 		public void AddTextRow( RowSetup rowSetup, params string[] cellText ) {
-			AddRow( rowSetup, cellText.Select( ct => (EwfTableCell)ct ).ToArray() );
+			AddRow( rowSetup, cellText.Select( ct => ct.ToCell() ).ToArray() );
 		}
 
 		/// <summary>

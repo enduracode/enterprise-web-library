@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -42,7 +41,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new EwfTableItem(
 					new EwfTableItemSetup( verticalAlignment: TableCellVerticalAlignment.Top ),
 					getNonIdListRegionComponents().ToCell(),
-					"",
+					"".ToCell(),
 					getIdListRegionComponents().ToCell() ) );
 			ph.AddControlsReturnThis( listTable.ToCollection().GetControls() );
 		}

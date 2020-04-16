@@ -19,21 +19,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Creates an EWF table column with the specified header cell text.
 		/// </summary>
 		public EwfTableColumn( string headerCellText ) {
-			init( headerCellText, Unit.Empty, "" );
+			init( headerCellText.ToCell(), Unit.Empty, "" );
 		}
 
 		/// <summary>
 		/// Creates an EWF table column with the specified header cell text and the specified width.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, Unit width ) {
-			init( headerCellText, width, "" );
+			init( headerCellText.ToCell(), width, "" );
 		}
 
 		/// <summary>
 		/// Creates an EWF table column with the specified header cell text and the specified CSS class.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, string cssClass ) {
-			init( headerCellText, Unit.Empty, cssClass );
+			init( headerCellText.ToCell(), Unit.Empty, cssClass );
 		}
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Creates an EWF table column with the specified header cell text and the specified width and CSS class.
 		/// </summary>
 		public EwfTableColumn( string headerCellText, Unit width, string cssClass ) {
-			init( headerCellText, width, cssClass );
+			init( headerCellText.ToCell(), width, cssClass );
 		}
 
 		private void init( EwfTableCell headerCell, Unit width, string cssClass ) {

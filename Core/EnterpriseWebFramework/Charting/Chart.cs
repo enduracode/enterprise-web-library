@@ -207,10 +207,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var table = new ColumnPrimaryTable(
 				firstDataFieldIndex: 1,
-				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select (EwfTableCell)i ).ToCollection()
+				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select i.ToCell() ).ToCollection()
 					.Concat(
-						from series in seriesCollection
-						select new EwfTableItem( ( (EwfTableCell)series.Name ).ToCollection().Concat( from i in series.Values select (EwfTableCell)i.ToString() ) ) )
+						from series in seriesCollection select new EwfTableItem( series.Name.ToCell().Concat( from i in series.Values select i.ToString().ToCell() ) ) )
 					.Materialize() );
 			this.AddControlsReturnThis( table.ToCollection().GetControls() );
 

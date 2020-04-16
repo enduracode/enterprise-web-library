@@ -161,7 +161,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.ToCollection()
 					.ToCell() );
 
-			cells.Add( file.UploadedDate.ToDayMonthYearString( false ) );
+			cells.Add( file.UploadedDate.ToDayMonthYearString( false ).ToCell() );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
 			var delete = new DataValue<bool>();

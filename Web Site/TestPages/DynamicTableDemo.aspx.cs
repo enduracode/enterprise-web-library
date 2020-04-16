@@ -23,9 +23,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			table2.SetUpColumns( new EwfTableColumn( "1" ), new EwfTableColumn( "2" ), new EwfTableColumn( "3" ), new EwfTableColumn( "4" ) );
 			table2.AddTextRow( new RowSetup { UniqueIdentifier = 1 }, "One", "Two", "Three", "Four" );
 			table2.AllowExportToExcel = true;
-			for( var i = 0; i < 20; i += 3 ) {
-				table2.AddRow( new RowSetup { UniqueIdentifier = 2 }, "One", "Two", "Three with Tip", "Four with TipControl" );
-			}
+			for( var i = 0; i < 20; i += 3 )
+				table2.AddRow( new RowSetup { UniqueIdentifier = 2 }, "One".ToCell(), "Two".ToCell(), "Three with Tip".ToCell(), "Four with TipControl".ToCell() );
 			table2.AddSelectedRowsAction( "Selected Rows Action", delegate( object id ) { AddStatusMessage( StatusMessageType.Info, id.ToString() ); } );
 
 			//Clickable Rows
@@ -136,19 +135,19 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			// Rowspan test
 			table9.AddTextRow( "one", "two", "three" );
-			table9.AddRow( "four rowspan".ToCell( new TableCellSetup( itemSpan: 2 ) ), "five", "six rowspan".ToCell( new TableCellSetup( itemSpan: 2 ) ) );
+			table9.AddRow( "four rowspan".ToCell( new TableCellSetup( itemSpan: 2 ) ), "five".ToCell(), "six rowspan".ToCell( new TableCellSetup( itemSpan: 2 ) ) );
 			table9.AddTextRow( "this is allowed because of the previous rowspans" );
 			table9.AddTextRow( "seven", "eight", "nine" );
-			table9.AddRow( "ten columnspan".ToCell( new TableCellSetup( fieldSpan: 2 ) ), "eleven" );
+			table9.AddRow( "ten columnspan".ToCell( new TableCellSetup( fieldSpan: 2 ) ), "eleven".ToCell() );
 			table9.AddRow( "twelve whole row".ToCell( new TableCellSetup( fieldSpan: 3 ) ) );
-			table9.AddRow( "thirteen whole row, three row column span".ToCell( new TableCellSetup( fieldSpan: 2, itemSpan: 3 ) ), "1/3 thirteen" );
+			table9.AddRow( "thirteen whole row, three row column span".ToCell( new TableCellSetup( fieldSpan: 2, itemSpan: 3 ) ), "1/3 thirteen".ToCell() );
 			table9.AddTextRow( "fourteen" );
 			table9.AddTextRow( "fifteen" );
 			table9.AddTextRow( "sixteen", "seventeen", "eighteen" );
-			table9.AddRow( "Nineteen", "Twenty -two rows two columns".ToCell( new TableCellSetup( fieldSpan: 2, itemSpan: 2 ) ) );
+			table9.AddRow( "Nineteen".ToCell(), "Twenty -two rows two columns".ToCell( new TableCellSetup( fieldSpan: 2, itemSpan: 2 ) ) );
 			table9.AddTextRow( "21" );
 			table9.AddTextRow( "Twenty-two", "Twenty-three", "Twenty-four" );
-			table9.AddRow( "Twenty-five", "Twenty-six -Three rowspan".ToCell( new TableCellSetup( itemSpan: 3 ) ), "Twenty-seven" );
+			table9.AddRow( "Twenty-five".ToCell(), "Twenty-six -Three rowspan".ToCell( new TableCellSetup( itemSpan: 3 ) ), "Twenty-seven".ToCell() );
 			table9.AddTextRow( "Twenty-eight", "Twenty-nine" );
 			table9.AddTextRow( "Thirty", "Thirty-one" );
 

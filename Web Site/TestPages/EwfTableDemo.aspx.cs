@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -43,7 +42,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						caption: "Caption",
 						subCaption: "Sub caption",
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
-						headItems: new EwfTableItem( "First Column", "Second Column" ).ToCollection(),
+						headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
 					.ToCollection()
 					.GetControls() );
@@ -81,8 +80,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			       select new Func<EwfTableItem>(
 				       () => new EwfTableItem(
 					       new EwfTableItemSetup( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
-					       i.ToString(),
-					       ( i * 2 ) + Environment.NewLine + "extra stuff" ) );
+					       i.ToString().ToCell(),
+					       ( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) );
 		}
 	}
 }

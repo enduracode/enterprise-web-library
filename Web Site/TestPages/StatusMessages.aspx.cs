@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -15,8 +14,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						items: getStatusTests()
 							.Select(
 								tests => new EwfTableItem(
-									tests.Item1,
-									new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCollection().ToCell() ) )
+									tests.Item1.ToCell(),
+									new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) )
 							.ToFunctions() )
 					.ToCollection()
 					.GetControls() );

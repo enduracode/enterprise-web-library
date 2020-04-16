@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private ControlList() {
 			NumberOfColumns = 1;
-			EmptyCellCreator = () => "";
+			EmptyCellCreator = () => "".ToCell();
 			IsStandard = true;
 			SpacerCellSetup = new ControlListSpacerCellSetup();
 
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Add the given list of strings to the control list. Do not pass null for any of the strings. If you do, it will be converted to the empty string.
 		/// </summary>
 		public void AddText( params string[] text ) {
-			AddControls( text.Select( s => (EwfTableCell)s ).ToArray() );
+			AddControls( text.Select( s => s.ToCell() ).ToArray() );
 		}
 
 		/// <summary>

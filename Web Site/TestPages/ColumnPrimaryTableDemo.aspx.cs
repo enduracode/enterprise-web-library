@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ColumnPrimaryTableDemo: EwfPage {
@@ -14,8 +13,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				.Select(
 					i => new EwfTableItem(
 						new EwfTableItemSetup( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
-						i.ToString(),
-						( i * 2 ) + Environment.NewLine + "extra stuff" ) )
+						i.ToString().ToCell(),
+						( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) )
 				.ToList();
 
 			place.AddControlsReturnThis(
