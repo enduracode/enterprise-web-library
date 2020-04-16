@@ -151,5 +151,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static FormItem ToFormItem(
 			this FlowComponent content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null, EwfValidation validation = null ) =>
 			content.ToCollection().ToFormItem( setup: setup, label: label, validation: validation );
+
+		/// <summary>
+		/// Concatenates form items.
+		/// </summary>
+		public static IEnumerable<FormItem> Concat( this FormItem first, IEnumerable<FormItem> second ) => second.Prepend( first );
+
+		/// <summary>
+		/// Returns a sequence of two form items.
+		/// </summary>
+		public static IEnumerable<FormItem> Append( this FormItem first, FormItem second ) => Enumerable.Empty<FormItem>().Append( first ).Append( second );
 	}
 }

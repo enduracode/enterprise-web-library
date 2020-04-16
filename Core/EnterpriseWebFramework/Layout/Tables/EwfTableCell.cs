@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -41,5 +42,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup"></param>
 		public static EwfTableCell ToCell( this string text, TableCellSetup setup = null ) =>
 			new EwfTableCell( setup ?? new TableCellSetup(), ( text ?? "" ).ToComponents(), simpleText: text ?? "" );
+
+		/// <summary>
+		/// Concatenates table cells.
+		/// </summary>
+		public static IEnumerable<EwfTableCell> Concat( this EwfTableCell first, IEnumerable<EwfTableCell> second ) => second.Prepend( first );
+
+		/// <summary>
+		/// Returns a sequence of two table cells.
+		/// </summary>
+		public static IEnumerable<EwfTableCell> Append( this EwfTableCell first, EwfTableCell second ) =>
+			Enumerable.Empty<EwfTableCell>().Append( first ).Append( second );
 	}
 }

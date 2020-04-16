@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -205,5 +206,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				id,
 				removalUpdateRegionSets );
 		}
+
+		/// <summary>
+		/// Concatenates list items.
+		/// </summary>
+		public static IEnumerable<ComponentListItem> Concat( this ComponentListItem first, IEnumerable<ComponentListItem> second ) => second.Prepend( first );
+
+		/// <summary>
+		/// Returns a sequence of two list items.
+		/// </summary>
+		public static IEnumerable<ComponentListItem> Append( this ComponentListItem first, ComponentListItem second ) =>
+			Enumerable.Empty<ComponentListItem>().Append( first ).Append( second );
 	}
 }
