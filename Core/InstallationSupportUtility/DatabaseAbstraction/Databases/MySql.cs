@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
 				if( filePath.Any() ) {
 					sw.WriteLine( "use {0}".FormatWith( info.Database ) );
-					sw.Write( File.ReadAllText( filePath ) );
+					sw.WriteLine( "source {0}".FormatWith( filePath ) );
 				}
 				sw.WriteLine( "quit" );
 
