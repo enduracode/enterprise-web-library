@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Humanizer;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -215,7 +216,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( resource is ExternalResourceInfo )
 					NetTools.Redirect( resource.GetUrl() );
 				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
-				break;
+				return;
+			}
+
+			// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
+			var absoluteUrl = new Uri( RequestState.Url );
+			if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
+				var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
+				if( systemManager != null )
+					NetTools.Redirect(
+						systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
+						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ) );
 			}
 		}
 
