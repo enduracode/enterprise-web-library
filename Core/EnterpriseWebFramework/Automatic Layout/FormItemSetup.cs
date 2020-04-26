@@ -1,10 +1,13 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using System.Collections.Generic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a form item.
 	/// </summary>
 	public class FormItemSetup {
 		internal readonly DisplaySetup DisplaySetup;
 		internal readonly int? ColumnSpan;
+		internal readonly IEnumerable<UpdateRegionSet> UpdateRegionSets;
 		internal readonly TextAlignment TextAlignment;
 
 		/// <summary>
@@ -12,10 +15,14 @@
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="columnSpan">Only applies to <see cref="FormItemList.CreateGrid"/>.</param>
+		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that the form item will be a part of.</param>
 		/// <param name="textAlignment"></param>
-		public FormItemSetup( DisplaySetup displaySetup = null, int? columnSpan = null, TextAlignment textAlignment = TextAlignment.NotSpecified ) {
+		public FormItemSetup(
+			DisplaySetup displaySetup = null, int? columnSpan = null, IEnumerable<UpdateRegionSet> updateRegionSets = null,
+			TextAlignment textAlignment = TextAlignment.NotSpecified ) {
 			DisplaySetup = displaySetup;
 			ColumnSpan = columnSpan;
+			UpdateRegionSets = updateRegionSets;
 			TextAlignment = textAlignment;
 		}
 	}

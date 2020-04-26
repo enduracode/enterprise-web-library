@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -164,19 +163,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
 						.Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
 						.Select(
-							i => new DisplayableElement(
-								itemContext => new DisplayableElementData(
-									i.item.Setup.DisplaySetup,
-									() => {
-										var styleAttribute = itemStyleAttributeGetter( i.item );
-										return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
-											itemContext,
-											"div",
-											i.item.ErrorSourceSet,
-											styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
-									},
-									classes: i.elementClass.Add( itemClassGetter( i.item ) ),
-									children: itemComponentGetter( i.item ) ) ) )
+							i => new FlowIdContainer(
+								new DisplayableElement(
+									itemContext => new DisplayableElementData(
+										i.item.Setup.DisplaySetup,
+										() => {
+											var styleAttribute = itemStyleAttributeGetter( i.item );
+											return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+												itemContext,
+												"div",
+												i.item.ErrorSourceSet,
+												styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
+										},
+										classes: i.elementClass.Add( itemClassGetter( i.item ) ),
+										children: itemComponentGetter( i.item ) ) ).ToCollection(),
+								updateRegionSets: i.item.Setup.UpdateRegionSets ) )
 						.Materialize() ) ).ToCollection();
 
 			this.items = ( items ?? Enumerable.Empty<FormItem>() ).ToList();

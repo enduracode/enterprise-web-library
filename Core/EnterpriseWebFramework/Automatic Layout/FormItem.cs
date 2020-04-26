@@ -52,29 +52,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// This can be used to display a form item without a <see cref="FormItemList"/>.
 		/// </summary>
 		public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false ) =>
-			new DisplayableElement(
-				context => new DisplayableElementData(
-					Setup.DisplaySetup,
-					() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
-					classes: itemClass,
-					children: ( !label.Any() || omitLabel
-						            ? Enumerable.Empty<FlowComponent>()
-						            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
-					.Append( new GenericFlowContainer( content, classes: contentClass ) )
-					.Concat( getErrorContainer() )
-					.Materialize() ) ).ToCollection();
+			new FlowIdContainer(
+				new DisplayableElement(
+					context => new DisplayableElementData(
+						Setup.DisplaySetup,
+						() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
+						classes: itemClass,
+						children: ( !label.Any() || omitLabel
+							            ? Enumerable.Empty<FlowComponent>()
+							            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>().Append( new LineBreak() ) )
+						.Append( new GenericFlowContainer( content, classes: contentClass ) )
+						.Concat( getErrorContainer() )
+						.Materialize() ) ).ToCollection(),
+				updateRegionSets: Setup.UpdateRegionSets ).ToCollection();
 
 		/// <summary>
 		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
 		/// </summary>
 		/// <param name="visualOrderRank"></param>
-		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="etherealContent"></param>
-		public ComponentListItem ToListItem(
-			int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		public ComponentListItem ToListItem( int? visualOrderRank = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			content.Concat( getErrorContainer() )
 				.Materialize()
-				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, updateRegionSets, etherealContent, getErrorFocusableElementLocalData );
+				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, Setup.UpdateRegionSets, etherealContent, getErrorFocusableElementLocalData );
 
 		/// <summary>
 		/// Creates a list item representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
@@ -82,11 +82,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="id">The ID of the item. This is required if you're adding the item on an intermediate post-back or want to remove the item on an
 		/// intermediate post-back. Do not pass null or the empty string.</param>
 		/// <param name="visualOrderRank"></param>
-		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this item will be a part of.</param>
 		/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 		/// <param name="etherealContent"></param>
 		public ComponentListItem ToListItem(
-			string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> updateRegionSets = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
+			string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			content.Concat( getErrorContainer() )
 				.Materialize()
@@ -95,7 +94,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Setup.DisplaySetup,
 					null,
 					visualOrderRank,
-					updateRegionSets,
+					Setup.UpdateRegionSets,
 					removalUpdateRegionSets,
 					etherealContent,
 					getErrorFocusableElementLocalData );
