@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 
@@ -22,25 +21,23 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override void loadData() {
 			var updateRegionSet = new UpdateRegionSet();
-			EwfUiStatics.SetPageActions(
-				new ButtonSetup(
-					"Remove Last Group",
-					behavior: new PostBackBehavior(
-						postBack: PostBack.CreateIntermediate(
-							updateRegionSet.ToCollection(),
-							id: "removeLastGroup",
-							firstModificationMethod: () => {
-								if( info.GroupCount <= 0 )
-									throw new DataModificationException( "No groups to remove." );
-								parametersModification.GroupCount -= 1;
-							} ) ) ).ToCollection() );
-
 			place.AddControlsReturnThis(
 				EwfTable.CreateWithItemGroups(
 						Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ),
 						defaultItemLimit: DataRowLimit.Fifty,
 						caption: "Caption",
 						subCaption: "Sub caption",
+						tableActions: new ButtonSetup(
+							"Remove Last Group",
+							behavior: new PostBackBehavior(
+								postBack: PostBack.CreateIntermediate(
+									updateRegionSet.ToCollection(),
+									id: "removeLastGroup",
+									firstModificationMethod: () => {
+										if( info.GroupCount <= 0 )
+											throw new DataModificationException( "No groups to remove." );
+										parametersModification.GroupCount -= 1;
+									} ) ) ).ToCollection(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
 						headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )

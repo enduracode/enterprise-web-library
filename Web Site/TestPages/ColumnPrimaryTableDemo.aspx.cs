@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ColumnPrimaryTableDemo: EwfPage {
@@ -21,6 +22,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new ColumnPrimaryTable(
 						caption: "My table",
 						subCaption: "A new table implementation",
+						tableActions: new ButtonSetup(
+							"Action",
+							behavior: new PostBackBehavior(
+								postBack: PostBack.CreateIntermediate(
+									null,
+									id: "action",
+									firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
 						items: items ).ToCollection()
 					.GetControls() );

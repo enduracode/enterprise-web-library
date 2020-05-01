@@ -19,16 +19,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
 		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
-		/// text (no controls).</param>
-		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="items">The items.</param>
 		public ColumnPrimaryTable(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EwfTableItem> items = null ): this(
 			style,
 			classes,
@@ -50,19 +50,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
 		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
-		/// text (no controls).</param>
-		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="itemGroups">The item groups.</param>
-		// NOTE: Change the Tuple for tableActions to a named type.
 		public ColumnPrimaryTable(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null ) {
-			tableActions = tableActions ?? Enumerable.Empty<Tuple<string, Action>>().Materialize();
+			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
@@ -87,6 +86,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								context => new ElementData(
 									() => new ElementLocalData( "colgroup" ),
 									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
+					}
+
+					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel, tableActions ).Materialize();
+					if( tableLevelGeneralActionList.Any() ) {
+						// NOTE: Table-level item actions, the group head, group-level item actions, and the checkbox row should all go here.
+						var tHeadRows = new EwfTableItem(
+							new GenericFlowContainer( tableLevelGeneralActionList, classes: EwfTable.ItemLimitingAndGeneralActionContainerClass ).ToCell(
+								new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ).ToCollection();
+						var cellPlaceholderListsForTHeadRows = TableOps.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
+						children.Add(
+							new ElementComponent(
+								context => new ElementData(
+									() => new ElementLocalData( "thead" ),
+									children: TableOps.BuildRows(
+											cellPlaceholderListsForTHeadRows,
+											tHeadRows.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
+											null,
+											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, allItemSetups.Length ).ToImmutableArray(),
+											0,
+											false )
+										.Materialize() ) ) );
 					}
 
 					fields = EwfTable.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );

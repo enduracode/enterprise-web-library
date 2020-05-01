@@ -244,6 +244,16 @@ th.ewfTcBaseLine, td.ewfTcBaseLine {
 .ewfOverflowedCell {
 	overflow: hidden;
 }
+ewfTableItemLimitingAndGeneralActionContainer {
+	display: flex;
+	flex-flow: row wrap;
+}
+ewfTableActionListContainer {
+	flex-grow: 1;
+}
+ewfTableActionListContainer > ewfUnorderedWrappingList {
+	justify-content: flex-end;
+}
 
 /* text control */
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {

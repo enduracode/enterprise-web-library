@@ -17,6 +17,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
 		internal static readonly ElementClass AllCellAlignmentsClass = new ElementClass( "ewfTc" );
 
+		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new ElementClass( "ewfTblIlga" );
+		private static readonly ElementClass itemLimitingControlContainerClass = new ElementClass( "ewfTblIl" );
+		private static readonly ElementClass actionListContainerClass = new ElementClass( "ewfTblAl" );
+
 		internal static readonly ElementClass ContrastClass = new ElementClass( "ewfContrast" );
 
 		/// <summary>
@@ -48,7 +52,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"table." + standardExceptLayoutStyleClass.ClassName ),
 						new CssElement( "TableStandardStyle", "table." + standardStyleClass.ClassName ),
 						new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ), new CssElement( "ThAndTd", CellSelectors ),
-						new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName )
+						new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName ),
+						new CssElement( "TableItemLimitingAndGeneralActionContainer", "div.{0}".FormatWith( ItemLimitingAndGeneralActionContainerClass.ClassName ) ),
+						new CssElement( "TableItemLimitingControlContainer", "div.{0}".FormatWith( itemLimitingControlContainerClass.ClassName ) ),
+						new CssElement( "TableActionListContainer", "div.{0}".FormatWith( actionListContainerClass.ClassName ) )
 					}.ToList();
 
 
@@ -163,6 +170,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								            : null ) ) ) );
 		}
 
+		// NOTE: Don't forget about Export to Excel, which should go last in the list.
+		internal static IEnumerable<FlowComponent> GetGeneralActionList( bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> actions ) {
+			if( !actions.Any() )
+				return Enumerable.Empty<FlowComponent>();
+
+			return new GenericFlowContainer(
+				new WrappingList(
+					actions.Select(
+							i => i.GetActionComponent(
+								( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+								( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) ) )
+						.Where( i => i != null )
+						.Select( i => (WrappingListItem)i.ToComponentListItem() ) ).ToCollection(),
+				classes: actionListContainerClass ).ToCollection();
+		}
+
 		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
 			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
 			if( !cellPlaceholderListsForItems.Any() )
@@ -185,9 +208,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
 		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
-		/// text (no controls).</param>
-		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
@@ -197,10 +220,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		public static EwfTable Create(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "", string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
-			return new EwfTable(
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			new EwfTable(
 				style,
 				classes,
 				postBackIdBase,
@@ -217,7 +240,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ),
 						Enumerable.Empty<Func<EwfTableItem>>() ) ),
 				null );
-		}
 
 		/// <summary>
 		/// Creates a table with one item group that contains the specified items.
@@ -230,9 +252,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
 		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
-		/// text (no controls).</param>
-		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
@@ -242,11 +264,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		public static EwfTable CreateWithItems(
 			IEnumerable<Func<EwfTableItem>> items, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null,
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
 			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
-			return new EwfTable(
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			new EwfTable(
 				style,
 				classes,
 				postBackIdBase,
@@ -260,7 +282,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				disableEmptyFieldDetection,
 				ImmutableArray.Create( new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ) ),
 				null );
-		}
 
 		/// <summary>
 		/// Creates a table with multiple item groups.
@@ -273,9 +294,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
 		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action link to appear. This will only work if the table consists of simple
-		/// text (no controls).</param>
-		/// <param name="tableActions">Table action buttons. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
@@ -285,11 +306,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions for the table. These operate on the item-group level, not the item level.</param>
 		public static EwfTable CreateWithItemGroups(
 			IEnumerable<EwfTableItemGroup> itemGroups, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<Tuple<string, Action>> tableActions = null,
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
 			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) {
-			return new EwfTable(
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			new EwfTable(
 				style,
 				classes,
 				postBackIdBase,
@@ -303,19 +324,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				disableEmptyFieldDetection,
 				itemGroups.ToImmutableArray(),
 				tailUpdateRegions );
-		}
 
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
 
-		// NOTE: Change table actions to be IEnumerable<namedType> rather than IEnumerable<Tuple<>>.
 		private EwfTable(
 			EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-			IReadOnlyCollection<Tuple<string, Action>> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields, IReadOnlyCollection<EwfTableItem> headItems,
+			IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields, IReadOnlyCollection<EwfTableItem> headItems,
 			DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IReadOnlyList<EwfTableItemGroup> itemGroups,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
 			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
-			tableActions = tableActions ?? Enumerable.Empty<Tuple<string, Action>>().Materialize();
+			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( specifiedFields != null && !specifiedFields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
@@ -354,16 +373,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var allVisibleItems = new List<EwfTableItem>();
 
 								var itemLimitingUpdateRegionSet = new UpdateRegionSet();
+								var itemLimitingAndGeneralActionComponents =
+									( defaultItemLimit != DataRowLimit.Unlimited
+										  ? getItemLimitingControlContainer( postBackIdBase, itemLimit.Value, itemLimitingUpdateRegionSet, tailUpdateRegions ).ToCollection()
+										  : Enumerable.Empty<FlowComponent>() ).Concat( GetGeneralActionList( allowExportToExcel, tableActions ) )
+									.Materialize();
 								var headRows = buildRows(
-										getItemLimitingAndGeneralActionsItem(
-												postBackIdBase,
-												fields.Count,
-												defaultItemLimit,
-												itemLimit.Value,
-												itemLimitingUpdateRegionSet,
-												tailUpdateRegions )
-											.Concat( getItemActionsItem( fields.Count ) )
-											.Materialize(),
+										( itemLimitingAndGeneralActionComponents.Any()
+											  ? new EwfTableItem(
+												  new GenericFlowContainer( itemLimitingAndGeneralActionComponents, classes: ItemLimitingAndGeneralActionContainerClass ).ToCell(
+													  new TableCellSetup( fieldSpan: fields.Count ) ) ).ToCollection()
+											  : Enumerable.Empty<EwfTableItem>() ).Concat( getItemActionsItem( fields.Count ) )
+										.Materialize(),
 										Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 										null,
 										false,
@@ -551,43 +572,37 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return fieldOrItemSetups.Select( f => GetColElement( f, factor ) ).Materialize();
 		}
 
-		// NOTE: This row also needs to include general actions, on the right. Don't forget about Export to Excel.
-		private IReadOnlyCollection<EwfTableItem> getItemLimitingAndGeneralActionsItem(
-			string postBackIdBase, int fieldCount, DataRowLimit defaultItemLimit, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
+		private FlowComponent getItemLimitingControlContainer(
+			string postBackIdBase, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
-			if( defaultItemLimit == DataRowLimit.Unlimited )
-				return Enumerable.Empty<EwfTableItem>().Materialize();
-
 			var itemCount = itemGroups.Sum( i => i.Items.Count );
 			var list = new LineList(
-				( (LineListItem)new PhrasingIdContainer(
-							"Item".ToQuantity( itemCount ).ToComponents(),
-							updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-								.Materialize()
-								.Concat( tailUpdateRegions )
-								.SelectMany( i => i.Sets ) ).ToCollection()
-						.ToComponentListItem() ).ToCollection()
-				.Append( "".ToComponents().ToComponentListItem() )
-				.Append( "Show:".ToComponents().ToComponentListItem() )
-				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
-				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
-				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
-			return new EwfTableItem( list.ToCollection().ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+				new PhrasingIdContainer(
+						"Item".ToQuantity( itemCount ).ToComponents(),
+						updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
+							.Materialize()
+							.Concat( tailUpdateRegions )
+							.SelectMany( i => i.Sets ) ).ToComponentListItem()
+					.AppendLineListItem( "".ToComponentListItem() )
+					.Append( "Show:".ToComponentListItem() )
+					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
+					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
+					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
+			return new GenericFlowContainer( list.ToCollection(), classes: itemLimitingControlContainerClass );
 		}
 
 		private ComponentListItem getItemLimitButtonItem(
 			string postBackIdBase, DataValue<int> currentItemLimit, DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
 			var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 			if( itemLimit == (DataRowLimit)currentItemLimit.Value )
-				return text.ToComponents().ToComponentListItem();
+				return text.ToComponentListItem();
 			return new EwfButton(
-					new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
-					behavior: new PostBackBehavior(
-						postBack: PostBack.CreateIntermediate(
-							updateRegionSet.ToCollection(),
-							id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-							firstModificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToCollection()
-				.ToComponentListItem();
+				new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateIntermediate(
+						updateRegionSet.ToCollection(),
+						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
+						firstModificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToComponentListItem();
 		}
 
 		private EwfTableItem[] getItemActionsItem( int fieldCount ) {
