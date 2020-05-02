@@ -26,10 +26,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="items">The items.</param>
+		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
 			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EwfTableItem> items = null ): this(
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EwfTableItem> items = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
 			style,
 			classes,
 			caption,
@@ -39,7 +41,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			fields,
 			headItems,
 			firstDataFieldIndex,
-			items != null ? new ColumnPrimaryItemGroup( null, items: items ).ToCollection() : null ) {}
+			items != null ? new ColumnPrimaryItemGroup( null, items: items ).ToCollection() : null,
+			etherealContent ) {}
 
 		/// <summary>
 		/// Creates a table with multiple item groups.
@@ -57,10 +60,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="itemGroups">The item groups.</param>
+		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
 			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null ) {
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
@@ -144,7 +149,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						null,
 						() => new DisplayableElementLocalData( "table" ),
 						classes: EwfTable.GetClasses( style, classes ?? ElementClassSet.Empty ),
-						children: children );
+						children: children,
+						etherealChildren: etherealContent );
 				} ).ToCollection();
 		}
 

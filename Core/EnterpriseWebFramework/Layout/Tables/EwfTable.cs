@@ -218,11 +218,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
+		/// <param name="etherealContent"></param>
 		public static EwfTable Create(
 			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "", string caption = "", string subCaption = "",
 			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
 				style,
 				classes,
@@ -239,7 +240,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					new EwfTableItemGroup(
 						() => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ),
 						Enumerable.Empty<Func<EwfTableItem>>() ) ),
-				null );
+				null,
+				etherealContent );
 
 		/// <summary>
 		/// Creates a table with one item group that contains the specified items.
@@ -262,12 +264,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
+		/// <param name="etherealContent"></param>
 		public static EwfTable CreateWithItems(
 			IEnumerable<Func<EwfTableItem>> items, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
 			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
 				style,
 				classes,
@@ -281,7 +284,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				defaultItemLimit,
 				disableEmptyFieldDetection,
 				ImmutableArray.Create( new EwfTableItemGroup( () => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tailUpdateRegions ), items ) ),
-				null );
+				null,
+				etherealContent );
 
 		/// <summary>
 		/// Creates a table with multiple item groups.
@@ -304,12 +308,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions for the table. These operate on the item-group level, not the item level.</param>
+		/// <param name="etherealContent"></param>
 		public static EwfTable CreateWithItemGroups(
 			IEnumerable<EwfTableItemGroup> itemGroups, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
 			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null ) =>
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
 				style,
 				classes,
@@ -323,7 +328,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				defaultItemLimit,
 				disableEmptyFieldDetection,
 				itemGroups.ToImmutableArray(),
-				tailUpdateRegions );
+				tailUpdateRegions,
+				etherealContent );
 
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
@@ -332,7 +338,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
 			IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields, IReadOnlyCollection<EwfTableItem> headItems,
 			DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IReadOnlyList<EwfTableItemGroup> itemGroups,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
+			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
@@ -535,7 +541,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() => new DisplayableElementLocalData( "table" ),
 						classes: GetClasses( style, classes ?? ElementClassSet.Empty ),
 						children: children,
-						etherealChildren: defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : null );
+						etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
+						.Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
+						.Materialize() );
 				} ).ToCollection();
 
 			this.itemGroups = itemGroups;
