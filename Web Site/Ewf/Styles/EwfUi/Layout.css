@@ -161,23 +161,14 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList > 
 }
 
 /* block element vertical spacing */
-p, ewfSectionNormalStyleBothStates > ewfSectionContentContainer, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul, .ewfControlList, div.ewfStandardDynamicTable, ewfTableStandardAndStandardLayoutOnlyStyles, ewfCheckboxList, div.ewfStandardFileCollectionManager, ewfMergeFieldTreeContainer, ewfMergeRowTreeContainer, ewfMergeRowTreeChildContainer, ewfControlStack, div.ewfControlList, ewfHtmlBlockEditor, ewfSectionBoxStyleBothStates, ewfFormItemList, ewfFormItem, ewfChart, ewfUiEntityBlock > *, ewfUiGlobalFootBlock, ewfHtmlBlock {
+.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiGlobalFootBlock {
 	margin-top: 1em;
 }
-p:first-child, ewfUnorderedLineList:first-child, ewfUnorderedStackList:first-child, ewfHtmlBlock ul:first-child, .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfTableStandardAndStandardLayoutOnlyStyles:first-child, ewfCheckboxList:first-child, div.ewfStandardFileCollectionManager:first-child, ewfMergeFieldTreeContainer:first-child, ewfMergeRowTreeContainer:first-child, ewfMergeRowTreeChildContainer:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfHtmlBlockEditor:first-child, ewfSectionBoxStyleBothStates:first-child, ewfFormItemList:first-child, ewfFormItem:first-child, ewfChart:first-child, ewfUiEntityBlock > *:first-child, ewfHtmlBlock:first-child {
+.ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfUiEntityBlock > *:first-child {
 	margin-top: 0;
-}
-ewfUnorderedWrappingList {
-	margin-top: calc( 1em - .25em );
-}
-ewfUnorderedWrappingList:first-child {
-	margin-top: calc( 0em - .25em );
 }
 ewfUiPageActionAndContentAndContentFootCell {
 	padding-top: 1em;
-}
-p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
-	margin-bottom: 0;
 }
 
 /* corner rounding */
@@ -283,8 +274,16 @@ ewfUiEntityBlock ewfPagePath {
 ewfUiEntityNavAndActionContainer {
 	display: flex;
 	margin-top: .5rem;
-	justify-content: space-between;
 	align-items: center;
+}
+UiEntityNavListContainer, ewfUiEntityActionListContainer {
+	flex-grow: 1;
+}
+ewfUiEntityActionListContainer {
+	text-align: right;
+}
+ewfUiEntityActionListContainer > ewfUnorderedLineList {
+	justify-content: flex-end;
 }
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	display: block;

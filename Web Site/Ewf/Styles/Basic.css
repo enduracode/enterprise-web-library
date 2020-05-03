@@ -4,6 +4,53 @@ html {
 }
 
 /* spacing */
+p,
+ewfSectionNormalStyleBothStates > ewfSectionContentContainer,
+ewfSectionBoxStyleBothStates,
+ewfUnorderedLineList,
+ewfUnorderedStackList,
+ewfHtmlBlock ul,
+ewfFormItemList,
+ewfFormItem,
+ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer,
+ewfTableStandardAndStandardLayoutOnlyStyles,
+ewfCheckboxList,
+ewfHtmlBlockEditor,
+div.ewfStandardFileCollectionManager,
+ewfMergeFieldTreeContainer,
+ewfMergeRowTreeContainer,
+ewfMergeRowTreeChildContainer,
+ewfChart,
+ewfHtmlBlock {
+	margin-top: 1em;
+}
+p:first-child,
+ewfSectionBoxStyleBothStates:first-child,
+ewfUnorderedLineList:first-child,
+ewfUnorderedStackList:first-child,
+ewfHtmlBlock ul:first-child,
+ewfFormItemList:first-child,
+ewfFormItem:first-child,
+ewfTableStandardAndStandardLayoutOnlyStyles:first-child,
+ewfCheckboxList:first-child,
+ewfHtmlBlockEditor:first-child,
+div.ewfStandardFileCollectionManager:first-child,
+ewfMergeFieldTreeContainer:first-child,
+ewfMergeRowTreeContainer:first-child,
+ewfMergeRowTreeChildContainer:first-child,
+ewfChart:first-child,
+ewfHtmlBlock:first-child {
+	margin-top: 0;
+}
+ewfUnorderedWrappingList {
+	margin-top: calc( 1em - .25em );
+}
+ewfUnorderedWrappingList:first-child {
+	margin-top: calc( 0em - .25em );
+}
+p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
+	margin-bottom: 0;
+}
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
@@ -54,6 +101,9 @@ ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfForm
 }
 ewfGridFormItemList {
 	grid-gap: 1em;
+}
+ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
+	margin-left: 3em;
 }
 
 /* sections */
@@ -288,10 +338,6 @@ ewfSingleLineTextControlAllStates[type="password"], ewfSingleLineTextControlAllS
 /* checkboxes */
 ewfFlowCheckboxAllStates > ewfCheckbox {
 	display: block;
-}
-ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
-	margin-top: .5em;
-	margin-left: 2em;
 }
 
 /* list controls */
