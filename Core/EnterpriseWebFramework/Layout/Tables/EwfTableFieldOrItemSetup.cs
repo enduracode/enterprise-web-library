@@ -1,18 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class EwfTableFieldOrItemSetup {
-		internal readonly List<string> Classes;
+		internal readonly ElementClassSet Classes;
 		internal readonly CssLength Size;
 		internal readonly TextAlignment TextAlignment;
 		internal readonly TableCellVerticalAlignment VerticalAlignment;
 		internal readonly ElementActivationBehavior ActivationBehavior;
 
 		internal EwfTableFieldOrItemSetup(
-			IEnumerable<string> classes, CssLength size, TextAlignment textAlignment, TableCellVerticalAlignment verticalAlignment,
+			ElementClassSet classes, CssLength size, TextAlignment textAlignment, TableCellVerticalAlignment verticalAlignment,
 			ElementActivationBehavior activationBehavior ) {
-			Classes = ( classes ?? new string[ 0 ] ).ToList();
+			Classes = classes ?? ElementClassSet.Empty;
 			Size = size;
 			TextAlignment = textAlignment;
 			VerticalAlignment = verticalAlignment;

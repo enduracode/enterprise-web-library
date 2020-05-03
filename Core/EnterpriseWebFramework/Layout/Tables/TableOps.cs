@@ -153,12 +153,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												jsInitStatements: ( rowActivationBehavior != null ? rowActivationBehavior.JsInitStatementGetter( rowContext.Id ) : "" )
 												.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( rowContext.Id ) : "" ) ) );
 									},
-									classes: ( rowActivationBehavior != null ? rowActivationBehavior.Classes : ElementClassSet.Empty )
-									.Add(
+									classes: ( rowActivationBehavior != null ? rowActivationBehavior.Classes : ElementClassSet.Empty ).Add(
 										useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
 											? EwfTable.ContrastClass
 											: ElementClassSet.Empty )
-									.Add( rowSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+									.Add( rowSetup.Classes ),
 									children: row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
 										.Where( cellAndIndex => cellAndIndex.Cell != null )
 										.Select(
@@ -200,7 +199,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															.Add( EwfTable.AllCellAlignmentsClass )
 															.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
 															.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
-															.Add( columnSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) )
+															.Add( columnSetup.Classes )
 															.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
 															children: cellAndIndex.Cell.Content,
 															etherealChildren: cellActivationBehavior?.EtherealChildren );

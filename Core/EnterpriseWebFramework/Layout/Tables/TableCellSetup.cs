@@ -21,10 +21,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="itemSpan">The number of items this cell will span.
 		/// NOTE: Don't allow this to be less than one. Zero is allowed by the HTML spec but is too difficult for us to implement right now.
 		/// </param>
-		/// <param name="classes">The CSS class(es).</param>
+		/// <param name="classes">The classes on the cell.</param>
 		/// <param name="textAlignment">The text alignment of the cell.</param>
 		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="containsActivatableElements">Pass true if the cell contains “activatable” elements, e.g. hyperlinks, buttons, or form controls.</param>
+		// NOTE: Change classes type to ElementClassSet when DynamicTable is gone.
 		public TableCellSetup(
 			int fieldSpan = 1, int itemSpan = 1, IEnumerable<string> classes = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 			ElementActivationBehavior activationBehavior = null, bool containsActivatableElements = false ) {
