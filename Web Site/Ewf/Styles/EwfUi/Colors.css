@@ -59,10 +59,10 @@ ewfUiTopErrorMessageListContainer {
 }
 
 /* global nav block, top tabs, and side tabs */
-ewfUiGlobalNavBlock {
+ewfUiGlobalNavListContainer {
 	background-color: #005675;
 }
-ewfUiGlobalNavBlock, ewfUiGlobalNavBlock ewfActionControlAllStylesAllStates {
+ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfActionControlAllStylesAllStates {
 	color: hsla( 193, 27%, 90%, 1 );
 }
 ewfUiTopErrorMessageListContainer {
@@ -88,7 +88,7 @@ ewfUiSideTabBlock ewfActionControlAllStylesStatesWithFocus {
 }
 
 /* new content */
-ewfUiGlobalNavBlock ewfActionControlAllStylesAllNewContentActionStates,
+ewfUiGlobalNavListContainer ewfActionControlAllStylesAllNewContentActionStates,
 ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNewContentActionStates,
 ewfUiTopTabBlock ewfActionControlAllStylesAllNewContentActionStates,
 ewfUiSideTabBlock ewfActionControlAllStylesAllNewContentActionStates {

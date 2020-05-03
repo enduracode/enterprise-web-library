@@ -242,7 +242,7 @@ ewfUiUserInfoContainer {
 ewfUiUserInfoContainer > ewfUnorderedInlineList {
 	margin-left: .5em;
 }
-ewfUiGlobalNavBlock,
+ewfUiGlobalNavListContainer,
 ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
@@ -251,7 +251,7 @@ ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	padding-left: .5rem;
 	padding-right: .5rem;
 }
-ewfUiGlobalNavBlock,
+ewfUiGlobalNavListContainer,
 ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
@@ -259,9 +259,9 @@ ewfUiSideTabBlock {
 	padding-top: .5rem;
 	padding-bottom: .5rem;
 }
-ewfUiGlobalNavBlock ewfActionControlAllStylesActionlessState,
-ewfUiGlobalNavBlock ewfActionControlAllStylesAllNormalStates,
-ewfUiGlobalNavBlock ewfActionControlAllStylesAllVisitedStates,
+ewfUiGlobalNavListContainer ewfActionControlAllStylesActionlessState,
+ewfUiGlobalNavListContainer ewfActionControlAllStylesAllNormalStates,
+ewfUiGlobalNavListContainer ewfActionControlAllStylesAllVisitedStates,
 ewfUiEntityNavAndActionContainer ewfActionControlAllStylesActionlessState,
 ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNormalStates,
 ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllVisitedStates {
@@ -334,7 +334,7 @@ ewfUiPoweredByEwlFooterBlock {
 }
 @media print {
 	ewfUiUserInfoContainer,
-	ewfUiGlobalNavBlock,
+	ewfUiGlobalNavListContainer,
 	ewfUiTopErrorMessageListContainer,
 	ewfUiEntityNavAndActionContainer,
 	ewfUiSideTabBlockCell,

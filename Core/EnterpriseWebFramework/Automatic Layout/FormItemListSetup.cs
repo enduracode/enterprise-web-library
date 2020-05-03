@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -8,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class FormItemListSetup {
 		internal readonly DisplaySetup DisplaySetup;
 		internal readonly ElementClassSet Classes;
-		internal readonly IReadOnlyCollection<PhrasingComponent> Button;
+		internal readonly Func<Func<DisplaySetup, FormItemSetup>, IReadOnlyCollection<FormItem>> ButtonItemGetter;
 
 		/// <summary>
 		/// Creates a form-item-list setup object.
@@ -21,10 +22,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			DisplaySetup displaySetup = null, ElementClassSet classes = null, ButtonSetup buttonSetup = null, bool enableSubmitButton = false ) {
 			DisplaySetup = displaySetup;
 			Classes = classes;
-			Button = buttonSetup == null
-				         ? Enumerable.Empty<PhrasingComponent>().Materialize()
-				         : buttonSetup.GetActionComponent( null, ( text, icon ) => new StandardButtonStyle( text, icon: icon ), enableSubmitButton: enableSubmitButton )
-					         .ToCollection();
+			ButtonItemGetter = setupGetter => buttonSetup == null
+				                                  ? Enumerable.Empty<FormItem>().Materialize()
+				                                  : buttonSetup.GetActionComponent(
+						                                  null,
+						                                  ( text, icon ) => new StandardButtonStyle( text, icon: icon ),
+						                                  enableSubmitButton: enableSubmitButton )
+					                                  .ToFormItem( setup: setupGetter( buttonSetup.DisplaySetup ) )
+					                                  .ToCollection();
 		}
 	}
 }

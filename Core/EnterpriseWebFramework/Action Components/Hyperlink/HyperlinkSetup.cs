@@ -15,11 +15,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkModalBoxBehavior(ResourceInfo, BrowsingContextSetup)"/>. For a mailto link, call
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkBehavior(Email.EmailAddress, string, string, string, string)"/>.</param>
 		/// <param name="text">Do not pass null. Pass the empty string to use the destination URL.</param>
+		/// <param name="displaySetup"></param>
 		/// <param name="icon">The icon.</param>
-		public HyperlinkSetup( HyperlinkBehavior behavior, string text, ActionComponentIcon icon = null ) {
+		public HyperlinkSetup( HyperlinkBehavior behavior, string text, DisplaySetup displaySetup = null, ActionComponentIcon icon = null ) {
+			DisplaySetup = displaySetup;
 			hyperlinkGetter = hyperlinkStyleSelector =>
 				behavior.UserCanNavigateToDestination() ? new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ) ) : null;
 		}
+
+		/// <inheritdoc/>
+		public DisplaySetup DisplaySetup { get; }
 
 		/// <inheritdoc/>
 		public PhrasingComponent GetActionComponent(

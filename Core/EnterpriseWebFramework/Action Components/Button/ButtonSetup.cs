@@ -11,11 +11,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a button setup object.
 		/// </summary>
 		/// <param name="text">Do not pass null or the empty string.</param>
+		/// <param name="displaySetup"></param>
 		/// <param name="behavior">The behavior. Pass null to use the form default action.</param>
 		/// <param name="icon">The icon.</param>
-		public ButtonSetup( string text, ButtonBehavior behavior = null, ActionComponentIcon icon = null ) {
+		public ButtonSetup( string text, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ActionComponentIcon icon = null ) {
 			behavior = behavior ?? new FormActionBehavior( FormState.Current.DefaultAction );
 
+			DisplaySetup = displaySetup;
 			buttonGetter = ( enableSubmitButton, buttonStyleSelector ) => {
 				var postBack = !enableSubmitButton ? null :
 				               behavior is FormActionBehavior formActionBehavior ? ( formActionBehavior.Action as PostBackFormAction )?.PostBack :
@@ -25,6 +27,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					       : new EwfButton( buttonStyleSelector( text, icon ), behavior: behavior );
 			};
 		}
+
+		/// <inheritdoc/>
+		public DisplaySetup DisplaySetup { get; }
 
 		/// <inheritdoc/>
 		public PhrasingComponent GetActionComponent(

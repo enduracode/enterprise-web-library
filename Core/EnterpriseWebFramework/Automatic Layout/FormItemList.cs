@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 					return span == 1 ? "" : "grid-column-end: span {0}".FormatWith( span );
 				},
-				new FormItemSetup( columnSpan: defaultColumnSpan ),
+				displaySetup => new FormItemSetup( displaySetup: displaySetup, columnSpan: defaultColumnSpan ),
 				getItemComponents,
 				items );
 		}
@@ -147,11 +147,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private FormItemList(
 			FormItemListSetup setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
-			Func<FormItem, string> itemStyleAttributeGetter, FormItemSetup buttonItemSetup, Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter,
-			IReadOnlyCollection<FormItem> items ) {
+			Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup> buttonItemSetupGetter,
+			Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter, IReadOnlyCollection<FormItem> items ) {
 			setup = setup ?? new FormItemListSetup();
+			buttonItemSetupGetter = buttonItemSetupGetter ?? ( displaySetup => new FormItemSetup( displaySetup: displaySetup ) );
 
-			var buttonItem = setup.Button.Any() ? setup.Button.ToFormItem( setup: buttonItemSetup ).ToCollection() : Enumerable.Empty<FormItem>().Materialize();
+			var buttonItem = setup.ButtonItemGetter( buttonItemSetupGetter );
 			children = new DisplayableElement(
 				listContext => new DisplayableElementData(
 					setup.DisplaySetup,

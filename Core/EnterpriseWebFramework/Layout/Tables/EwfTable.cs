@@ -177,12 +177,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new GenericFlowContainer(
 				new WrappingList(
-					actions.Select(
-							i => i.GetActionComponent(
-								( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
-								( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) ) )
-						.Where( i => i != null )
-						.Select( i => (WrappingListItem)i.ToComponentListItem() ) ).ToCollection(),
+					from action in actions
+					let actionComponent = action.GetActionComponent(
+						( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+						( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
+					where actionComponent != null
+					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
 				classes: actionListContainerClass ).ToCollection();
 		}
 

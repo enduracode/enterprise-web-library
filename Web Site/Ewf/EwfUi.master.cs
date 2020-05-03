@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal static readonly ElementClass AppLogoAndUserInfoBlockClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
 			internal static readonly ElementClass AppLogoClass = new ElementClass( "ewfUiAppLogo" );
 			internal static readonly ElementClass UserInfoClass = new ElementClass( "ewfUiUserInfo" );
-			internal const string GlobalNavBlockCssClass = "ewfUiGlobalNav";
+			internal static readonly ElementClass GlobalNavListContainerClass = new ElementClass( "ewfUiGlobalNav" );
 
 			internal static readonly ElementClass TopErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
 
@@ -63,7 +63,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			private IEnumerable<CssElement> getGlobalElements() {
 				const string globalBlockSelector = "div#" + GlobalBlockId;
-				const string globalNavBlockSelector = globalBlockSelector + " " + "div." + GlobalNavBlockCssClass;
 				return new[]
 					{
 						new CssElement( "UiGlobalBlock", globalBlockSelector ),
@@ -72,8 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName ).ToArray() ),
 						new CssElement( "UiAppLogoContainer", globalBlockSelector + " " + "div." + AppLogoClass.ClassName ),
 						new CssElement( "UiUserInfoContainer", globalBlockSelector + " " + "div." + UserInfoClass.ClassName ),
-						new CssElement( "UiGlobalNavBlock", globalNavBlockSelector ),
-						new CssElement( "UiGlobalNavControlList", ControlLine.CssElementCreator.Selectors.Select( i => globalNavBlockSelector + " > " + i ).ToArray() ),
+						new CssElement( "UiGlobalNavListContainer", globalBlockSelector + " " + "div." + GlobalNavListContainerClass.ClassName ),
 						new CssElement(
 							"UiTopErrorMessageListContainer",
 							ListErrorDisplayStyle.CssSelectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListContainerClass.ClassName ).ToArray() )
@@ -174,7 +172,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
-			pageActionPlace.AddControlsReturnThis( getPageActionList() );
+			pageActionPlace.AddControlsReturnThis( getPageActionList().GetControls() );
 			contentFootPlace.AddControlsReturnThis( getContentFootBlock().GetControls() );
 			var globalFootBlock = getGlobalFootBlock();
 			if( globalFootBlock != null )
@@ -212,7 +210,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							appLogoAndUserInfoControlOverrider != null
 								? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl()
 								: new PlaceHolder().AddControlsReturnThis( getAppLogoAndUserInfoBlock().ToCollection().GetControls() ),
-							getGlobalNavBlock(),
+							getGlobalNavListContainer(),
 							new PlaceHolder().AddControlsReturnThis(
 								new FlowErrorContainer(
 										new ErrorSourceSet( includeGeneralErrors: true ),
@@ -270,7 +268,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return components;
 		}
 
-		private Control getGlobalNavBlock() {
+		private Control getGlobalNavListContainer() {
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
@@ -280,19 +278,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "global", "nav", index.ToString() ) ) )
 				.Materialize();
-			var controls = getActionComponents( EwfUiStatics.AppProvider.GetGlobalNavActions() )
-				.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) )
-				.Concat( formItems.Select( i => new PlaceHolder().AddControlsReturnThis( i.Content.GetControls() ) ) )
-				.ToArray();
-			if( !controls.Any() )
+			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions() )
+				.Concat( formItems.Select( i => i.Content.ToComponentListItem() ) )
+				.Materialize();
+			if( !listItems.Any() )
 				return null;
 
-			return new Block(
-				new ControlLine( controls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe() }.ToCollection()
-					.Concat(
-						new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ).ToCollection()
-							.GetControls() )
-					.ToArray() ) { CssClass = CssElementCreator.GlobalNavBlockCssClass };
+			return new PlaceHolder().AddControlsReturnThis(
+				new GenericFlowContainer(
+						( EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe()
+							  ? (FlowComponent)new InlineList( listItems )
+							  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
+							new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
+						.Materialize(),
+						classes: CssElementCreator.GlobalNavListContainerClass ).ToCollection()
+					.GetControls() );
 		}
 
 		private Control getEntityAndTopTabBlock() {
@@ -336,18 +336,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = uiEntitySetup.GetNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
 				.Materialize();
-			var listItems = getActionComponents( uiEntitySetup.GetNavActions() )
-				.Select( i => i.ToCollection().ToComponentListItem() )
-				.Concat( formItems.Select( i => i.Content.ToComponentListItem() ) )
-				.Materialize();
+			var listItems = getActionListItems( uiEntitySetup.GetNavActions() ).Concat( formItems.Select( i => i.Content.ToComponentListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
 			return new GenericFlowContainer(
 				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
 					  ? (FlowComponent)new InlineList( listItems )
-					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection()
-				.Append<FlowComponent>(
+					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
 					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
 				.Materialize(),
 				classes: CssElementCreator.EntityNavListContainerClass );
@@ -356,13 +352,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private FlowComponent getEntityActionListContainer() {
 			if( uiEntitySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
-			var actionComponents = getActionComponents( uiEntitySetup.GetActions() ).Materialize();
-			if( !actionComponents.Any() )
+			var listItems = getActionListItems( uiEntitySetup.GetActions() ).Materialize();
+			if( !listItems.Any() )
 				return null;
 			return new GenericFlowContainer(
 				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					  ? (FlowComponent)new InlineList( actionComponents.Select( i => i.ToCollection().ToComponentListItem() ) )
-					  : new LineList( actionComponents.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) ).ToCollection(),
+					  ? (FlowComponent)new InlineList( listItems )
+					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection(),
 				classes: CssElementCreator.EntityActionListContainerClass );
 		}
 
@@ -419,22 +415,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return tabs;
 		}
 
-		private IEnumerable<Control> getPageActionList() {
-			var actionControls = getActionComponents( pageActions )
-				.Select( i => (Control)new PlaceHolder().AddControlsReturnThis( i.ToCollection().GetControls() ) )
-				.ToArray();
-			if( !actionControls.Any() )
+		private IEnumerable<FlowComponent> getPageActionList() {
+			var listItems = getActionListItems( pageActions ).Materialize();
+			if( !listItems.Any() )
 				yield break;
-			yield return new ControlLine( actionControls ) { ItemsSeparatedWithPipe = EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe() };
+			yield return EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe()
+				             ? (FlowComponent)new InlineList( listItems )
+				             : new LineList( listItems.Select( i => (LineListItem)i ) );
 		}
 
-		private IEnumerable<PhrasingComponent> getActionComponents( IReadOnlyCollection<ActionComponentSetup> actions ) =>
+		private IEnumerable<ComponentListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
 			let actionComponent = action.GetActionComponent(
 				( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
 				( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
 			where actionComponent != null
-			select actionComponent;
+			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
 		private IReadOnlyCollection<FlowComponent> getContentFootBlock() {
 			var components = new List<FlowComponent>();
@@ -448,8 +444,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											null,
 											( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.Large, icon: icon ),
 											enableSubmitButton: index == 0 )
-										.ToCollection()
-										.ToComponentListItem() ) ).ToCollection(),
+										.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
 							classes: CssElementCreator.ContentFootActionListContainerClass ) );
 				else if( EwfPage.Instance.IsAutoDataUpdater )
 					components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: EwfPage.Instance.DataUpdatePostBack ) );
