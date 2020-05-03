@@ -51,6 +51,9 @@ ewfUnorderedWrappingList:first-child {
 p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
 	margin-bottom: 0;
 }
+ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
+	margin-bottom: 1em;
+}
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
@@ -130,7 +133,8 @@ ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemLi
 ewfWrappingFormItemList {
 	display: flex;
 }
-ewfUnorderedLineList, ewfUnorderedWrappingList,
+ewfUnorderedLineList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
+ewfUnorderedWrappingList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
 ewfWrappingFormItemList {
 	align-items: center;
 }
@@ -331,7 +335,7 @@ ewfMultilineTextControlAllStates {
 textarea {
 	resize: none;
 }
-ewfSingleLineTextControlAllStates[type="password"], ewfSingleLineTextControlAllStates[type="email"] {
+ewfSingleLineTextControlAllStates[type="password"], ewfSingleLineTextControlAllStates[type="email"], ewfSingleLineTextControlAllStates[type="tel"] {
 	width: 20em;
 }
 
@@ -344,7 +348,7 @@ ewfFlowCheckboxAllStates > ewfCheckbox {
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
 ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
 ewfControlStackItem > ewfDropDownListContainer > ewfDropDownList,
-ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfDropDownListContainer > ewfDropDownList {
+ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfFormItem > ewfFormItemContent > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
 ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
