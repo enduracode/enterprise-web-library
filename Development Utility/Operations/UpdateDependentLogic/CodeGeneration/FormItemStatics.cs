@@ -203,23 +203,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 							.FormatWith( dv ),
 					preFormItemStatements: getNumberControlValueStepStatements( field ) );
 
-			if( field.TypeIs( typeof( int ) ) ) {
-				writeDurationFormItemGetter( writer, field );
+			if( field.TypeIs( typeof( int ) ) )
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
-			}
-			if( field.TypeIs( typeof( int? ) ) ) {
-				writeDurationFormItemGetter( writer, field );
+			if( field.TypeIs( typeof( int? ) ) )
 				writeHtmlAndFileFormItemGetters( writer, field, "int?" );
-			}
 
-			if( field.TypeIs( typeof( decimal ) ) ) {
-				writeDurationFormItemGetter( writer, field );
+			if( field.TypeIs( typeof( decimal ) ) )
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
-			}
-			if( field.TypeIs( typeof( decimal? ) ) ) {
-				writeDurationFormItemGetter( writer, field );
+			if( field.TypeIs( typeof( decimal? ) ) )
 				writeHtmlAndFileFormItemGetters( writer, field, "decimal?" );
-			}
 		}
 
 		private static string getNumberControlValueStepStatements( ModificationField field ) {
@@ -311,23 +303,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 						.FormatWith( getDataValueExpression( dv ), getValueExpression( dv ), getAdditionalValidationMethodExpression( dv ) ),
 				preFormItemStatements: preFormItemStatements );
 		}
-
-		private static void writeDurationFormItemGetter( TextWriter writer, ModificationField field ) =>
-			writeFormItemGetter(
-				writer,
-				field,
-				"DurationControl",
-				Enumerable.Empty<CSharpParameter>(),
-				false,
-				new CSharpParameter( "DurationControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
-				field.TypeName == field.NullableTypeName ? getAllowEmptyParameter( true ).ToCollection() : Enumerable.Empty<CSharpParameter>(),
-				true,
-				dv => field.TypeName == field.NullableTypeName
-					      ? "{0}.ToDurationControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						      .FormatWith( dv )
-					      : "{0}.ToDurationControl( setup: controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
-						      .FormatWith( dv ) );
 
 		private static void writeHtmlAndFileFormItemGetters( TextWriter writer, ModificationField field, string valueParamTypeName ) {
 			writeFormItemGetter(
@@ -508,6 +483,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					dv =>
 						"{0}.ToDateAndTimeControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
+
+			if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( decimal ) ) || field.TypeIs( typeof( decimal? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DurationControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "DurationControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					field.TypeName == field.NullableTypeName ? getAllowEmptyParameter( true ).ToCollection() : Enumerable.Empty<CSharpParameter>(),
+					true,
+					dv => field.TypeName == field.NullableTypeName
+						      ? "{0}.ToDurationControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							      .FormatWith( dv )
+						      : "{0}.ToDurationControl( setup: controlSetup, value: value, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							      .FormatWith( dv ) );
 		}
 
 		private static void writeFormItemGetter(
