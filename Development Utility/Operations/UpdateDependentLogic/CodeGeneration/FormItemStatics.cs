@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			writeNumericFormItemGetters( writer, field );
 			writeCheckboxFormItemGetters( writer, field );
 			writeListFormItemGetters( writer, field );
-			writeDateFormItemGetters( writer, field );
+			writeDateAndTimeFormItemGetters( writer, field );
 
 			writeGenericGetter( writer, field );
 		}
@@ -444,7 +444,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 							.FormatWith( dv ) );
 		}
 
-		private static void writeDateFormItemGetters( TextWriter writer, ModificationField field ) {
+		private static void writeDateAndTimeFormItemGetters( TextWriter writer, ModificationField field ) {
 			if( field.TypeIs( typeof( DateTime ) ) )
 				writeFormItemGetter(
 					writer,
@@ -475,6 +475,38 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 					true,
 					dv =>
 						"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+
+			if( field.TypeIs( typeof( DateTime ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DateAndTimeControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "DateAndTimeControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					new CSharpParameter( "LocalDate?", "minValue", "null" ).ToCollection().Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToDateAndTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
+							.FormatWith( dv ) );
+			if( field.TypeIs( typeof( DateTime? ) ) )
+				writeFormItemGetter(
+					writer,
+					field,
+					"DateAndTimeControl",
+					Enumerable.Empty<CSharpParameter>(),
+					false,
+					new CSharpParameter( "DateAndTimeControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+					"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+					getAllowEmptyParameter( true )
+						.ToCollection()
+						.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
+						.Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
+					true,
+					dv =>
+						"{0}.ToDateAndTimeControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod ).ToFormItem( setup: formItemSetup, label: label )"
 							.FormatWith( dv ) );
 		}
 
