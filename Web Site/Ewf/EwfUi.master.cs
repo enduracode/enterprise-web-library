@@ -43,6 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string DisabledTabCssClass = "ewfUiDisabledTab";
 
 			internal const string ContentCssClass = "ewfUiContent";
+			internal static readonly ElementClass PageActionListContainerClass = new ElementClass( "ewfUiPageAction" );
 			internal static readonly ElementClass ContentFootBlockClass = new ElementClass( "ewfButtons" );
 			internal static readonly ElementClass ContentFootActionListContainerClass = new ElementClass( "ewfUiCfActions" );
 
@@ -106,7 +107,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 
 			private IEnumerable<CssElement> getSideTabAndContentElements( string entityAndTabAndContentBlockSelector ) {
-				var pageActionAndContentAndContentFootCellSelector = entityAndTabAndContentBlockSelector + " td." + ContentCssClass;
 				return new[]
 					{
 						new CssElement(
@@ -116,10 +116,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
 						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadClass.ClassName ),
-						new CssElement( "UiPageActionAndContentAndContentFootCell", pageActionAndContentAndContentFootCellSelector ),
-						new CssElement(
-							"UiPageActionControlList",
-							ControlLine.CssElementCreator.Selectors.Select( i => pageActionAndContentAndContentFootCellSelector + " > " + i ).ToArray() ),
+						new CssElement( "UiPageActionAndContentAndContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentCssClass ),
+						new CssElement( "UiPageActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + PageActionListContainerClass.ClassName ),
 						new CssElement( "UiContentBlock", entityAndTabAndContentBlockSelector + " " + "div." + ContentCssClass ),
 						new CssElement(
 							"UiContentFootBlock",
@@ -172,7 +170,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
-			pageActionPlace.AddControlsReturnThis( getPageActionList().GetControls() );
+			pageActionPlace.AddControlsReturnThis( getPageActionListContainer().GetControls() );
 			contentFootPlace.AddControlsReturnThis( getContentFootBlock().GetControls() );
 			var globalFootBlock = getGlobalFootBlock();
 			if( globalFootBlock != null )
@@ -415,13 +413,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return tabs;
 		}
 
-		private IEnumerable<FlowComponent> getPageActionList() {
+		private IReadOnlyCollection<FlowComponent> getPageActionListContainer() {
 			var listItems = getActionListItems( pageActions ).Materialize();
 			if( !listItems.Any() )
-				yield break;
-			yield return EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe()
-				             ? (FlowComponent)new InlineList( listItems )
-				             : new LineList( listItems.Select( i => (LineListItem)i ) );
+				return Enumerable.Empty<FlowComponent>().Materialize();
+			return new GenericFlowContainer(
+				( EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe()
+					  ? (FlowComponent)new InlineList( listItems )
+					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection(),
+				classes: CssElementCreator.PageActionListContainerClass ).ToCollection();
 		}
 
 		private IEnumerable<ComponentListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>

@@ -279,10 +279,10 @@ ewfUiEntityNavAndActionContainer {
 UiEntityNavListContainer, ewfUiEntityActionListContainer {
 	flex-grow: 1;
 }
-ewfUiEntityActionListContainer {
+ewfUiEntityActionListContainer, ewfUiPageActionListContainer {
 	text-align: right;
 }
-ewfUiEntityActionListContainer > ewfUnorderedLineList {
+ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
 }
 ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
@@ -319,8 +319,7 @@ ewfUiSideTabGroupHead:not( :first-child ) {
 ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
 	font-size: .9em;
 }
-ewfUiPageActionControlList {
-	float: right;
+ewfUiPageActionListContainer {
 	margin-bottom: 1em;
 	margin-left: 1em;
 }
