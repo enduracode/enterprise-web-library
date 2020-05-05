@@ -13,6 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a table with one item group.
 		/// </summary>
+		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
@@ -28,10 +29,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="items">The items.</param>
 		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
-			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EwfTableItem> items = null,
-			IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
+			IReadOnlyCollection<EwfTableItem> items = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
+			displaySetup,
 			style,
 			classes,
 			caption,
@@ -47,6 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a table with multiple item groups.
 		/// </summary>
+		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
@@ -62,10 +65,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="itemGroups">The item groups.</param>
 		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
-			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null,
-			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
+			IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
@@ -146,7 +149,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					EwfTable.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 
 					return new DisplayableElementData(
-						null,
+						displaySetup,
 						() => new DisplayableElementLocalData( "table" ),
 						classes: EwfTable.GetClasses( style, classes ?? ElementClassSet.Empty ),
 						children: children,

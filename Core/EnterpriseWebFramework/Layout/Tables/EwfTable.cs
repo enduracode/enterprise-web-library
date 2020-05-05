@@ -201,6 +201,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a table with one empty item group.
 		/// </summary>
+		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="postBackIdBase">Do not pass null.</param>
@@ -220,11 +221,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		/// <param name="etherealContent"></param>
 		public static EwfTable Create(
-			EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "", string caption = "", string subCaption = "",
-			bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
+			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
+				displaySetup,
 				style,
 				classes,
 				postBackIdBase,
@@ -247,6 +250,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a table with one item group that contains the specified items.
 		/// </summary>
 		/// <param name="items">The items. Do not pass null.</param>
+		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="postBackIdBase">Do not pass null.</param>
@@ -266,12 +270,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions.</param>
 		/// <param name="etherealContent"></param>
 		public static EwfTable CreateWithItems(
-			IEnumerable<Func<EwfTableItem>> items, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
-			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IEnumerable<Func<EwfTableItem>> items, DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null,
+			string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
+			IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
+				displaySetup,
 				style,
 				classes,
 				postBackIdBase,
@@ -291,6 +296,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a table with multiple item groups.
 		/// </summary>
 		/// <param name="itemGroups">The item groups. Do not pass null.</param>
+		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
 		/// <param name="postBackIdBase">Do not pass null.</param>
@@ -310,12 +316,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions for the table. These operate on the item-group level, not the item level.</param>
 		/// <param name="etherealContent"></param>
 		public static EwfTable CreateWithItemGroups(
-			IEnumerable<EwfTableItemGroup> itemGroups, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
-			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
+			IEnumerable<EwfTableItemGroup> itemGroups, DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null,
+			string postBackIdBase = "", string caption = "", string subCaption = "", bool allowExportToExcel = false,
+			IReadOnlyCollection<ActionComponentSetup> tableActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
+				displaySetup,
 				style,
 				classes,
 				postBackIdBase,
@@ -335,9 +342,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
 
 		private EwfTable(
-			EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-			IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields, IReadOnlyCollection<EwfTableItem> headItems,
-			DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IReadOnlyList<EwfTableItemGroup> itemGroups,
+			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
+			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields,
+			IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection, IReadOnlyList<EwfTableItemGroup> itemGroups,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
@@ -537,7 +544,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							} );
 					}
 					return new DisplayableElementData(
-						null,
+						displaySetup,
 						() => new DisplayableElementLocalData( "table" ),
 						classes: GetClasses( style, classes ?? ElementClassSet.Empty ),
 						children: children,
