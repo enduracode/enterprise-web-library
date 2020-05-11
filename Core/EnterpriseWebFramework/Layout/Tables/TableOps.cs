@@ -197,13 +197,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																		jsInitStatements: ( cellActivationBehavior != null ? cellActivationBehavior.JsInitStatementGetter( cellContext.Id ) : "" )
 																		.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( cellContext.Id ) : "" ) ) );
 															},
-															classes: ( cellActivationBehavior != null ? cellActivationBehavior.Classes : ElementClassSet.Empty )
-															.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
-															.Add( EwfTable.AllCellAlignmentsClass )
-															.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
-															.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
-															.Add( columnSetup.Classes )
-															.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+															classes: EwfTable.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+																.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
+																.Add( cellActivationBehavior != null ? cellActivationBehavior.Classes : ElementClassSet.Empty )
+																.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
+																.Add( columnSetup.Classes )
+																.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
 															children: cellAndIndex.Cell.Content,
 															etherealChildren: ( cellActivationBehavior?.EtherealChildren ?? Enumerable.Empty<EtherealComponent>() )
 															.Concat( cellSetup.EtherealContent )
