@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -11,6 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly TextAlignment TextAlignment;
 		internal readonly ElementActivationBehavior ActivationBehavior;
 		internal readonly bool ContainsActivatableElements;
+		internal readonly IReadOnlyCollection<EtherealComponent> EtherealContent;
 
 		/// <summary>
 		/// Creates a cell setup object.
@@ -25,16 +27,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="textAlignment">The text alignment of the cell.</param>
 		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="containsActivatableElements">Pass true if the cell contains “activatable” elements, e.g. hyperlinks, buttons, or form controls.</param>
+		/// <param name="etherealContent"></param>
 		// NOTE: Change classes type to ElementClassSet when DynamicTable is gone.
 		public TableCellSetup(
 			int fieldSpan = 1, int itemSpan = 1, IEnumerable<string> classes = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-			ElementActivationBehavior activationBehavior = null, bool containsActivatableElements = false ) {
+			ElementActivationBehavior activationBehavior = null, bool containsActivatableElements = false,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			FieldSpan = fieldSpan;
 			ItemSpan = itemSpan;
 			Classes = classes ?? new string[ 0 ];
 			TextAlignment = textAlignment;
 			ActivationBehavior = activationBehavior;
 			ContainsActivatableElements = containsActivatableElements;
+			EtherealContent = etherealContent ?? Enumerable.Empty<EtherealComponent>().Materialize();
 		}
 	}
 }

@@ -46,6 +46,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				underlyingCell.ColumnSpan = colSpan;
 			if( rowSpan != 1 )
 				underlyingCell.RowSpan = rowSpan;
+
+			ewfCell.Setup.EtherealContent.AddEtherealControls( underlyingCell );
+
 			return underlyingCell;
 		}
 
@@ -202,7 +205,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															.Add( columnSetup.Classes )
 															.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
 															children: cellAndIndex.Cell.Content,
-															etherealChildren: cellActivationBehavior?.EtherealChildren );
+															etherealChildren: ( cellActivationBehavior?.EtherealChildren ?? Enumerable.Empty<EtherealComponent>() )
+															.Concat( cellSetup.EtherealContent )
+															.Materialize() );
 													} );
 											} )
 										.Materialize(),
