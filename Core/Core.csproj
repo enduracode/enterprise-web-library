@@ -541,8 +541,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\PageName.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\PagePath.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\CellPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryItemGroup.cs" />
@@ -629,6 +627,8 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionSet.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
+    <Compile Include="EnterpriseWebFramework\PageName.cs" />
+    <Compile Include="EnterpriseWebFramework\PagePath.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />

@@ -304,20 +304,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return new Block( controls.ToArray() ) { CssClass = CssElementCreator.EntityAndTopTabBlockCssClass };
 		}
 
-		private Control getEntityBlock() {
-			return new Block( getPagePath().Concat( getEntityNavAndActionContainer().GetControls() ).Concat( getEntitySummaryBlock() ).ToArray() )
+		private Control getEntityBlock() =>
+			new Block( getPagePath().Concat( getEntityNavAndActionContainer() ).GetControls().Concat( getEntitySummaryBlock() ).ToArray() )
 				{
 					CssClass = CssElementCreator.EntityBlockCssClass
 				};
-		}
 
-		private IReadOnlyCollection<Control> getPagePath() {
+		private IReadOnlyCollection<FlowComponent> getPagePath() {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
 			var pagePath = new PagePath(
 				currentPageBehavior: entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.Resources.Any()
 					                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 					                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
-			return pagePath.IsEmpty ? Enumerable.Empty<Control>().Materialize() : pagePath.ToCollection();
+			return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
 		}
 
 		private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer() {

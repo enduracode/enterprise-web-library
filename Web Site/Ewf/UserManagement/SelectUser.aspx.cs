@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.SelectUserPageBodyCssClass;
 
-			ph.AddControlsReturnThis( new PageName() );
+			ph.AddControlsReturnThis( new PageName().ToCollection().GetControls() );
 
 			if( ConfigurationStatics.IsLiveInstallation )
 				ph.AddControlsReturnThis(
