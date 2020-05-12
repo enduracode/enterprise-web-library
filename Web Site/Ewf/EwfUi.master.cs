@@ -247,7 +247,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			components.Add(
 				new InlineList(
-					new EwfHyperlink( changePasswordPage, new StandardHyperlinkStyle( "Change password" ) ).ToCollection()
+					new EwfHyperlink( changePasswordPage, new ButtonHyperlinkStyle( "Change password", buttonSize: ButtonSize.ShrinkWrap ) ).ToCollection()
 						.ToComponentListItem()
 						.ToCollection()
 						.Append(
@@ -426,7 +426,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private IEnumerable<ComponentListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
 			let actionComponent = action.GetActionComponent(
-				( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+				( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ),
 				( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
 			where actionComponent != null
 			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );

@@ -179,7 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new WrappingList(
 					from action in actions
 					let actionComponent = action.GetActionComponent(
-						( text, icon ) => new StandardHyperlinkStyle( text, icon: icon ),
+						( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ),
 						( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
 					where actionComponent != null
 					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
