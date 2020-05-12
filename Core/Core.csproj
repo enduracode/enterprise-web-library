@@ -330,6 +330,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\HyperlinkStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\ButtonHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\CustomHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\ImageHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
