@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		// This class allows us to cut the number of selectors in the ActionControlAllStyles... elements by an order of magnitude.
 		internal static readonly ElementClass AllStylesClass = new ElementClass( "ewfAction" );
 
-		internal static readonly ElementClass TextStyleClass = new ElementClass( "ewfActionText" );
+		internal static readonly ElementClass HyperlinkStandardStyleClass = new ElementClass( "ewfActionText" );
 		internal static readonly ElementClass ShrinkWrapButtonStyleClass = new ElementClass( "ewfActionShrinkWrapButton" );
 		internal static readonly ElementClass NormalButtonStyleClass = new ElementClass( "ewfActionNormalButton" );
 		internal static readonly ElementClass LargeButtonStyleClass = new ElementClass( "ewfActionLargeButton" );
@@ -191,7 +191,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new[]
 					{
 						getElementsForAllStates( "ActionComponentAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ) ),
-						getElementsForAllStates( "HyperlinkStandardStyle", ".{0}".FormatWith( TextStyleClass.ClassName ) ),
+						getElementsForAllStates( "HyperlinkStandardStyle", ".{0}".FormatWith( HyperlinkStandardStyleClass.ClassName ) ),
 						getElementsForAllStates( "ActionComponentAllButtonStyles", buttonSizes.Select( i => ".{0}".FormatWith( i ) ).ToArray() ),
 						getElementsForAllStates( "ActionComponentShrinkWrapButtonStyle", ".{0}".FormatWith( ShrinkWrapButtonStyleClass.ClassName ) ),
 						getElementsForAllStates( "ActionComponentNormalButtonStyle", ".{0}".FormatWith( NormalButtonStyleClass.ClassName ) ),

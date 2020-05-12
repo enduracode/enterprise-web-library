@@ -31,9 +31,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		WebControl ActionControlStyle.SetUpControl( WebControl control, string defaultText ) {
-			control.CssClass =
-				control.CssClass.ConcatenateWithSpace(
-					ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + ActionComponentCssElementCreator.TextStyleClass.ClassName );
+			control.CssClass = control.CssClass.ConcatenateWithSpace(
+				ActionComponentCssElementCreator.AllStylesClass.ClassName + " " + ActionComponentCssElementCreator.HyperlinkStandardStyleClass.ClassName );
 			return control.AddControlsReturnThis( ActionComponentIcon.GetIconAndTextComponents( icon, Text.Any() ? Text : defaultText ).GetControls() );
 		}
 

@@ -19,16 +19,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.text = text;
 		}
 
-		ElementClassSet HyperlinkStyle.GetClasses() {
-			return ActionComponentCssElementCreator.AllStylesClass.Add( ActionComponentCssElementCreator.TextStyleClass );
-		}
+		ElementClassSet HyperlinkStyle.GetClasses() =>
+			ActionComponentCssElementCreator.AllStylesClass.Add( ActionComponentCssElementCreator.HyperlinkStandardStyleClass );
 
-		IReadOnlyCollection<FlowComponent> HyperlinkStyle.GetChildren( string destinationUrl ) {
-			return ActionComponentIcon.GetIconAndTextComponents( icon, text.Any() ? text : destinationUrl );
-		}
+		IReadOnlyCollection<FlowComponent> HyperlinkStyle.GetChildren( string destinationUrl ) =>
+			ActionComponentIcon.GetIconAndTextComponents( icon, text.Any() ? text : destinationUrl );
 
-		string HyperlinkStyle.GetJsInitStatements( string id ) {
-			return "";
-		}
+		string HyperlinkStyle.GetJsInitStatements( string id ) => "";
 	}
 }
