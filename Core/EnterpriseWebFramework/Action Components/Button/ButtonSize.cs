@@ -18,4 +18,17 @@
 		/// </summary>
 		Large
 	}
+
+	internal static class ButtonSizeStatics {
+		internal static ElementClassSet Class( ButtonSize size ) {
+			switch( size ) {
+				case ButtonSize.ShrinkWrap:
+					return ActionComponentCssElementCreator.ShrinkWrapButtonStyleClass;
+				case ButtonSize.Large:
+					return ActionComponentCssElementCreator.LargeButtonStyleClass;
+				default:
+					return ActionComponentCssElementCreator.NormalButtonStyleClass;
+			}
+		}
+	}
 }

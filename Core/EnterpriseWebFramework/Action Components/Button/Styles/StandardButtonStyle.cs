@@ -22,12 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		ElementClassSet ButtonStyle.GetClasses() {
-			var styleClass = ActionComponentCssElementCreator.NormalButtonStyleClass;
-			if( buttonSize == ButtonSize.ShrinkWrap )
-				styleClass = ActionComponentCssElementCreator.ShrinkWrapButtonStyleClass;
-			else if( buttonSize == ButtonSize.Large )
-				styleClass = ActionComponentCssElementCreator.LargeButtonStyleClass;
-			return ActionComponentCssElementCreator.AllStylesClass.Add( styleClass );
+			return ActionComponentCssElementCreator.AllStylesClass.Add( ButtonSizeStatics.Class( buttonSize ) );
 		}
 
 		IReadOnlyCollection<FlowComponent> ButtonStyle.GetChildren() {
