@@ -17,7 +17,7 @@ ewfPagePath {
 	font-size: 1.4em;
 	margin: .3em 0;
 }
-ewfPagePath > ewfActionControlAllStylesAllStates {
+ewfPagePath > ewfActionComponentAllStylesAllStates {
 	font-size: .95em;
 }
 ewfPagePath > h1 {
@@ -139,8 +139,8 @@ img {
 	display: block;
 }
 
-/* text style action controls */
-ewfActionControlTextStyleAllStates, ewfHtmlBlock a {
+/* standard-style hyperlinks */
+ewfHyperlinkStandardStyleAllStates, ewfHtmlBlock a {
 	text-decoration: underline;
 }
 
@@ -172,7 +172,7 @@ ewfUiPageActionAndContentAndContentFootCell {
 }
 
 /* corner rounding */
-ewfActionControlLargeButtonStyleAllStates,
+ewfActionComponentLargeButtonStyleAllStates,
 ewfCheckboxList {
 	border-radius: .5em;
 }
@@ -200,15 +200,15 @@ ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWi
 		border-radius: 0;
 	}
 }
-ewfActionControlShrinkWrapButtonStyleAllStates {
+ewfActionComponentShrinkWrapButtonStyleAllStates {
 	border-radius: .25em;
 }
-ewfActionControlNormalButtonStyleAllStates {
+ewfActionComponentNormalButtonStyleAllStates {
 	border-radius: .4em;
 }
 
 /* modal boxes */
-ewfModalBox > ewfModalBoxCloseButtonContainer > ewfActionControlNormalButtonStyleAllStates {
+ewfModalBox > ewfModalBoxCloseButtonContainer > ewfActionComponentNormalButtonStyleAllStates {
 	border-radius: 0 0 0 .5em;
 }
 ewfModalSectionContainer {
@@ -236,26 +236,26 @@ ewfUiUserInfoContainer > ewfUnorderedInlineList {
 ewfUiGlobalNavListContainer,
 ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
-ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates,
 ewfUiSideTabGroupHead,
-ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	padding-left: .5rem;
 	padding-right: .5rem;
 }
 ewfUiGlobalNavListContainer,
 ewfUiTopErrorMessageListContainer,
 ewfUiEntityBlock,
-ewfUiTopTabBlock ewfActionControlAllStylesAllStates,
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates,
 ewfUiSideTabBlock {
 	padding-top: .5rem;
 	padding-bottom: .5rem;
 }
-ewfUiGlobalNavListContainer ewfActionControlAllStylesActionlessState,
-ewfUiGlobalNavListContainer ewfActionControlAllStylesAllNormalStates,
-ewfUiGlobalNavListContainer ewfActionControlAllStylesAllVisitedStates,
-ewfUiEntityNavAndActionContainer ewfActionControlAllStylesActionlessState,
-ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNormalStates,
-ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllVisitedStates {
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesActionlessState,
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNormalStates,
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllVisitedStates,
+ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesActionlessState,
+ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNormalStates,
+ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllVisitedStates {
 	text-decoration: none;
 }
 ewfUiTopErrorMessageListContainer {
@@ -285,7 +285,7 @@ ewfUiEntityActionListContainer, ewfUiPageActionListContainer {
 ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
 }
-ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	display: block;
 	text-decoration: none;
 }
@@ -306,7 +306,7 @@ ewfUiSideTabBlockCell {
 	padding-right: 1rem;
 	width: 12.5em;
 }
-ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	padding-top: .2rem;
 	padding-bottom: .2rem;
 }
@@ -316,7 +316,7 @@ ewfUiSideTabGroupHead {
 ewfUiSideTabGroupHead:not( :first-child ) {
 	padding-top: .5rem;
 }
-ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	font-size: .9em;
 }
 ewfUiPageActionListContainer {

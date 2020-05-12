@@ -398,41 +398,41 @@ ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
 	max-width: 6em;
 }
 
-/* action controls */
+/* action components */
 button {
 	font: inherit;
 }
-ewfActionControlAllStylesAllStates {
+ewfActionComponentAllStylesAllStates {
 	margin: 0;
 	border-style: none;
 	background-color: Transparent;
 	padding: 0;
 }
-ewfActionControlAllStylesAllStates::-moz-focus-inner {
+ewfActionComponentAllStylesAllStates::-moz-focus-inner {
 	border-style: none;
 	padding: 0;
 }
-ewfActionControlAllStylesAllStates > ewfIcon {
+ewfActionComponentAllStylesAllStates > ewfIcon {
 	padding-left: .4em;
 	padding-right: .4em;
 }
-ewfActionControlAllStylesAllStates > ewfIcon:first-child {
+ewfActionComponentAllStylesAllStates > ewfIcon:first-child {
 	padding-left: 0;
 }
-ewfActionControlAllStylesAllStates > ewfIcon:last-child {
+ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
 	padding-right: 0;
 }
-ewfActionControlAllButtonStylesAllStates {
+ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none;
 }
-ewfActionControlShrinkWrapButtonStyleAllStates {
+ewfActionComponentShrinkWrapButtonStyleAllStates {
 	padding: .01em .2em;
 }
-ewfActionControlNormalButtonStyleAllStates {
+ewfActionComponentNormalButtonStyleAllStates {
 	padding: .4em;
 }
-ewfActionControlLargeButtonStyleAllStates {
+ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
 	padding: 1em;
 }
@@ -452,10 +452,10 @@ ewfActionControlLargeButtonStyleAllStates {
 }
 
 /* cursors */
-ewfActionControlAllStylesAllActionStates, .ewfAc {
+ewfActionComponentAllStylesAllActionStates, .ewfAc {
 	cursor: pointer;
 }
-ewfActionControlAllStylesActionlessState, .ewfAec {
+ewfActionComponentAllStylesActionlessState, .ewfAec {
 	cursor: default;
 }
 
@@ -544,20 +544,20 @@ ewfTopWarningContainer {
 		display: none;
 	}
 }
-ewfTopWarningContainer ewfActionControlAllButtonStylesAllStates {
+ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none;
 	color: white;
 }
-ewfTopWarningContainer ewfActionControlAllButtonStylesAllNormalStates,
-ewfTopWarningContainer ewfActionControlAllButtonStylesAllVisitedStates {
+ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
+ewfTopWarningContainer ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: hsla( 4, 100%, 32%, 1 );
 }
-ewfTopWarningContainer ewfActionControlAllButtonStylesStatesWithHover,
-ewfTopWarningContainer ewfActionControlAllButtonStylesStatesWithFocus {
+ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
+ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: hsla( 4, 100%, 45%, 1 );
 }
-ewfTopWarningContainer ewfActionControlShrinkWrapButtonStyleAllStates {
+ewfTopWarningContainer ewfActionComponentShrinkWrapButtonStyleAllStates {
 	padding: .1em .2em;
 	border-radius: .5em;
 }
@@ -862,42 +862,42 @@ ewfSelectUserPageBody, ewfErrorPageBody {
 	max-width: 60em;
 	color: black;
 }
-ewfSelectUserPageBody ewfActionControlTextStyleAllNormalStates,
-ewfSelectUserPageBody ewfActionControlTextStyleAllVisitedStates,
-ewfErrorPageBody ewfActionControlTextStyleAllNormalStates,
-ewfErrorPageBody ewfActionControlTextStyleAllVisitedStates {
+ewfSelectUserPageBody ewfHyperlinkStandardStyleAllNormalStates,
+ewfSelectUserPageBody ewfHyperlinkStandardStyleAllVisitedStates,
+ewfErrorPageBody ewfHyperlinkStandardStyleAllNormalStates,
+ewfErrorPageBody ewfHyperlinkStandardStyleAllVisitedStates {
 	color: hsla( 4, 100%, 32%, 1 );
 }
-ewfSelectUserPageBody ewfActionControlAllButtonStylesAllNormalStates,
-ewfSelectUserPageBody ewfActionControlAllButtonStylesAllVisitedStates,
-ewfErrorPageBody ewfActionControlAllButtonStylesAllNormalStates,
-ewfErrorPageBody ewfActionControlAllButtonStylesAllVisitedStates {
+ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllNormalStates,
+ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllVisitedStates,
+ewfErrorPageBody ewfActionComponentAllButtonStylesAllNormalStates,
+ewfErrorPageBody ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: hsla( 4, 100%, 32%, 1 );
 }
-ewfSelectUserPageBody ewfActionControlTextStyleStatesWithHover,
-ewfSelectUserPageBody ewfActionControlTextStyleStatesWithFocus,
-ewfErrorPageBody ewfActionControlTextStyleStatesWithHover,
-ewfErrorPageBody ewfActionControlTextStyleStatesWithFocus {
+ewfSelectUserPageBody ewfHyperlinkStandardStyleStatesWithHover,
+ewfSelectUserPageBody ewfHyperlinkStandardStyleStatesWithFocus,
+ewfErrorPageBody ewfHyperlinkStandardStyleStatesWithHover,
+ewfErrorPageBody ewfHyperlinkStandardStyleStatesWithFocus {
 	color: hsla( 4, 100%, 45%, 1 );
 }
-ewfSelectUserPageBody ewfActionControlAllButtonStylesStatesWithHover,
-ewfSelectUserPageBody ewfActionControlAllButtonStylesStatesWithFocus,
-ewfErrorPageBody ewfActionControlAllButtonStylesStatesWithHover,
-ewfErrorPageBody ewfActionControlAllButtonStylesStatesWithFocus {
+ewfSelectUserPageBody ewfActionComponentAllButtonStylesStatesWithHover,
+ewfSelectUserPageBody ewfActionComponentAllButtonStylesStatesWithFocus,
+ewfErrorPageBody ewfActionComponentAllButtonStylesStatesWithHover,
+ewfErrorPageBody ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: hsla( 4, 100%, 45%, 1 );
 }
-ewfSelectUserPageBody ewfActionControlTextStyleAllStates,
-ewfErrorPageBody ewfActionControlTextStyleAllStates {
+ewfSelectUserPageBody ewfHyperlinkStandardStyleAllStates,
+ewfErrorPageBody ewfHyperlinkStandardStyleAllStates {
 	text-decoration: underline;
 }
-ewfSelectUserPageBody ewfActionControlAllButtonStylesAllStates,
-ewfErrorPageBody ewfActionControlAllButtonStylesAllStates {
+ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllStates,
+ewfErrorPageBody ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
 	text-decoration: none;
 	color: white;
 }
-ewfSelectUserPageBody ewfActionControlLargeButtonStyleAllStates,
-ewfErrorPageBody ewfActionControlLargeButtonStyleAllStates {
+ewfSelectUserPageBody ewfActionComponentLargeButtonStyleAllStates,
+ewfErrorPageBody ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
 	border-radius: .5em;
 	padding: 1em;

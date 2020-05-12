@@ -7,6 +7,6 @@ ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading
 /*control list with a class to limit to major nav elements,*/
 ewfTableStandardAndStandardExceptLayoutStyles > caption,
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh,
-ewfActionControlLargeButtonStyleAllStates {
+ewfActionComponentLargeButtonStyleAllStates {
 	font-family: 'Droid Serif', serif;
 }

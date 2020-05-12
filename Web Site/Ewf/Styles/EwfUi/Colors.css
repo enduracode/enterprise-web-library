@@ -27,26 +27,26 @@ ewfUiSideTabBlock ewfUiCurrentTabActionControl {
 }
 
 /* action controls */
-ewfActionControlTextStyleAllNormalStates,
-ewfActionControlTextStyleAllVisitedStates,
-ewfActionControlAllStylesAllNormalStates.icon,
-ewfActionControlAllStylesAllVisitedStates.icon,
+ewfHyperlinkStandardStyleAllNormalStates,
+ewfHyperlinkStandardStyleAllVisitedStates,
+ewfActionComponentAllStylesAllNormalStates.icon,
+ewfActionComponentAllStylesAllVisitedStates.icon,
 ewfHtmlBlock a {
 	color: hsla( 4, 100%, 32%, 1 );
 }
-ewfActionControlAllButtonStylesAllNormalStates, ewfActionControlAllButtonStylesAllVisitedStates {
+ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: hsla( 4, 100%, 32%, 1 );
 }
-ewfActionControlTextStyleStatesWithHover,
-ewfActionControlTextStyleStatesWithFocus,
-ewfActionControlAllStylesStatesWithHover.icon,
-ewfActionControlAllStylesStatesWithFocus.icon {
+ewfHyperlinkStandardStyleStatesWithHover,
+ewfHyperlinkStandardStyleStatesWithFocus,
+ewfActionComponentAllStylesStatesWithHover.icon,
+ewfActionComponentAllStylesStatesWithFocus.icon {
 	color: hsla( 4, 100%, 45%, 1 );
 }
-ewfActionControlAllButtonStylesStatesWithHover, ewfActionControlAllButtonStylesStatesWithFocus {
+ewfActionComponentAllButtonStylesStatesWithHover, ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: hsla( 4, 100%, 45%, 1 );
 }
-ewfActionControlAllButtonStylesAllStates {
+ewfActionComponentAllButtonStylesAllStates {
 	color: white;
 }
 
@@ -62,7 +62,7 @@ ewfUiTopErrorMessageListContainer {
 ewfUiGlobalNavListContainer {
 	background-color: #005675;
 }
-ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfActionControlAllStylesAllStates {
+ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates {
 	color: hsla( 193, 27%, 90%, 1 );
 }
 ewfUiTopErrorMessageListContainer {
@@ -74,24 +74,24 @@ ewfUiEntityBlock {
 ewfUiTopTabBlock, ewfUiSideTabBlock {
 	background-color: #9DBEC7;
 }
-ewfUiTopTabBlock ewfActionControlAllStylesAllStates, ewfUiSideTabBlock ewfActionControlAllStylesAllStates {
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	color: inherit;
 }
 ewfUiTopTabBlock ewfUiDisabledTabActionControl, ewfUiSideTabBlock ewfUiDisabledTabActionControl {
 	opacity: .2;
 }
-ewfUiTopTabBlock ewfActionControlAllStylesStatesWithHover,
-ewfUiTopTabBlock ewfActionControlAllStylesStatesWithFocus,
-ewfUiSideTabBlock ewfActionControlAllStylesStatesWithHover,
-ewfUiSideTabBlock ewfActionControlAllStylesStatesWithFocus {
+ewfUiTopTabBlock ewfActionComponentAllStylesStatesWithHover,
+ewfUiTopTabBlock ewfActionComponentAllStylesStatesWithFocus,
+ewfUiSideTabBlock ewfActionComponentAllStylesStatesWithHover,
+ewfUiSideTabBlock ewfActionComponentAllStylesStatesWithFocus {
 	background-image: linear-gradient( rgba( 255, 255, 255, .3 ), rgba( 255, 255, 255, .3 ) );
 }
 
 /* new content */
-ewfUiGlobalNavListContainer ewfActionControlAllStylesAllNewContentActionStates,
-ewfUiEntityNavAndActionContainer ewfActionControlAllStylesAllNewContentActionStates,
-ewfUiTopTabBlock ewfActionControlAllStylesAllNewContentActionStates,
-ewfUiSideTabBlock ewfActionControlAllStylesAllNewContentActionStates {
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiTopTabBlock ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiSideTabBlock ewfActionComponentAllStylesAllNewContentActionStates {
 	font-weight: bold;
 }
 
