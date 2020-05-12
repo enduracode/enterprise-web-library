@@ -318,6 +318,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Behaviors\PostBackBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonSize.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\ButtonStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\EwfButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\Button\Styles\CustomButtonStyle.cs" />
