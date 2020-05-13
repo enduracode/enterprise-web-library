@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 
@@ -66,20 +63,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// The file name is used as the label unless labelOverride is specified.
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
-		public static Control GetFileLink( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
+		public static IReadOnlyCollection<PhrasingComponent> GetFileButton( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
 			var file = BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId );
 			if( file == null )
-				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
-			return new PostBackButton(
-				new TextActionControlStyle( labelOverride ?? file.FileName ),
-				usesSubmitBehavior: false,
-				postBack: PostBack.CreateFull(
-					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-					actionGetter: () => new PostBackAction(
-						new PageReloadBehavior(
-							secondaryResponse: new SecondaryResponse(
-								new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ),
-								false ) ) ) ) );
+				return textIfNoFile.ToComponents();
+			return new EwfButton(
+				new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter: () => new PostBackAction(
+							new PageReloadBehavior(
+								secondaryResponse: new SecondaryResponse(
+									new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ),
+									false ) ) ) ) ) ).ToCollection();
 		}
 
 		/// <summary>
@@ -88,17 +85,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// The file name is used as the label unless labelOverride is specified.
 		/// SystemBlobFileManagementProvider must be implemented.
 		/// </summary>
-		public static Control GetFileLinkFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
+		public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
 			var file = BlobStorageStatics.SystemProvider.GetFile( fileId );
 			if( file == null )
-				return new PlaceHolder().AddControlsReturnThis( textIfNoFile.ToComponents().GetControls() );
-			return new PostBackButton(
-				new TextActionControlStyle( labelOverride ?? file.FileName ),
-				usesSubmitBehavior: false,
-				postBack: PostBack.CreateFull(
-					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-					actionGetter: () =>
-						new PostBackAction( new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) ) );
+				return textIfNoFile.ToComponents();
+			return new EwfButton(
+				new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateFull(
+						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
+						actionGetter: () => new PostBackAction(
+							new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( fileId, () => true ), false ) ) ) ) ) ).ToCollection();
 		}
 	}
 }

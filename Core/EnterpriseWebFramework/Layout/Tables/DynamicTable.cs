@@ -22,9 +22,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private string caption = "";
 		private string subCaption = "";
 		private DataRowLimit defaultDataRowLimit = DataRowLimit.Unlimited;
-		private readonly List<ActionButtonSetup> actionLinks = new List<ActionButtonSetup>();
+		private readonly List<ActionComponentSetup> actionLinks = new List<ActionComponentSetup>();
 		private readonly Dictionary<DataModification, RowMethod> selectedRowDataModificationsToMethods = new Dictionary<DataModification, RowMethod>();
-		private readonly List<PostBackButton> selectedRowActionButtonsToAdd = new List<PostBackButton>();
+		private readonly List<EwfButton> selectedRowActionButtonsToAdd = new List<EwfButton>();
 		private bool allowExportToExcel;
 		private bool isStandard = true;
 
@@ -154,7 +154,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Adds a new action link to the top of the table.  This could be used to add a new customer or other entity to the table, for example.
 		/// </summary>
-		public void AddActionLink( ActionButtonSetup actionButtonSetup ) {
+		public void AddActionLink( ActionComponentSetup actionButtonSetup ) {
 			actionLinks.Add( actionButtonSetup );
 		}
 
@@ -169,7 +169,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		public void AddSelectedRowsAction( string label, RowMethod action ) {
 			var postBack = PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, label ) );
 			selectedRowDataModificationsToMethods.Add( postBack, action );
-			selectedRowActionButtonsToAdd.Add( new PostBackButton( new TextActionControlStyle( label ), usesSubmitBehavior: false, postBack: postBack ) );
+			selectedRowActionButtonsToAdd.Add(
+				new EwfButton( new StandardButtonStyle( label, buttonSize: ButtonSize.ShrinkWrap ), behavior: new PostBackBehavior( postBack: postBack ) ) );
 		}
 
 		/// <summary>
@@ -335,20 +336,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 					// Excel export
 					if( allowExportToExcel )
 						actionLinks.Add(
-							new ActionButtonSetup(
+							new ButtonSetup(
 								"Export to Excel",
-								new PostBackButton( PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ), actionGetter: ExportToExcel ) ) ) );
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull( id: PostBack.GetCompositeId( PostBackIdBase, "excel" ), actionGetter: ExportToExcel ) ) ) );
 
 					// Action links
 					foreach( var actionLink in actionLinks ) {
 						captionTable.Visible = true;
-						actionLinkStack.AddControls( actionLink.BuildButton( ( text, icon ) => new TextActionControlStyle( text, icon: icon ), false ) );
+
+						var actionComponent = actionLink.GetActionComponent(
+							( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ),
+							( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) );
+						if( actionComponent == null )
+							continue;
+
+						actionLinkStack.AddControls( new PlaceHolder().AddControlsReturnThis( actionComponent.ToCollection().GetControls() ) );
 					}
 
 					// Selected row actions
 					foreach( var button in selectedRowActionButtonsToAdd ) {
 						captionTable.Visible = true;
-						actionLinkStack.AddControls( button );
+						actionLinkStack.AddControls( new PlaceHolder().AddControlsReturnThis( button.ToCollection().GetControls() ) );
 					}
 
 					var checkedRowSetups = new HashSet<RowSetup>();
@@ -397,22 +406,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 						var controlLine = new ControlLine( new Control[ 0 ] );
 						if( previousRowSetup != null ) {
-							var upButton = new PostBackButton(
-								new ButtonActionControlStyle( @"/\", ButtonSize.ShrinkWrap ),
-								usesSubmitBehavior: false,
-								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
-									firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) );
-							controlLine.AddControls( upButton );
+							var upButton = new EwfButton(
+								new StandardButtonStyle( @"/\", ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "up" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( previousRowSetup.RankId.Value, rowSetup.RankId.Value ) ) ) );
+							controlLine.AddControls( new PlaceHolder().AddControlsReturnThis( upButton.ToCollection().GetControls() ) );
 						}
 						if( nextRowSetup != null ) {
-							var downButton = new PostBackButton(
-								new ButtonActionControlStyle( @"\/", ButtonSize.ShrinkWrap ),
-								usesSubmitBehavior: false,
-								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
-									firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) );
-							controlLine.AddControls( downButton );
+							var downButton = new EwfButton(
+								new StandardButtonStyle( @"\/", ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: PostBack.GetCompositeId( PostBackIdBase, rowSetup.RankId.Value.ToString(), "down" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( rowSetup.RankId.Value, nextRowSetup.RankId.Value ) ) ) );
+							controlLine.AddControls( new PlaceHolder().AddControlsReturnThis( downButton.ToCollection().GetControls() ) );
 						}
 
 						// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
@@ -451,12 +460,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private Control getDataRowLimitControl( DataRowLimit dataRowLimit ) {
 			if( dataRowLimit == (DataRowLimit)CurrentDataRowLimit )
 				return new Literal { Text = getDataRowLimitText( dataRowLimit ) };
-			return new PostBackButton(
-				new TextActionControlStyle( getDataRowLimitText( dataRowLimit ) ),
-				usesSubmitBehavior: false,
-				postBack: PostBack.CreateFull(
-					id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
-					firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ) );
+			return new PlaceHolder().AddControlsReturnThis(
+				new EwfButton(
+						new StandardButtonStyle( getDataRowLimitText( dataRowLimit ), buttonSize: ButtonSize.ShrinkWrap ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: PostBack.GetCompositeId( PostBackIdBase, dataRowLimit.ToString() ),
+								firstModificationMethod: () => EwfPage.Instance.PageState.SetValue( this, pageStateKey, (int)dataRowLimit ) ) ) ).ToCollection()
+					.GetControls() );
 		}
 
 		private string getDataRowLimitText( DataRowLimit dataRowLimit ) {

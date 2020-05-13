@@ -182,19 +182,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Controls.Add( canvas );
 
 			if( seriesCollection.Count() > 1 )
-				Controls.Add(
-					new LegacySection(
-						"Key",
-						new ControlLine(
-							chartData.datasets.Select(
-									( dataset, i ) => new Literal
-										{
-											Text =
-												@"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-													.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name )
-										} as Control )
-								.ToArray() ).ToCollection(),
-						style: SectionStyle.Box ) );
+				this.AddControlsReturnThis(
+					new Section(
+							"Key",
+							new LineList(
+								chartData.datasets.Select(
+									( dataset, i ) => (LineListItem)new TrustedHtmlString(
+											"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
+												.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name ) ).ToComponent()
+										.ToComponentListItem() ) ).ToCollection(),
+							style: SectionStyle.Box ).ToCollection()
+						.GetControls() );
 
 			// Remove this when ColumnPrimaryTable supports Excel export.
 			var headers = setup.XAxisTitle.ToCollection().Concat( seriesCollection.Select( v => v.Name ) );
@@ -203,9 +201,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var i1 = i;
 				tableData.Add( setup.Labels.ElementAt( i1 ).ToCollection().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
 			}
-			Controls.Add( getExportButton( headers, tableData ) );
+			var exportAction = getExportAction( headers, tableData );
 
 			var table = new ColumnPrimaryTable(
+				tableActions: exportAction.ToCollection(),
 				firstDataFieldIndex: 1,
 				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select i.ToCell() ).ToCollection()
 					.Concat(
@@ -230,11 +229,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			yield return Color.FromArgb( 255, 230, 149 );
 		}
 
-		private Block getExportButton( IEnumerable<object> headers, List<IEnumerable<object>> tableData ) {
-			var block = new Block(
-				new PostBackButton(
-					new TextActionControlStyle( "Export" ),
-					usesSubmitBehavior: false,
+		private ActionComponentSetup getExportAction( IEnumerable<object> headers, List<IEnumerable<object>> tableData ) =>
+			new ButtonSetup(
+				"Export",
+				behavior: new PostBackBehavior(
 					postBack: PostBack.CreateFull(
 						id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
 						actionGetter: () => new PostBackAction(
@@ -256,9 +254,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											      setup.ExportFileName,
 											      AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
 										      FileExtensions.Csv ) ) ) ) ) ) );
-			block.Style.Add( "text-align", "right" );
-			return block;
-		}
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return jsInitStatementGetter();

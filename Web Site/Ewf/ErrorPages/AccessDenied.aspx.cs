@@ -1,12 +1,10 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-
-// Parameter: bool showHomeLink
+﻿// Parameter: bool showHomeLink
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class AccessDenied: EwfPage {
 		partial class Info {
-			protected override bool IsIntermediateInstallationPublicResource { get { return true; } }
-			protected override ConnectionSecurity ConnectionSecurity { get { return ConnectionSecurity.MatchingCurrentRequest; } }
+			protected override bool IsIntermediateInstallationPublicResource => true;
+			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 		}
 
 		protected override void loadData() {
@@ -14,7 +12,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			if( info.ShowHomeLink )
 				ph.AddControlsReturnThis(
-					new LegacyParagraph( EwfLink.Create( new ExternalResourceInfo( NetTools.HomeUrl ), new TextActionControlStyle( Translation.ClickHereToGoToHomePage ) ) ) );
+					new Paragraph(
+							new EwfHyperlink(
+								new ExternalResourceInfo( NetTools.HomeUrl ),
+								new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
+						.ToCollection()
+						.GetControls() );
 
 			Response.StatusCode = 403;
 			Response.TrySkipIisCustomErrors = true;

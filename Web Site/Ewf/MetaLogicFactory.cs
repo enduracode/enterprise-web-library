@@ -47,7 +47,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
 			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
-			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryModal_v1.JquerymodalCss.Info() );
 			infos.Add( new Styles.BasicCss.Info() );
 			return infos;
 		}
@@ -71,7 +70,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ThirdParty.TimePicker.JavaScriptJs.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
 			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
-			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryModal_v1.JquerymodalJs.Info() );
 			infos.Add( new ThirdParty.SpinJs.SpinminJs.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
 			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js" ) );

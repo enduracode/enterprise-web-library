@@ -1,21 +1,22 @@
 using System;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	public partial class BasicTests: EwfPage {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
-				ControlStack.CreateWithControls(
-					true,
-					new PostBackButton(
-						new ButtonActionControlStyle( "Send Health Check" ),
-						usesSubmitBehavior: false,
-						postBack: PostBack.CreateFull( id: "sendHealthCheck", firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ) ),
-					new PostBackButton(
-						new ButtonActionControlStyle( "Throw Unhandled Exception" ),
-						usesSubmitBehavior: false,
-						postBack: PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ) ) ) );
+				new StackList(
+						new EwfButton(
+								new StandardButtonStyle( "Send Health Check" ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull( id: "sendHealthCheck", firstModificationMethod: () => EwfApp.Instance.SendHealthCheck() ) ) )
+							.ToComponentListItem()
+							.Append(
+								new EwfButton(
+										new StandardButtonStyle( "Throw Unhandled Exception" ),
+										behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "throwException", firstModificationMethod: throwException ) ) )
+									.ToComponentListItem() ) ).ToCollection()
+					.GetControls() );
 		}
 
 		private void throwException() {

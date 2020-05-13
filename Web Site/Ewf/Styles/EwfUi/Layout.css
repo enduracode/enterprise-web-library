@@ -211,12 +211,6 @@ ewfActionComponentNormalButtonStyleAllStates {
 ewfModalBox > ewfModalBoxCloseButtonContainer > ewfActionComponentNormalButtonStyleAllStates {
 	border-radius: 0 0 0 .5em;
 }
-ewfModalSectionContainer {
-	width: 35em;
-}
-ewfModalSectionContainer > ewfSectionNormalStyleBothStates > ewfSectionContentContainer:first-child {
-	margin-top: 0;
-}
 
 /* error messages */
 ewfErrorMessageListContainer {

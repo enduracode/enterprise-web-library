@@ -25,8 +25,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
 		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
 		private const string notificationSpacerClass = "ewfNotificationSpacer";
-		private const string infoMessageContainerClass = "ewfInfoMsg";
-		private const string warningMessageContainerClass = "ewfWarnMsg";
+		private static readonly ElementClass infoMessageContainerClass = new ElementClass( "ewfInfoMsg" );
+		private static readonly ElementClass warningMessageContainerClass = new ElementClass( "ewfWarnMsg" );
 		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
 
 		internal class CssElementCreator: ControlCssElementCreator {
@@ -94,8 +94,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						} );
 
 				elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass ) );
-				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass ) );
-				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass ) );
+				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass.ClassName ) );
+				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass.ClassName ) );
 				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
 
 				return elements;
@@ -243,36 +243,41 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private IEnumerable<Control> getStatusMessageControl() {
 			var messagesExist = EwfPage.Instance.StatusMessages.Any();
-			new ModalWindow(
-				this,
-				new NamingPlaceholder( messagesExist && !statusMessagesDisplayAsNotification() ? getStatusMessageControlList() : new Control[ 0 ] ),
-				title: "Messages",
-				open: messagesExist && !statusMessagesDisplayAsNotification() );
+			new ModalBox(
+					new ModalBoxId(),
+					true,
+					new FlowIdContainer(
+						new Section(
+							"Messages",
+							messagesExist && !statusMessagesDisplayAsNotification()
+								? getStatusMessageComponentList().ToCollection()
+								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
+					open: messagesExist && !statusMessagesDisplayAsNotification() ).ToCollection()
+				.AddEtherealControls( this );
 
 			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()
-				       ? new Block( new LegacySection( SectionStyle.Box, "Messages", null, getStatusMessageControlList(), false, true ) )
+				       ? new Block(
+					       new PlaceHolder().AddControlsReturnThis(
+						       new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), false, true, null )
+							       .ToCollection()
+							       .GetControls() ) )
 					       {
 						       ClientIDMode = ClientIDMode.Static, ID = notificationSectionContainerId, CssClass = notificationSectionContainerNotificationClass
 					       }.ToCollection()
 				       : Enumerable.Empty<Control>();
 		}
 
-		private IEnumerable<Control> getStatusMessageControlList() {
-			return ControlStack.CreateWithControls(
-					true,
-					EwfPage.Instance.StatusMessages.Select(
-							i => new Block(
-								     new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
-									     .ToCollection<PhrasingComponent>()
-									     .Append( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
-									     .GetControls()
-									     .ToArray() ) { CssClass = i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass } as Control )
-						.ToArray() )
-				.ToCollection();
-		}
+		private FlowComponent getStatusMessageComponentList() =>
+			new StackList(
+				EwfPage.Instance.StatusMessages.Select(
+					i => new GenericFlowContainer(
+						new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
+							.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
+							.Materialize(),
+						classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
 
 		string ControlWithJsInitLogic.GetJsInitStatements() {
 			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()

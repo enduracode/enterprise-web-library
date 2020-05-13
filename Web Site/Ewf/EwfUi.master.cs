@@ -39,8 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal const string SideTabCssClass = "ewfUiSideTab";
 			internal static readonly ElementClass SideTabGroupHeadClass = new ElementClass( "ewfEditorTabSeparator" );
 
-			internal const string CurrentTabCssClass = "ewfEditorSelectedTab";
-			internal const string DisabledTabCssClass = "ewfUiDisabledTab";
+			internal static readonly ElementClass CurrentTabClass = new ElementClass( "ewfEditorSelectedTab" );
+			internal static readonly ElementClass DisabledTabClass = new ElementClass( "ewfUiDisabledTab" );
 
 			internal const string ContentCssClass = "ewfUiContent";
 			internal static readonly ElementClass PageActionListContainerClass = new ElementClass( "ewfUiPageAction" );
@@ -132,8 +132,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private IEnumerable<CssElement> getTabElements() {
 				return new[]
 					{
-						new CssElement( "UiCurrentTabActionControl", ActionComponentCssElementCreator.Selectors.Select( i => i + "." + CurrentTabCssClass ).ToArray() ),
-						new CssElement( "UiDisabledTabActionControl", ActionComponentCssElementCreator.Selectors.Select( i => i + "." + DisabledTabCssClass ).ToArray() )
+						new CssElement(
+							"UiCurrentTabActionControl",
+							ActionComponentCssElementCreator.Selectors.Select( i => i + "." + CurrentTabClass.ClassName ).ToArray() ),
+						new CssElement(
+							"UiDisabledTabActionControl",
+							ActionComponentCssElementCreator.Selectors.Select( i => i + "." + DisabledTabClass.ClassName ).ToArray() )
 					};
 			}
 
@@ -399,15 +403,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private IEnumerable<Control> getTabControlsForResources( ResourceGroup resourceGroup, bool includeIcons ) {
 			var tabs = new List<Control>();
 			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) ) {
-				var tab = EwfLink.Create(
-					resource.IsIdenticalToCurrent() ? null : resource,
-					new TextActionControlStyle(
-						resource.ResourceName,
-						icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ) );
-
-				tab.CssClass = resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabCssClass :
-				               resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabCssClass : "";
-				tabs.Add( tab );
+				tabs.Add(
+					new PlaceHolder().AddControlsReturnThis(
+						new EwfHyperlink(
+								resource.IsIdenticalToCurrent() ? null : resource,
+								new StandardHyperlinkStyle(
+									resource.ResourceName,
+									icon: includeIcons
+										      ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) )
+										      : null ),
+								classes: resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabClass :
+								         resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabClass : ElementClassSet.Empty ).ToCollection()
+							.GetControls() ) );
 			}
 			return tabs;
 		}

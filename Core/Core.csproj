@@ -336,18 +336,6 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\SubmitButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\ActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\CustomButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\EwfLink.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\LaunchWindowLink.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\MailtoLink.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\PostBackButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\Styles\ButtonActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\Styles\CustomActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\Styles\ImageActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\Styles\TextActionControlStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\ToggleButton.cs" />
-    <Compile Include="EnterpriseWebFramework\Action Controls\ToolTipButton.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
@@ -408,7 +396,6 @@
     <Compile Include="Email\EmailAttachment.cs" />
     <Compile Include="Email\EmailSendingException.cs" />
     <Compile Include="Encryption\EncryptionOps.cs" />
-    <Compile Include="EnterpriseWebFramework\ActionButtonSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClass.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClassSet.cs" />
@@ -532,7 +519,6 @@
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="ContentTypes.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\ActionControl.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlLine.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlList.cs" />
@@ -542,7 +528,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\Controls\ModalWindow.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\CellPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryItemGroup.cs" />

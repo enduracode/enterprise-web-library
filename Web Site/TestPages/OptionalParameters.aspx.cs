@@ -1,5 +1,4 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.InputValidation;
 
 // OptionalParameter: string field1
@@ -20,10 +19,13 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis( fil.ToCollection().GetControls() );
 
 			ph.AddControlsReturnThis(
-				new PostBackButton(
-					new ButtonActionControlStyle( "Navigate and change Field 2" ),
-					usesSubmitBehavior: false,
-					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) );
+				new EwfButton(
+						new StandardButtonStyle( "Navigate and change Field 2" ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) )
+					.ToCollection()
+					.GetControls() );
 
 			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url".ToCell(), "Valid?".ToCell() ) } );
 			ph.AddControlsReturnThis( table.ToCollection().GetControls() );

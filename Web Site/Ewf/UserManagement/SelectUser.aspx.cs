@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 
@@ -85,13 +84,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 										validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 								} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )
 							.ToComponentCollection()
-							.GetControls()
 							.Append(
-								new LegacyParagraph(
-									new PostBackButton(
-										new ButtonActionControlStyle(
-											AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
-											buttonSize: ButtonSize.Large ) ) ) ) );
+								new Paragraph(
+									new EwfButton(
+											new StandardButtonStyle(
+												AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
+												buttonSize: ButtonSize.Large ) )
+										.ToCollection() ) )
+							.GetControls() );
 				} );
 		}
 	}
