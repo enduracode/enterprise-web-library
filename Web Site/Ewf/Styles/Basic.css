@@ -743,8 +743,8 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > e
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
 	margin: 0;
+	border-style: none;
 	padding: 0;
-	background-image: none;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
 	display: block;
