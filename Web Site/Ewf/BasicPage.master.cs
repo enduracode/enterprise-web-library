@@ -181,7 +181,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )
 				warningLines.Add(
 					"User impersonation is in effect. ".ToComponents()
-						.Append( new EwfHyperlink( SelectUser.GetInfo( AppRequestState.Instance.Url ), new StandardHyperlinkStyle( "Change User" ) ) )
+						.Append(
+							new EwfHyperlink(
+								SelectUser.GetInfo( AppRequestState.Instance.Url ),
+								new ButtonHyperlinkStyle( "Change User", buttonSize: ButtonSize.ShrinkWrap ) ) )
 						.Concat( " ".ToComponents() )
 						.Append(
 							new EwfButton(
