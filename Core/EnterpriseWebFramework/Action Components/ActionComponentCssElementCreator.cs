@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			getElementsForAllStates( "", "." + AllStylesClass.ClassName ).Single( i => i.Name == "AllStates" ).Selectors.ToImmutableArray();
 
 		private static IEnumerable<CssElement> getElementsForAllStates( string baseName, params string[] styleSelectors ) {
-			const string actionless = ":not([href]):not([" + JsWritingMethods.onclick + "])";
+			const string actionless = ":not([href])";
 			var normal = ( ":not(:focus):not(:hover):not(:active)", ":not(:visited)" );
 			var normalWithoutNotVisited = ( ":not(:focus):not(:hover):not(:active)", "" ); // seems to fix an issue in which IE 11 ignores background-color
 			var visited = ( ":visited:not(:focus):not(:hover):not(:active)", "" );
@@ -165,10 +165,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                                 ? getHyperlinkSelector( styleSelector, contentSelector ?? "", stateSelector.general ).ToCollection()
 				                                 : ( baseName.StartsWith( "Button" )
 					                                     ? Enumerable.Empty<string>()
-					                                     : getActionHyperlinkSelectors(
-						                                     styleSelector,
-						                                     contentSelector,
-						                                     stateSelector.anchorOnly + stateSelector.general ) ).Concat(
+					                                     : getActionHyperlinkSelector( styleSelector, contentSelector, stateSelector.anchorOnly + stateSelector.general )
+						                                     .ToCollection() ).Concat(
 					                                 baseName.StartsWith( "Hyperlink" )
 						                                 ? Enumerable.Empty<string>()
 						                                 : getButtonSelector( styleSelector, contentSelector, stateSelector.general ).ToCollection() )
@@ -178,12 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private static string getHyperlinkSelector( string style, string content, string state ) => "a" + style + content + state;
-
-		private static IEnumerable<string> getActionHyperlinkSelectors( string style, string content, string state ) {
-			yield return "a" + style + "[href]" + content + state;
-			yield return "a" + style + "[" + JsWritingMethods.onclick + "]" + content + state;
-		}
-
+		private static string getActionHyperlinkSelector( string style, string content, string state ) => "a" + style + "[href]" + content + state;
 		private static string getButtonSelector( string style, string content, string state ) => "button" + style + content + state;
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
