@@ -424,7 +424,6 @@ ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
 }
 ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
-	text-decoration: none;
 }
 ewfActionComponentShrinkWrapButtonStyleAllStates {
 	padding: .01em .2em;
@@ -546,7 +545,6 @@ ewfTopWarningContainer {
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
-	text-decoration: none;
 	color: white;
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
@@ -893,7 +891,6 @@ ewfErrorPageBody ewfHyperlinkStandardStyleAllStates {
 ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllStates,
 ewfErrorPageBody ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
-	text-decoration: none;
 	color: white;
 }
 ewfSelectUserPageBody ewfActionComponentLargeButtonStyleAllStates,

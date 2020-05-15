@@ -139,8 +139,8 @@ img {
 	display: block;
 }
 
-/* standard-style hyperlinks */
-ewfHyperlinkStandardStyleAllStates, ewfHtmlBlock a {
+/* hyperlinks */
+ewfHyperlinkStandardStyleAllStates, ewfHyperlinkAllButtonStylesAllStates, ewfHtmlBlock a {
 	text-decoration: underline;
 }
 
@@ -243,14 +243,6 @@ ewfUiTopTabBlock ewfActionComponentAllStylesAllStates,
 ewfUiSideTabBlock {
 	padding-top: .5rem;
 	padding-bottom: .5rem;
-}
-ewfUiGlobalNavListContainer ewfActionComponentAllStylesActionlessState,
-ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNormalStates,
-ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllVisitedStates,
-ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesActionlessState,
-ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNormalStates,
-ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllVisitedStates {
-	text-decoration: none;
 }
 ewfUiTopErrorMessageListContainer {
 	font-size: 1.4em;
