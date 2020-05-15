@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -36,15 +35,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var hover = ( ":hover:not(:active)", "" );
 			var active = ( ":active", "" );
 
-			yield return
-				getStateElement(
+			yield return getStateElement(
+				baseName,
+				"AllStates",
+				"",
+				"",
+				styleSelectors,
+				null,
+				actionless,
+				normal,
+				normalWithoutNotVisited,
+				visited,
+				focus,
+				focusNoHover,
+				hover,
+				active );
+			yield return getStateElement( baseName, "ActionlessState", "", "", styleSelectors, null, actionless );
+
+			foreach( var newContent in new bool?[] { null, false, true } ) {
+				yield return getStateElement(
 					baseName,
-					"AllStates",
-					"",
-					"",
+					"AllActionStates",
+					"AllNormalContentActionStates",
+					"AllNewContentActionStates",
 					styleSelectors,
+					newContent,
 					null,
-					actionless,
 					normal,
 					normalWithoutNotVisited,
 					visited,
@@ -52,101 +68,99 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					focusNoHover,
 					hover,
 					active );
-			yield return getStateElement( baseName, "ActionlessState", "", "", styleSelectors, null, actionless );
-
-			foreach( var newContent in new bool?[] { null, false, true } ) {
-				yield return
-					getStateElement(
-						baseName,
-						"AllActionStates",
-						"AllNormalContentActionStates",
-						"AllNewContentActionStates",
-						styleSelectors,
-						newContent,
-						null,
-						normal,
-						normalWithoutNotVisited,
-						visited,
-						focus,
-						focusNoHover,
-						hover,
-						active );
-				yield return getStateElement( baseName, "AllNormalStates", "NormalContentNormalState", "NewContentNormalState", styleSelectors, newContent, null, normal );
-				yield return
-					getStateElement( baseName, "AllVisitedStates", "NormalContentVisitedState", "NewContentVisitedState", styleSelectors, newContent, null, visited );
+				yield return getStateElement(
+					baseName,
+					"AllNormalStates",
+					"NormalContentNormalState",
+					"NewContentNormalState",
+					styleSelectors,
+					newContent,
+					null,
+					normal );
+				yield return getStateElement(
+					baseName,
+					"AllVisitedStates",
+					"NormalContentVisitedState",
+					"NewContentVisitedState",
+					styleSelectors,
+					newContent,
+					null,
+					visited );
 
 				// focus with or without hover
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithFocus",
-						"StatesWithNormalContentAndWithFocus",
-						"StatesWithNewContentAndWithFocus",
-						styleSelectors,
-						newContent,
-						null,
-						focus,
-						focusNoHover,
-						active );
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithFocusAndWithoutActive",
-						"StatesWithNormalContentAndWithFocusAndWithoutActive",
-						"StatesWithNewContentAndWithFocusAndWithoutActive",
-						styleSelectors,
-						newContent,
-						null,
-						focus,
-						focusNoHover );
+				yield return getStateElement(
+					baseName,
+					"StatesWithFocus",
+					"StatesWithNormalContentAndWithFocus",
+					"StatesWithNewContentAndWithFocus",
+					styleSelectors,
+					newContent,
+					null,
+					focus,
+					focusNoHover,
+					active );
+				yield return getStateElement(
+					baseName,
+					"StatesWithFocusAndWithoutActive",
+					"StatesWithNormalContentAndWithFocusAndWithoutActive",
+					"StatesWithNewContentAndWithFocusAndWithoutActive",
+					styleSelectors,
+					newContent,
+					null,
+					focus,
+					focusNoHover );
 
 				// Focus without hover. Hover should trump focus according to http://meyerweb.com/eric/thoughts/2007/06/04/ordering-the-link-states/.
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithFocusAndWithoutHover",
-						"StatesWithNormalContentAndWithFocusAndWithoutHover",
-						"StatesWithNewContentAndWithFocusAndWithoutHover",
-						styleSelectors,
-						newContent,
-						null,
-						focusNoHover,
-						active );
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithFocusAndWithoutHoverAndWithoutActive",
-						"NormalContentFocusNoHoverState",
-						"NewContentFocusNoHoverState",
-						styleSelectors,
-						newContent,
-						null,
-						focusNoHover );
+				yield return getStateElement(
+					baseName,
+					"StatesWithFocusAndWithoutHover",
+					"StatesWithNormalContentAndWithFocusAndWithoutHover",
+					"StatesWithNewContentAndWithFocusAndWithoutHover",
+					styleSelectors,
+					newContent,
+					null,
+					focusNoHover,
+					active );
+				yield return getStateElement(
+					baseName,
+					"StatesWithFocusAndWithoutHoverAndWithoutActive",
+					"NormalContentFocusNoHoverState",
+					"NewContentFocusNoHoverState",
+					styleSelectors,
+					newContent,
+					null,
+					focusNoHover );
 
 				// hover with or without focus
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithHover",
-						"StatesWithNormalContentAndWithHover",
-						"StatesWithNewContentAndWithHover",
-						styleSelectors,
-						newContent,
-						null,
-						hover,
-						active );
-				yield return
-					getStateElement(
-						baseName,
-						"StatesWithHoverAndWithoutActive",
-						"StatesWithNormalContentAndWithHoverAndWithoutActive",
-						"StatesWithNewContentAndWithHoverAndWithoutActive",
-						styleSelectors,
-						newContent,
-						null,
-						hover );
+				yield return getStateElement(
+					baseName,
+					"StatesWithHover",
+					"StatesWithNormalContentAndWithHover",
+					"StatesWithNewContentAndWithHover",
+					styleSelectors,
+					newContent,
+					null,
+					hover,
+					active );
+				yield return getStateElement(
+					baseName,
+					"StatesWithHoverAndWithoutActive",
+					"StatesWithNormalContentAndWithHoverAndWithoutActive",
+					"StatesWithNewContentAndWithHoverAndWithoutActive",
+					styleSelectors,
+					newContent,
+					null,
+					hover );
 
-				yield return getStateElement( baseName, "AllActiveStates", "NormalContentActiveState", "NewContentActiveState", styleSelectors, newContent, null, active );
+				yield return getStateElement(
+					baseName,
+					"AllActiveStates",
+					"NormalContentActiveState",
+					"NewContentActiveState",
+					styleSelectors,
+					newContent,
+					null,
+					active );
 			}
 		}
 
