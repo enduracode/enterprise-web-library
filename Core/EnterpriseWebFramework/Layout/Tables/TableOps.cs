@@ -135,83 +135,46 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var rowSetup = rowSetups[ rowIndex ];
 					var rowActivationBehavior = rowSetup.ActivationBehavior;
 					return new FlowIdContainer(
-						new ElementComponent(
-							rowContext => {
-								rowActivationBehavior?.PostBackAdder();
-								return new ElementData(
-									() => {
-										var attributes = new List<Tuple<string, string>>();
-										if( rowActivationBehavior != null )
-											attributes.AddRange( rowActivationBehavior.AttributeGetter() );
-										if( rowSetup.Size != null )
-											attributes.Add( Tuple.Create( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ) );
-										if( rowActivationBehavior?.IsFocusable == true )
-											attributes.AddRange( new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) } );
-										return new ElementLocalData(
-											"tr",
-											new FocusabilityCondition( rowActivationBehavior?.IsFocusable == true ),
-											isFocused => new ElementFocusDependentData(
-												attributes: attributes,
-												includeIdAttribute: rowActivationBehavior?.IncludeIdAttribute == true || isFocused,
-												jsInitStatements: ( rowActivationBehavior != null ? rowActivationBehavior.JsInitStatementGetter( rowContext.Id ) : "" )
-												.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( rowContext.Id ) : "" ) ) );
-									},
-									classes: ( rowActivationBehavior != null ? rowActivationBehavior.Classes : ElementClassSet.Empty ).Add(
-										useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
-											? EwfTable.ContrastClass
-											: ElementClassSet.Empty )
-									.Add( rowSetup.Classes ),
-									children: row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
-										.Where( cellAndIndex => cellAndIndex.Cell != null )
-										.Select(
-											cellAndIndex => {
-												var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-												var cellSetup = cellAndIndex.Cell.Setup;
-												var cellActivationBehavior = cellSetup.ActivationBehavior ??
-												                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
-												return new ElementComponent(
-													cellContext => {
-														cellActivationBehavior?.PostBackAdder();
-														return new ElementData(
-															() => {
-																var attributes = new List<Tuple<string, string>>();
+						ElementActivationBehavior.GetActivatableElement(
+								"tr",
+								( useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value ) ? EwfTable.ContrastClass : ElementClassSet.Empty )
+								.Add( rowSetup.Classes ),
+								rowSetup.Size != null
+									? Tuple.Create( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
+									: Enumerable.Empty<Tuple<string, string>>().Materialize(),
+								rowActivationBehavior,
+								row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
+									.Where( cellAndIndex => cellAndIndex.Cell != null )
+									.Select(
+										cellAndIndex => {
+											var columnSetup = columns[ cellAndIndex.ColumnIndex ];
+											var cellSetup = cellAndIndex.Cell.Setup;
 
-																var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
-																if( rowSpan != 1 )
-																	attributes.Add( Tuple.Create( "rowspan", rowSpan.ToString() ) );
+											var attributes = new List<Tuple<string, string>>();
+											var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
+											if( rowSpan != 1 )
+												attributes.Add( Tuple.Create( "rowspan", rowSpan.ToString() ) );
+											var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
+											if( colSpan != 1 )
+												attributes.Add( Tuple.Create( "colspan", colSpan.ToString() ) );
 
-																var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
-																if( colSpan != 1 )
-																	attributes.Add( Tuple.Create( "colspan", colSpan.ToString() ) );
-
-																if( cellActivationBehavior != null )
-																	attributes.AddRange( cellActivationBehavior.AttributeGetter() );
-																if( cellActivationBehavior?.IsFocusable == true )
-																	attributes.AddRange( new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) } );
-																return new ElementLocalData(
-																	cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
-																	new FocusabilityCondition( cellActivationBehavior?.IsFocusable == true ),
-																	isFocused => new ElementFocusDependentData(
-																		attributes: attributes,
-																		includeIdAttribute: cellActivationBehavior?.IncludeIdAttribute == true || isFocused,
-																		jsInitStatements: ( cellActivationBehavior != null ? cellActivationBehavior.JsInitStatementGetter( cellContext.Id ) : "" )
-																		.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( cellContext.Id ) : "" ) ) );
-															},
-															classes: EwfTable.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
-																.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
-																.Add( cellActivationBehavior != null ? cellActivationBehavior.Classes : ElementClassSet.Empty )
-																.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
-																.Add( columnSetup.Classes )
-																.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
-															children: cellAndIndex.Cell.Content,
-															etherealChildren: ( cellActivationBehavior?.EtherealChildren ?? Enumerable.Empty<EtherealComponent>() )
-															.Concat( cellSetup.EtherealContent )
-															.Materialize() );
-													} );
-											} )
-										.Materialize(),
-									etherealChildren: rowActivationBehavior?.EtherealChildren );
-							} ).ToCollection() );
+											var cellActivationBehavior = cellSetup.ActivationBehavior ??
+											                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
+											return ElementActivationBehavior.GetActivatableElement(
+												cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
+												EwfTable.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+													.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
+													.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
+													.Add( columnSetup.Classes )
+													.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+												attributes,
+												cellActivationBehavior,
+												cellAndIndex.Cell.Content,
+												cellSetup.EtherealContent );
+										} )
+									.Materialize(),
+								Enumerable.Empty<EtherealComponent>().Materialize() )
+							.ToCollection() );
 				} );
 		}
 

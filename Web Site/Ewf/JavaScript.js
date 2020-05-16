@@ -70,15 +70,17 @@ function NumericalOnly( evt, field ) {
 
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
-	stopActivatableTableRowNestedClickEvents();
+	stopActivatableTableRowNestedEvents();
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 }
 
-function stopActivatableTableRowNestedClickEvents() {
+function stopActivatableTableRowNestedEvents() {
 	$( "tr.ewfAc" ).each(
 		function() {
-			// Stop propagation of click events on cells that have activation behavior or contain activatable elements.
-			$( this ).children( ".ewfAc" ).add( $( this ).children( ".ewfAec" ) ).click( function( e ) { e.stopPropagation(); } );
+			// Stop propagation of click events and some keypress events on cells that have activation behavior or contain activatable elements.
+			$( this ).children( ".ewfAc" ).add( $( this ).children( ".ewfAec" ) ).click( function( e ) { e.stopPropagation(); } ).keypress( function( e ) {
+				if( e.key === " " || e.key === "Enter" ) e.stopPropagation();
+			} );
 		}
 	);
 }

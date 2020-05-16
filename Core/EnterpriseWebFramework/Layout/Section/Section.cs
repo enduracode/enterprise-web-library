@@ -115,39 +115,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return expanded.HasValue
 							       ?
 							       // We cannot use EwfButton because we have flow content.
-							       (FlowComponent)new DisplayableElement(
-								       buttonContext => new DisplayableElementData(
-									       null,
-									       () => new DisplayableElementLocalData(
-										       "div",
-										       new FocusabilityCondition( true ),
-										       isFocused => new DisplayableElementFocusDependentData(
-											       attributes: new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) },
-											       includeIdAttribute: true,
-											       jsInitStatements:
-											       "$( '#{0}' ).click( function() {{ {1} }} ); $( '#{0}' ).keypress( function( e ) {{ if( e.key === ' ' || e.key === 'Enter' ) $( this ).click(); }} );"
-												       .FormatWith(
-													       buttonContext.Id,
-													       disableStatePersistence
-														       ? "$( '#{0}' ).toggleClass( '{1}', 200 );".FormatWith(
-															       context.Id,
-															       StringTools.ConcatenateWithDelimiter(
-																       " ",
-																       style == SectionStyle.Normal
-																	       ? new[] { normalClosedClass.ClassName, normalExpandedClass.ClassName }
-																	       : new[] { boxClosedClass.ClassName, boxExpandedClass.ClassName } ) )
-														       : hiddenFieldId.GetJsValueModificationStatements(
-															       "document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
-																       hiddenFieldId.ElementId.Id,
-																       bool.FalseString,
-																       bool.TrueString ) ) ) +
-											       ( isFocused ? " document.getElementById( '{0}' ).focus();".FormatWith( buttonContext.Id ) : "" ) ) ),
-									       children: new GenericFlowContainer(
-										       new GenericPhrasingContainer( "Click to Expand".ToComponents(), classes: closeClass ).ToCollection()
-											       .Append( new GenericPhrasingContainer( "Click to Close".ToComponents(), classes: expandClass ) )
-											       .Concat( headingComponents )
-											       .Materialize(),
-										       classes: headingClass ).ToCollection() ) )
+							       ElementActivationBehavior.GetActivatableElement(
+								       "div",
+								       ElementClassSet.Empty,
+								       Enumerable.Empty<Tuple<string, string>>().Materialize(),
+								       ElementActivationBehavior.CreateButton(
+									       buttonBehavior: new CustomButtonBehavior(
+										       () => disableStatePersistence
+											             ? "$( '#{0}' ).toggleClass( '{1}', 200 );".FormatWith(
+												             context.Id,
+												             StringTools.ConcatenateWithDelimiter(
+													             " ",
+													             style == SectionStyle.Normal
+														             ? new[] { normalClosedClass.ClassName, normalExpandedClass.ClassName }
+														             : new[] { boxClosedClass.ClassName, boxExpandedClass.ClassName } ) )
+											             : hiddenFieldId.GetJsValueModificationStatements(
+												             "document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
+													             hiddenFieldId.ElementId.Id,
+													             bool.FalseString,
+													             bool.TrueString ) ) ) ),
+								       new GenericFlowContainer(
+									       new GenericPhrasingContainer( "Click to Expand".ToComponents(), classes: closeClass ).ToCollection()
+										       .Append( new GenericPhrasingContainer( "Click to Close".ToComponents(), classes: expandClass ) )
+										       .Concat( headingComponents )
+										       .Materialize(),
+									       classes: headingClass ).ToCollection(),
+								       Enumerable.Empty<EtherealComponent>().Materialize() )
 							       : new GenericFlowContainer( new GenericFlowContainer( headingComponents.Materialize(), classes: headingClass ).ToCollection() );
 					}
 

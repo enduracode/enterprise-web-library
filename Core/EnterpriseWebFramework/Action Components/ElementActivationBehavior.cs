@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.JavaScriptWriting;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -12,6 +13,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ElementActivationBehavior {
 		// This class name is used by EWF CSS and JavaScript files.
 		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfAc" );
+
+		internal static FlowComponent GetActivatableElement(
+			string elementName, ElementClassSet classes, IReadOnlyCollection<Tuple<string, string>> attributes, ElementActivationBehavior activationBehavior,
+			IReadOnlyCollection<FlowComponent> children, IReadOnlyCollection<EtherealComponent> etherealChildren ) =>
+			new ElementComponent(
+				context => {
+					activationBehavior?.PostBackAdder();
+					return new ElementData(
+						() => new ElementLocalData(
+							elementName,
+							new FocusabilityCondition( activationBehavior?.IsFocusable == true ),
+							isFocused => new ElementFocusDependentData(
+								attributes: attributes.Concat( activationBehavior != null ? activationBehavior.AttributeGetter() : Enumerable.Empty<Tuple<string, string>>() )
+									.Concat(
+										activationBehavior?.IsFocusable == true
+											? new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) }
+											: Enumerable.Empty<Tuple<string, string>>() ),
+								includeIdAttribute: activationBehavior?.IncludeIdAttribute == true || isFocused,
+								jsInitStatements: ( activationBehavior != null ? activationBehavior.JsInitStatementGetter( context.Id ) : "" ).AppendDelimiter(
+									// This list of keys is duplicated in the JavaScript file.
+									" $( '#{0}' ).keypress( function( e ) {{ if( e.key === ' ' || e.key === 'Enter' ) {{ e.preventDefault(); $( this ).click(); }} }} );"
+										.FormatWith( context.Id ) )
+								.ConcatenateWithSpace( isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) ) ),
+						classes: classes.Add( activationBehavior != null ? activationBehavior.Classes : ElementClassSet.Empty ),
+						children: children,
+						etherealChildren: ( activationBehavior?.EtherealChildren ?? Enumerable.Empty<EtherealComponent>() ).Concat( etherealChildren ).Materialize() );
+				} );
 
 		/// <summary>
 		/// Creates hyperlink behavior. EnduraCode goal 2450 will add a JavaScript predicate parameter to this method.
