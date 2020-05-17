@@ -345,6 +345,9 @@ ewfFlowCheckboxAllStates > ewfCheckbox {
 }
 
 /* list controls */
+ewfDropDownListContainer > ewfDropDownList {
+	text-align: start;
+}
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
 ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
 ewfControlStackItem > ewfDropDownListContainer > ewfDropDownList,
