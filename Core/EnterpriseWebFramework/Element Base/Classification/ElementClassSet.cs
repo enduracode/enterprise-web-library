@@ -8,9 +8,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ElementClassSet {
 		public static readonly ElementClassSet Empty = new ElementClassSet( ImmutableDictionary<string, PageModificationValueCondition>.Empty );
 
-		public static implicit operator ElementClassSet( ElementClass elementClass ) {
-			return new ElementClassSet( ( (PageModificationValueCondition)null ).ToCollection().ToImmutableDictionary( i => elementClass.ClassName ) );
-		}
+		public static implicit operator ElementClassSet( ElementClass elementClass ) =>
+			elementClass != null
+				? new ElementClassSet( ( (PageModificationValueCondition)null ).ToCollection().ToImmutableDictionary( i => elementClass.ClassName ) )
+				: Empty;
 
 		internal readonly IImmutableDictionary<string, PageModificationValueCondition> ConditionsByClassName;
 
