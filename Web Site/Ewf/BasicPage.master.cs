@@ -166,14 +166,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				components.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
 				components.AddRange( " This is not the live system. Changes made here will be lost and are not recoverable. ".ToComponents() );
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
-					components.Add(
+					components.AddRange(
 						new EwfButton(
-							new StandardButtonStyle( "Log Out", buttonSize: ButtonSize.ShrinkWrap ),
+							new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: "ewfIntermediateLogOut",
 									firstModificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
-									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) );
+									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ).Concat( " ".ToComponents() ) );
+				components.Add(
+					new EwfButton(
+						new StandardButtonStyle(
+							"Hide this warning",
+							buttonSize: ButtonSize.ShrinkWrap,
+							icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-eye-slash" ) ) ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateIntermediate(
+								null,
+								id: "ewfHideNonLiveWarnings",
+								firstModificationMethod: NonLiveInstallationStatics.SetWarningsHiddenCookie ) ) ) );
 				warningLines.Add( components );
 			}
 
@@ -184,11 +195,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						.Append(
 							new EwfHyperlink(
 								SelectUser.GetInfo( AppRequestState.Instance.Url ),
-								new ButtonHyperlinkStyle( "Change User", buttonSize: ButtonSize.ShrinkWrap ) ) )
+								new ButtonHyperlinkStyle( "Change user", buttonSize: ButtonSize.ShrinkWrap ) ) )
 						.Concat( " ".ToComponents() )
 						.Append(
 							new EwfButton(
-								new StandardButtonStyle( "End Impersonation", buttonSize: ButtonSize.ShrinkWrap ),
+								new StandardButtonStyle( "End impersonation", buttonSize: ButtonSize.ShrinkWrap ),
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: "ewfEndImpersonation",
