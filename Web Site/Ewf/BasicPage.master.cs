@@ -185,6 +185,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								null,
 								id: "ewfHideNonLiveWarnings",
 								firstModificationMethod: NonLiveInstallationStatics.SetWarningsHiddenCookie ) ) ) );
+				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
+					var boxId = new ModalBoxId();
+					components.AddRange(
+						" ".ToComponents()
+							.Append(
+								new EwfButton(
+									new StandardButtonStyle( "Get link", buttonSize: ButtonSize.ShrinkWrap, icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-link" ) ) ),
+									behavior: new OpenModalBehavior(
+										boxId,
+										etherealChildren: new ModalBox(
+											boxId,
+											true,
+											FormItemList.CreateGrid(
+													1,
+													items: new[] { false, true }.Select(
+															i => {
+																var url = AppRequestState.Instance.Url;
+																if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
+																	url = SelectUser.GetInfo(
+																			url,
+																			optionalParameterPackage: new SelectUser.OptionalParameterPackage { User = AppTools.User.Email } )
+																		.GetUrl();
+																url = IntermediateLogIn.GetInfo(
+																		url,
+																		new IntermediateLogIn.OptionalParameterPackage
+																			{
+																				Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword, HideWarnings = i
+																			} )
+																	.GetUrl();
+																return url.ToComponents().ToFormItem( label: i ? "Non-live warnings hidden:".ToComponents() : "Standard:".ToComponents() );
+															} )
+														.Materialize() )
+												.ToCollection() ).ToCollection() ) ) ) );
+				}
 				warningLines.Add( components );
 			}
 
