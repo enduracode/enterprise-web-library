@@ -256,6 +256,44 @@ div.ewfControlList > div > table {
 	table-layout: fixed;
 }
 
+/* action components */
+ewfActionComponentAllStylesAllStates {
+	margin: 0;
+	border-style: none;
+	background-color: Transparent;
+	padding: 0;
+}
+ewfActionComponentAllStylesAllStates::-moz-focus-inner {
+	border-style: none;
+	padding: 0;
+}
+ewfActionComponentAllStylesAllStates > ewfIcon {
+	padding-left: .4em;
+	padding-right: .4em;
+}
+ewfActionComponentAllStylesAllStates > ewfIcon:first-child {
+	padding-left: 0;
+}
+ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
+	padding-right: 0;
+}
+ewfActionComponentAllButtonStylesAllStates {
+	display: inline-block;
+}
+ewfActionComponentShrinkWrapButtonStyleAllStates {
+	padding: .01em .2em;
+}
+ewfActionComponentNormalButtonStyleAllStates {
+	padding: .4em;
+}
+ewfActionComponentLargeButtonStyleAllStates {
+	font-size: 1.4em;
+	padding: 1em;
+}
+button {
+	font: inherit;
+}
+
 /* images */
 img {
 	border-width: 0; /* Remove default borders around images when they are inside anchor tags. */
@@ -399,44 +437,6 @@ ewfDateAndTimeControl ewfIcon.fa-clock-o {
 ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
 	width: 100%;
 	max-width: 6em;
-}
-
-/* action components */
-button {
-	font: inherit;
-}
-ewfActionComponentAllStylesAllStates {
-	margin: 0;
-	border-style: none;
-	background-color: Transparent;
-	padding: 0;
-}
-ewfActionComponentAllStylesAllStates::-moz-focus-inner {
-	border-style: none;
-	padding: 0;
-}
-ewfActionComponentAllStylesAllStates > ewfIcon {
-	padding-left: .4em;
-	padding-right: .4em;
-}
-ewfActionComponentAllStylesAllStates > ewfIcon:first-child {
-	padding-left: 0;
-}
-ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
-	padding-right: 0;
-}
-ewfActionComponentAllButtonStylesAllStates {
-	display: inline-block;
-}
-ewfActionComponentShrinkWrapButtonStyleAllStates {
-	padding: .01em .2em;
-}
-ewfActionComponentNormalButtonStyleAllStates {
-	padding: .4em;
-}
-ewfActionComponentLargeButtonStyleAllStates {
-	font-size: 1.4em;
-	padding: 1em;
 }
 
 /* Text alignment. NOTE: The classes ewfCurrencyCell, ewfRightAlignCell, and ewfCenterCell are deprecated. Eliminate them from all systems and then remove them from these rules. */
