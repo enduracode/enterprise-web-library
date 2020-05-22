@@ -562,7 +562,7 @@ ewfTopWarningContainer ewfActionComponentShrinkWrapButtonStyleAllStates {
 	padding: .1em .2em;
 	border-radius: .5em;
 }
-ewfTopWarningContainer span.url {
+span.ewfIntermediateUrl {
 	word-break: break-all;
 }
 ewfClickBlockerBothStates {
