@@ -62,7 +62,7 @@ ewfUiTopErrorMessageListContainer {
 ewfUiGlobalNavListContainer {
 	background-color: #005675;
 }
-ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates {
+ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfHyperlinkStandardStyleAllStates {
 	color: hsla( 193, 27%, 90%, 1 );
 }
 ewfUiTopErrorMessageListContainer {
