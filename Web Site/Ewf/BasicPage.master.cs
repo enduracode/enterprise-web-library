@@ -214,7 +214,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 																				Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword, HideWarnings = i
 																			} )
 																	.GetUrl();
-																return new GenericPhrasingContainer( url.ToComponents(), classes: ElementClasses.EwfIntermediateUrl ).ToFormItem(
+																return new GenericPhrasingContainer(
+																	url.ToComponents(),
+																	classes: new ElementClass( "ewfIntermediateUrl" /* This is used by EWF CSS files. */ ) ).ToFormItem(
 																	label: i ? "Non-live warnings hidden:".ToComponents() : "Standard:".ToComponents() );
 															} )
 														.Materialize() )
