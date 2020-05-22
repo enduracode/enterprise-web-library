@@ -277,17 +277,21 @@ ewfActionComponentAllStylesAllStates > ewfIcon:first-child {
 ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
 	padding-right: 0;
 }
-ewfActionComponentAllButtonStylesAllStates {
+ewfActionComponentAllButtonStylesAllStates, ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
+	font-weight: initial;
 }
-ewfActionComponentShrinkWrapButtonStyleAllStates {
-	padding: .01em .2em;
+ewfActionComponentShrinkWrapButtonStyleAllStates, ewfTopWarningContainer ewfActionComponentShrinkWrapButtonStyleAllStates {
+	border-radius: .25em;
+	padding: .1em .3em;
 }
 ewfActionComponentNormalButtonStyleAllStates {
-	padding: .4em;
+	border-radius: .4em;
+	padding: .6em;
 }
 ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
+	border-radius: .5em;
 	padding: 1em;
 }
 button {
@@ -547,7 +551,6 @@ ewfTopWarningContainer {
 	}
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
-	display: inline-block;
 	color: white;
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
@@ -557,10 +560,6 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesAllVisitedStates {
 ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
 ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: hsla( 4, 100%, 45%, 1 );
-}
-ewfTopWarningContainer ewfActionComponentShrinkWrapButtonStyleAllStates {
-	padding: .1em .2em;
-	border-radius: .5em;
 }
 span.ewfIntermediateUrl {
 	word-break: break-all;

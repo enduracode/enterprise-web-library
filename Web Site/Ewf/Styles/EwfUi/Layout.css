@@ -172,7 +172,6 @@ ewfUiPageActionAndContentAndContentFootCell {
 }
 
 /* corner rounding */
-ewfActionComponentLargeButtonStyleAllStates,
 ewfCheckboxList {
 	border-radius: .5em;
 }
@@ -199,12 +198,6 @@ ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWi
 	ewfCheckboxList {
 		border-radius: 0;
 	}
-}
-ewfActionComponentShrinkWrapButtonStyleAllStates {
-	border-radius: .25em;
-}
-ewfActionComponentNormalButtonStyleAllStates {
-	border-radius: .4em;
 }
 
 /* modal boxes */
