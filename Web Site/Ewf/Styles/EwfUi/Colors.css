@@ -30,8 +30,7 @@ ewfUiSideTabBlock ewfUiCurrentTabActionControl {
 ewfHyperlinkStandardStyleAllNormalStates,
 ewfHyperlinkStandardStyleAllVisitedStates,
 ewfActionComponentAllStylesAllNormalStates.icon,
-ewfActionComponentAllStylesAllVisitedStates.icon,
-ewfHtmlBlock a {
+ewfActionComponentAllStylesAllVisitedStates.icon {
 	color: hsla( 4, 100%, 32%, 1 );
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {

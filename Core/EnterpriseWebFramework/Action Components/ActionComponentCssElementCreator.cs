@@ -189,16 +189,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new CssElement( baseName + ( newContent.HasValue ? newContent.Value ? newContentName : normalContentName : allContentName ), selectors.ToArray() );
 		}
 
-		private static string getHyperlinkSelector( string style, string content, string state ) => "a" + style + content + state;
-		private static string getActionHyperlinkSelector( string style, string content, string state ) => "a" + style + "[href]" + content + state;
-		private static string getButtonSelector( string style, string content, string state ) => "button" + style + content + state;
+		private static string getHyperlinkSelector( string style, string content, string state ) =>
+			( style == HtmlBlockContainer.CssElementCreator.Selector ? style + " a" : "a" + style ) + content + state;
+
+		private static string getActionHyperlinkSelector( string style, string content, string state ) =>
+			( style == HtmlBlockContainer.CssElementCreator.Selector ? style + " a" : "a" + style ) + "[href]" + content + state;
+
+		private static string getButtonSelector( string style, string content, string state ) =>
+			( style == HtmlBlockContainer.CssElementCreator.Selector ? style + " button" : "button" + style ) + content + state;
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			var buttonSizes = new[] { ShrinkWrapButtonStyleClass.ClassName, NormalButtonStyleClass.ClassName, LargeButtonStyleClass.ClassName };
 			return new[]
 					{
-						getElementsForAllStates( "ActionComponentAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ) ),
-						getElementsForAllStates( "HyperlinkStandardStyle", ".{0}".FormatWith( HyperlinkStandardStyleClass.ClassName ) ),
+						getElementsForAllStates( "ActionComponentAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ), HtmlBlockContainer.CssElementCreator.Selector ),
+						getElementsForAllStates(
+							"HyperlinkStandardStyle",
+							".{0}".FormatWith( HyperlinkStandardStyleClass.ClassName ),
+							HtmlBlockContainer.CssElementCreator.Selector ),
 						getElementsForAllStates( "ActionComponentAllButtonStyles", buttonSizes.Select( i => ".{0}".FormatWith( i ) ).ToArray() ),
 						getElementsForAllStates( "ActionComponentShrinkWrapButtonStyle", ".{0}".FormatWith( ShrinkWrapButtonStyleClass.ClassName ) ),
 						getElementsForAllStates( "ActionComponentNormalButtonStyle", ".{0}".FormatWith( NormalButtonStyleClass.ClassName ) ),

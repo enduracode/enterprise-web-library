@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -10,11 +9,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class HtmlBlockContainer: FlowComponent {
 		private static readonly ElementClass elementClass = new ElementClass( "ewfHtmlBlock" );
 
-		[ UsedImplicitly ]
-		private class CssElementCreator: ControlCssElementCreator {
-			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new CssElement( "HtmlBlock", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
-			}
+		internal class CssElementCreator: ControlCssElementCreator {
+			internal static readonly string Selector = "div.{0}".FormatWith( elementClass.ClassName );
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() => new CssElement( "HtmlBlock", Selector ).ToCollection();
 		}
 
 		private readonly string html;

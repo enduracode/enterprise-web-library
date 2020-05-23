@@ -140,7 +140,7 @@ img {
 }
 
 /* hyperlinks */
-ewfHyperlinkStandardStyleAllStates, ewfHyperlinkAllButtonStylesAllStates, ewfHtmlBlock a {
+ewfHyperlinkStandardStyleAllStates, ewfHyperlinkAllButtonStylesAllStates {
 	text-decoration: underline;
 }
 
