@@ -200,11 +200,6 @@ ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWi
 	}
 }
 
-/* modal boxes */
-ewfModalBox > ewfModalBoxCloseButtonContainer > ewfActionComponentNormalButtonStyleAllStates {
-	border-radius: 0 0 0 .5em;
-}
-
 /* error messages */
 ewfErrorMessageListContainer {
 	font-weight: bold;

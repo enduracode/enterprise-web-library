@@ -54,12 +54,6 @@ p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 	margin-bottom: 1em;
 }
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
-ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
-ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
-	border-color: rgba( 0, 0, 0, 0.1 );
-}
 ewfUnorderedLineList > ewfComponentListItem {
 	margin-left: .5em;
 }
@@ -107,6 +101,20 @@ ewfGridFormItemList {
 }
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 	margin-left: 3em;
+}
+ewfModalBox > ewfModalBoxCloseButtonContainer {
+	padding: .5em;
+}
+
+/* border colors */
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
+ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
+	border-color: rgba( 0, 0, 0, 0.1 );
+}
+ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
+ewfModalBox > ewfModalBoxCloseButtonContainer {
+	border-color: hsla( 0, 0%, 58%, 1 );
 }
 
 /* sections */
@@ -360,7 +368,6 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: .4em;
-	background-color: hsla( 216, 33%, 97%, 1 );
 	padding: .5em .75em;
 	color: hsla( 215, 11%, 22%, 1 );
 }
@@ -484,6 +491,8 @@ ewfModalBox {
 }
 ewfModalBox > ewfModalBoxCloseButtonContainer {
 	flex: none;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
 	padding-bottom: .5em;
 	text-align: right;
 }
