@@ -117,6 +117,20 @@ ewfModalBox > ewfModalBoxCloseButtonContainer {
 	border-color: hsla( 0, 0%, 58%, 1 );
 }
 
+/* focus */
+ewfHyperlinkStandardStyleStatesWithFocus, ewfActionComponentAllStylesStatesWithFocus.icon {
+	outline: 2px dashed hsl( 209, 91%, 47% );
+}
+ewfActionComponentAllButtonStylesStatesWithFocus {
+	outline: 2px dashed hsl( 209, 91%, 47% );
+	outline-offset: 1px;
+}
+ewfSingleLineTextControlFocusState, ewfMultilineTextControlFocusState {
+	box-shadow: 0 0 8px hsla( 209, 91%, 47%, 0.3 );
+	border-color: hsla( 209, 91%, 47%, 1 );
+	outline: none;
+}
+
 /* sections */
 ewfSectionAllStylesBothStates {
 	clear: both;
@@ -370,11 +384,6 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	border-radius: .4em;
 	padding: .5em .75em;
 	color: hsla( 215, 11%, 22%, 1 );
-}
-ewfSingleLineTextControlFocusState, ewfMultilineTextControlFocusState {
-	box-shadow: 0 0 8px rgba( 11, 125, 229, 0.3 );
-	border-color: hsla( 209, 91%, 47%, 1 );
-	outline: none;
 }
 ewfMultilineTextControlAllStates {
 	width: 35em;
