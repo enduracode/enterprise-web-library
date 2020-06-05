@@ -17,12 +17,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class SelectList {
 		internal static readonly ElementClass DropDownClass = new ElementClass( "ewfDropDown" );
 
+		// This class name is used by the third-party select-css file.
+		internal static readonly ElementClass SelectCssClass = new ElementClass( "select-css" );
+
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 				new[]
 					{
-						new CssElement( "DropDownList", "select", ".chosen-container" ),
+						new CssElement( "DropDownList", "select.{0}".FormatWith( SelectCssClass.ClassName ), ".chosen-container" ),
 						new CssElement( "DropDownListContainer", "div.{0}".FormatWith( DropDownClass.ClassName ) )
 					};
 		}
@@ -277,6 +280,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															.Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
 											} );
 									},
+									classes: SelectList.SelectCssClass,
 									children: items.Select(
 											i => getOption(
 												i.StringId,

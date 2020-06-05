@@ -496,6 +496,7 @@
     <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
     <Content Include="Ewf\Styles\EwfUi\Layout.css" />
     <Content Include="Ewf\Styles\EwfUi\Transitions.css" />
+    <Content Include="Ewf\ThirdParty\SelectCss.css" />
     <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
     <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />

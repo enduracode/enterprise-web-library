@@ -43,6 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
 			infos.Add( new ExternalResourceInfo( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryUi.Jquery_ui_1114custom_v2.Jquery_uiminCss.Info() );
+			infos.Add( new ThirdParty.SelectCssCss.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Chosen.Chosen_v187.ChosenminCss.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
 			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
