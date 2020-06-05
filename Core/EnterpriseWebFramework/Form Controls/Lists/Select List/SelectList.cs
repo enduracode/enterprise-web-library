@@ -223,7 +223,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							focusDependentData: new DisplayableElementFocusDependentData(
 								includeIdAttribute: !isReadOnly,
 								jsInitStatements: !isReadOnly
-									                  ? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+									                  ? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, useNativeDropDownControl.Value )
 										                  .Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( containerContext.Id ), " } );" )
 									                  : "" ) ),
 						classes: SelectList.DropDownClass.Add( classes ?? ElementClassSet.Empty ),
