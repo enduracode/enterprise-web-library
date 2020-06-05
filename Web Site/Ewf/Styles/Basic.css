@@ -403,6 +403,15 @@ ewfFlowCheckboxAllStates > ewfCheckbox {
 }
 
 /* list controls */
+.select-css {
+	display: inline-block;
+	width: auto;
+	padding-top: .5em;
+	padding-bottom: .5em;
+	line-height: unset;
+	font-family: unset;
+	font-weight: unset;
+}
 ewfDropDownListContainer > ewfDropDownList {
 	text-align: start;
 }
