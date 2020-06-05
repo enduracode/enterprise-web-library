@@ -51,6 +51,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.DisplaySetup,
 				setup.UseHorizontalLayout,
 				null,
+				null,
 				setup.IsReadOnly,
 				setup.Classes,
 				setup.UnlistedSelectedItemLabelGetter,
@@ -88,6 +89,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			new SelectList<ItemIdType>(
 				setup.DisplaySetup,
 				null,
+				setup.UseNativeControl,
 				setup.Width,
 				setup.IsReadOnly,
 				setup.Classes,
@@ -139,10 +141,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfValidation Validation { get; }
 
 		internal SelectList(
-			DisplaySetup displaySetup, bool? useHorizontalRadioLayout, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
-			IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId, string autoFillTokens,
-			FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			DisplaySetup displaySetup, bool? useHorizontalRadioLayout, bool? useNativeDropDownControl, ContentBasedLength width, bool isReadOnly,
+			ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid,
+			string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId,
+			string autoFillTokens, FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier, Action<ItemIdType, Validator> validationMethod ) {
 			var items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
@@ -271,7 +273,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																					setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
 																.ToArray() )
 															.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
-														getChosenLogic( width, isReadOnly, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
+														getChosenLogic( useNativeDropDownControl.Value, width, items, isFocused )
+															.Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
 											} );
 									},
 									children: items.Select(
@@ -330,11 +333,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				isPlaceholder );
 		}
 
-		private string getChosenLogic( ContentBasedLength width, bool isReadOnly, ImmutableArray<ListItem> items, bool isFocused ) {
+		private string getChosenLogic( bool useNativeControl, ContentBasedLength width, ImmutableArray<ListItem> items, bool isFocused ) {
 			var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 
 			// Chosen’s allow_single_deselect only works if the placeholder is the first item.
-			var chosenLogic = !isReadOnly && ( placeholderItem == null || placeholderItem == items.First() )
+			var chosenLogic = !useNativeControl && ( placeholderItem == null || placeholderItem == items.First() )
 				                  ? ".chosen( {{ {0} }} )".FormatWith(
 					                  StringTools.ConcatenateWithDelimiter(
 						                  ", ",

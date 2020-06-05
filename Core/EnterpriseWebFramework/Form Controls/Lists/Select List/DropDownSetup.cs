@@ -12,6 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="items">The items in the list. There must be at least one.</param>
 		/// <param name="displaySetup"></param>
+		/// <param name="useNativeControl">Pass true to force the drop-down list to be a native control.</param>
 		/// <param name="width">The width of the list. This overrides any value that may be specified via CSS. If no width is specified via CSS and you pass null
 		/// for this parameter, the list will be just wide enough to show the selected item and will resize whenever the selected item is changed.</param>
 		/// <param name="unlistedSelectedItemLabelGetter">A function that will be called if the selected item ID does not match any list item and is not the default
@@ -28,13 +29,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static DropDownSetup<ItemIdType> Create<ItemIdType>(
-			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, ContentBasedLength width = null,
+			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useNativeControl = false, ContentBasedLength width = null,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", string autoFillTokens = "",
 			FormAction action = null, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) =>
 			new DropDownSetup<ItemIdType>(
 				displaySetup,
+				useNativeControl,
 				width,
 				false,
 				null,
@@ -68,6 +70,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Action validationErrorNotifier = null ) =>
 			new DropDownSetup<ItemIdType>(
 				displaySetup,
+				true,
 				width,
 				true,
 				null,
@@ -88,6 +91,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class DropDownSetup<ItemIdType> {
 		internal readonly DisplaySetup DisplaySetup;
+		internal readonly bool UseNativeControl;
 		internal readonly ContentBasedLength Width;
 		internal readonly bool IsReadOnly;
 		internal readonly ElementClassSet Classes;
@@ -103,12 +107,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Action ValidationErrorNotifier;
 
 		internal DropDownSetup(
-			DisplaySetup displaySetup, ContentBasedLength width, bool isReadOnly, ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
-			string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens, FormAction action, FormAction selectionChangedAction,
-			PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			DisplaySetup displaySetup, bool useNativeControl, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
+			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens,
+			FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
+			UseNativeControl = useNativeControl;
 			Width = width;
 			IsReadOnly = isReadOnly;
 			Classes = classes;
