@@ -302,6 +302,7 @@ ewfActionComponentAllStylesAllStates > ewfIcon:last-child {
 ewfActionComponentAllButtonStylesAllStates, ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
 	display: inline-block;
 	font-weight: initial;
+	white-space: nowrap;
 }
 ewfActionComponentShrinkWrapButtonStyleAllStates, ewfTopWarningContainer ewfActionComponentShrinkWrapButtonStyleAllStates {
 	border-radius: .25em;
