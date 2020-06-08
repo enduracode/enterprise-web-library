@@ -28,6 +28,7 @@ ewfPagePath > h1 {
 }
 ewfSectionNormalStyleBothStates {
 	margin-top: 2em;
+	margin-bottom: 2em;
 }
 ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1.2em;
@@ -36,6 +37,7 @@ ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
+	margin-bottom: 1em;
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1.1em;
@@ -43,6 +45,7 @@ ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadin
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
+	margin-bottom: 1em;
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
@@ -50,6 +53,9 @@ ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyl
 }
 ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
 	margin-top: 0;
+}
+ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child {
+	margin-bottom: 0;
 }
 
 /* lists */
