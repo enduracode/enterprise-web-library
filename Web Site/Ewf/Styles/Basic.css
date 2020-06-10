@@ -47,6 +47,12 @@ ewfUnorderedWrappingList {
 ewfUnorderedWrappingList:first-child {
 	margin-top: calc( 0em - .25em );
 }
+ewfWrappingFormItemList {
+	margin-top: calc( 1em - .5em );
+}
+ewfWrappingFormItemList:first-child {
+	margin-top: calc( 0em - .5em );
+}
 p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
 	margin-bottom: 0;
 }
@@ -92,7 +98,9 @@ ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:last-child
 	padding-bottom: 0;
 }
 ewfWrappingFormItemList {
-	margin: -.5em;
+	margin-right: -.5em;
+	margin-bottom: -.5em;
+	margin-left: -.5em;
 }
 ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem {
 	margin: .5em;
