@@ -66,7 +66,9 @@ ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > 
 	margin-top: 0;
 }
 ewfUnorderedWrappingList {
-	margin: -.25em;
+	margin-right: -.25em;
+	margin-bottom: -.25em;
+	margin-left: -.25em;
 }
 ewfUnorderedWrappingList > ewfComponentListItem {
 	margin: .25em;
