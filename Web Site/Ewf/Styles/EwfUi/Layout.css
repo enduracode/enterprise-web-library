@@ -26,37 +26,6 @@ ewfPagePath > h1 {
 	margin: 0;
 	font-weight: inherit;
 }
-ewfSectionNormalStyleBothStates {
-	margin-top: 2em;
-	margin-bottom: 2em;
-}
-ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1.2em;
-	margin-top: 0;
-	margin-bottom: 1em;
-}
-ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1.1em;
-	margin-bottom: 0;
-}
-ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
-	margin-top: 1em;
-	margin-bottom: 1em;
-}
-ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1em;
-	margin-bottom: 0;
-}
-ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
-	margin-top: 0;
-}
-ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child {
-	margin-bottom: 0;
-}
 
 /* lists */
 ewfHtmlBlock ul {

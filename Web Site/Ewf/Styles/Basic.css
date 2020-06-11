@@ -3,9 +3,45 @@ html {
 	overflow-y: scroll;
 }
 
-/* spacing */
-p,
+/* section spacing and heading sizes */
+ewfSectionNormalStyleBothStates {
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1.2em;
+	margin-top: 0;
+	margin-bottom: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1.1em;
+	margin-bottom: 0;
+}
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1em;
+	margin-bottom: 0;
+}
+ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
+	margin-top: 0;
+}
+ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child {
+	margin-bottom: 0;
+}
+
+
+/* other spacing */
+
+/* top */
 ewfSectionBoxStyleBothStates,
+p,
 ewfUnorderedLineList,
 ewfUnorderedStackList,
 ewfHtmlBlock ul,
@@ -23,8 +59,8 @@ ewfChart,
 ewfHtmlBlock {
 	margin-top: 1em;
 }
-p:first-child,
 ewfSectionBoxStyleBothStates:first-child,
+p:first-child,
 ewfUnorderedLineList:first-child,
 ewfUnorderedStackList:first-child,
 ewfHtmlBlock ul:first-child,
@@ -53,12 +89,16 @@ ewfWrappingFormItemList {
 ewfWrappingFormItemList:first-child {
 	margin-top: calc( 0em - .5em );
 }
+
+/* bottom */
 p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
 	margin-bottom: 0;
 }
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 	margin-bottom: 1em;
 }
+
+/* lists */
 ewfUnorderedLineList > ewfComponentListItem {
 	margin-left: .5em;
 }
@@ -108,12 +148,15 @@ ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfForm
 ewfGridFormItemList {
 	grid-gap: 1em;
 }
+
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 	margin-left: 3em;
 }
+
 ewfModalBox > ewfModalBoxCloseButtonContainer {
 	padding: .5em;
 }
+
 
 /* border colors */
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
