@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ActionControls: EwfPage {
 		protected override void loadData() {
+			EwfUiStatics.OmitContentBox();
+
 			ph.AddControlsReturnThis(
 				getBox(
 					new EwfButton(

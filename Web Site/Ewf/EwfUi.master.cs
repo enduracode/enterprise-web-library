@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal static readonly ElementClass CurrentTabClass = new ElementClass( "ewfEditorSelectedTab" );
 			internal static readonly ElementClass DisabledTabClass = new ElementClass( "ewfUiDisabledTab" );
 
-			internal const string ContentCssClass = "ewfUiContent";
+			internal static readonly ElementClass ContentClass = new ElementClass( "ewfUiContent" );
 			internal static readonly ElementClass PageActionListContainerClass = new ElementClass( "ewfUiPageAction" );
 			internal static readonly ElementClass ContentFootBlockClass = new ElementClass( "ewfButtons" );
 			internal static readonly ElementClass ContentFootActionListContainerClass = new ElementClass( "ewfUiCfActions" );
@@ -116,9 +116,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
 						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadClass.ClassName ),
-						new CssElement( "UiPageActionAndContentAndContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentCssClass ),
+						new CssElement( "UiPageActionAndContentAndContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentClass.ClassName ),
 						new CssElement( "UiPageActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + PageActionListContainerClass.ClassName ),
-						new CssElement( "UiContentBlock", entityAndTabAndContentBlockSelector + " " + "div." + ContentCssClass ),
+						new CssElement( "UiContentBox", entityAndTabAndContentBlockSelector + " " + "div." + ContentClass.ClassName ),
 						new CssElement(
 							"UiContentFootBlock",
 							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockClass.ClassName )
@@ -151,9 +151,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
+		private bool omitContentBox;
 		private IReadOnlyCollection<ActionComponentSetup> pageActions = Enumerable.Empty<ActionComponentSetup>().Materialize();
 		private IReadOnlyCollection<ButtonSetup> contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 		private IReadOnlyCollection<FlowComponent> contentFootComponents;
+
+		void AppEwfUiMasterPage.OmitContentBox() {
+			omitContentBox = true;
+		}
 
 		void AppEwfUiMasterPage.SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions ) {
 			pageActions = actions;
@@ -175,6 +180,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
 			pageActionPlace.AddControlsReturnThis( getPageActionListContainer().GetControls() );
+			if( !omitContentBox )
+				contentContainer.Attributes.Add( "class", CssElementCreator.ContentClass.ClassName );
 			contentFootPlace.AddControlsReturnThis( getContentFootBlock().GetControls() );
 			var globalFootBlock = getGlobalFootBlock();
 			if( globalFootBlock != null )

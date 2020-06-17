@@ -9,7 +9,7 @@
 				<td runat="server" id="sideTabCell" class="ewfUiSideTab" visible="false" />
 				<td runat="server" id="contentCell" class="ewfUiContent">
 					<asp:PlaceHolder runat="server" ID="pageActionPlace" />
-					<div class="ewfUiContent"><asp:ContentPlaceHolder runat="server" ID="contentPlace" /></div>
+					<div runat="server" id="contentContainer"><asp:ContentPlaceHolder runat="server" ID="contentPlace" /></div>
 					<asp:PlaceHolder runat="server" ID="contentFootPlace" />
 				</td>
 			</tr>

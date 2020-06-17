@@ -41,8 +41,8 @@ ewfHtmlBlock ul {
 }
 
 /* boxes */
-ewfSectionBoxStyleBothStates {
-	padding: .5em;
+ewfSectionBoxStyleBothStates, ewfUiContentBox {
+	padding: 1em;
 }
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
@@ -147,7 +147,7 @@ ewfUiPageActionAndContentAndContentFootCell {
 }
 
 /* corner rounding */
-ewfCheckboxList {
+ewfCheckboxList, ewfUiContentBox {
 	border-radius: .5em;
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
@@ -170,7 +170,8 @@ ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWi
 	ewfTableStandardAndStandardExceptLayoutStyles,
 	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:first-child,
 	ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child,
-	ewfCheckboxList {
+	ewfCheckboxList,
+	ewfUiContentBox {
 		border-radius: 0;
 	}
 }

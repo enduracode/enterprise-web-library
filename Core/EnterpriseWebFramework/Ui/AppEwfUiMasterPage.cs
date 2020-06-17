@@ -9,6 +9,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
+		void OmitContentBox();
+
+		/// <summary>
+		/// EWL use only.
+		/// </summary>
 		void SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions );
 
 		/// <summary>

@@ -57,6 +57,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 		}
 
 		/// <summary>
+		/// Omits the box-style effect around the page content. Useful when all content is contained within multiple box-style sections. This must be called before
+		/// EwfPage.LoadData finishes executing.
+		/// </summary>
+		public static void OmitContentBox() {
+			AppMasterPage.OmitContentBox();
+		}
+
+		/// <summary>
 		/// Sets the page actions. This must be called before EwfPage.LoadData finishes executing.
 		/// </summary>
 		/// <param name="actions">Do not pass null.</param>
