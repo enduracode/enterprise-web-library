@@ -19,7 +19,7 @@ ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1.1em;
-	margin-bottom: 0;
+	margin-bottom: .5em;
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
@@ -27,7 +27,7 @@ ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyl
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
-	margin-bottom: 0;
+	margin-bottom: .5em;
 }
 ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
 	margin-top: 0;
