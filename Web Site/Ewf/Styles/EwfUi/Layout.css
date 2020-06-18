@@ -49,8 +49,6 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-top: -1em;
 	margin-right: -1em;
 	margin-left: -1em;
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
 	padding: 1em;
 }
 ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
@@ -58,6 +56,8 @@ ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
 }
 ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin-bottom: 1em;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
 }
 
 /* tables */
