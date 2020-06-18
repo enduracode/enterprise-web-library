@@ -30,8 +30,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var colSpan = tableIsColumnPrimary ? ewfCell.Setup.ItemSpan : ewfCell.Setup.FieldSpan;
 			var rowSpan = tableIsColumnPrimary ? ewfCell.Setup.FieldSpan : ewfCell.Setup.ItemSpan;
 
-			var underlyingCell = ( rowSetup.IsHeader || columnSetup.IsHeader ) ? new TableHeaderCell() : new TableCell();
-			underlyingCell.AddControlsReturnThis( ewfCell.Content.GetControls() );
+			var underlyingCell = rowSetup.IsHeader || columnSetup.IsHeader ? new TableHeaderCell() : new TableCell();
+			underlyingCell.AddControlsReturnThis( ( ewfCell.Content ?? Enumerable.Empty<FlowComponent>() ).GetControls() );
 			if( colSpan == 1 )
 				underlyingCell.Width = columnSetup.Width;
 			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter(

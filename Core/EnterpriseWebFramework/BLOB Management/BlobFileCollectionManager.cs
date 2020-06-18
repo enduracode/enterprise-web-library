@@ -126,7 +126,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( !ReadOnly )
 								table.AddRow(
 									getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-									( files.Any() ? new EwfButton( new StandardButtonStyle( "Delete Selected Files" ) ).ToCollection() : null ).ToCell(
+									( files.Any() ? new EwfButton( new StandardButtonStyle( "Delete Selected Files" ) ) : null ).ToCell(
 										new TableCellSetup( fieldSpan: 2, textAlignment: TextAlignment.Right ) ) );
 						} );
 

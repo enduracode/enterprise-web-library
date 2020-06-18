@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 	public static class EwfTableCellExtensionCreators {
 		/// <summary>
-		/// Creates a table cell containing these components.
+		/// Creates a table cell containing these components. If called on null, creates an empty cell.
 		/// </summary>
 		/// <param name="content"></param>
 		/// <param name="setup"></param>
@@ -29,18 +29,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			new EwfTableCell( setup ?? new TableCellSetup(), content );
 
 		/// <summary>
-		/// Creates a table cell containing this component.
+		/// Creates a table cell containing this component. If called on null, creates an empty cell.
 		/// </summary>
 		/// <param name="content"></param>
 		/// <param name="setup"></param>
-		public static EwfTableCell ToCell( this FlowComponent content, TableCellSetup setup = null ) => content.ToCollection().ToCell( setup: setup );
+		public static EwfTableCell ToCell( this FlowComponent content, TableCellSetup setup = null ) => ( content?.ToCollection() ).ToCell( setup: setup );
 
 		/// <summary>
-		/// Creates a table cell containing components that represent this string.
+		/// Creates a table cell containing components that represent this string. Do not call on null.
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="setup"></param>
 		public static EwfTableCell ToCell( this string text, TableCellSetup setup = null ) =>
+			// Remove null handling when we’re confident it won’t break too many things.
 			new EwfTableCell( setup ?? new TableCellSetup(), ( text ?? "" ).ToComponents(), simpleText: text ?? "" );
 
 		/// <summary>
