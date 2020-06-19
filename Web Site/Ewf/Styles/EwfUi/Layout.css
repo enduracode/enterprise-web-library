@@ -44,20 +44,23 @@ ewfHtmlBlock ul {
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	padding: 1em;
 }
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1em;
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	margin-top: -1em;
 	margin-right: -1em;
 	margin-left: -1em;
 	padding: 1em;
 }
-ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
 	margin-bottom: -1em;
 }
-ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: 1em;
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
+}
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1em;
+	margin: 0;
 }
 
 /* tables */

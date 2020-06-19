@@ -159,7 +159,7 @@ ewfModalBox > ewfModalBoxCloseButtonContainer {
 
 
 /* border colors */
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
 	border-color: rgba( 0, 0, 0, 0.1 );
@@ -774,27 +774,23 @@ ewfNotificationSectionContainerDockedState {
 	animation-name: notificationSectionPosition;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates {
-	border-style: solid;
-	border-color: rgba( 0, 0, 0, .5 );
 	background-color: white;
 	color: black;
 }
 ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates {
 	font-size: 1.2em;
 	box-shadow: 0 0 15px black;
-	border-width: .1em;
 	border-radius: 1em;
 	padding: 2em;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates {
 	font-size: 1rem;
-	border-width: .1rem;
-	border-top-width: 0;
 	border-radius: 0 0 .5em .5em;
 	padding: .2rem 1em;
-	transition-property: font-size, box-shadow, border-width, border-radius, padding;
+	transition-property: font-size, box-shadow, border-radius, padding;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	border-style: none;
 	overflow: hidden;
 
 	/* See http://stackoverflow.com/a/4407335/35349. */
@@ -806,6 +802,8 @@ ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSe
 	user-select: none;
 }
 ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	margin: 0;
+	padding: 0;
 	height: 0;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
@@ -822,12 +820,6 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewf
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: .2rem;
-}
-ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
-	font-size: 1em;
-	margin: 0;
-	border-style: none;
-	padding: 0;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
 	display: block;
