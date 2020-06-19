@@ -703,7 +703,6 @@ ewfProcessingDialogProcessingParagraph {
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis1,
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis2,
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
-	-webkit-animation: pulse 2s infinite;
 	animation: pulse 2s infinite;
 }
 @keyframes pulse {
@@ -717,27 +716,13 @@ ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
 		opacity: 1;
 	}
 }
-@-webkit-keyframes pulse {
-	0% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0;
-	}
-	100% {
-		opacity: 1;
-	}
-}
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis1 {
-	-webkit-animation-delay: 0;
 	animation-delay: 0;
 }
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis2 {
-	-webkit-animation-delay: 200ms;
 	animation-delay: 200ms;
 }
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
-	-webkit-animation-delay: 300ms;
 	animation-delay: 300ms;
 }
 ewfProcessingDialogTimeOutParagraphBothStates {
@@ -764,13 +749,10 @@ ewfNotificationSectionContainerBothStates {
 	max-width: 40rem;
 }
 ewfNotificationSectionContainerNotificationState {
-	-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 	transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
 }
 ewfNotificationSectionContainerDockedState {
-	-webkit-transform: translateX( -50% );
 	transform: translateX( -50% );
-	-webkit-animation-name: notificationSectionPosition;
 	animation-name: notificationSectionPosition;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates {
@@ -812,7 +794,6 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfS
 	margin-right: -1em;
 	background-color: rgba( 0, 0, 0, .05 );
 	padding: .2rem 1em;
-	-webkit-animation-name: notificationSectionDisplay;
 	animation-name: notificationSectionDisplay;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
@@ -847,14 +828,12 @@ ewfWarningMessageContainer > ewfStatusMessageText {
 	font-weight: bold;
 }
 ewfNotificationSectionContainerDockedState {
-	-webkit-animation-duration: 800ms;
 	animation-duration: 800ms;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
 	transition-delay: 400ms;
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	-webkit-animation-duration: 400ms;
 	animation-duration: 400ms;
 }
 @keyframes notificationSectionPosition {
@@ -870,35 +849,7 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfS
 		animation-timing-function: ease-out;
 	}
 }
-@-webkit-keyframes notificationSectionPosition {
-	0% {
-		-webkit-transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
-		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
-		-webkit-animation-timing-function: ease-in;
-	}
-	50% {
-		-webkit-transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
-		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
-	}
-	75% {
-		-webkit-transform: translateX( -50% ) translateY( -1.7em );
-		transform: translateX( -50% ) translateY( -1.7em );
-		-webkit-animation-timing-function: ease-out;
-	}
-}
 @keyframes notificationSectionDisplay {
-	0% {
-		margin: 0;
-		padding: 0;
-		height: 0;
-	}
-	99.9% {
-		margin: 0;
-		padding: 0;
-		height: 0;
-	}
-}
-@-webkit-keyframes notificationSectionDisplay {
 	0% {
 		margin: 0;
 		padding: 0;
