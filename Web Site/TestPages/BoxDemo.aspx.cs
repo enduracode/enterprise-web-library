@@ -20,6 +20,19 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							new Paragraph( "This is an expandable box.".ToComponents() ).ToCollection(),
 							style: SectionStyle.Box,
 							expanded: false ) )
+					.Append(
+						new Section(
+							"Heading Box",
+							new Paragraph( "This is a box with heading.".ToComponents() ).ToCollection(),
+							style: SectionStyle.Box,
+							postHeadingComponents: new Paragraph( "Post-heading components.".ToComponents() ).ToCollection() ) )
+					.Append(
+						new Section(
+							"Expandable Box",
+							new Paragraph( "This is an expandable box.".ToComponents() ).ToCollection(),
+							style: SectionStyle.Box,
+							postHeadingComponents: new Paragraph( "Post-heading components.".ToComponents() ).ToCollection(),
+							expanded: false ) )
 					.GetControls() );
 		}
 	}
