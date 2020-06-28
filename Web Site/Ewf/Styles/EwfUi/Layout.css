@@ -23,14 +23,12 @@ ewfUiGlobalContainer {
 }
 ewfUiTopErrorMessageListContainer,
 ewfUiGlobalNavListContainer,
-ewfUiEntityBlock {
+ewfUiEntityBlock,
+ewfUiTopTabBlock {
 	margin-top: 1rem;
 }
 ewfUiGlobalContainer {
 	padding-bottom: 1rem;
-}
-ewfUiTopTabBlock {
-	margin-top: .5rem;
 }
 ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
 	padding: .5rem;
