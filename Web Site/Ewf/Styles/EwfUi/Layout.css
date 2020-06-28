@@ -208,6 +208,9 @@ ewfErrorMessageListContainer {
 }
 
 /* master page */
+ewfNotificationSpacer {
+	display: none;
+}
 ewfUiAppLogoAndUserInfoBlock, ewfUiTopErrorMessageListContainer, ewfUiGlobalNavListContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootBlock {
 	margin-left: auto;
 	margin-right: auto;
