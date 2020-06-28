@@ -31,7 +31,7 @@ ewfUiGlobalContainer {
 	padding-bottom: 1rem;
 }
 ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
-	padding: .5rem;
+	padding: .5rem 1rem;
 }
 
 /* borders */
