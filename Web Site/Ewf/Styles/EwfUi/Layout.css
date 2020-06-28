@@ -44,16 +44,14 @@ ewfUiGlobalContainer, ewfUiTopTabBlock {
 
 /* headings and sections */
 ewfPagePath {
-	font-size: 1.4em;
-	margin: .3em 0;
+	font-size: 1.1em;
 }
 ewfPagePath > ewfActionComponentAllStylesAllStates {
-	font-size: .8em;
 	font-weight: 600;
 }
 ewfPagePath > h1 {
 	display: inline;
-	font-size: 1em;
+	font-size: 1.3em;
 	margin: 0;
 	font-weight: 700;
 }
