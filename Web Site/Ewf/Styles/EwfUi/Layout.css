@@ -14,6 +14,28 @@ ewfUiGlobalContainer {
 	}
 }
 
+/* spacing */
+.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootBlock {
+	margin-top: 1em;
+}
+.ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfUiEntityBlock > *:first-child {
+	margin-top: 0;
+}
+ewfUiTopErrorMessageListContainer,
+ewfUiGlobalNavListContainer,
+ewfUiEntityBlock {
+	margin-top: 1rem;
+}
+ewfUiGlobalContainer {
+	padding-bottom: 1rem;
+}
+ewfUiTopTabBlock {
+	margin-top: .5rem;
+}
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
+	padding: .5rem;
+}
+
 /* borders */
 ewfUiGlobalContainer, ewfUiTopTabBlock {
 	border-bottom-width: 1px;
@@ -148,28 +170,6 @@ ewfCheckboxList > ewfCheckboxListContentContainer {
 }
 ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList > ewfComponentListItem > ewfFlowCheckboxAllStates > ewfCheckbox {
 	padding: .25em;
-}
-
-/* spacing */
-.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootBlock {
-	margin-top: 1em;
-}
-.ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfUiEntityBlock > *:first-child {
-	margin-top: 0;
-}
-ewfUiTopErrorMessageListContainer,
-ewfUiGlobalNavListContainer,
-ewfUiEntityBlock {
-	margin-top: 1rem;
-}
-ewfUiGlobalContainer {
-	padding-bottom: 1rem;
-}
-ewfUiTopTabBlock {
-	margin-top: .5rem;
-}
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
-	padding: .5rem;
 }
 
 /* corner rounding */
