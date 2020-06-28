@@ -818,7 +818,7 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewf
 	transition-property: max-height;
 }
 ewfNotificationSpacer {
-	height: 1.7rem;
+	height: 1.8rem;
 }
 ewfInfoMessageContainer > ewfIcon {
 	color: rgb( 120, 160, 195 );
