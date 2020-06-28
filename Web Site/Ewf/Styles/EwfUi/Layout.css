@@ -1,9 +1,11 @@
 ﻿body {
 	font-size: 1rem;
-	margin: 1rem auto;
+	margin: 0 0 1rem 0;
 	border: 0;
 	padding: 0;
-	max-width: 75em;
+}
+ewfUiGlobalContainer {
+	padding-top: 1rem;
 }
 @media print {
 	body {
@@ -12,19 +14,26 @@
 	}
 }
 
+/* borders */
+ewfUiGlobalContainer, ewfUiTopTabBlock {
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
 /* headings and sections */
 ewfPagePath {
 	font-size: 1.4em;
 	margin: .3em 0;
 }
 ewfPagePath > ewfActionComponentAllStylesAllStates {
-	font-size: .95em;
+	font-size: .8em;
+	font-weight: 600;
 }
 ewfPagePath > h1 {
 	display: inline;
 	font-size: 1em;
 	margin: 0;
-	font-weight: inherit;
+	font-weight: 700;
 }
 
 /* lists */
@@ -77,7 +86,7 @@ ewfTableStandardAndStandardExceptLayoutStyles > caption {
 	padding-top: .125em; /* prevents text from being cropped by rounded corners in Chrome */
 	padding-bottom: .5em;
 	text-align: left;
-	font-weight: bold;
+	font-weight: 600;
 }
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > th:not( .ewfTcTop ):not( .ewfTcMiddle ):not( .ewfTcBottom ):not( .ewfTcBaseLine ), ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > td:not( .ewfTcTop ):not( .ewfTcMiddle ):not( .ewfTcBottom ):not( .ewfTcBaseLine ) {
 	vertical-align: top;
@@ -92,6 +101,9 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates:first-child > ewfThAndTd {
 		border-top: 1pt solid black;
 	}
+}
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
+	font-weight: 600;
 }
 table.ewfStandardDynamicTableCaption {
 	margin-bottom: .5em;
@@ -138,15 +150,26 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList > 
 	padding: .25em;
 }
 
-/* block element vertical spacing */
-.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiGlobalFootBlock {
+/* spacing */
+.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootBlock {
 	margin-top: 1em;
 }
 .ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfUiEntityBlock > *:first-child {
 	margin-top: 0;
 }
-ewfUiPageActionAndContentAndContentFootCell {
-	padding-top: 1em;
+ewfUiTopErrorMessageListContainer,
+ewfUiGlobalNavListContainer,
+ewfUiEntityBlock {
+	margin-top: 1rem;
+}
+ewfUiGlobalContainer {
+	padding-bottom: 1rem;
+}
+ewfUiTopTabBlock {
+	margin-top: .5rem;
+}
+ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
+	padding: .5rem;
 }
 
 /* corner rounding */
@@ -185,8 +208,10 @@ ewfErrorMessageListContainer {
 }
 
 /* master page */
-ewfUiAppLogoAndUserInfoBlock {
-	margin-bottom: .5rem;
+ewfUiAppLogoAndUserInfoBlock, ewfUiTopErrorMessageListContainer, ewfUiGlobalNavListContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootBlock {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 75rem;
 }
 ewfUiUserInfoContainer {
 	text-align: right;
@@ -194,26 +219,8 @@ ewfUiUserInfoContainer {
 ewfUiUserInfoContainer > ewfUnorderedInlineList {
 	margin-left: .5em;
 }
-ewfUiGlobalNavListContainer,
-ewfUiTopErrorMessageListContainer,
-ewfUiEntityBlock,
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates,
-ewfUiSideTabGroupHead,
-ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
-	padding-left: .5rem;
-	padding-right: .5rem;
-}
-ewfUiGlobalNavListContainer,
-ewfUiTopErrorMessageListContainer,
-ewfUiEntityBlock,
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates,
-ewfUiSideTabBlock {
-	padding-top: .5rem;
-	padding-bottom: .5rem;
-}
 ewfUiTopErrorMessageListContainer {
 	font-size: 1.4em;
-	margin: 1rem 0;
 }
 @media print {
 	ewfUiEntityBlock {
@@ -240,7 +247,11 @@ ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContai
 }
 ewfUiTopTabBlock ewfActionComponentAllStylesAllStates, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
 	display: block;
+	font-weight: 600;
 	text-decoration: none;
+}
+ewfUiTopTabBlock {
+	font-size: 1.1em;
 }
 ewfUiTopTabBlock > ewfControlLine {
 	display: block;
@@ -285,8 +296,8 @@ ewfUiPoweredByEwlFooterBlock {
 }
 @media print {
 	ewfUiUserInfoContainer,
-	ewfUiGlobalNavListContainer,
 	ewfUiTopErrorMessageListContainer,
+	ewfUiGlobalNavListContainer,
 	ewfUiEntityNavAndActionContainer,
 	ewfUiSideTabBlockCell,
 	ewfUiContentFootBlock {

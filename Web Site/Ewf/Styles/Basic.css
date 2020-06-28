@@ -12,6 +12,7 @@ ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading
 	font-size: 1.2em;
 	margin-top: 0;
 	margin-bottom: 1em;
+	font-weight: 600;
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
 	margin-top: 1em;
@@ -368,6 +369,7 @@ ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
 	border-radius: .5em;
 	padding: 1em;
+	font-weight: 600;
 }
 button {
 	font: inherit;
@@ -920,6 +922,7 @@ ewfErrorPageBody ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
 	border-radius: .5em;
 	padding: 1em;
+	font-weight: 600;
 }
 
 /* fonts */
@@ -927,5 +930,5 @@ ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectio
 	font-family: 'Open Sans', sans-serif;
 }
 ewfSelectUserPageBody h1, ewfErrorPageBody h1 {
-	font-family: 'Droid Serif', serif;
+	font-family: 'Libre Franklin', sans-serif;
 }

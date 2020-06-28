@@ -3,6 +3,14 @@
 	color: hsla( 215, 11%, 22%, 1 );
 }
 
+/* borders */
+ewfUiGlobalContainer {
+	border-color: hsla( 215, 33%, 85%, 1 );
+}
+ewfUiTopTabBlock {
+	border-color: hsl( 0, 0%, 75% );
+}
+
 /* boxes */
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
@@ -18,9 +26,7 @@ ewfCheckboxList {
 
 /* block highlighting */
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrStatesWithActionAndWithHover,
-ewfFlowCheckboxHighlightedState > ewfCheckbox,
-ewfUiTopTabBlock ewfUiCurrentTabActionControl,
-ewfUiSideTabBlock ewfUiCurrentTabActionControl {
+ewfFlowCheckboxHighlightedState > ewfCheckbox {
 	background-color: #81989E;
 	background-image: none;
 	color: white;
@@ -30,11 +36,16 @@ ewfUiSideTabBlock ewfUiCurrentTabActionControl {
 ewfHyperlinkStandardStyleAllNormalStates,
 ewfHyperlinkStandardStyleAllVisitedStates,
 ewfActionComponentAllStylesAllNormalStates.icon,
-ewfActionComponentAllStylesAllVisitedStates.icon {
-	color: hsla( 4, 100%, 32%, 1 );
+ewfActionComponentAllStylesAllVisitedStates.icon,
+ewfUiTopTabBlock ewfUiCurrentTabActionControl,
+ewfUiSideTabBlock ewfUiCurrentTabActionControl {
+	color: hsla( 211, 70%, 45%, 1 );
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
-	background-color: hsla( 4, 100%, 32%, 1 );
+	background-color: hsla( 211, 70%, 45%, 1 );
+}
+ewfUiTopTabBlock ewfUiCurrentTabActionControl {
+	box-shadow: 0 3px hsla( 211, 70%, 45%, 1 );
 }
 ewfHyperlinkStandardStyleStatesWithHover,
 ewfHyperlinkStandardStyleStatesWithFocus,
@@ -53,37 +64,19 @@ ewfActionComponentAllButtonStylesAllStates {
 ewfErrorMessageListContainer {
 	color: hsla( 0, 100%, 47%, 1 );
 }
-ewfUiTopErrorMessageListContainer {
-	background-color: hsla( 0, 100%, 47%, 1 );
-}
 
-/* global nav block, top tabs, and side tabs */
-ewfUiGlobalNavListContainer {
-	background-color: #005675;
+/* master page */
+ewfUiGlobalContainer {
+	background-color: white;
 }
-ewfUiGlobalNavListContainer, ewfUiGlobalNavListContainer ewfHyperlinkStandardStyleAllStates {
-	color: hsla( 193, 27%, 90%, 1 );
-}
-ewfUiTopErrorMessageListContainer {
-	color: white;
-}
-ewfUiEntityBlock {
-	background-color: hsla( 192, 39%, 90%, 1 );
-}
-ewfUiTopTabBlock, ewfUiSideTabBlock {
-	background-color: #9DBEC7;
-}
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
+ewfUiTopTabBlock ewfActionComponentAllStylesAllNormalStates,
+ewfUiTopTabBlock ewfActionComponentAllStylesAllVisitedStates,
+ewfUiSideTabBlock ewfActionComponentAllStylesAllNormalStates,
+ewfUiSideTabBlock ewfActionComponentAllStylesAllVisitedStates {
 	color: inherit;
 }
 ewfUiTopTabBlock ewfUiDisabledTabActionControl, ewfUiSideTabBlock ewfUiDisabledTabActionControl {
 	opacity: .2;
-}
-ewfUiTopTabBlock ewfActionComponentAllStylesStatesWithHover,
-ewfUiTopTabBlock ewfActionComponentAllStylesStatesWithFocus,
-ewfUiSideTabBlock ewfActionComponentAllStylesStatesWithHover,
-ewfUiSideTabBlock ewfActionComponentAllStylesStatesWithFocus {
-	background-image: linear-gradient( rgba( 255, 255, 255, .3 ), rgba( 255, 255, 255, .3 ) );
 }
 
 /* new content */

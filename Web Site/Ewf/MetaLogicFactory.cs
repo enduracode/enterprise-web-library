@@ -40,7 +40,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateBasicCssInfos() {
 			var infos = new List<ResourceInfo>();
-			infos.Add( new ExternalResourceInfo( "//fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700,400italic" ) );
+			infos.Add(
+				new ExternalResourceInfo(
+					"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=fallback" ) );
 			infos.Add( new ExternalResourceInfo( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryUi.Jquery_ui_1114custom_v2.Jquery_uiminCss.Info() );
 			infos.Add( new ThirdParty.SelectCssCss.Info() );

@@ -4,9 +4,8 @@
 
 ewfPagePath,
 ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
-/*control list with a class to limit to major nav elements,*/
+ewfActionComponentLargeButtonStyleAllStates,
 ewfTableStandardAndStandardExceptLayoutStyles > caption,
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh,
-ewfActionComponentLargeButtonStyleAllStates {
-	font-family: 'Droid Serif', serif;
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
+	font-family: 'Libre Franklin', sans-serif;
 }

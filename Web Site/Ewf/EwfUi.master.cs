@@ -14,13 +14,12 @@ using Humanizer;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
 		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string GlobalBlockId = "ewfUiGlobal";
+			internal const string GlobalContainerId = "ewfUiGlobal";
 			internal static readonly ElementClass AppLogoAndUserInfoBlockClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
 			internal static readonly ElementClass AppLogoClass = new ElementClass( "ewfUiAppLogo" );
 			internal static readonly ElementClass UserInfoClass = new ElementClass( "ewfUiUserInfo" );
-			internal static readonly ElementClass GlobalNavListContainerClass = new ElementClass( "ewfUiGlobalNav" );
-
 			internal static readonly ElementClass TopErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
+			internal static readonly ElementClass GlobalNavListContainerClass = new ElementClass( "ewfUiGlobalNav" );
 
 			internal const string EntityAndTabAndContentBlockId = "ewfUiEntityAndTabsAndContent";
 
@@ -63,19 +62,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 
 			private IEnumerable<CssElement> getGlobalElements() {
-				const string globalBlockSelector = "div#" + GlobalBlockId;
+				const string globalContainerSelector = "div#" + GlobalContainerId;
 				return new[]
 					{
-						new CssElement( "UiGlobalBlock", globalBlockSelector ),
+						new CssElement( "UiGlobalContainer", globalContainerSelector ),
 						new CssElement(
 							"UiAppLogoAndUserInfoBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => globalBlockSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName ).ToArray() ),
-						new CssElement( "UiAppLogoContainer", globalBlockSelector + " " + "div." + AppLogoClass.ClassName ),
-						new CssElement( "UiUserInfoContainer", globalBlockSelector + " " + "div." + UserInfoClass.ClassName ),
-						new CssElement( "UiGlobalNavListContainer", globalBlockSelector + " " + "div." + GlobalNavListContainerClass.ClassName ),
+							EwfTable.CssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName )
+								.ToArray() ),
+						new CssElement( "UiAppLogoContainer", globalContainerSelector + " " + "div." + AppLogoClass.ClassName ),
+						new CssElement( "UiUserInfoContainer", globalContainerSelector + " " + "div." + UserInfoClass.ClassName ),
 						new CssElement(
 							"UiTopErrorMessageListContainer",
-							ListErrorDisplayStyle.CssSelectors.Select( i => globalBlockSelector + " " + i + "." + TopErrorMessageListContainerClass.ClassName ).ToArray() )
+							ListErrorDisplayStyle.CssSelectors.Select( i => globalContainerSelector + " " + i + "." + TopErrorMessageListContainerClass.ClassName )
+								.ToArray() ),
+						new CssElement( "UiGlobalNavListContainer", globalContainerSelector + " " + "div." + GlobalNavListContainerClass.ClassName )
 					};
 			}
 
@@ -175,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			globalPlace.AddControlsReturnThis( getGlobalBlock() );
+			globalPlace.AddControlsReturnThis( getGlobalContainer() );
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
@@ -209,25 +210,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		private Control getGlobalBlock() {
-			// ReSharper disable once SuspiciousTypeConversion.Global
-			var appLogoAndUserInfoControlOverrider = EwfUiStatics.AppProvider as AppLogoAndUserInfoControlOverrider;
-
-			return new Block(
+		private Control getGlobalContainer() =>
+			new Block(
 				new[]
 						{
-							appLogoAndUserInfoControlOverrider != null
+							// ReSharper disable once SuspiciousTypeConversion.Global
+							EwfUiStatics.AppProvider is AppLogoAndUserInfoControlOverrider appLogoAndUserInfoControlOverrider
 								? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl()
 								: new PlaceHolder().AddControlsReturnThis( getAppLogoAndUserInfoBlock().ToCollection().GetControls() ),
-							getGlobalNavListContainer(),
 							new PlaceHolder().AddControlsReturnThis(
 								new FlowErrorContainer(
 										new ErrorSourceSet( includeGeneralErrors: true ),
 										new ListErrorDisplayStyle( classes: CssElementCreator.TopErrorMessageListContainerClass ) ).ToCollection()
-									.GetControls() )
+									.GetControls() ),
+							getGlobalNavListContainer()
 						}.Where( i => i != null )
-					.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalBlockId };
-		}
+					.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalContainerId };
 
 		private FlowComponent getAppLogoAndUserInfoBlock() {
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockClass );
@@ -383,10 +381,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private Control getTopTabBlock( ResourceGroup resourceGroup ) {
 			return new Block(
-				new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() )
-					{
-						CssClass = CssElementCreator.TopTabCssClass, VerticalAlignment = TableCellVerticalAlignment.Bottom
-					} ) { CssClass = CssElementCreator.TopTabCssClass };
+				new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() ) { VerticalAlignment = TableCellVerticalAlignment.Bottom } )
+				{
+					CssClass = CssElementCreator.TopTabCssClass
+				};
 		}
 
 		private bool entityUsesTabMode( TabMode tabMode ) {
