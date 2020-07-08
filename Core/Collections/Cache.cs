@@ -11,9 +11,8 @@ namespace EnterpriseWebLibrary.Collections {
 
 		public Cache( bool isThreadSafe, IEqualityComparer<KeyType> comparer = null ) {
 			dictionary = isThreadSafe
-				             ? comparer != null
-					               ? (IDictionary<KeyType, ValType>)new ConcurrentDictionary<KeyType, ValType>( comparer )
-					               : new ConcurrentDictionary<KeyType, ValType>()
+				             ? comparer != null ? (IDictionary<KeyType, ValType>)new ConcurrentDictionary<KeyType, ValType>( comparer ) :
+				               new ConcurrentDictionary<KeyType, ValType>()
 				             : new Dictionary<KeyType, ValType>( comparer );
 		}
 

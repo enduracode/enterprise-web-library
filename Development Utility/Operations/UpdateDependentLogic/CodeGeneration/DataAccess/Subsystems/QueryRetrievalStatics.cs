@@ -118,9 +118,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static string getQueryCacheName(
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-			RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
-			return "Rows" + postSelectFromClause.name +
-			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any() ? "Queries" : "Query" );
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+			return "Rows" + postSelectFromClause.name + ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any()
+				                                              ? "Queries"
+				                                              : "Query" );
 		}
 	}
 }
