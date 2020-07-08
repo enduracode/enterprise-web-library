@@ -68,14 +68,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				"QueryRetrieval\", () => new Cache() ); } }" );
 			foreach( var i in query.postSelectFromClauses ) {
 				var type = getQueryCacheType( query, i );
-				writer.WriteLine( "private readonly " + type + " " + getQueryCacheName( query, i, true ) + " = new " + type + "();" );
+				writer.WriteLine( "internal readonly " + type + " " + getQueryCacheName( query, i ) + " = new " + type + "();" );
 			}
 			writer.WriteLine( "private Cache() {}" );
-			foreach( var i in query.postSelectFromClauses ) {
-				var type = getQueryCacheType( query, i );
-				writer.WriteLine(
-					"internal " + type + " " + getQueryCacheName( query, i, false ) + " { get { return " + getQueryCacheName( query, i, true ) + "; } }" );
-			}
 			writer.WriteLine( "}" );
 		}
 
@@ -101,8 +96,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			var namedParamList = DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value );
 			var getResultSetFirstArg = namedParamList.Any() ? "new[] { " + StringTools.ConcatenateWithDelimiter( ", ", namedParamList.ToArray() ) + " }, " : "";
-			writer.WriteLine(
-				"return Cache.Current." + getQueryCacheName( query, postSelectFromClause, false ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
+			writer.WriteLine( "return Cache.Current." + getQueryCacheName( query, postSelectFromClause ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );
@@ -124,8 +118,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static string getQueryCacheName(
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause, bool getFieldName ) {
-			return ( getFieldName ? "rows" : "Rows" ) + postSelectFromClause.name +
+			RedStapler.StandardLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+			return "Rows" + postSelectFromClause.name +
 			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any() ? "Queries" : "Query" );
 		}
 	}
