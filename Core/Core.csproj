@@ -701,6 +701,7 @@
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\Isu.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\ServiceContracts\ProgramRunner.cs" />
     <Compile Include="InstallationSupportUtility\UserCorrectableException.cs" />
+    <Compile Include="IO\JsonOps.cs" />
     <Compile Include="IO\PdfOps.cs" />
     <Compile Include="IO\RsFile.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeRemapping.cs" />

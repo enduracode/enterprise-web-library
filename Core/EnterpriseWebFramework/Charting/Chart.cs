@@ -6,7 +6,6 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using JetBrains.Annotations;
@@ -216,7 +215,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				using( var writer = new StringWriter() ) {
 					writer.WriteLine( "var canvas = document.getElementById( '{0}' );".FormatWith( canvas.ClientID ) );
 					writer.WriteLine( "canvas.width = $( canvas ).parent().width();" );
-					writer.WriteLine( "new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith( setup.ChartType, chartData.ToJson(), options.ToJson() ) );
+					writer.WriteLine(
+						"new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith(
+							setup.ChartType,
+							JsonOps.SerializeObject( chartData ),
+							JsonOps.SerializeObject( options ) ) );
 					return writer.ToString();
 				}
 			};
