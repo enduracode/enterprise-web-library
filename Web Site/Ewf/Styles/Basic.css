@@ -210,6 +210,7 @@ ewfWrappingFormItemList {
 }
 ewfUnorderedLineList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
 ewfUnorderedWrappingList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfWrappingFormItemList {
 	align-items: center;
 }
@@ -236,13 +237,14 @@ ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInline
 ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 	content: " | ";
 }
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
-	align-items: center;
-}
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 	min-width: 0;
 	flex-grow: 1;
+}
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	align-self: stretch;
 }
 ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
 	min-width: 0;
