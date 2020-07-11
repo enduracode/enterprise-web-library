@@ -138,6 +138,15 @@ ewfStackFormItemList > ewfFormItemListItem:last-child, ewfStackFormItemList > ew
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem:last-child {
 	padding-bottom: 0;
 }
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
+	margin-left: -.5em;
+	margin-right: -.5em;
+}
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	margin-left: .5em;
+	margin-right: .5em;
+}
 ewfWrappingFormItemList {
 	margin-right: -.5em;
 	margin-bottom: -.5em;
