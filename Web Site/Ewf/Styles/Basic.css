@@ -780,6 +780,7 @@ ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates 
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates {
 	font-size: 1rem;
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
 	border-radius: 0 0 .5em .5em;
 	padding: .2rem 1em;
 	transition-property: font-size, box-shadow, border-radius, padding;
@@ -814,6 +815,10 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewf
 }
 ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: .2rem;
+}
+ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+	font-size: 1em;
+	margin: 0;
 }
 ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
 	display: block;
