@@ -752,6 +752,9 @@ ewfProcessingDialogTimeOutParagraphInactiveState {
 ewfProcessingDialogTimeOutParagraphActiveState {
 	transition: visibility 0 200ms;
 }
+ewfProcessingDialogTimeOutParagraphBothStates > ewfActionComponentAllButtonStylesAllStates {
+	white-space: unset;
+}
 ewfNotificationSectionContainerBothStates {
 	position: fixed;
 	font-size: 1rem;
