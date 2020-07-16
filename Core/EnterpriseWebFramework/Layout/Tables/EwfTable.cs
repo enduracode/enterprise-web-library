@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using EnterpriseWebLibrary.IO;
 using Humanizer;
 using StackExchange.Profiling;
 
@@ -170,8 +171,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								            : null ) ) ) );
 		}
 
-		// NOTE: Don't forget about Export to Excel, which should go last in the list.
-		internal static IEnumerable<FlowComponent> GetGeneralActionList( bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> actions ) {
+		internal static PostBack GetExportToExcelPostBack( string postBackIdBase, string caption, IReadOnlyCollection<Action<ExcelWorksheet>> rowAdders ) =>
+			PostBack.CreateIntermediate(
+				null,
+				id: PostBack.GetCompositeId( postBackIdBase, "excel" ),
+				reloadBehaviorGetter: () => new PageReloadBehavior(
+					secondaryResponse: new SecondaryResponse(
+						() => EwfResponse.CreateExcelWorkbookResponse(
+							() => caption.Any() ? caption : "Excel export",
+							() => {
+								var workbook = new ExcelFileWriter();
+								foreach( var i in rowAdders )
+									i( workbook.DefaultWorksheet );
+								return workbook;
+							} ) ) ) );
+
+		internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
+			if( exportToExcelPostBack != null )
+				actions = actions.Append( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) ).Materialize();
+
 			if( !actions.Any() )
 				return Enumerable.Empty<FlowComponent>();
 
@@ -185,6 +203,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
 				classes: actionListContainerClass ).ToCollection();
 		}
+
+		internal static Action<ExcelWorksheet> GetExcelRowAdder( bool rowIsHeader, IReadOnlyCollection<EwfTableCell> cells ) =>
+			worksheet => {
+				if( cells.Any( i => i.Setup.FieldSpan != 1 || i.Setup.ItemSpan != 1 ) )
+					throw new ApplicationException( "Export to Excel does not currently support cells that span multiple columns or rows." );
+
+				if( rowIsHeader )
+					worksheet.AddHeaderToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+				else
+					worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+			};
 
 		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
 			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
@@ -339,6 +368,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				etherealContent );
 
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
+		private readonly PostBack exportToExcelPostBack;
 		private readonly IReadOnlyList<EwfTableItemGroup> itemGroups;
 
 		private EwfTable(
@@ -356,6 +386,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			tailUpdateRegions = tailUpdateRegions ?? Enumerable.Empty<TailUpdateRegion>().Materialize();
 
 			var dataModifications = FormState.Current.DataModifications;
+
+			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
 				tableContext => {
 					var children = new List<FlowComponentOrNode>();
@@ -372,7 +404,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>>();
 								foreach( var itemGroup in itemGroups ) {
 									var visibleItems = itemGroup.Items.Take( itemLimit.Value.Value - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i() );
-									visibleItemGroupsAndItems.Add( Tuple.Create<EwfTableItemGroup, IReadOnlyCollection<EwfTableItem>>( itemGroup, visibleItems.Materialize() ) );
+									visibleItemGroupsAndItems.Add( Tuple.Create( itemGroup, visibleItems.Materialize() ) );
 									if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == itemLimit.Value.Value )
 										break;
 								}
@@ -389,7 +421,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var itemLimitingAndGeneralActionComponents =
 									( defaultItemLimit != DataRowLimit.Unlimited
 										  ? getItemLimitingControlContainer( postBackIdBase, itemLimit.Value, itemLimitingUpdateRegionSet, tailUpdateRegions ).ToCollection()
-										  : Enumerable.Empty<FlowComponent>() ).Concat( GetGeneralActionList( allowExportToExcel, tableActions ) )
+										  : Enumerable.Empty<FlowComponent>() ).Concat( GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
 									.Materialize();
 								var headRows = buildRows(
 										( itemLimitingAndGeneralActionComponents.Any()
@@ -408,6 +440,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Materialize();
 								if( headRows.Any() )
 									children.Add( new ElementComponent( context => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
+								excelRowAdders.AddRange( headItems.Select( i => GetExcelRowAdder( true, i.Cells ) ) );
 
 								var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
 								var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
@@ -442,6 +475,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																errorsBySource => groupBodyRows ) ) )
 													.Materialize() ) ).ToCollection() );
 									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
+									excelRowAdders.AddRange( groupAndItems.Item2.Select( i => GetExcelRowAdder( false, i.Cells ) ) );
 
 									// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
 									if( defaultItemLimit != DataRowLimit.Unlimited )
@@ -553,8 +587,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.Materialize() );
 				} ).ToCollection();
 
+			exportToExcelPostBack = GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
+
 			this.itemGroups = itemGroups;
 		}
+
+		/// <summary>
+		/// Gets the Export to Excel post-back. This is convenient if you want to use the built-in export functionality, but from an external button.
+		/// </summary>
+		public PostBack ExportToExcelPostBack => exportToExcelPostBack;
 
 		/// <summary>
 		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If

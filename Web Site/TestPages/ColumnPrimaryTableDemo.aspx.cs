@@ -22,6 +22,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new ColumnPrimaryTable(
 						caption: "My table",
 						subCaption: "A new table implementation",
+						allowExportToExcel: true,
 						tableActions: new ButtonSetup(
 							"Action",
 							behavior: new PostBackBehavior(

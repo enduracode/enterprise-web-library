@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -9,6 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public sealed class ColumnPrimaryTable: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
+		private readonly PostBack exportToExcelPostBack;
 
 		/// <summary>
 		/// Creates a table with one item group.
@@ -16,6 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -29,13 +32,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="items">The items.</param>
 		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
-			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "",
-			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<EwfTableItem> items = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
 			displaySetup,
 			style,
 			classes,
+			postBackIdBase,
 			caption,
 			subCaption,
 			allowExportToExcel,
@@ -52,6 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
 		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -65,8 +70,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="itemGroups">The item groups.</param>
 		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
-			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string caption = "",
-			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
@@ -77,6 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
 			itemGroups = itemGroups ?? Enumerable.Empty<ColumnPrimaryItemGroup>().Materialize();
 
+			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
 				tableContext => {
 					var children = new List<FlowComponentOrNode>();
@@ -96,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
 					}
 
-					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel, tableActions ).Materialize();
+					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
 					if( tableLevelGeneralActionList.Any() ) {
 						// NOTE: Table-level item actions, the group head, group-level item actions, and the checkbox row should all go here.
 						var tHeadRows = new EwfTableItem(
@@ -134,6 +140,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						allItemSetups,
 						allItemSetups.Length,
 						true );
+					excelRowAdders.AddRange(
+						cellPlaceholderListsForRows.Take( firstDataFieldIndex ).Select( i => EwfTable.GetExcelRowAdder( true, i.OfType<EwfTableCell>().Materialize() ) ) );
+
 					var bodyRows = TableOps.BuildRows(
 						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
 						fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
@@ -141,6 +150,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						allItemSetups,
 						headItems.Count,
 						true );
+					excelRowAdders.AddRange(
+						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).Select( i => EwfTable.GetExcelRowAdder( false, i.OfType<EwfTableCell>().Materialize() ) ) );
 
 					// We can't easily put the head fields in thead because we don't have a way of verifying that cells don't cross between head and data fields.
 					children.Add(
@@ -155,7 +166,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						children: children,
 						etherealChildren: etherealContent );
 				} ).ToCollection();
+
+			exportToExcelPostBack = EwfTable.GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
 		}
+
+		/// <summary>
+		/// Gets the Export to Excel post-back. This is convenient if you want to use the built-in export functionality, but from an external button.
+		/// </summary>
+		public PostBack ExportToExcelPostBack => exportToExcelPostBack;
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
 	}

@@ -24,9 +24,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			place.AddControlsReturnThis(
 				EwfTable.CreateWithItemGroups(
 						Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ),
-						defaultItemLimit: DataRowLimit.Fifty,
 						caption: "Caption",
 						subCaption: "Sub caption",
+						allowExportToExcel: true,
 						tableActions: new ButtonSetup(
 							"Remove Last Group",
 							behavior: new PostBackBehavior(
@@ -40,6 +40,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									} ) ) ).ToCollection(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
 						headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
+						defaultItemLimit: DataRowLimit.Fifty,
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
 					.ToCollection()
 					.GetControls() );
@@ -68,7 +69,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 													updateRegionSet.ToCollection(),
 													id: "addRow",
 													firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
-										.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) ).ToCollection() )
+										.ToCell(),
+									"".ToCell() ) ).ToCollection() )
 					: getItems( 250 ) );
 		}
 
