@@ -622,6 +622,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			itemGroups.Single().Items.Add( item );
 		}
 
+		/// <summary>
+		/// Gets whether the table has items, not including head items.
+		/// </summary>
+		public bool HasItems => itemGroups.Any( i => i.Items.Any() );
+
 		private IReadOnlyCollection<FlowComponent> getColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
 			var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
 			var factor = GetColumnWidthFactor( fieldOrItemSetups );
@@ -689,5 +694,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
+
+		// NOTE: Put method down here?
 	}
 }
