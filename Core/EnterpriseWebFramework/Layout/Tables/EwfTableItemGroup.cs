@@ -23,14 +23,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private IReadOnlyCollection<EwfTableItem> getHeadItem( int fieldCount ) {
-			// NOTE: Set up group-level general actions.
 			// NOTE: If group is collapsible, set up item-count display and "click to expand" button.
 			// NOTE: The item-count display should be wrapped in a NamingPlaceholder that is part of all tail update regions for this group.
 			if( !RemainingData.Value.GroupName.Any() )
 				return Enumerable.Empty<EwfTableItem>().Materialize();
 			return new EwfTableItem(
 				new EwfTableItemSetup( activationBehavior: RemainingData.Value.GroupHeadActivationBehavior ),
-				RemainingData.Value.GroupName.ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+				new GenericFlowContainer(
+					new GenericFlowContainer( RemainingData.Value.GroupName ).Concat( EwfTable.GetGeneralActionList( null, RemainingData.Value.GroupActions ) )
+						.Materialize(),
+					classes: EwfTable.ItemGroupNameAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
 		private IReadOnlyCollection<EwfTableItem> getItemActionsItem( int fieldCount ) {

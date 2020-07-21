@@ -1,4 +1,5 @@
-﻿body {
+﻿body,
+ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
 	font-family: 'Open Sans', sans-serif;
 }
 

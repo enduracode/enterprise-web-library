@@ -51,6 +51,24 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			return new EwfTableItemGroup(
 				() => new EwfTableItemGroupRemainingData(
 					"Group {0}".FormatWith( groupNumber ).ToComponents(),
+					groupActions: groupNumber == 2
+						              ? new ButtonSetup(
+								              "Action 1",
+								              behavior: new PostBackBehavior(
+									              postBack: PostBack.CreateIntermediate(
+										              null,
+										              id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
+										              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).ToCollection()
+							              .Append(
+								              new ButtonSetup(
+									              "Action 2",
+									              behavior: new PostBackBehavior(
+										              postBack: PostBack.CreateIntermediate(
+											              null,
+											              id: PostBack.GetCompositeId( groupNumber.ToString(), "action2" ),
+											              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
+							              .Materialize()
+						              : null,
 					groupHeadActivationBehavior: ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateIntermediate(
 							null,

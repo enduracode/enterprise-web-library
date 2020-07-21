@@ -20,6 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new ElementClass( "ewfTblIlga" );
 		private static readonly ElementClass itemLimitingControlContainerClass = new ElementClass( "ewfTblIl" );
+		internal static readonly ElementClass ItemGroupNameAndGeneralActionContainerClass = new ElementClass( "ewfTblIgnga" );
 		private static readonly ElementClass actionListContainerClass = new ElementClass( "ewfTblAl" );
 
 		internal static readonly ElementClass ContrastClass = new ElementClass( "ewfContrast" );
@@ -56,6 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName ),
 						new CssElement( "TableItemLimitingAndGeneralActionContainer", "div.{0}".FormatWith( ItemLimitingAndGeneralActionContainerClass.ClassName ) ),
 						new CssElement( "TableItemLimitingControlContainer", "div.{0}".FormatWith( itemLimitingControlContainerClass.ClassName ) ),
+						new CssElement( "TableItemGroupNameAndGeneralActionContainer", "div.{0}".FormatWith( ItemGroupNameAndGeneralActionContainerClass.ClassName ) ),
 						new CssElement( "TableActionListContainer", "div.{0}".FormatWith( actionListContainerClass.ClassName ) )
 					}.ToList();
 

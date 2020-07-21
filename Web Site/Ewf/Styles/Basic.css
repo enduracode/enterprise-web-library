@@ -428,12 +428,15 @@ th.ewfTcBaseLine, td.ewfTcBaseLine {
 .ewfOverflowedCell {
 	overflow: hidden;
 }
-ewfTableItemLimitingAndGeneralActionContainer {
+ewfTableItemLimitingAndGeneralActionContainer, ewfTableItemGroupNameAndGeneralActionContainer {
 	display: flex;
 	flex-flow: row wrap;
 }
 ewfTableActionListContainer {
 	flex-grow: 1;
+}
+ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
+	font-weight: initial;
 }
 ewfTableActionListContainer > ewfUnorderedWrappingList {
 	justify-content: flex-end;
