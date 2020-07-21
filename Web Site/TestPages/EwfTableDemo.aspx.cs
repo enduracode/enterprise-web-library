@@ -58,8 +58,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									              postBack: PostBack.CreateIntermediate(
 										              null,
 										              id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
-										              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).ToCollection()
-							              .Append(
+										              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
 								              new ButtonSetup(
 									              "Action 2",
 									              behavior: new PostBackBehavior(
