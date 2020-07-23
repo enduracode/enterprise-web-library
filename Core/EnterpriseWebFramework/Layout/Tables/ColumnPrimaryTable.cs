@@ -102,7 +102,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
 					}
 
-					// NOTE: Table-level item actions, the group head, group-level item actions, and the checkbox row should all go here.
 					var tHeadRows = new List<EwfTableItem>();
 					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
 					if( tableLevelGeneralActionList.Any() )
@@ -110,6 +109,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							new EwfTableItem(
 								new GenericFlowContainer( tableLevelGeneralActionList, classes: EwfTable.ItemLimitingAndGeneralActionContainerClass ).ToCell(
 									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
+					// NOTE: Table-level item actions should go here.
+					var groupHeadCells = itemGroups.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) ).Materialize();
+					if( groupHeadCells.Any( i => i.content.Any() ) )
+						tHeadRows.Add(
+							new EwfTableItem(
+								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) ) ) );
+					// NOTE: The checkbox row should go here.
 					if( tHeadRows.Any() ) {
 						var cellPlaceholderListsForTHeadRows = TableOps.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
 						children.Add(
