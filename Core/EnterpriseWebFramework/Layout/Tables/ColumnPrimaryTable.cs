@@ -102,12 +102,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
 					}
 
+					// NOTE: Table-level item actions, the group head, group-level item actions, and the checkbox row should all go here.
+					var tHeadRows = new List<EwfTableItem>();
 					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
-					if( tableLevelGeneralActionList.Any() ) {
-						// NOTE: Table-level item actions, the group head, group-level item actions, and the checkbox row should all go here.
-						var tHeadRows = new EwfTableItem(
-							new GenericFlowContainer( tableLevelGeneralActionList, classes: EwfTable.ItemLimitingAndGeneralActionContainerClass ).ToCell(
-								new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ).ToCollection();
+					if( tableLevelGeneralActionList.Any() )
+						tHeadRows.Add(
+							new EwfTableItem(
+								new GenericFlowContainer( tableLevelGeneralActionList, classes: EwfTable.ItemLimitingAndGeneralActionContainerClass ).ToCell(
+									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
+					if( tHeadRows.Any() ) {
 						var cellPlaceholderListsForTHeadRows = TableOps.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
 						children.Add(
 							new ElementComponent(
