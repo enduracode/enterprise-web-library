@@ -87,23 +87,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				tableContext => {
 					var children = new List<FlowComponentOrNode>();
 
-					children.AddRange( EwfTable.GetCaption( caption, subCaption ) );
+					children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
 
 					var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) )
 						.Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) )
 						.Materialize();
 					var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
-					var columnWidthFactor = EwfTable.GetColumnWidthFactor( allItemSetups );
+					var columnWidthFactor = TableStatics.GetColumnWidthFactor( allItemSetups );
 					foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
 						children.Add(
 							new ElementComponent(
 								context => new ElementData(
 									() => new ElementLocalData( "colgroup" ),
-									children: itemSetups.Select( i => EwfTable.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
+									children: itemSetups.Select( i => TableStatics.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
 					}
 
 					var tHeadRows = new List<EwfTableItem>();
-					var tableLevelGeneralActionList = EwfTable.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
+					var tableLevelGeneralActionList = TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
 					if( tableLevelGeneralActionList.Any() )
 						tHeadRows.Add(
 							new EwfTableItem(
@@ -133,7 +133,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										.Materialize() ) ) );
 					}
 
-					fields = EwfTable.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );
+					fields = TableStatics.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );
 					var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems(
 						headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
 						fields.Count );
@@ -174,12 +174,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return new DisplayableElementData(
 						displaySetup,
 						() => new DisplayableElementLocalData( "table" ),
-						classes: EwfTable.GetClasses( style, classes ?? ElementClassSet.Empty ),
+						classes: TableStatics.GetClasses( style, classes ?? ElementClassSet.Empty ),
 						children: children,
 						etherealChildren: etherealContent );
 				} ).ToCollection();
 
-			exportToExcelPostBack = EwfTable.GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
+			exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
 		}
 
 		/// <summary>

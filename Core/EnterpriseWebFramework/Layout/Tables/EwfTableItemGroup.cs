@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new EwfTableItem(
 				new EwfTableItemSetup( activationBehavior: RemainingData.Value.GroupHeadActivationBehavior ),
 				new GenericFlowContainer(
-					new GenericFlowContainer( RemainingData.Value.GroupName ).Concat( EwfTable.GetGeneralActionList( null, RemainingData.Value.GroupActions ) )
+					new GenericFlowContainer( RemainingData.Value.GroupName ).Concat( TableStatics.GetGeneralActionList( null, RemainingData.Value.GroupActions ) )
 						.Materialize(),
 					classes: TableCssElementCreator.ItemGroupNameAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}

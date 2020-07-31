@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !groupName.Any() )
 				return Enumerable.Empty<FlowComponent>().Materialize();
 			return new GenericFlowContainer(
-				new GenericFlowContainer( groupName ).Concat( EwfTable.GetGeneralActionList( null, groupActions ) ).Materialize(),
+				new GenericFlowContainer( groupName ).Concat( TableStatics.GetGeneralActionList( null, groupActions ) ).Materialize(),
 				classes: TableCssElementCreator.ItemGroupNameAndGeneralActionContainerClass ).ToCollection();
 		}
 	}

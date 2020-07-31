@@ -72,6 +72,106 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		internal static ElementClassSet GetClasses( EwfTableStyle style, ElementClassSet classes ) => getTableStyleClass( style ).Add( classes );
+
+		private static ElementClassSet getTableStyleClass( EwfTableStyle style ) {
+			switch( style ) {
+				case EwfTableStyle.StandardLayoutOnly:
+					return TableCssElementCreator.StandardLayoutOnlyStyleClass;
+				case EwfTableStyle.StandardExceptLayout:
+					return TableCssElementCreator.StandardExceptLayoutStyleClass;
+				case EwfTableStyle.Standard:
+					return TableCssElementCreator.StandardStyleClass;
+				default:
+					return ElementClassSet.Empty;
+			}
+		}
+
+		internal static IReadOnlyCollection<FlowComponent> GetCaption( string caption, string subCaption ) {
+			if( caption.Length == 0 )
+				return Enumerable.Empty<FlowComponent>().Materialize();
+			var subCaptionComponents = new List<PhrasingComponent>();
+			if( subCaption.Length > 0 )
+				subCaptionComponents.AddRange( new LineBreak().ToCollection().Concat( subCaption.ToComponents() ) );
+			return new DisplayableElement(
+				context => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData( "caption" ),
+					children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
+		}
+
+		internal static IReadOnlyCollection<EwfTableField> GetFields(
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
+			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
+			if( firstSpecifiedItem == null )
+				return Enumerable.Empty<EwfTableField>().Materialize();
+
+			if( fields != null )
+				return fields;
+
+			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
+			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.Setup.FieldSpan );
+			return Enumerable.Repeat( new EwfTableField(), fieldCount ).Materialize();
+		}
+
+		internal static decimal GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
+			if( fieldOrItemSetups.Any( f => f.Size == null ) )
+				return 1;
+			return 100 / fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size.Value.EndsWith( "%" ) )
+				       .Sum( f => decimal.Parse( f.Size.Value.Remove( f.Size.Value.Length - 1 ) ) );
+		}
+
+		internal static FlowComponent GetColElement( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
+			var width = fieldOrItemSetup.Size;
+			return new ElementComponent(
+				context => new ElementData(
+					() => new ElementLocalData(
+						"col",
+						focusDependentData: new ElementFocusDependentData(
+							attributes: width != null
+								            ? Tuple.Create(
+										            "style",
+										            "width: {0}".FormatWith(
+											            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
+												              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
+												              : width ).Value ) )
+									            .ToCollection()
+								            : null ) ) ) );
+		}
+
+		internal static PostBack GetExportToExcelPostBack( string postBackIdBase, string caption, IReadOnlyCollection<Action<ExcelWorksheet>> rowAdders ) =>
+			PostBack.CreateIntermediate(
+				null,
+				id: PostBack.GetCompositeId( postBackIdBase, "excel" ),
+				reloadBehaviorGetter: () => new PageReloadBehavior(
+					secondaryResponse: new SecondaryResponse(
+						() => EwfResponse.CreateExcelWorkbookResponse(
+							() => caption.Any() ? caption : "Excel export",
+							() => {
+								var workbook = new ExcelFileWriter();
+								foreach( var i in rowAdders )
+									i( workbook.DefaultWorksheet );
+								return workbook;
+							} ) ) ) );
+
+		internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
+			if( exportToExcelPostBack != null )
+				actions = actions.Append( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) ).Materialize();
+
+			if( !actions.Any() )
+				return Enumerable.Empty<FlowComponent>();
+
+			return new GenericFlowContainer(
+				new WrappingList(
+					from action in actions
+					let actionComponent = action.GetActionComponent(
+						( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ),
+						( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
+					where actionComponent != null
+					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
+				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
+		}
+
 		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems( IReadOnlyCollection<EwfTableItem> items, int fieldCount ) {
 			var itemIndex = 0;
 			var cellPlaceholderListsForItems = new List<List<CellPlaceholder>>();
