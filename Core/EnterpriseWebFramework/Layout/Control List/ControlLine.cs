@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// Creates a new instance of a Control Line with the given controls.
 		/// </summary>
 		public ControlLine( params Control[] controls ) {
-			var table = TableOps.CreateUnderlyingTable();
+			var table = TableStatics.CreateUnderlyingTable();
 			table.Rows.Add( row = new TableRow() );
 			base.Controls.Add( table );
 			AddControls( controls );

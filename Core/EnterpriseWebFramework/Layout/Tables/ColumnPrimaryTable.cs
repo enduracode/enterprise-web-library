@@ -118,12 +118,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) ) ) );
 					// NOTE: The checkbox row should go here.
 					if( tHeadRows.Any() ) {
-						var cellPlaceholderListsForTHeadRows = TableOps.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
+						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
 						children.Add(
 							new ElementComponent(
 								context => new ElementData(
 									() => new ElementLocalData( "thead" ),
-									children: TableOps.BuildRows(
+									children: TableStatics.BuildRows(
 											cellPlaceholderListsForTHeadRows,
 											tHeadRows.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
 											null,
@@ -134,7 +134,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					fields = EwfTable.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );
-					var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems(
+					var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems(
 						headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
 						fields.Count );
 
@@ -143,7 +143,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.Select( field => Enumerable.Range( 0, allItemSetups.Length ).Select( item => cellPlaceholderListsForItems[ item ][ field ] ).ToList() )
 						.ToList();
 
-					var headRows = TableOps.BuildRows(
+					var headRows = TableStatics.BuildRows(
 						cellPlaceholderListsForRows.Take( firstDataFieldIndex ).ToList(),
 						fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
 						null,
@@ -153,7 +153,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					excelRowAdders.AddRange(
 						cellPlaceholderListsForRows.Take( firstDataFieldIndex ).Select( i => EwfTable.GetExcelRowAdder( true, i.OfType<EwfTableCell>().Materialize() ) ) );
 
-					var bodyRows = TableOps.BuildRows(
+					var bodyRows = TableStatics.BuildRows(
 						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
 						fields.Select( i => i.FieldOrItemSetup ).ToImmutableArray(),
 						false,
@@ -167,7 +167,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					children.Add(
 						new ElementComponent( context => new ElementData( () => new ElementLocalData( "tbody" ), children: headRows.Concat( bodyRows ).Materialize() ) ) );
 
-					TableOps.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+					TableStatics.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 
 					return new DisplayableElementData(
 						displaySetup,

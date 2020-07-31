@@ -72,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		}
 
 		private void createChildControlsAndWireUpEvents() {
-			captionTable = TableOps.CreateUnderlyingTable();
+			captionTable = TableStatics.CreateUnderlyingTable();
 			captionTable.CssClass = "ewfStandardDynamicTableCaption";
 			captionTable.Visible = false;
 			var row = new TableRow();
@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			captionTable.Rows.Add( row );
 			Controls.Add( captionTable );
 
-			table = TableOps.CreateUnderlyingTable();
+			table = TableStatics.CreateUnderlyingTable();
 			Controls.Add( table );
 
 			PreRender += ewfTable_PreRender;
@@ -288,7 +288,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 									                         } ) ) ).ToList();
 
 			var cellPlaceHolders = new List<CellPlaceholder>( cells );
-			TableOps.DrawRow( table, rowSetup, cellPlaceHolders, columnSetups, false );
+			TableStatics.DrawRow( table, rowSetup, cellPlaceHolders, columnSetups, false );
 		}
 
 		private class RowColumnSpanPair {
@@ -482,7 +482,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private void ewfTable_PreRender( object sender, EventArgs e ) {
 			// NOTE: This should all move to ControlTreeDataLoader.LoadData, but it can't right now because so many pages add table rows from PreRender.
-			TableOps.AlternateRowColors( table, rowSetups );
+			TableStatics.AlternateRowColors( table, rowSetups );
 
 			// NOTE: We should be able to get rid of this row hiding when we port everything over to use AddAllDataToTable.
 			var dataRowIndex = 0;

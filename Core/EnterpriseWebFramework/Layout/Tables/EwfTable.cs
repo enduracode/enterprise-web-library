@@ -469,10 +469,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													.SelectMany( i => i.Sets ) ) ) );
 
 								// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-								var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
+								var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
 
 								if( !disableEmptyFieldDetection )
-									TableOps.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+									TableStatics.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 							} );
 					}
 					return new DisplayableElementData(
@@ -576,10 +576,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IReadOnlyCollection<EwfTableItem> items, IReadOnlyCollection<EwfTableField> fields, bool? useContrastForFirstRow, bool useHeadCells,
 			Func<EwfTableCell> itemActionCheckBoxCellGetter, Func<EwfTableCell> itemReorderingCellGetter, List<EwfTableItem> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
-			var cellPlaceholderListsForRows = TableOps.BuildCellPlaceholderListsForItems( items, fields.Count );
+			var cellPlaceholderListsForRows = TableStatics.BuildCellPlaceholderListsForItems( items, fields.Count );
 
 			// NOTE: Be sure to take check box and reordering columns into account.
-			var rows = TableOps.BuildRows(
+			var rows = TableStatics.BuildRows(
 				cellPlaceholderListsForRows,
 				items.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
 				useContrastForFirstRow,

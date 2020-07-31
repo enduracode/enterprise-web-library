@@ -6,7 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal static class TableOps {
+	internal static class TableStatics {
 		// This class name is used by EWF CSS and JavaScript files.
 		private static readonly ElementClass activatableElementContainerClass = new ElementClass( "ewfAec" );
 
