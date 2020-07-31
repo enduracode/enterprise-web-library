@@ -107,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( tableLevelGeneralActionList.Any() )
 						tHeadRows.Add(
 							new EwfTableItem(
-								new GenericFlowContainer( tableLevelGeneralActionList, classes: EwfTable.ItemLimitingAndGeneralActionContainerClass ).ToCell(
+								new GenericFlowContainer( tableLevelGeneralActionList, classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
 									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
 					// NOTE: Table-level item actions should go here.
 					var groupHeadCells = itemGroups.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) ).Materialize();

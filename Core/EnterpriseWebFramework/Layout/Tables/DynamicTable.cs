@@ -375,7 +375,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 					if( selectedRowDataModificationsToMethods.Any() )
 						foreach( var rowSetup in rowSetups ) {
-							var cell = new TableCell { Width = Unit.Percentage( 5 ), CssClass = EwfTable.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfAec" ) };
+							var cell = new TableCell
+								{
+									Width = Unit.Percentage( 5 ), CssClass = TableCssElementCreator.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfAec" )
+								};
 							if( rowSetup.UniqueIdentifier != null ) {
 								var firstDm = selectedRowDataModificationsToMethods.First().Key;
 								var pb = firstDm as PostBack;
@@ -425,7 +428,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						}
 
 						// NOTE: What about rows that don't have a RankId? They need to have an empty cell so all rows have the same cell count.
-						var cell = new TableCell { Width = Unit.Percentage( 10 ), CssClass = EwfTable.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfAec" ) };
+						var cell = new TableCell
+							{
+								Width = Unit.Percentage( 10 ), CssClass = TableCssElementCreator.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfAec" )
+							};
 						cell.Controls.Add( controlLine );
 						rowSetup.UnderlyingTableRow.Cells.Add( cell );
 					}

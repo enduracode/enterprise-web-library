@@ -68,8 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiGlobalContainer", globalContainerSelector ),
 						new CssElement(
 							"UiAppLogoAndUserInfoBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName )
-								.ToArray() ),
+							TableCssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName ).ToArray() ),
 						new CssElement( "UiAppLogoContainer", globalContainerSelector + " " + "div." + AppLogoClass.ClassName ),
 						new CssElement( "UiUserInfoContainer", globalContainerSelector + " " + "div." + UserInfoClass.ClassName ),
 						new CssElement(
@@ -112,7 +111,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					{
 						new CssElement(
 							"UiSideTabAndContentBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
+							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
 								.ToArray() ),
 						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
 						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
@@ -122,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						new CssElement( "UiContentBox", entityAndTabAndContentBlockSelector + " " + "div." + ContentClass.ClassName ),
 						new CssElement(
 							"UiContentFootBlock",
-							EwfTable.CssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockClass.ClassName )
+							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + ContentFootBlockClass.ClassName )
 								.ToArray() ),
 						new CssElement(
 							"UiContentFootActionListContainer",

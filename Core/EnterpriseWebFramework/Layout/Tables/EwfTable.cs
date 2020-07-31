@@ -11,111 +11,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A table.
 	/// </summary>
 	public sealed class EwfTable: FlowComponent {
-		private static readonly ElementClass standardLayoutOnlyStyleClass = new ElementClass( "ewfStandardLayoutOnly" );
-		private static readonly ElementClass standardExceptLayoutStyleClass = new ElementClass( "ewfTblSel" );
-		private static readonly ElementClass standardStyleClass = new ElementClass( "ewfStandard" );
-
-		// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
-		internal static readonly ElementClass AllCellAlignmentsClass = new ElementClass( "ewfTc" );
-
-		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new ElementClass( "ewfTblIlga" );
-		private static readonly ElementClass itemLimitingControlContainerClass = new ElementClass( "ewfTblIl" );
-		internal static readonly ElementClass ItemGroupNameAndGeneralActionContainerClass = new ElementClass( "ewfTblIgnga" );
-		private static readonly ElementClass actionListContainerClass = new ElementClass( "ewfTblAl" );
-
-		internal static readonly ElementClass ContrastClass = new ElementClass( "ewfContrast" );
-
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public class CssElementCreator: ControlCssElementCreator {
-			/// <summary>
-			/// EWL use only.
-			/// </summary>
-			public static readonly string[] Selectors =
-				{
-					"table", "table." + standardLayoutOnlyStyleClass.ClassName, "table." + standardExceptLayoutStyleClass.ClassName,
-					"table." + standardStyleClass.ClassName
-				};
-
-			internal static readonly string[] CellSelectors = ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass.ClassName ).ToArray();
-
-			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				var elements = new[]
-					{
-						new CssElement( "TableAllStyles", Selectors ),
-						new CssElement(
-							"TableStandardAndStandardLayoutOnlyStyles",
-							"table." + standardStyleClass.ClassName,
-							"table." + standardLayoutOnlyStyleClass.ClassName ),
-						new CssElement(
-							"TableStandardAndStandardExceptLayoutStyles",
-							"table." + standardStyleClass.ClassName,
-							"table." + standardExceptLayoutStyleClass.ClassName ),
-						new CssElement( "TableStandardStyle", "table." + standardStyleClass.ClassName ),
-						new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ), new CssElement( "ThAndTd", CellSelectors ),
-						new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName ),
-						new CssElement( "TableItemLimitingAndGeneralActionContainer", "div.{0}".FormatWith( ItemLimitingAndGeneralActionContainerClass.ClassName ) ),
-						new CssElement( "TableItemLimitingControlContainer", "div.{0}".FormatWith( itemLimitingControlContainerClass.ClassName ) ),
-						new CssElement( "TableItemGroupNameAndGeneralActionContainer", "div.{0}".FormatWith( ItemGroupNameAndGeneralActionContainerClass.ClassName ) ),
-						new CssElement( "TableActionListContainer", "div.{0}".FormatWith( actionListContainerClass.ClassName ) )
-					}.ToList();
-
-
-				// Add row elements.
-
-				const string tr = "tr";
-				var noActionSelector = ":not(." + ElementActivationBehavior.ActivatableClass.ClassName + ")";
-				var actionSelector = "." + ElementActivationBehavior.ActivatableClass.ClassName;
-				const string noHoverSelector = ":not(:hover)";
-				const string hoverSelector = ":hover";
-				var contrastSelector = "." + ContrastClass.ClassName;
-
-				var trNoAction = tr + noActionSelector;
-				var trNoActionContrast = tr + noActionSelector + contrastSelector;
-				var trActionNoHover = tr + actionSelector + noHoverSelector;
-				var trActionNoHoverContrast = tr + actionSelector + noHoverSelector + contrastSelector;
-				var trActionHover = tr + actionSelector + hoverSelector;
-				var trActionHoverContrast = tr + actionSelector + hoverSelector + contrastSelector;
-
-				// all rows
-				elements.Add(
-					new CssElement( "TrAllStates", trNoAction, trNoActionContrast, trActionNoHover, trActionNoHoverContrast, trActionHover, trActionHoverContrast ) );
-				elements.Add( new CssElement( "TrStatesWithContrast", trNoActionContrast, trActionNoHoverContrast, trActionHoverContrast ) );
-
-				// all rows except the one being hovered, if it's an action row
-				elements.Add( new CssElement( "TrStatesWithNoActionHover", trNoAction, trNoActionContrast, trActionNoHover, trActionNoHoverContrast ) );
-				elements.Add( new CssElement( "TrStatesWithNoActionHoverAndWithContrast", trNoActionContrast, trActionNoHoverContrast ) );
-
-				// non action rows
-				elements.Add( new CssElement( "TrStatesWithNoAction", trNoAction, trNoActionContrast ) );
-				elements.Add( new CssElement( "TrStatesWithNoActionAndWithContrast", trNoActionContrast ) );
-
-				// action rows
-				elements.Add( new CssElement( "TrStatesWithAction", trActionNoHover, trActionNoHoverContrast, trActionHover, trActionHoverContrast ) );
-				elements.Add( new CssElement( "TrStatesWithActionAndWithContrast", trActionNoHoverContrast, trActionHoverContrast ) );
-
-				// action rows except the one being hovered
-				elements.Add( new CssElement( "TrStatesWithActionAndWithNoHover", trActionNoHover, trActionNoHoverContrast ) );
-				elements.Add( new CssElement( "TrStatesWithActionAndWithNoHoverAndWithContrast", trActionNoHoverContrast ) );
-
-				// the action row being hovered
-				elements.Add( new CssElement( "TrStatesWithActionAndWithHover", trActionHover, trActionHoverContrast ) );
-
-				return elements.ToArray();
-			}
-		}
-
 		internal static ElementClassSet GetClasses( EwfTableStyle style, ElementClassSet classes ) => getTableStyleClass( style ).Add( classes );
 
 		private static ElementClassSet getTableStyleClass( EwfTableStyle style ) {
 			switch( style ) {
 				case EwfTableStyle.StandardLayoutOnly:
-					return standardLayoutOnlyStyleClass;
+					return TableCssElementCreator.StandardLayoutOnlyStyleClass;
 				case EwfTableStyle.StandardExceptLayout:
-					return standardExceptLayoutStyleClass;
+					return TableCssElementCreator.StandardExceptLayoutStyleClass;
 				case EwfTableStyle.Standard:
-					return standardStyleClass;
+					return TableCssElementCreator.StandardStyleClass;
 				default:
 					return ElementClassSet.Empty;
 			}
@@ -203,7 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
 					where actionComponent != null
 					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
-				classes: actionListContainerClass ).ToCollection();
+				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
 		}
 
 		internal static Action<ExcelWorksheet> GetExcelRowAdder( bool rowIsHeader, IReadOnlyCollection<EwfTableCell> cells ) =>
@@ -428,8 +333,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var headRows = buildRows(
 										( itemLimitingAndGeneralActionComponents.Any()
 											  ? new EwfTableItem(
-												  new GenericFlowContainer( itemLimitingAndGeneralActionComponents, classes: ItemLimitingAndGeneralActionContainerClass ).ToCell(
-													  new TableCellSetup( fieldSpan: fields.Count ) ) ).ToCollection()
+													  new GenericFlowContainer(
+														  itemLimitingAndGeneralActionComponents,
+														  classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
+														  new TableCellSetup( fieldSpan: fields.Count ) ) )
+												  .ToCollection()
 											  : Enumerable.Empty<EwfTableItem>() ).Concat( getItemActionsItem( fields.Count ) )
 										.Materialize(),
 										Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
@@ -651,7 +559,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
 					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.FiveHundred, itemLimitingUpdateRegionSet ) )
 					.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Unlimited, itemLimitingUpdateRegionSet ) ) );
-			return new GenericFlowContainer( list.ToCollection(), classes: itemLimitingControlContainerClass );
+			return new GenericFlowContainer( list.ToCollection(), classes: TableCssElementCreator.ItemLimitingControlContainerClass );
 		}
 
 		private ComponentListItem getItemLimitButtonItem(

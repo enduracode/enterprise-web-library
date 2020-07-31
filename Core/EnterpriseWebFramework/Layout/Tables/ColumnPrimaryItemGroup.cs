@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return Enumerable.Empty<FlowComponent>().Materialize();
 			return new GenericFlowContainer(
 				new GenericFlowContainer( groupName ).Concat( EwfTable.GetGeneralActionList( null, groupActions ) ).Materialize(),
-				classes: EwfTable.ItemGroupNameAndGeneralActionContainerClass ).ToCollection();
+				classes: TableCssElementCreator.ItemGroupNameAndGeneralActionContainerClass ).ToCollection();
 		}
 	}
 }

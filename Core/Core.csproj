@@ -502,6 +502,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TextAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\MailMergingStatics.cs" />

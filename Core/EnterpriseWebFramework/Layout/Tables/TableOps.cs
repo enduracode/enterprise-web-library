@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				underlyingCell.Width = columnSetup.Width;
 			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter(
 				" ",
-				EwfTable.AllCellAlignmentsClass.ClassName,
+				TableCssElementCreator.AllCellAlignmentsClass.ClassName,
 				columnSetup.CssClassOnAllCells,
 				StringTools.ConcatenateWithDelimiter( " ", ewfCell.Setup.Classes.ToArray() ) );
 			if( ewfCell.Setup.ActivationBehavior != null )
@@ -137,8 +137,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return new FlowIdContainer(
 						ElementActivationBehavior.GetActivatableElement(
 								"tr",
-								( useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value ) ? EwfTable.ContrastClass : ElementClassSet.Empty )
-								.Add( rowSetup.Classes ),
+								( useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
+									  ? TableCssElementCreator.ContrastClass
+									  : ElementClassSet.Empty ).Add( rowSetup.Classes ),
 								rowSetup.Size != null
 									? Tuple.Create( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
 									: Enumerable.Empty<Tuple<string, string>>().Materialize(),
@@ -162,7 +163,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
 											return ElementActivationBehavior.GetActivatableElement(
 												cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
-												EwfTable.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+												TableCssElementCreator.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
 													.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
 													.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
 													.Add( columnSetup.Classes )

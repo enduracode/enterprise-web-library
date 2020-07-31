@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new GenericFlowContainer(
 					new GenericFlowContainer( RemainingData.Value.GroupName ).Concat( EwfTable.GetGeneralActionList( null, RemainingData.Value.GroupActions ) )
 						.Materialize(),
-					classes: EwfTable.ItemGroupNameAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
+					classes: TableCssElementCreator.ItemGroupNameAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) ).ToCollection();
 		}
 
 		private IReadOnlyCollection<EwfTableItem> getItemActionsItem( int fieldCount ) {

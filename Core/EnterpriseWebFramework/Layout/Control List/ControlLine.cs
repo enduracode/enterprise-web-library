@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			public static readonly IReadOnlyCollection<string> Selectors = ( "div." + CssClass ).ToCollection();
 
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				var itemSelectors = from i in EwfTable.CssElementCreator.CellSelectors select "table > tbody > tr > " + i + "." + ItemCssClass;
+				var itemSelectors = from i in TableCssElementCreator.CellSelectors select "table > tbody > tr > " + i + "." + ItemCssClass;
 				return new[] { new CssElement( "ControlLine", Selectors.ToArray() ), new CssElement( "ControlLineItem", itemSelectors.ToArray() ) };
 			}
 		}
@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 				            {
 					            CssClass = StringTools.ConcatenateWithDelimiter(
 						            " ",
-						            EwfTable.AllCellAlignmentsClass.ClassName,
+						            TableCssElementCreator.AllCellAlignmentsClass.ClassName,
 						            tableCellVerticalAlignmentClass( VerticalAlignment ),
 						            CssElementCreator.ItemCssClass )
 				            }.AddControlsReturnThis( i );
