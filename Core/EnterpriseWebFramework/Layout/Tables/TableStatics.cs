@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
+using EnterpriseWebLibrary.IO;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -191,6 +192,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return TableCellVerticalAlignmentOps.Class(
 				alignments.FirstOrDefault( i => i != TableCellVerticalAlignment.NotSpecified ) ?? TableCellVerticalAlignment.NotSpecified );
 		}
+
+		internal static Action<ExcelWorksheet> GetExcelRowAdder( bool rowIsHeader, IReadOnlyCollection<EwfTableCell> cells ) =>
+			worksheet => {
+				if( cells.Any( i => i.Setup.FieldSpan != 1 || i.Setup.ItemSpan != 1 ) )
+					throw new ApplicationException( "Export to Excel does not currently support cells that span multiple columns or rows." );
+
+				if( rowIsHeader )
+					worksheet.AddHeaderToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+				else
+					worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+			};
 
 		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
 			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.

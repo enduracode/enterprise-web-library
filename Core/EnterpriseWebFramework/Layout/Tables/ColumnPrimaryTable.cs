@@ -151,7 +151,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						allItemSetups.Length,
 						true );
 					excelRowAdders.AddRange(
-						cellPlaceholderListsForRows.Take( firstDataFieldIndex ).Select( i => EwfTable.GetExcelRowAdder( true, i.OfType<EwfTableCell>().Materialize() ) ) );
+						cellPlaceholderListsForRows.Take( firstDataFieldIndex )
+							.Select( i => TableStatics.GetExcelRowAdder( true, i.OfType<EwfTableCell>().Materialize() ) ) );
 
 					var bodyRows = TableStatics.BuildRows(
 						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).ToList(),
@@ -161,7 +162,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						headItems.Count,
 						true );
 					excelRowAdders.AddRange(
-						cellPlaceholderListsForRows.Skip( firstDataFieldIndex ).Select( i => EwfTable.GetExcelRowAdder( false, i.OfType<EwfTableCell>().Materialize() ) ) );
+						cellPlaceholderListsForRows.Skip( firstDataFieldIndex )
+							.Select( i => TableStatics.GetExcelRowAdder( false, i.OfType<EwfTableCell>().Materialize() ) ) );
 
 					// We can't easily put the head fields in thead because we don't have a way of verifying that cells don't cross between head and data fields.
 					children.Add(

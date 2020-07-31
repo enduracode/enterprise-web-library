@@ -111,17 +111,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
 		}
 
-		internal static Action<ExcelWorksheet> GetExcelRowAdder( bool rowIsHeader, IReadOnlyCollection<EwfTableCell> cells ) =>
-			worksheet => {
-				if( cells.Any( i => i.Setup.FieldSpan != 1 || i.Setup.ItemSpan != 1 ) )
-					throw new ApplicationException( "Export to Excel does not currently support cells that span multiple columns or rows." );
-
-				if( rowIsHeader )
-					worksheet.AddHeaderToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
-				else
-					worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
-			};
-
 		/// <summary>
 		/// Creates a table with one empty item group.
 		/// </summary>
@@ -338,7 +327,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Materialize();
 								if( headRows.Any() )
 									children.Add( new ElementComponent( context => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
-								excelRowAdders.AddRange( headItems.Select( i => GetExcelRowAdder( true, i.Cells ) ) );
+								excelRowAdders.AddRange( headItems.Select( i => TableStatics.GetExcelRowAdder( true, i.Cells ) ) );
 
 								var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
 								var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
@@ -373,7 +362,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																errorsBySource => groupBodyRows ) ) )
 													.Materialize() ) ).ToCollection() );
 									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
-									excelRowAdders.AddRange( groupAndItems.Item2.Select( i => GetExcelRowAdder( false, i.Cells ) ) );
+									excelRowAdders.AddRange( groupAndItems.Item2.Select( i => TableStatics.GetExcelRowAdder( false, i.Cells ) ) );
 
 									// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
 									if( defaultItemLimit != DataRowLimit.Unlimited )
