@@ -167,7 +167,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					children.Add(
 						new ElementComponent( context => new ElementData( () => new ElementLocalData( "tbody" ), children: headRows.Concat( bodyRows ).Materialize() ) ) );
 
-					EwfTable.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+					TableOps.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 
 					return new DisplayableElementData(
 						displaySetup,

@@ -191,5 +191,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return TableCellVerticalAlignmentOps.Class(
 				alignments.FirstOrDefault( i => i != TableCellVerticalAlignment.NotSpecified ) ?? TableCellVerticalAlignment.NotSpecified );
 		}
+
+		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
+			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
+			if( !cellPlaceholderListsForItems.Any() )
+				return;
+
+			// Enforce that there is at least one cell in each field by looking at array of all items.
+			for( var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex += 1 ) {
+				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
+					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
+			}
+		}
 	}
 }

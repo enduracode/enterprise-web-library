@@ -122,18 +122,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
 			};
 
-		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
-			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
-			if( !cellPlaceholderListsForItems.Any() )
-				return;
-
-			// Enforce that there is at least one cell in each field by looking at array of all items.
-			for( var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex += 1 ) {
-				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
-					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
-			}
-		}
-
 		/// <summary>
 		/// Creates a table with one empty item group.
 		/// </summary>
@@ -484,7 +472,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var cellPlaceholderListsForItems = TableOps.BuildCellPlaceholderListsForItems( allVisibleItems, fields.Count );
 
 								if( !disableEmptyFieldDetection )
-									AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+									TableOps.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
 							} );
 					}
 					return new DisplayableElementData(
@@ -604,7 +592,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
-
-		// NOTE: Put method down here?
 	}
 }
