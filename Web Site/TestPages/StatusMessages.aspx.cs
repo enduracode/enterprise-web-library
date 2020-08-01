@@ -10,13 +10,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class StatusMessages: EwfPage {
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
-				EwfTable.CreateWithItems(
-						items: getStatusTests()
-							.Select(
-								tests => new EwfTableItem(
-									tests.Item1.ToCell(),
-									new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) )
-							.ToFunctions() )
+				EwfTable.Create()
+					.AddData(
+						getStatusTests(),
+						tests => new EwfTableItem(
+							tests.Item1.ToCell(),
+							new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) )
 					.ToCollection()
 					.GetControls() );
 		}

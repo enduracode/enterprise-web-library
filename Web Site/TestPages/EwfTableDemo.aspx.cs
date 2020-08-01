@@ -22,8 +22,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var updateRegionSet = new UpdateRegionSet();
 			place.AddControlsReturnThis(
-				EwfTable.CreateWithItemGroups(
-						Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ),
+				EwfTable.Create(
 						caption: "Caption",
 						subCaption: "Sub caption",
 						allowExportToExcel: true,
@@ -42,6 +41,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						defaultItemLimit: DataRowLimit.Fifty,
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
+					.AddItemGroups( Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ).Materialize() )
 					.ToCollection()
 					.GetControls() );
 		}
