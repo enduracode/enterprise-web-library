@@ -202,10 +202,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			var exportAction = getExportAction( headers, tableData );
 
-			var table = new ColumnPrimaryTable(
-				tableActions: exportAction.ToCollection(),
-				firstDataFieldIndex: 1,
-				items: new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select i.ToCell() ).ToCollection()
+			var table = new ColumnPrimaryTable( tableActions: exportAction.ToCollection(), firstDataFieldIndex: 1 ).AddItems(
+				new EwfTableItem( from i in setup.XAxisTitle.ToCollection().Concat( setup.Labels ) select i.ToCell() ).ToCollection()
 					.Concat(
 						from series in seriesCollection select new EwfTableItem( series.Name.ToCell().Concat( from i in series.Values select i.ToString().ToCell() ) ) )
 					.Materialize() );

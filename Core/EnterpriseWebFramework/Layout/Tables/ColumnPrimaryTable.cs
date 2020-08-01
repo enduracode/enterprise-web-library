@@ -11,9 +11,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ColumnPrimaryTable: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly PostBack exportToExcelPostBack;
+		private readonly List<ColumnPrimaryItemGroup> itemGroups = new List<ColumnPrimaryItemGroup>();
+		private bool? hasExplicitItemGroups;
 
 		/// <summary>
-		/// Creates a table with one item group.
+		/// Creates a table.
 		/// </summary>
 		/// <param name="displaySetup"></param>
 		/// <param name="style">The table's style.</param>
@@ -29,58 +31,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
-		/// <param name="items">The items.</param>
 		/// <param name="etherealContent"></param>
 		public ColumnPrimaryTable(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
-			IReadOnlyCollection<EwfTableItem> items = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
-			displaySetup,
-			style,
-			classes,
-			postBackIdBase,
-			caption,
-			subCaption,
-			allowExportToExcel,
-			tableActions,
-			fields,
-			headItems,
-			firstDataFieldIndex,
-			items != null ? new ColumnPrimaryItemGroup( null, items: items ).ToCollection() : null,
-			etherealContent ) {}
-
-		/// <summary>
-		/// Creates a table with multiple item groups.
-		/// </summary>
-		/// <param name="displaySetup"></param>
-		/// <param name="style">The table's style.</param>
-		/// <param name="classes">The classes on the table.</param>
-		/// <param name="postBackIdBase">Do not pass null.</param>
-		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
-		/// </param>
-		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
-		/// no sub caption.</param>
-		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
-		/// simple text (no controls).</param>
-		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
-		/// <param name="headItems">The table's head items.</param>
-		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
-		/// <param name="itemGroups">The item groups.</param>
-		/// <param name="etherealContent"></param>
-		public ColumnPrimaryTable(
-			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
-			IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
 			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
-			itemGroups = itemGroups ?? Enumerable.Empty<ColumnPrimaryItemGroup>().Materialize();
 
 			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
@@ -186,6 +148,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the Export to Excel post-back. This is convenient if you want to use the built-in export functionality, but from an external button.
 		/// </summary>
 		public PostBack ExportToExcelPostBack => exportToExcelPostBack;
+
+		/// <summary>
+		/// Adds items to the table. 
+		/// </summary>
+		public ColumnPrimaryTable AddItems( IReadOnlyCollection<EwfTableItem> items ) {
+			if( hasExplicitItemGroups == true )
+				throw new ApplicationException( "Item groups were previously added to the table. You cannot add both items and item groups." );
+			hasExplicitItemGroups = false;
+
+			var group = itemGroups.SingleOrDefault();
+			if( group == null )
+				itemGroups.Add( group = new ColumnPrimaryItemGroup( null ) );
+
+			group.Items.AddRange( items );
+			return this;
+		}
+
+		/// <summary>
+		/// Adds item groups to the table.
+		/// </summary>
+		public ColumnPrimaryTable AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups ) {
+			if( hasExplicitItemGroups == false )
+				throw new ApplicationException( "Items were previously added to the table. You cannot add both items and item groups." );
+			hasExplicitItemGroups = true;
+
+			this.itemGroups.AddRange( itemGroups );
+			return this;
+		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
 	}

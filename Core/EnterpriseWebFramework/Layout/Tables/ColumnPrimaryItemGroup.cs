@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -10,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly IReadOnlyCollection<FlowComponent> groupName;
 		private readonly IReadOnlyCollection<ActionComponentSetup> groupActions;
 		private readonly ElementActivationBehavior groupHeadActivationBehavior;
-		internal readonly ReadOnlyCollection<EwfTableItem> Items;
+		internal readonly List<EwfTableItem> Items;
 
 		/// <summary>
 		/// Creates an item group.
@@ -25,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.groupName = groupName ?? Enumerable.Empty<FlowComponent>().Materialize();
 			this.groupActions = groupActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 			this.groupHeadActivationBehavior = groupHeadActivationBehavior;
-			Items = ( items ?? new EwfTableItem[ 0 ] ).ToList().AsReadOnly();
+			Items = ( items ?? Enumerable.Empty<EwfTableItem>() ).ToList();
 		}
 
 		internal IReadOnlyCollection<FlowComponent> GetHeadCellContent() {

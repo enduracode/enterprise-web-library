@@ -50,8 +50,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									null,
 									id: "action",
 									firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
-						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
-						itemGroups: itemGroups ).ToCollection()
+						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) } ).AddItemGroups( itemGroups )
+					.ToCollection()
 					.GetControls() );
 		}
 	}
