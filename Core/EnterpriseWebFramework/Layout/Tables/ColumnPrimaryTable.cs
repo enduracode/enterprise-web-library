@@ -9,11 +9,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A column-primary table.
 	/// </summary>
 	public sealed class ColumnPrimaryTable: FlowComponent {
-		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
-		private readonly PostBack exportToExcelPostBack;
-		private readonly List<ColumnPrimaryItemGroup> itemGroups = new List<ColumnPrimaryItemGroup>();
-		private bool? hasExplicitItemGroups;
-
 		/// <summary>
 		/// Creates a table.
 		/// </summary>
@@ -32,11 +27,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="etherealContent"></param>
-		public ColumnPrimaryTable(
+		public static ColumnPrimaryTable Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
-			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			new ColumnPrimaryTable(
+				displaySetup,
+				style,
+				classes,
+				postBackIdBase,
+				caption,
+				subCaption,
+				allowExportToExcel,
+				tableActions,
+				fields,
+				headItems,
+				firstDataFieldIndex,
+				etherealContent );
+
+		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
+		private readonly PostBack exportToExcelPostBack;
+		private readonly List<ColumnPrimaryItemGroup> itemGroups = new List<ColumnPrimaryItemGroup>();
+		private bool? hasExplicitItemGroups;
+
+		private ColumnPrimaryTable(
+			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
+			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
+			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
