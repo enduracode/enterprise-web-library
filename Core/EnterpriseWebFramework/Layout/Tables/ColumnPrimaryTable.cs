@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A column-primary table.
 	/// </summary>
-	public sealed class ColumnPrimaryTable: FlowComponent {
+	public static class ColumnPrimaryTable {
 		/// <summary>
 		/// Creates a table.
 		/// </summary>
@@ -27,12 +27,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="etherealContent"></param>
-		public static ColumnPrimaryTable Create(
+		public static ColumnPrimaryTable<int> Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			new ColumnPrimaryTable(
+			new ColumnPrimaryTable<int>(
 				displaySetup,
 				style,
 				classes,
@@ -45,13 +45,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				headItems,
 				firstDataFieldIndex,
 				etherealContent );
+	}
 
+	/// <summary>
+	/// A column-primary table.
+	/// </summary>
+	public sealed class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly PostBack exportToExcelPostBack;
 		private readonly List<ColumnPrimaryItemGroup> itemGroups = new List<ColumnPrimaryItemGroup>();
 		private bool? hasExplicitItemGroups;
 
-		private ColumnPrimaryTable(
+		internal ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
 			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
@@ -170,7 +175,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds items to the table. 
 		/// </summary>
-		public ColumnPrimaryTable AddItems( IReadOnlyCollection<EwfTableItem> items ) {
+		public ColumnPrimaryTable<ItemIdType> AddItems( IReadOnlyCollection<EwfTableItem> items ) {
 			if( hasExplicitItemGroups == true )
 				throw new ApplicationException( "Item groups were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = false;
@@ -186,7 +191,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds item groups to the table.
 		/// </summary>
-		public ColumnPrimaryTable AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups ) {
+		public ColumnPrimaryTable<ItemIdType> AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups ) {
 			if( hasExplicitItemGroups == false )
 				throw new ApplicationException( "Items were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = true;

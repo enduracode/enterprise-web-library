@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A table.
 	/// </summary>
-	public sealed class EwfTable: FlowComponent {
+	public static class EwfTable {
 		/// <summary>
 		/// Creates a table.
 		/// </summary>
@@ -34,13 +34,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="tailUpdateRegions">The tail update regions for the table, which will operate on the item level if you add items, or the item-group level if
 		/// you add item groups.</param>
 		/// <param name="etherealContent"></param>
-		public static EwfTable Create(
+		public static EwfTable<int> Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null,
 			DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
 			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			new EwfTable(
+			new EwfTable<int>(
 				displaySetup,
 				style,
 				classes,
@@ -55,14 +55,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				disableEmptyFieldDetection,
 				tailUpdateRegions,
 				etherealContent );
+	}
 
+	/// <summary>
+	/// A table.
+	/// </summary>
+	public sealed class EwfTable<ItemIdType>: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly PostBack exportToExcelPostBack;
 		private readonly List<EwfTableItemGroup> itemGroups = new List<EwfTableItemGroup>();
 		private bool? hasExplicitItemGroups;
 		private IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
 
-		private EwfTable(
+		internal EwfTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> specifiedFields,
 			IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection,
@@ -296,7 +301,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If
 		/// enumerating the data is expensive, this call will be slow. The data must be enumerated so the table can show the total number of items.
 		/// </summary>
-		public EwfTable AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem> itemSelector ) {
+		public EwfTable<ItemIdType> AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem> itemSelector ) {
 			data.ToList().ForEach( d => AddItem( () => itemSelector( d ) ) );
 			return this;
 		}
@@ -304,7 +309,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds an item to the table. Does not defer creation of the item. Do not use this in tables that use item limiting.
 		/// </summary>
-		public EwfTable AddItem( EwfTableItem item ) {
+		public EwfTable<ItemIdType> AddItem( EwfTableItem item ) {
 			AddItem( () => item );
 			return this;
 		}
@@ -313,7 +318,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds an item to the table. Defers creation of the item. Do not directly or indirectly create validations inside the function if they will be added to a
 		/// validation list that exists outside the function; this will likely cause your validations to execute in the wrong order or be skipped.
 		/// </summary>
-		public EwfTable AddItem( Func<EwfTableItem> item ) {
+		public EwfTable<ItemIdType> AddItem( Func<EwfTableItem> item ) {
 			if( hasExplicitItemGroups == true )
 				throw new ApplicationException( "Item groups were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = false;
@@ -335,7 +340,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds item groups to the table.
 		/// </summary>
-		public EwfTable AddItemGroups( IReadOnlyCollection<EwfTableItemGroup> itemGroups ) {
+		public EwfTable<ItemIdType> AddItemGroups( IReadOnlyCollection<EwfTableItemGroup> itemGroups ) {
 			foreach( var i in itemGroups )
 				AddItemGroup( i );
 			return this;
@@ -344,7 +349,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds an item group to the table.
 		/// </summary>
-		public EwfTable AddItemGroup( EwfTableItemGroup itemGroup ) {
+		public EwfTable<ItemIdType> AddItemGroup( EwfTableItemGroup itemGroup ) {
 			if( hasExplicitItemGroups == false )
 				throw new ApplicationException( "Items were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = true;

@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		private void testUrl( EwfTable table, string url ) {
+		private void testUrl( EwfTable<int> table, string url ) {
 			var validator = new Validator();
 			validator.GetUrl( new ValidationErrorHandler( "" ), url, false );
 			table.AddItem(
