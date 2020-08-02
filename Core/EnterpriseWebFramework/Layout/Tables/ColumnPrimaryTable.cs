@@ -45,6 +45,43 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				headItems,
 				firstDataFieldIndex,
 				etherealContent );
+
+		/// <summary>
+		/// Creates a table with a specified item ID type.
+		/// </summary>
+		/// <param name="displaySetup"></param>
+		/// <param name="style">The table's style.</param>
+		/// <param name="classes">The classes on the table.</param>
+		/// <param name="postBackIdBase">Do not pass null.</param>
+		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
+		/// </param>
+		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
+		/// no sub caption.</param>
+		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
+		/// simple text (no controls).</param>
+		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
+		/// <param name="headItems">The table's head items.</param>
+		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
+		/// <param name="etherealContent"></param>
+		public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
+			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			new ColumnPrimaryTable<ItemIdType>(
+				displaySetup,
+				style,
+				classes,
+				postBackIdBase,
+				caption,
+				subCaption,
+				allowExportToExcel,
+				tableActions,
+				fields,
+				headItems,
+				firstDataFieldIndex,
+				etherealContent );
 	}
 
 	/// <summary>
