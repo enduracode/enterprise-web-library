@@ -37,11 +37,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static IReadOnlyCollection<FlowComponent> getFieldTree( string name, IEnumerable<MergeRow> emptyRowTree ) {
 			var singleRow = emptyRowTree.Single();
 
-			var table = EwfTable.Create( caption: name, headItems: new EwfTableItem( "Field name".ToCell(), "Description".ToCell() ).ToCollection() );
-			table.AddData( singleRow.Values, i => new EwfTableItem( getFieldNameCellText( i ).ToCell(), i.GetDescription().ToCell() ) );
+			var table = EwfTable.Create( caption: name, headItems: EwfTableItem.Create( "Field name".ToCell(), "Description".ToCell() ).ToCollection() );
+			table.AddData( singleRow.Values, i => EwfTableItem.Create( getFieldNameCellText( i ).ToCell(), i.GetDescription().ToCell() ) );
 			table.AddData(
 				singleRow.Children,
-				i => new EwfTableItem(
+				i => EwfTableItem.Create(
 					new GenericFlowContainer( getFieldTree( i.NodeName, i.Rows ), classes: fieldTreeChildClass ).ToCollection()
 						.ToCell( new TableCellSetup( fieldSpan: 2 ) ) ) );
 			return table.ToCollection();

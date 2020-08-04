@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					.ToCollection()
 					.GetControls() );
 
-			var table = EwfTable.Create( headItems: new[] { new EwfTableItem( "Url".ToCell(), "Valid?".ToCell() ) } );
+			var table = EwfTable.Create( headItems: new[] { EwfTableItem.Create( "Url".ToCell(), "Valid?".ToCell() ) } );
 			ph.AddControlsReturnThis( table.ToCollection().GetControls() );
 
 			foreach( var scheme in new[] { "http://", "ftp://", "file://" } ) {
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var validator = new Validator();
 			validator.GetUrl( new ValidationErrorHandler( "" ), url, false );
 			table.AddItem(
-				new EwfTableItem(
+				EwfTableItem.Create(
 					url.ToCell(),
 					( !validator.ErrorsOccurred ).ToYesOrEmpty()
 					.ToCell( new TableCellSetup( classes: ( validator.ErrorsOccurred ? CssClasses.Red : CssClasses.Green ).ToCollection() ) ) ) );

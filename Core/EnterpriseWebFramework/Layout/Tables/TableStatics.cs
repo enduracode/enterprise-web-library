@@ -100,8 +100,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
 		}
 
-		internal static IReadOnlyCollection<EwfTableField> GetFields(
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem> items ) {
+		internal static IReadOnlyCollection<EwfTableField> GetFields<ItemIdType>(
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems, IEnumerable<EwfTableItem<ItemIdType>> items ) {
 			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
 			if( firstSpecifiedItem == null )
 				return Enumerable.Empty<EwfTableField>().Materialize();
@@ -172,7 +172,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
 		}
 
-		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems( IReadOnlyCollection<EwfTableItem> items, int fieldCount ) {
+		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems<ItemIdType>(
+			IReadOnlyCollection<EwfTableItem<ItemIdType>> items, int fieldCount ) {
 			var itemIndex = 0;
 			var cellPlaceholderListsForItems = new List<List<CellPlaceholder>>();
 			foreach( var itemCells in items.Select( i => i.Cells ) ) {

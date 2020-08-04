@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				EwfTable.Create()
 					.AddData(
 						getStatusTests(),
-						tests => new EwfTableItem(
+						tests => EwfTableItem.Create(
 							tests.Item1.ToCell(),
 							new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) )
 					.ToCollection()

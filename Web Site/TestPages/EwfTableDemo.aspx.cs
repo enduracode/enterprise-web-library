@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 										parametersModification.GroupCount -= 1;
 									} ) ) ).ToCollection(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
-						headItems: new EwfTableItem( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
+						headItems: EwfTableItem.Create( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						defaultItemLimit: DataRowLimit.Fifty,
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
 					.AddItemGroups( Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ).Materialize() )
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private EwfTableItemGroup getItemGroup( int groupNumber ) {
 			var updateRegionSet = new UpdateRegionSet();
-			return new EwfTableItemGroup(
+			return EwfTableItemGroup.Create(
 				() => new EwfTableItemGroupRemainingData(
 					"Group {0}".FormatWith( groupNumber ).ToComponents(),
 					groupActions: groupNumber == 2
@@ -78,7 +78,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					? getItems( info.FirstGroupItemCount )
 						.Concat(
 							new Func<EwfTableItem>(
-								() => new EwfTableItem(
+								() => EwfTableItem.Create(
 									new EwfButton(
 											new StandardButtonStyle( "Add Row" ),
 											behavior: new PostBackBehavior(
@@ -94,8 +94,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		private IEnumerable<Func<EwfTableItem>> getItems( int count ) {
 			return from i in Enumerable.Range( 1, count )
 			       select new Func<EwfTableItem>(
-				       () => new EwfTableItem(
-					       new EwfTableItemSetup( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
+				       () => EwfTableItem.Create(
+					       EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
 					       i.ToString().ToCell(),
 					       ( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) );
 		}

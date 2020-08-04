@@ -242,7 +242,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: CssElementCreator.UserInfoClass ) );
 			}
 
-			table.AddItem( () => new EwfTableItem( appLogo.ToCollection().ToCell(), userInfo.ToCell() ) );
+			table.AddItem( () => EwfTableItem.Create( appLogo.ToCollection().ToCell(), userInfo.ToCell() ) );
 			return table;
 		}
 
@@ -470,7 +470,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.ContentFootBlockClass );
 			table.AddItem(
-				new EwfTableItem(
+				EwfTableItem.Create(
 					components.ToCell(
 						new TableCellSetup(
 							textAlignment: contentFootActions == null || !contentFootActions.Any() ? TextAlignment.Center : TextAlignment.NotSpecified ) ) ) );

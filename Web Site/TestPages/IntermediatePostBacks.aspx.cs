@@ -38,8 +38,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				style: EwfTableStyle.StandardLayoutOnly,
 				fields: new[] { 10, 1, 10 }.Select( i => new EwfTableField( size: i.ToPercentage() ) ).Materialize() );
 			listTable.AddItem(
-				new EwfTableItem(
-					new EwfTableItemSetup( verticalAlignment: TableCellVerticalAlignment.Top ),
+				EwfTableItem.Create(
+					EwfTableItemSetup.Create( verticalAlignment: TableCellVerticalAlignment.Top ),
 					getNonIdListRegionComponents().ToCell(),
 					"".ToCell(),
 					getIdListRegionComponents().ToCell() ) );

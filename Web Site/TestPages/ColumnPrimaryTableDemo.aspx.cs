@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override void loadData() {
 			var itemGroups = Enumerable.Range( 1, 2 )
 				.Select(
-					group => new ColumnPrimaryItemGroup(
+					group => ColumnPrimaryItemGroup.Create(
 						"Group {0}".FormatWith( group ).ToComponents(),
 						groupActions: new ButtonSetup(
 								"Action 1",
@@ -32,8 +32,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							.Materialize(),
 						items: Enumerable.Range( 1, 5 )
 							.Select(
-								i => new EwfTableItem(
-									new EwfTableItemSetup( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
+								i => EwfTableItem.Create(
+									EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
 									i.ToString().ToCell(),
 									( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) ) ) )
 				.Materialize();

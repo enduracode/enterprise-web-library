@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A column-primary table.
 	/// </summary>
-	public static class ColumnPrimaryTable {
+	public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 		/// <summary>
 		/// Creates a table.
 		/// </summary>
@@ -27,12 +27,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
 		/// <param name="etherealContent"></param>
-		public static ColumnPrimaryTable<int> Create(
+		public static ColumnPrimaryTable Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			new ColumnPrimaryTable<int>(
+			new ColumnPrimaryTable(
 				displaySetup,
 				style,
 				classes,
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable<ItemIdType>(
 				displaySetup,
@@ -82,27 +82,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				headItems,
 				firstDataFieldIndex,
 				etherealContent );
+
+		private ColumnPrimaryTable(
+			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
+			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
+			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+			displaySetup,
+			style,
+			classes,
+			postBackIdBase,
+			caption,
+			subCaption,
+			allowExportToExcel,
+			tableActions,
+			fields,
+			headItems,
+			firstDataFieldIndex,
+			etherealContent ) {}
 	}
 
 	/// <summary>
 	/// A column-primary table.
 	/// </summary>
-	public sealed class ColumnPrimaryTable<ItemIdType>: FlowComponent {
+	public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 		private readonly PostBack exportToExcelPostBack;
-		private readonly List<ColumnPrimaryItemGroup> itemGroups = new List<ColumnPrimaryItemGroup>();
+		private readonly List<ColumnPrimaryItemGroup<ItemIdType>> itemGroups = new List<ColumnPrimaryItemGroup<ItemIdType>>();
 		private bool? hasExplicitItemGroups;
 
 		internal ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
-			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+			IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
+			headItems = headItems ?? Enumerable.Empty<EwfTableItem<ItemIdType>>().Materialize();
 
 			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
@@ -128,16 +145,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var tableLevelGeneralActionList = TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ).Materialize();
 					if( tableLevelGeneralActionList.Any() )
 						tHeadRows.Add(
-							new EwfTableItem(
+							EwfTableItem.Create(
 								new GenericFlowContainer( tableLevelGeneralActionList, classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
 									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
 					// NOTE: Table-level item actions should go here.
 					var groupHeadCells = itemGroups.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) ).Materialize();
 					if( groupHeadCells.Any( i => i.content.Any() ) )
 						tHeadRows.Add(
-							new EwfTableItem(
+							EwfTableItem.Create(
 								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
-								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) ) ) );
+								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) )
+								.Materialize() ) );
 					// NOTE: The checkbox row should go here.
 					if( tHeadRows.Any() ) {
 						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
@@ -212,14 +230,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds items to the table. 
 		/// </summary>
-		public ColumnPrimaryTable<ItemIdType> AddItems( IReadOnlyCollection<EwfTableItem> items ) {
+		public ColumnPrimaryTable<ItemIdType> AddItems( IReadOnlyCollection<EwfTableItem<ItemIdType>> items ) {
 			if( hasExplicitItemGroups == true )
 				throw new ApplicationException( "Item groups were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = false;
 
 			var group = itemGroups.SingleOrDefault();
 			if( group == null )
-				itemGroups.Add( group = new ColumnPrimaryItemGroup( null ) );
+				itemGroups.Add( group = ColumnPrimaryItemGroup.CreateWithItemIdType<ItemIdType>( null ) );
 
 			group.Items.AddRange( items );
 			return this;
@@ -228,7 +246,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds item groups to the table.
 		/// </summary>
-		public ColumnPrimaryTable<ItemIdType> AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup> itemGroups ) {
+		public ColumnPrimaryTable<ItemIdType> AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup<ItemIdType>> itemGroups ) {
 			if( hasExplicitItemGroups == false )
 				throw new ApplicationException( "Items were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = true;
