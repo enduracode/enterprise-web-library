@@ -228,7 +228,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public PostBack ExportToExcelPostBack => exportToExcelPostBack;
 
 		/// <summary>
-		/// Adds items to the table. 
+		/// Adds items to the table.
+		/// 
+		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
 		public ColumnPrimaryTable<ItemIdType> AddItems( IReadOnlyCollection<EwfTableItem<ItemIdType>> items ) {
 			if( hasExplicitItemGroups == true )
@@ -245,6 +247,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Adds item groups to the table.
+		/// 
+		/// You can pass ColumnPrimaryItemGroup wherever ColumnPrimaryItemGroup&lt;int&gt; is expected.
 		/// </summary>
 		public ColumnPrimaryTable<ItemIdType> AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup<ItemIdType>> itemGroups ) {
 			if( hasExplicitItemGroups == false )

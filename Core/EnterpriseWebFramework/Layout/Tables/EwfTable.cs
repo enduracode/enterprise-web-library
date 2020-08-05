@@ -365,6 +365,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds all of the given data to the table by enumerating the data and translating each item into an EwfTableItem using the given itemSelector. If
 		/// enumerating the data is expensive, this call will be slow. The data must be enumerated so the table can show the total number of items.
+		/// 
+		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
 		public EwfTable<ItemIdType> AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem<ItemIdType>> itemSelector ) {
 			data.ToList().ForEach( d => AddItem( () => itemSelector( d ) ) );
@@ -373,6 +375,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Adds an item to the table. Does not defer creation of the item. Do not use this in tables that use item limiting.
+		/// 
+		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
 		public EwfTable<ItemIdType> AddItem( EwfTableItem<ItemIdType> item ) {
 			AddItem( () => item );
@@ -382,6 +386,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Adds an item to the table. Defers creation of the item. Do not directly or indirectly create validations inside the function if they will be added to a
 		/// validation list that exists outside the function; this will likely cause your validations to execute in the wrong order or be skipped.
+		/// 
+		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
 		public EwfTable<ItemIdType> AddItem( Func<EwfTableItem<ItemIdType>> item ) {
 			if( hasExplicitItemGroups == true )
@@ -404,6 +410,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Adds item groups to the table.
+		/// 
+		/// You can pass EwfTableItemGroup wherever EwfTableItemGroup&lt;int&gt; is expected.
 		/// </summary>
 		public EwfTable<ItemIdType> AddItemGroups( IReadOnlyCollection<EwfTableItemGroup<ItemIdType>> itemGroups ) {
 			foreach( var i in itemGroups )
@@ -413,6 +421,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		/// <summary>
 		/// Adds an item group to the table.
+		/// 
+		/// You can pass EwfTableItemGroup wherever EwfTableItemGroup&lt;int&gt; is expected.
 		/// </summary>
 		public EwfTable<ItemIdType> AddItemGroup( EwfTableItemGroup<ItemIdType> itemGroup ) {
 			if( hasExplicitItemGroups == false )
