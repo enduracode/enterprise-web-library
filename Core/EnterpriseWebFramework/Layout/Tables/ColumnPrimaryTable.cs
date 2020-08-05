@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems = null, int firstDataFieldIndex = 0,
+			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable<ItemIdType>(
 				displaySetup,
@@ -113,13 +113,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
-			IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-			headItems = headItems ?? Enumerable.Empty<EwfTableItem<ItemIdType>>().Materialize();
+			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
 
 			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
@@ -128,8 +128,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
 
-					var itemSetupLists = new[] { headItems }.Concat( itemGroups.Select( i => i.Items ) )
-						.Select( i => i.Select( j => j.Setup.FieldOrItemSetup ) )
+					var itemSetupLists = new[] { headItems.Select( i => i.Setup.FieldOrItemSetup ).Materialize() }
+						.Concat( itemGroups.Select( i => i.Items.Select( j => j.Setup.FieldOrItemSetup ).Materialize() ) )
 						.Materialize();
 					var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
 					var columnWidthFactor = TableStatics.GetColumnWidthFactor( allItemSetups );
@@ -158,7 +158,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								.Materialize() ) );
 					// NOTE: The checkbox row should go here.
 					if( tHeadRows.Any() ) {
-						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems( tHeadRows, allItemSetups.Length );
+						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems(
+							tHeadRows.Select( i => i.Cells ).Materialize(),
+							allItemSetups.Length );
 						children.Add(
 							new ElementComponent(
 								context => new ElementData(
@@ -175,7 +177,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					fields = TableStatics.GetFields( fields, headItems, itemGroups.SelectMany( i => i.Items ) );
 					var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems(
-						headItems.Concat( itemGroups.SelectMany( i => i.Items ) ).ToList(),
+						headItems.Select( i => i.Cells ).Concat( itemGroups.SelectMany( i => i.Items ).Select( i => i.Cells ) ).Materialize(),
 						fields.Count );
 
 					// Pivot the cell placeholders from column primary into row primary format.

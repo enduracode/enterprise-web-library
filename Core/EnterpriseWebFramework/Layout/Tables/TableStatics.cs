@@ -101,16 +101,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static IReadOnlyCollection<EwfTableField> GetFields<ItemIdType>(
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem<ItemIdType>> headItems, IEnumerable<EwfTableItem<ItemIdType>> items ) {
-			var firstSpecifiedItem = headItems.Concat( items ).FirstOrDefault();
-			if( firstSpecifiedItem == null )
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem<ItemIdType>> items ) {
+			var firstSpecifiedItemCells = headItems.Select( i => i.Cells ).Concat( items.Select( i => i.Cells ) ).FirstOrDefault();
+			if( firstSpecifiedItemCells == null )
 				return Enumerable.Empty<EwfTableField>().Materialize();
 
 			if( fields != null )
 				return fields;
 
 			// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
-			var fieldCount = firstSpecifiedItem.Cells.Sum( i => i.Setup.FieldSpan );
+			var fieldCount = firstSpecifiedItemCells.Sum( i => i.Setup.FieldSpan );
 			return Enumerable.Repeat( new EwfTableField(), fieldCount ).Materialize();
 		}
 
@@ -172,11 +172,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
 		}
 
-		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems<ItemIdType>(
-			IReadOnlyCollection<EwfTableItem<ItemIdType>> items, int fieldCount ) {
+		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems(
+			IReadOnlyCollection<IReadOnlyCollection<EwfTableCell>> items, int fieldCount ) {
 			var itemIndex = 0;
 			var cellPlaceholderListsForItems = new List<List<CellPlaceholder>>();
-			foreach( var itemCells in items.Select( i => i.Cells ) ) {
+			foreach( var itemCells in items ) {
 				// Add a list of cell placeholders for this item if necessary.
 				if( itemIndex >= cellPlaceholderListsForItems.Count )
 					addCellPlaceholderListForItem( cellPlaceholderListsForItems, fieldCount );
