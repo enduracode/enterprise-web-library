@@ -288,7 +288,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														null )
 													.Concat(
 														buildRows(
-															selectedItemData.HasValue
+															hasExplicitItemGroups == true && selectedItemData.HasValue
 																? EwfTableItem.Create(
 																		TableStatics.GetItemSelectionAndActionComponents(
 																				"$( this ).closest( 'tbody' ).children().children( ':first-child' )",
