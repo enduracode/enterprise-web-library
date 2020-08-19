@@ -159,6 +159,10 @@ ewfGridFormItemList {
 	grid-gap: 1em;
 }
 
+ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTd > ewfTableItemSelectionAndActionContainer > ewfTableItemSelectionLabelAndControlContainer > ewfTableItemSelectionLabel {
+	margin-right: .5em;
+}
+
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 	margin-left: 3em;
 }
@@ -428,18 +432,24 @@ th.ewfTcBaseLine, td.ewfTcBaseLine {
 .ewfOverflowedCell {
 	overflow: hidden;
 }
-ewfTableItemLimitingAndGeneralActionContainer, ewfTableItemGroupNameAndGeneralActionContainer {
-	display: flex;
-	flex-flow: row wrap;
-}
 ewfTableActionListContainer {
 	flex-grow: 1;
 }
-ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
-	font-weight: initial;
-}
 ewfTableActionListContainer > ewfUnorderedWrappingList {
 	justify-content: flex-end;
+}
+ewfTableItemLimitingAndGeneralActionContainer,
+ewfTableItemSelectionAndActionContainer,
+ewfTableItemSelectionLabelAndControlContainer,
+ewfTableItemGroupNameAndGeneralActionContainer {
+	display: flex;
+	flex-flow: row wrap;
+}
+ewfTableItemSelectionLabelAndControlContainer {
+	align-items: baseline;
+}
+ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
+	font-weight: initial;
 }
 
 /* text control */

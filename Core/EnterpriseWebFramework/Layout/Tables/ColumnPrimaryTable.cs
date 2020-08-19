@@ -211,7 +211,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					children.Add(
 						new ElementComponent( context => new ElementData( () => new ElementLocalData( "tbody" ), children: headRows.Concat( bodyRows ).Materialize() ) ) );
 
-					TableStatics.AssertAtLeastOneCellPerField( fields, cellPlaceholderListsForItems );
+					TableStatics.AssertAtLeastOneCellPerField( fields.Count, cellPlaceholderListsForItems );
 
 					return new DisplayableElementData(
 						displaySetup,

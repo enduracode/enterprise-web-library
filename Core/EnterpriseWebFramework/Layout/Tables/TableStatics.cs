@@ -157,10 +157,48 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
 			if( exportToExcelPostBack != null )
 				actions = actions.Append( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) ).Materialize();
+			return GetActionList( actions );
+		}
 
+		internal static IReadOnlyCollection<FlowComponent>
+			GetItemSelectionAndActionComponents( string checkboxCellSelector, IReadOnlyCollection<ButtonSetup> buttons, EwfValidation validation ) =>
+			new DisplayableElement(
+					context => new DisplayableElementData(
+						null,
+						() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+							context,
+							"div",
+							new ErrorSourceSet( validations: validation?.ToCollection() ),
+							null ),
+						classes: TableCssElementCreator.ItemSelectionAndActionContainerClass,
+						children: new GenericFlowContainer(
+								new GenericPhrasingContainer( "Select:".ToComponents(), classes: TableCssElementCreator.ItemSelectionLabelClass ).Append<FlowComponent>(
+										new GenericFlowContainer(
+											new WrappingList(
+												new EwfButton(
+														new StandardButtonStyle( "All", buttonSize: ButtonSize.ShrinkWrap ),
+														behavior: new CustomButtonBehavior(
+															() => "{0}.find( 'input[type=checkbox]:not(:checked)' ).click();".FormatWith( checkboxCellSelector ) ) )
+													.ToComponentListItem()
+													.AppendWrappingListItem(
+														new EwfButton(
+																new StandardButtonStyle( "None", buttonSize: ButtonSize.ShrinkWrap ),
+																behavior: new CustomButtonBehavior(
+																	() => "{0}.find( 'input[type=checkbox]:checked' ).click();".FormatWith( checkboxCellSelector ) ) )
+															.ToComponentListItem() ) ).ToCollection(),
+											classes: TableCssElementCreator.ItemSelectionControlContainerClass ) )
+									.Materialize(),
+								classes: TableCssElementCreator.ItemSelectionLabelAndControlContainerClass ).Concat( GetActionList( buttons ) )
+							.Materialize() ) ).Append<FlowComponent>(
+					new FlowErrorContainer(
+						new ErrorSourceSet( validations: validation?.ToCollection() ),
+						new ListErrorDisplayStyle(),
+						disableFocusabilityOnError: true ) )
+				.Materialize();
+
+		internal static IEnumerable<FlowComponent> GetActionList( IReadOnlyCollection<ActionComponentSetup> actions ) {
 			if( !actions.Any() )
 				return Enumerable.Empty<FlowComponent>();
-
 			return new GenericFlowContainer(
 				new WrappingList(
 					from action in actions
@@ -305,13 +343,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
 			};
 
-		internal static void AssertAtLeastOneCellPerField( IReadOnlyCollection<EwfTableField> fields, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
+		internal static void AssertAtLeastOneCellPerField( int fieldCount, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
 			// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
 			if( !cellPlaceholderListsForItems.Any() )
 				return;
 
 			// Enforce that there is at least one cell in each field by looking at array of all items.
-			for( var fieldIndex = 0; fieldIndex < fields.Count; fieldIndex += 1 ) {
+			for( var fieldIndex = 0; fieldIndex < fieldCount; fieldIndex += 1 ) {
 				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
 					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
 			}

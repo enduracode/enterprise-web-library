@@ -501,6 +501,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\Section.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Section\SectionStyle.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\SelectedItemAction.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCssElementCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableStatics.cs" />

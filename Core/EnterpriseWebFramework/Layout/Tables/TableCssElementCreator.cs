@@ -16,6 +16,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new ElementClass( "ewfTblIlga" );
 		internal static readonly ElementClass ItemLimitingControlContainerClass = new ElementClass( "ewfTblIl" );
+		internal static readonly ElementClass ItemSelectionAndActionContainerClass = new ElementClass( "ewfTblIsa" );
+		internal static readonly ElementClass ItemSelectionLabelAndControlContainerClass = new ElementClass( "ewfTblIs" );
+		internal static readonly ElementClass ItemSelectionLabelClass = new ElementClass( "ewfTblIsl" );
+		internal static readonly ElementClass ItemSelectionControlContainerClass = new ElementClass( "ewfTblIsc" );
 		internal static readonly ElementClass ItemGroupNameAndGeneralActionContainerClass = new ElementClass( "ewfTblIgnga" );
 		internal static readonly ElementClass ActionListContainerClass = new ElementClass( "ewfTblAl" );
 
@@ -50,6 +54,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName ),
 					new CssElement( "TableItemLimitingAndGeneralActionContainer", "div.{0}".FormatWith( ItemLimitingAndGeneralActionContainerClass.ClassName ) ),
 					new CssElement( "TableItemLimitingControlContainer", "div.{0}".FormatWith( ItemLimitingControlContainerClass.ClassName ) ),
+					new CssElement( "TableItemSelectionAndActionContainer", "div.{0}".FormatWith( ItemSelectionAndActionContainerClass.ClassName ) ),
+					new CssElement( "TableItemSelectionLabelAndControlContainer", "div.{0}".FormatWith( ItemSelectionLabelAndControlContainerClass.ClassName ) ),
+					new CssElement( "TableItemSelectionLabel", "span.{0}".FormatWith( ItemSelectionLabelClass.ClassName ) ),
+					new CssElement( "TableItemSelectionControlContainer", "div.{0}".FormatWith( ItemSelectionControlContainerClass.ClassName ) ),
 					new CssElement( "TableItemGroupNameAndGeneralActionContainer", "div.{0}".FormatWith( ItemGroupNameAndGeneralActionContainerClass.ClassName ) ),
 					new CssElement( "TableActionListContainer", "div.{0}".FormatWith( ActionListContainerClass.ClassName ) )
 				}.ToList();

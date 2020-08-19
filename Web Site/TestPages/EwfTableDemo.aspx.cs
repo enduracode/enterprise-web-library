@@ -37,6 +37,18 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 											throw new DataModificationException( "No groups to remove." );
 										parametersModification.GroupCount -= 1;
 									} ) ) ).ToCollection(),
+						selectedItemActions: SelectedItemAction
+							.CreateWithIntermediatePostBackBehavior<int>(
+								"Echo IDs",
+								null,
+								ids => AddStatusMessage( StatusMessageType.Info, StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ) )
+							.Append(
+								SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
+									"With confirmation",
+									null,
+									ids => AddStatusMessage( StatusMessageType.Info, StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ),
+									confirmationDialogContent: "Are you sure?".ToComponents() ) )
+							.Materialize(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
 						headItems: EwfTableItem.Create( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						defaultItemLimit: DataRowLimit.Fifty,
@@ -75,7 +87,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
 					tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
 				groupNumber == 1
-					? getItems( info.FirstGroupItemCount )
+					? getItems( info.FirstGroupItemCount, true )
 						.Concat(
 							new Func<EwfTableItem>(
 								() => EwfTableItem.Create(
@@ -88,14 +100,25 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 													firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
 										.ToCell(),
 									"".ToCell() ) ).ToCollection() )
-					: getItems( 250 ) );
+					: getItems( 250, false ),
+				selectedItemActions: groupNumber == 1
+					                     ? SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
+							                     "Echo group IDs",
+							                     null,
+							                     ids => AddStatusMessage(
+								                     StatusMessageType.Info,
+								                     StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ) )
+						                     .ToCollection()
+					                     : Enumerable.Empty<SelectedItemAction<int>>().Materialize() );
 		}
 
-		private IEnumerable<Func<EwfTableItem>> getItems( int count ) {
+		private IEnumerable<Func<EwfTableItem>> getItems( int count, bool includeId ) {
 			return from i in Enumerable.Range( 1, count )
 			       select new Func<EwfTableItem>(
 				       () => EwfTableItem.Create(
-					       EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
+					       EwfTableItemSetup.Create(
+						       activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ),
+						       id: includeId ? new SpecifiedValue<int>( i ) : null ),
 					       i.ToString().ToCell(),
 					       ( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) );
 		}
