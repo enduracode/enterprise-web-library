@@ -26,7 +26,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an item group with a specified item ID type.
 		/// </summary>
-		/// <typeparam name="ItemIdType"></typeparam>
 		/// <param name="remainingDataGetter"></param>
 		/// <param name="items"></param>
 		/// <param name="selectedItemActions">Group selected-item actions. Passing one or more of these will add a new column to the table containing a checkbox for
