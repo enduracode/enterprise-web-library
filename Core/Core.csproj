@@ -504,6 +504,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SelectedItemAction.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCssElementCreator.cs" />
+    <Compile Include="EnterpriseWebFramework\Layout\Tables\TableSelectedItemData.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TailUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\TextAlignment.cs" />

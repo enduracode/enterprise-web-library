@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
@@ -70,6 +71,69 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( rowIndex == rowSetups.Count - 1 )
 					row.CssClass = row.CssClass.ConcatenateWithSpace( "ewfLast" );
 			}
+		}
+
+		internal static void AddCheckboxes<ItemIdType>(
+			string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
+			IReadOnlyCollection<EwfTableItemGroup<ItemIdType>> itemGroups, DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds,
+			IReadOnlyCollection<DataModification> externalDataModifications ) {
+			var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select(
+					action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() ) )
+				.Materialize();
+			selectedItemData.Buttons = tablePostBackAndButtonPairs.Select( i => i.button ).Materialize();
+
+			if( selectedItemActions == null && selectedItemIds == null )
+				return;
+
+			selectedItemData.ItemGroupData = itemGroups.Select(
+					group => {
+						var groupSelectedItemIds = new List<ItemIdType>();
+						var groupPostBackAndButtonPairs = group.SelectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
+							.Materialize();
+
+						var dataModifications = externalDataModifications.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
+							.Concat( groupPostBackAndButtonPairs.Select( i => i.postBack ) )
+							.Materialize();
+						if( !dataModifications.Any() )
+							return (( IReadOnlyCollection<ButtonSetup>, EwfValidation, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType> )?)null;
+
+						var checkboxes = FormState.ExecuteWithDataModificationsAndDefaultAction(
+							dataModifications,
+							() => group.Items.Select(
+									i => new Checkbox(
+										false,
+										Enumerable.Empty<PhrasingComponent>().Materialize(),
+										validationMethod: ( postBackValue, validator ) => {
+											if( postBackValue.Value )
+												groupSelectedItemIds.Add( i.Value.Setup.Id.Value );
+										} ).PageComponent )
+								.Materialize() );
+
+						var validation = groupPostBackAndButtonPairs.Any()
+							                 ? FormState.ExecuteWithDataModificationsAndDefaultAction(
+								                 groupPostBackAndButtonPairs.Select( i => i.postBack ),
+								                 () => new EwfValidation(
+									                 validator => {
+										                 if( !groupSelectedItemIds.Any() )
+											                 validator.NoteErrorAndAddMessage( "Please select at least one item." );
+									                 } ) )
+							                 : null;
+
+						return ( groupPostBackAndButtonPairs.Select( i => i.button ).Materialize(), validation, checkboxes, groupSelectedItemIds );
+					} )
+				.ToImmutableArray();
+
+			if( tablePostBackAndButtonPairs.Any() )
+				FormState.ExecuteWithDataModificationsAndDefaultAction(
+					tablePostBackAndButtonPairs.Select( i => i.postBack ),
+					() => selectedItemData.Validation = new EwfValidation(
+						      validator => {
+							      if( !selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Any() )
+								      validator.NoteErrorAndAddMessage( "Please select at least one item." );
+						      } ) );
+
+			if( selectedItemIds != null )
+				new EwfValidation( validator => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() );
 		}
 
 		internal static ElementClassSet GetClasses( EwfTableStyle style, ElementClassSet classes ) => getTableStyleClass( style ).Add( classes );
