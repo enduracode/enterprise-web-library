@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using EnterpriseWebLibrary.IO;
+using Humanizer;
 using static MoreLinq.Extensions.EquiZipExtension;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -194,15 +195,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							EwfTableItem.Create(
 								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
 								.Concat(
-									itemGroups.EquiZip(
-										selectedItemData.ItemGroupData,
-										( group, groupSelectedItemData ) => ( groupSelectedItemData.HasValue
-											                                      ? TableStatics.GetItemSelectionAndActionComponents(
-												                                      // NOTE: This needs to only affcet checkboxes within the group.
-												                                      "$( this ).closest( 'thead' ).children( ':last-child' ).children()",
-												                                      groupSelectedItemData.Value.buttons,
-												                                      groupSelectedItemData.Value.validation )
-											                                      : null ).ToCell( setup: new TableCellSetup( fieldSpan: group.Items.Count ) ) ) )
+									itemGroups.Select(
+										( group, index ) => {
+											var groupSelectedItemData = selectedItemData.ItemGroupData[ index ];
+											IReadOnlyCollection<FlowComponent> components = null;
+											if( groupSelectedItemData.HasValue ) {
+												var beginCell = ( headItems.Any() ? 1 : 0 ) + itemGroups.Take( index ).Sum( i => i.Items.Count );
+												var endCell = beginCell + group.Items.Count;
+												components = TableStatics.GetItemSelectionAndActionComponents(
+													"$( this ).closest( 'thead' ).children( ':last-child' ).children( ':nth-child( n + {0} ):nth-child( -n + {1} )' )".FormatWith(
+														beginCell + 1,
+														endCell ),
+													groupSelectedItemData.Value.buttons,
+													groupSelectedItemData.Value.validation );
+											}
+											return components.ToCell( setup: new TableCellSetup( fieldSpan: group.Items.Count ) );
+										} ) )
 								.Materialize() ) );
 					if( selectedItemData.ItemGroupData != null )
 						tHeadRows.Add(
