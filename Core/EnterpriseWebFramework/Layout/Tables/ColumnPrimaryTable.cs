@@ -198,6 +198,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										selectedItemData.ItemGroupData,
 										( group, groupSelectedItemData ) => ( groupSelectedItemData.HasValue
 											                                      ? TableStatics.GetItemSelectionAndActionComponents(
+												                                      // NOTE: This needs to only affcet checkboxes within the group.
 												                                      "$( this ).closest( 'thead' ).children( ':last-child' ).children()",
 												                                      groupSelectedItemData.Value.buttons,
 												                                      groupSelectedItemData.Value.validation )
