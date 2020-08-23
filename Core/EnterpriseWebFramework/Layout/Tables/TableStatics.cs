@@ -75,8 +75,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static void AddCheckboxes<ItemIdType>(
 			string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
-			IReadOnlyCollection<EwfTableItemGroup<ItemIdType>> itemGroups, DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds,
-			IReadOnlyCollection<DataModification> externalDataModifications ) {
+			IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
+				itemGroups, DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds, IReadOnlyCollection<DataModification> externalDataModifications ) {
 			var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select(
 					action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() ) )
 				.Materialize();
@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			selectedItemData.ItemGroupData = itemGroups.Select(
 					group => {
 						var groupSelectedItemIds = new List<ItemIdType>();
-						var groupPostBackAndButtonPairs = group.SelectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
+						var groupPostBackAndButtonPairs = group.selectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
 							.Materialize();
 
 						var dataModifications = externalDataModifications.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
@@ -99,13 +99,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						var checkboxes = FormState.ExecuteWithDataModificationsAndDefaultAction(
 							dataModifications,
-							() => group.Items.Select(
+							() => group.itemGetters.Select(
 									i => new Checkbox(
 										false,
 										Enumerable.Empty<PhrasingComponent>().Materialize(),
 										validationMethod: ( postBackValue, validator ) => {
 											if( postBackValue.Value )
-												groupSelectedItemIds.Add( i.Value.Setup.Id.Value );
+												groupSelectedItemIds.Add( i().Setup.Id.Value );
 										} ).PageComponent )
 								.Materialize() );
 
@@ -134,6 +134,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( selectedItemIds != null )
 				new EwfValidation( validator => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() );
+		}
+
+		internal static void AssertItemIdsUnique<ItemIdType>( IEnumerable<EwfTableItem<ItemIdType>> items ) {
+			if( items.Where( i => i.Setup.Id != null ).Select( i => i.Setup.Id.Value ).GetDuplicates().Any() )
+				throw new ApplicationException( "Item IDs must be unique." );
 		}
 
 		internal static ElementClassSet GetClasses( EwfTableStyle style, ElementClassSet classes ) => getTableStyleClass( style ).Add( classes );

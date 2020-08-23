@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using EnterpriseWebLibrary.IO;
+using static MoreLinq.Extensions.EquiZipExtension;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -23,6 +24,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
 		/// simple text (no controls).</param>
 		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new row to the table containing a checkbox for
+		/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
+		/// empty.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
@@ -30,8 +34,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ColumnPrimaryTable Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
-			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable(
 				displaySetup,
 				style,
@@ -41,6 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				subCaption,
 				allowExportToExcel,
 				tableActions,
+				selectedItemActions,
 				fields,
 				headItems,
 				firstDataFieldIndex,
@@ -60,6 +65,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
 		/// simple text (no controls).</param>
 		/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
+		/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new row to the table containing a checkbox for
+		/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
+		/// empty.</param>
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
@@ -67,8 +75,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
-			IReadOnlyCollection<EwfTableField> fields = null, IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0,
-			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable<ItemIdType>(
 				displaySetup,
 				style,
@@ -78,6 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				subCaption,
 				allowExportToExcel,
 				tableActions,
+				selectedItemActions,
 				fields,
 				headItems,
 				firstDataFieldIndex,
@@ -85,8 +94,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
-			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
-			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex,
+			IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 			displaySetup,
 			style,
 			classes,
@@ -95,6 +105,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			subCaption,
 			allowExportToExcel,
 			tableActions,
+			selectedItemActions,
 			fields,
 			headItems,
 			firstDataFieldIndex,
@@ -106,14 +117,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
+		private readonly string postBackIdBase;
 		private readonly PostBack exportToExcelPostBack;
+		private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions;
+		private readonly TableSelectedItemData<ItemIdType> selectedItemData = new TableSelectedItemData<ItemIdType>();
 		private readonly List<ColumnPrimaryItemGroup<ItemIdType>> itemGroups = new List<ColumnPrimaryItemGroup<ItemIdType>>();
 		private bool? hasExplicitItemGroups;
 
 		internal ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
-			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<EwfTableField> fields,
-			IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex,
+			IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
@@ -124,6 +139,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
 				tableContext => {
+					if( selectedItemData.Buttons == null )
+						TableStatics.AddCheckboxes(
+							postBackIdBase,
+							selectedItemActions,
+							selectedItemData,
+							itemGroups.Select( i => ( i.SelectedItemActions, i.Items.ToFunctions() ) ),
+							null,
+							Enumerable.Empty<DataModification>().Materialize() );
+
+					TableStatics.AssertItemIdsUnique( itemGroups.SelectMany( i => i.Items ) );
+
 					var children = new List<FlowComponentOrNode>();
 
 					children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
@@ -148,7 +174,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							EwfTableItem.Create(
 								new GenericFlowContainer( tableLevelGeneralActionList, classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
 									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
-					// NOTE: Table-level item actions should go here.
+					if( selectedItemData.ItemGroupData != null )
+						tHeadRows.Add(
+							EwfTableItem.Create(
+								TableStatics.GetItemSelectionAndActionComponents(
+										"$( this ).closest( 'thead' ).children( ':last-child' ).children()",
+										selectedItemData.Buttons,
+										selectedItemData.Validation )
+									.ToCell( new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
 					var groupHeadCells = itemGroups.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) ).Materialize();
 					if( groupHeadCells.Any( i => i.content.Any() ) )
 						tHeadRows.Add(
@@ -156,7 +189,35 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
 								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) )
 								.Materialize() ) );
-					// NOTE: The checkbox row should go here.
+					if( hasExplicitItemGroups == true && selectedItemData.ItemGroupData != null && selectedItemData.ItemGroupData.Any( i => i.HasValue ) )
+						tHeadRows.Add(
+							EwfTableItem.Create(
+								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+								.Concat(
+									itemGroups.EquiZip(
+										selectedItemData.ItemGroupData,
+										( group, groupSelectedItemData ) => ( groupSelectedItemData.HasValue
+											                                      ? TableStatics.GetItemSelectionAndActionComponents(
+												                                      "$( this ).closest( 'thead' ).children( ':last-child' ).children()",
+												                                      groupSelectedItemData.Value.buttons,
+												                                      groupSelectedItemData.Value.validation )
+											                                      : null ).ToCell( setup: new TableCellSetup( fieldSpan: group.Items.Count ) ) ) )
+								.Materialize() ) );
+					if( selectedItemData.ItemGroupData != null )
+						tHeadRows.Add(
+							EwfTableItem.Create(
+								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+								.Concat(
+									itemGroups.EquiZip(
+											selectedItemData.ItemGroupData,
+											( group, groupSelectedItemData ) => groupSelectedItemData.HasValue
+												                                    ? group.Items.EquiZip(
+													                                    groupSelectedItemData.Value.checkboxes,
+													                                    ( item, checkbox ) => item.Setup.Id != null ? checkbox : null )
+												                                    : Enumerable.Repeat( (PhrasingComponent)null, group.Items.Count ) )
+										.SelectMany( i => i )
+										.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
+								.Materialize() ) );
 					if( tHeadRows.Any() ) {
 						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems(
 							tHeadRows.Select( i => i.Cells ).Materialize(),
@@ -221,7 +282,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						etherealChildren: etherealContent );
 				} ).ToCollection();
 
+			this.postBackIdBase = postBackIdBase;
 			exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
+			this.selectedItemActions = selectedItemActions;
 		}
 
 		/// <summary>
@@ -235,6 +298,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
 		public ColumnPrimaryTable<ItemIdType> AddItems( IReadOnlyCollection<EwfTableItem<ItemIdType>> items ) {
+			if( selectedItemData.Buttons != null )
+				throw new ApplicationException( "You cannot modify the table after checkboxes have been added." );
+
 			if( hasExplicitItemGroups == true )
 				throw new ApplicationException( "Item groups were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = false;
@@ -253,11 +319,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// You can pass ColumnPrimaryItemGroup wherever ColumnPrimaryItemGroup&lt;int&gt; is expected.
 		/// </summary>
 		public ColumnPrimaryTable<ItemIdType> AddItemGroups( IReadOnlyCollection<ColumnPrimaryItemGroup<ItemIdType>> itemGroups ) {
+			if( selectedItemData.Buttons != null )
+				throw new ApplicationException( "You cannot modify the table after checkboxes have been added." );
+
 			if( hasExplicitItemGroups == false )
 				throw new ApplicationException( "Items were previously added to the table. You cannot add both items and item groups." );
 			hasExplicitItemGroups = true;
 
+			if( itemGroups.Any( i => i.SelectedItemActions.Any() ) && selectedItemActions == null )
+				throw new ApplicationException( "Selected-item actions are disabled." );
+
 			this.itemGroups.AddRange( itemGroups );
+			return this;
+		}
+
+		/// <summary>
+		/// Adds a new row to the table containing a checkbox for each item with an ID. Validation will put the selected-item IDs in the specified <see cref="DataValue{T}"/>.
+		/// </summary>
+		/// <param name="selectedItemIds">Do not pass null.</param>
+		public ColumnPrimaryTable<ItemIdType> AddCheckboxes( DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds ) {
+			TableStatics.AddCheckboxes(
+				postBackIdBase,
+				selectedItemActions,
+				selectedItemData,
+				itemGroups.Select( i => ( i.SelectedItemActions, i.Items.ToFunctions() ) ),
+				selectedItemIds,
+				FormState.Current.DataModifications );
 			return this;
 		}
 

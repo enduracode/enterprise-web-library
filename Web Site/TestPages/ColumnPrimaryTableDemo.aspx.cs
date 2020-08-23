@@ -15,7 +15,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				.Select(
 					group => ColumnPrimaryItemGroup.Create(
 						"Group {0}".FormatWith( group ).ToComponents(),
-						groupActions: new ButtonSetup(
+						groupActions:
+						new ButtonSetup(
 								"Action 1",
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateIntermediate(
@@ -30,10 +31,21 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 											id: PostBack.GetCompositeId( group.ToString(), "action2" ),
 											firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
 							.Materialize(),
+						selectedItemActions: group == 1
+							                     ? SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
+									                     "Echo group IDs",
+									                     null,
+									                     ids => AddStatusMessage(
+										                     StatusMessageType.Info,
+										                     StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ) )
+								                     .ToCollection()
+							                     : Enumerable.Empty<SelectedItemAction<int>>().Materialize(),
 						items: Enumerable.Range( 1, 5 )
 							.Select(
 								i => EwfTableItem.Create(
-									EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ) ),
+									EwfTableItemSetup.Create(
+										activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ),
+										id: new SpecifiedValue<int>( group * 10 + i ) ),
 									i.ToString().ToCell(),
 									( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) ) ) )
 				.Materialize();
@@ -50,6 +62,18 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									null,
 									id: "action",
 									firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
+						selectedItemActions: SelectedItemAction
+							.CreateWithIntermediatePostBackBehavior<int>(
+								"Echo IDs",
+								null,
+								ids => AddStatusMessage( StatusMessageType.Info, StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ) )
+							.Append(
+								SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
+									"With confirmation",
+									null,
+									ids => AddStatusMessage( StatusMessageType.Info, StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ),
+									confirmationDialogContent: "Are you sure?".ToComponents() ) )
+							.Materialize(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) } )
 					.AddItemGroups( itemGroups )
 					.ToCollection()

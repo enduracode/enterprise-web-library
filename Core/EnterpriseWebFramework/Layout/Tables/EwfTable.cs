@@ -169,7 +169,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							postBackIdBase,
 							selectedItemActions,
 							selectedItemData,
-							itemGroups,
+							itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
 							null,
 							Enumerable.Empty<DataModification>().Materialize() );
 
@@ -192,12 +192,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										break;
 								}
 
-								if( visibleItemGroupsAndItems.SelectMany( i => i.Item2 )
-									.Where( i => i.Setup.Id != null )
-									.Select( i => i.Setup.Id.Value )
-									.GetDuplicates()
-									.Any() )
-									throw new ApplicationException( "Item IDs must be unique." );
+								TableStatics.AssertItemIdsUnique( visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 
 								fields = TableStatics.GetFields( fields, headItems, visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 								if( !fields.Any() )
@@ -532,7 +527,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="selectedItemIds">Do not pass null.</param>
 		public EwfTable<ItemIdType> AddCheckboxes( DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds ) {
-			TableStatics.AddCheckboxes( postBackIdBase, selectedItemActions, selectedItemData, itemGroups, selectedItemIds, FormState.Current.DataModifications );
+			TableStatics.AddCheckboxes(
+				postBackIdBase,
+				selectedItemActions,
+				selectedItemData,
+				itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
+				selectedItemIds,
+				FormState.Current.DataModifications );
 			return this;
 		}
 
