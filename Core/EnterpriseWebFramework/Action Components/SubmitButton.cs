@@ -15,8 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="action">Do not pass null.</param>
 		/// <param name="forceJsHandling"></param>
 		/// <param name="predicate"></param>
-		/// <param name="legacy"></param>
-		internal static string GetImplicitSubmissionKeyPressStatements( FormAction action, bool forceJsHandling, string predicate = "", bool legacy = false ) {
+		internal static string GetImplicitSubmissionKeyPressStatements( FormAction action, bool forceJsHandling, string predicate = "" ) {
 			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
 			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
 			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don't want the implicit submission behavior of
@@ -24,10 +23,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return action is PostBackFormAction postBackAction && postBackAction.PostBack == EwfPage.Instance.SubmitButtonPostBack && !forceJsHandling
 				       ? ""
 				       : "if( {0} ) {{ {1} }}".FormatWith(
-					       "{0}.which == 13".FormatWith( legacy ? "event" : "e" ) + predicate.PrependDelimiter( " && " ),
-					       legacy
-						       ? action.GetJsStatements().ConcatenateWithSpace( "return false;" )
-						       : "e.preventDefault();".ConcatenateWithSpace( action.GetJsStatements() ) );
+					       "e.which == 13" + predicate.PrependDelimiter( " && " ),
+					       "e.preventDefault();".ConcatenateWithSpace( action.GetJsStatements() ) );
 		}
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
