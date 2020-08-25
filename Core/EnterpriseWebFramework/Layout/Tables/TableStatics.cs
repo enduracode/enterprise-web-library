@@ -107,7 +107,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											if( postBackValue.Value )
 												groupSelectedItemIds.Add( i().Setup.Id.Value );
 										} ).PageComponent )
-								.Materialize() );
+								.Materialize(),
+							formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction>( null ) );
 
 						var validation = groupPostBackAndButtonPairs.Any()
 							                 ? FormState.ExecuteWithDataModificationsAndDefaultAction(

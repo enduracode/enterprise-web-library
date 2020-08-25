@@ -379,9 +379,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 								{
 									Width = Unit.Percentage( 5 ), CssClass = TableCssElementCreator.AllCellAlignmentsClass.ClassName.ConcatenateWithSpace( "ewfAec" )
 								};
-							if( rowSetup.UniqueIdentifier != null ) {
-								var firstDm = selectedRowDataModificationsToMethods.First().Key;
-								var pb = firstDm as PostBack;
+							if( rowSetup.UniqueIdentifier != null )
 								cell.Controls.Add(
 									new PlaceHolder().AddControlsReturnThis(
 										FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -389,14 +387,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 												() => new Checkbox(
 													false,
 													Enumerable.Empty<PhrasingComponent>().Materialize(),
-													setup: CheckboxSetup.Create( action: new PostBackFormAction( pb ?? EwfPage.Instance.DataUpdatePostBack ) ),
 													validationMethod: ( postBackValue, validator ) => {
 														if( postBackValue.Value )
 															checkedRowSetups.Add( rowSetup );
-													} ) )
+													} ),
+												formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction>( null ) )
 											.PageComponent.ToCollection()
 											.GetControls() ) );
-							}
 							rowSetup.UnderlyingTableRow.Cells.AddAt( 0, cell );
 						}
 
