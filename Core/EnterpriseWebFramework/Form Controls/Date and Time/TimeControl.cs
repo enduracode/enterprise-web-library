@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						       ? TextControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
 						       : TextControlSetup.Create(
 							       autoFillTokens: setup.AutoFillTokens,
-							       action: setup.Action,
+							       action: new SpecifiedValue<FormAction>( setup.Action ),
 							       valueChangedAction: setup.ValueChangedAction,
 							       pageModificationValue: setup.PageModificationValue,
 							       validationPredicate: setup.ValidationPredicate,
@@ -124,7 +124,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							items,
 							placeholderText: "",
 							autoFillTokens: setup.AutoFillTokens,
-							action: setup.Action,
+							action: new SpecifiedValue<FormAction>( setup.Action ),
 							selectionChangedAction: setup.ValueChangedAction,
 							validationPredicate: setup.ValidationPredicate,
 							validationErrorNotifier: setup.ValidationErrorNotifier ),

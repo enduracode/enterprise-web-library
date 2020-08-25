@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static DateControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", FormAction action = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
 			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) {
 			return new DateControlSetup(
@@ -57,13 +57,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Action ValidationErrorNotifier;
 
 		internal DateControlSetup(
-			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, FormAction action, FormAction valueChangedAction,
-			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, SpecifiedValue<FormAction> action,
+			FormAction valueChangedAction, PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate,
+			Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
 			IsReadOnly = isReadOnly;
 			Classes = classes;
 			AutoFillTokens = autoFillTokens;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			ValueChangedAction = valueChangedAction;
 			PageModificationValue = pageModificationValue;
 			ValidationPredicate = validationPredicate;

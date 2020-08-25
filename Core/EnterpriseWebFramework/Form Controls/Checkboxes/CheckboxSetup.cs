@@ -12,7 +12,7 @@
 		/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 		/// <param name="pageModificationValue"></param>
 		public static CheckboxSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, FormAction action = null, FormAction valueChangedAction = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
 			PageModificationValue<bool> pageModificationValue = null ) {
 			return new CheckboxSetup( displaySetup, false, classes, action, valueChangedAction, pageModificationValue );
 		}
@@ -34,12 +34,12 @@
 		internal readonly PageModificationValue<bool> PageModificationValue;
 
 		private CheckboxSetup(
-			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, FormAction action, FormAction valueChangedAction,
+			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, SpecifiedValue<FormAction> action, FormAction valueChangedAction,
 			PageModificationValue<bool> pageModificationValue ) {
 			DisplaySetup = displaySetup;
 			IsReadOnly = isReadOnly;
 			Classes = classes;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			ValueChangedAction = valueChangedAction;
 			PageModificationValue = pageModificationValue ?? new PageModificationValue<bool>();
 		}

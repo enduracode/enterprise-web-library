@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the button is selected.
 		/// </param>
 		public static FlowRadioButtonSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenSelected = false, FormAction action = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenSelected = false, SpecifiedValue<FormAction> action = null,
 			PageModificationValue<bool> pageModificationValue = null, Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null,
 			bool nestedContentAlwaysDisplayed = false ) {
 			return new FlowRadioButtonSetup(

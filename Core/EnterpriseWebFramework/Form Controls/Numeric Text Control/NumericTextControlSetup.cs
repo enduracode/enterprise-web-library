@@ -21,8 +21,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static NumericTextControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "", FormAction action = null,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
+			SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
 			PageModificationValue<long?> numericPageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new NumericTextControlSetup(
 				new TextControlSetup(
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static NumericTextControlSetup CreateAutoComplete(
 			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-			FormAction action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
+			SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, PageModificationValue<long?> numericPageModificationValue = null,
 			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new NumericTextControlSetup(

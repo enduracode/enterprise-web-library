@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static DurationControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, FormAction action = null, FormAction valueChangedAction = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new DurationControlSetup(
 				displaySetup,
@@ -51,12 +51,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Action ValidationErrorNotifier;
 
 		internal DurationControlSetup(
-			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, FormAction action, FormAction valueChangedAction,
+			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, SpecifiedValue<FormAction> action, FormAction valueChangedAction,
 			PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
 			IsReadOnly = isReadOnly;
 			Classes = classes;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			ValueChangedAction = valueChangedAction;
 			PageModificationValue = pageModificationValue;
 			ValidationPredicate = validationPredicate;

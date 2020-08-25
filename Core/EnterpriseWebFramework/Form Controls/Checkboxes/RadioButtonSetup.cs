@@ -11,7 +11,8 @@
 		/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action.</param>
 		/// <param name="pageModificationValue"></param>
 		public static RadioButtonSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, FormAction action = null, PageModificationValue<bool> pageModificationValue = null ) {
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, SpecifiedValue<FormAction> action = null,
+			PageModificationValue<bool> pageModificationValue = null ) {
 			return new RadioButtonSetup( displaySetup, false, classes, action, pageModificationValue );
 		}
 
@@ -31,11 +32,12 @@
 		internal readonly PageModificationValue<bool> PageModificationValue;
 
 		private RadioButtonSetup(
-			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, FormAction action, PageModificationValue<bool> pageModificationValue ) {
+			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, SpecifiedValue<FormAction> action,
+			PageModificationValue<bool> pageModificationValue ) {
 			DisplaySetup = displaySetup;
 			IsReadOnly = isReadOnly;
 			Classes = classes;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			PageModificationValue = pageModificationValue ?? new PageModificationValue<bool>();
 		}
 	}

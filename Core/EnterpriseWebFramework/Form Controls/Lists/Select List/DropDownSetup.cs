@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static DropDownSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useNativeControl = false, ContentBasedLength width = null,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", string autoFillTokens = "",
-			FormAction action = null, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
+			SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) =>
 			new DropDownSetup<ItemIdType>(
@@ -109,7 +109,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal DropDownSetup(
 			DisplaySetup displaySetup, bool useNativeControl, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
 			Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens,
-			FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
+			SpecifiedValue<FormAction> action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
@@ -121,7 +121,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PlaceholderText = placeholderText;
 			Items = items;
 			AutoFillTokens = autoFillTokens;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			SelectionChangedAction = selectionChangedAction;
 			ItemIdPageModificationValue = itemIdPageModificationValue;
 			ItemMatchPageModificationSetups = itemMatchPageModificationSetups ?? Enumerable.Empty<ListItemMatchPageModificationSetup<ItemIdType>>().Materialize();

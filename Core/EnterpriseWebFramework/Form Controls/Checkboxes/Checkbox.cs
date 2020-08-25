@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									id.AddId( context.Id );
 
 									if( !isReadOnly ) {
-										action.AddToPageIfNecessary();
+										action?.AddToPageIfNecessary();
 										valueChangedAction?.AddToPageIfNecessary();
 									}
 

@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="nestedContentGetter">A function that gets the content that will appear beneath the checkbox.</param>
 		/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the box is checked.</param>
 		public static FlowCheckboxSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenChecked = false, FormAction action = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenChecked = false, SpecifiedValue<FormAction> action = null,
 			FormAction valueChangedAction = null, PageModificationValue<bool> pageModificationValue = null,
 			Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) {
 			return new FlowCheckboxSetup(

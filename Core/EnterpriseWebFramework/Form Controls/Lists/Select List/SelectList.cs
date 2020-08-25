@@ -190,7 +190,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                   select freeFormList.CreateRadioButton(
 					                   i.Item.Id,
 					                   label: i.Item.Label.ToComponents(),
-					                   setup: isReadOnly ? RadioButtonSetup.CreateReadOnly() : RadioButtonSetup.Create( action: action ) );
+					                   setup: isReadOnly
+						                          ? RadioButtonSetup.CreateReadOnly()
+						                          : RadioButtonSetup.Create( action: new SpecifiedValue<FormAction>( action ) ) );
 				PageComponent = new GenericFlowContainer(
 					useHorizontalRadioLayout.Value
 						? new LineList( from i in radioButtons select (LineListItem)i.PageComponent.ToCollection().ToComponentListItem() ).ToCollection<FlowComponent>()
@@ -233,7 +235,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								Labeler.AddControlId( context.Id );
 
 								if( !isReadOnly ) {
-									action.AddToPageIfNecessary();
+									action?.AddToPageIfNecessary();
 									selectionChangedAction?.AddToPageIfNecessary();
 								}
 

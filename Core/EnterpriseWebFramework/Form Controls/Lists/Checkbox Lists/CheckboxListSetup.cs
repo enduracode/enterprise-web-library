@@ -19,8 +19,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static CheckboxListSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool includeSelectAndDeselectAllButtons = false,
-			ContentBasedLength minColumnWidth = null, FormAction action = null, FormAction selectionChangedAction = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
+			ContentBasedLength minColumnWidth = null, SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new CheckboxListSetup<ItemIdType>(
 				displaySetup,
 				includeSelectAndDeselectAllButtons,
@@ -48,12 +48,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal CheckboxListSetup(
 			DisplaySetup displaySetup, bool includeSelectAndDeselectAllButtons, IEnumerable<SelectListItem<ItemIdType>> items, ContentBasedLength minColumnWidth,
-			FormAction action, FormAction selectionChangedAction, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+			SpecifiedValue<FormAction> action, FormAction selectionChangedAction, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
 			IncludeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
 			Items = items.Materialize();
 			MinColumnWidth = minColumnWidth;
-			Action = action;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			SelectionChangedAction = selectionChangedAction;
 			ValidationPredicate = validationPredicate;
 			ValidationErrorNotifier = validationErrorNotifier;

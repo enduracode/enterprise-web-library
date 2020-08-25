@@ -46,7 +46,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					i => new FlowCheckbox(
 						valueSet.Contains( i.Id ),
 						i.Label.ToComponents(),
-						setup: FlowCheckboxSetup.Create( highlightedWhenChecked: true, action: setup.Action, valueChangedAction: setup.SelectionChangedAction ),
+						setup: FlowCheckboxSetup.Create(
+							highlightedWhenChecked: true,
+							action: new SpecifiedValue<FormAction>( setup.Action ),
+							valueChangedAction: setup.SelectionChangedAction ),
 						validationMethod: ( postBackValue, validator ) => {
 							if( postBackValue.Value )
 								selectedItemIdsInPostBack.Add( i.Id );

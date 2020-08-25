@@ -20,9 +20,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static DateAndTimeControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", int minuteInterval = 15, FormAction action = null,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", int minuteInterval = 15,
+			SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new DateAndTimeControlSetup(
 				displaySetup,
 				false,
@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Action ValidationErrorNotifier;
 
 		internal DateAndTimeControlSetup(
-			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, int? minuteInterval, FormAction action,
+			DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, int? minuteInterval, SpecifiedValue<FormAction> action,
 			FormAction valueChangedAction, PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier ) {
 			DisplaySetup = displaySetup;
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = classes;
 			AutoFillTokens = autoFillTokens;
 			MinuteInterval = minuteInterval;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 			ValueChangedAction = valueChangedAction;
 			PageModificationValue = pageModificationValue;
 			ValidationPredicate = validationPredicate;

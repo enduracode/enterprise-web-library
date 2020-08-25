@@ -36,15 +36,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="dataModifications"></param>
 		/// <param name="method"></param>
-		/// <param name="defaultActionOverride">Pass null to use the post-back corresponding to the first of the data modifications.</param>
+		/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modifications.</param>
+		/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
+		/// buttons.</param>
 		public static void ExecuteWithDataModificationsAndDefaultAction(
-			IEnumerable<DataModification> dataModifications, Action method, NonPostBackFormAction defaultActionOverride = null ) {
+			IEnumerable<DataModification> dataModifications, Action method, NonPostBackFormAction defaultActionOverride = null,
+			SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
 			IReadOnlyCollection<DataModification> dmCollection = dataModifications.ToImmutableArray();
 			if( dmCollection.Count == 0 )
 				throw new ApplicationException( "There must be at least one data modification." );
 			dataModificationAsserter( dmCollection );
 
-			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
+			Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
 			try {
 				method();
 			}
@@ -59,15 +62,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="dataModifications"></param>
 		/// <param name="method"></param>
-		/// <param name="defaultActionOverride">Pass null to use the post-back corresponding to the first of the data modifications.</param>
+		/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modifications.</param>
+		/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
+		/// buttons.</param>
 		public static T ExecuteWithDataModificationsAndDefaultAction<T>(
-			IEnumerable<DataModification> dataModifications, Func<T> method, NonPostBackFormAction defaultActionOverride = null ) {
+			IEnumerable<DataModification> dataModifications, Func<T> method, NonPostBackFormAction defaultActionOverride = null,
+			SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
 			IReadOnlyCollection<DataModification> dmCollection = dataModifications.ToImmutableArray();
 			if( dmCollection.Count == 0 )
 				throw new ApplicationException( "There must be at least one data modification." );
 			dataModificationAsserter( dmCollection );
 
-			Current.stack.Push( Tuple.Create( defaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
+			Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
 			try {
 				return method();
 			}
@@ -102,8 +108,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private readonly Stack<Tuple<NonPostBackFormAction, Stack<Func<bool>>, IReadOnlyCollection<DataModification>>> stack =
-			new Stack<Tuple<NonPostBackFormAction, Stack<Func<bool>>, IReadOnlyCollection<DataModification>>>();
+		private readonly
+			Stack<( NonPostBackFormAction actionOverride, SpecifiedValue<NonPostBackFormAction> formControlActionOverride, Stack<Func<bool>> validationPredicateStack,
+				IReadOnlyCollection<DataModification> dataModifications )> stack =
+				new Stack<( NonPostBackFormAction, SpecifiedValue<NonPostBackFormAction>, Stack<Func<bool>>, IReadOnlyCollection<DataModification> )>();
 
 		/// <summary>
 		/// EwfPage and private use only.
@@ -117,17 +125,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the current default action.
 		/// </summary>
-		public FormAction DefaultAction => DefaultActionOverride ?? (FormAction)new PostBackFormAction( PostBack );
+		public FormAction DefaultAction => actionOverride ?? (FormAction)new PostBackFormAction( PostBack );
+
+		/// <summary>
+		/// Gets the current form-control-specific default action. Returns null for no action.
+		/// </summary>
+		public FormAction FormControlDefaultAction => formControlActionOverride != null ? formControlActionOverride.Value : DefaultAction;
 
 		/// <summary>
 		/// Gets the post-back corresponding to the first of the current data modifications.
 		/// </summary>
 		public PostBack PostBack => postBackSelector( DataModifications.First() );
 
-		/// <summary>
-		/// Gets the current default-action override.
-		/// </summary>
-		public NonPostBackFormAction DefaultActionOverride => stack.Peek().Item1;
+		private NonPostBackFormAction actionOverride => stack.Peek().actionOverride;
+		private SpecifiedValue<NonPostBackFormAction> formControlActionOverride => stack.Peek().formControlActionOverride;
 
 		/// <summary>
 		/// EwfPage use only.
@@ -145,12 +156,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private Stack<Func<bool>> validationPredicateStack => stack.Peek().Item2;
+		private Stack<Func<bool>> validationPredicateStack => stack.Peek().validationPredicateStack;
 
 		/// <summary>
 		/// Gets the current data modifications.
 		/// </summary>
-		public IReadOnlyCollection<DataModification> DataModifications => stack.Peek().Item3;
+		public IReadOnlyCollection<DataModification> DataModifications => stack.Peek().dataModifications;
 
 		/// <summary>
 		/// EwfPage use only.

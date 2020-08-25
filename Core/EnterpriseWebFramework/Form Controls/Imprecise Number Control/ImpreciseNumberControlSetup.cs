@@ -13,14 +13,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
 		/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
 		/// (see https://stackoverflow.com/a/23234498/35349 for an explanation of why this could be ignored). Do not pass null.</param>
-		/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action. Currently has no
-		/// effect for multiline controls.</param>
+		/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action.</param>
 		/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 		/// <param name="pageModificationValue"></param>
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static ImpreciseNumberControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", FormAction action = null,
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
 			FormAction valueChangedAction = null, PageModificationValue<decimal> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) {
 			return new ImpreciseNumberControlSetup(

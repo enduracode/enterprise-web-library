@@ -65,9 +65,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static TextControlSetup Create(
 			DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1, ElementClassSet classes = null,
-			bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null, FormAction action = null,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
+			bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
+			SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
 				numberOfRows == 1 ? "text" : "",
@@ -115,7 +115,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static TextControlSetup CreateAutoComplete(
 			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1,
 			ElementClassSet classes = null, bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
-			FormAction action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
+			SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
@@ -193,8 +193,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <returns></returns>
 		public static TextControlSetup CreateObscured(
 			DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, ElementClassSet classes = null, string placeholder = "",
-			string autoFillTokens = "", FormAction action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
-			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+			string autoFillTokens = "", SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
+			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new TextControlSetup(
 				displaySetup,
 				"password",
@@ -224,11 +224,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal TextControlSetup(
 			DisplaySetup displaySetup, string inputElementType, ContentBasedLength widthOverride, int? numberOfRows, bool isReadOnly, ElementClassSet classes,
 			bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource,
-			bool? checksSpellingAndGrammar, FormAction action, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
+			bool? checksSpellingAndGrammar, SpecifiedValue<FormAction> specifiedAction, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
 			PageModificationValue<string> pageModificationValue, PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate,
 			Action validationErrorNotifier ) {
 			var labeler = new FormControlLabeler();
-			action = action ?? FormState.Current.DefaultAction;
+			var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 			pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
 
 			LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minLength, maxLength, internalValidationMethod, externalValidationMethod ) => {
@@ -255,7 +255,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 								       if( !isReadOnly ) {
 									       if( inputElementType.Any() || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
-										       action.AddToPageIfNecessary();
+										       action?.AddToPageIfNecessary();
 									       valueChangedAction?.AddToPageIfNecessary();
 								       }
 
@@ -313,7 +313,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											       autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
 											       autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteResource.GetUrl() + "'" ) );
 
-											       if( triggersActionWhenItemSelected.Value ) {
+											       if( action != null && triggersActionWhenItemSelected.Value ) {
 												       var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1} return false; }}".FormatWith(
 													       context.Id,
 													       action.GetJsStatements() );

@@ -20,9 +20,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationPredicate"></param>
 		/// <param name="validationErrorNotifier"></param>
 		public static EmailAddressControlSetup Create(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "", FormAction action = null,
-			FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-			Action validationErrorNotifier = null ) {
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
+			SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
+			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new EmailAddressControlSetup(
 				new TextControlSetup(
 					displaySetup,
@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static EmailAddressControlSetup CreateAutoComplete(
 			ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-			FormAction action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
+			SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 			PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			return new EmailAddressControlSetup(
 				new TextControlSetup(

@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static CheckboxList<ItemIdType> Create<ItemIdType>(
 			IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
 			DisplaySetup displaySetup = null, bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null,
-			IEnumerable<ItemIdType> uiSelectedItemIds = null, FormAction action = null, FormAction selectionChangedAction = null,
+			IEnumerable<ItemIdType> uiSelectedItemIds = null, SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null,
 			Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			items = items.Materialize();
 			var selectedItemIdSet = selectedItemIds.ToImmutableHashSet();
@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static CheckboxList<ItemIdType> Create<ItemIdType>(
 			IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, DisplaySetup displaySetup = null,
-			bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null, FormAction action = null,
+			bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null, SpecifiedValue<FormAction> action = null,
 			FormAction selectionChangedAction = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 			items = items.Materialize();
 			return Create(

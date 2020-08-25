@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="validationErrorNotifier"></param>
 		public static RadioListSetup<ItemIdType> Create<ItemIdType>(
 			IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useHorizontalLayout = false, ElementClassSet classes = null,
-			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, bool disableSingleButtonDetection = false, FormAction action = null,
+			Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, bool disableSingleButtonDetection = false, SpecifiedValue<FormAction> action = null,
 			FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
 			IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
 			Action validationErrorNotifier = null ) =>
@@ -87,7 +87,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal RadioListSetup(
 			DisplaySetup displaySetup, bool useHorizontalLayout, bool isReadOnly, ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
-			IEnumerable<SelectListItem<ItemIdType>> items, FreeFormRadioListSetup<ItemIdType> freeFormSetup, FormAction action ) {
+			IEnumerable<SelectListItem<ItemIdType>> items, FreeFormRadioListSetup<ItemIdType> freeFormSetup, SpecifiedValue<FormAction> action ) {
 			DisplaySetup = displaySetup;
 			UseHorizontalLayout = useHorizontalLayout;
 			IsReadOnly = isReadOnly;
@@ -95,7 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			UnlistedSelectedItemLabelGetter = unlistedSelectedItemLabelGetter;
 			Items = items;
 			FreeFormSetup = freeFormSetup;
-			Action = action ?? FormState.Current.DefaultAction;
+			Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
 		}
 	}
 }
