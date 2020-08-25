@@ -9,16 +9,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class SubmitButton: PhrasingComponent {
 		/// <summary>
 		/// Returns the JavaScript statements that should be executed on keypress to ensure that a form control will trigger the specified action when the enter key
-		/// is pressed while the control has focus. If you specify the submit-button post-back, this method relies on HTML's built-in implicit submission behavior,
+		/// is pressed while the control has focus. If you specify the submit-button post-back, this method relies on HTML’s built-in implicit submission behavior,
 		/// which will simulate a click on the submit button.
 		/// </summary>
 		/// <param name="action">Do not pass null.</param>
 		/// <param name="forceJsHandling"></param>
 		/// <param name="predicate"></param>
 		internal static string GetImplicitSubmissionKeyPressStatements( FormAction action, bool forceJsHandling, string predicate = "" ) {
-			// EWF does not allow form controls to use HTML's built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
-			// behavior of HTML's implicit submission appears to be somewhat arbitrary when there is no submit button; see
-			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don't want the implicit submission behavior of
+			// EWF does not allow form controls to use HTML’s built-in implicit submission on a page with no submit button. There are two reasons for this. First, the
+			// behavior of HTML’s implicit submission appears to be somewhat arbitrary when there is no submit button; see
+			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don’t want the implicit submission behavior of
 			// form controls to unpredictably change if a submit button is added or removed.
 			return action is PostBackFormAction postBackAction && postBackAction.PostBack == EwfPage.Instance.SubmitButtonPostBack && !forceJsHandling
 				       ? ""
