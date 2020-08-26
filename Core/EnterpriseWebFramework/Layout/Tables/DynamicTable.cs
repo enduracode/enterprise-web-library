@@ -11,6 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
 	/// A wrapper built around System.Web.UI.WebControls.Table that makes it easier to manipulate from code.
 	/// </summary>
+	[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 	public class DynamicTable: WebControl, ControlTreeDataLoader {
 		private const string pageStateKey = "rowLimit";
 
@@ -51,6 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a table.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public DynamicTable() {
 			createChildControlsAndWireUpEvents();
 		}
@@ -58,6 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a table with the specified columns. Do not call SetUpColumns when using this constructor.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public DynamicTable( params ColumnSetup[] columnSetups ) {
 			createChildControlsAndWireUpEvents();
 			SetUpColumns( columnSetups );
@@ -66,6 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// <summary>
 		/// Creates a table with the specified columns and header cells. Do not call SetUpColumns when using this constructor.
 		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public DynamicTable( params EwfTableColumn[] columns ) {
 			createChildControlsAndWireUpEvents();
 			SetUpColumns( columns );
