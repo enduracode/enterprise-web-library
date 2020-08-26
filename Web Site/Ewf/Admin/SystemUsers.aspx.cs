@@ -1,5 +1,3 @@
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
@@ -10,15 +8,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		protected override void loadData() {
-			var table = new DynamicTable( new EwfTableColumn( "Email", Unit.Percentage( 50 ) ), new EwfTableColumn( "Role", Unit.Percentage( 50 ) ) );
-			table.AddActionLink( new HyperlinkSetup( new EditUser.Info( es.info, null ), "Create User" ) );
-			foreach( var user in UserManagementStatics.GetUsers() ) {
-				table.AddTextRow(
-					new RowSetup { ActivationBehavior = ElementActivationBehavior.CreateRedirectScript( new EditUser.Info( es.info, user.UserId ) ) },
-					user.Email,
-					user.Role.Name );
-			}
-			ph.AddControlsReturnThis( table );
+			ph.AddControlsReturnThis(
+				EwfTable
+					.Create(
+						tableActions: new HyperlinkSetup( new EditUser.Info( es.info, null ), "Create User" ).ToCollection(),
+						headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
+					.AddData(
+						UserManagementStatics.GetUsers(),
+						user => EwfTableItem.Create(
+							user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
+							setup: EwfTableItemSetup.Create(
+								activationBehavior: ElementActivationBehavior.CreateRedirectScript( new EditUser.Info( es.info, user.UserId ) ) ) ) )
+					.ToCollection()
+					.GetControls() );
 		}
 	}
 }

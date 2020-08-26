@@ -279,13 +279,6 @@
     <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.designer.cs">
       <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\DynamicTableDemo.aspx.cs">
-      <DependentUpon>DynamicTableDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\DynamicTableDemo.aspx.designer.cs">
-      <DependentUpon>DynamicTableDemo.aspx</DependentUpon>
-    </Compile>
     <Compile Include="TestPages\EwfTableDemo.aspx.cs">
       <DependentUpon>EwfTableDemo.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -540,7 +533,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\HtmlEditing.aspx" />
-    <Content Include="TestPages\DynamicTableDemo.aspx" />
     <Content Include="TestPages\IntermediatePostBacks.aspx" />
     <Content Include="TestPages\MailMerging.aspx" />
     <Content Include="TestPages\ModalBoxes.aspx" />

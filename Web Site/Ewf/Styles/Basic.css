@@ -341,10 +341,6 @@ ewfControlLine > ewfControlLineItem {
 ewfControlLine > ewfControlLineItem:first-child {
 	padding-left: 0;
 }
-div.ewfControlList > div > table {
-	width: 100%;
-	table-layout: fixed;
-}
 
 /* action components */
 ewfActionComponentAllStylesAllStates {

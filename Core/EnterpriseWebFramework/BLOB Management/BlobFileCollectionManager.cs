@@ -5,7 +5,6 @@ using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
 
@@ -22,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string postBackIdBase;
 		private readonly NewFileNotificationMethod fileCreatedOrReplacedNotifier;
 		private readonly Action filesDeletedNotifier;
-		private IEnumerable<BlobFile> files;
+		private IReadOnlyCollection<BlobFile> files;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
 		/// <summary>
@@ -96,48 +95,46 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										"Because you are using Internet Explorer, clicking on a file below will result in a yellow warning bar appearing near the top of the browser.  You will need to then click the warning bar and tell Internet Explorer you are sure you want to download the file."
 								} );
 
-					var columnSetups = new List<ColumnSetup>();
+					var columnSetups = new List<EwfTableField>();
 					if( ThumbnailResourceInfoCreator != null )
-						columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 10 ) } );
-					columnSetups.Add( new ColumnSetup { CssClassOnAllCells = "ewfOverflowedCell" } );
-					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 13 ) } );
-					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 7 ) } );
-					columnSetups.Add( new ColumnSetup { Width = Unit.Percentage( 23 ), CssClassOnAllCells = "ewfRightAlignCell" } );
+						columnSetups.Add( new EwfTableField( size: 10.ToPercentage() ) );
+					columnSetups.Add( new EwfTableField( classes: new ElementClass( "ewfOverflowedCell" ) ) );
+					columnSetups.Add( new EwfTableField( size: 13.ToPercentage() ) );
+					columnSetups.Add( new EwfTableField( size: 7.ToPercentage() ) );
 
-					var table = new DynamicTable( columnSetups.ToArray() ) { Caption = Caption };
+					var table = EwfTable.Create(
+						postBackIdBase: postBackIdBase,
+						caption: Caption,
+						selectedItemActions: ReadOnly
+							                     ? null
+							                     : SelectedItemAction.CreateWithFullPostBackBehavior<int>(
+									                     "Delete Selected Files",
+									                     ids => {
+										                     foreach( var i in ids )
+											                     BlobStorageStatics.SystemProvider.DeleteFile( i );
+										                     filesDeletedNotifier?.Invoke();
+										                     EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+									                     } )
+								                     .ToCollection(),
+						fields: columnSetups );
 
 					files = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
-					files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).ToArray();
+					files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).Materialize();
 
-					var deleteModMethods = new List<Func<bool>>();
-					var deletePb = PostBack.CreateFull(
-						id: PostBack.GetCompositeId( postBackIdBase, "delete" ),
-						firstModificationMethod: () => {
-							if( deleteModMethods.Aggregate( false, ( deletesOccurred, method ) => method() || deletesOccurred ) ) {
-								filesDeletedNotifier?.Invoke();
-								EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
-							}
-						} );
-					FormState.ExecuteWithDataModificationsAndDefaultAction(
-						deletePb.ToCollection(),
-						() => {
-							foreach( var file in files )
-								addFileRow( table, file, deleteModMethods );
-							if( !ReadOnly )
-								table.AddRow(
-									getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 3 : 2 ) ),
-									( files.Any() ? new EwfButton( new StandardButtonStyle( "Delete Selected Files" ) ) : null ).ToCell(
-										new TableCellSetup( fieldSpan: 2, textAlignment: TextAlignment.Right ) ) );
-						} );
+					foreach( var file in files )
+						addFileRow( table, file );
+					if( !ReadOnly )
+						table.AddItem(
+							EwfTableItem.Create( getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 4 : 3 ) ) ) );
 
-					Controls.Add( table );
+					this.AddControlsReturnThis( table.ToCollection().GetControls() );
 
 					if( ReadOnly && !files.Any() )
 						Visible = false;
 				} );
 		}
 
-		private void addFileRow( DynamicTable table, BlobFile file, List<Func<bool>> deleteModMethods ) {
+		private void addFileRow( EwfTable table, BlobFile file ) {
 			var cells = new List<EwfTableCell>();
 
 			var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, ThumbnailResourceInfoCreator );
@@ -164,21 +161,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ).ToCell() );
 			cells.Add( ( fileIsUnread ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
 
-			var delete = new DataValue<bool>();
-			cells.Add(
-				( ReadOnly
-					  ? Enumerable.Empty<FlowComponent>()
-					  : delete.ToCheckbox( Enumerable.Empty<PhrasingComponent>().Materialize(), value: false ).ToFormItem().ToComponentCollection() ).Materialize()
-				.ToCell() );
-			deleteModMethods.Add(
-				() => {
-					if( !delete.Value )
-						return false;
-					BlobStorageStatics.SystemProvider.DeleteFile( file.FileId );
-					return true;
-				} );
-
-			table.AddRow( cells.ToArray() );
+			table.AddItem( EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) ) );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getUploadComponents() {

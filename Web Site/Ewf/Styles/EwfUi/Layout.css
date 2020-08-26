@@ -15,10 +15,10 @@ ewfUiGlobalContainer {
 }
 
 /* spacing */
-.ewfControlList, div.ewfStandardDynamicTable, ewfControlStack, div.ewfControlList, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootBlock {
+div.ewfStandardDynamicTable, ewfControlStack, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootBlock {
 	margin-top: 1em;
 }
-.ewfControlList:first-child, div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, div.ewfControlList:first-child, ewfUiEntityBlock > *:first-child {
+div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, ewfUiEntityBlock > *:first-child {
 	margin-top: 0;
 }
 ewfUiTopErrorMessageListContainer,
@@ -59,12 +59,6 @@ ewfHtmlBlock ul {
 	margin-left: 1em;
 	padding: 0;
 	list-style-type: circle;
-}
-.ewfControlList tr td {
-	padding-top: .25em;
-}
-.ewfControlList tr:first-child td {
-	padding-top: 0;
 }
 
 /* boxes */
