@@ -34,6 +34,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
+		/// <param name="enableItemReordering">Pass true to add a column to the table containing controls for reordering items. Every item must have a rank ID, with
+		/// the exception of item groups in which none of the items have rank IDs.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions for the table, which will operate on the item level if you add items, or the item-group level if
 		/// you add item groups.</param>
@@ -42,8 +44,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
+			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable(
 				displaySetup,
 				style,
@@ -57,6 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				fields,
 				headItems,
 				defaultItemLimit,
+				enableItemReordering,
 				disableEmptyFieldDetection,
 				tailUpdateRegions,
 				etherealContent );
@@ -83,6 +87,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
+		/// <param name="enableItemReordering">Pass true to add a column to the table containing controls for reordering items. Every item must have a rank ID, with
+		/// the exception of item groups in which none of the items have rank IDs.</param>
 		/// <param name="disableEmptyFieldDetection">Set to true if you want to disable the "at least one cell per field" assertion. Use with caution.</param>
 		/// <param name="tailUpdateRegions">The tail update regions for the table, which will operate on the item level if you add items, or the item-group level if
 		/// you add item groups.</param>
@@ -91,8 +97,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool disableEmptyFieldDetection = false,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
+			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new EwfTable<ItemIdType>(
 				displaySetup,
 				style,
@@ -106,6 +113,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				fields,
 				headItems,
 				defaultItemLimit,
+				enableItemReordering,
 				disableEmptyFieldDetection,
 				tailUpdateRegions,
 				etherealContent );
@@ -113,8 +121,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private EwfTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
+			bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 			displaySetup,
 			style,
 			classes,
@@ -127,6 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			fields,
 			headItems,
 			defaultItemLimit,
+			enableItemReordering,
 			disableEmptyFieldDetection,
 			tailUpdateRegions,
 			etherealContent ) {}
@@ -148,8 +157,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal EwfTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool disableEmptyFieldDetection,
-			IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
+			bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
@@ -184,10 +193,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								// the maximum number of items that will be shown in this table
 								itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ) );
 
-								var visibleItemGroupsAndItems = new List<Tuple<EwfTableItemGroup<ItemIdType>, IReadOnlyCollection<EwfTableItem<ItemIdType>>>>();
+								var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
 								foreach( var itemGroup in itemGroups ) {
 									var visibleItems = itemGroup.Items.Take( itemLimit.Value.Value - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i.Value );
-									visibleItemGroupsAndItems.Add( Tuple.Create( itemGroup, visibleItems.Materialize() ) );
+									visibleItemGroupsAndItems.Add( ( itemGroup, visibleItems.ToImmutableArray() ) );
 									if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == itemLimit.Value.Value )
 										break;
 								}
@@ -197,8 +206,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								fields = TableStatics.GetFields( fields, headItems, visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 								if( !fields.Any() )
 									fields = new EwfTableField().ToCollection();
-								else if( selectedItemData.ItemGroupData != null )
-									fields = fields.Prepend( new EwfTableField( size: 2.ToEm() ) ).Materialize();
+								else {
+									if( selectedItemData.ItemGroupData != null )
+										fields = fields.Prepend( new EwfTableField( size: 2.5m.ToEm() ) ).Materialize();
+									if( enableItemReordering )
+										fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
+								}
 
 								children.AddRange( getColumnSpecifications( fields ) );
 
@@ -233,17 +246,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 										null,
 										null,
-										false,
 										null,
+										false,
 										null )
 									.Concat(
 										buildRows(
 											headItems,
 											fields,
 											selectedItemData.ItemGroupData == null ? null : Enumerable.Repeat( (PhrasingComponent)null, headItems.Count ),
+											!enableItemReordering ? null : Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, headItems.Count ),
 											null,
 											true,
-											null,
 											allVisibleItems ) )
 									.Materialize();
 								if( headRows.Any() )
@@ -263,9 +276,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
 											groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
 												.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
+											TableStatics.GetReorderingControls( postBackIdBase, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
 											useContrastForFirstRow,
 											false,
-											null,
 											allVisibleItems )
 										.Materialize();
 									var cachedVisibleGroupIndex = visibleGroupIndex;
@@ -279,8 +292,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 														null,
 														null,
-														true,
 														null,
+														true,
 														null )
 													.Concat(
 														buildRows(
@@ -296,8 +309,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 															null,
 															null,
-															false,
 															null,
+															false,
 															null ) )
 													.Append<FlowComponentOrNode>(
 														new IdentifiedFlowComponent(
@@ -392,9 +405,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														item.ToCollection(),
 														Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 														null,
+														null,
 														useContrast,
 														false,
-														null,
 														null )
 													.Materialize() ) ) );
 								}
@@ -409,7 +422,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													.SelectMany( i => i.Sets ) ) ) );
 
 								// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-								var fieldCount = fields.Count - ( selectedItemData.ItemGroupData != null ? 1 : 0 );
+								var fieldCount = fields.Count - ( selectedItemData.ItemGroupData != null ? 1 : 0 ) - ( enableItemReordering ? 1 : 0 );
 								var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems( allVisibleItems, fieldCount );
 
 								if( !disableEmptyFieldDetection )
@@ -578,15 +591,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private IEnumerable<FlowComponent> buildRows<IdType>(
 			IReadOnlyCollection<EwfTableItem<IdType>> items, IReadOnlyCollection<EwfTableField> fields, IEnumerable<PhrasingComponent> checkboxes,
-			bool? useContrastForFirstRow, bool useHeadCells, Func<EwfTableCell> itemReorderingCellGetter, List<IReadOnlyCollection<EwfTableCell>> allVisibleItems ) {
+			IEnumerable<IReadOnlyCollection<PhrasingComponent>> reorderingControls, bool? useContrastForFirstRow, bool useHeadCells,
+			List<IReadOnlyCollection<EwfTableCell>> allVisibleItems ) {
 			// Assert that the cells in the list of items are valid and store a data structure for below.
 			var cellPlaceholderListsForRows = TableStatics.BuildCellPlaceholderListsForItems(
 				items.Select( i => i.Cells ).Materialize(),
-				fields.Count - ( checkboxes != null ? 1 : 0 ) );
+				fields.Count - ( checkboxes != null ? 1 : 0 ) - ( reorderingControls != null ? 1 : 0 ) );
 
 			if( checkboxes != null )
 				foreach( var i in checkboxes.Select( ( checkbox, index ) => ( checkbox, index ) ) )
 					cellPlaceholderListsForRows[ i.index ].Insert( 0, i.checkbox.ToCell( setup: new TableCellSetup( containsActivatableElements: i.checkbox != null ) ) );
+
+			if( reorderingControls != null )
+				foreach( var i in reorderingControls.Select( ( control, index ) => ( control, index ) ) )
+					cellPlaceholderListsForRows[ i.index ].Add( i.control.ToCell( setup: new TableCellSetup( containsActivatableElements: i.control != null ) ) );
 
 			var rows = TableStatics.BuildRows(
 				cellPlaceholderListsForRows,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Web.UI.WebControls;
+using EnterpriseWebLibrary.DataAccess.Ranking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
@@ -278,6 +279,49 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					where actionComponent != null
 					select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup ) ).ToCollection(),
 				classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
+		}
+
+		internal static IEnumerable<IReadOnlyCollection<PhrasingComponent>> GetReorderingControls<ItemIdType>(
+			string postBackIdBase, bool enableItemReordering, bool hasExplicitItemGroups, IReadOnlyList<EwfTableItem<ItemIdType>> items ) {
+			if( !enableItemReordering ) {
+				if( items.Any( i => i.Setup.RankId.HasValue ) )
+					throw new ApplicationException( "Item rank IDs are valid only when item reordering is enabled." );
+				return null;
+			}
+
+			if( !hasExplicitItemGroups && items.Any( i => !i.Setup.RankId.HasValue ) )
+				throw new ApplicationException( "Every item must have a rank ID when item reordering is enabled." );
+
+			if( items.All( i => !i.Setup.RankId.HasValue ) )
+				return Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, items.Count );
+
+			if( items.Any( i => !i.Setup.RankId.HasValue ) )
+				throw new ApplicationException(
+					"When item reordering is enabled, every item in a group must have a rank ID unless none of the items in that group have a rank ID." );
+
+			return items.Select(
+				( item, index ) => {
+					var components = new List<PhrasingComponent>();
+					if( index != 0 )
+						components.Add(
+							new EwfButton(
+								new StandardButtonStyle( @"/\", ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "up" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId.Value, item.Setup.RankId.Value ) ) ) ) );
+					if( index != 0 && index != items.Count - 1 )
+						components.AddRange( " ".ToComponents() );
+					if( index != items.Count - 1 )
+						components.Add(
+							new EwfButton(
+								new StandardButtonStyle( @"\/", ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "down" ),
+										firstModificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId.Value ) ) ) ) );
+					return components;
+				} );
 		}
 
 		internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems(

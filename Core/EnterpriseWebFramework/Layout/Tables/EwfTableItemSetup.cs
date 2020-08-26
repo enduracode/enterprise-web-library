@@ -15,10 +15,7 @@
 		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="id">A value that uniquely identifies this item in table-level and group-level item actions. If you specify this, the item will have a
 		/// checkbox that enables it to be included in the actions.</param>
-		/// <param name="rankId">
-		/// The rank ID for this item. Swapping will be enabled for all items that have a non null rank ID. Setting this on at least one item of a table adds a
-		/// column on the right of the table containing controls to move each item up or down the list. This consumes a small amount of table width.
-		/// </param>
+		/// <param name="rankId">The rank ID for this item, which is used for item reordering.</param>
 		public static EwfTableItemSetup Create(
 			ElementClassSet classes = null, CssLength size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 			TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ElementActivationBehavior activationBehavior = null,
@@ -37,10 +34,7 @@
 		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="id">A value that uniquely identifies this item in table-level and group-level item actions. If you specify this, the item will have a
 		/// checkbox that enables it to be included in the actions.</param>
-		/// <param name="rankId">
-		/// The rank ID for this item. Swapping will be enabled for all items that have a non null rank ID. Setting this on at least one item of a table adds a
-		/// column on the right of the table containing controls to move each item up or down the list. This consumes a small amount of table width.
-		/// </param>
+		/// <param name="rankId">The rank ID for this item, which is used for item reordering.</param>
 		public static EwfTableItemSetup<IdType> CreateWithIdType<IdType>(
 			ElementClassSet classes = null, CssLength size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 			TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ElementActivationBehavior activationBehavior = null,
