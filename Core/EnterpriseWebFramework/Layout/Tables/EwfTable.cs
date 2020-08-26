@@ -276,7 +276,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
 											groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
 												.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
-											TableStatics.GetReorderingControls( postBackIdBase, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
+											TableStatics.GetReorderingControls( postBackIdBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
 											useContrastForFirstRow,
 											false,
 											allVisibleItems )

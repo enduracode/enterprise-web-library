@@ -31,12 +31,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
+		/// <param name="enableItemReordering">Pass true to add a row to the table containing controls for reordering items. Every item must have a rank ID, with
+		/// the exception of item groups in which none of the items have rank IDs.</param>
 		/// <param name="etherealContent"></param>
 		public static ColumnPrimaryTable Create(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable(
 				displaySetup,
 				style,
@@ -50,6 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				fields,
 				headItems,
 				firstDataFieldIndex,
+				enableItemReordering,
 				etherealContent );
 
 		/// <summary>
@@ -72,12 +76,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
 		/// <param name="headItems">The table's head items.</param>
 		/// <param name="firstDataFieldIndex">The index of the first data field.</param>
+		/// <param name="enableItemReordering">Pass true to add a row to the table containing controls for reordering items. Every item must have a rank ID, with
+		/// the exception of item groups in which none of the items have rank IDs.</param>
 		/// <param name="etherealContent"></param>
 		public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
 			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+			IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 			new ColumnPrimaryTable<ItemIdType>(
 				displaySetup,
 				style,
@@ -91,12 +98,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				fields,
 				headItems,
 				firstDataFieldIndex,
+				enableItemReordering,
 				etherealContent );
 
 		private ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex,
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
 			IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 			displaySetup,
 			style,
@@ -110,6 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			fields,
 			headItems,
 			firstDataFieldIndex,
+			enableItemReordering,
 			etherealContent ) {}
 	}
 
@@ -128,7 +137,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal ColumnPrimaryTable(
 			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
 			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
-			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex,
+			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
 			IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 
@@ -282,6 +291,37 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new ElementComponent( context => new ElementData( () => new ElementLocalData( "tbody" ), children: headRows.Concat( bodyRows ).Materialize() ) ) );
 
 					TableStatics.AssertAtLeastOneCellPerField( fields.Count, cellPlaceholderListsForItems );
+
+					var tFootRows = new List<EwfTableItem>();
+					var reorderingControlCollections = itemGroups.Select(
+							i => TableStatics.GetReorderingControls( postBackIdBase, true, enableItemReordering, hasExplicitItemGroups.Value, i.Items ) )
+						.Materialize();
+					if( enableItemReordering )
+						tFootRows.Add(
+							EwfTableItem.Create(
+								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+								.Concat(
+									reorderingControlCollections.SelectMany( i => i )
+										.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
+								.Materialize(),
+								setup: EwfTableItemSetup.Create( textAlignment: TextAlignment.Center ) ) );
+					if( tFootRows.Any() ) {
+						var cellPlaceholderListsForTFootRows = TableStatics.BuildCellPlaceholderListsForItems(
+							tFootRows.Select( i => i.Cells ).Materialize(),
+							allItemSetups.Length );
+						children.Add(
+							new ElementComponent(
+								context => new ElementData(
+									() => new ElementLocalData( "tfoot" ),
+									children: TableStatics.BuildRows(
+											cellPlaceholderListsForTFootRows,
+											tFootRows.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
+											null,
+											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, allItemSetups.Length ).ToImmutableArray(),
+											0,
+											false )
+										.Materialize() ) ) );
+					}
 
 					return new DisplayableElementData(
 						displaySetup,

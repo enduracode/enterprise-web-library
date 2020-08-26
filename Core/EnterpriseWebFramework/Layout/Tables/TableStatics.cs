@@ -282,7 +282,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static IEnumerable<IReadOnlyCollection<PhrasingComponent>> GetReorderingControls<ItemIdType>(
-			string postBackIdBase, bool enableItemReordering, bool hasExplicitItemGroups, IReadOnlyList<EwfTableItem<ItemIdType>> items ) {
+			string postBackIdBase, bool tableIsColumnPrimary, bool enableItemReordering, bool hasExplicitItemGroups, IReadOnlyList<EwfTableItem<ItemIdType>> items ) {
 			if( !enableItemReordering ) {
 				if( items.Any( i => i.Setup.RankId.HasValue ) )
 					throw new ApplicationException( "Item rank IDs are valid only when item reordering is enabled." );
@@ -305,7 +305,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( index != 0 )
 						components.Add(
 							new EwfButton(
-								new StandardButtonStyle( @"/\", ButtonSize.ShrinkWrap ),
+								new StandardButtonStyle( tableIsColumnPrimary ? "<" : @"/\", ButtonSize.ShrinkWrap ),
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "up" ),
@@ -315,7 +315,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					if( index != items.Count - 1 )
 						components.Add(
 							new EwfButton(
-								new StandardButtonStyle( @"\/", ButtonSize.ShrinkWrap ),
+								new StandardButtonStyle( tableIsColumnPrimary ? ">" : @"\/", ButtonSize.ShrinkWrap ),
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "down" ),
