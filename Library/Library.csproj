@@ -102,6 +102,7 @@
     <Content Include="Files\System Template\Website\AppStatics.cs" />
     <Content Include="Files\System Template\Website\Global.asax" />
     <Content Include="Files\System Template\Website\Global.asax.cs" />
+    <Content Include="Files\System Template\Website\Providers\EwfUiProvider.cs" />
     <Content Include="Files\System Template\Website\Website.csproj" />
   </ItemGroup>
   <ItemGroup>
