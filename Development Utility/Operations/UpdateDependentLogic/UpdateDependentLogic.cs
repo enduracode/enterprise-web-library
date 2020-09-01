@@ -367,7 +367,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					CustomModificationStatics.Generate( cn, writer, baseNamespace, database, configuration );
 
 					// other commands
-					if( cn.DatabaseInfo is OracleInfo ) {
+					if( cn.DatabaseInfo is SqlServerInfo ) {
+						writer.WriteLine();
+						writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
+						writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
+						writer.WriteLine( "public static int GetNextValue() => MainSequenceModification.InsertRow();" );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+					}
+					else if( cn.DatabaseInfo is OracleInfo ) {
 						writer.WriteLine();
 						SequenceStatics.Generate( cn, writer, baseNamespace, database );
 						writer.WriteLine();
