@@ -200,6 +200,51 @@ Instead of creating an `EwfButton` component ourselves, we create a `ButtonSetup
 
 ## Displaying data in a table
 
+Open `ServiceOrders.aspx.cs`. Add this block of code to `loadData`:
+
+```C#
+ph.AddControlsReturnThis(
+	EwfTable
+		.Create(
+			caption: "Existing service orders",
+			fields: new EwfTableField( size: 1.ToPercentage() ).Append( new EwfTableField( size: 3.ToPercentage() ) )
+				.Append( new EwfTableField( size: 6.ToPercentage() ) )
+				.Append( new EwfTableField( size: 2.ToPercentage() ) )
+				.Materialize(),
+			headItems: EwfTableItem.Create(
+					"ID".ToCell().Append( "Customer".ToCell() ).Append( "Bicycle".ToCell() ).Append( "Service type".ToCell() ).Materialize() )
+				.ToCollection(),
+			defaultItemLimit: DataRowLimit.Fifty )
+		.AddData(
+			ServiceOrdersTableRetrieval.GetRows(),
+			i => EwfTableItem.Create(
+				i.ServiceOrderId.ToString()
+					.ToCell()
+					.Append( i.CustomerName.ToCell() )
+					.Append( i.BicycleDescription.ToCell() )
+					.Append( ServiceTypesTableRetrieval.GetRowMatchingId( i.ServiceTypeId ).ServiceTypeName.ToCell() )
+					.Materialize(),
+				setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder.Info( i.ServiceOrderId ) ) ) ) )
+		.ToCollection()
+		.GetControls() );
+```
+
+You’ll now see a table of existing service orders on the page, in which clicking on a row navigates to the form for that order. Let’s look at the call to `EwfTable.Create`. The `caption` is a title for the table. `fields` configures the columns. In this case we’re using a “12 column grid” system to specify their widths; the `.ToPercentage()` calls are misleading here because the table treats the values as simple proportions and doesn’t require them to add up to 100%.
+
+`headItems` specifies the header row(s). The framework uses the term “item” instead of row to be a bit more abstract—there’s another table component, `ColumnPrimaryTable`, that renders items as columns instead of rows. `EwfTableItem.Create` takes a collection of cells. We typically use the chained `.Append` syntax instead of collection initializers for maintainability reasons. In the future, maybe you’d want to use a helper method to create a chunk of the cells. In that case you’d just add a `.Concat( getCells() )` expression to the chain.
+
+`defaultItemLimit` limits the number of items initially visible, to improve page performance. The user can display more items if desired using buttons built into the table component.
+
+The `AddData` method takes two parameters, a sequence of data rows and a selector function that creates a table item from a data row. The functions will never execute for rows that aren’t drawn due to item limiting.
+
+In the selector function we create an item that includes a setup:
+
+```C#
+setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder.Info( i.ServiceOrderId ) ) )
+```
+
+The setup object lets us pass an `ElementActivationBehavior`, which lets us make the table row act like a hyperlink and navigate to the form when clicked.
+
 
 ## Using temporary state during a post-back
 
