@@ -371,7 +371,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine();
 						writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
 						writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
-						writer.WriteLine( "public static int GetNextValue() => MainSequenceModification.InsertRow();" );
+						writer.WriteLine(
+							"public static int GetNextValue() => {0}Modification.MainSequenceModification.InsertRow();".FormatWith( database.SecondaryDatabaseName ) );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 					}
