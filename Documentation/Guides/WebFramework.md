@@ -25,7 +25,7 @@ Then open `Library/Configuration/Development.xml` and replace the empty `<databa
  Run `Update-DependentLogic`. This will give you the schema, reference data, and data-access layer needed for the rest of this guide. See the [Database Migration](DatabaseMigration.md) and [Data Access](DataAccess.md) guides to learn how all of this works.
 
 
-## Adding the pages
+## Adding pages
 
 We’re going to build a simple service-order management system for a bicycle repair shop, consisting of two pages: a list of service orders and a form to create/update a service order.
 
@@ -60,7 +60,7 @@ The first argument to the `EwfHyperlink` constructor, `new ServiceOrder.Info( nu
 Click `ServiceOrders.aspx` in the Solution Explorer and then select Start Without Debugging from the Debug menu. You’ll see the list page, with the single large button you added. The button sits within a user interface that is provided by the framework, called the **EWF UI**. You can opt out of this UI but it’s powerful enough to be used even in large enterprise applications.
 
 
-## Page information classes
+## Using page information classes
 
 Open up `ServiceOrder.aspx.cs` (the form page) and paste the following above `loadData`:
 
@@ -84,9 +84,133 @@ The `init` method is called by the constructor. In our implementation here, we l
 The `createParentResourceInfo` method specifies the parent of this page, which is used to inherit security settings and for other purposes such as automatic navigational breadcrumbs for users.
 
 
-## Creating the form
+## Creating a form
+
+Paste the following complete form implementation into `loadData`:
+
+```C#
+var mod = info.ServiceOrderId.HasValue ? info.ServiceOrder.ToModification() : ServiceOrdersModification.CreateForInsert();
+FormState.ExecuteWithDataModificationsAndDefaultAction(
+	PostBack.CreateFull(
+			firstModificationMethod: () => {
+				if( !info.ServiceOrderId.HasValue )
+					mod.ServiceOrderId = MainSequence.GetNextValue();
+				mod.Execute();
+			},
+			actionGetter: () => new PostBackAction( info.ParentResource ) )
+		.ToCollection(),
+	() => {
+		ph.AddControlsReturnThis(
+			FormItemList.CreateStack(
+					items: mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
+						.Append( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
+						.Append( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
+						.Append(
+							mod.GetServiceTypeIdRadioListFormItem(
+								RadioListSetup.Create(
+									ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
+								value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) )
+						.Materialize() )
+				.ToCollection()
+				.GetControls() );
+
+		EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
+	} );
+```
+
+If you go back to `ServiceOrders.aspx` in your browser and click the button, you’ll see the form. Try it out. When you submit, you’ll go back to the list page--but won’t see your new order yet since we haven’t implemented this.
+
+Let’s break down the code above.
+
+First we have the creation of a `ServiceOrdersModification` object:
+
+```C#
+var mod = info.ServiceOrderId.HasValue ? info.ServiceOrder.ToModification() : ServiceOrdersModification.CreateForInsert();
+```
+
+If we’re updating an order, we set the object up to modify the row we loaded in `Info.init`. For a new order we set it up to do a row insert. Learn more in the [Data Access](DataAccess.md) guide.
+
+Then we have a call to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first argument is a `PostBack` object and the second is a method (starting with `ph.AddControlsReturnThis`). There are a couple of important concepts here.
+
+First is the `PostBack` object, which represents a server-side action that executes when the browser submits the form (in this framework there is always one form per page) with an HTTP `POST` request. Only one `PostBack` executes per request. `PostBack` execution has three stages:
+
+1.  Form validation
+2.  Modification method
+3.  Post-modification action (e.g. navigation)
+
+The **form validation** stage involves executing all validation objects that were added to the `PostBack`, in the order they were added. We don’t directly add validations to a `PostBack`, and this leads us to the second important concept: `FormState.ExecuteWithDataModificationsAndDefaultAction`.
+
+This method takes one or more `DataModification` objects. `DataModification` is a base class of `PostBack` with one other derived type that isn’t important at the moment. The `DataModification`/`PostBack` objects are made available while the passed-in method executes so that whenever a validation is created, it is added to those objects.
+
+You can create validations directly, but they are most commonly created by form-control components (for example text controls or drop-down lists). The validations created by form controls are responsible for taking the posted-back values from the controls, validating them (of course), and preparing them to be persisted. In this page the validations are hidden under the hood but they place the values in the `ServiceOrdersModification` object.
+
+The **modification method** stage of `PostBack` execution runs the specified method:
+
+```C#
+if( !info.ServiceOrderId.HasValue )
+	mod.ServiceOrderId = MainSequence.GetNextValue();
+mod.Execute();
+```
+
+This is where the persistence actually happens. If this is a new service order we create an ID. We then execute the database modification.
+
+The **post-modification action** stage of the `PostBack` determines what happens after data is modified. Sometimes you’ll want the user to stay on the page, with or without extra behavior such as a change in keyboard focus or a file download. But in this case we want to navigate them back to the list page:
+
+```C#
+() => new PostBackAction( info.ParentResource )
+```
+
+We don’t refererence the list page directly. Instead we just navigate back to the parent page, which does the same thing since we already designated the list as the parent. But this makes our page more maintainable in the event we change the parent.
+
+Now let’s break down the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first statement spans several lines to create a `FormItemList` component that contains several `FormItem` objects. A form item is an abstract container that includes content (usually a form control), a label, and a validation object. Here, we create the form items using generated methods in the `ServiceOrdersModification` class. For example:
+
+```C#
+mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
+```
+
+This creates a form item containing an email-address form control. The first parameter specifies that it should require a value from the user. The second parameter (`value`) determines the initial value in the control. When updating a service order, we pass `null` which tells the control to get its value from the `ServiceOrdersModification` object. For new orders we specify the empty string.
+
+The form control has full email-address semantics, bringing up the correct keyboard on mobile devices and enforcing a valid email address according to the spec.
+
+You can display form items in several different ways, but the most common way is to put them in a `FormItemList`. This component lays out a list of form items in a format of your choice. Here we’re using a “stack”:
+
+```C#
+FormItemList.CreateStack(
+	items: mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
+		.Append( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
+		.Append( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
+		.Append(
+			mod.GetServiceTypeIdRadioListFormItem(
+				RadioListSetup.Create(
+					ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
+				value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) )
+		.Materialize() )
+```
+
+If you wanted to switch to a wrapping list or a grid, for example, you’d just change `CreateStack` to `CreateWrapping` or `CreateGrid`.
+
+The other statement in the method adds a button to the page:
+
+```C#
+EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
+```
+
+Instead of creating an `EwfButton` component ourselves, we create a `ButtonSetup` with the functionality we want, and let the EWF UI decide on the style.
 
 
+## Displaying data in a table
+
+
+## Using temporary state during a post-back
+
+
+## Modifying a page on the client side
+
+
+## Modifying a page on the server side
+
+
+## Using component state
 
 
 ## Security (section needs work)
