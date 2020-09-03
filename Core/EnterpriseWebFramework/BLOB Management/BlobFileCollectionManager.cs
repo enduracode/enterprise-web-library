@@ -123,11 +123,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					foreach( var file in files )
 						addFileRow( table, file );
-					if( !ReadOnly )
-						table.AddItem(
-							EwfTableItem.Create( getUploadComponents().ToCell( new TableCellSetup( fieldSpan: ThumbnailResourceInfoCreator != null ? 4 : 3 ) ) ) );
-
 					this.AddControlsReturnThis( table.ToCollection().GetControls() );
+
+					if( !ReadOnly )
+						this.AddControlsReturnThis( getUploadComponents().GetControls() );
 
 					if( ReadOnly && !files.Any() )
 						Visible = false;
@@ -195,17 +194,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dm.ToCollection(),
 				() => new StackList(
-					"Select and upload a new file:".ToComponents()
-						.ToComponentListItem()
-						.ToCollection()
-						.Append(
-							new FileUpload(
-									validationMethod: ( postBackValue, validator ) => {
-										BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
-										file = postBackValue;
-									} ).ToFormItem()
-								.ToListItem() )
-						.Append( new EwfButton( new StandardButtonStyle( "Upload new file" ) ).ToCollection().ToComponentListItem() ) ).ToCollection() );
+						new FileUpload(
+								validationMethod: ( postBackValue, validator ) => {
+									BlobManagementStatics.ValidateUploadedFile( validator, postBackValue, acceptableFileExtensions, AcceptOnlyImages );
+									file = postBackValue;
+								} ).ToFormItem()
+							.ToListItem()
+							.Append( new EwfButton( new StandardButtonStyle( "Upload new file" ) ).ToCollection().ToComponentListItem() ) )
+					.ToFormItem( label: "Select and upload a new file:".ToComponents() )
+					.ToComponentCollection() );
 		}
 
 		/// <summary>
