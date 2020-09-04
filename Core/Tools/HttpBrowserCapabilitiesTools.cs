@@ -12,7 +12,8 @@ namespace EnterpriseWebLibrary {
 		public static bool IsOldVersionOfMajorBrowser( this HttpBrowserCapabilities browser ) {
 			const int latestIeVersion = 9;
 			const int latestFirefoxVersion = 4;
-			return ( browser.IsInternetExplorer() && browser.MajorVersion < latestIeVersion ) || ( browser.isFirefox() && browser.MajorVersion < latestFirefoxVersion );
+			return ( browser.isInternetExplorer() && browser.MajorVersion < latestIeVersion ) ||
+			       ( browser.isFirefox() && browser.MajorVersion < latestFirefoxVersion );
 		}
 
 		private static bool isFirefox( this HttpBrowserCapabilities browser ) {
@@ -22,7 +23,7 @@ namespace EnterpriseWebLibrary {
 		/// <summary>
 		/// Returns true if the browser being used is any version of Internet Explorer.
 		/// </summary>
-		public static bool IsInternetExplorer( this HttpBrowserCapabilities browser ) {
+		private static bool isInternetExplorer( this HttpBrowserCapabilities browser ) {
 			return browser.Browser == "IE";
 		}
 	}

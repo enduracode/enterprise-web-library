@@ -13,6 +13,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Pass null for acceptableFileExtensions if there is no restriction on file extension.
 		/// PerformAdditionalImageValidation cannot be null but may be an empty delegate.
 		/// </summary>
+		/// <param name="validator"></param>
+		/// <param name="file"></param>
+		/// <param name="acceptableFileExtensions">Prevents the user from uploading a file of a type other than those provided. File type constants found in
+		/// EnterpriseWebLibrary.FileExtensions. Do not use this to force the file to be a specific type of file, such as an image (which consists of several file
+		/// extensions). Instead, use mustBeRenderableImage.</param>
+		/// <param name="mustBeRenderableImage">Pass true to only accept images (of any renderable type - jpgs, pngs, but not nefs).</param>
 		public static void ValidateUploadedFile( Validator validator, RsFile file, string[] acceptableFileExtensions, bool mustBeRenderableImage ) {
 			if( file == null )
 				return;
