@@ -69,5 +69,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						classes: TableCssElementCreator.ItemGroupNameAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fieldCount ) ) )
 				.ToCollection();
 		}
+
+		internal IEnumerable<TailUpdateRegion> GetTailUpdateRegionsIncludingAllItems() =>
+			RemainingData.Value.TailUpdateRegions.Where( i => Items.Count - i.UpdatingItemCount == 0 );
+
+		internal IEnumerable<TailUpdateRegion> GetTailUpdateRegionsNotIncludingAllItems() =>
+			RemainingData.Value.TailUpdateRegions.Where( i => Items.Count - i.UpdatingItemCount != 0 );
 	}
 }

@@ -225,10 +225,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													? Enumerable.Empty<PreModificationUpdateRegion>()
 													: new PreModificationUpdateRegion(
 														this.tailUpdateRegions.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 )
-															.Concat(
-																visibleItemGroupsAndItems.Select( i => i.Item1 )
-																	.SelectMany(
-																		group => group.RemainingData.Value.TailUpdateRegions.Where( i => group.Items.Count - i.UpdatingItemCount == 0 ) ) )
+															.Concat( visibleItemGroupsAndItems.Select( i => i.Item1 ).SelectMany( i => i.GetTailUpdateRegionsIncludingAllItems() ) )
 															.SelectMany( i => i.Sets ),
 														columnIdentifiedComponent.ToCollection,
 														() => "" ).ToCollection(),
@@ -339,7 +336,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																"",
 																new UpdateRegionLinker(
 																	"tail",
-																	from region in groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+																	from region in hasExplicitItemGroups.Value
+																		               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+																		               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
 																	let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
 																	select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
 																	arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
@@ -396,8 +395,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								linkers.Add(
 									new UpdateRegionLinker(
 										"tail",
-										from region in this.tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
-											.Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+										from region in hasExplicitItemGroups == false
+											               ? visibleItemGroupsAndItems.Single()
+												               .Item1.GetTailUpdateRegionsIncludingAllItems()
+												               .Select( i => new { sets = i.Sets, staticRowGroupCount = 0 } )
+											               : this.tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
+												               .Concat(
+													               updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
 										select new PreModificationUpdateRegion(
 											region.sets,
 											() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
