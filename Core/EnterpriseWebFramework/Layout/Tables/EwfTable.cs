@@ -213,6 +213,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
 								}
 
+								// Fields, and therefore column specifications, change when a table goes from no items to having items or vice versa.
 								FlowComponentOrNode columnIdentifiedComponent = null;
 								children.Add(
 									columnIdentifiedComponent = new IdentifiedFlowComponent(
