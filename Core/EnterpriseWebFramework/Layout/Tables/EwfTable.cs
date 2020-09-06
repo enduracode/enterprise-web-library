@@ -213,7 +213,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
 								}
 
-								children.AddRange( getColumnSpecifications( fields ) );
+								FlowComponentOrNode columnIdentifiedComponent = null;
+								children.Add(
+									columnIdentifiedComponent = new IdentifiedFlowComponent(
+										() => new IdentifiedComponentData<FlowComponentOrNode>(
+											"",
+											new UpdateRegionLinker(
+												"",
+												headItems.Any()
+													? Enumerable.Empty<PreModificationUpdateRegion>()
+													: new PreModificationUpdateRegion(
+														this.tailUpdateRegions.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 )
+															.Concat(
+																visibleItemGroupsAndItems.Select( i => i.Item1 )
+																	.SelectMany(
+																		group => group.RemainingData.Value.TailUpdateRegions.Where( i => group.Items.Count - i.UpdatingItemCount == 0 ) ) )
+															.SelectMany( i => i.Sets ),
+														columnIdentifiedComponent.ToCollection,
+														() => "" ).ToCollection(),
+												arg => columnIdentifiedComponent.ToCollection() ).ToCollection(),
+											new ErrorSourceSet(),
+											errorsBySource => getColumnSpecifications( fields ) ) ) );
 
 								var allVisibleItems = new List<IReadOnlyCollection<EwfTableCell>>();
 
