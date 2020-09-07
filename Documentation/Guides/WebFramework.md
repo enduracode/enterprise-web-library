@@ -47,7 +47,7 @@ Let’s start our implementation with the list page. For now, since we don’t y
 ```C#
 ph.AddControlsReturnThis(
 	new EwfHyperlink( new ServiceOrder.Info( null ), new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) )
-		.ToCollection().GetControls() 
+		.ToCollection().GetControls()
 );
 ```
 
