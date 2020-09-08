@@ -322,10 +322,13 @@ Try out the form again and see how it works with the new checkbox and nested con
 ## Modifying a page on the server side
 
 
-## Using component state
+## Using component state with an underlying durable value
 
 
-## Security (section needs work)
+## Managing keyboard focus
+
+
+## Securing pages (section needs work)
 
 *	The page usees the entity setup’s security that’s in the same folder. It does not matter if the entity setup has the page as a tab. If it’s in the same folder it affects it.
 *	You can’t be less-restrictive than your parent’s security.
