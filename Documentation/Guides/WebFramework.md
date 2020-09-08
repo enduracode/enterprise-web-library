@@ -248,6 +248,73 @@ The setup object lets us pass an `ElementActivationBehavior`, which lets us make
 
 ## Using temporary state during a post-back
 
+What we’ve built above covers the staple features of the framework that you’ll need for almost any application. But let’s go back to `ServiceOrder.aspx.cs` and look at some more-advanced features that are just as important when building complex forms.
+
+First we’ll cover temporary state. The form controls that we’re already using store their validated values in the `ServiceOrdersModification` object, with the intention that the values will be persisted in our database. But what if you want to have a form control whose posted-back value shouldn’t be directly persisted, and only used to influence the validation of other controls?
+
+Imagine a checkbox with another form control nested beneath it. When the box is checked, the nested value should be persisted, but when the box is unchecked the nested value should be ignored and `null` should be persisted instead. The true/false state of the checkbox should only be used to determine this behavior.
+
+Let’s build this. In our `ServiceOrders` database table we have a `CustomerBudget` nullable column, which we’ll use to add a budget control to our form, nested beneath a checkbox. We’ll start by adding this as the first line in the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`:
+
+```C#
+var customerHasBudget = new DataValue<bool>();
+```
+
+This is our temporary state. `DataValue` is a simple type that contains a value (a `bool` in this case) and tracks whether the value has been initialized and whether it has changed. It’s a good fit for temporary state because it lets us say, as we do on the line above, that the state is currently uninitialized and will throw an exception if anything attempts to get the value. We won’t have a meaningful value until the checkbox’s validation executes.
+
+We’ll also add this line, directly under the line above:
+
+```C#
+Action budgetClearer = null;
+```
+
+This will be a method called during validation that is responsible for storing `null` as the value to be persisted for the nested budget control, in the case that the control is ignored.
+
+Now we’ll make a helper method that creates the nested components and initializes `budgetClearer` (called `dataClearer` in this scope):
+
+```C#
+private IReadOnlyCollection<FlowComponent> getBudgetComponents( ServiceOrdersModification mod, out Action dataClearer ) {
+	dataClearer = () => mod.CustomerBudget = null;
+	return mod.GetCustomerBudgetNumberControlFormItem(
+			label: "Amount ($)".ToComponents().Append( new LineBreak() ).Append( new SideComments( "Multiple of $5, minimum $10".ToComponents() ) ).Materialize(),
+			value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
+			allowEmpty: false,
+			minValue: 10,
+			valueStep: 5 )
+		.ToComponentCollection();
+}
+```
+
+The creation of the budget form item here is just like the creation of the earlier form items, but with a few more parameters to get the behavior just right.
+
+Finally, we’ll put together all the pieces above by adding a checkbox to our chain of `Append` calls for the `FormItemList`. Put this right before the `.Materialize()` at the end:
+
+```C#
+.Append(
+	customerHasBudget.ToFlowCheckbox(
+			"Customer has budget".ToComponents(),
+			setup: FlowCheckboxSetup.Create(
+				nestedContentGetter: () => FormState.ExecuteWithValidationPredicate(
+					() => customerHasBudget.Value,
+					() => getBudgetComponents( mod, out budgetClearer ) ) ),
+			value: info.ServiceOrderId.HasValue && info.ServiceOrder.CustomerBudget.HasValue,
+			additionalValidationMethod: validator => {
+				if( !customerHasBudget.Value )
+					budgetClearer();
+			} )
+		.ToFormItem( label: "Budget".ToComponents() ) )
+```
+
+We create the checkbox using an extension method on `DataValue<bool>` called `ToFlowCheckbox`, which gives us a checkbox with a validation that puts the posted-back value into the `DataValue`. The first argument is our label. The second creates a setup object with `nestedContentGetter`: a method that executes during the creation of the checkbox, after the checkbox’s own validation is created.
+
+`FormState.ExecuteWithValidationPredicate` executes a method (the second parameter) with the specified predicate method (the first parameter) applied to any validations that are created. The predicate will execute before the validations, and if it returns `false` the validations will be skipped. That’s the reason, for example, we can specify `allowEmpty: false` for the budget control without having it ever block the post-back when the box is unchecked.
+
+The third argument for `ToFlowCheckbox` determines whether the box is initially checked, which will only be the case if we’re updating a service order and a budget exists.
+
+The fourth argument, `additionalValidationMethod`, runs during the checkbox’s validation after the built-in part that populates the `DataValue`. Every form-item-creation method includes this parameter and you’d typically use it to perform additional domain-specific validation for the control, adding your own error messages to `validator`. But in this case we’re using it to run the `budgetClearer` when the box is unchecked.
+
+Try out the form again and see how it works with the new checkbox and nested control!
+
 
 ## Modifying a page on the client side
 
