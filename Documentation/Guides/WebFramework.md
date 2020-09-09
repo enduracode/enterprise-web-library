@@ -318,6 +318,70 @@ Try out the form again and see how it works with the new checkbox and nested con
 
 ## Modifying a page on the client side
 
+You may have noticed that our checkbox automatically toggles the visibility of its nested content when clicked. This type of instant, client-side page modification can be important to user experience. Let’s learn how it works by attaching some of our own modifications to the Service Type radio buttons.
+
+First, we need a `PageModificationValue` that matches the data type of the item IDs in the radio list. Make this the new first line in the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`:
+
+```C#
+var serviceTypeIdPmv = new PageModificationValue<int?>();
+```
+
+We then must connect this page-modification value to the form control. Add a second argument to `RadioListSetup.Create`:
+
+```C#
+itemIdPageModificationValue: serviceTypeIdPmv
+```
+
+Now, for our first page modification based on this value, we’ll hide the budget form item unless General Service is selected; a budget doesn’t make much sense for flat-tire repair. Make this the new first argument of the `ToFormItem` call that follows `customerHasBudget.ToFlowCheckbox`:
+
+```C#
+setup: new FormItemSetup( displaySetup: serviceTypeIdPmv.ToCondition( ( (int?)ServiceTypesRows.GeneralService ).ToCollection() ).ToDisplaySetup() )
+```
+
+We pass a setup object with a `DisplaySetup` for the form item. This `DisplaySetup` is based upon a `PageModificationValueCondition` that is true only when the underlying `PageModificationValue` matches `GeneralService`. Therefore the form item will only be displayed in that case.
+
+That handles the visibility toggle, but since we’re hiding form controls we need to add another validation predicate to prevent errors in the hidden budget control from blocking the post-back. Wrap the entire `customerHasBudget.ToFlowCheckbox( … ).ToFormItem( … )` call in the following:
+
+```C#
+FormState.ExecuteWithValidationPredicate( () => mod.ServiceTypeId == ServiceTypesRows.GeneralService, () => … )
+```
+
+Finally, let’s add an `additionalValidationMethod` argument to the `mod.GetServiceTypeIdRadioListFormItem` call to invoke the `budgetClearer` when the service type is not General Service:
+
+```C#
+additionalValidationMethod: validator => {
+	if( mod.ServiceTypeId != ServiceTypesRows.GeneralService )
+		budgetClearer();
+}
+```
+
+Let’s make another page modification that changes the color of the form when it’s a flat tire repair, to make it clear to users that this service order is a quick job.
+
+We’ll use CSS to do this, and our first step is to add a style sheet to the `Website` project. Name it `Styles` and paste this into it:
+
+```CSS
+.flatTire {
+	background-color: lightyellow;
+}
+```
+
+Run `Update-DependentLogic` to generate some code for our new style sheet. Open `Global.asax.cs` and override `EwfApp.GetStyleSheets`:
+
+```C#
+protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new StylesCss.Info() };
+```
+
+This will include the style sheet on all pages in the application. Now we’ll conditionally add the `flatTire` class to the `FormItemList`. Paste in the following as the first argument to `FormItemList.CreateStack`:
+
+```C#
+generalSetup:
+new FormItemListSetup(
+	classes: serviceTypeIdPmv.ToCondition( ( (int?)ServiceTypesRows.FlatTireRepair ).ToCollection() )
+		.ToElementClassSet( ElementClasses.FlatTire ) )
+```
+
+Now you’ll see the form turn yellow if you select Flat Tire Repair.
+
 
 ## Modifying a page on the server side
 
