@@ -81,8 +81,11 @@ namespace EnterpriseWebLibrary {
 		/// <summary>
 		/// Creates a collection from this sequence.
 		/// </summary>
-		public static IReadOnlyCollection<T> Materialize<T>( this IEnumerable<T> items ) {
-			return items.ToImmutableArray();
-		}
+		public static IReadOnlyCollection<T> Materialize<T>( this IEnumerable<T> items ) => items.ToImmutableArray();
+
+		/// <summary>
+		/// Creates a list from this sequence, enabling elements to be accessed by index.
+		/// </summary>
+		public static IReadOnlyList<T> MaterializeAsList<T>( this IEnumerable<T> items ) => items.ToImmutableArray();
 	}
 }
