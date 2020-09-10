@@ -385,6 +385,18 @@ Now you’ll see the form turn yellow if you select Flat Tire Repair.
 
 ## Modifying a page on the server side
 
+The instant, client-side page modifications above require the server to replicate the changes when it rebuilds the page after a post-back. This pattern works well for simple modifications, such as toggling element display or adding and removing CSS classes. But it’s impractical for larger changes. Imagine adding new form controls or making complex changes to the DOM. Implementing this logic for both server and client and getting it right would be tedious and time consuming.
+
+We’ve created a solution to this, and it involves a couple of new concepts. First is the **intermediate post-back**. This is a post-back that changes parts of the page, but does not fully process the form. It keeps the user on the page and leaves the form values in unchanged regions intact so that a future *full* post-back can properly persist them. Intermediate post-backs can be performed asynchronously (coming soon), enabling the user to continue working while parts of the page update in the background.
+
+An intermediate post-back must declare the page regions that it will change. This is essential for usability: since any post-back requires a round trip to the server that could take one second or more, we prevent the user from interacting with the updating parts of the page until the updates are received and applied. Also, since the framework knows which regions are intentionally being changed, it can detect accidental changes outside those regions that would otherwise result in lost form values for the user.
+
+The other concept we need here is **component state**. In order to change a page, an intermediate post-back needs to modify some data that causes the page to be different when it is rebuilt. In many cases it is not feasible to use the database or other persistent storage since you don’t yet have a completed form. Furthermore, the data may represent some type of transient state that won’t ever be persisted.
+
+You can use component state to store data across intermediate post-backs. Under the hood it’s kept in a hidden field. A piece of component state is also an invisible component and must be placed in the tree of components on the page. This lets state that is associated with a changing region of the page be automatically disregarded on an intermediate post-back.
+
+Let’s illustrate these concepts by implementing an expandable list of service requests on the service-order form.
+
 
 ## Using component state with an underlying durable value
 
