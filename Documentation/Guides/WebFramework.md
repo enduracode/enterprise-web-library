@@ -100,19 +100,18 @@ FormState.ExecuteWithDataModificationsAndDefaultAction(
 			actionGetter: () => new PostBackAction( info.ParentResource ) )
 		.ToCollection(),
 	() => {
-		ph.AddControlsReturnThis(
-			FormItemList.CreateStack(
-					items: mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
-						.Append( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
-						.Append( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
-						.Append(
-							mod.GetServiceTypeIdRadioListFormItem(
-								RadioListSetup.Create(
-									ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
-								value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) )
-						.Materialize() )
-				.ToCollection()
-				.GetControls() );
+		var formItemList = FormItemList.CreateStack();
+
+		formItemList.AddItem( mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
+		formItemList.AddItem( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
+		formItemList.AddItem( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
+
+		formItemList.AddItem(
+			mod.GetServiceTypeIdRadioListFormItem(
+				RadioListSetup.Create( ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
+				value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) );
+
+		ph.AddControlsReturnThis( formItemList.ToCollection().GetControls() );
 
 		EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
 	} );
@@ -162,7 +161,7 @@ The **post-modification action** stage of the `PostBack` determines what happens
 
 We don’t refererence the list page directly. Instead we just navigate back to the parent page, which does the same thing since we already designated the list as the parent. But this makes our page more maintainable in the event we change the parent.
 
-Now let’s break down the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first statement spans several lines to create a `FormItemList` component that contains several `FormItem` objects. A form item is an abstract container that includes content (usually a form control), a label, and a validation object. Here, we create the form items using generated methods in the `ServiceOrdersModification` class. For example:
+Now let’s break down the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first statement creates a `FormItemList` component, to which we will add several `FormItem` objects. A form item is an abstract container that includes content (usually a form control), a label, and a validation object. Here, we create the form items using generated methods in the `ServiceOrdersModification` class. For example:
 
 ```C#
 mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
@@ -172,24 +171,9 @@ This creates a form item containing an email-address form control. The first par
 
 The form control has full email-address semantics, bringing up the correct keyboard on mobile devices and enforcing a valid email address according to the spec.
 
-You can display form items in several different ways, but the most common way is to put them in a `FormItemList`. This component lays out a list of form items in a format of your choice. Here we’re using a “stack”:
+You can display form items in several different ways, but the most common way is to put them in a `FormItemList`. This component lays out a list of form items in a format of your choice. Here we’re using a “stack” by calling `FormItemList.CreateStack`. If you wanted to switch to a wrapping list or a grid, for example, you’d just change `CreateStack` to `CreateWrapping` or `CreateGrid`.
 
-```C#
-FormItemList.CreateStack(
-	items: mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
-		.Append( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
-		.Append( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) )
-		.Append(
-			mod.GetServiceTypeIdRadioListFormItem(
-				RadioListSetup.Create(
-					ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
-				value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) )
-		.Materialize() )
-```
-
-If you wanted to switch to a wrapping list or a grid, for example, you’d just change `CreateStack` to `CreateWrapping` or `CreateGrid`.
-
-The other statement in the method adds a button to the page:
+The final statement in the method adds a button to the page:
 
 ```C#
 EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
@@ -254,7 +238,20 @@ First we’ll cover temporary state. The form controls that we’re already usin
 
 Imagine a checkbox with another form control nested beneath it. When the box is checked, the nested value should be persisted, but when the box is unchecked the nested value should be ignored and `null` should be persisted instead. The true/false state of the checkbox should only be used to determine this behavior.
 
-Let’s build this. In our `ServiceOrders` database table we have a `CustomerBudget` nullable column, which we’ll use to add a budget control to our form, nested beneath a checkbox. We’ll start by adding this as the first line in the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`:
+Let’s build this. In our `ServiceOrders` database table we have a `CustomerBudget` nullable column, which we’ll use to add a budget control to our form, nested beneath a checkbox. We’ll start by stubbing out a helper method for our new logic:
+
+```C#
+private void addServiceDetailFormItems( ServiceOrdersModification mod, FormItemList formItemList ) {
+}
+```
+
+Add a call to this method in `loadData` between the last `formItemList.AddItem` call and `ph.AddControlsReturnThis`, leaving blank lines above and below since we’ll be expanding it later:
+
+```C#
+addServiceDetailFormItems( mod, formItemList );
+```
+
+Now add this as the first line in our helper method:
 
 ```C#
 var customerHasBudget = new DataValue<bool>();
@@ -268,46 +265,43 @@ We’ll also add this line, directly under the line above:
 Action budgetClearer = null;
 ```
 
-This will be a method called during validation that is responsible for storing `null` as the value to be persisted for the nested budget control, in the case that the control is ignored.
+This will be a method sometimes called during validation that is responsible for storing `null` as the value to be persisted for the nested budget control, in the case that the control is ignored.
 
-Now we’ll make a helper method that creates the nested components and initializes `budgetClearer` (called `dataClearer` in this scope):
-
-```C#
-private IReadOnlyCollection<FlowComponent> getBudgetComponents( ServiceOrdersModification mod, out Action dataClearer ) {
-	dataClearer = () => mod.CustomerBudget = null;
-	return mod.GetCustomerBudgetNumberControlFormItem(
-			label: "Amount ($)".ToComponents().Append( new LineBreak() ).Append( new SideComments( "Multiple of $5, minimum $10".ToComponents() ) ).Materialize(),
-			value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
-			allowEmpty: false,
-			minValue: 10,
-			valueStep: 5 )
-		.ToComponentCollection();
-}
-```
-
-The creation of the budget form item here is just like the creation of the earlier form items, but with a few more parameters to get the behavior just right.
-
-Finally, we’ll put together all the pieces above by adding a checkbox to our chain of `Append` calls for the `FormItemList`. Put this right before the `.Materialize()` at the end:
+Now we’ll complete the job by creating and adding a form item with our checkbox. Add this as the final line in our helper method:
 
 ```C#
-.Append(
+formItemList.AddItem(
 	customerHasBudget.ToFlowCheckbox(
 			"Customer has budget".ToComponents(),
 			setup: FlowCheckboxSetup.Create(
 				nestedContentGetter: () => FormState.ExecuteWithValidationPredicate(
 					() => customerHasBudget.Value,
-					() => getBudgetComponents( mod, out budgetClearer ) ) ),
+					() => {
+						budgetClearer = () => mod.CustomerBudget = null;
+						return mod.GetCustomerBudgetNumberControlFormItem(
+								label: "Amount ($)".ToComponents()
+									.Append( new LineBreak() )
+									.Append( new SideComments( "Multiple of $5, minimum $10".ToComponents() ) )
+									.Materialize(),
+								value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
+								allowEmpty: false,
+								minValue: 10,
+								valueStep: 5 )
+							.ToComponentCollection();
+					} ) ),
 			value: info.ServiceOrderId.HasValue && info.ServiceOrder.CustomerBudget.HasValue,
 			additionalValidationMethod: validator => {
 				if( !customerHasBudget.Value )
 					budgetClearer();
 			} )
-		.ToFormItem( label: "Budget".ToComponents() ) )
+		.ToFormItem( label: "Budget".ToComponents() ) );
 ```
 
 We create the checkbox using an extension method on `DataValue<bool>` called `ToFlowCheckbox`, which gives us a checkbox with a validation that puts the posted-back value into the `DataValue`. The first argument is our label. The second creates a setup object with `nestedContentGetter`: a method that executes during the creation of the checkbox, after the checkbox’s own validation is created.
 
-`FormState.ExecuteWithValidationPredicate` executes a method (the second parameter) with the specified predicate method (the first parameter) applied to any validations that are created. The predicate will execute before the validations, and if it returns `false` the validations will be skipped. That’s the reason, for example, we can specify `allowEmpty: false` for the budget control without having it ever block the post-back when the box is unchecked.
+`FormState.ExecuteWithValidationPredicate` executes a method (the second parameter) with the specified predicate method (the first parameter) applied to any validations that are created. The predicate will execute before the validations, and if it returns `false` the validations will be skipped.
+
+The wrapped method first initializes `budgetClearer` and then returns the nested components. The creation of the budget form item here is just like the creation of the earlier form items, but with a few more parameters to get the behavior just right.
 
 The third argument for `ToFlowCheckbox` determines whether the box is initially checked, which will only be the case if we’re updating a service order and a budget exists.
 
@@ -320,7 +314,7 @@ Try out the form again and see how it works with the new checkbox and nested con
 
 You may have noticed that our checkbox automatically toggles the visibility of its nested content when clicked. This type of instant, client-side page modification can be important to user experience. Let’s learn how it works by attaching some of our own modifications to the Service Type radio buttons.
 
-First, we need a `PageModificationValue` that matches the data type of the item IDs in the radio list. Make this the new first line in the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`:
+First we need a `PageModificationValue` that matches the data type of the item IDs in the radio list. In `loadData`, add this line directly above the `FormItemList` creation:
 
 ```C#
 var serviceTypeIdPmv = new PageModificationValue<int?>();
@@ -332,26 +326,74 @@ We then must connect this page-modification value to the form control. Add a sec
 itemIdPageModificationValue: serviceTypeIdPmv
 ```
 
-Now, for our first page modification based on this value, we’ll hide the budget form item unless General Service is selected; a budget doesn’t make much sense for flat-tire repair. Make this the new first argument of the `ToFormItem` call that follows `customerHasBudget.ToFlowCheckbox`:
+Now, for our first page modification based on this value, we’ll hide the budget form item unless General Service is selected; a budget doesn’t make much sense for flat-tire repair. Add a third parameter to `addServiceDetailFormItems`:
 
 ```C#
-setup: new FormItemSetup( displaySetup: serviceTypeIdPmv.ToCondition( ( (int?)ServiceTypesRows.GeneralService ).ToCollection() ).ToDisplaySetup() )
+DisplaySetup displaySetup
 ```
 
-We pass a setup object with a `DisplaySetup` for the form item. This `DisplaySetup` is based upon a `PageModificationValueCondition` that is true only when the underlying `PageModificationValue` matches `GeneralService`. Therefore the form item will only be displayed in that case.
-
-That handles the visibility toggle, but since we’re hiding form controls we need to add another validation predicate to prevent errors in the hidden budget control from blocking the post-back. Wrap the entire `customerHasBudget.ToFlowCheckbox( … ).ToFormItem( … )` call in the following:
+Then forward the parameter to the checkbox by making this the new first argument of the `ToFormItem` call near the end of the method:
 
 ```C#
-FormState.ExecuteWithValidationPredicate( () => mod.ServiceTypeId == ServiceTypesRows.GeneralService, () => … )
+setup: new FormItemSetup( displaySetup: displaySetup )
 ```
 
-Finally, let’s add an `additionalValidationMethod` argument to the `mod.GetServiceTypeIdRadioListFormItem` call to invoke the `budgetClearer` when the service type is not General Service:
+This connects the visibility of the form item to the `DisplaySetup` parameter we just added. Now modify the method call in `loadData` to make this expression the third argument:
+
+```C#
+serviceTypeIdPmv.ToCondition( ( (int?)ServiceTypesRows.GeneralService ).ToCollection() ).ToDisplaySetup()
+```
+
+This produces a `DisplaySetup` that is based upon a `PageModificationValueCondition` that is true only when the underlying `PageModificationValue` matches `GeneralService`. Now the form item will only be displayed in that case.
+
+That handles the visibility toggle, but since we’re hiding form controls we need to add another validation predicate to prevent errors in the hidden budget control from blocking the post-back. The predicate will determine whether the General Service radio button is selected. That requires knowing whether the Service Type control validated successfully; it could be invalid if the user has not yet selected either radio button. Declare a new boolean right above the `formItemList.AddItem` call for the Service Type:
+
+```C#
+var serviceTypeInvalid = false;
+```
+
+Now add a third argument to `RadioListSetup.Create`:
+
+```C#
+validationErrorNotifier: () => serviceTypeInvalid = true
+```
+
+With our new boolean flag, we can now write our validation predicate. Wrap the `addServiceDetailFormItems` call in the following:
+
+```C#
+FormState.ExecuteWithValidationPredicate( () => !serviceTypeInvalid && mod.ServiceTypeId == ServiceTypesRows.GeneralService, () => … )
+```
+
+Finally, let’s clear the budget when the service type is not General Service. This requires exposing the `budgetClearer` from `addServiceDetailFormItems`. Add a fourth parameter to the method:
+
+```C#
+out Action dataClearer
+```
+
+And set it with this line at the end of the method:
+
+```C#
+dataClearer = budgetClearer;
+```
+
+Now, in `loadData`, add this line just below the `serviceTypeInvalid` declaration:
+
+```C#
+Action serviceDetailClearer = null;
+```
+
+And use it as the fourth argument to `addServiceDetailFormItems`:
+
+```C#
+out serviceDetailClearer
+```
+
+And finally add an `additionalValidationMethod` argument to the `mod.GetServiceTypeIdRadioListFormItem` call to invoke the `serviceDetailClearer` when the service type is not General Service:
 
 ```C#
 additionalValidationMethod: validator => {
 	if( mod.ServiceTypeId != ServiceTypesRows.GeneralService )
-		budgetClearer();
+		serviceDetailClearer();
 }
 ```
 
@@ -374,8 +416,7 @@ protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo>
 This will include the style sheet on all pages in the application. Now we’ll conditionally add the `flatTire` class to the `FormItemList`. Paste in the following as the first argument to `FormItemList.CreateStack`:
 
 ```C#
-generalSetup:
-new FormItemListSetup(
+generalSetup: new FormItemListSetup(
 	classes: serviceTypeIdPmv.ToCondition( ( (int?)ServiceTypesRows.FlatTireRepair ).ToCollection() )
 		.ToElementClassSet( ElementClasses.FlatTire ) )
 ```
