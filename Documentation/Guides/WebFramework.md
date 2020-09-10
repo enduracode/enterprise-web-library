@@ -436,7 +436,86 @@ The other concept we need here is **component state**. In order to change a page
 
 You can use component state to store data across intermediate post-backs. Under the hood it’s kept in a hidden field. A piece of component state is also an invisible component and must be placed in the tree of components on the page. This lets state that is associated with a changing region of the page be automatically disregarded on an intermediate post-back.
 
-Let’s illustrate these concepts by implementing an expandable list of service requests on the service-order form.
+Let’s illustrate these concepts by implementing an expandable list of service requests on the service-order form. We’ll put this just above the budget control, and have it similarly hidden when General Service is not selected.
+
+Add these three lines at the top of the `addServiceDetailFormItems` method:
+
+```C#
+var requests = info.ServiceOrderId.HasValue
+	               ? ServiceOrderRequestsTableRetrieval.GetRows(
+		               new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( info.ServiceOrderId.Value ) )
+	               : Enumerable.Empty<ServiceOrderRequestsTableRetrieval.Row>();
+var requestLineCount = ComponentStateItem.Create( "requestLineCount", Math.Max( requests.Count(), 1 ), v => v > 0 );
+var addRequestUpdateRegion = new UpdateRegionSet();
+```
+
+The first line retrieves existing requests from the database, if we’re updating a service order. The second creates a piece of component state. And the third creates an `UpdateRegionSet` object that will identify the region of the page that is changing when we add a new request line.
+
+Let’s look at the arguments to `ComponentStateItem.Create`. The first is a unique identifier, which is required because, at this point in page construction, that’s the only way the framework can distinguish state items from each other and immediately provide you with the current value of this item. The second argument is the default value of the state item. And the third argument is a predicate method that ensures that the item’s current value is in the expected range. Since component state is stored on the client side between requests, unexpected incoming values are always possible, just as with form controls.
+
+Our next step is adding this as the new second parameter to `addServiceDetailFormItems`:
+
+```C#
+List<ServiceOrderRequestsModification> requestInserts
+```
+
+We’ll use this list to store modification objects for the service requests that we need to insert into the database.
+
+We can now add a form item for our expandable list of requests. Put this line directly beneath the three lines we just added above:
+
+```C#
+formItemList.AddItem(
+	new StackList(
+			Enumerable.Range( 0, requestLineCount.Value.Value )
+				.Select(
+					i => {
+						var insert = ServiceOrderRequestsModification.CreateForInsert();
+						requestInserts.Add( insert );
+						return insert.GetRequestDescriptionTextControlFormItem( i != 0, value: requests.ElementAtOrDefault( i )?.RequestDescription ?? "" )
+							.ToListItem();
+					} )
+				.Materialize(),
+			setup: new ComponentListSetup(
+				tailUpdateRegions: new TailUpdateRegion( addRequestUpdateRegion.ToCollection(), 0 ).ToCollection(),
+				etherealContent: requestLineCount.ToCollection() ) ).Append<FlowComponent>(
+			new EwfButton(
+				new StandardButtonStyle( "Add another request" ),
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateIntermediate(
+						addRequestUpdateRegion.ToCollection(),
+						id: "addRequest",
+						firstModificationMethod: () => requestLineCount.Value.Value += 1 ) ) ) )
+		.Materialize()
+		.ToFormItem( setup: new FormItemSetup( displaySetup: displaySetup ), label: "Service requests".ToComponents() ) );
+```
+
+Let’s break this down. The first half is the creation of a `StackList` that contains N items, where N equals the current value of our `requestLineCount` state item. For each list item, we create a service-request modification object, add it to the `requestInserts` parameter, and create a text control in which the user can type the request. The first argument of `GetRequestDescriptionTextControlFormItem` specifies that it will only require a value from the user if it’s the first line. The second argument prefills the text control with the existing request text from that line if there is any.
+
+The `ComponentListSetup` object passes two important things to the `StackList`. First, a tail update region, which declares that any new items added to the list on an intermediate post-back request will be part of `addRequestUpdateRegion`. Second, the `requestLineCount` state item. This places the state item logically within the list. If the list itself were ever included within an update region of another intermediate post-back, the state item’s value would be silently forgotten in just the same way as form values within the list.
+
+The second half of the code block is the creation of the `EwfButton` that lets the user add new request lines. When clicked, the button will trigger the intermediate post-back specified by `PostBack.CreateIntermediate`. The first argument of this connects the post-back to our update region. The second is a unique ID, which every post-back needs; we didn’t see this with our first post-back earlier in the guide because we just relied on the default value. The modification method of the post-back increments the component state value, which gives the `StackList` one more item when it is rebuilt.
+
+Let’s turn our attention to `loadData` and finish our implementation. Create a list of service-request modification objects just below the declaration of `mod` at the top of the method:
+
+```C#
+var serviceRequestInserts = new List<ServiceOrderRequestsModification>();
+```
+
+Pass this to `addServiceDetailFormItems` as the second argument. Now our only remaining task is to add logic that appropriately modifies service requests when the form is submitted. Add this block to the modification method of `PostBack.CreateFull`, after `mod.Execute`:
+
+```C#
+if( info.ServiceOrderId.HasValue )
+	ServiceOrderRequestsModification.DeleteRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( info.ServiceOrderId.Value ) );
+foreach( var i in serviceRequestInserts.Where( i => i.RequestDescriptionHasChanged && i.RequestDescription.Any() ) ) {
+	i.ServiceOrderRequestId = MainSequence.GetNextValue();
+	i.ServiceOrderId = mod.ServiceOrderId;
+	i.Execute();
+}
+```
+
+Here we’re using a “delete and re-insert” pattern: The `if` statement unconditionally deletes all requests (if we’re updating an existing service order) and the `foreach` loop inserts new ones. The `Where` predicate is important. `RequestDescriptionHasChanged` will be false for all modification objects in the list if validation did not take place, i.e. when the General Service radio button is not selected. And `RequestDescription.Any` will be false for any empty line, preventing those from being persisted.
+
+Take a look at the form. It’s getting quite complex and maybe even a bit realistic!
 
 
 ## Using component state with an underlying durable value
