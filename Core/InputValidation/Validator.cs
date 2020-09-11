@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
+using Tewl;
 
 namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>
@@ -444,8 +445,10 @@ namespace EnterpriseWebLibrary.InputValidation {
 						const string domainUnconditionallyPermittedCharacters = @"[a-z0-9-]";
 						const string domain = "(" + domainUnconditionallyPermittedCharacters + @"+\.)+" + domainUnconditionallyPermittedCharacters + "+";
 						// The first two conditions are for performance only.
-						if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) ||
-						    !Regex.IsMatch( emailAddress, "^" + localPart + "@" + domain + "$", RegexOptions.IgnoreCase ) )
+						if( !emailAddress.Contains( "@" ) || !emailAddress.Contains( "." ) || !Regex.IsMatch(
+							    emailAddress,
+							    "^" + localPart + "@" + domain + "$",
+							    RegexOptions.IgnoreCase ) )
 							errorHandler.SetValidationResult( ValidationResult.Invalid() );
 						// Max length is already checked by the string validation
 						// NOTE: We should really enforce the max length of the domain portion and the local portion individually as well.
@@ -519,7 +522,8 @@ namespace EnterpriseWebLibrary.InputValidation {
 		/// This is useful when working with data that had the area code omitted because the number was local.
 		/// </summary>
 		public string GetPhoneNumberWithDefaultAreaCode(
-			ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, string defaultAreaCode ) {
+			ValidationErrorHandler errorHandler, string completePhoneNumber, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage,
+			string defaultAreaCode ) {
 			var validator = new Validator(); // We need to use a separate one so that erroneous error messages don't get left in the collection
 			var fakeHandler = new ValidationErrorHandler( "" );
 
@@ -552,12 +556,14 @@ namespace EnterpriseWebLibrary.InputValidation {
 		/// digits to five-digit groups that become the first five digits of the full number.  If allow empty is true and an empty string or null is given, the empty string is returned.
 		/// </summary>
 		public string GetPhoneWithLastFiveMapping(
-			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
+			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage,
+			Dictionary<string, string> firstFives ) {
 			return GetPhoneNumberAsObject( errorHandler, input, allowExtension, allowEmpty, allowSurroundingGarbage, firstFives ).StandardPhoneString;
 		}
 
 		internal PhoneNumber GetPhoneNumberAsObject(
-			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage, Dictionary<string, string> firstFives ) {
+			ValidationErrorHandler errorHandler, string input, bool allowExtension, bool allowEmpty, bool allowSurroundingGarbage,
+			Dictionary<string, string> firstFives ) {
 			return executeValidationMethodAndHandleEmptyAndReturnDefaultIfInvalid(
 				errorHandler,
 				input,
@@ -581,7 +587,8 @@ namespace EnterpriseWebLibrary.InputValidation {
 							phoneNumber = PhoneNumber.CreateFromParts( firstFive.Substring( 0, 3 ), firstFive.Substring( 3 ) + input, "" );
 						}
 						else
-							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, "The five digit phone number you entered isn't recognized." ) );
+							errorHandler.SetValidationResult(
+								ValidationResult.Custom( ErrorCondition.Invalid, "The five digit phone number you entered isn't recognized." ) );
 					}
 					// International phone numbers
 					// We require a country code and then at least 7 digits (but if country code is more than one digit, we require fewer subsequent digits).
@@ -604,7 +611,9 @@ namespace EnterpriseWebLibrary.InputValidation {
 							phoneNumber = PhoneNumber.CreateFromParts( areaCode, number, extension );
 							if( !allowExtension && phoneNumber.Extension.Length > 0 )
 								errorHandler.SetValidationResult(
-									ValidationResult.Custom( ErrorCondition.Invalid, invalidPrefix + " Extensions are not permitted in this field. Use the separate extension field." ) );
+									ValidationResult.Custom(
+										ErrorCondition.Invalid,
+										invalidPrefix + " Extensions are not permitted in this field. Use the separate extension field." ) );
 						}
 						else
 							errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.Invalid, invalidMessage ) );
@@ -798,9 +807,11 @@ namespace EnterpriseWebLibrary.InputValidation {
 			else if( date.HasValue ) {
 				var minMaxMessage = " It must be between " + minDate.ToDayMonthYearString( false ) + " and " + maxDate.ToDayMonthYearString( false ) + ".";
 				if( date < minDate )
-					errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooEarly, "The " + errorHandler.Subject + " is too early." + minMaxMessage ) );
+					errorHandler.SetValidationResult(
+						ValidationResult.Custom( ErrorCondition.TooEarly, "The " + errorHandler.Subject + " is too early." + minMaxMessage ) );
 				else if( date >= maxDate )
-					errorHandler.SetValidationResult( ValidationResult.Custom( ErrorCondition.TooLate, "The " + errorHandler.Subject + " is too late." + minMaxMessage ) );
+					errorHandler.SetValidationResult(
+						ValidationResult.Custom( ErrorCondition.TooLate, "The " + errorHandler.Subject + " is too late." + minMaxMessage ) );
 			}
 		}
 

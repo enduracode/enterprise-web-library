@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Tewl;
 
 namespace EnterpriseWebLibrary {
 	public static class GlobalInitializationOps {

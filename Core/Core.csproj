@@ -247,7 +247,6 @@
     <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
     <Compile Include="Configuration\WebApplication.cs" />
-    <Compile Include="Cultures.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
     <Compile Include="DataAccess\BlobStorage\BlobFile.cs" />
     <Compile Include="DataAccess\BlobStorage\BlobStorageStatics.cs" />
