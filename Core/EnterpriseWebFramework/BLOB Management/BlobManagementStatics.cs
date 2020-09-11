@@ -5,6 +5,7 @@ using System.Linq;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
+using Tewl;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class BlobManagementStatics {

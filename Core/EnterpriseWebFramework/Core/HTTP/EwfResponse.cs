@@ -4,6 +4,7 @@ using System.IO;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Tewl;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -45,7 +46,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return Create(
 				ContentTypes.WordDoc,
 				new EwfResponseBodyCreator(
-					destinationStream => inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
+					destinationStream =>
+						inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.WordDoc );
 		}
 
@@ -69,7 +71,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) {
 			return Create(
 				ContentTypes.TabSeparatedValues,
-				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
+				new EwfResponseBodyCreator(
+					writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );
 		}
 

@@ -726,7 +726,6 @@
     <Compile Include="Tools\IntTools.cs" />
     <Compile Include="Tools\RegularExpressions.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserManagementStatics.cs" />
-    <Compile Include="FileExtensions.cs" />
     <Compile Include="IO\ExcelFileWriter.cs" />
     <Compile Include="IO\ExcelWorksheet.cs" />
     <Compile Include="MailMerging\AsposeMergeRowEnumerator.cs" />
