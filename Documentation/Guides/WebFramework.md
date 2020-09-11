@@ -520,6 +520,8 @@ Take a look at the form. It’s getting quite complex and maybe even a bit reali
 
 ## Using component state with an underlying durable value
 
+Coming soon. We’ll make a display of other service orders from the same customer that updates when the email address is entered or changed.
+
 
 ## Managing keyboard focus
 
