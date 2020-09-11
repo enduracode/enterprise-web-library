@@ -14,6 +14,7 @@ using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeDocumentMergeFi
 using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.TestFileMergeFields;
 using Humanizer;
 using NUnit.Framework;
+using Tewl;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging {
 	[ TestFixture ]

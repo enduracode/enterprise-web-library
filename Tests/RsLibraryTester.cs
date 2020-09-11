@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
 using Humanizer;
 using NUnit.Framework;
+using Tewl;
 
 namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
