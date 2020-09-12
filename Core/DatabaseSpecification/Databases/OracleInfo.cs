@@ -2,6 +2,7 @@ using System.Data.Common;
 using Oracle.ManagedDataAccess.Client;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DatabaseSpecification.Databases {
 	/// <summary>

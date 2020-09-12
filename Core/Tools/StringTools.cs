@@ -579,15 +579,6 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
-		/// Converts this string to a given Enum value. Case sensitive.
-		/// This method does not enforce valid Enum values.
-		/// </summary>
-		/// C# doesn't allow constraining the value to an Enum
-		public static T ToEnum<T>( this string s ) {
-			return (T)Enum.Parse( typeof( T ), s );
-		}
-
-		/// <summary>
 		/// Returns a slug for this string, which will contain only lowercase alphanumeric characters and hyphens.
 		/// </summary>
 		// From https://stackoverflow.com/a/2921135/35349.
