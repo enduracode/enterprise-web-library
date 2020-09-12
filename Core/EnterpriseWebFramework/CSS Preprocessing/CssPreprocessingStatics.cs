@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -23,6 +24,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "Duplicate elements exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicateElementNames ) + "." );
 		}
 
-		internal static ReadOnlyCollection<CssElement> Elements { get { return elements.AsReadOnly(); } }
+		internal static ReadOnlyCollection<CssElement> Elements => elements.AsReadOnly();
 	}
 }
