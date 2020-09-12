@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                  var validatedValue = validator.GetNullableTimeOfDayTimeSpan(
 									                  errorHandler,
 									                  postBackValue.ToUpper(),
-									                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+									                  TewlContrib.DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
 									                  allowEmpty )
 								                  .ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) );
 							                  if( errorHandler.LastResult != ErrorCondition.NoError ) {

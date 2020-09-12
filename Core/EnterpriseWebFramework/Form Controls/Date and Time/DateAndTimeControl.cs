@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                  var validatedValue = validator.GetNullableDateTime(
 							                  errorHandler,
 							                  postBackValue.ToUpper(),
-							                  DateTimeTools.MonthDayYearFormats.Select( i => i + " " + DateTimeTools.HourAndMinuteFormat ).ToArray(),
+							                  TewlContrib.DateTimeTools.MonthDayYearFormats.Select( i => i + " " + TewlContrib.DateTimeTools.HourAndMinuteFormat ).ToArray(),
 							                  allowEmpty,
 							                  minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
 							                  maxValue?.PlusDays( 1 ).ToDateTimeUnspecified() ?? DateTime.MaxValue );

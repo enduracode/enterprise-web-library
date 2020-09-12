@@ -2,6 +2,7 @@
 using System.Linq;
 using ClosedXML.Excel;
 using EnterpriseWebLibrary.InputValidation;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -90,7 +91,7 @@ namespace EnterpriseWebLibrary.IO {
 				var detectedDate = v.GetNullableDateTime(
 					new ValidationErrorHandler( "" ),
 					cellValue,
-					DateTimeTools.DayMonthYearFormats.Concat( DateTimeTools.MonthDayYearFormats ).ToArray(),
+					TewlContrib.DateTimeTools.DayMonthYearFormats.Concat( TewlContrib.DateTimeTools.MonthDayYearFormats ).ToArray(),
 					false,
 					DateTime.MinValue,
 					DateTime.MaxValue );

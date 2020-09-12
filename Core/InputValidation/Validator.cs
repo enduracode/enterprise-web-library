@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>

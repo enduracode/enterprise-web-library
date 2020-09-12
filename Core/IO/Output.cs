@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Humanizer;
 using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>

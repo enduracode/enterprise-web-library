@@ -8,6 +8,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ImageResizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
 	/// <summary>
