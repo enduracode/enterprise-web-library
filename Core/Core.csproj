@@ -717,8 +717,6 @@
     <Compile Include="TewlContrib\Tools\DateTimeTools.cs" />
     <Compile Include="Tools\IntervalTools.cs" />
     <Compile Include="Tools\ObjectTools.cs" />
-    <Compile Include="Tools\DecimalTools.cs" />
-    <Compile Include="Tools\DoubleTools.cs" />
     <Compile Include="Tools\EnglishAttribute.cs" />
     <Compile Include="Tools\EnumTools.cs" />
     <Compile Include="Tools\ExceptionTools.cs" />
