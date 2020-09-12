@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.MailMerging.PseudoTableFields;
 using EnterpriseWebLibrary.MailMerging.PsuedoChildFields;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
