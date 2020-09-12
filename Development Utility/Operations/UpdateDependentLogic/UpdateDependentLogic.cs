@@ -424,6 +424,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 				writer.WriteLine( "using NodaTime;" );
+				writer.WriteLine( "using Tewl.Tools;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();

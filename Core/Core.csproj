@@ -716,7 +716,6 @@
     <Compile Include="TewlContrib\Tools\CollectionTools.cs" />
     <Compile Include="TewlContrib\Tools\DateTimeTools.cs" />
     <Compile Include="Tools\IntervalTools.cs" />
-    <Compile Include="Tools\ObjectTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
     <Compile Include="Tools\RegularExpressions.cs" />
