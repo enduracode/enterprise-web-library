@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	public static class DatabaseOps {
@@ -109,7 +110,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			if( database is NoDatabase )
 				return;
 			StatusStatics.SetStatus( "Waiting for database to be ready..." );
-			EwlStatics.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
+			ActionTools.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
 			StatusStatics.SetStatus( "Database is ready." );
 		}
 

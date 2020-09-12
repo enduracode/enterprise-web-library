@@ -12,6 +12,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {
@@ -219,7 +220,7 @@ LOG ON (
 				cn => {
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
 					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
-					EwlStatics.Retry(
+					ActionTools.Retry(
 						() => {
 							// This sometimes fails with "A severe error occurred on the current command."
 							executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
