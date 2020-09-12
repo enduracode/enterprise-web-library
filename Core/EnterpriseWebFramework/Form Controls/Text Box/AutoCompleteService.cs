@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Web.Script.Serialization;
+using EnterpriseWebLibrary.TewlContrib;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class AutoCompleteService: EwfPage {

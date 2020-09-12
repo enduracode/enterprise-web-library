@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.TewlContrib;
 using Tewl;
 
 // Parameter: string fileName

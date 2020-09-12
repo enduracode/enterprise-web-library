@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.TewlContrib;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.Email {

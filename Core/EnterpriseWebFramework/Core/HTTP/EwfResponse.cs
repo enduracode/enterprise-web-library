@@ -4,6 +4,7 @@ using System.IO;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using EnterpriseWebLibrary.TewlContrib;
 using Tewl;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

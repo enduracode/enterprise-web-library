@@ -1,6 +1,6 @@
-using System.Net.Mime;
+﻿using System.Net.Mime;
 
-namespace EnterpriseWebLibrary {
+namespace EnterpriseWebLibrary.TewlContrib {
 	/// <summary>
 	/// String constants for the content types for common file types.
 	/// </summary>

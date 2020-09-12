@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ClosedXML.Excel;
+using EnterpriseWebLibrary.TewlContrib;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.IO {

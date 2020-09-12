@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
+using EnterpriseWebLibrary.TewlContrib;
 using MimeTypes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -78,13 +79,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( versionStringOrFileExtensionIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the extension in the URL.", null );
 			var extension = url.Substring( extensionIndex );
-			var staticFileInfo =
-				EwfApp.GlobalType.Assembly.CreateInstance(
-					CombineNamespacesAndProcessEwfIfNecessary(
-						EwfApp.GlobalType.Namespace,
-						( url.Remove( versionStringOrFileExtensionIndex ) + extension.CapitalizeString() ).Separate( "/", false )
-							.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) )
-							.Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
+			var staticFileInfo = EwfApp.GlobalType.Assembly.CreateInstance(
+				                     CombineNamespacesAndProcessEwfIfNecessary(
+					                     EwfApp.GlobalType.Namespace,
+					                     ( url.Remove( versionStringOrFileExtensionIndex ) + extension.CapitalizeString() ).Separate( "/", false )
+					                     .Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) )
+					                     .Aggregate( ( a, b ) => a + "." + b ) + "+Info" ) ) as StaticFileInfo;
 			if( staticFileInfo == null )
 				throw new ResourceNotAvailableException( "Failed to create an Info object for the request.", null );
 
@@ -97,32 +97,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				Func<string> cssGetter = () => File.ReadAllText( staticFileInfo.FilePath );
 				responseWriter = urlVersionString.Any()
 					                 ? new EwfSafeResponseWriter(
-						                   cssGetter,
-						                   urlVersionString,
-						                   () => new ResponseMemoryCachingSetup( cacheKeyGetter(), staticFileInfo.GetResourceLastModificationDateAndTime() ) )
+						                 cssGetter,
+						                 urlVersionString,
+						                 () => new ResponseMemoryCachingSetup( cacheKeyGetter(), staticFileInfo.GetResourceLastModificationDateAndTime() ) )
 					                 : new EwfSafeResponseWriter(
-						                   () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
-						                   staticFileInfo.GetResourceLastModificationDateAndTime(),
-						                   memoryCacheKeyGetter: cacheKeyGetter );
+						                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+						                 staticFileInfo.GetResourceLastModificationDateAndTime(),
+						                 memoryCacheKeyGetter: cacheKeyGetter );
 			}
 			else {
 				Func<EwfResponse> responseCreator = () => EwfResponse.Create(
 					contentType,
 					new EwfResponseBodyCreator(
-					                                          responseStream => {
-						                                          using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
-							                                          fileStream.CopyTo( responseStream );
-					                                          } ) );
+						responseStream => {
+							using( var fileStream = File.OpenRead( staticFileInfo.FilePath ) )
+								fileStream.CopyTo( responseStream );
+						} ) );
 				responseWriter = urlVersionString.Any()
 					                 ? new EwfSafeResponseWriter(
-						                   responseCreator,
-						                   urlVersionString,
-						                   memoryCachingSetupGetter:
-						                   () => new ResponseMemoryCachingSetup( cacheKeyGetter(), staticFileInfo.GetResourceLastModificationDateAndTime() ) )
+						                 responseCreator,
+						                 urlVersionString,
+						                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup(
+							                 cacheKeyGetter(),
+							                 staticFileInfo.GetResourceLastModificationDateAndTime() ) )
 					                 : new EwfSafeResponseWriter(
-						                   responseCreator,
-						                   staticFileInfo.GetResourceLastModificationDateAndTime(),
-						                   memoryCacheKeyGetter: cacheKeyGetter );
+						                 responseCreator,
+						                 staticFileInfo.GetResourceLastModificationDateAndTime(),
+						                 memoryCacheKeyGetter: cacheKeyGetter );
 			}
 			responseWriter.WriteResponse();
 		}

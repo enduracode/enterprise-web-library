@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using EnterpriseWebLibrary.TewlContrib;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -179,7 +180,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="urlVersionString">The resource-version string from the request URL. Do not pass null or the empty string.</param>
 		/// <param name="memoryCachingSetupGetter">A function that gets the memory-caching setup object for the response. Pass null or return null if you do not
 		/// want to use EWL's memory cache.</param>
-		public EwfSafeResponseWriter( Func<EwfResponse> responseCreator, string urlVersionString, Func<ResponseMemoryCachingSetup> memoryCachingSetupGetter = null ) {
+		public EwfSafeResponseWriter(
+			Func<EwfResponse> responseCreator, string urlVersionString, Func<ResponseMemoryCachingSetup> memoryCachingSetupGetter = null ) {
 			var memoryCachingSetup = new Lazy<ResponseMemoryCachingSetup>( memoryCachingSetupGetter ?? ( () => null ) );
 			writer = createWriter(
 				responseCreator,
