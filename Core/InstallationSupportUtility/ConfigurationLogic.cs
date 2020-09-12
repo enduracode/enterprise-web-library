@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			if( SystemManager.HttpBaseUrl.StartsWith( "https://localhost" ) )
 				System.Net.ServicePointManager.ServerCertificateValidationCallback = ( ( sender, certificate, chain, sslPolicyErrors ) => true );
 
-			return new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemManager.HttpBaseUrl, "Service/" + serviceFileName ) );
+			return new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( SystemManager.HttpBaseUrl, "Service/" + serviceFileName ) );
 		}
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			// Performance
 			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
 
-			var factory = new ChannelFactory<T>( binding, NetTools.CombineUrls( SystemManager.TcpBaseUrl, "Service/" + serviceFileName ) );
+			var factory = new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( SystemManager.TcpBaseUrl, "Service/" + serviceFileName ) );
 			factory.Credentials.Windows.ClientCredential.UserName = SystemManager.TcpUsername;
 			factory.Credentials.Windows.ClientCredential.Password = SystemManager.TcpPassword;
 			return factory;

@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary {
 				if( !ConfigurationStatics.IsDevelopmentInstallation ) {
 					sw.WriteLine();
 					sw.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
-					sw.WriteLine( "Machine: {0}".FormatWith( EwlStatics.GetLocalHostName() ) );
+					sw.WriteLine( "Machine: {0}".FormatWith( Tewl.Tools.NetTools.GetLocalHostName() ) );
 				}
 
 				if( NetTools.IsWebApp() )
@@ -169,7 +169,7 @@ namespace EnterpriseWebLibrary {
 			return new EmailMessage
 				{
 					Subject = "Error in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ) +
-					          ( ConfigurationStatics.IsClientSideApp ? " on {0}".FormatWith( EwlStatics.GetLocalHostName() ) : "" ),
+					          ( ConfigurationStatics.IsClientSideApp ? " on {0}".FormatWith( Tewl.Tools.NetTools.GetLocalHostName() ) : "" ),
 					BodyHtml = body.GetTextAsEncodedHtml()
 				};
 		}
@@ -177,16 +177,14 @@ namespace EnterpriseWebLibrary {
 		private static EmailMessage getFaultEmailMessage( string message ) {
 			return new EmailMessage
 				{
-					Subject = "Fault in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ),
-					BodyHtml = message.GetTextAsEncodedHtml()
+					Subject = "Fault in {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ), BodyHtml = message.GetTextAsEncodedHtml()
 				};
 		}
 
 		private static EmailMessage getNotificationEmailMessage( string message ) {
 			return new EmailMessage
 				{
-					Subject = "Notification from {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ),
-					BodyHtml = message.GetTextAsEncodedHtml()
+					Subject = "Notification from {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.SystemName ), BodyHtml = message.GetTextAsEncodedHtml()
 				};
 		}
 

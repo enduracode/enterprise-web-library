@@ -37,14 +37,14 @@ namespace EnterpriseWebLibrary {
 			var port = bindingInfo[ 1 ]; // never empty
 			var host = bindingInfo[ 2 ];
 
-			return
-				NetTools.CombineUrls(
-					"{0}://{1}:{2}".FormatWith( (string)firstHttpBinding[ "protocol" ], host.Any() ? host : ipAddress != "*" ? ipAddress : "localhost", port ),
-					HttpRuntime.AppDomainAppVirtualPath );
+			return Tewl.Tools.NetTools.CombineUrls(
+				"{0}://{1}:{2}".FormatWith( (string)firstHttpBinding[ "protocol" ], host.Any() ? host : ipAddress != "*" ? ipAddress : "localhost", port ),
+				HttpRuntime.AppDomainAppVirtualPath );
 		}
 
 		private static Assembly getAssembly( bool iisExpress ) {
-			var assemblyName = "Microsoft.Web.Administration, Version=" + ( iisExpress ? "7.9.0.0" : "7.0.0.0" ) + ", Culture=neutral, PublicKeyToken=31bf3856ad364e35";
+			var assemblyName = "Microsoft.Web.Administration, Version=" + ( iisExpress ? "7.9.0.0" : "7.0.0.0" ) +
+			                   ", Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 			return Assembly.Load( assemblyName );
 		}
 	}

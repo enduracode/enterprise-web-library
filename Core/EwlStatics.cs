@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ImageResizer;
@@ -197,13 +196,6 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static T LastItem<T>( this List<T> list ) where T: class {
 			return list.Count == 0 ? null : list[ list.Count - 1 ];
-		}
-
-		/// <summary>
-		/// Returns the host name of the local computer.
-		/// </summary>
-		public static string GetLocalHostName() {
-			return Dns.GetHostEntry( "" ).HostName;
 		}
 
 		internal static void CallEveryMethod( params Action[] methods ) {

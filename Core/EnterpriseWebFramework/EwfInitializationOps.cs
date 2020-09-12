@@ -34,13 +34,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 					false,
 					mainDataAccessStateGetter: () => {
-						return EwfApp.Instance != null
-							       ? EwfApp.Instance.RequestState != null
-								         ? EwfApp.Instance.RequestState.DataAccessState
-								         : initTimeDataAccessState.Value
-							       : System.ServiceModel.OperationContext.Current != null
-								       ? wcfDataAccessState.Value
-								       : null;
+						return EwfApp.Instance != null ? EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.DataAccessState :
+						                                 initTimeDataAccessState.Value :
+						       System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
 					} );
 			}
 			catch {
@@ -106,7 +102,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							//
 							// Disable server certificate validation so that this request gets through even for web sites that don't use a certificate that is trusted by
 							// default. There is no security risk since we're not sending any sensitive information and we're not using the response.
-							NetTools.ExecuteWithResponse( IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ), response => {}, disableCertificateValidation: true );
+							Tewl.Tools.NetTools.ExecuteWithResponse(
+								IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ),
+								response => {},
+								disableCertificateValidation: true );
 						},
 						false,
 						false ),
