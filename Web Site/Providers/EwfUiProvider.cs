@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSessionState;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.Providers {
 	internal class EwfUiProvider: AppEwfUiProvider {

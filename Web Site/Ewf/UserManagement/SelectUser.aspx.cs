@@ -3,6 +3,7 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
+using Tewl.Tools;
 
 // Parameter: string returnUrl
 // OptionalParameter: string user

@@ -1,5 +1,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
 	partial class ModalContent: EwfPage {

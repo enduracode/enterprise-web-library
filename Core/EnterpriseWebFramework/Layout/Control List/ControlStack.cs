@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 	/// <summary>
@@ -73,7 +74,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 
 		private int modErrorDisplayKeySuffix;
 
-		private ControlStack( bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions ) {
+		private ControlStack(
+			bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions ) {
 			this.isStandard = isStandard;
 			this.tailUpdateRegions = tailUpdateRegions ?? new TailUpdateRegion[ 0 ];
 			this.itemInsertionUpdateRegions = itemInsertionUpdateRegions ?? new ItemInsertionUpdateRegion[ 0 ];

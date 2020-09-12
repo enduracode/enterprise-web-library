@@ -5,6 +5,7 @@ using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

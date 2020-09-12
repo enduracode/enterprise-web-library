@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -37,7 +38,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new AutofocusCondition( focusKeyAndPageConditionPairs.Concat( condition.focusKeyAndPageConditionPairs ).ToImmutableArray() );
 		}
 
-		internal bool IsTrue( string focusKey ) => focusKeyAndPageConditionPairs.Any(
-			i => ( i.focusKey.Any() ? i.focusKey == focusKey : focusKey == null ) && ( i.pageCondition == null || i.pageCondition.IsTrue ) );
+		internal bool IsTrue( string focusKey ) =>
+			focusKeyAndPageConditionPairs.Any(
+				i => ( i.focusKey.Any() ? i.focusKey == focusKey : focusKey == null ) && ( i.pageCondition == null || i.pageCondition.IsTrue ) );
 	}
 }

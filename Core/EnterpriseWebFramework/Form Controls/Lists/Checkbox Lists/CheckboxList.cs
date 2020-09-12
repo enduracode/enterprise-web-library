@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// We can't nest this inside the class below because of the type parameter.

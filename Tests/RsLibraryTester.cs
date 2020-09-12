@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.MailMerging;
 using Humanizer;
 using NUnit.Framework;
 using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
@@ -83,7 +84,14 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( "LeftLeg".CamelToEnglish() );
 			Console.WriteLine( "hits you in the Head and the LeftLeg!  That hurts.".CamelToEnglish() );
 
-			var mySet = new HashSet<string> { "a", "c", "", "b", "fred" };
+			var mySet = new HashSet<string>
+				{
+					"a",
+					"c",
+					"",
+					"b",
+					"fred"
+				};
 
 			var list = new List<string>( mySet );
 			foreach( var item in mySet )
@@ -271,7 +279,8 @@ namespace EnterpriseWebLibrary.Tests {
 			using( var outputFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, multipleRowsWordDoc ) ) ) {
 				using( var word = File.OpenRead( wordDocx ) )
 					MergeOps.CreateMsWordDoc( pseudoTableRowTree, false, word, outputFile );
-				explanations.Add( Tuple.Create( multipleRowsWordDoc, "Should be {0} with three pages, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
+				explanations.Add(
+					Tuple.Create( multipleRowsWordDoc, "Should be {0} with three pages, and FullName merged in the upper left.".FormatWith( wordDocx ) ) );
 			}
 
 			const string multipleRowsWordDocAsPdf = "MultipleRowMsWordDoc" + FileExtensions.Pdf;

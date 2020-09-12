@@ -3,6 +3,7 @@ using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ColumnPrimaryTableDemo: EwfPage {

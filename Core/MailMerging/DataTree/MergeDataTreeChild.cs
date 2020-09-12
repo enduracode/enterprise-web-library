@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.MailMerging.DataTree {
 	/// <summary>

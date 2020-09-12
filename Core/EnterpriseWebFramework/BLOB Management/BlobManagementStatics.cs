@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class BlobManagementStatics {

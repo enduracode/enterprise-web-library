@@ -4,6 +4,7 @@ using System.IO;
 using System.Web;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

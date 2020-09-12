@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CssElementCreator: ControlCssElementCreator {
@@ -16,13 +17,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static readonly ElementClass ItemClass = new ElementClass( "ewfLi" );
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-			return
-				new[]
+			return new[]
 					{
 						getListElements( "Unordered", "ul" ), getListElements( "Ordered", "ol" ),
 						new CssElement( "ComponentListItem", "li.{0}".FormatWith( ItemClass.ClassName ) ).ToCollection(),
 						new CssElement( "InlineListItemContentContainer", "div.{0}".FormatWith( ItemClass.ClassName ) ).ToCollection()
-					}.SelectMany( i => i ).ToArray();
+					}.SelectMany( i => i )
+				.ToArray();
 		}
 
 		private IEnumerable<CssElement> getListElements( string elementNamePrefix, string selectorElement ) {

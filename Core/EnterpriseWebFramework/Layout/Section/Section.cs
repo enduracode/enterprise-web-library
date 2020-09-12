@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -105,12 +106,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					FlowComponent getHeadingButton() {
 						var headingComponents =
 							new DisplayableElement(
-									headingContext => new DisplayableElementData(
-										null,
-										() => new DisplayableElementLocalData( "h1" ),
-										classes: headingClass,
-										children: heading.ToComponents() ) ).ToCollection<FlowComponent>()
-								.Concat( postHeadingComponents ?? Enumerable.Empty<FlowComponent>() );
+								headingContext => new DisplayableElementData(
+									null,
+									() => new DisplayableElementLocalData( "h1" ),
+									classes: headingClass,
+									children: heading.ToComponents() ) ).Concat( postHeadingComponents ?? Enumerable.Empty<FlowComponent>() );
 
 						return expanded.HasValue
 							       ?

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

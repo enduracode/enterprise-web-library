@@ -4,6 +4,7 @@ using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class EntitySetup: UserControl, UiEntitySetupBase {

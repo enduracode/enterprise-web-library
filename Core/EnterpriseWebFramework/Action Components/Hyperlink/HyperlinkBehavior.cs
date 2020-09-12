@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Email;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

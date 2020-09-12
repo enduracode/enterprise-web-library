@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -16,8 +17,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.children = new IdentifiedEtherealComponent(
 				() => new IdentifiedComponentData<EtherealComponentOrElement>(
 					"",
-					new UpdateRegionLinker( "", new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(), arg => this.ToCollection() )
-						.ToCollection(),
+					new UpdateRegionLinker(
+						"",
+						new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(),
+						arg => this.ToCollection() ).ToCollection(),
 					new ErrorSourceSet(),
 					errorsBySource => children ) ).ToCollection();
 		}

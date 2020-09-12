@@ -1,5 +1,7 @@
 ﻿// Parameter: bool showHomeLink
 
+using Tewl.Tools;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class AccessDenied: EwfPage {
 		partial class Info {

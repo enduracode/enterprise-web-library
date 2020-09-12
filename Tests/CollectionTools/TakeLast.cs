@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using EnterpriseWebLibrary;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Tests.CollectionTools {
 	[ TestFixture ]
 	public class TakeLast {
 		[ Test ]
 		public void Test() {
-			var a = new int[] { };
+			var a = new int[] {};
 			Assert.IsEmpty( a.TakeLast( 1 ) );
 			Assert.IsEmpty( a.TakeLast( 0 ) );
 			Assert.Throws<ApplicationException>( () => a.TakeLast( -1 ) );

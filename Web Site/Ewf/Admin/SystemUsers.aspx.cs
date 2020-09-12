@@ -1,4 +1,5 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	partial class SystemUsers: EwfPage {

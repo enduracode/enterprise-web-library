@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
 using ServiceStack.Stripe;
 using ServiceStack.Stripe.Types;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -29,8 +30,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
 		/// email address).</param>
 		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
-			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey, string liveSecretKey,
-			Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
+			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey,
+			string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
@@ -65,10 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						response = new StripeGateway( ConfigurationStatics.IsLiveInstallation ? liveSecretKey : testSecretKey ).Post(
 							new ChargeStripeCustomer
 								{
-									Amount = (int)( amountInDollars.Value * 100 ),
-									Currency = "usd",
-									Description = description.Any() ? description : null,
-									Card = token.Value
+									Amount = (int)( amountInDollars.Value * 100 ), Currency = "usd", Description = description.Any() ? description : null, Card = token.Value
 								} );
 					}
 					catch( StripeException e ) {
@@ -93,7 +91,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return Tuple.Create<IReadOnlyCollection<EtherealComponent>, Func<string>>(
 				hiddenFields,
 				() => {
-					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() + " }";
+					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() +
+					                     " }";
 					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
 					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
 					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +

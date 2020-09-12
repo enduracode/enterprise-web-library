@@ -4,6 +4,7 @@ using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
+using Tewl.Tools;
 
 // Parameter: string returnUrl
 
@@ -41,7 +42,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								.ExecuteWithDataModificationsAndDefaultAction(
 									new[] { logInPb, newPasswordPb },
 									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
-								.ToCollection()
 								.Append(
 									password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "current-password" ), value: "" )
 										.ToFormItem( label: "Password".ToComponents() ) )

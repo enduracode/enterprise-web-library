@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using Tewl.Tools;
 
 // OptionalParameter: string someText
 

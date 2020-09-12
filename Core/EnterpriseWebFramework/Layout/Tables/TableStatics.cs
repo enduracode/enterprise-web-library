@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.DataAccess.Ranking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class TableStatics {

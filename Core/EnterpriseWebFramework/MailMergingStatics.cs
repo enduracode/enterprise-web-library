@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Humanizer;
 using JetBrains.Annotations;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class MailMergingStatics {

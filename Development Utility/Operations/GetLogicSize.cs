@@ -10,6 +10,7 @@ using NDepend.Analysis;
 using NDepend.CodeModel;
 using NDepend.Path;
 using NDepend.Project;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class GetLogicSize: Operation {

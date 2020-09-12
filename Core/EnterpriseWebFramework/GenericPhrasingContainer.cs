@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

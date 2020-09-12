@@ -2,6 +2,7 @@ using System;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	partial class RequestProfiling: EwfPage {

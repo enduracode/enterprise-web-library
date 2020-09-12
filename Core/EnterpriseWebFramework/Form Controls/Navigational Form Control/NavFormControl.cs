@@ -1,6 +1,7 @@
 ﻿using System;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -30,13 +31,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( disableNewlineReplacement )
 				return new TextComponent( s ).ToCollection();
 
-			return
-				s.Separate( Environment.NewLine, false )
-					.Aggregate(
-						(IEnumerable<PhrasingComponent>)null,
-						( collection, line ) =>
-						collection?.Concat( new PhrasingComponent[] { new LineBreak(), new TextComponent( line ) } ) ?? new TextComponent( line ).ToCollection() )
-					.ToImmutableArray();
+			return s.Separate( Environment.NewLine, false )
+				.Aggregate(
+					(IEnumerable<PhrasingComponent>)null,
+					( collection, line ) => collection?.Concat( new PhrasingComponent[] { new LineBreak(), new TextComponent( line ) } ) ??
+					                        new TextComponent( line ).ToCollection() )
+				.ToImmutableArray();
 		}
 	}
 }

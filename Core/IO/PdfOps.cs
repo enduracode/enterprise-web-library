@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Aspose.Pdf.Facades;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -25,10 +26,9 @@ namespace EnterpriseWebLibrary.IO {
 		/// <param name="bookmarkNamesAndPdfStreams">Title to write in the bookmark, PDF MemoryStream</param>
 		public static void CreateBookmarkedPdf( IEnumerable<Tuple<string, MemoryStream>> bookmarkNamesAndPdfStreams, Stream outputStream ) {
 			var concatPdfsStream = new MemoryStream();
-			using( concatPdfsStream ) {
+			using( concatPdfsStream )
 				// Paste all of the PDFs together
 				ConcatPdfs( bookmarkNamesAndPdfStreams.Select( p => p.Item2 ), concatPdfsStream );
-			}
 
 			// Add bookmarks to PDF
 			var bookMarkedPdf = addBookmarksToPdf( concatPdfsStream.ToArray(), bookmarkNamesAndPdfStreams.Select( t => Tuple.Create( t.Item1, t.Item2.ToArray() ) ) );
@@ -119,7 +119,10 @@ namespace EnterpriseWebLibrary.IO {
 						explanations.Add(
 							Tuple.Create(
 								concatThreePdfs,
-								"This file should look like {0} immediately followed by {1} immediately followed by {2}.".FormatWith( onePagePdfPath, twoPagePdfPath, threePagePdfPath ) ) );
+								"This file should look like {0} immediately followed by {1} immediately followed by {2}.".FormatWith(
+									onePagePdfPath,
+									twoPagePdfPath,
+									threePagePdfPath ) ) );
 					}
 				}
 			}
@@ -132,7 +135,8 @@ namespace EnterpriseWebLibrary.IO {
 				const string bookmarkTitle = "Bookmark 1";
 				using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkOnePdf ) ) )
 					CreateBookmarkedPdf( Tuple.Create( bookmarkTitle, onePage ).ToCollection(), bookmarkFile );
-				explanations.Add( Tuple.Create( bookmarkOnePdf, "This should be {0} labeled with one bookmark named {1}.".FormatWith( onePagePdfPath, bookmarkTitle ) ) );
+				explanations.Add(
+					Tuple.Create( bookmarkOnePdf, "This should be {0} labeled with one bookmark named {1}.".FormatWith( onePagePdfPath, bookmarkTitle ) ) );
 
 				using( var twoPage = new MemoryStream() ) {
 					File.OpenRead( twoPagePdfPath ).CopyTo( twoPage );
@@ -156,7 +160,10 @@ namespace EnterpriseWebLibrary.IO {
 						const string thirdBookmarkTItle = "Third bookmark";
 						using( var bookmarkFile = File.OpenWrite( EwlStatics.CombinePaths( outputFolder, bookmarkThreePdf ) ) ) {
 							CreateBookmarkedPdf(
-								new[] { Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ), Tuple.Create( thirdBookmarkTItle, threePage ) },
+								new[]
+									{
+										Tuple.Create( firstBookmarkTitle, onePage ), Tuple.Create( secondBookmarkTitle, twoPage ), Tuple.Create( thirdBookmarkTItle, threePage )
+									},
 								bookmarkFile );
 						}
 						explanations.Add(
