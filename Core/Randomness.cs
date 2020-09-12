@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace EnterpriseWebLibrary {
@@ -98,6 +100,27 @@ namespace EnterpriseWebLibrary {
 			using( var rng = RandomNumberGenerator.Create() )
 				rng.GetBytes( bytes );
 			return BitConverter.ToString( bytes ).Replace( "-", "" ).ToLowerInvariant();
+		}
+
+		/// <summary>
+		/// Returns null if the enumeration has no elements.
+		/// </summary>
+		public static T GetRandomElement<T>( this IEnumerable<T> enumeration ) {
+			return enumeration.ElementAtOrDefault( GetRandomInt( 0, enumeration.Count() ) );
+		}
+
+		/// <summary>
+		/// Creates a shallow copy of the enumeration, scrambles and returns it.
+		/// </summary>
+		public static IEnumerable<T> Scramble<T>( this IEnumerable<T> items ) {
+			var itemsCopy = new List<T>( items );
+			for( var i = 0; i < itemsCopy.Count; i++ ) {
+				var randomIndex = GetRandomInt( 0, itemsCopy.Count );
+				var temp = itemsCopy[ randomIndex ];
+				itemsCopy[ randomIndex ] = itemsCopy[ i ];
+				itemsCopy[ i ] = temp;
+			}
+			return itemsCopy;
 		}
 	}
 }
