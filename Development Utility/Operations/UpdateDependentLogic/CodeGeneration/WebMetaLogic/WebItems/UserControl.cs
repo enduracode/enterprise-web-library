@@ -1,5 +1,4 @@
 using System.IO;
-using EnterpriseWebLibrary;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class UserControl {
@@ -20,8 +19,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		private void writeLoadThisMethod( TextWriter writer ) {
 			writer.WriteLine( "public static " + generalData.ClassName + " LoadThis() {" );
-			writer.WriteLine( "return (" + generalData.ClassName + ")( (Page)HttpContext.Current.CurrentHandler ).LoadControl( \"" +
-			                  NetTools.CombineUrls( "~", generalData.UrlRelativeToProject ) + "\" );" );
+			writer.WriteLine(
+				"return (" + generalData.ClassName + ")( (Page)HttpContext.Current.CurrentHandler ).LoadControl( \"" +
+				Tewl.Tools.NetTools.CombineUrls( "~", generalData.UrlRelativeToProject ) + "\" );" );
 			writer.WriteLine( "}" );
 		}
 	}

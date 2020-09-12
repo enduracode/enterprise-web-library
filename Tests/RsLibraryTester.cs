@@ -65,10 +65,10 @@ namespace EnterpriseWebLibrary.Tests {
 
 			Console.WriteLine( "abcde".Truncate( 4 ) );
 			Console.WriteLine( "abcde".TruncateStart( 4 ) );
-			Console.WriteLine( NetTools.CombineUrls( @"http://www.redstapler.biz", "/Files", "Carriers", "Hancock/", "blabla.pdf" ) );
-			Console.WriteLine( NetTools.CombineUrls( @"http://www.redstapler.biz", "//Files", "Carriers", "Hancock//", "blabla.pdf//" ) );
-			Console.WriteLine( NetTools.CombineUrls( @"///http://www.redstapler.biz//", "/Files/", "Carriers/", "Hancock/", "/blabla.pdf/" ) );
-			Console.WriteLine( NetTools.CombineUrls( @"http://localhost/ToddPublicWebSite/", "Carriers", "UP", "ComparisonLogo.jpg" ) );
+			Console.WriteLine( Tewl.Tools.NetTools.CombineUrls( @"http://www.redstapler.biz", "/Files", "Carriers", "Hancock/", "blabla.pdf" ) );
+			Console.WriteLine( Tewl.Tools.NetTools.CombineUrls( @"http://www.redstapler.biz", "//Files", "Carriers", "Hancock//", "blabla.pdf//" ) );
+			Console.WriteLine( Tewl.Tools.NetTools.CombineUrls( @"///http://www.redstapler.biz//", "/Files/", "Carriers/", "Hancock/", "/blabla.pdf/" ) );
+			Console.WriteLine( Tewl.Tools.NetTools.CombineUrls( @"http://localhost/ToddPublicWebSite/", "Carriers", "UP", "ComparisonLogo.jpg" ) );
 
 			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "box.txt" ) );
 			Console.WriteLine( EwlStatics.CombinePaths( @"C:\Inetpub\", "Files", "orgs", "anotherFolder", "box.txt" ) );

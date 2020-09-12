@@ -150,7 +150,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( entitySetup != null ) {
 				var name = entitySetup.GeneralData.ClassName;
 				if( entitySetup.GeneralData.UrlRelativeToProject.Length > 0 )
-					writer.WriteLine( "es = (" + name + ")LoadControl( \"" + NetTools.CombineUrls( "~", entitySetup.GeneralData.UrlRelativeToProject ) + "\" );" );
+					writer.WriteLine(
+						"es = (" + name + ")LoadControl( \"" + Tewl.Tools.NetTools.CombineUrls( "~", entitySetup.GeneralData.UrlRelativeToProject ) + "\" );" );
 				else
 					writer.WriteLine( "es = new " + name + "();" );
 			}
