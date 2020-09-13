@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 				IoMethods.DeleteFolder( supportFilesDestinationPath );
 				if( seleniumServerService != null ) {
 					// Delete the service and remove the registry values.
-					EwlStatics.RunProgram( "sc", "delete " + serviceName, "", true );
+					TewlContrib.ProcessTools.RunProgram( "sc", "delete " + serviceName, "", true );
 					seleniumServerService = null;
 				}
 
@@ -55,10 +55,14 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 				}
 
 				// This is the code to add the registry parameters to the Selenium Server.  This only needs to be run once.
-				EwlStatics.RunProgram( "sc", "create " + serviceName + " binPath= \"" + srvanyDestinationPath + "\" start= auto", "", true );
-				EwlStatics.RunProgram( "REG", serviceRegCmd + "Application" + regDataType + "\"" + EwlStatics.CombinePaths( javaFolder, "java.exe" ) + "\"", "", true );
-				EwlStatics.RunProgram( "REG", serviceRegCmd + "AppDirectory" + regDataType + "\"" + supportFilesDestinationPath + "\" ", "", true );
-				EwlStatics.RunProgram(
+				TewlContrib.ProcessTools.RunProgram( "sc", "create " + serviceName + " binPath= \"" + srvanyDestinationPath + "\" start= auto", "", true );
+				TewlContrib.ProcessTools.RunProgram(
+					"REG",
+					serviceRegCmd + "Application" + regDataType + "\"" + EwlStatics.CombinePaths( javaFolder, "java.exe" ) + "\"",
+					"",
+					true );
+				TewlContrib.ProcessTools.RunProgram( "REG", serviceRegCmd + "AppDirectory" + regDataType + "\"" + supportFilesDestinationPath + "\" ", "", true );
+				TewlContrib.ProcessTools.RunProgram(
 					"REG",
 					serviceRegCmd + "AppParameters" + regDataType + "\"-Xrs -jar " + seleniumJarFile + parametersToSeleniumServer + "\"",
 					"",

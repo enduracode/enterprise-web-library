@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					delegate {
 						try {
 							// -L option stops it from prompting on failed logon.
-							EwlStatics.RunProgram( "sqlplus", "-L " + getLogonString(), sw.ToString(), true );
+							TewlContrib.ProcessTools.RunProgram( "sqlplus", "-L " + getLogonString(), sw.ToString(), true );
 						}
 						catch( Exception e ) {
 							throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					delegate {
 						try {
 							// We pass an enter keystroke as input in an attempt to kill the program if it gets stuck on a username prompt because of a bad logon string.
-							EwlStatics.RunProgram(
+							TewlContrib.ProcessTools.RunProgram(
 								"expdp",
 								getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y VERSION=12.1",
 								Environment.NewLine,
@@ -127,7 +127,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 								executeMethodWithDbExceptionHandling(
 									delegate {
 										try {
-											EwlStatics.RunProgram(
+											TewlContrib.ProcessTools.RunProgram(
 												"impdp",
 												getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() +
 												"\"\"\" NOLOGFILE=y REMAP_SCHEMA=" + File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" +

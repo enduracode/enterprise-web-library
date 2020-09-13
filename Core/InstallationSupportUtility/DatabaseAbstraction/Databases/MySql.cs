@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							EwlStatics.RunProgram(
+							TewlContrib.ProcessTools.RunProgram(
 								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
 								getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
 								sw.ToString(),
@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				delegate {
 					try {
 						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
-						EwlStatics.RunProgram(
+						TewlContrib.ProcessTools.RunProgram(
 							EwlStatics.CombinePaths( binFolderPath, "mysqldump" ),
 							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
 							"",
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							EwlStatics.RunProgram(
+							TewlContrib.ProcessTools.RunProgram(
 								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
 								getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
 								sw.ToString(),

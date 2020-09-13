@@ -611,7 +611,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( projectPath, "Generated Code" );
 			if( useSvcUtil )
 				try {
-					EwlStatics.RunProgram(
+					TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
 						"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" +
 						codeFileName + "\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
@@ -624,7 +624,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			else {
 				Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 				try {
-					EwlStatics.RunProgram(
+					TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
 						"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath +
 						"\"",

@@ -54,10 +54,14 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			var allServices = ServiceController.GetServices();
 			var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
 			foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) ) ) {
-				EwlStatics.RunProgram( "sc", "config \"{0}\" start= demand".FormatWith( service.ServiceName ), "", true );
+				TewlContrib.ProcessTools.RunProgram( "sc", "config \"{0}\" start= demand".FormatWith( service.ServiceName ), "", true );
 
 				// Clear failure actions.
-				EwlStatics.RunProgram( "sc", "failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ), "", true );
+				TewlContrib.ProcessTools.RunProgram(
+					"sc",
+					"failure \"{0}\" reset= {1} actions= \"\"".FormatWith( service.ServiceName, serviceFailureResetPeriod ),
+					"",
+					true );
 
 				if( service.Status == ServiceControllerStatus.Stopped )
 					continue;
@@ -96,16 +100,16 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 				}
 				serviceController.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
 
-				EwlStatics.RunProgram( "sc", "config \"{0}\" start= delayed-auto".FormatWith( serviceController.ServiceName ), "", true );
+				TewlContrib.ProcessTools.RunProgram( "sc", "config \"{0}\" start= delayed-auto".FormatWith( serviceController.ServiceName ), "", true );
 
 				// Set failure actions.
 				const int restartDelay = 60000; // milliseconds
-				EwlStatics.RunProgram(
+				TewlContrib.ProcessTools.RunProgram(
 					"sc",
 					"failure \"{0}\" reset= {1} actions= restart/{2}".FormatWith( serviceController.ServiceName, serviceFailureResetPeriod, restartDelay ),
 					"",
 					true );
-				EwlStatics.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( serviceController.ServiceName ), "", true );
+				TewlContrib.ProcessTools.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( serviceController.ServiceName ), "", true );
 			}
 			if( runtimeConfiguration.WebApplications.Any( i => i.IisApplication != null ) && runtimeConfiguration.InstallationType != InstallationType.Development )
 				IsuStatics.StartIisAppPool( IisAppPoolName );
@@ -121,7 +125,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		private void runInstallutil( WindowsService service, bool uninstall ) {
 			try {
-				EwlStatics.RunProgram(
+				TewlContrib.ProcessTools.RunProgram(
 					EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
 					( uninstall ? "/u " : "" ) + "\"" + EwlStatics.CombinePaths(
 						GetWindowsServiceFolderPath( service, true ),

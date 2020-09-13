@@ -715,6 +715,7 @@
     <Compile Include="TewlContrib\Oracle\OracleStatics.cs" />
     <Compile Include="TewlContrib\Tools\CollectionTools.cs" />
     <Compile Include="TewlContrib\Tools\DateTimeTools.cs" />
+    <Compile Include="TewlContrib\Tools\ProcessTools.cs" />
     <Compile Include="Tools\IntervalTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />

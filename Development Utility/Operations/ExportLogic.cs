@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writeNuGetPackageManifest( installation, packagingConfiguration, prerelease, localExportDateAndTime, writer );
 
 					StatusStatics.SetStatus(
-						EwlStatics.RunProgram(
+						TewlContrib.ProcessTools.RunProgram(
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 							"",
@@ -187,7 +187,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.BuildNumber = installation.NextBuildNumber;
 
 			var hgOutput = Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) )
-				               ? EwlStatics.RunProgram(
+				               ? TewlContrib.ProcessTools.RunProgram(
 						               @"C:\Program Files\TortoiseHg\hg",
 						               "--debug identify --id \"{0}\"".FormatWith( installation.GeneralLogic.Path ),
 						               "",
@@ -291,7 +291,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				// Pre-compile the web project.
 				try {
-					EwlStatics.RunProgram(
+					TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
 						"-v \"/" + webProject.name + ".csproj\" -p \"" + EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
 						( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" + webAppPath + "\"",
@@ -302,7 +302,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
 				}
 				try {
-					EwlStatics.RunProgram(
+					TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
 						"\"" + webAppPath + "\" -o " + webProject.NamespaceAndAssemblyName + ".Package -a -copyattrs",
 						"",

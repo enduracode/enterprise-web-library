@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 			executeMethodWithDbExceptionHandling(
 				delegate {
 					try {
-						EwlStatics.RunProgram(
+						TewlContrib.ProcessTools.RunProgram(
 							"sqlcmd",
 							( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
 							"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine +
