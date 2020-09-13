@@ -8,8 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.TewlContrib;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Email {
 	public static class EmailStatics {
@@ -149,7 +149,7 @@ namespace EnterpriseWebLibrary.Email {
 
 					// Add an alternate view for the HTML part.
 					m.AlternateViews.Add(
-						System.Net.Mail.AlternateView.CreateAlternateViewFromString( message.BodyHtml, new System.Net.Mime.ContentType( ContentTypes.Html ) ) );
+						System.Net.Mail.AlternateView.CreateAlternateViewFromString( message.BodyHtml, new System.Net.Mime.ContentType( TewlContrib.ContentTypes.Html ) ) );
 
 					foreach( var attachment in message.Attachments )
 						m.Attachments.Add( attachment.ToAttachment() );

@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Email;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EmailSendingFormItems {
@@ -15,8 +16,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		public static FormItem GetBodyHtmlFormItem( this EmailMessage emailMessage, string value = "" ) {
-			return new WysiwygHtmlEditor( value, true, ( postBackValue, validator ) => emailMessage.BodyHtml = postBackValue )
-				.ToFormItem( label: "Body".ToComponents() );
+			return new WysiwygHtmlEditor( value, true, ( postBackValue, validator ) => emailMessage.BodyHtml = postBackValue ).ToFormItem(
+				label: "Body".ToComponents() );
 		}
 	}
 }

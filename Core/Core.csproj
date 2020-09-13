@@ -719,7 +719,6 @@
     <Compile Include="Tools\IntervalTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
-    <Compile Include="Tools\RegularExpressions.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserManagementStatics.cs" />
     <Compile Include="IO\ExcelFileWriter.cs" />
     <Compile Include="IO\ExcelWorksheet.cs" />

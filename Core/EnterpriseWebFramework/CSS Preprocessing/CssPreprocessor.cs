@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -20,10 +21,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			customElementsDetected = customElementsDetected.Distinct();
 			var knownCustomElements = CssPreprocessingStatics.Elements.Select( ce => reservedCustomElementPrefix + ce.Name );
 			var unknownCustomElements = customElementsDetected.Except( knownCustomElements ).ToList();
-			if( unknownCustomElements.Any() ) {
+			if( unknownCustomElements.Any() )
 				throw new MultiMessageApplicationException(
 					unknownCustomElements.Select( e => "\"" + e + "\" begins with the reserved custom element prefix but is not a known custom element." ).ToArray() );
-			}
 
 			using( var writer = new StringWriter() ) {
 				var buffer = new StringBuilder();
@@ -79,12 +79,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var match = Regex.Match( selectorWithCustomElements, customElementPattern );
 			if( !match.Success )
 				yield return selectorWithCustomElements;
-			else {
+			else
 				foreach( var elementSelector in CssPreprocessingStatics.Elements.Single( i => reservedCustomElementPrefix + i.Name == match.Value ).Selectors ) {
 					foreach( var selectorTail in getSelectors( selectorWithCustomElements.Substring( match.Index + match.Length ) ) )
 						yield return selectorWithCustomElements.Substring( 0, match.Index ) + elementSelector + selectorTail;
 				}
-			}
 		}
 	}
 }
