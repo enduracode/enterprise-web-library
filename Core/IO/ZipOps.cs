@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ICSharpCode.SharpZipLib.Zip;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>

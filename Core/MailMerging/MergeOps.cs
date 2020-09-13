@@ -7,6 +7,7 @@ using System.Xml;
 using Aspose.Words.Reporting;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.MailMerging {
 	/// <summary>
@@ -90,12 +91,12 @@ namespace EnterpriseWebLibrary.MailMerging {
 			return new MergeFieldNameTree( getFieldsInTemplateString( template ) );
 		}
 
-		private static IEnumerable<string> getFieldsInTemplateString( string template ) => from Match match in Regex.Matches(
-			                                                                                   template.Replace( ApplicationRelativeNonSecureUrlPrefix, "" )
-				                                                                                   .Replace( ApplicationRelativeSecureUrlPrefix, "" ),
-			                                                                                   @"@@(\w+)",
-			                                                                                   RegexOptions.Multiline )
-		                                                                                   select match.Groups[ 1 ].Value;
+		private static IEnumerable<string> getFieldsInTemplateString( string template ) =>
+			from Match match in Regex.Matches(
+				template.Replace( ApplicationRelativeNonSecureUrlPrefix, "" ).Replace( ApplicationRelativeSecureUrlPrefix, "" ),
+				@"@@(\w+)",
+				RegexOptions.Multiline )
+			select match.Groups[ 1 ].Value;
 
 		/// <summary>
 		/// Returns the specified template string with the merge fields converted to Silverpop personalized tags.

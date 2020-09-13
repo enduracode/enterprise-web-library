@@ -737,7 +737,6 @@
     <Compile Include="MultiMessageApplicationException.cs" />
     <Compile Include="Tools\ControlTools.cs" />
     <Compile Include="Tools\ServiceControllerTools.cs" />
-    <Compile Include="Tools\StreamTools.cs" />
     <Compile Include="TrustedHtmlString.cs" />
     <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="UnitTestingInitializationOps.cs" />
