@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace EnterpriseWebLibrary {
+namespace EnterpriseWebLibrary.TewlContrib {
 	/// <summary>
 	/// Provides helpful methods to get random numbers and strings without falling into random pitfalls.
 	/// </summary>
-	public static class Randomness {
+	public static class RandomStatics {
 		// We want one instance per thread because Random is not thread safe. 
 		// Threadstatic is safe for us to use even in ASP.NET because we don't care if/when the resource is cleaned up and we don't care if multiple requests
 		// use the same Random object. Another approach would be to have one Random object and use lock when calling the next method.

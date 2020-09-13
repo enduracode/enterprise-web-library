@@ -703,7 +703,6 @@
     <Compile Include="MailMerging\DataTree\MergeDataTreeRemapping.cs" />
     <Compile Include="MailMerging\MergeFieldNameTree.cs" />
     <Compile Include="MailMerging\RowTree\MergeRowTree.cs" />
-    <Compile Include="Randomness.cs" />
     <Compile Include="RateLimiter.cs" />
     <Compile Include="SpecifiedValue.cs" />
     <Compile Include="StructuralEqualityComparer.cs" />
@@ -713,6 +712,7 @@
     <Compile Include="TestStatics.cs" />
     <Compile Include="TewlContrib\ContentTypes.cs" />
     <Compile Include="TewlContrib\Oracle\OracleStatics.cs" />
+    <Compile Include="TewlContrib\RandomStatics.cs" />
     <Compile Include="TewlContrib\Tools\CollectionTools.cs" />
     <Compile Include="TewlContrib\Tools\DateTimeTools.cs" />
     <Compile Include="TewlContrib\Tools\ProcessTools.cs" />
