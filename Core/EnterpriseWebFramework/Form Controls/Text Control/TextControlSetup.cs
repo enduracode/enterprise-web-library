@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
 using JetBrains.Annotations;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

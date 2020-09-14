@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary.InputValidation;
+﻿using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>

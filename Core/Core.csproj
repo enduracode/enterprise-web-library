@@ -648,14 +648,6 @@
     <Compile Include="Generated Code\System List Message.cs" />
     <Compile Include="GlobalInitializationOps.cs" />
     <Compile Include="IisConfigurationStatics.cs" />
-    <Compile Include="InputValidation\Error.cs" />
-    <Compile Include="InputValidation\ErrorCondition.cs" />
-    <Compile Include="InputValidation\PhoneNumber.cs" />
-    <Compile Include="InputValidation\ValidationErrorHandler.cs" />
-    <Compile Include="InputValidation\ValidationPackage.cs" />
-    <Compile Include="InputValidation\ValidationResult.cs" />
-    <Compile Include="InputValidation\Validator.cs" />
-    <Compile Include="InputValidation\ZipCode.cs" />
     <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\DatabaseOps.cs" />
@@ -755,7 +747,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\User.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="Collections\ListSet.cs" />
-    <Compile Include="FormattingMethods.cs" />
     <Compile Include="InstallationFileStatics.cs" />
     <Compile Include="IO\CsvFileWriter.cs" />
     <Compile Include="IO\ValidationError.cs" />

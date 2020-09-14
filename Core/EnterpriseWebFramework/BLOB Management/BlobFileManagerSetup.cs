@@ -1,6 +1,6 @@
 ﻿using System;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
+using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using EnterpriseWebLibrary.InputValidation;
+using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface FormValue {

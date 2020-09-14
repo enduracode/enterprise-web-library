@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
-using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using Tewl;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Humanizer;
 using EnterpriseWebLibrary.IO;
-using EnterpriseWebLibrary.InputValidation;
+using Humanizer;
 
 namespace EnterpriseWebLibrary {
 	public static class TestStatics {
@@ -12,12 +11,14 @@ namespace EnterpriseWebLibrary {
 			Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ),
 			"StdLib Test Outputs" );
 
-		public static readonly string InputTestFilesFolderPath =
-			EwlStatics.CombinePaths( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "..", "..", "TestFiles" );
+		public static readonly string InputTestFilesFolderPath = EwlStatics.CombinePaths(
+			Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ),
+			"..",
+			"..",
+			"TestFiles" );
 
 		public static void RunTests() {
 			ZipOps.Test();
-			Validator.Test();
 			PdfOps.Test();
 		}
 

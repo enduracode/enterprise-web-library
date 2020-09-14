@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.InputValidation;
+using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class BasicDataModification: DataModification, ValidationList {

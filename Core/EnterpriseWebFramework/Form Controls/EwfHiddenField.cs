@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

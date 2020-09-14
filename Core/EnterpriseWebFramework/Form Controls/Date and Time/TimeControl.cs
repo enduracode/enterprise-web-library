@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
 using JetBrains.Annotations;
 using NodaTime;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

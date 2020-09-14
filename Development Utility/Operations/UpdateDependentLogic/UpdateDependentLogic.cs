@@ -214,8 +214,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 				writer.WriteLine( "using NodaTime;" );
+				writer.WriteLine( "using Tewl.InputValidation;" );
 
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
@@ -423,8 +423,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.InputValidation;" );
 				writer.WriteLine( "using NodaTime;" );
+				writer.WriteLine( "using Tewl.InputValidation;" );
 				writer.WriteLine( "using Tewl.Tools;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );

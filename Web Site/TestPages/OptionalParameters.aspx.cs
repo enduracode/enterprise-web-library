@@ -1,5 +1,5 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.InputValidation;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 // OptionalParameter: string field1
