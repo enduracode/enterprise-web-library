@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
 	public class BaseUrl {
@@ -36,7 +37,11 @@ namespace EnterpriseWebLibrary {
 		}
 
 		internal BaseUrl CompleteWithDefaults( BaseUrl defaults ) {
-			return new BaseUrl( host.Any() ? host : defaults.host, nonsecurePort ?? defaults.nonsecurePort, securePort ?? defaults.securePort, path ?? defaults.path );
+			return new BaseUrl(
+				host.Any() ? host : defaults.host,
+				nonsecurePort ?? defaults.nonsecurePort,
+				securePort ?? defaults.securePort,
+				path ?? defaults.path );
 		}
 
 		internal string GetUrlString( bool secure ) {

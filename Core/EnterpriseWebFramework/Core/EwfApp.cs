@@ -6,8 +6,9 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using Humanizer;
 using StackExchange.Profiling;
+using Tewl.Tools;
+using static Humanizer.StringExtensions;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

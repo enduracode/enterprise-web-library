@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 	/// <summary>
@@ -43,7 +44,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 			var command = cn.DatabaseInfo.CreateCommand();
 			command.CommandText = "SELECT{0} {1} ".FormatWith(
 				                      cacheQueryInDatabase && cn.DatabaseInfo.QueryCacheHint.Any() ? " {0}".FormatWith( cn.DatabaseInfo.QueryCacheHint ) : "",
-				                      StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.ToArray() ) ) + fromClause;
+				                      StringTools.ConcatenateWithDelimiter( ", ", selectExpressions ) ) + fromClause;
 
 			if( conditions.Any() ) {
 				command.CommandText += " WHERE ";

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Humanizer;
 using NodaTime;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CookieStatics {

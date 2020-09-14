@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	internal class FixedWidthParser: Parser {

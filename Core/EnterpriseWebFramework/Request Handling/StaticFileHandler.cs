@@ -3,8 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
-using EnterpriseWebLibrary.TewlContrib;
 using MimeTypes;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Func<string> cacheKeyGetter = () => staticFileInfo.GetUrl( false, false, false );
 			EwfSafeResponseWriter responseWriter;
-			if( contentType == ContentTypes.Css ) {
+			if( contentType == TewlContrib.ContentTypes.Css ) {
 				Func<string> cssGetter = () => File.ReadAllText( staticFileInfo.FilePath );
 				responseWriter = urlVersionString.Any()
 					                 ? new EwfSafeResponseWriter(
@@ -101,7 +101,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                 urlVersionString,
 						                 () => new ResponseMemoryCachingSetup( cacheKeyGetter(), staticFileInfo.GetResourceLastModificationDateAndTime() ) )
 					                 : new EwfSafeResponseWriter(
-						                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+						                 () => EwfResponse.Create(
+							                 TewlContrib.ContentTypes.Css,
+							                 new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 						                 staticFileInfo.GetResourceLastModificationDateAndTime(),
 						                 memoryCacheKeyGetter: cacheKeyGetter );
 			}

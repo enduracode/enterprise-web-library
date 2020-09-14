@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InputValidation {
 	/// <summary>

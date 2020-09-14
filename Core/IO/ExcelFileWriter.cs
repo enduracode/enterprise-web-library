@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using ClosedXML.Excel;
-using EnterpriseWebLibrary.TewlContrib;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>
@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.IO {
 		/// <summary>
 		/// The content type of Excel files.
 		/// </summary>
-		public static string ContentType { get { return ContentTypes.ExcelXlsx; } }
+		public static string ContentType { get { return TewlContrib.ContentTypes.ExcelXlsx; } }
 
 		/// <summary>
 		/// Gets a safe file name (using ToSafeFileName) using the appropriate extension.

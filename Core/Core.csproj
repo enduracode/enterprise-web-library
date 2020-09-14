@@ -772,7 +772,6 @@
     <Compile Include="JavaScriptWriting\PopUpWindowSettings.cs" />
     <Compile Include="NetTools.cs" />
     <Compile Include="StreamMethod.cs" />
-    <Compile Include="Tools\StringTools.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementation.cs" />
     <Compile Include="MailMerging\MergeOps.cs" />
     <Compile Include="MultiColumnForms\CellLoadMethod.cs" />

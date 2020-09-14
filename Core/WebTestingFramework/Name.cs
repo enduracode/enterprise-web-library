@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.TewlContrib;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebTestingFramework {
 	/// <summary>

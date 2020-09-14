@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using EnterpriseWebLibrary.InputValidation;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -51,7 +52,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									jsInitStatements: StringTools.ConcatenateWithDelimiter(
 										" ",
 										pageModificationValue != null
-											? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
+											? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith(
+												context.Id,
+												pageModificationValue.GetJsModificationStatements( "$( this ).val()" ) )
 											: "",
 										jsInitStatementGetter?.Invoke( context.Id ) ?? "" ) ) );
 						} );

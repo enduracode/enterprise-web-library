@@ -2,6 +2,7 @@
 using System.Linq;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Configuration {
 	/// <summary>
@@ -79,7 +80,8 @@ namespace EnterpriseWebLibrary.Configuration {
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = baseUrl != null
-				                 ? new BaseUrl(
+				                 ?
+				                 new BaseUrl(
 					                 baseUrl.Host,
 					                 baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
 					                 baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,

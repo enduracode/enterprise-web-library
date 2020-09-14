@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Web;
 using System.Web.Hosting;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
 	internal static class IisConfigurationStatics {

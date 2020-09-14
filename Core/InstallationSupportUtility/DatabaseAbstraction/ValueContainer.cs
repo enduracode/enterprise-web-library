@@ -3,6 +3,7 @@ using System.Linq;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 	/// <summary>
@@ -98,11 +99,15 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction {
 			var conversionExpression = outgoingValueConversionExpressionGetter( valueExpression );
 			var parameterValueExpression = valueExpression == "null"
 				                               ? valueExpression
-				                               : conversionExpression == valueExpression || ( dataType.IsValueType && ( nullValueExpression.Any() || !allowsNull ) )
-					                                 ? conversionExpression
-					                                 : "{0} != null ? {1} : null".FormatWith(
-						                                 valueExpression,
-						                                 dataType.IsValueType ? "({0}?){1}".FormatWith( UnconvertedDataTypeName, conversionExpression ) : conversionExpression );
+				                               :
+				                               conversionExpression == valueExpression || ( dataType.IsValueType && ( nullValueExpression.Any() || !allowsNull ) )
+					                               ?
+					                               conversionExpression
+					                               : "{0} != null ? {1} : null".FormatWith(
+						                               valueExpression,
+						                               dataType.IsValueType
+							                               ? "({0}?){1}".FormatWith( UnconvertedDataTypeName, conversionExpression )
+							                               : conversionExpression );
 			return "new DbParameterValue( {0}, \"{1}\" )".FormatWith( parameterValueExpression, dbTypeString );
 		}
 	}

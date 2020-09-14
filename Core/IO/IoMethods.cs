@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
 	/// <summary>

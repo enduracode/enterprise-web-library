@@ -7,6 +7,7 @@ using System.Web;
 using EnterpriseWebLibrary.Configuration.Machine;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Configuration {
 	public static class ConfigurationStatics {

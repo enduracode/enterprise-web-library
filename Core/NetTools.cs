@@ -8,7 +8,7 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
-using EnterpriseWebLibrary.TewlContrib;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
 	/// <summary>
@@ -84,7 +84,7 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static EwfResponse CreateImageFromText( string text, Font font ) {
 			return EwfResponse.Create(
-				ContentTypes.Png,
+				TewlContrib.ContentTypes.Png,
 				new EwfResponseBodyCreator(
 					stream => {
 						font = font ?? new Font( FontFamily.GenericSansSerif, 10 );
