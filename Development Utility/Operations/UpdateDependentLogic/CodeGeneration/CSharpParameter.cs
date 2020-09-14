@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary;
+﻿using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal class CSharpParameter {

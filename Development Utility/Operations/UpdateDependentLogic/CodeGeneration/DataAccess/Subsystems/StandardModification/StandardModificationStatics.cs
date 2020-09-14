@@ -5,6 +5,7 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -176,7 +177,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// body
 			writer.WriteLine( "var mod = CreateForUpdate" + revisionHistorySuffix + "( requiredCondition, additionalConditions );" );
 			writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
-			writer.WriteLine( "mod.Execute{0}( isLongRunning: {1} );".FormatWith( additionalLogicSuffix, includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
+			writer.WriteLine(
+				"mod.Execute{0}( isLongRunning: {1} );".FormatWith( additionalLogicSuffix, includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 			writer.WriteLine( "}" );
 		}
 
@@ -249,7 +251,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		}
 
 		private static string getPostDeleteCallClassName( DBConnection cn, string tableName ) {
-			return "PostDeleteCall<IEnumerable<" + database.SecondaryDatabaseName + "TableRetrieval." + TableRetrievalStatics.GetClassName( cn, tableName ) + ".Row>>";
+			return "PostDeleteCall<IEnumerable<" + database.SecondaryDatabaseName + "TableRetrieval." + TableRetrievalStatics.GetClassName( cn, tableName ) +
+			       ".Row>>";
 		}
 
 		private static void writeFieldsAndPropertiesForColumn( Column column ) {
@@ -270,7 +273,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				CodeGenerationStatics.AddSummaryDocComment(
 					writer,
-					"Indicates whether or not the value for the " + column.Name + " has been set since object creation or the last call to Execute, whichever was latest." );
+					"Indicates whether or not the value for the " + column.Name +
+					" has been set since object creation or the last call to Execute, whichever was latest." );
 				writer.WriteLine(
 					"public bool " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle + "HasChanged" ) + " { get { return " +
 					getColumnFieldName( column ) + ".Changed; } }" );
@@ -294,7 +298,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// header
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
-				"Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " + tableName + " table." );
+				"Creates a modification object in update mode with the specified conditions, which can be used to do a piecemeal update of the " + tableName +
+				" table." );
 			writer.WriteLine(
 				"public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForUpdate" + methodNameSuffix + "( " +
 				getConditionParameterDeclarations( cn, tableName ) + " ) {" );
@@ -313,8 +318,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			foreach( var column in columns.AllColumnsExceptRowVersion ) {
 				writer.WriteLine( prefix + "( condition is " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " )" );
 				writer.WriteLine(
-					"mod." + getColumnFieldName( column ) + ".Value = ( condition as " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) +
-					" ).Value;" );
+					"mod." + getColumnFieldName( column ) + ".Value = ( condition as " +
+					DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " ).Value;" );
 				prefix = "else if";
 			}
 			writer.WriteLine( "}" );
@@ -332,7 +337,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				"Creates a modification object in single-row update mode with the specified current data. All column values in this object will have HasChanged = false, despite being initialized. This object can then be used to do a piecemeal update of the " +
 				tableName + " table." );
 			writer.Write(
-				"public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForSingleRowUpdate" + methodNameSuffix + "( " );
+				"public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForSingleRowUpdate" + methodNameSuffix +
+				"( " );
 			writeColumnParameterDeclarations( columns.AllColumnsExceptRowVersion );
 			writer.WriteLine( " ) {" );
 
@@ -406,7 +412,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {
 			writer.Write(
-				StringTools.ConcatenateWithDelimiter( ", ", columns.Select( i => i.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ).ToArray() ) );
+				StringTools.ConcatenateWithDelimiter(
+					", ",
+					columns.Select( i => i.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ).ToArray() ) );
 		}
 
 		private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
@@ -536,7 +544,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			foreach( var column in nonIdentityColumns ) {
 				writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
 				writer.WriteLine(
-					"values.Add( {0} );".FormatWith( column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
+					"values.Add( {0} );".FormatWith(
+						column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
 			}
 			writer.WriteLine( "return values;" );
 			writer.WriteLine( "}" );
@@ -555,8 +564,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "command.AddCondition( getLatestRevisionsCondition() );" );
 			writer.WriteLine( "var latestRevisionIds = new List<int>();" );
 			writer.WriteLine(
-				"command.Execute( {0}, r => {{ while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); }}, isLongRunning: isLongRunning );".FormatWith(
-					DataAccessStatics.GetConnectionExpression( database ) ) );
+				"command.Execute( {0}, r => {{ while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); }}, isLongRunning: isLongRunning );"
+					.FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 			writer.WriteLine( "foreach( var latestRevisionId in latestRevisionIds ) {" );
 
 			// Get the latest revision.

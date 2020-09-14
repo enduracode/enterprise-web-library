@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class TypedCssClassStatics {

@@ -5,13 +5,15 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class CustomModificationStatics {
 		private static DatabaseInfo info;
 
 		internal static void Generate(
-			DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+			DBConnection cn, TextWriter writer, string baseNamespace, Database database,
+			EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 			info = cn.DatabaseInfo;
 			if( configuration.customModifications != null ) {
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
@@ -59,7 +61,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			var cnt = 0;
 			foreach( var command in mod.commands ) {
 				var commandVariableName = "cmd" + cnt++;
-				writer.WriteLine( "DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+				writer.WriteLine(
+					"DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 				writer.WriteLine( commandVariableName + ".CommandText = @\"" + command + "\";" );
 				DataAccessStatics.WriteAddParamBlockFromCommandText( writer, commandVariableName, info, command, database );
 				writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( " + commandVariableName + " );" );

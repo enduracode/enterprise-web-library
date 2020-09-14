@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using EnterpriseWebLibrary;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Tests.StringTools {
 	[ TestFixture ]

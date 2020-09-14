@@ -4,6 +4,7 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
 using EnterpriseWebLibrary.IO;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
@@ -83,8 +84,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( var parameter in requiredParameters ) {
 				// Blow up if a required parameter was not specified.
 				writer.WriteLine(
-					"if( " + getLocalQueryValueVariableName( parameter ) + " == null ) throw new ApplicationException( \"Required parameter not included in query string: " +
-					parameter.Name + "\" );" );
+					"if( " + getLocalQueryValueVariableName( parameter ) +
+					" == null ) throw new ApplicationException( \"Required parameter not included in query string: " + parameter.Name + "\" );" );
 			}
 
 			// Build up the call to the info constructor.
@@ -145,8 +146,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromNewParameterValues() {" );
 			writer.WriteLine(
-				"return new Info( " +
-				StringTools.ConcatenateWithDelimiter(
+				"return new Info( " + StringTools.ConcatenateWithDelimiter(
 					", ",
 					infoConstructorArgPrefix,
 					InfoStatics.GetInfoConstructorArguments(

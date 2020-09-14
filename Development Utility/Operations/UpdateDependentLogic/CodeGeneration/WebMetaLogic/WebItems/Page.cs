@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class Page {
@@ -85,7 +86,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var defaultParameterReference = prefix + InfoStatics.DefaultOptionalParameterPackageName + "." + parameter.PropertyName;
 				var defaultParameterWasSpecifiedReference = prefix + InfoStatics.DefaultOptionalParameterPackageName + "." +
 				                                            OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( parameter );
-				if( optionalParameters.Contains( parameter ) || ( entitySetup != null && entitySetup.OptionalParameters.Contains( parameter ) ) ) {
+				if( optionalParameters.Contains( parameter ) || ( entitySetup != null && entitySetup.OptionalParameters.Contains( parameter ) ) )
 					// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
 					// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
 					writer.WriteLine(
@@ -96,9 +97,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						( parameter.IsEnumerable
 							  ? "!" + parameterReference + ".Any()"
 							  : parameterReference + " == " + ( parameter.IsString ? "\"\"" : "default(" + parameter.TypeName + ")" ) ) + " ) ) )" );
-				}
 				writer.WriteLine(
-					"url += \"" + parameter.PropertyName + "=\" + HttpUtility.UrlEncode( " + parameter.GetUrlSerializationExpression( parameterReference ) + " ) + '&';" );
+					"url += \"" + parameter.PropertyName + "=\" + HttpUtility.UrlEncode( " + parameter.GetUrlSerializationExpression( parameterReference ) +
+					" ) + '&';" );
 			}
 
 			writer.WriteLine( "return url.Remove( url.Length - 1 );" );
@@ -124,20 +125,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "var parametersModification = Instance.ParametersModificationAsBaseType as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
 				writer.WriteLine(
-					"return new Info( " +
-					StringTools.ConcatenateWithDelimiter(
+					"return new Info( " + StringTools.ConcatenateWithDelimiter(
 						", ",
 						entitySetup != null ? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
 						InfoStatics.GetInfoConstructorArguments(
 							requiredParameters,
 							optionalParameters,
 							parameter => parameter.FieldName,
-							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." + parameter.PropertyName ),
+							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." +
+							             parameter.PropertyName ),
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			}
 			writer.WriteLine(
-				"return new Info( " +
-				StringTools.ConcatenateWithDelimiter(
+				"return new Info( " + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? "esInfo.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
 					InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ),
@@ -163,24 +163,23 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer,
 				"Creates an info object for this page. Use the Info class constructor instead of this method if you want to reuse the entity setup info object." );
 			writer.WriteLine(
-				"public static Info GetInfo( " +
-				StringTools.ConcatenateWithDelimiter(
+				"public static Info GetInfo( " + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
 					WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
-					entitySetup != null && entitySetup.OptionalParameters.Count > 0 ? "EntitySetup.OptionalParameterPackage entitySetupOptionalParameterPackage = null" : "",
+					entitySetup != null && entitySetup.OptionalParameters.Count > 0
+						? "EntitySetup.OptionalParameterPackage entitySetupOptionalParameterPackage = null"
+						: "",
 					optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
 					"string uriFragmentIdentifier = \"\"" ) + " ) {" );
 			var entitySetupArgs = entitySetup != null
-				                      ? "new EntitySetup.Info( " +
-				                        StringTools.ConcatenateWithDelimiter(
+				                      ? "new EntitySetup.Info( " + StringTools.ConcatenateWithDelimiter(
 					                        ", ",
 					                        InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( entitySetup.RequiredParameters, parameter => parameter.Name ),
 					                        entitySetup.OptionalParameters.Count > 0 ? "optionalParameterPackage: entitySetupOptionalParameterPackage" : "" ) + " )"
 				                      : "";
 			writer.WriteLine(
-				"return new Info( " +
-				StringTools.ConcatenateWithDelimiter(
+				"return new Info( " + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetupArgs,
 					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.Name ),

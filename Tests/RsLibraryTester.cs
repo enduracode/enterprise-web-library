@@ -7,10 +7,10 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.InputValidation;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
-using Humanizer;
 using NUnit.Framework;
 using Tewl;
 using Tewl.Tools;
+using static Humanizer.StringExtensions;
 
 namespace EnterpriseWebLibrary.Tests {
 	internal class RsLibraryTester {
@@ -60,8 +60,8 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( "body.ewf div.ewfIeWarningBanner table a { font-size:1.5em; }".RemoveTextBetweenStrings( "{", "}" ) );
 
 			Console.WriteLine( "one".ConcatenateWithSpace( "two" ) );
-			Console.WriteLine( EnterpriseWebLibrary.StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
-			Console.WriteLine( EnterpriseWebLibrary.StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
+			Console.WriteLine( Tewl.Tools.StringTools.ConcatenateWithDelimiter( ", ", "one", "two", "three" ) );
+			Console.WriteLine( Tewl.Tools.StringTools.ConcatenateWithDelimiter( "|", "", "one", "", "", "two", "", "three ", "   " ) );
 
 			Console.WriteLine( "abcde".Truncate( 4 ) );
 			Console.WriteLine( "abcde".TruncateStart( 4 ) );
@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.Tests {
 			Console.WriteLine( EwlStatics.CombinePaths( @"Inetpub", @"Files" ) );
 			Console.WriteLine( EwlStatics.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
-			Console.WriteLine( EnterpriseWebLibrary.StringTools.CamelToEnglish( null ) );
+			Console.WriteLine( Tewl.Tools.StringTools.CamelToEnglish( null ) );
 			Console.WriteLine( "".CamelToEnglish() );
 			Console.WriteLine( "L".CamelToEnglish() );
 			Console.WriteLine( "l".CamelToEnglish() );

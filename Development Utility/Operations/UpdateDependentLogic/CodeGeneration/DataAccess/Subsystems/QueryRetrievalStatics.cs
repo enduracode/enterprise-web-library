@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class QueryRetrievalStatics {

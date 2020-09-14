@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using NUnit.Framework;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Tests.IO {
 	[ TestFixture ]

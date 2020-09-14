@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSite.TestPages;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite {
 	public class Global: EwfApp {
@@ -29,8 +30,10 @@ namespace EnterpriseWebLibrary.WebSite {
 
 			foreach( var i in GlobalStatics.ConfigurationXsdFileNames ) {
 				var fileName = i;
-				yield return
-					new ShortcutUrlResolver( "ConfigurationSchemas/" + fileName.EnglishToPascal(), ConnectionSecurity.NonSecure, () => GetSchema.GetInfo( fileName ) );
+				yield return new ShortcutUrlResolver(
+					"ConfigurationSchemas/" + fileName.EnglishToPascal(),
+					ConnectionSecurity.NonSecure,
+					() => GetSchema.GetInfo( fileName ) );
 			}
 		}
 

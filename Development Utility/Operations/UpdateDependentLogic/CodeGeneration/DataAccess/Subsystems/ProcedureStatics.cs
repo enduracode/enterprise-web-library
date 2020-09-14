@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using System.IO;
 using System.Linq;
-using Humanizer;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
 	internal static class ProcedureStatics {
@@ -16,9 +16,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 				// header
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Executes the " + procedure + " procedure." );
-				var parameterDeclarations =
-					parameters.Select(
-						i => ( i.Direction == ParameterDirection.Output ? "out " : i.Direction == ParameterDirection.InputOutput ? "ref " : "" ) + i.DataTypeName + " " + i.Name );
+				var parameterDeclarations = parameters.Select(
+					i => ( i.Direction == ParameterDirection.Output ? "out " : i.Direction == ParameterDirection.InputOutput ? "ref " : "" ) + i.DataTypeName + " " +
+					     i.Name );
 				writer.WriteLine( "public static void " + procedure + "( " + StringTools.ConcatenateWithDelimiter( ", ", parameterDeclarations.ToArray() ) + " ) {" );
 
 				// body
@@ -52,7 +52,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						"{0}Local = {1};".FormatWith(
 							parameter.Name,
 							parameter.GetIncomingValueConversionExpression(
-								"EwlStatics.ChangeType( {0}.ToString(), typeof( {1} ) )".FormatWith( adoDotNetParameterValueExpression, parameter.UnconvertedDataTypeName ) ) ) );
+								"EwlStatics.ChangeType( {0}.ToString(), typeof( {1} ) )".FormatWith(
+									adoDotNetParameterValueExpression,
+									parameter.UnconvertedDataTypeName ) ) ) );
 					//writer.WriteLine( "{0}Local = {1};".FormatWith( parameter.Name, parameter.GetIncomingValueConversionExpression( adoDotNetParameterValueExpression ) ) );
 				}
 				writer.WriteLine( "} );" );

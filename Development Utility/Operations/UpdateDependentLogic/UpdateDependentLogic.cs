@@ -21,6 +21,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class UpdateDependentLogic: Operation {

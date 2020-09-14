@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal class WebItemGeneralData {
@@ -17,7 +18,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private readonly string code;
 		private readonly WebProject webProjectConfiguration;
 
-		internal WebItemGeneralData( string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
+		internal WebItemGeneralData(
+			string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
 			this.pathRelativeToProject = pathRelativeToProject;
 
 			// Get the URL for this item. "Plain old class" entity setups do not have URLs.
@@ -34,10 +36,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( itemNamespace == null )
 				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
 
-			className =
-				EwlStatics.GetCSharpIdentifier(
-					System.IO.Path.GetFileNameWithoutExtension( path ).CapitalizeString() +
-					( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
+			className = EwlStatics.GetCSharpIdentifier(
+				System.IO.Path.GetFileNameWithoutExtension( path ).CapitalizeString() +
+				( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
 			this.webProjectConfiguration = webProjectConfiguration;
 		}
 

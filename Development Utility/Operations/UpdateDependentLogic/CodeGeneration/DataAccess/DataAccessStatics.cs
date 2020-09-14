@@ -12,6 +12,7 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess {
 	internal static class DataAccessStatics {
@@ -67,8 +68,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			foreach( var column in columns.Where( i => !i.IsRowVersion ) ) {
 				writer.WriteLine(
-					"internal " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " + getMemberVariableName( column ) +
-					"; } }" );
+					"internal " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " +
+					getMemberVariableName( column ) + "; } }" );
 			}
 
 			writer.WriteLine( "}" );
@@ -195,7 +196,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 						retrievalClassName,
 						column.PascalCasedName.CamelToEnglish() ) );
 				writer.WriteLine(
-					"return revisionDelta.GetValueDelta( valueName, i => i.{0} );".FormatWith( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) );
+					"return revisionDelta.GetValueDelta( valueName, i => i.{0} );".FormatWith(
+						EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) );
 				writer.WriteLine( "}" );
 			}
 		}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class InfoStatics {
@@ -37,12 +38,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal static void WriteConstructorAndHelperMethods(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter, bool isEsInfo ) {
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter,
+			bool isEsInfo ) {
 			// It's important to force the cache to be enabled in the constructor since info objects are often created in post-back-action getters.
 
 			writeConstructorDocComments( writer, requiredParameters );
-			var constructorAndInitialParameterArguments = "( " +
-			                                              StringTools.ConcatenateWithDelimiter(
+			var constructorAndInitialParameterArguments = "( " + StringTools.ConcatenateWithDelimiter(
 				                                              ", ",
 				                                              includeEsInfoParameter ? "EntitySetup.Info esInfo" : "",
 				                                              WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
@@ -54,8 +55,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			// Initialize required parameter fields. We want to create and call this method even if there are no parameters so that non-generated Info constructors can still
 			// call it and remain resistant to changes.
 			writer.WriteLine(
-				"initializeParameters( " +
-				StringTools.ConcatenateWithDelimiter(
+				"initializeParameters( " + StringTools.ConcatenateWithDelimiter(
 					", ",
 					includeEsInfoParameter ? "esInfo" : "",
 					GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, p => p.Name ),
@@ -92,8 +92,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void writeInitParametersMethod(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter, bool isEsInfo,
-			string arguments ) {
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter,
+			bool isEsInfo, string arguments ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Initializes required and optional parameters. A call to this should be the first line of every non-generated Info constructor." );
@@ -102,10 +102,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( includeEsInfoParameter )
 				writer.WriteLine( "this.esInfo = esInfo;" );
 			foreach( var requiredParameter in requiredParameters ) {
-				if( requiredParameter.IsString || requiredParameter.IsEnumerable ) {
+				if( requiredParameter.IsString || requiredParameter.IsEnumerable )
 					writer.WriteLine(
-						"if( " + requiredParameter.Name + " == null ) throw new ApplicationException( \"You cannot specify null for the value of a string or an IEnumerable.\" );" );
-				}
+						"if( " + requiredParameter.Name +
+						" == null ) throw new ApplicationException( \"You cannot specify null for the value of a string or an IEnumerable.\" );" );
 				writer.WriteLine( requiredParameter.FieldName + " = " + requiredParameter.Name + ";" );
 			}
 
@@ -122,10 +122,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				}
 
 				// If the current info object is the same type, use it to initialize fields whose values have not been specified.
-				if( isEsInfo ) {
+				if( isEsInfo )
 					writer.WriteLine(
 						"var currentInfo = EwfPage.Instance != null && EwfPage.Instance.EsAsBaseType != null ? EwfPage.Instance.EsAsBaseType.InfoAsBaseType as Info : null;" );
-				}
 				else
 					writer.WriteLine( "var currentInfo = Instance != null ? Instance.InfoAsBaseType as Info : null;" );
 				writer.WriteLine( "if( currentInfo != null ) {" );

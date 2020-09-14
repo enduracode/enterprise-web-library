@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CSharp;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	/// <summary>
