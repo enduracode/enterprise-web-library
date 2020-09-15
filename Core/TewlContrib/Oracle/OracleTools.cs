@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace EnterpriseWebLibrary.TewlContrib.Oracle {
-	public static class OracleStatics {
+	public static class OracleTools {
 		/// <summary>
 		/// Converts a boolean into a decimal for storage in Oracle.
 		/// </summary>
