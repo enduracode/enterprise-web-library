@@ -7,9 +7,9 @@ using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
-using EnterpriseWebLibrary.IO;
 using MoreLinq;
 using Tewl;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Configuration {

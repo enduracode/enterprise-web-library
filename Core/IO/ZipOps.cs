@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ICSharpCode.SharpZipLib.Zip;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {
@@ -155,10 +156,9 @@ namespace EnterpriseWebLibrary.IO {
 				while( ( entry = zipInputStream.GetNextEntry() ) != null ) {
 					if( entry.IsDirectory )
 						Directory.CreateDirectory( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) );
-					else {
+					else
 						using( var outputStream = IoMethods.GetFileStreamForWrite( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) ) )
 							zipInputStream.CopyTo( outputStream );
-					}
 				}
 			}
 		}

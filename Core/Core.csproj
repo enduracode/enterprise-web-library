@@ -712,8 +712,6 @@
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserManagementStatics.cs" />
-    <Compile Include="IO\ExcelFileWriter.cs" />
-    <Compile Include="IO\ExcelWorksheet.cs" />
     <Compile Include="MailMerging\AsposeMergeRowEnumerator.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeChild.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeOps.cs" />
@@ -734,8 +732,6 @@
     <Compile Include="UnitTestingInitializationOps.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="InitializationAwareValue.cs" />
-    <Compile Include="IO\TabDelimitedFileWriter.cs" />
-    <Compile Include="IO\TabularDataFileWriter.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
     <Compile Include="Encryption\Password.cs" />
@@ -748,12 +744,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="InstallationFileStatics.cs" />
-    <Compile Include="IO\CsvFileWriter.cs" />
-    <Compile Include="IO\ValidationError.cs" />
-    <Compile Include="IO\FileReader.cs" />
-    <Compile Include="IO\IoMethods.cs" />
-    <Compile Include="IO\Output.cs" />
-    <Compile Include="IO\XmlOps.cs" />
     <Compile Include="JavaScriptWriting\JsWritingMethods.cs" />
     <Compile Include="JavaScriptWriting\PopUpWindowSettings.cs" />
     <Compile Include="NetTools.cs" />

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using EnterpriseWebLibrary.TewlContrib;
 using Tewl;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static EwfResponse CreateExcelWorkbookResponse( Func<string> extensionlessFileNameCreator, Func<ExcelFileWriter> workbookCreator ) {
 			return Create(
-				ExcelFileWriter.ContentType,
+				ContentTypes.ExcelXlsx,
 				new EwfResponseBodyCreator( stream => workbookCreator().SaveToStream( stream ) ),
 				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( extensionlessFileNameCreator() ) );
 		}

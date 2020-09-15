@@ -5,7 +5,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess.Ranking;
-using EnterpriseWebLibrary.IO;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {

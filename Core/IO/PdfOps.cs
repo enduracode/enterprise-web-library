@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Aspose.Pdf.Facades;
 using Humanizer;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.IO {

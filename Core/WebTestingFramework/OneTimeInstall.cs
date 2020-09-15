@@ -2,7 +2,7 @@
 using System.Linq;
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.IO;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.WebTestingFramework {
 	internal class OneTimeInstall {

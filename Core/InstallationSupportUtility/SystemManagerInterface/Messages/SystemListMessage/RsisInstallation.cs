@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage {
 	public partial class RsisInstallation {

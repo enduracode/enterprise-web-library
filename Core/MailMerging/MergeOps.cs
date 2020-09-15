@@ -7,6 +7,7 @@ using System.Xml;
 using Aspose.Words.Reporting;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.MailMerging {
@@ -221,7 +222,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 					throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
 			}
 
-			var writer = useTabAsSeparator ? (TabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
+			var writer = useTabAsSeparator ? (TextBasedTabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
 
 			if( !omitHeaderRow ) {
 				writer.AddValuesToLine(

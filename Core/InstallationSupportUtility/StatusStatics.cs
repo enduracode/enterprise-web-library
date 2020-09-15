@@ -1,5 +1,5 @@
 ﻿using System;
-using EnterpriseWebLibrary.IO;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class StatusStatics {
