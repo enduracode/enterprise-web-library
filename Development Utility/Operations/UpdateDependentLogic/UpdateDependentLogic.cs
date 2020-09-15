@@ -216,6 +216,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;" );
 				writer.WriteLine( "using NodaTime;" );
 				writer.WriteLine( "using Tewl.InputValidation;" );
+				writer.WriteLine( "using Tewl.Tools;" );
 
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, "Library" );
