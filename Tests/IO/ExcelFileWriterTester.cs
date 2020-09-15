@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
-using EnterpriseWebLibrary.IO;
 using Humanizer;
 using NUnit.Framework;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Tests.IO {

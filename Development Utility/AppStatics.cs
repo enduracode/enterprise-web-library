@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.IO;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {

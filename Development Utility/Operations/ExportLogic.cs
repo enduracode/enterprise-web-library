@@ -14,6 +14,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using Tewl;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {

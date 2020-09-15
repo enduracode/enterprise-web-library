@@ -18,9 +18,9 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
-using EnterpriseWebLibrary.IO;
 using Humanizer;
 using Tewl;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {

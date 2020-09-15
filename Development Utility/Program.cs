@@ -6,8 +6,8 @@ using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
-using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
