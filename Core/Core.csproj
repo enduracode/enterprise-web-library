@@ -751,13 +751,8 @@
     <Compile Include="IO\CsvFileWriter.cs" />
     <Compile Include="IO\ValidationError.cs" />
     <Compile Include="IO\FileReader.cs" />
-    <Compile Include="IO\FixedWidthParser.cs" />
     <Compile Include="IO\IoMethods.cs" />
-    <Compile Include="IO\ParsedLine.cs" />
-    <Compile Include="IO\CsvLineParser.cs" />
     <Compile Include="IO\Output.cs" />
-    <Compile Include="IO\Parser.cs" />
-    <Compile Include="IO\TabularDataParser.cs" />
     <Compile Include="IO\XmlOps.cs" />
     <Compile Include="JavaScriptWriting\JsWritingMethods.cs" />
     <Compile Include="JavaScriptWriting\PopUpWindowSettings.cs" />
