@@ -525,6 +525,38 @@ Coming soon. We’ll make a display of other service orders from the same custom
 
 ## Managing keyboard focus
 
+Let’s improve keyboard access a bit. First we’ll put the cursor on the first form control when a user lands on the form. In `loadData`, replace the `ph.AddControlsReturnThis` statement near the end of the method (the one that adds the `FormItemList` to the page) with this:
+
+```C#
+ph.AddControlsReturnThis( new FlowAutofocusRegion( AutofocusCondition.InitialRequest(), formItemList.ToCollection() ).ToCollection().GetControls() );
+```
+
+We’ve wrapped `formItemList` in a `FlowAutofocusRegion`. If you visit the form you’ll see that the Customer Name control automatically gets keyboard focus. That’s because it’s the first control in the autofocus region. This region-based design is fully intentional, to improve maintainability: if you later remove the Customer Name control, or add another control above it, the focus will adjust automatically to whatever the new first control is. If you do ever want to designate one specific control for autofocus, you can by just wrapping that one control in an autofocus region.
+
+`AutofocusCondition.InitialRequest` specifies that the region will only be active on initial requests for the page, and not after post-backs. Let’s now make another region to show why you might want different autofocus behavior after a post-back. We’re going to modify the expandable service-request list we created earlier. In `addServiceDetailFormItems`, add this line above the first `formItemList.AddItem` call:
+
+```C#
+const string addRequestFocusKey = "addRequest";
+```
+
+Now expand the `PostBack.CreateIntermediate` call, which is a bit further down in the method, with this new argument:
+
+```C#
+reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: addRequestFocusKey )
+```
+
+And finally, find the `insert.GetRequestDescriptionTextControlFormItem` call (a little bit earlier in the method) and replace the entire return statement with these new lines:
+
+```C#
+var components = insert.GetRequestDescriptionTextControlFormItem( i != 0, value: requests.ElementAtOrDefault( i )?.RequestDescription ?? "" )
+	.ToComponentCollection( omitLabel: true );
+return ( i == requestLineCount.Value.Value - 1
+	         ? new FlowAutofocusRegion( AutofocusCondition.PostBack( addRequestFocusKey ), components ).ToCollection()
+	         : components ).ToComponentListItem();
+```
+
+What we’re doing here is using a **focus key** in the intermediate post-back so that when the list of service-request lines is rebuilt after the post-back, the last line (i.e. the one that was just added) is wrapped in an active autofocus region. Having a focus key is essential because we want the region to only be active for *this* post-back. If we later add other post-backs to the page that concern different parts of the form, we don’t want to give keyboard focus to a service-request line.
+
 
 ## Securing pages (section needs work)
 
