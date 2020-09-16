@@ -566,8 +566,3 @@ What we’re doing here is using a **focus key** in the intermediate post-back s
 *	You can’t be less-restrictive than your parent’s security.
 *	The security is checked for the whole tree. The page and its parent and its parent and its parent...
 *	The folder structure does not matter other than the entity setup being in the same folder as the page
-
-
-## Horizontal/vertical tabs (section needs work; also move elsewhere since uncommon)
-
-Have your page’s `Info` class implement the `TabModeOverrider` interface. Then implement the only method in that interface, `GetTabMode`, and return `TabMode.Horizontal`.
