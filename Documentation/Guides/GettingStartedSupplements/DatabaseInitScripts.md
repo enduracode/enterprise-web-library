@@ -1,1 +1,0 @@
-This file is now just a placeholder so we can retain the “Supplements” folder-naming convention.

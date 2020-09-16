@@ -4,7 +4,8 @@
 	* [Getting started](Guides/GettingStarted.md)
 	* [Database migration](Guides/DatabaseMigration.md)
 	* [Data access](Guides/DataAccess.md)
-	* [Web framework](Guides/WebFramework.md)
+	* [Adding user management](Guides/UserManagement.md)
+	* [Using the web framework](Guides/WebFramework.md)
 *	Procedures
 	*	[Creating database schema for common types](Procedures/CreatingSchemaForCommonTypes.md)
 	*	[Making an EWF-UI web site](Procedures/MakingEwfUiSite.md)
