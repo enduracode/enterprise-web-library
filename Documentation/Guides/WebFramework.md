@@ -560,9 +560,70 @@ return ( i == requestLineCount.Value.Value - 1
 What we’re doing here is using a **focus key** in the intermediate post-back so that when the list of service-request lines is rebuilt after the post-back, the last line (i.e. the one that was just added) is wrapped in an active autofocus region. Having a focus key is essential because we want the region to only be active for *this* post-back. If we later add other post-backs to the page that concern different parts of the form, we don’t want to give keyboard focus to a service-request line.
 
 
-## Securing pages (section needs work)
+## Securing pages
 
-*	The page usees the entity setup’s security that’s in the same folder. It does not matter if the entity setup has the page as a tab. If it’s in the same folder it affects it.
-*	You can’t be less-restrictive than your parent’s security.
-*	The security is checked for the whole tree. The page and its parent and its parent and its parent...
-*	The folder structure does not matter other than the entity setup being in the same folder as the page
+Before we can say our service-order management system is complete, we need to secure it against unauthorized access. First jump over to the [user management guide](UserManagement.md) and follow it all the way through. When you’re back, let’s add one additional role to our database by appending these lines to `Database Updates.sql`:
+
+```SQL
+insert into UserRoles values( 3, 'Bicycle mechanic' )
+go
+```
+
+Run `Update-DependentLogic` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `ServiceOrders.aspx.cs` add this `Info` class above `loadData`:
+
+```C#
+partial class Info {
+	protected override bool userCanAccessResource => AppTools.User != null;
+}
+```
+
+The `AppTools.User` property gives us the currently-authenticated user, or null if authentication hasn’t taken place. Therefore this expression will allow access to the page only if the user has logged in. Try it out by visiting `ServiceOrders.aspx`. You should see a page titled Select User, which is a special log in page provided by the framework when you are running the system locally for development. It saves you from having to enter a password. If you were visiting a live installation of the system you’d see a real log in page.
+
+Type in whatever email address you used for the first user and you should land on the Service Orders page. Notice the new Logged In As section in the upper-right corner of the page.
+
+Let’s now restrict the creation and updating of service orders such that this can only be done by mechanics and administrators. Open `ServiceOrder.aspx.cs` and add this property override to the `Info` class:
+
+```C#
+protected override bool userCanAccessResource =>
+	new[] { UserRolesRows.BicycleMechanic, UserRolesRows.Administrator }.Contains( AppTools.User.Role.RoleId );
+```
+
+Notice that we’re not handling a null `AppTools.User`. That’s because, if you recall, this page uses the service-order list as its parent. A child page inherits the parent’s authorization logic and can never be less restrictive. The child’s `userCanAccessResource` property can only add additional restrictions. To access the child, the user must effectively pass `parentConditions && childConditions`. This is recursive all the way up the tree of pages.
+
+There’s one more thing we need to do. Go back to `ServiceOrders.aspx.cs`. Replace the first `ph.AddControlsReturnThis` statement with the following:
+
+```C#
+var newOrderPage = new ServiceOrder.Info( null );
+if( newOrderPage.UserCanAccessResource )
+	ph.AddControlsReturnThis(
+		new EwfHyperlink( newOrderPage, new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) ).ToCollection().GetControls() );
+```
+
+And replace the second argument of the `AddData` call for the table with:
+
+```C#
+i => {
+	var page = new ServiceOrder.Info( i.ServiceOrderId );
+	return EwfTableItem.Create(
+		i.ServiceOrderId.ToString()
+			.ToCell()
+			.Append( i.CustomerName.ToCell() )
+			.Append( i.BicycleDescription.ToCell() )
+			.Append( ServiceTypesTableRetrieval.GetRowMatchingId( i.ServiceTypeId ).ServiceTypeName.ToCell() )
+			.Materialize(),
+		setup: EwfTableItemSetup.Create( activationBehavior: page.UserCanAccessResource ? ElementActivationBehavior.CreateHyperlink( page ) : null ) );
+}
+```
+
+Together these two changes prevent any linking to the form page if the user does not have access. If you skip this step you’ll receive exceptions when visiting the list page. The framework does this intentionally to prevent you from creating links to unauthorized pages, to spare the user from ever receiving “access denied” errors when navigating.
+
+Let’s see what this looks like for normal users. Visit `ServiceOrders.aspx`. Since you’re an admin you’ll still see the links. We now need to create and switch into a normal user, so go to the address bar and replace the `/ServiceOrders.aspx` at the end of the URL with `/ewf`.
+
+This is the framework’s built-in admin area. One thing you can do here is view and modify the users of the system. Click the System Users tab and then the Create User button on the right. Type an email address, e.g. `standard-user@example.com`, and select the Standard User role. Click OK. Now click the End Impersonation button in the yellow bar at the top of the page.
+
+Put `ServiceOrders.aspx` back into the address bar. This time, on the Select User page, enter the email address you used for the standard user. When you click Begin Impersonation, you should now see the service-order list without the New Service Order button, and with no option to click any of the existing service orders.
+
+
+## Learning more
+
+If you’ve made it this far, congratulations. You’ve developed a piece of enterprise software that adheres to best practices and is of sufficient quality that it could be used in production by a real business. At the moment this is the end of our Guide series but if you’d like to learn more please reach out to us in our [Community Forum](https://community.enterpriseweblibrary.org/).
