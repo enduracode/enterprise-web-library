@@ -9,7 +9,7 @@
 *	Visual Studio 2019 (recommended)
 *	SQL Server 2019 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
 
-For servers, the only requirement is Windows Server 2016 with IIS enabled.
+For servers, the only requirement is Windows Server 2016 or later with IIS enabled.
 
 
 ## Creating a new system
