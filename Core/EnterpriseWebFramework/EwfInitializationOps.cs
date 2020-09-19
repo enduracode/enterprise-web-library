@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							//
 							// Disable server certificate validation so that this request gets through even for web sites that don't use a certificate that is trusted by
 							// default. There is no security risk since we're not sending any sensitive information and we're not using the response.
-							Tewl.Tools.NetTools.ExecuteWithResponse(
+							Tewl.Tools.NetTools.ExecuteHttpHeadRequest(
 								IisConfigurationStatics.GetFirstBaseUrlForCurrentSite( false ),
 								response => {},
 								disableCertificateValidation: true );
