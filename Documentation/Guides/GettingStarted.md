@@ -5,7 +5,7 @@
 
 ## Requirements
 
-*	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 5 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you're interested!)
+*	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 5 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you’re interested!)
 *	Visual Studio 2019 (recommended)
 *	SQL Server 2019 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
 
@@ -28,7 +28,7 @@ For servers, the only requirement is Windows Server 2016 or later with IIS enabl
 
 4.	Understand the elements of your new system:
 
-	*	The `Library` project, which contains configuration files, provider classes (which allow parts of EWL's behavior to be customized), and a `GlobalInitializer` class (which gives you a place to initialize static fields when your system starts up). `Library` should also be the home of most of your "business logic" and anything else that you would reuse across multiple applications in your system. Right now your system only contains a single web app, but as it grows, you may need another web app or a different type of application, e.g. a Windows service.
+	*	The `Library` project, which contains configuration files, provider classes (which allow parts of EWL’s behavior to be customized), and a `GlobalInitializer` class (which gives you a place to initialize static fields when your system starts up). `Library` should also be the home of most of your "business logic" and anything else that you would reuse across multiple applications in your system. Right now your system only contains a single web app, but as it grows, you may need another web app or a different type of application, e.g. a Windows service.
 
 	*	The `Website` project, which references `Library` and will contain your pages and other resources.
 
@@ -56,7 +56,7 @@ Now, when you run `Update-DependentLogic`, data-access code will be generated fo
 
 ## Deploying your system
 
-This section is more theoretical than practical since it's generally not a good practice to deploy enterprise software by hand, and without a continuous integration infrastructure.
+This section is more theoretical than practical since it’s generally not a good practice to deploy enterprise software by hand, and without a continuous integration infrastructure.
 
 1.	In the Package Manager Console, run `ExportLogic`.
 
@@ -66,4 +66,9 @@ This section is more theoretical than practical since it's generally not a good 
 
 4.	Set up an IIS website or virtual directory that points at the appropriate folder in the logic that you copied to the server in step 2. Run the application pool as `NETWORK SERVICE`.
 
-Some of the EWL developers use an internal product called the EWL System Manager, which builds, tests, and deploys EWL systems automatically. It's like an ultra-opinionated version of Heroku or AppHarbor. It can be run in the cloud or on-premises. [Let us know in the forum](https://community.enterpriseweblibrary.org/) if you are interested in using this.
+Some of the EWL developers use an internal product called the EWL System Manager, which builds, tests, and deploys EWL systems automatically. It’s like an ultra-opinionated version of Heroku or AppHarbor. It can be run in the cloud or on-premises. [Let us know in the forum](https://community.enterpriseweblibrary.org/) if you are interested in using this.
+
+
+## Learning more
+
+If you’d like to learn how to build a web application, check out the [web framework guide](WebFramework.md). Or see the [table of contents](../TableOfContents.md) for a full list of documentation.
