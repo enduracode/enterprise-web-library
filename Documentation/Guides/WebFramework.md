@@ -547,14 +547,10 @@ Now expand the `PostBack.CreateIntermediate` call, which is a bit further down i
 reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: addRequestFocusKey )
 ```
 
-And finally, find the `insert.GetRequestDescriptionTextControlFormItem` call (a little bit earlier in the method) and replace the entire return statement with these new lines:
+And finally, find the `new ComponentListSetup` call (a little bit earlier in the method) and add this as the first argument:
 
 ```C#
-var components = insert.GetRequestDescriptionTextControlFormItem( i != 0, value: requests.ElementAtOrDefault( i )?.RequestDescription ?? "" )
-	.ToComponentCollection( omitLabel: true );
-return ( i == requestLineCount.Value.Value - 1
-	         ? new FlowAutofocusRegion( AutofocusCondition.PostBack( addRequestFocusKey ), components ).ToCollection()
-	         : components ).ToComponentListItem();
+lastItemAutofocusCondition: AutofocusCondition.PostBack( addRequestFocusKey )
 ```
 
 What we’re doing here is using a **focus key** in the intermediate post-back so that when the list of service-request lines is rebuilt after the post-back, the last line (i.e. the one that was just added) is wrapped in an active autofocus region. Having a focus key is essential because we want the region to only be active for *this* post-back. If we later add other post-backs to the page that concern different parts of the form, we don’t want to give keyboard focus to a service-request line.
