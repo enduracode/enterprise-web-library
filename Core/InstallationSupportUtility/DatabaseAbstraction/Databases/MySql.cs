@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using Humanizer;
+using Polly;
 using Tewl.IO;
 using Tewl.Tools;
 
@@ -96,11 +97,14 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							TewlContrib.ProcessTools.RunProgram(
-								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
-								getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
-								sw.ToString(),
-								true );
+							Policy.Handle<Exception>( e => filePath.Any() && e.Message.Contains( "ERROR at line 4: Unknown command '\\U'." ) )
+								.Retry( 3 )
+								.Execute(
+									() => TewlContrib.ProcessTools.RunProgram(
+										EwlStatics.CombinePaths( binFolderPath, "mysql" ),
+										getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
+										sw.ToString(),
+										true ) );
 						}
 						catch( Exception e ) {
 							if( filePath.Any() && e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
