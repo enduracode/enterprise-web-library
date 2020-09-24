@@ -270,7 +270,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, \"" + project.Name +
 				                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
-				var runProgramExpression = "EwlStatics.RunProgram( " + programPath +
+				var runProgramExpression = "EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( " + programPath +
 				                           ", \"\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )";
 
 				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
