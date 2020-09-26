@@ -1,17 +1,13 @@
-﻿using System.Web.UI;
+﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// A block with no special meaning.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 	public class Block: WebControl, ControlTreeDataLoader {
 		private readonly Control[] childControls;
 
-		/// <summary>
-		/// Creates a block. Add all child controls now; do not use AddControlsReturnThis at any time.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public Block( params Control[] childControls ) {
 			this.childControls = childControls;
 		}

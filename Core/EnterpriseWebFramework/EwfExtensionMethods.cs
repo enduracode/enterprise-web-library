@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 using Tewl.Tools;
 
@@ -15,16 +12,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Useful methods that require a web context.
 	/// </summary>
 	public static class EwfExtensionMethods {
-		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
-		public static Literal GetLiteralControl( this string s, bool returnNonBreakingSpaceIfEmpty = true ) {
-			return new Literal { Text = s.GetTextAsEncodedHtml( returnNonBreakingSpaceIfEmpty: returnNonBreakingSpaceIfEmpty ) };
-		}
-
-		[ Obsolete( "Guaranteed through 30 September 2017." ) ]
-		public static EwfLabel GetLabelControl( this string s ) {
-			return new EwfLabel { Text = s };
-		}
-
 		internal static bool ShouldBeSecureGivenCurrentRequest( this ConnectionSecurity connectionSecurity, bool isIntermediateInstallationPublicPage ) {
 			// Intermediate installations must be secure because the intermediate user cookie is secure.
 			if( ConfigurationStatics.IsIntermediateInstallation && !isIntermediateInstallationPublicPage )

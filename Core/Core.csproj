@@ -395,7 +395,6 @@
     <Compile Include="Email\EmailAttachment.cs" />
     <Compile Include="Email\EmailSendingException.cs" />
     <Compile Include="Encryption\EncryptionOps.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Emphasis.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClass.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\Classification\ElementClassSet.cs" />
     <Compile Include="EnterpriseWebFramework\Element Base\ElementComponent.cs" />
@@ -426,7 +425,6 @@
     <Compile Include="EnterpriseWebFramework\Form Controls\Date and Time\TimeControlSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControl.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Email Address Control\EmailAddressControlSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Strong.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\EwfHiddenField.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FileUpload.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\FormControl.cs" />
@@ -524,7 +522,6 @@
     <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlLine.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlStack.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\EwfLabel.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -549,7 +546,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\RowSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\EtherealAutofocusRegion.cs" />

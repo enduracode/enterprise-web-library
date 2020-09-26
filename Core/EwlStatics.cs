@@ -107,11 +107,6 @@ namespace EnterpriseWebLibrary {
 			return "";
 		}
 
-		[ Obsolete( "Guaranteed through 30 September 2017. Use ToYesOrNo or ToYesOrEmpty instead." ) ]
-		public static string BooleanToYesNo( this bool b, bool blankForNo ) {
-			return b ? "Yes" : blankForNo ? "" : "No";
-		}
-
 		/// <summary>
 		/// Returns the first element of the list.  Returns null if the list is empty.
 		/// </summary>
