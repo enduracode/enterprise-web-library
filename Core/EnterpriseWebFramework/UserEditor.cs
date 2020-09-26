@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -45,9 +46,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a user editor.
 		/// </summary>
 		/// <param name="userId"></param>
+		/// <param name="modificationMethod"></param>
 		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available in the System Provider are
 		/// used.</param>
-		public UserEditor( int? userId, List<Role> availableRoles = null ) {
+		public UserEditor( int? userId, out Action modificationMethod, List<Role> availableRoles = null ) {
 			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
@@ -125,6 +127,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.ToFormItem( label: "Role".ToComponents() ) );
 
 			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
+
+			modificationMethod = () => {
+				if( passwordToEmail == null )
+					return;
+				FormsAuthStatics.SendPassword( Email.Value, passwordToEmail );
+				EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
+			};
 		}
 
 		private bool includePasswordControls() {
@@ -138,18 +147,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			MustChangePassword.Value = true;
 			if( emailPassword )
 				passwordToEmail = password.PasswordText;
-		}
-
-		/// <summary>
-		/// Call this during ModifyData.
-		/// </summary>
-		// NOTE SJR: This needs to change: You can't see this comment unless you're scrolling through all of the methods. It's easy to not call this
-		// even though the radio button for generating a new password and emailing it to the user is always there.
-		public void SendEmailIfNecessary() {
-			if( passwordToEmail == null )
-				return;
-			FormsAuthStatics.SendPassword( Email.Value, passwordToEmail );
-			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;

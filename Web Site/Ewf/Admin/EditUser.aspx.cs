@@ -1,3 +1,4 @@
+using System;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
@@ -34,10 +35,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								firstModificationMethod: deleteUser,
 								actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ).ToCollection() );
 
+			Action userModMethod = null;
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
+				PostBack.CreateFull(
+						firstModificationMethod: () => {
+							if( FormsAuthStatics.FormsAuthEnabled )
+								if( info.UserId.HasValue )
+									FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+										info.User.UserId,
+										userFieldTable.Email.Value,
+										userFieldTable.RoleId.Value,
+										info.User.LastRequestTime,
+										userFieldTable.Salt.Value,
+										userFieldTable.SaltedPassword.Value,
+										userFieldTable.MustChangePassword.Value );
+								else
+									FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+										null,
+										userFieldTable.Email.Value,
+										userFieldTable.RoleId.Value,
+										null,
+										userFieldTable.Salt.Value,
+										userFieldTable.SaltedPassword.Value,
+										userFieldTable.MustChangePassword.Value );
+							else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
+								var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+								provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email.Value, userFieldTable.RoleId.Value, info.User?.LastRequestTime );
+							}
+							userModMethod();
+						},
+						actionGetter: () => new PostBackAction( info.ParentResource ) )
+					.ToCollection(),
 				() => {
-					userFieldTable = new UserEditor( info.UserId );
+					userFieldTable = new UserEditor( info.UserId, out userModMethod );
 					ph.AddControlsReturnThis( userFieldTable.ToCollection().GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "OK" ).ToCollection() );
@@ -46,33 +76,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private void deleteUser() {
 			UserManagementStatics.SystemProvider.DeleteUser( info.User.UserId );
-		}
-
-		private void modifyData() {
-			if( FormsAuthStatics.FormsAuthEnabled )
-				if( info.UserId.HasValue )
-					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-						info.User.UserId,
-						userFieldTable.Email.Value,
-						userFieldTable.RoleId.Value,
-						info.User.LastRequestTime,
-						userFieldTable.Salt.Value,
-						userFieldTable.SaltedPassword.Value,
-						userFieldTable.MustChangePassword.Value );
-				else
-					FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-						null,
-						userFieldTable.Email.Value,
-						userFieldTable.RoleId.Value,
-						null,
-						userFieldTable.Salt.Value,
-						userFieldTable.SaltedPassword.Value,
-						userFieldTable.MustChangePassword.Value );
-			else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
-				var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-				provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email.Value, userFieldTable.RoleId.Value, info.User?.LastRequestTime );
-			}
-			userFieldTable.SendEmailIfNecessary();
 		}
 	}
 }
