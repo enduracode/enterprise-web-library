@@ -22,8 +22,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			public override string ResourceName => User == null ? "New User" : User.Email;
 		}
 
-		private UserEditor userFieldTable;
-
 		protected override void loadData() {
 			if( info.UserId.HasValue )
 				EwfUiStatics.SetPageActions(
@@ -37,39 +35,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			Action userModMethod = null;
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull(
-						firstModificationMethod: () => {
-							if( FormsAuthStatics.FormsAuthEnabled )
-								if( info.UserId.HasValue )
-									FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-										info.User.UserId,
-										userFieldTable.Email.Value,
-										userFieldTable.RoleId.Value,
-										info.User.LastRequestTime,
-										userFieldTable.Salt.Value,
-										userFieldTable.SaltedPassword.Value,
-										userFieldTable.MustChangePassword.Value );
-								else
-									FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-										null,
-										userFieldTable.Email.Value,
-										userFieldTable.RoleId.Value,
-										null,
-										userFieldTable.Salt.Value,
-										userFieldTable.SaltedPassword.Value,
-										userFieldTable.MustChangePassword.Value );
-							else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
-								var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-								provider.InsertOrUpdateUser( info.UserId, userFieldTable.Email.Value, userFieldTable.RoleId.Value, info.User?.LastRequestTime );
-							}
-							userModMethod();
-						},
-						actionGetter: () => new PostBackAction( info.ParentResource ) )
-					.ToCollection(),
+				PostBack.CreateFull( firstModificationMethod: () => userModMethod(), actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
 				() => {
-					userFieldTable = new UserEditor( info.UserId, out userModMethod );
-					ph.AddControlsReturnThis( userFieldTable.ToCollection().GetControls() );
-
+					ph.AddControlsReturnThis( new UserEditor( info.UserId, out userModMethod ).ToCollection().GetControls() );
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "OK" ).ToCollection() );
 				} );
 		}

@@ -129,6 +129,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
 
 			modificationMethod = () => {
+				if( FormsAuthStatics.FormsAuthEnabled )
+					if( userId.HasValue )
+						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+							userId.Value,
+							Email.Value,
+							RoleId.Value,
+							user.LastRequestTime,
+							Salt.Value,
+							SaltedPassword.Value,
+							MustChangePassword.Value );
+					else
+						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+							null,
+							Email.Value,
+							RoleId.Value,
+							null,
+							Salt.Value,
+							SaltedPassword.Value,
+							MustChangePassword.Value );
+				else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
+					var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
+					provider.InsertOrUpdateUser( userId, Email.Value, RoleId.Value, user?.LastRequestTime );
+				}
+
 				if( passwordToEmail == null )
 					return;
 				FormsAuthStatics.SendPassword( Email.Value, passwordToEmail );
