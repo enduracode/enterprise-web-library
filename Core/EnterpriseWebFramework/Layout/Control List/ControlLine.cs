@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
@@ -5,9 +6,7 @@ using System.Web.UI.WebControls;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// A horizontal line of controls, top-aligned.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 	[ ParseChildren( ChildrenAsProperties = true, DefaultProperty = "MarkupControls" ) ]
 	public class ControlLine: WebControl, ControlTreeDataLoader {
 		/// <summary>
@@ -41,9 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		/// </summary>
 		public bool ItemsSeparatedWithPipe { get; set; }
 
-		/// <summary>
-		/// Creates a new instance of a Control Line with the given controls.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public ControlLine( params Control[] controls ) {
 			var table = TableStatics.CreateUnderlyingTable();
 			table.Rows.Add( row = new TableRow() );
@@ -52,9 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			VerticalAlignment = TableCellVerticalAlignment.NotSpecified;
 		}
 
-		/// <summary>
-		/// Adds the specified controls to the line.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public void AddControls( params Control[] controls ) {
 			items.AddRange( controls );
 		}

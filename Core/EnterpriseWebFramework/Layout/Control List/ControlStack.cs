@@ -7,9 +7,7 @@ using System.Web.UI.WebControls;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
-	/// <summary>
-	/// Used to stack inline controls vertically. Implemented with div blocks.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 	public class ControlStack: WebControl, ControlTreeDataLoader {
 		/// <summary>
 		/// EWL use only.
@@ -38,29 +36,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			}
 		}
 
-		/// <summary>
-		/// Creates a blank vertical stack of controls.
-		/// </summary>
-		/// <param name="isStandard">Sets whether or not this control stack will have standard styling.</param>
-		/// <param name="tailUpdateRegions"></param>
-		/// <param name="itemInsertionUpdateRegions"></param>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public static ControlStack Create(
 			bool isStandard, IEnumerable<TailUpdateRegion> tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions = null ) {
 			return new ControlStack( isStandard, tailUpdateRegions, itemInsertionUpdateRegions );
 		}
 
-		/// <summary>
-		/// Creates a vertical stack of text controls out of the given list of strings.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public static ControlStack CreateWithText( bool isStandard, params string[] text ) {
 			var cs = Create( isStandard );
 			cs.AddText( text );
 			return cs;
 		}
 
-		/// <summary>
-		/// Creates a control stack and adds the specified controls to it.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 30 November 2020." ) ]
 		public static ControlStack CreateWithControls( bool isStandard, params Control[] controls ) {
 			var cs = Create( isStandard );
 			cs.AddControls( controls );
