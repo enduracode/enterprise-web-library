@@ -1,19 +1,19 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A table that contains fields to enable editing of a user's generic properties.
-	/// NOTE: Convert this to use FormItems and take additional FormItems to allow customization of this control?
+	/// A list of fields to enable editing of a user’s generic properties.
+	/// NOTE: Expand this to take additional FormItems to allow customization of this control?
 	/// </summary>
-	public class UserFieldTable: WebControl {
+	public class UserEditor: FlowComponent {
+		private readonly IReadOnlyCollection<FlowComponent> children;
+
 		/// <summary>
 		/// The validated email address.
 		/// </summary>
@@ -42,12 +42,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 		private string passwordToEmail;
 
 		/// <summary>
-		/// Call this during LoadData.
+		/// Creates a user editor.
 		/// </summary>
 		/// <param name="userId"></param>
-		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available 
-		/// in the System Provider are used.</param>
-		public void LoadData( int? userId, List<Role> availableRoles = null ) {
+		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available in the System Provider are
+		/// used.</param>
+		public UserEditor( int? userId, List<Role> availableRoles = null ) {
 			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
@@ -124,7 +124,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 						value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
 					.ToFormItem( label: "Role".ToComponents() ) );
 
-			this.AddControlsReturnThis( new Section( "Security Information", b.ToCollection() ).ToCollection().GetControls() );
+			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
 		}
 
 		private bool includePasswordControls() {
@@ -152,9 +152,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Controls {
 			EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 		}
 
-		/// <summary>
-		/// Returns the div tag, which represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }

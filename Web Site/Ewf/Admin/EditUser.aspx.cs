@@ -1,4 +1,3 @@
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
@@ -22,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			public override string ResourceName => User == null ? "New User" : User.Email;
 		}
 
-		private UserFieldTable userFieldTable;
+		private UserEditor userFieldTable;
 
 		protected override void loadData() {
 			if( info.UserId.HasValue )
@@ -38,9 +37,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
 				() => {
-					userFieldTable = new UserFieldTable();
-					userFieldTable.LoadData( info.UserId );
-					ph.AddControlsReturnThis( userFieldTable );
+					userFieldTable = new UserEditor( info.UserId );
+					ph.AddControlsReturnThis( userFieldTable.ToCollection().GetControls() );
 
 					EwfUiStatics.SetContentFootActions( new ButtonSetup( "OK" ).ToCollection() );
 				} );

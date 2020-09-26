@@ -546,7 +546,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\RowSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\UserManagement\UserFieldTable.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\EtherealAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\FlowAutofocusRegion.cs" />
@@ -632,6 +631,7 @@
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
+    <Compile Include="EnterpriseWebFramework\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
