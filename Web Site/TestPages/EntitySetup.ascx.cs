@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
@@ -49,8 +48,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		void EntitySetupBase.LoadData() {
 			ph.AddControlsReturnThis(
-				new LegacyParagraph(
-					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget." ) );
+				new Paragraph(
+						"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget."
+							.ToComponents() ).ToCollection()
+					.GetControls() );
 
 			new ModalBox( one, true, new Paragraph( "This is a modal box!".ToComponents() ).ToCollection() ).ToCollection().AddEtherealControls( this );
 			new ModalBox(
